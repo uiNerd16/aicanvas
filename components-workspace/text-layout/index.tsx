@@ -5,26 +5,20 @@ import { animate, motion, useMotionValue, useTransform } from 'framer-motion'
 import type { AnimationPlaybackControls } from 'framer-motion'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-// Font must match the CSS font exactly so canvas measurement = CSS rendering.
-// "Courier New" is universally available — avoids the macOS system-ui inaccuracy
-// documented in the Pretext README.
 const SAMPLE_TEXT =
   'Pretext computes wrap and height via canvas. No DOM reflow. ~0.09ms per layout call.'
 const FONT    = '14px "Courier New"'
-const LINE_H  = 22   // must match CSS line-height below
+const LINE_H  = 22
 const W_MIN   = 160
 const W_MAX   = 320
 
-// ─── Tiny HTML escaper for safe innerHTML writes ──────────────────────────────
 function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export function TextLayoutCard() {
   const motionWidth = useMotionValue(W_MIN)
 
-  // Direct-DOM refs so live stat updates never re-render the React tree
   const widthValRef  = useRef<HTMLSpanElement>(null)
   const heightValRef = useRef<HTMLSpanElement>(null)
   const linesNumRef  = useRef<HTMLSpanElement>(null)
@@ -35,18 +29,13 @@ export function TextLayoutCard() {
     let controls : AnimationPlaybackControls | undefined
     let unsub    : (() => void) | undefined
 
-    // Dynamic import — prepare() uses browser canvas, must not run on server
     import('@chenglou/pretext').then(({ prepareWithSegments, layoutWithLines }) => {
       if (!alive) return
 
-      // prepare() is the one-time expensive step (~19ms).
-      // prepareWithSegments() is the richer variant that lets us call layoutWithLines().
       const prepared = prepareWithSegments(SAMPLE_TEXT, FONT)
 
-      // Write a full stats + lines update directly to the DOM
       function flush(w: number) {
         const rw = Math.round(w)
-        // layout() is the fast hot path (~0.09ms) — pure arithmetic over cached widths
         const { height, lineCount, lines } = layoutWithLines(prepared, rw, LINE_H)
 
         if (widthValRef.current)  widthValRef.current.textContent  = String(rw)
@@ -70,13 +59,8 @@ export function TextLayoutCard() {
         }
       }
 
-      // Initial render before animation starts
       flush(W_MIN)
-
-      // Subscribe to every frame of the width motion value
       unsub = motionWidth.on('change', flush)
-
-      // Drive the width back-and-forth
       controls = animate(motionWidth, [W_MIN, W_MAX, W_MIN], {
         duration: 5,
         ease: 'easeInOut',
@@ -92,7 +76,6 @@ export function TextLayoutCard() {
     }
   }, [motionWidth])
 
-  // Amber progress bar tracks motionWidth without React re-renders
   const progressPct = useTransform(motionWidth, [W_MIN, W_MAX], ['0%', '100%'])
 
   return (
@@ -110,13 +93,12 @@ export function TextLayoutCard() {
       {/* Amber glow */}
       <div className="pointer-events-none absolute bottom-0 left-4 h-32 w-48 rounded-full bg-amber-500/10 blur-3xl" />
 
-      {/* ── Left column: CSS-rendered text box ─────────────────────────────── */}
+      {/* Left column: CSS-rendered text box */}
       <div className="relative flex flex-col gap-3">
         <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
           container
         </span>
 
-        {/* The text box — CSS renders the text; Pretext measures it */}
         <motion.div
           style={{
             width: motionWidth,
@@ -129,7 +111,6 @@ export function TextLayoutCard() {
           {SAMPLE_TEXT}
         </motion.div>
 
-        {/* Width progress bar + readout */}
         <div className="flex flex-col gap-1.5">
           <div className="h-1 overflow-hidden rounded-full bg-zinc-800">
             <motion.div style={{ width: progressPct }} className="h-full rounded-full bg-amber-400" />
@@ -141,16 +122,14 @@ export function TextLayoutCard() {
         </div>
       </div>
 
-      {/* ── Right column: live Pretext output ──────────────────────────────── */}
+      {/* Right column: live Pretext output */}
       <div className="relative flex min-w-0 flex-1 flex-col gap-3">
         <span className="font-mono text-[10px] uppercase tracking-widest text-amber-500/80">
           pretext output
         </span>
 
-        {/* Line list — written imperatively each frame */}
         <div ref={linesListRef} className="min-h-0 flex-1 overflow-hidden" />
 
-        {/* Summary stats */}
         <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 font-mono text-xs">
           <div className="flex items-center gap-1.5">
             <span className="text-zinc-500">height</span>

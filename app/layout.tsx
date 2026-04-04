@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Manrope, Geist_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from './components/ThemeProvider'
 import { Sidebar } from './components/Sidebar'
@@ -33,15 +34,13 @@ export default function RootLayout({
     >
       {/* Apply saved theme before first paint to prevent flash */}
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){}`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark')` }} />
       </head>
       <body className="flex h-full overflow-hidden bg-sand-200 dark:bg-sand-950">
         <ThemeProvider>
-          <Sidebar />
+          <Suspense fallback={null}>
+            <Sidebar />
+          </Suspense>
           {/* Content area scrolls independently of the sidebar */}
           <div className="flex flex-1 flex-col overflow-y-auto">
             {children}

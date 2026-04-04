@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Class-based dark mode — toggle .dark on <html> instead of OS preference */
-@variant dark (&:where(.dark, .dark *));
+@variant dark (&:where(.dark, .dark *):not([data-card-theme="light"] *));
 
 :root {
   --background: #EDEAE5;

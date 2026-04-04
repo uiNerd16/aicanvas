@@ -1,11 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { MagnifyingGlass, Moon, Sun, SignIn, UploadSimple } from '@phosphor-icons/react'
-import { useTheme } from './ThemeProvider'
+import { MagnifyingGlass, SignIn, UploadSimple } from '@phosphor-icons/react'
 
 export function Navbar() {
-  const { theme, toggle } = useTheme()
 
   return (
     <header className="sticky top-0 z-50 border-b border-sand-300 bg-sand-200/90 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
@@ -42,16 +40,6 @@ export function Navbar() {
             <span className="hidden sm:inline">Sign in</span>
           </button>
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggle}
-            aria-label="Toggle theme"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-300 text-sand-500 transition-colors hover:border-sand-400 hover:text-sand-700 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-600 dark:hover:text-sand-200"
-          >
-            {theme === 'dark'
-              ? <Sun weight="regular" size={16} />
-              : <Moon weight="regular" size={16} />}
-          </button>
         </div>
 
       </div>
