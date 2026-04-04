@@ -13,10 +13,14 @@ export function GlassNavbar() {
 
   const glassStyle = {
     background: 'rgba(255, 255, 255, 0.08)',
-    backdropFilter: 'blur(24px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
     border: '1px solid rgba(255, 255, 255, 0.12)',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+  }
+
+  // Blur kept separate — applying it on the animated element forces a repaint every animation frame
+  const glassBlur = {
+    backdropFilter: 'blur(24px) saturate(1.8)',
+    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
   }
 
   const ctaStyle = {
@@ -44,12 +48,14 @@ export function GlassNavbar() {
 
         {/* ── Main navbar pill ── */}
         <motion.nav
-          initial={{ y: -40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          initial={{ y: -40 }}
+          animate={{ y: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-          className="flex w-full items-center gap-1 rounded-full px-2 py-2"
+          className="relative isolate flex w-full items-center gap-1 rounded-full px-2 py-2"
           style={glassStyle}
         >
+          {/* Blur layer — non-animating, isolated from the infinite-spin logo inside */}
+          <div className="pointer-events-none absolute inset-0 z-[-1] rounded-full" style={glassBlur} />
           {/* Logo — clicking resets to home (no active link) */}
           <div className="flex cursor-pointer items-center gap-2 px-3" onClick={() => setActive(null)}>
             <motion.div
@@ -125,9 +131,10 @@ export function GlassNavbar() {
               animate={{ opacity: 1, y: 0,  scale: 1    }}
               exit={{    opacity: 0, y: -8, scale: 0.97 }}
               transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-2 flex flex-col gap-1 rounded-2xl p-2 sm:hidden"
+              className="relative isolate mt-2 flex flex-col gap-1 rounded-2xl p-2 sm:hidden"
               style={glassStyle}
             >
+              <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassBlur} />
               {NAV_ITEMS.map((item, i) => (
                 <button
                   key={item}

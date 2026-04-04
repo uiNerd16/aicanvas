@@ -15,18 +15,21 @@ export function GlassModal() {
 
       {/* Modal card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        initial={{ scale: 0.9, y: 16 }}
+        animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-        className="relative w-[340px] overflow-hidden rounded-3xl"
+        className="relative isolate w-[340px] overflow-hidden rounded-3xl"
         style={{
           background: 'rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(40px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
           boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}
       >
+        {/* Blur layer — non-animating, isolated from entrance spring */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+          style={{ backdropFilter: 'blur(40px) saturate(1.8)', WebkitBackdropFilter: 'blur(40px) saturate(1.8)' }}
+        />
         {/* Top edge highlight */}
         <div
           className="absolute left-8 right-8 top-0 h-[1px]"

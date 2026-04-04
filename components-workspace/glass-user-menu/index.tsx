@@ -42,10 +42,14 @@ const MENU_GROUPS = [
 
 const glassPanel = {
   background: 'rgba(255, 255, 255, 0.08)',
-  backdropFilter: 'blur(24px) saturate(1.8)',
-  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
   border: '1px solid rgba(255, 255, 255, 0.1)',
   boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1)',
+}
+
+// Blur kept separate — avoids recalculation on every hover/spring frame
+const glassPanelBlur = {
+  backdropFilter: 'blur(24px) saturate(1.8)',
+  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
 }
 
 // ─── MenuItem ─────────────────────────────────────────────────────────────────
@@ -112,9 +116,10 @@ export function GlassUserMenu() {
           onClick={() => setOpen(v => !v)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="flex cursor-pointer items-center gap-2 rounded-2xl px-4 py-2.5"
+          className="relative isolate flex cursor-pointer items-center gap-2 rounded-2xl px-4 py-2.5"
           style={glassPanel}
         >
+          <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassPanelBlur} />
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
             style={{ background: 'linear-gradient(135deg, #FF7B54, #FF6BF5)' }}
@@ -138,9 +143,10 @@ export function GlassUserMenu() {
               animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, scale: 0.95, y: -8, filter: 'blur(4px)' }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="absolute top-full mt-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
+              className="absolute isolate top-full mt-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
               style={{ ...glassPanel, transformOrigin: 'top center' }}
             >
+              <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassPanelBlur} />
               {/* Top edge highlight */}
               <div
                 className="absolute left-6 right-6 top-0 h-[1px]"

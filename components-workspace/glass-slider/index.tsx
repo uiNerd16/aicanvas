@@ -146,18 +146,21 @@ export function GlassSlider() {
       />
 
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ y: 20, scale: 0.96 }}
+        animate={{ y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="relative flex w-[calc(100%-32px)] max-w-[360px] flex-col gap-7 rounded-3xl px-7 py-8"
+        className="relative isolate flex w-[calc(100%-32px)] max-w-[360px] flex-col gap-7 rounded-3xl px-7 py-8"
         style={{
           background: 'rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(24px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
         }}
       >
+        {/* Blur layer — non-animating so it isn't recalculated during drag frames */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+          style={{ backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
+        />
         {/* Top edge highlight */}
         <div
           className="absolute left-7 right-7 top-0 h-[1px]"

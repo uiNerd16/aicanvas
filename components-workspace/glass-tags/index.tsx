@@ -33,18 +33,16 @@ function GlassTag({ label, color, index }: { label: string; color: string; index
 
   return (
     <motion.button
-      initial={{ opacity: 0, scale: 0.8, y: 12 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      initial={{ scale: 0.8, y: 12 }}
+      animate={{ scale: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 20, delay: index * 0.04 }}
       onClick={() => setSelected(s => !s)}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.94 }}
-      className="relative cursor-pointer rounded-full px-4 py-2 sm:px-5 sm:py-2.5"
+      className="relative isolate cursor-pointer rounded-full px-4 py-2 sm:px-5 sm:py-2.5"
       style={{
-        backdropFilter: GLASS_FILTER,
-        WebkitBackdropFilter: GLASS_FILTER,
         background: selected
           ? `linear-gradient(135deg, ${color}33, ${color}18)`
           : hovered ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.08)',
@@ -59,6 +57,11 @@ function GlassTag({ label, color, index }: { label: string; color: string; index
         transition: 'background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease',
       }}
     >
+      {/* Blur layer — non-animating, isolated from scale hover/tap */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[-1] rounded-full"
+        style={{ backdropFilter: GLASS_FILTER, WebkitBackdropFilter: GLASS_FILTER }}
+      />
       {/* Selection glow */}
       <motion.div
         className="absolute inset-0 rounded-full"
@@ -118,16 +121,13 @@ export function GlassTags() {
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+      <div
         className="relative flex w-full max-w-sm flex-wrap justify-center gap-2 px-4 sm:max-w-md sm:gap-3 sm:px-6"
       >
         {TAGS.map((tag, i) => (
           <GlassTag key={tag.label} label={tag.label} color={tag.color} index={i} />
         ))}
-      </motion.div>
+      </div>
     </div>
   )
 }

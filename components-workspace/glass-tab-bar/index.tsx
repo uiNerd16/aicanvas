@@ -28,18 +28,21 @@ export function GlassTabBar() {
 
       {/* Glass tab bar */}
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-        className="relative flex w-[380px] items-center justify-around rounded-full px-5 py-2.5"
+        className="relative isolate flex w-[380px] items-center justify-around rounded-full px-5 py-2.5"
         style={{
           background: 'rgba(255, 255, 255, 0.07)',
-          backdropFilter: 'blur(24px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
           border: '1px solid rgba(255, 255, 255, 0.11)',
           boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)',
         }}
       >
+        {/* Blur layer — non-animating, isolated from entrance spring */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-full"
+          style={{ backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
+        />
         {TABS.map((tab, i) => {
           const Icon     = tab.icon
           const isActive = active === i

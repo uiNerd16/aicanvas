@@ -84,11 +84,14 @@ const HOURLY_DATA: HourlyEntry[] = [
 
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(255, 255, 255, 0.10)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  boxShadow: '0 8px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+}
+
+// Blur kept in a separate non-animating layer — prevents recalculation on every spring/particle frame
+const GLASS_BLUR_STYLE: React.CSSProperties = {
   backdropFilter: 'blur(24px) saturate(1.6)',
   WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-  border: '1px solid rgba(255, 255, 255, 0.18)',
-  boxShadow:
-    '0 8px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
 }
 
 // ─── Particle Structs ─────────────────────────────────────────────────────────
@@ -378,8 +381,8 @@ export function GlassWeatherWidget() {
 
       {/* ── Frosted glass card ─────────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ y: 24, scale: 0.96 }}
+        animate={{ y: 0, scale: 1 }}
         transition={{
           type: 'spring',
           stiffness: 180,
@@ -392,8 +395,20 @@ export function GlassWeatherWidget() {
           borderRadius: 28,
           position: 'relative',
           overflow: 'hidden',
+          isolation: 'isolate',
         }}
       >
+        {/* Blur layer — non-animating, isolated from entrance spring and canvas particles */}
+        <div
+          style={{
+            ...GLASS_BLUR_STYLE,
+            position: 'absolute',
+            inset: 0,
+            zIndex: -1,
+            borderRadius: 28,
+            pointerEvents: 'none',
+          }}
+        />
         {/* Canvas particle layer */}
         <canvas
           ref={canvasRef}
