@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# AI Toolkit — Global Rules
+# AI Canvas — Global Rules
 
 ## Agent hierarchy
 
@@ -21,7 +21,7 @@ Component status is tracked in `supervisor/component-status.md`.
 Known recurring mistakes are logged in `supervisor/mistakes.md`.
 
 ## What this project is
-AI Toolkit is an open component marketplace where every component ships with:
+AI Canvas (aicanvas.me) is an open component marketplace where every component ships with:
 - Its full source code
 - Expert-crafted prompts for 5 AI coding tools: V0, Bolt, Lovable, Claude Code, Cursor
 
