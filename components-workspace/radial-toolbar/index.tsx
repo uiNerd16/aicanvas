@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import {
@@ -63,13 +63,31 @@ export function RadialToolbar() {
   const [hoveredId, setHover] = useState<string | null>(null)
   const [activeId,  setActive]= useState<string | null>(null)
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const check = () => {
+      const card = el.closest('[data-card-theme]')
+      setIsDark(card ? card.classList.contains('dark') : document.documentElement.classList.contains('dark'))
+    }
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    const cardWrapper = el.closest('[data-card-theme]')
+    if (cardWrapper) observer.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
   const handleTool = (id: string) => setActive(p => p === id ? null : id)
   const close = () => { setOpen(false); setActive(null); setHover(null) }
 
   const labelTool = TOOLS.find(t => t.id === hoveredId) ?? TOOLS.find(t => t.id === activeId)
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center bg-zinc-950">
+    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
 
       {/* ── Wheel — fades in around the persistent circle ─────────────────── */}
       <AnimatePresence>
@@ -91,15 +109,9 @@ export function RadialToolbar() {
                 <circle
                   cx={CX} cy={CY} r={R_OUT + 1}
                   fill="none"
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.10)'}
                   strokeWidth={1}
                 />
-                <defs>
-                  <radialGradient id="activeGrad" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-                    <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
-                  </radialGradient>
-                </defs>
 
                 {TOOLS.map((tool, i) => {
                   const isH = hoveredId === tool.id
@@ -110,17 +122,17 @@ export function RadialToolbar() {
                       d={wedgePath(i * 60, i * 60 + 60)}
                       style={{
                         fill: isA
-                          ? 'url(#activeGrad)'
+                          ? (isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.16)')
                           : isH
-                            ? 'rgba(255,255,255,0.14)'
-                            : 'rgba(255,255,255,0.07)',
-                        stroke: 'rgba(255,255,255,0.04)',
+                            ? (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.10)')
+                            : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'),
+                        stroke: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)',
                         strokeWidth: 1,
                         transition: 'fill 0.18s ease',
                         cursor: 'pointer',
                       }}
-                      onMouseEnter={() => setHover(tool.id)}
-                      onMouseLeave={() => setHover(null)}
+                      onPointerEnter={() => setHover(tool.id)}
+                      onPointerLeave={() => setHover(null)}
                       onClick={() => handleTool(tool.id)}
                     />
                   )
@@ -155,7 +167,7 @@ export function RadialToolbar() {
                     <tool.Icon
                       size={18}
                       weight="regular"
-                      color={isA ? '#ffffff' : isH ? '#e4e4e7' : '#71717a'}
+                      color={isA ? (isDark ? '#ffffff' : '#110F0C') : isH ? (isDark ? '#e4e4e7' : '#2E2A24') : (isDark ? '#71717a' : '#9E9890')}
                     />
                   </motion.div>
                 )
@@ -177,9 +189,11 @@ export function RadialToolbar() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          background: 'rgba(255,255,255,0.07)',
-          border: '1px solid rgba(255,255,255,0.14)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+          background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.14)'}`,
+          boxShadow: isDark
+            ? '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+            : '0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6)',
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
@@ -199,7 +213,7 @@ export function RadialToolbar() {
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.1em',
-                color: '#e4e4e7',
+                color: isDark ? '#e4e4e7' : '#2E2A24',
                 userSelect: 'none',
               }}
             >
@@ -215,7 +229,7 @@ export function RadialToolbar() {
               transition={{ type: 'spring', stiffness: 260, damping: 24 }}
               style={{ display: 'flex' }}
             >
-              <X size={16} weight="regular" color="#a1a1aa" />
+              <X size={16} weight="regular" color={isDark ? '#a1a1aa' : '#4A453F'} />
             </motion.span>
           )}
         </AnimatePresence>
@@ -231,8 +245,8 @@ export function RadialToolbar() {
               top: 'calc(50% + 140px)',
               left: '50%',
               x: '-50%',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.10)'}`,
               fontFamily: 'var(--font-sans, sans-serif)',
               whiteSpace: 'nowrap',
             }}
@@ -241,11 +255,12 @@ export function RadialToolbar() {
             exit={{    opacity: 0, y: 4,  scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           >
-            <labelTool.Icon size={11} weight="regular" color={activeId === labelTool.id ? '#e4e4e7' : '#71717a'} />
-            <span className="text-xs font-medium text-zinc-400">{labelTool.label}</span>
+            <labelTool.Icon size={11} weight="regular" color={activeId === labelTool.id ? (isDark ? '#e4e4e7' : '#2E2A24') : (isDark ? '#71717a' : '#9E9890')} />
+            <span className="text-xs font-medium" style={{ color: isDark ? '#a1a1aa' : '#736D65' }}>{labelTool.label}</span>
             {activeId === labelTool.id && (
               <motion.span
-                className="h-1 w-1 rounded-full bg-white"
+                className="h-1 w-1 rounded-full"
+                style={{ background: isDark ? '#ffffff' : '#1C1916' }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 20 }}

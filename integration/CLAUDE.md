@@ -29,10 +29,11 @@ In `app/lib/component-registry.tsx`:
    import { prompts as componentNamePrompts } from '../../components-workspace/component-name/prompts'
    ```
 
-3. Add an entry to the `COMPONENTS` array:
+3. Add an entry to the `COMPONENTS` array — always include the `image` field with the ImageKit URL:
    ```ts
    {
      slug: 'component-slug',
+     image: 'https://ik.imagekit.io/aitoolkit/component-slug.png',
      name: 'Human Readable Name',
      description: 'One sentence describing what it does.',
      tags: [
@@ -51,6 +52,44 @@ In `app/lib/component-registry.tsx`:
 - Run `npx tsc --noEmit` to check for TypeScript errors
 - The component page is automatically available at `/components/<slug>` via the existing dynamic route
 - The homepage grid automatically includes the new card (it reads from `COMPONENTS`)
+
+### Step 4 — Screenshot and upload to ImageKit (MANDATORY — integration is not complete without this)
+
+**This step is required. A component without a screenshot image is considered broken on the homepage.**
+
+#### 4a — Register the slug in the screenshot script
+Open `scripts/screenshot.mjs` and:
+1. Add the slug to the `ALL_SLUGS` array
+2. If the component has an interactive or active state (hover effect, toggle on, animation triggered), add it to the `INTERACTIONS` map so the screenshot captures the active state. Use `hoverCenter` for hover-based components, or write a custom interaction (click a button, move the mouse, etc.). See existing entries for examples.
+
+#### 4b — Run the screenshot
+The dev server must be running (`npm run dev`). Then:
+
+```bash
+npm run screenshot -- <slug>
+```
+
+The script will open the component page, trigger the interaction, screenshot the preview area, upload to ImageKit, and print the URL.
+
+#### 4c — Update the registry
+Copy the URL printed by the script and set it as the `image` field in the registry entry. The entry is not complete until this field has a real URL.
+
+**Never report back to the Supervisor until the `image` field is populated with the ImageKit URL.**
+
+## Completion checklist — confirm all before reporting to Supervisor
+
+Before reporting back, verify every item:
+
+- [ ] Component imported in `component-registry.tsx`
+- [ ] Prompts imported in `component-registry.tsx`
+- [ ] Registry entry appended to `COMPONENTS` array
+- [ ] `npx tsc --noEmit` passes with no errors
+- [ ] Slug added to `ALL_SLUGS` in `scripts/screenshot.mjs`
+- [ ] Interaction added to `INTERACTIONS` map in `scripts/screenshot.mjs` (if component has active/hover state)
+- [ ] `npm run screenshot -- <slug>` ran successfully and printed an ImageKit URL
+- [ ] `image` field in the registry entry set to the exact URL printed by the script
+
+**If any item is unchecked, do not report back. Complete it first.**
 
 ## Rules
 - **Never** modify `index.tsx` or `prompts.ts` in `components-workspace/`

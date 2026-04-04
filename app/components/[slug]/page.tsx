@@ -19,11 +19,13 @@ export default async function Page({
 
   return (
     <ComponentPageView
+      slug={slug}
       name={entry.name}
       description={entry.description}
       tags={entry.tags}
       code={entry.code}
       prompts={entry.prompts}
+      dualTheme={entry.dualTheme ?? false}
     >
       <PreviewComponent />
     </ComponentPageView>

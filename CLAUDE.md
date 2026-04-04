@@ -2,6 +2,24 @@
 
 # AI Toolkit — Global Rules
 
+## Agent hierarchy
+
+This project uses a structured multi-agent system. All agents inherit these global rules.
+
+```
+CLAUDE.md (root) ← you are here — global rules for everyone
+└── supervisor/CLAUDE.md     ← Supervisor: the only agent you talk to directly
+    ├── components-workspace/CLAUDE.md   ← Builder: builds components in isolation
+    ├── reviewer/CLAUDE.md               ← Reviewer: checks quality before preview
+    └── integration/CLAUDE.md            ← Integrator: wires components into the website
+```
+
+**Always start a session by loading the Supervisor.** It manages the full pipeline:
+`Brief → Build → Review → Preview → Adjust → Integrate`
+
+Component status is tracked in `supervisor/component-status.md`.
+Known recurring mistakes are logged in `supervisor/mistakes.md`.
+
 ## What this project is
 AI Toolkit is an open component marketplace where every component ships with:
 - Its full source code
@@ -30,7 +48,7 @@ All colors come from two custom scales defined in `globals.css` via `@theme inli
 |---------------|-----------|--------------------------------------------|
 | `sand-50`     | `#FAF7F2` | Elevated surfaces (dropdowns, hover fills) |
 | `sand-100`    | `#F5F1EA` | Card backgrounds (light), input fills      |
-| `sand-200`    | `#EDE8DF` | Page background (light)                    |
+| `sand-200`    | `#EDEAE5` | Page background (light)                    |
 | `sand-300`    | `#DDD8CE` | Borders (light), dividers                  |
 | `sand-400`    | `#C8C2B8` | Muted borders, placeholder icons           |
 | `sand-500`    | `#9E9890` | Muted / secondary text (light)             |
@@ -75,6 +93,7 @@ components-workspace/
   my-component/
     index.tsx    ← the React component (export named function)
     prompts.ts   ← prompts for all 5 platforms
+    spec.md      ← brief approved by user before building
 ```
 
 Existing components (built before this structure) live in `app/components/` and are already registered in `app/lib/component-registry.tsx`.

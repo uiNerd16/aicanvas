@@ -22,6 +22,8 @@
 
 # misc
 .DS_Store
+.screenshots-tmp/
+/public/screenshots/
 *.pem
 
 # debug
@@ -39,3 +41,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code
+.claude/

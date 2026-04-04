@@ -1,11 +1,11 @@
-import { RadialToolbar } from '../../components-workspace/radial-toolbar'
+'use client'
+
+import { GlassModal } from '../../components-workspace/glass-modal'
 
 export default function PreviewPage() {
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-sand-950">
-      <div style={{ width: 480, height: 480 }}>
-        <RadialToolbar />
-      </div>
+    <div className="flex h-full w-full items-center justify-center bg-sand-950">
+      <GlassModal />
     </div>
   )
 }

@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { MagnifyingGlass } from '@phosphor-icons/react'
-import { useTheme } from './ThemeProvider'
+import { useSearchParams } from 'next/navigation'
 import { COMPONENTS } from '../lib/component-registry'
 
 // Derive categories from accent tags — runs once at module level
@@ -19,7 +18,8 @@ const CATEGORIES = [
 ]
 
 export function Sidebar() {
-  const { theme } = useTheme()
+  const searchParams = useSearchParams()
+  const activeCategory = searchParams.get('category') ?? 'All Components'
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sand-300 bg-sand-200 dark:border-sand-800 dark:bg-sand-950">
@@ -35,36 +35,33 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* ── Search ── */}
-      <div className="shrink-0 px-3 py-3">
-        <div className="flex cursor-text items-center gap-2 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 dark:border-sand-700 dark:bg-sand-900">
-          <MagnifyingGlass weight="regular" size={13} className="shrink-0 text-sand-400 dark:text-sand-500" />
-          <span className="flex-1 select-none text-sm text-sand-400 dark:text-sand-500">Search…</span>
-          <kbd className="rounded border border-sand-300 px-1.5 py-0.5 font-mono text-[10px] text-sand-400 dark:border-sand-700 dark:text-sand-600">
-            ⌘K
-          </kbd>
-        </div>
-      </div>
-
       {/* ── Navigation ── */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-2">
+      <nav className="flex-1 overflow-y-auto px-3 pt-4 pb-2">
         <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-sand-400 dark:text-sand-600">
           Explore
         </p>
         <ul className="space-y-0.5">
-          {CATEGORIES.map(({ label, count }) => (
-            <li key={label}>
-              <Link
-                href="/"
-                className="group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
-              >
-                <span>{label}</span>
-                <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">
-                  {count}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {CATEGORIES.map(({ label, count }) => {
+            const isActive = label === activeCategory
+            const href = label === 'All Components' ? '/' : `/?category=${encodeURIComponent(label)}`
+            return (
+              <li key={label}>
+                <Link
+                  href={href}
+                  className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                  }`}
+                >
+                  <span>{label}</span>
+                  <span className={`tabular-nums text-xs ${isActive ? 'text-sand-600 dark:text-sand-400' : 'text-sand-400 dark:text-sand-600'}`}>
+                    {count}
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </nav>
 

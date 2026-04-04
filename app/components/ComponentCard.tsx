@@ -1,10 +1,7 @@
 'use client'
 
-import type { ComponentType } from 'react'
-import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from '@phosphor-icons/react'
-import { MotionConfig } from 'framer-motion'
+import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
@@ -20,44 +17,34 @@ export interface ComponentCardProps {
   name: string
   description: string
   tags: Tag[]
-  // Component type (not JSX) so MotionConfig context reaches it directly
-  PreviewComponent: ComponentType
+  image?: string
   href: string
 }
 
 // ─── ComponentCard ─────────────────────────────────────────────────────────────
 
-export function ComponentCard({ name, description, PreviewComponent, href }: ComponentCardProps) {
-  const [hovered, setHovered] = useState(false)
-  const [mountKey, setMountKey] = useState(0)
-
-  const handleMouseEnter = () => {
-    setMountKey((k) => k + 1)
-    setHovered(true)
-  }
-
+export function ComponentCard({ name, description, href, image }: ComponentCardProps) {
   return (
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setHovered(false)}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
     >
-      <div className="relative h-48 overflow-hidden bg-sand-950">
-        {hovered ? (
-          // Hover: fresh mount so every animation replays from the start
-          <div key={mountKey} className="absolute inset-0 flex items-center justify-center">
-            <PreviewComponent />
-          </div>
+      <div className="relative aspect-video overflow-hidden bg-sand-950">
+        {image ? (
+          <>
+            <img src={image} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-sand-900 to-transparent dark:from-sand-900" />
+          </>
         ) : (
-          // Default: MotionConfig IS a true ancestor here — context reaches PreviewComponent.
-          // reducedMotion="always" freezes all motion.div animations at their target values.
-          // [&_canvas]:hidden stops Three.js / WebGL canvases from rendering.
-          <MotionConfig reducedMotion="always">
-            <div className="absolute inset-0 flex items-center justify-center [&_canvas]:hidden">
-              <PreviewComponent />
-            </div>
-          </MotionConfig>
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+              backgroundSize: '22px 22px',
+            }}
+          >
+            <ImageSquare weight="regular" size={28} className="text-sand-700" />
+          </div>
         )}
       </div>
 

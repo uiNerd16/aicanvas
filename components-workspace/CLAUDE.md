@@ -2,6 +2,20 @@
 
 You build new components in isolation. Your job ends when the component works. Integration into the website is handled by a separate agent.
 
+## Skills library — read before building
+
+- `skills/component-anatomy.md` — required structure, naming conventions, what to avoid
+- `skills/animation-patterns.md` — Framer Motion patterns, spring presets, cleanup patterns
+- `skills/design-tokens.md` — colors, typography, icon rules (quick reference)
+- `skills/prompts-guide.md` — how to write the 5 platform prompts
+- `skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
+- `skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
+
+## Extended skills (`.claude/skills/`) — read for complex visual components
+
+- **`.claude/skills/creative-3d-components/SKILL.md`** — Read this for ANY 3D, particle, canvas, or visually complex component. Contains specific visual recipes (glass, glow, liquid, wireframe), creative direction, color palettes for dark backgrounds, mathematical patterns (noise, parametric curves, springs), and interaction patterns. This is not API docs — it's opinionated creative guidance with code.
+- **`.claude/skills/design-motion-principles/SKILL.md`** — Read when tuning animation quality. Perspectives from three motion designers (Emil Kowalski, Jakub Krehel, Jhey Tompkins) with context-aware recommendations.
+
 ## Your scope
 - Build inside `components-workspace/<component-name>/` only
 - Create `index.tsx` (the component) and `prompts.ts` (5 platform prompts)
@@ -12,10 +26,13 @@ You build new components in isolation. Your job ends when the component works. I
 ### index.tsx
 - `'use client'` at the top (always)
 - Export a single named function that matches the folder name in PascalCase (e.g. folder `glowing-button` → `export function GlowingButton()`)
-- Root element must fill its container: `className="flex h-full w-full items-center justify-center bg-zinc-950"`
-- Preview area is always dark (`bg-zinc-950`) — design for dark backgrounds
+- Root element must fill its container: `className="flex h-full w-full items-center justify-center bg-sand-100 dark:bg-sand-950"`
+- **Support both light AND dark mode** — always use `dark:` Tailwind variants so the component looks great in both themes. The preview page has a theme toggle; the user will check both modes.
+- For colors set via inline styles (e.g. custom hex values), import `useTheme` from `../../app/components/ThemeProvider` and pick different values per theme.
+- Design a distinct but cohesive light version — lighter surface, darker/adjusted accent colors that maintain contrast on light backgrounds.
+- **Be creative** — components are visual showcases. You are NOT required to use the site's sand/olive design tokens inside component internals. Use whatever colors, gradients, and styles make the component look its best in both modes.
 - Use **Framer Motion** for all animations — no CSS-only keyframes
-- Use `@phosphor-icons/react` with `weight="duotone"` for any icons
+- Use `@phosphor-icons/react` with `weight="regular"` for any icons
 - No hardcoded widths/heights — components must look good in a 480×480 preview box
 
 ### prompts.ts
@@ -30,11 +47,17 @@ You build new components in isolation. Your job ends when the component works. I
 - Clean up all effects: cancel RAF, stop animations, unsubscribe from MotionValues
 - Dynamic import browser-only APIs (e.g. Three.js, canvas) with `alive` guard pattern
 
-## Before finishing
+## Before finishing a BUILD task
 1. Verify `index.tsx` exports the correct named function
-2. Verify `prompts.ts` has all 5 platforms filled in
-3. Verify there are no TypeScript errors in the files you created
+2. Verify there are no TypeScript errors in the files you created
+3. Do NOT write `prompts.ts` during the initial build — prompts are written in a separate step AFTER the user approves the final visual
 4. Do NOT register the component in the registry — that is the integrator's job
+
+## Before finishing a PROMPTS task
+When the Supervisor delegates a prompts-only task (after the user has approved the component):
+1. Read the FINAL `index.tsx` carefully — the component may have changed since the spec
+2. Write `prompts.ts` based on what the component ACTUALLY does, not what the spec says
+3. Verify all 5 platforms are filled in and each prompt is self-contained
 
 ## Template
 Copy from `components-workspace/_template/` to get started.
