@@ -31,7 +31,7 @@ export function Sidebar() {
           className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
         >
           <span className="text-olive-500">◈</span>
-          AI Toolkit
+          AI Canvas
         </Link>
       </div>
 
