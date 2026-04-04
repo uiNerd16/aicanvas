@@ -54,6 +54,7 @@ const ALL_SLUGS = [
   'glass-navbar',
   'glass-tags',
   'glass-card',
+  'glass-sidebar',
 ]
 
 const arg   = process.argv[2]
@@ -179,6 +180,13 @@ const INTERACTIONS = {
     await preview.page().waitForTimeout(400)
     await preview.locator('button').first().click()
     await preview.page().waitForTimeout(180)
+  },
+
+  // Glass sidebar — click the toggle button to expand the sidebar
+  'glass-sidebar': async (preview, page) => {
+    // Click the toggle button to expand the sidebar
+    await page.click('button[aria-label="Expand sidebar"]')
+    await page.waitForTimeout(600) // wait for spring animation to settle
   },
 }
 

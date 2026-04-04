@@ -74,6 +74,10 @@ import { GlassMusicPlayer } from '../../components-workspace/glass-music-player'
 import { prompts as glassMusicPlayerPrompts } from '../../components-workspace/glass-music-player/prompts'
 import { GlassNotification } from '../../components-workspace/glass-notification'
 import { prompts as glassNotificationPrompts } from '../../components-workspace/glass-notification/prompts'
+import { GlassSidebar } from '../../components-workspace/glass-sidebar'
+import { prompts as glassSidebarPrompts } from '../../components-workspace/glass-sidebar/prompts'
+import { GlassUserMenu } from '../../components-workspace/glass-user-menu'
+import { prompts as glassUserMenuPrompts } from '../../components-workspace/glass-user-menu/prompts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -3265,6 +3269,282 @@ const GLASSMUSICPLAYER_CODE = "'use client'\n\nimport { useState, useEffect, use
 
 const GLASSNOTIFICATION_CODE = "'use client'\n\nimport { useState } from 'react'\nimport { motion, AnimatePresence } from 'framer-motion'\nimport { Bell, ChatCircle, Heart, ShieldCheck, X, ArrowUp } from '@phosphor-icons/react'\n\ninterface Notification {\n  id: number\n  icon: typeof Bell\n  color: string\n  title: string\n  message: string\n  time: string\n}\n\nconst INITIAL_NOTIFICATIONS: Notification[] = [\n  {\n    id: 1,\n    icon: ChatCircle,\n    color: '#3A86FF',\n    title: 'New Message',\n    message: 'Alex sent you a photo',\n    time: '2m ago',\n  },\n  {\n    id: 2,\n    icon: Heart,\n    color: '#FF7B54',\n    title: 'New Like',\n    message: 'Sarah liked your post',\n    time: '5m ago',\n  },\n  {\n    id: 3,\n    icon: ShieldCheck,\n    color: '#06D6A0',\n    title: 'Security',\n    message: 'New login from MacBook Pro',\n    time: '12m ago',\n  },\n  {\n    id: 4,\n    icon: ArrowUp,\n    color: '#B388FF',\n    title: 'Update Available',\n    message: 'Version 4.2 is ready to install',\n    time: '1h ago',\n  },\n  {\n    id: 5,\n    icon: Bell,\n    color: '#FFBE0B',\n    title: 'Reminder',\n    message: 'Team standup in 15 minutes',\n    time: '1h ago',\n  },\n]\n\nfunction NotificationCard({\n  notification,\n  onDismiss,\n  index,\n}: {\n  notification: Notification\n  onDismiss: (id: number) => void\n  index: number\n}) {\n  const Icon = notification.icon\n\n  return (\n    <motion.div\n      layout\n      initial={{ opacity: 0, x: 60, scale: 0.9 }}\n      animate={{ opacity: 1, x: 0, scale: 1 }}\n      exit={{ opacity: 0, x: -60, scale: 0.9, filter: 'blur(4px)' }}\n      transition={{ type: 'spring', stiffness: 280, damping: 24, delay: index * 0.05 }}\n      drag=\"x\"\n      dragConstraints={{ left: 0, right: 0 }}\n      dragElastic={0.3}\n      onDragEnd={(_, info) => {\n        if (Math.abs(info.offset.x) > 80) {\n          onDismiss(notification.id)\n        }\n      }}\n      className=\"group relative w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing transition-colors duration-200\"\n      style={{\n        background: 'rgba(255, 255, 255, 0.06)',\n        backdropFilter: 'blur(20px) saturate(1.6)',\n        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',\n        border: '1px solid rgba(255, 255, 255, 0.08)',\n        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06)',\n      }}\n      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}\n    >\n      <div className=\"flex items-start gap-3.5 px-4 py-3.5 pr-12\">\n        {/* Icon */}\n        <motion.div\n          initial={{ scale: 0 }}\n          animate={{ scale: 1 }}\n          transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 + index * 0.05 }}\n          className=\"mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl\"\n          style={{\n            background: `${notification.color}18`,\n            border: `1px solid ${notification.color}22`,\n          }}\n        >\n          <Icon size={18} weight=\"regular\" style={{ color: notification.color }} />\n        </motion.div>\n\n        {/* Content */}\n        <div className=\"min-w-0 flex-1\">\n          <h4 className=\"text-sm font-semibold text-white/85\">{notification.title}</h4>\n          <p className=\"mt-0.5 text-[13px] text-white/40\">{notification.message}</p>\n        </div>\n      </div>\n\n      {/* Dismiss + time — positioned top-right */}\n      <div className=\"absolute right-3 top-3 flex flex-col items-end gap-1.5\">\n        <motion.button\n          whileHover={{ scale: 1.2, backgroundColor: 'rgba(255,255,255,0.15)' }}\n          whileTap={{ scale: 0.85 }}\n          onClick={() => onDismiss(notification.id)}\n          className=\"flex h-5 w-5 cursor-pointer items-center justify-center rounded-full\"\n          style={{\n            background: 'rgba(255,255,255,0.06)',\n          }}\n        >\n          <X size={11} weight=\"regular\" className=\"text-white/30\" />\n        </motion.button>\n        <span className=\"text-[10px] text-white/25\">{notification.time}</span>\n      </div>\n\n      {/* Bottom accent line */}\n      <div\n        className=\"absolute bottom-0 left-4 right-4 h-[1px]\"\n        style={{\n          background: `linear-gradient(90deg, transparent, ${notification.color}22, transparent)`,\n        }}\n      />\n    </motion.div>\n  )\n}\n\nexport function GlassNotification() {\n  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)\n\n  const dismiss = (id: number) => {\n    setNotifications((prev) => prev.filter((n) => n.id !== id))\n  }\n\n  const reset = () => setNotifications(INITIAL_NOTIFICATIONS)\n\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image */}\n      <img\n        src=\"https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png\"\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n      {/* Notification stack */}\n      <motion.div\n        initial={{ opacity: 0 }}\n        animate={{ opacity: 1 }}\n        className=\"relative flex w-[360px] flex-col gap-2.5\"\n      >\n        {/* Header */}\n        <div className=\"mb-1 flex items-center justify-between px-1\">\n          <div className=\"flex items-center gap-2\">\n            <Bell size={20} weight=\"regular\" className=\"text-white/40\" />\n            <span className=\"text-sm font-semibold text-white/60\">\n              Notifications\n            </span>\n            {notifications.length > 0 && (\n              <motion.span\n                layout\n                className=\"flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-semibold text-white\"\n                style={{\n                  background: 'rgba(255, 107, 245, 0.4)',\n                  border: '1px solid rgba(255, 107, 245, 0.3)',\n                }}\n              >\n                {notifications.length}\n              </motion.span>\n            )}\n          </div>\n          {notifications.length < INITIAL_NOTIFICATIONS.length && (\n            <motion.button\n              initial={{ opacity: 0, scale: 0.8 }}\n              animate={{ opacity: 1, scale: 1 }}\n              whileHover={{ scale: 1.05 }}\n              whileTap={{ scale: 0.95 }}\n              onClick={reset}\n              className=\"cursor-pointer text-xs font-medium text-white/30 transition-colors hover:text-white/50\"\n            >\n              Reset\n            </motion.button>\n          )}\n        </div>\n\n        {/* Cards */}\n        <AnimatePresence mode=\"popLayout\">\n          {notifications.map((n, i) => (\n            <NotificationCard key={n.id} notification={n} onDismiss={dismiss} index={i} />\n          ))}\n        </AnimatePresence>\n\n        {/* Empty state */}\n        <AnimatePresence>\n          {notifications.length === 0 && (\n            <motion.div\n              initial={{ opacity: 0, scale: 0.9 }}\n              animate={{ opacity: 1, scale: 1 }}\n              className=\"flex flex-col items-center gap-3 py-12\"\n            >\n              <span className=\"text-sm text-white/60\">All caught up</span>\n            </motion.div>\n          )}\n        </AnimatePresence>\n      </motion.div>\n    </div>\n  )\n}\n"
 
+const GLASS_SIDEBAR_CODE = `'use client'
+
+import { useState, useEffect } from 'react'
+import { motion, useSpring, AnimatePresence } from 'framer-motion'
+import {
+  House,
+  MagnifyingGlass,
+  Folders,
+  Bell,
+  ChartLine,
+  Gear,
+  User,
+  ArrowRight,
+  ArrowLeft,
+} from '@phosphor-icons/react'
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+// iOS-style continuous corner (squircle) — scales with objectBoundingBox
+const SQUIRCLE_PATH =
+  'M0.5 0C0.7413 0 0.8559 0 0.9227 0.0773C1 0.1441 1 0.2587 1 0.5C1 0.7413 1 0.8559 0.9227 0.9227C0.8559 1 0.7413 1 0.5 1C0.2587 1 0.1441 1 0.0773 0.9227C0 0.8559 0 0.7413 0 0.5C0 0.2587 0 0.1441 0.0773 0.0773C0.1441 0 0.2587 0 0.5 0Z'
+
+const COLLAPSED_WIDTH = 64
+const EXPANDED_WIDTH = 220
+
+// Design size for icon tiles — intentionally fixed, not responsive
+const ICON_TILE_SIZE = 44
+const TOGGLE_BUTTON_HEIGHT = 36
+
+const NAV_ITEMS = [
+  { icon: House,           label: 'Home',          color: '#3A86FF' },
+  { icon: MagnifyingGlass, label: 'Search',        color: '#B388FF' },
+  { icon: Folders,         label: 'Projects',      color: '#FFBE0B' },
+  { icon: Bell,            label: 'Notifications', color: '#FF5C8A' },
+  { icon: ChartLine,       label: 'Analytics',     color: '#06D6A0' },
+  { icon: Gear,            label: 'Settings',      color: '#C9A96E' },
+  { icon: User,            label: 'Profile',       color: '#FF7B54' },
+] as const
+
+type NavItem = (typeof NAV_ITEMS)[number]
+
+const GLASS_STYLE = {
+  background: 'rgba(255, 255, 255, 0.06)',
+  backdropFilter: 'blur(24px) saturate(1.8)',
+  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+} as const
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function NavItemRow({
+  item,
+  index,
+  isActive,
+  isOpen,
+  onActivate,
+}: {
+  item: NavItem
+  index: number
+  isActive: boolean
+  isOpen: boolean
+  onActivate: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  const Icon = item.icon
+
+  // Reset stuck hover state when sidebar opens/closes — avoids tooltip lingering
+  useEffect(() => { setHovered(false) }, [isOpen])
+
+  return (
+    <div className="relative flex w-full items-center">
+      {/* Tooltip — only shown in collapsed state to surface the hidden label */}
+      <AnimatePresence>
+        {!isOpen && hovered && (
+          <motion.div
+            key="tooltip"
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -6 }}
+            transition={{ duration: 0.15 }}
+            className="pointer-events-none absolute left-[calc(100%+10px)] z-50 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold text-white/90 font-sans"
+            style={GLASS_STYLE}
+          >
+            {item.label}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Icon tile + label row */}
+      <motion.button
+        onClick={onActivate}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        animate={{
+          // Collapsed: nudge right + scale up more to signal interactivity without a label
+          scale: hovered ? (isOpen ? 1.08 : 1.15) : 1,
+          x: hovered ? (isOpen ? 0 : 3) : 0,
+        }}
+        whileTap={{ scale: 0.90 }}
+        // stiffness 320 / damping 20 — snappy enough to feel physical without overshooting
+        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+        className="flex w-full items-center gap-3 rounded-xl cursor-pointer justify-start"
+        style={{ background: 'transparent', border: 'none', outline: 'none' }}
+        aria-label={item.label}
+      >
+        {/* Squircle icon tile */}
+        <motion.div
+          className="relative flex shrink-0 items-center justify-center"
+          style={{
+            width: ICON_TILE_SIZE,
+            height: ICON_TILE_SIZE,
+            background: isActive
+              ? \`linear-gradient(145deg, \${item.color}ff, \${item.color}cc)\`
+              : \`linear-gradient(145deg, \${item.color}cc, \${item.color}66)\`,
+            clipPath: 'url(#squircle-sidebar)',
+            filter: isActive
+              ? \`drop-shadow(0 0 10px \${item.color}88)\`
+              : \`drop-shadow(0 4px 8px \${item.color}44)\`,
+            transition: 'filter 0.2s, background 0.2s',
+          }}
+        >
+          <Icon size={22} weight="regular" className="text-white relative z-10" />
+
+          {/* Top-half gloss — simulates ambient light catching a convex surface */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 50%, transparent 50%)',
+            }}
+          />
+        </motion.div>
+
+        {/* Label — only rendered when sidebar is open */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.span
+              key="label"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0, transition: { duration: 0.18, ease: 'easeOut', delay: 0.18 + index * 0.03 } }}
+              exit={{ opacity: 0, x: -6, transition: { duration: 0.08, ease: 'easeIn', delay: 0 } }}
+              className="whitespace-nowrap text-sm font-semibold font-sans"
+              style={{
+                color: isActive ? item.color : 'rgba(255,255,255,0.75)',
+              }}
+            >
+              {item.label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
+    </div>
+  )
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function GlassSidebar() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [toggleHovered, setToggleHovered] = useState(false)
+
+  // Spring width gives the expand/collapse a physical, momentum-based feel
+  const widthSpring = useSpring(COLLAPSED_WIDTH, { stiffness: 280, damping: 26 })
+
+  function toggle() {
+    const next = !isOpen
+    setIsOpen(next)
+    widthSpring.set(next ? EXPANDED_WIDTH : COLLAPSED_WIDTH)
+  }
+
+  return (
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+      {/* Squircle SVG clip-path definition — zero-size so it doesn't affect layout */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <clipPath id="squircle-sidebar" clipPathUnits="objectBoundingBox">
+            <path d={SQUIRCLE_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
+
+      {/* Background image */}
+      <img
+        src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png"
+        alt=""
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
+      />
+
+      {/* Fixed-width anchor: keeps the left edge stable so the sidebar expands rightward */}
+      <div style={{ width: EXPANDED_WIDTH }} className="flex items-center justify-start">
+        {/* Sidebar panel */}
+        <motion.div
+          style={{
+            width: widthSpring,
+            ...GLASS_STYLE,
+          }}
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          // delay: 0.1s lets the background settle before the sidebar slides in
+          transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
+          className="relative flex h-auto flex-col items-center gap-2 overflow-visible rounded-3xl px-2.5 py-3"
+        >
+          {/* Nav items */}
+          <div className="flex w-full flex-col gap-1.5">
+            {NAV_ITEMS.map((item, i) => (
+              <NavItemRow
+                key={item.label}
+                item={item}
+                index={i}
+                isActive={activeIndex === i}
+                isOpen={isOpen}
+                onActivate={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div
+            className="my-1 w-full"
+            style={{ height: 1, background: 'rgba(255,255,255,0.1)' }}
+          />
+
+          {/* Toggle button */}
+          <div className={\`flex w-full items-center \${isOpen ? 'justify-start px-1' : 'justify-center'}\`}>
+            <motion.button
+              onClick={toggle}
+              onMouseEnter={() => setToggleHovered(true)}
+              onMouseLeave={() => setToggleHovered(false)}
+              animate={{ scale: toggleHovered ? 1.08 : 1 }}
+              whileTap={{ scale: 0.90 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="flex items-center justify-center rounded-2xl cursor-pointer"
+              style={{
+                width: ICON_TILE_SIZE,
+                height: TOGGLE_BUTTON_HEIGHT,
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                outline: 'none',
+              }}
+              aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              {/* Arrow spins 90° on enter/exit — gives the swap a sense of rotation direction */}
+              <AnimatePresence mode="wait" initial={false}>
+                {isOpen ? (
+                  <motion.span
+                    key="left"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <ArrowLeft size={18} weight="regular" className="text-white/70" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="right"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <ArrowRight size={18} weight="regular" className="text-white/70" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+`
+
 export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'silk-lines',
@@ -5054,6 +5334,7 @@ export function EmojiBurst() {
     slug: 'glass-dock',
     name: 'Glass Dock',
     description: "macOS-style dock with cursor-proximity magnification. Icons scale with spring physics as the mouse approaches.",
+    image: 'https://ik.imagekit.io/aitoolkit/glass-dock.png',
     tags: [
       { label: 'Navigation', accent: true },
       { label: 'Glass' },
@@ -5067,6 +5348,7 @@ export function EmojiBurst() {
     slug: 'glass-slider',
     name: 'Glass Slider',
     description: "Range sliders with glass tracks, glowing colored fills, and spring-animated thumbs that scale on drag.",
+    image: 'https://ik.imagekit.io/aitoolkit/glass-slider.png',
     tags: [
       { label: 'Slider', accent: true },
       { label: 'Glass' },
@@ -5117,6 +5399,34 @@ export function EmojiBurst() {
     PreviewComponent: GlassNotification,
     code: GLASSNOTIFICATION_CODE,
     prompts: glassNotificationPrompts,
+  },
+  {
+    slug: 'glass-sidebar',
+    image: 'https://ik.imagekit.io/aitoolkit/glass-sidebar.png',
+    name: 'Glass Sidebar',
+    description: 'A collapsible glassmorphism sidebar with icon-only and expanded label states.',
+    tags: [
+      { label: 'Navigation', accent: true },
+      { label: 'Framer Motion' },
+      { label: 'Glassmorphism' },
+    ],
+    PreviewComponent: GlassSidebar,
+    code: GLASS_SIDEBAR_CODE,
+    prompts: glassSidebarPrompts,
+  },
+  {
+    slug: 'glass-user-menu',
+    name: 'Glass User Menu',
+    description: 'Frosted glass user avatar trigger with animated dropdown, grouped menu items, and Log Out.',
+    image: 'https://ik.imagekit.io/aitoolkit/glass-user-menu.png',
+    tags: [
+      { label: 'Navigation', accent: true },
+      { label: 'Glass' },
+      { label: 'Interactive' },
+    ],
+    PreviewComponent: GlassUserMenu,
+    code: '',
+    prompts: glassUserMenuPrompts,
   },
 ]
 

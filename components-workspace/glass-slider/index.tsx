@@ -3,162 +3,172 @@
 import { useState, useRef } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 
+// ─── Config ───────────────────────────────────────────────────────────────────
+
+const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
+
+const SLIDERS = [
+  { label: 'Brightness', defaultValue: 72, colorA: '#5B8FF9', colorB: '#A78BFA' },
+  { label: 'Contrast',   defaultValue: 45, colorA: '#FF6BF5', colorB: '#FF6680' },
+  { label: 'Warmth',     defaultValue: 60, colorA: '#FF7B54', colorB: '#FFBE0B' },
+  { label: 'Saturation', defaultValue: 55, colorA: '#06D6A0', colorB: '#5B8FF9' },
+]
+
+// ─── Hex interpolation — returns gradient color at position t (0–1) ───────────
+
+function lerpHex(a: string, b: string, t: number): string {
+  const ah = a.replace('#', '')
+  const bh = b.replace('#', '')
+  const ar = parseInt(ah.slice(0, 2), 16)
+  const ag = parseInt(ah.slice(2, 4), 16)
+  const ab = parseInt(ah.slice(4, 6), 16)
+  const br = parseInt(bh.slice(0, 2), 16)
+  const bg = parseInt(bh.slice(2, 4), 16)
+  const bb = parseInt(bh.slice(4, 6), 16)
+  return `#${Math.round(ar + (br - ar) * t).toString(16).padStart(2, '0')}${Math.round(ag + (bg - ag) * t).toString(16).padStart(2, '0')}${Math.round(ab + (bb - ab) * t).toString(16).padStart(2, '0')}`
+}
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+
 function Slider({
   label,
   defaultValue,
-  color,
+  colorA,
+  colorB,
   delay,
 }: {
   label: string
   defaultValue: number
-  color: string
+  colorA: string
+  colorB: string
   delay: number
 }) {
   const [value, setValue] = useState(defaultValue)
+  const [hovered, setHovered] = useState(false)
   const trackRef = useRef<HTMLDivElement>(null)
-  const dragging = useMotionValue(0)
-  const thumbScale = useSpring(useTransform(dragging, [0, 1], [1, 1.3]), {
-    stiffness: 400,
-    damping: 20,
-  })
-  const glowOpacity = useSpring(useTransform(dragging, [0, 1], [0, 0.6]), {
-    stiffness: 300,
-    damping: 25,
-  })
+  const isDragging = useMotionValue(0)
+  const thumbScale = useSpring(useTransform(isDragging, [0, 1], [1, 1.3]), { stiffness: 400, damping: 20 })
+
+  const thumbColor = lerpHex(colorA, colorB, value / 100)
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
-    dragging.set(1)
+    isDragging.set(1)
 
     const track = trackRef.current
     if (!track) return
 
     const updateValue = (clientX: number) => {
       const rect = track.getBoundingClientRect()
-      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-      setValue(Math.round(pct * 100))
+      setValue(Math.round(Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * 100))
     }
 
     updateValue(e.clientX)
 
     const onMove = (ev: PointerEvent) => updateValue(ev.clientX)
     const onUp = () => {
-      dragging.set(0)
+      isDragging.set(0)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
-
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 22, delay }}
-      className="flex w-full items-center gap-4"
+      className="flex flex-col gap-[14px]"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <span className="w-20 text-right text-sm font-medium text-white/50">{label}</span>
+      {/* Label row */}
+      <div className="flex items-center justify-between">
+        <motion.span
+          animate={{ color: hovered ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.5)' }}
+          transition={{ duration: 0.2 }}
+          className="text-sm font-medium"
+        >
+          {label}
+        </motion.span>
+        <span className="font-mono text-sm font-semibold" style={{ color: thumbColor }}>{value}</span>
+      </div>
 
+      {/* Track */}
       <div
         ref={trackRef}
         onPointerDown={handlePointerDown}
-        className="relative flex h-10 flex-1 cursor-pointer items-center rounded-2xl px-1"
+        className="relative h-[5px] w-full cursor-pointer rounded-full touch-none"
         style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: hovered ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)',
+          transition: 'background 0.2s ease',
         }}
       >
-        {/* Fill */}
-        <motion.div
-          className="absolute left-0 top-0 h-full rounded-2xl"
+        {/* Gradient fill */}
+        <div
+          className="absolute left-0 top-0 h-full rounded-full"
           style={{
             width: `${value}%`,
-            background: `linear-gradient(90deg, ${color}22, ${color}44)`,
-          }}
-          layout
-          transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-        />
-
-        {/* Active glow */}
-        <motion.div
-          className="absolute left-0 top-0 h-full rounded-2xl"
-          style={{
-            width: `${value}%`,
-            opacity: glowOpacity,
-            background: `linear-gradient(90deg, transparent 60%, ${color}33)`,
-            boxShadow: `0 0 20px ${color}22`,
+            background: `linear-gradient(90deg, ${colorA}, ${colorB})`,
+            filter: hovered ? `drop-shadow(0 0 4px ${thumbColor}88)` : 'none',
+            transition: 'filter 0.2s ease',
           }}
         />
 
-        {/* Thumb */}
+        {/* Thumb — larger touch target wraps the visible circle */}
         <motion.div
-          className="absolute top-1/2 flex items-center justify-center"
-          style={{
-            left: `${value}%`,
-            x: '-50%',
-            y: '-50%',
-            scale: thumbScale,
-          }}
+          className="absolute top-1/2 flex h-[44px] w-[44px] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+          style={{ left: `${value}%`, scale: thumbScale }}
         >
           <div
-            className="h-6 w-6 rounded-full"
+            className="h-[18px] w-[18px] rounded-full bg-white"
             style={{
-              background: `linear-gradient(135deg, ${color}, ${color}bb)`,
-              border: '2px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: `0 2px 12px ${color}55, 0 0 0 4px ${color}11`,
+              boxShadow: `0 0 0 2.5px ${thumbColor}, 0 2px 10px ${thumbColor}66`,
             }}
           />
         </motion.div>
       </div>
-
-      {/* Value display */}
-      <motion.span
-        className="w-12 text-right font-mono text-sm font-semibold"
-        style={{ color }}
-      >
-        {value}
-      </motion.span>
     </motion.div>
   )
 }
 
+// ─── GlassSlider ──────────────────────────────────────────────────────────────
+
 export function GlassSlider() {
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
-      {/* Background image */}
       <img
-        src="https://ik.imagekit.io/aitoolkit/bg%20images/glass%20background.png"
+        src={BACKGROUND}
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
-      {/* Slider panel */}
+
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="relative flex w-[400px] flex-col gap-5 rounded-3xl px-8 py-8"
+        className="relative flex w-[calc(100%-32px)] max-w-[360px] flex-col gap-7 rounded-3xl px-7 py-8"
         style={{
-          background: 'rgba(255, 255, 255, 0.06)',
-          backdropFilter: 'blur(24px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(24px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
         }}
       >
-        {/* Top highlight */}
+        {/* Top edge highlight */}
         <div
-          className="absolute left-8 right-8 top-0 h-[1px]"
+          className="absolute left-7 right-7 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}
         />
 
-        <h3 className="mb-1 text-base font-semibold text-white/80">Audio Settings</h3>
+        <h3 className="text-base font-semibold text-white/80">Display</h3>
 
-        <Slider label="Volume" defaultValue={72} color="#FF6BF5" delay={0.1} />
-        <Slider label="Bass" defaultValue={45} color="#FF7B54" delay={0.15} />
-        <Slider label="Treble" defaultValue={60} color="#06D6A0" delay={0.2} />
-        <Slider label="Balance" defaultValue={50} color="#FFBE0B" delay={0.25} />
+        {SLIDERS.map((s, i) => (
+          <Slider key={s.label} {...s} delay={0.08 + i * 0.06} />
+        ))}
       </motion.div>
     </div>
   )
