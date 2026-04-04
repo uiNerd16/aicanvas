@@ -134,20 +134,26 @@ export function GlassDock() {
 
       {/* Dock container */}
       <motion.div
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        initial={{ y: 50 }}
+        animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 180, damping: 20 }}
         onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(-200)}
-        className="mx-auto flex items-end gap-2 rounded-3xl px-4 pb-3 pt-3"
+        className="relative isolate mx-auto flex items-end gap-2 rounded-3xl px-4 pb-3 pt-3"
         style={{
           background: 'rgba(255, 255, 255, 0.06)',
-          backdropFilter: 'blur(24px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         }}
       >
+        {/* Blur layer — non-animating so it isn't recalculated on every mouse-move frame */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+          style={{
+            backdropFilter: 'blur(24px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+          }}
+        />
         {DOCK_ITEMS.map((item, i) => (
           <DockItem key={item.label} {...item} mouseX={mouseX} index={i} />
         ))}

@@ -70,10 +70,9 @@ function NotificationCard({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 60, scale: 0.9 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -60, scale: 0.9, filter: 'blur(4px)' }}
-      transition={{ type: 'spring', stiffness: 280, damping: 24, delay: index * 0.05 }}
+      initial={{ x: 60, scale: 0.9 }}
+      animate={{ x: 0, scale: 1, transition: { type: 'spring', stiffness: 280, damping: 24, delay: index * 0.05 } }}
+      exit={{ opacity: 0, x: -60, scale: 0.9, filter: 'blur(4px)', transition: { duration: 0.2, ease: 'easeIn' } }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.3}
@@ -82,16 +81,19 @@ function NotificationCard({
           onDismiss(notification.id)
         }
       }}
-      className="group relative w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing transition-colors duration-200"
+      className="group relative isolate w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing transition-colors duration-200"
       style={{
         background: 'rgba(255, 255, 255, 0.06)',
-        backdropFilter: 'blur(20px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
       }}
       whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
     >
+      {/* Blur layer — non-animating, isolated from drag frames */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl"
+        style={{ backdropFilter: 'blur(20px) saturate(1.6)', WebkitBackdropFilter: 'blur(20px) saturate(1.6)' }}
+      />
       <div className="flex items-start gap-3.5 px-4 py-3.5 pr-12">
         {/* Icon */}
         <motion.div
@@ -159,9 +161,7 @@ export function GlassNotification() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
       {/* Notification stack */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+      <div
         className="relative flex w-[360px] flex-col gap-2.5"
       >
         {/* Header */}
@@ -217,7 +217,7 @@ export function GlassNotification() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   )
 }

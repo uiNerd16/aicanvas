@@ -39,10 +39,14 @@ const NAV_ITEMS = [
 
 type NavItem = (typeof NAV_ITEMS)[number]
 
-const GLASS_STYLE = {
-  background: 'rgba(255, 255, 255, 0.06)',
+// Blur is on a separate non-animating layer so it isn't recalculated every spring frame
+const GLASS_BLUR_STYLE = {
   backdropFilter: 'blur(24px) saturate(1.8)',
   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+} as const
+
+const GLASS_STYLE = {
+  background: 'rgba(255, 255, 255, 0.06)',
   border: '1px solid rgba(255, 255, 255, 0.1)',
   boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 } as const
@@ -80,7 +84,7 @@ function NavItemRow({
             exit={{ opacity: 0, x: -6 }}
             transition={{ duration: 0.15 }}
             className="pointer-events-none absolute left-[calc(100%+10px)] z-50 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold text-white/90 font-sans"
-            style={GLASS_STYLE}
+            style={{ ...GLASS_STYLE, ...GLASS_BLUR_STYLE }}
           >
             {item.label}
           </motion.div>
@@ -196,12 +200,18 @@ export function GlassSidebar() {
             width: widthSpring,
             ...GLASS_STYLE,
           }}
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
+          initial={{ x: -20 }}
+          animate={{ x: 0 }}
           // delay: 0.1s lets the background settle before the sidebar slides in
           transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
-          className="relative flex h-auto flex-col items-center gap-2 overflow-visible rounded-3xl px-2.5 py-3"
+          className="relative isolate flex h-auto flex-col items-center gap-2 overflow-visible rounded-3xl px-2.5 py-3"
         >
+          {/* Blur layer — absolute, never animates, so blur is not recalculated every spring frame */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+            style={GLASS_BLUR_STYLE}
+          />
+
           {/* Nav items */}
           <div className="flex w-full flex-col gap-1.5">
             {NAV_ITEMS.map((item, i) => (

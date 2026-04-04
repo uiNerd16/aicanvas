@@ -110,18 +110,21 @@ export function GlassToggle() {
       />
       {/* Settings panel */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ y: 20, scale: 0.96 }}
+        animate={{ y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="relative flex w-[320px] flex-col gap-5 rounded-3xl px-7 py-7"
+        className="relative isolate flex w-[320px] flex-col gap-5 rounded-3xl px-7 py-7"
         style={{
           background: 'rgba(255, 255, 255, 0.06)',
-          backdropFilter: 'blur(24px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         }}
       >
+        {/* Blur layer — non-animating, isolated from entrance spring */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+          style={{ backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}
+        />
         {/* Top highlight */}
         <div
           className="absolute left-7 right-7 top-0 h-[1px]"

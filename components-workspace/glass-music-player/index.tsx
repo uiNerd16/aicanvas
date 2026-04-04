@@ -83,18 +83,21 @@ export function GlassMusicPlayer() {
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ y: 24, scale: 0.95 }}
+        animate={{ y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        className="relative w-[320px] overflow-hidden rounded-[32px]"
+        className="relative isolate w-[320px] overflow-hidden rounded-[32px]"
         style={{
           background: 'rgba(12,10,14,0.55)',
-          backdropFilter: 'blur(48px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(48px) saturate(1.6)',
           border: '1px solid rgba(255,255,255,0.09)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)',
         }}
       >
+        {/* Blur layer — non-animating, isolated from entrance spring */}
+        <div
+          className="pointer-events-none absolute inset-0 z-[-1] rounded-[32px]"
+          style={{ backdropFilter: 'blur(48px) saturate(1.6)', WebkitBackdropFilter: 'blur(48px) saturate(1.6)' }}
+        />
         {/* Top edge highlight */}
         <div
           className="absolute left-12 right-12 top-0 h-[1px]"
