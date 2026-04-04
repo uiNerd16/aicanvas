@@ -3347,7 +3347,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Pill Toggle',
     description: 'A minimal iOS-style slider toggle — thumb glides between off (grey) and on (green) with a snappy spring. Fully responsive.',
     tags: [
-      { label: 'Toggle', accent: true },
+      { label: 'Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3444,7 +3444,7 @@ export function PillToggle() {
     name: 'Mark Toggle',
     description: 'An iOS-style pill toggle in warm earth and sand tones — the thumb carries a small icon that morphs from X to checkmark as it slides across.',
     tags: [
-      { label: 'Toggle', accent: true },
+      { label: 'Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3559,7 +3559,7 @@ export function MarkToggle() {
     name: 'Taga Toggle',
     description: 'A playful pill toggle with an expressive face on the thumb — dead (×× eyes, flat mouth) when off, happy (arc eyes, big smile) when on. Track warms from grey to yellow.',
     tags: [
-      { label: 'Toggle', accent: true },
+      { label: 'Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3677,7 +3677,7 @@ export function TagaToggle() {
     name: 'Blind Pull Toggle',
     description: 'A dark/light mode toggle styled as a window-blind pull cord — click to yank the cord and watch the icon swap through a venetian-blind slat animation.',
     tags: [
-      { label: 'Toggle', accent: true },
+      { label: 'Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -5081,7 +5081,7 @@ export function EmojiBurst() {
     name: 'Glass Toggle',
     description: "On/off toggles with glass housing and liquid-feel spring animation. Track color transitions smoothly.",
     tags: [
-      { label: 'Toggle', accent: true },
+      { label: 'Toggles', accent: true },
       { label: 'Glass' },
       { label: 'Interactive' },
     ],
