@@ -13,20 +13,6 @@ export function GlassModal() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Echo ring — pulsing glow behind the modal */}
-      <motion.div
-        className="absolute w-[340px] rounded-3xl"
-        animate={{ opacity: [0.4, 0.18, 0.4], scale: [1.02, 1.07, 1.02] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          minHeight: 480,
-          background: 'transparent',
-          border: '1px solid rgba(255, 160, 50, 0.25)',
-          boxShadow: '0 0 40px rgba(220, 80, 30, 0.2), 0 0 80px rgba(220, 80, 30, 0.1)',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* Modal card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 16 }}

@@ -27,3 +27,5 @@
 | grid-lines | integrated | 20px dot grid with H/V lines, radial wave pulse on hover, dualTheme |
 | origami-card | deleted | Removed by user request |
 | kinetic-vortex | deleted | Removed by user request |
+| glass-sidebar | integrated | Two-state glassmorphism sidebar, squircle icons, spring width, staggered labels, pink flower bg |
+| glass-weather-widget | previewing | Glassmorphism weather card, 4 cycling states, canvas particles, live clock, temperature spring |
