@@ -25,15 +25,15 @@ const MENU_GROUPS = [
   {
     label: 'Account',
     items: [
-      { icon: User, label: 'Profile'  },
-      { icon: Gear, label: 'Settings' },
+      { icon: User, label: 'Profile',  color: '#3A86FF' },
+      { icon: Gear, label: 'Settings', color: '#B388FF' },
     ],
   },
   {
     label: 'Workspace',
     items: [
-      { icon: Users,      label: 'Team'    },
-      { icon: CreditCard, label: 'Billing' },
+      { icon: Users,      label: 'Team',    color: '#06D6A0' },
+      { icon: CreditCard, label: 'Billing', color: '#FFBE0B' },
     ],
   },
 ]
@@ -46,36 +46,75 @@ const glassPanel = {
   boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1)',
 }
 
-// Blur kept separate — avoids recalculation on every hover/spring frame
 const glassPanelBlur = {
   backdropFilter: 'blur(24px) saturate(1.8)',
   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
 }
+
+// Active glow — warm orange border + ambient glow (matches glass-search-bar)
+const ACTIVE_GLOW =
+  '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1.5px rgba(255, 160, 50, 0.5), 0 0 20px rgba(255, 160, 50, 0.12)'
 
 // ─── MenuItem ─────────────────────────────────────────────────────────────────
 
 function MenuItem({
   icon: Icon,
   label,
+  color,
   index,
 }: {
   icon: typeof User
   label: string
+  color: string
   index: number
 }) {
+  const [hovered, setHovered] = useState(false)
+
   return (
-    <motion.button
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 26, delay: 0.06 + index * 0.04 }}
-      whileHover={{ x: 3, backgroundColor: 'rgba(255,255,255,0.07)' }}
-      whileTap={{ scale: 0.98 }}
-      className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5"
-      style={{ background: 'transparent' }}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15, delay: 0.06 + index * 0.04 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5"
+      style={{ minHeight: 44, background: 'transparent' }}
     >
-      <Icon size={20} weight="regular" className="shrink-0 text-white/50" />
-      <span className="text-sm font-medium text-white/70">{label}</span>
-    </motion.button>
+      {/* Animated group: icon badge + label — scales and nudges right on hover */}
+      <motion.button
+        onClick={() => {}}
+        animate={{
+          x: hovered ? 3 : 0,
+          scale: hovered ? 1.08 : 1,
+        }}
+        whileTap={{ scale: 0.90 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5"
+        style={{ background: 'transparent', transformOrigin: 'left center' }}
+      >
+        {/* Icon badge — notification-style tinted */}
+        <div
+          className="flex shrink-0 items-center justify-center rounded-xl"
+          style={{
+            width: 32,
+            height: 32,
+            background: `${color}18`,
+            border: `1px solid ${color}22`,
+          }}
+        >
+          <Icon size={16} weight="regular" style={{ color }} />
+        </div>
+        <span
+          className="text-sm font-medium"
+          style={{
+            color: hovered ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.70)',
+            transition: 'color 0.15s',
+          }}
+        >
+          {label}
+        </span>
+      </motion.button>
+    </motion.div>
   )
 }
 
@@ -109,15 +148,20 @@ export function GlassUserMenu() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      <div ref={ref} className="relative flex flex-col items-center px-4">
+      <div ref={ref} className="relative flex flex-col items-center px-4" style={{ marginTop: -150 }}>
 
-        {/* Trigger */}
+        {/* Trigger — orange glow when open */}
         <motion.button
           onClick={() => setOpen(v => !v)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          animate={{ boxShadow: open ? ACTIVE_GLOW : glassPanel.boxShadow }}
+          transition={{ type: 'spring', stiffness: 300, damping: 26 }}
           className="relative isolate flex cursor-pointer items-center gap-2 rounded-2xl px-4 py-2.5"
-          style={glassPanel}
+          style={{
+            background: glassPanel.background,
+            border: glassPanel.border,
+          }}
         >
           <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassPanelBlur} />
           <div
@@ -135,7 +179,7 @@ export function GlassUserMenu() {
           </motion.div>
         </motion.button>
 
-        {/* Dropdown — min-w matches trigger, max-w caps on small screens */}
+        {/* Dropdown */}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -160,7 +204,7 @@ export function GlassUserMenu() {
                     {group.label}
                   </p>
                   {group.items.map((item) => (
-                    <MenuItem key={item.label} icon={item.icon} label={item.label} index={itemIndex++} />
+                    <MenuItem key={item.label} icon={item.icon} label={item.label} color={item.color} index={itemIndex++} />
                   ))}
                 </div>
               ))}
@@ -168,23 +212,63 @@ export function GlassUserMenu() {
               {/* Divider */}
               <div className="mx-2 my-1.5 h-[1px]" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
-              {/* Log out */}
-              <motion.button
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 26, delay: 0.06 + itemIndex * 0.04 }}
-                whileHover={{ x: 3, backgroundColor: 'rgba(255, 80, 80, 0.12)' }}
-                whileTap={{ scale: 0.98 }}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5"
-                style={{ background: 'transparent' }}
-              >
-                <SignOut size={20} weight="regular" style={{ color: 'rgba(255,90,90,0.7)' }} />
-                <span className="text-sm font-medium" style={{ color: 'rgba(255,90,90,0.8)' }}>Log Out</span>
-              </motion.button>
+              {/* Log out — same hover pattern */}
+              <LogOutItem index={itemIndex} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+// ─── Log Out Item ─────────────────────────────────────────────────────────────
+
+function LogOutItem({ index }: { index: number }) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15, delay: 0.06 + index * 0.04 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5"
+      style={{ minHeight: 44, background: 'transparent' }}
+    >
+      <motion.button
+        onClick={() => {}}
+        animate={{
+          x: hovered ? 3 : 0,
+          scale: hovered ? 1.08 : 1,
+        }}
+        whileTap={{ scale: 0.90 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5"
+        style={{ background: 'transparent', transformOrigin: 'left center' }}
+      >
+        <div
+          className="flex shrink-0 items-center justify-center rounded-xl"
+          style={{
+            width: 32,
+            height: 32,
+            background: '#FF5A5A18',
+            border: '1px solid #FF5A5A22',
+          }}
+        >
+          <SignOut size={16} weight="regular" style={{ color: '#FF5A5A' }} />
+        </div>
+        <span
+          className="text-sm font-medium"
+          style={{
+            color: hovered ? 'rgba(255,90,90,0.95)' : 'rgba(255,90,90,0.70)',
+            transition: 'color 0.15s',
+          }}
+        >
+          Log Out
+        </span>
+      </motion.button>
+    </motion.div>
   )
 }

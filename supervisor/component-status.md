@@ -28,4 +28,9 @@
 | origami-card | deleted | Removed by user request |
 | kinetic-vortex | deleted | Removed by user request |
 | glass-sidebar | integrated | Two-state glassmorphism sidebar, squircle icons, spring width, staggered labels, pink flower bg |
-| glass-weather-widget | previewing | Glassmorphism weather card, 4 cycling states, canvas particles, live clock, temperature spring |
+| glass-weather-widget | deleted | Removed by user request |
+| glass-search-bar | integrated | Frosted glass search bar, orange active glow, suggestion dropdown with clear buttons, spring animations |
+| glass-input | deleted | Removed by user request |
+| glass-toast | integrated | Glass toast notifications, 4 variants, auto-dismiss progress bar, spring stacking |
+| glass-stepper | integrated | Glass numeric stepper, spring number flip, notification-style tinted buttons, configurable min/max/step |
+| glass-progress | integrated | Glass progress bar panel, glowing gradient fills, spring counters, staggered reveal, replay button |

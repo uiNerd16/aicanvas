@@ -1,6 +1,6 @@
 # Component Anatomy
 
-Every component in AI Toolkit follows this exact structure. No exceptions.
+Every component in AI Canvas follows this exact structure. No exceptions.
 
 ## Folder structure
 

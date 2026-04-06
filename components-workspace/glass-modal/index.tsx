@@ -55,19 +55,18 @@ export function GlassModal() {
 
         {/* Content */}
         <div className="flex flex-col items-center px-8 pb-8 pt-10">
-          {/* Icon */}
+          {/* Icon — notification-style tinted badge */}
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.15 }}
-            className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl"
+            className="mb-5 flex h-16 w-16 items-center justify-center rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 160, 50, 0.25), rgba(220, 60, 40, 0.15))',
-              border: '1px solid rgba(255, 180, 80, 0.2)',
-              boxShadow: '0 8px 24px rgba(220, 80, 30, 0.2)',
+              background: '#FFA03218',
+              border: '1px solid #FFA03222',
             }}
           >
-            <ShieldCheck size={28} weight="regular" className="text-white/80" />
+            <ShieldCheck size={28} weight="regular" style={{ color: '#FFA032' }} />
           </motion.div>
 
           <motion.h2

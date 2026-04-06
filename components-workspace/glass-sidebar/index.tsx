@@ -16,10 +16,6 @@ import {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-// iOS-style continuous corner (squircle) — scales with objectBoundingBox
-const SQUIRCLE_PATH =
-  'M0.5 0C0.7413 0 0.8559 0 0.9227 0.0773C1 0.1441 1 0.2587 1 0.5C1 0.7413 1 0.8559 0.9227 0.9227C0.8559 1 0.7413 1 0.5 1C0.2587 1 0.1441 1 0.0773 0.9227C0 0.8559 0 0.7413 0 0.5C0 0.2587 0 0.1441 0.0773 0.0773C0.1441 0 0.2587 0 0.5 0Z'
-
 const COLLAPSED_WIDTH = 64
 const EXPANDED_WIDTH = 220
 
@@ -108,32 +104,18 @@ function NavItemRow({
         style={{ background: 'transparent', border: 'none', outline: 'none' }}
         aria-label={item.label}
       >
-        {/* Squircle icon tile */}
+        {/* Icon tile — notification-style tinted badge */}
         <motion.div
-          className="relative flex shrink-0 items-center justify-center"
+          className="flex shrink-0 items-center justify-center rounded-xl"
           style={{
             width: ICON_TILE_SIZE,
             height: ICON_TILE_SIZE,
-            background: isActive
-              ? `linear-gradient(145deg, ${item.color}ff, ${item.color}cc)`
-              : `linear-gradient(145deg, ${item.color}cc, ${item.color}66)`,
-            clipPath: 'url(#squircle-sidebar)',
-            filter: isActive
-              ? `drop-shadow(0 0 10px ${item.color}88)`
-              : `drop-shadow(0 4px 8px ${item.color}44)`,
-            transition: 'filter 0.2s, background 0.2s',
+            background: isActive ? `${item.color}28` : `${item.color}18`,
+            border: `1px solid ${isActive ? `${item.color}44` : `${item.color}22`}`,
+            transition: 'background 0.2s, border-color 0.2s',
           }}
         >
-          <Icon size={22} weight="regular" className="text-white relative z-10" />
-
-          {/* Top-half gloss — simulates ambient light catching a convex surface */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 50%, transparent 50%)',
-            }}
-          />
+          <Icon size={20} weight="regular" style={{ color: item.color }} />
         </motion.div>
 
         {/* Label — only rendered when sidebar is open */}
@@ -176,15 +158,6 @@ export function GlassSidebar() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
-      {/* Squircle SVG clip-path definition — zero-size so it doesn't affect layout */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <clipPath id="squircle-sidebar" clipPathUnits="objectBoundingBox">
-            <path d={SQUIRCLE_PATH} />
-          </clipPath>
-        </defs>
-      </svg>
-
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png"
