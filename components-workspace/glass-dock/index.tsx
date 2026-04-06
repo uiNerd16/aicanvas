@@ -30,10 +30,6 @@ const ICON_SIZE = 44
 const MAG_RANGE = 120
 const MAG_SCALE = 1.55
 
-// iOS-style continuous corner (squircle) — scales with objectBoundingBox
-const SQUIRCLE_PATH =
-  'M0.5 0C0.7413 0 0.8559 0 0.9227 0.0773C1 0.1441 1 0.2587 1 0.5C1 0.7413 1 0.8559 0.9227 0.9227C0.8559 1 0.7413 1 0.5 1C0.2587 1 0.1441 1 0.0773 0.9227C0 0.8559 0 0.7413 0 0.5C0 0.2587 0 0.1441 0.0773 0.0773C0.1441 0 0.2587 0 0.5 0Z'
-
 function DockItem({
   icon: Icon,
   color,
@@ -83,29 +79,20 @@ function DockItem({
         {label}
       </motion.div>
 
-      {/* Icon — squircle clip + drop-shadow so shadow is not clipped */}
+      {/* Icon — notification-style tinted badge */}
       <motion.div
         style={{
           width: size,
           height: size,
           y,
-          background: `linear-gradient(145deg, ${color}dd, ${color}88)`,
-          clipPath: 'url(#squircle)',
-          filter: `drop-shadow(0 4px 12px ${color}55)`,
+          background: `${color}18`,
+          border: `1px solid ${color}22`,
+          borderRadius: 12,
         }}
         whileTap={{ scale: 0.82 }}
-        className="relative flex items-center justify-center"
+        className="flex items-center justify-center"
       >
-        <Icon size={22} weight="regular" className="text-white" />
-
-        {/* Gloss overlay */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, transparent 50%)',
-          }}
-        />
+        <Icon size={22} weight="regular" style={{ color }} />
       </motion.div>
     </motion.div>
   )
@@ -116,18 +103,9 @@ export function GlassDock() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-end overflow-hidden bg-sand-950 pb-8">
-      {/* Squircle clip-path definition — objectBoundingBox makes it scale with any element size */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <clipPath id="squircle" clipPathUnits="objectBoundingBox">
-            <path d={SQUIRCLE_PATH} />
-          </clipPath>
-        </defs>
-      </svg>
-
       {/* Background image */}
       <img
-        src="https://ik.imagekit.io/aitoolkit/bg%20images/glass%20background.png"
+        src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />

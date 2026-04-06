@@ -9,10 +9,10 @@ import type { Icon } from '@phosphor-icons/react'
 
 const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
 
-const CARDS: { title: string; subtitle: string; gradient: string; cta: string; Icon: Icon }[] = [
-  { title: 'Analytics',  subtitle: 'Real-time metrics and insights for your application.',    gradient: '#5B8FF9, #A78BFA', cta: 'View Dashboard',    Icon: ChartLineUp },
-  { title: 'Automation', subtitle: 'Streamline your workflows with intelligent triggers.',     gradient: '#FF6BF5, #FF6680', cta: 'Create Workflow',    Icon: Lightning    },
-  { title: 'Security',   subtitle: 'Enterprise-grade protection for your data.',              gradient: '#FF7B54, #FFBE0B', cta: 'View Report',        Icon: ShieldCheck  },
+const CARDS: { title: string; subtitle: string; color: string; gradient: string; cta: string; Icon: Icon }[] = [
+  { title: 'Analytics',  subtitle: 'Real-time metrics and insights for your application.',    color: '#5B8FF9', gradient: '#5B8FF9, #A78BFA', cta: 'View Dashboard',    Icon: ChartLineUp },
+  { title: 'Automation', subtitle: 'Streamline your workflows with intelligent triggers.',     color: '#FF6BF5', gradient: '#FF6BF5, #FF6680', cta: 'Create Workflow',    Icon: Lightning    },
+  { title: 'Security',   subtitle: 'Enterprise-grade protection for your data.',              color: '#FF7B54', gradient: '#FF7B54, #FFBE0B', cta: 'View Report',        Icon: ShieldCheck  },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,12 +20,14 @@ const CARDS: { title: string; subtitle: string; gradient: string; cta: string; I
 function GlassCardItem({
   title,
   subtitle,
+  color,
   gradient,
   cta,
   Icon,
 }: {
   title: string
   subtitle: string
+  color: string
   gradient: string
   cta: string
   Icon: Icon
@@ -85,17 +87,17 @@ function GlassCardItem({
           style={{ background: glareBackground }}
         />
 
-        {/* Icon */}
+        {/* Icon — notification-style tinted badge */}
         <motion.div
-          className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl"
+          className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
           style={{
-            background: `linear-gradient(135deg, ${gradient})`,
-            boxShadow: `0 4px 16px ${gradient.split(',')[0]}44`,
+            background: `${color}18`,
+            border: `1px solid ${color}22`,
           }}
           whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ type: 'spring', stiffness: 400, damping: 15 }}
         >
-          <Icon size={22} weight="regular" color="rgba(255,255,255,0.9)" />
+          <Icon size={22} weight="regular" style={{ color }} />
         </motion.div>
 
         <h3 className="mb-2 text-base font-semibold text-white/90">{title}</h3>

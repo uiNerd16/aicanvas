@@ -55,6 +55,15 @@ const ALL_SLUGS = [
   'glass-tags',
   'glass-card',
   'glass-sidebar',
+  'glass-toast',
+  'glass-search-bar',
+  'glass-tab-bar',
+  'glass-modal',
+  'glass-dock',
+  'glass-slider',
+  'glass-user-menu',
+  'glass-stepper',
+  'glass-progress',
 ]
 
 const arg   = process.argv[2]
@@ -180,6 +189,21 @@ const INTERACTIONS = {
     await preview.page().waitForTimeout(400)
     await preview.locator('button').first().click()
     await preview.page().waitForTimeout(180)
+  },
+
+  // Glass toast — click a trigger button to show a toast
+  'glass-toast': async (preview, page) => {
+    await preview.page().waitForTimeout(400)
+    await preview.locator('button').first().click()
+    await preview.page().waitForTimeout(800)
+  },
+
+  // Glass search bar — click to activate and show the dropdown
+  'glass-search-bar': async (preview, page) => {
+    await preview.page().waitForTimeout(400)
+    const input = preview.locator('input').first()
+    await input.click()
+    await preview.page().waitForTimeout(800)
   },
 
   // Glass sidebar — click the toggle button to expand the sidebar

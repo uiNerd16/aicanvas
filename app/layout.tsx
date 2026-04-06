@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Toolkit — Component Marketplace',
+  title: 'AI Canvas — Component Marketplace',
   description:
     'Beautiful animated components with AI prompts for V0, Bolt, Lovable, Claude Code, and Cursor.',
 }

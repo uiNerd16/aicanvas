@@ -5,14 +5,12 @@ import { motion } from 'framer-motion'
 import { House, Compass, PlusCircle, ChatCircle, User } from '@phosphor-icons/react'
 
 const TABS = [
-  { icon: House,       label: 'Home'     },
-  { icon: Compass,     label: 'Explore'  },
-  { icon: PlusCircle,  label: 'Create'   },
-  { icon: ChatCircle,  label: 'Messages' },
-  { icon: User,        label: 'Profile'  },
+  { icon: House,       label: 'Home',     color: '#3A86FF' },
+  { icon: Compass,     label: 'Explore',  color: '#FF7B54' },
+  { icon: PlusCircle,  label: 'Create',   color: '#06D6A0' },
+  { icon: ChatCircle,  label: 'Messages', color: '#FF5C8A' },
+  { icon: User,        label: 'Profile',  color: '#B388FF' },
 ]
-
-const ACCENT = 'rgba(255, 155, 50, 1)'
 
 export function GlassTabBar() {
   const [active, setActive]   = useState(0)
@@ -80,12 +78,20 @@ export function GlassTabBar() {
                 <motion.div
                   animate={{ scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className="flex items-center justify-center rounded-xl"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    background: isActive ? `${tab.color}28` : isHover ? `${tab.color}12` : 'transparent',
+                    border: isActive ? `1px solid ${tab.color}44` : isHover ? `1px solid ${tab.color}18` : '1px solid transparent',
+                    transition: 'background 0.2s, border-color 0.2s',
+                  }}
                 >
                   <Icon
-                    size={24}
+                    size={20}
                     weight="regular"
                     style={{
-                      color: isActive ? ACCENT : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)',
+                      color: isActive ? tab.color : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)',
                       transition: 'color 0.2s ease',
                     }}
                   />
@@ -94,7 +100,7 @@ export function GlassTabBar() {
                 <span
                   className="text-[10px] font-medium"
                   style={{
-                    color: isActive ? ACCENT : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)',
+                    color: isActive ? tab.color : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)',
                     transition: 'color 0.2s ease',
                   }}
                 >

@@ -12,7 +12,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
           <span className="text-olive-500">◈</span>
-          AI Toolkit
+          AI Canvas
         </Link>
 
         {/* Search — centered, grows to fill space */}
