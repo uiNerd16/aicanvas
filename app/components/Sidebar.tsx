@@ -1,25 +1,96 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CaretDown, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { COMPONENTS } from '../lib/component-registry'
 
-// Derive categories from accent tags — runs once at module level
-const accentLabels = [...new Set(
-  COMPONENTS.flatMap(c => c.tags.filter(t => t.accent).map(t => t.label))
-)]
+// ── Tier structure ────────────────────────────────────────────────────────
+// Hardcoded so the ordering is predictable. Every label here must correspond
+// to an `accent: true` tag on at least one component in the registry.
+const COMPONENTS_LABELS = [
+  'Backgrounds',
+  'Buttons & Toggles',
+  'Navigation',
+  'Widgets',
+  'Cards & Modals',
+  'Inputs & Controls',
+  'Notifications',
+  'Typography',
+  'AI',
+] as const
 
-const CATEGORIES = [
-  { label: 'All Components', count: COMPONENTS.length },
-  ...accentLabels.map(label => ({
-    label,
-    count: COMPONENTS.filter(c => c.tags.some(t => t.accent && t.label === label)).length,
-  })),
+const DESIGN_SYSTEM_LABELS = ['Glass'] as const
+
+type Section = {
+  title: string
+  labels: readonly string[]
+  disabled?: boolean
+}
+
+const SECTIONS: Section[] = [
+  { title: 'Components', labels: COMPONENTS_LABELS },
+  { title: 'Design Systems', labels: DESIGN_SYSTEM_LABELS, disabled: true },
+  { title: 'Hero Sections', labels: [], disabled: true },
+  { title: 'Landing Pages', labels: [], disabled: true },
 ]
 
+function countByLabel(label: string) {
+  return COMPONENTS.filter((c) =>
+    c.tags.some((t) => t.accent && t.label === label)
+  ).length
+}
+
 export function Sidebar() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const activeCategory = searchParams.get('category') ?? 'All Components'
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+
+  const toggle = (title: string) =>
+    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
+
+  // ── Search ──────────────────────────────────────────────────────────────
+  // Local state keeps the input snappy; URL is the source of truth so the
+  // home page (HomeClient) can read `?q=` and filter the grid.
+  const urlQuery = searchParams.get('q') ?? ''
+  const [searchValue, setSearchValue] = useState(urlQuery)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [, startTransition] = useTransition()
+
+  // Sync local state when the URL changes from outside (back/forward, clear button).
+  useEffect(() => {
+    setSearchValue(urlQuery)
+  }, [urlQuery])
+
+  // ⌘K / Ctrl+K focuses the search input.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  const updateQuery = (next: string) => {
+    setSearchValue(next)
+    const params = new URLSearchParams(searchParams.toString())
+    if (next) params.set('q', next)
+    else params.delete('q')
+    const qs = params.toString()
+    startTransition(() => {
+      router.replace(qs ? `/?${qs}` : '/', { scroll: false })
+    })
+  }
+
+  const clearSearch = () => {
+    updateQuery('')
+    searchInputRef.current?.focus()
+  }
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sand-300 bg-sand-200 dark:border-sand-800 dark:bg-sand-950">
@@ -35,34 +106,125 @@ export function Sidebar() {
         </Link>
       </div>
 
+      {/* ── Search ── */}
+      <div className="shrink-0 px-3 py-3">
+        <div className="relative">
+          <MagnifyingGlass
+            weight="regular"
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sand-400 dark:text-sand-500"
+          />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchValue}
+            onChange={(e) => updateQuery(e.target.value)}
+            placeholder="Search…"
+            className="w-full rounded-lg border border-sand-300 bg-sand-100 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 hover:border-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
+          />
+          {searchValue && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              aria-label="Clear search"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-sand-400 transition-colors hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300"
+            >
+              <X weight="regular" size={13} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* ── Navigation ── */}
       <nav className="flex-1 overflow-y-auto px-3 pt-4 pb-2">
-        <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-sand-400 dark:text-sand-600">
-          Explore
-        </p>
-        <ul className="space-y-0.5">
-          {CATEGORIES.map(({ label, count }) => {
-            const isActive = label === activeCategory
-            const href = label === 'All Components' ? '/' : `/?category=${encodeURIComponent(label)}`
-            return (
-              <li key={label}>
-                <Link
-                  href={href}
-                  className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
-                  }`}
-                >
-                  <span>{label}</span>
-                  <span className={`tabular-nums text-xs ${isActive ? 'text-sand-600 dark:text-sand-400' : 'text-sand-400 dark:text-sand-600'}`}>
-                    {count}
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+        {/* Tiered sections */}
+        {SECTIONS.map((section) => {
+          const isCollapsed = collapsed[section.title] ?? false
+          const isDisabled = section.disabled === true
+
+          return (
+            <div key={section.title} className="mb-3">
+              <button
+                type="button"
+                onClick={() => !isDisabled && toggle(section.title)}
+                disabled={isDisabled}
+                className={`mb-1 flex w-full items-center justify-between px-2 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+                  isDisabled
+                    ? 'cursor-not-allowed text-sand-400/60 dark:text-sand-600/60'
+                    : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
+                }`}
+              >
+                <span>
+                  {section.title}
+                  {isDisabled && <span className="ml-1 normal-case tracking-normal text-sand-400 dark:text-sand-700">· soon</span>}
+                </span>
+                {!isDisabled && (
+                  <CaretDown
+                    size={10}
+                    weight="regular"
+                    className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
+                  />
+                )}
+              </button>
+
+              {!isCollapsed && !isDisabled && (
+                <ul className="space-y-0.5">
+                  {section.title === 'Components' && (
+                    <li>
+                      <Link
+                        href="/"
+                        className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+                          activeCategory === 'All Components'
+                            ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                            : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                        }`}
+                      >
+                        <span>All Components</span>
+                        <span
+                          className={`tabular-nums text-xs ${
+                            activeCategory === 'All Components'
+                              ? 'text-sand-600 dark:text-sand-400'
+                              : 'text-sand-400 dark:text-sand-600'
+                          }`}
+                        >
+                          {COMPONENTS.length}
+                        </span>
+                      </Link>
+                    </li>
+                  )}
+                  {section.labels.map((label) => {
+                    const isActive = label === activeCategory
+                    const href = `/?category=${encodeURIComponent(label)}`
+                    const count = countByLabel(label)
+                    return (
+                      <li key={label}>
+                        <Link
+                          href={href}
+                          className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+                            isActive
+                              ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                              : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                          }`}
+                        >
+                          <span>{label}</span>
+                          <span
+                            className={`tabular-nums text-xs ${
+                              isActive
+                                ? 'text-sand-600 dark:text-sand-400'
+                                : 'text-sand-400 dark:text-sand-600'
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          )
+        })}
       </nav>
 
       {/* ── Bottom card ── */}
