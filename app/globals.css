@@ -44,3 +44,46 @@ body {
   font-family: var(--font-manrope), sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* ── Custom scrollbar ── */
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 18px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand-300);
+  border-radius: 9999px;
+  border-left: 4px solid transparent;
+  border-right: 8px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sand-400);
+  border-left: 4px solid transparent;
+  border-right: 8px solid transparent;
+  background-clip: padding-box;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-sand-800);
+  border-left: 4px solid transparent;
+  border-right: 8px solid transparent;
+  background-clip: padding-box;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sand-700);
+  border-left: 4px solid transparent;
+  border-right: 8px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sand-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-sand-800) transparent;
+}

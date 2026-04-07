@@ -86,6 +86,8 @@ import { GlassStepper } from '../../components-workspace/glass-stepper'
 import { prompts as glassStepperPrompts } from '../../components-workspace/glass-stepper/prompts'
 import { GlassProgress } from '../../components-workspace/glass-progress'
 import { prompts as glassProgressPrompts } from '../../components-workspace/glass-progress/prompts'
+import { GlassAiCompose } from '../../components-workspace/glass-ai-compose'
+import { prompts as glassAiComposePrompts } from '../../components-workspace/glass-ai-compose/prompts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,6 +102,14 @@ export interface ComponentEntry {
   code: string
   prompts: Record<Platform, string>
 }
+
+// Serializable subset of ComponentEntry — pass this across the
+// server/client boundary when you don't need PreviewComponent / code / prompts
+// (related grid, prev/next nav, etc).
+export type ComponentMeta = Pick<
+  ComponentEntry,
+  'slug' | 'name' | 'description' | 'tags' | 'image'
+>
 
 // ─── Code strings ─────────────────────────────────────────────────────────────
 
@@ -3121,6 +3131,7 @@ const GLASSMUSICPLAYER_CODE = "'use client'\n\nimport { useState, useEffect, use
 
 const GLASSNOTIFICATION_CODE = "'use client'\n\nimport { useState } from 'react'\nimport { motion, AnimatePresence } from 'framer-motion'\nimport { Bell, ChatCircle, Heart, ShieldCheck, X, ArrowUp } from '@phosphor-icons/react'\n\ninterface Notification {\n  id: number\n  icon: typeof Bell\n  color: string\n  title: string\n  message: string\n  time: string\n}\n\nconst INITIAL_NOTIFICATIONS: Notification[] = [\n  {\n    id: 1,\n    icon: ChatCircle,\n    color: '#3A86FF',\n    title: 'New Message',\n    message: 'Alex sent you a photo',\n    time: '2m ago',\n  },\n  {\n    id: 2,\n    icon: Heart,\n    color: '#FF7B54',\n    title: 'New Like',\n    message: 'Sarah liked your post',\n    time: '5m ago',\n  },\n  {\n    id: 3,\n    icon: ShieldCheck,\n    color: '#06D6A0',\n    title: 'Security',\n    message: 'New login from MacBook Pro',\n    time: '12m ago',\n  },\n  {\n    id: 4,\n    icon: ArrowUp,\n    color: '#B388FF',\n    title: 'Update Available',\n    message: 'Version 4.2 is ready to install',\n    time: '1h ago',\n  },\n  {\n    id: 5,\n    icon: Bell,\n    color: '#FFBE0B',\n    title: 'Reminder',\n    message: 'Team standup in 15 minutes',\n    time: '1h ago',\n  },\n]\n\nfunction NotificationCard({\n  notification,\n  onDismiss,\n  index,\n}: {\n  notification: Notification\n  onDismiss: (id: number) => void\n  index: number\n}) {\n  const Icon = notification.icon\n\n  return (\n    <motion.div\n      layout\n      initial={{ opacity: 0, x: 60, scale: 0.9 }}\n      animate={{ opacity: 1, x: 0, scale: 1 }}\n      exit={{ opacity: 0, x: -60, scale: 0.9, filter: 'blur(4px)' }}\n      transition={{ type: 'spring', stiffness: 280, damping: 24, delay: index * 0.05 }}\n      drag=\"x\"\n      dragConstraints={{ left: 0, right: 0 }}\n      dragElastic={0.3}\n      onDragEnd={(_, info) => {\n        if (Math.abs(info.offset.x) > 80) {\n          onDismiss(notification.id)\n        }\n      }}\n      className=\"group relative w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing transition-colors duration-200\"\n      style={{\n        background: 'rgba(255, 255, 255, 0.06)',\n        backdropFilter: 'blur(20px) saturate(1.6)',\n        WebkitBackdropFilter: 'blur(20px) saturate(1.6)',\n        border: '1px solid rgba(255, 255, 255, 0.08)',\n        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06)',\n      }}\n      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}\n    >\n      <div className=\"flex items-start gap-3.5 px-4 py-3.5 pr-12\">\n        {/* Icon */}\n        <motion.div\n          initial={{ scale: 0 }}\n          animate={{ scale: 1 }}\n          transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 + index * 0.05 }}\n          className=\"mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl\"\n          style={{\n            background: `${notification.color}18`,\n            border: `1px solid ${notification.color}22`,\n          }}\n        >\n          <Icon size={18} weight=\"regular\" style={{ color: notification.color }} />\n        </motion.div>\n\n        {/* Content */}\n        <div className=\"min-w-0 flex-1\">\n          <h4 className=\"text-sm font-semibold text-white/85\">{notification.title}</h4>\n          <p className=\"mt-0.5 text-[13px] text-white/40\">{notification.message}</p>\n        </div>\n      </div>\n\n      {/* Dismiss + time — positioned top-right */}\n      <div className=\"absolute right-3 top-3 flex flex-col items-end gap-1.5\">\n        <motion.button\n          whileHover={{ scale: 1.2, backgroundColor: 'rgba(255,255,255,0.15)' }}\n          whileTap={{ scale: 0.85 }}\n          onClick={() => onDismiss(notification.id)}\n          className=\"flex h-5 w-5 cursor-pointer items-center justify-center rounded-full\"\n          style={{\n            background: 'rgba(255,255,255,0.06)',\n          }}\n        >\n          <X size={11} weight=\"regular\" className=\"text-white/30\" />\n        </motion.button>\n        <span className=\"text-[10px] text-white/25\">{notification.time}</span>\n      </div>\n\n      {/* Bottom accent line */}\n      <div\n        className=\"absolute bottom-0 left-4 right-4 h-[1px]\"\n        style={{\n          background: `linear-gradient(90deg, transparent, ${notification.color}22, transparent)`,\n        }}\n      />\n    </motion.div>\n  )\n}\n\nexport function GlassNotification() {\n  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)\n\n  const dismiss = (id: number) => {\n    setNotifications((prev) => prev.filter((n) => n.id !== id))\n  }\n\n  const reset = () => setNotifications(INITIAL_NOTIFICATIONS)\n\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image */}\n      <img\n        src=\"https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png\"\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n      {/* Notification stack */}\n      <motion.div\n        initial={{ opacity: 0 }}\n        animate={{ opacity: 1 }}\n        className=\"relative flex w-[360px] flex-col gap-2.5\"\n      >\n        {/* Header */}\n        <div className=\"mb-1 flex items-center justify-between px-1\">\n          <div className=\"flex items-center gap-2\">\n            <Bell size={20} weight=\"regular\" className=\"text-white/40\" />\n            <span className=\"text-sm font-semibold text-white/60\">\n              Notifications\n            </span>\n            {notifications.length > 0 && (\n              <motion.span\n                layout\n                className=\"flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-semibold text-white\"\n                style={{\n                  background: 'rgba(255, 107, 245, 0.4)',\n                  border: '1px solid rgba(255, 107, 245, 0.3)',\n                }}\n              >\n                {notifications.length}\n              </motion.span>\n            )}\n          </div>\n          {notifications.length < INITIAL_NOTIFICATIONS.length && (\n            <motion.button\n              initial={{ opacity: 0, scale: 0.8 }}\n              animate={{ opacity: 1, scale: 1 }}\n              whileHover={{ scale: 1.05 }}\n              whileTap={{ scale: 0.95 }}\n              onClick={reset}\n              className=\"cursor-pointer text-xs font-medium text-white/30 transition-colors hover:text-white/50\"\n            >\n              Reset\n            </motion.button>\n          )}\n        </div>\n\n        {/* Cards */}\n        <AnimatePresence mode=\"popLayout\">\n          {notifications.map((n, i) => (\n            <NotificationCard key={n.id} notification={n} onDismiss={dismiss} index={i} />\n          ))}\n        </AnimatePresence>\n\n        {/* Empty state */}\n        <AnimatePresence>\n          {notifications.length === 0 && (\n            <motion.div\n              initial={{ opacity: 0, scale: 0.9 }}\n              animate={{ opacity: 1, scale: 1 }}\n              className=\"flex flex-col items-center gap-3 py-12\"\n            >\n              <span className=\"text-sm text-white/60\">All caught up</span>\n            </motion.div>\n          )}\n        </AnimatePresence>\n      </motion.div>\n    </div>\n  )\n}\n"
 
+const GLASS_AI_COMPOSE_CODE = "'use client'\n\nimport { useState, useRef, useEffect, useCallback } from 'react'\nimport { motion, AnimatePresence, useReducedMotion } from 'framer-motion'\nimport {\n  PaperPlaneRight,\n  ImageSquare,\n  GlobeSimple,\n  X,\n} from '@phosphor-icons/react'\n\n// ─── Constants ──────────────────────────────────────────────────────────────\n\nconst BACKGROUND =\n  'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'\n\nconst MODELS = [\n  { label: 'Claude',     color: '#FF7B54' },\n  { label: 'ChatGPT',    color: '#10A37F' },\n  { label: 'Perplexity', color: '#3A86FF' },\n  { label: 'Gemini',     color: '#FFBE0B' },\n] as const\n\ntype Model = (typeof MODELS)[number]\n\nconst MAX_TEXTAREA_HEIGHT = 160\n\n// ─── Glass family shared styles ─────────────────────────────────────────────\n\nconst glassBlur = {\n  backdropFilter: 'blur(24px) saturate(1.8)',\n  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',\n} as const\n\nconst glassPanel = {\n  background: 'rgba(255, 255, 255, 0.08)',\n  border: '1px solid rgba(255, 255, 255, 0.1)',\n  boxShadow:\n    '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',\n} as const\n\nconst ACTIVE_GLOW =\n  '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 255, 255, 0.25), 0 0 20px rgba(255, 255, 255, 0.06)'\n\n// ─── Model Switcher ─────────────────────────────────────────────────────────\n\nfunction ModelSwitcher({\n  activeModel,\n  onSelect,\n}: {\n  activeModel: Model\n  onSelect: (model: Model) => void\n}) {\n  return (\n    <div className=\"relative flex items-center gap-0.5\">\n      {MODELS.map((model) => {\n        const isActive = model.label === activeModel.label\n        return (\n          <button\n            key={model.label}\n            onClick={() => onSelect(model)}\n            className=\"relative z-10 flex cursor-pointer flex-col items-center rounded-lg px-3 py-1.5\"\n            style={{ background: 'transparent', flex: 1 }}\n          >\n            {isActive && (\n              <motion.div\n                layoutId=\"model-pill\"\n                className=\"absolute inset-0 rounded-lg\"\n                style={{\n                  background: `${model.color}18`,\n                  border: `1px solid ${model.color}22`,\n                }}\n                transition={{ type: 'spring', stiffness: 400, damping: 28 }}\n              />\n            )}\n            <span\n              className=\"relative z-10 text-[11px] font-semibold\"\n              style={{\n                color: isActive ? model.color : 'rgba(255,255,255,0.50)',\n                transition: 'color 0.15s',\n              }}\n            >\n              {model.label}\n            </span>\n          </button>\n        )\n      })}\n    </div>\n  )\n}\n\n// ─── Image Thumbnail ────────────────────────────────────────────────────────\n\nfunction ImageThumbnail({\n  src,\n  onRemove,\n}: {\n  src: string\n  onRemove: () => void\n}) {\n  return (\n    <motion.div\n      initial={{ opacity: 0, scale: 0.8 }}\n      animate={{ opacity: 1, scale: 1 }}\n      exit={{ opacity: 0, scale: 0.8 }}\n      transition={{ type: 'spring', stiffness: 350, damping: 25 }}\n      className=\"relative h-16 w-16 shrink-0 overflow-hidden rounded-xl\"\n      style={{\n        border: '1px solid rgba(255, 255, 255, 0.12)',\n      }}\n    >\n      <img\n        src={src}\n        alt=\"Upload preview\"\n        className=\"h-full w-full object-cover\"\n      />\n      <motion.button\n        onClick={onRemove}\n        whileHover={{ scale: 1.1 }}\n        whileTap={{ scale: 0.85 }}\n        className=\"absolute right-1 top-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full\"\n        style={{\n          background: 'rgba(0, 0, 0, 0.6)',\n          border: '1px solid rgba(255, 255, 255, 0.15)',\n        }}\n      >\n        <X size={10} weight=\"regular\" className=\"text-white/80\" />\n      </motion.button>\n    </motion.div>\n  )\n}\n\n// ─── Main Component ─────────────────────────────────────────────────────────\n\nexport function GlassAiCompose() {\n  const [isActive, setIsActive] = useState(false)\n  const [message, setMessage] = useState('')\n  const [activeModel, setActiveModel] = useState<Model>(MODELS[0]) // Claude default\n  const [images, setImages] = useState<string[]>([])\n  const [webSearch, setWebSearch] = useState(false)\n  const [showWebLabel, setShowWebLabel] = useState(false)\n\n  const containerRef = useRef<HTMLDivElement>(null)\n  const textareaRef = useRef<HTMLTextAreaElement>(null)\n  const fileInputRef = useRef<HTMLInputElement>(null)\n\n  const prefersReduced = useReducedMotion()\n  const reducedMotion = prefersReduced ?? false\n\n  const canSend = message.trim().length > 0 || images.length > 0\n\n  // Flash \"Web search on\" label for 2 seconds\n  useEffect(() => {\n    if (!webSearch) { setShowWebLabel(false); return }\n    setShowWebLabel(true)\n    const timer = setTimeout(() => setShowWebLabel(false), 1000)\n    return () => clearTimeout(timer)\n  }, [webSearch])\n\n  // Auto-resize textarea\n  const resizeTextarea = useCallback(() => {\n    const el = textareaRef.current\n    if (!el) return\n    el.style.height = 'auto'\n    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`\n  }, [])\n\n  // Click outside to deactivate\n  useEffect(() => {\n    if (!isActive) return\n    const handler = (e: MouseEvent | TouchEvent) => {\n      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {\n        setIsActive(false)\n      }\n    }\n    document.addEventListener('mousedown', handler)\n    document.addEventListener('touchstart', handler)\n    return () => {\n      document.removeEventListener('mousedown', handler)\n      document.removeEventListener('touchstart', handler)\n    }\n  }, [isActive])\n\n  // Handle image upload\n  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {\n    const files = e.target.files\n    if (!files) return\n    for (let i = 0; i < files.length; i++) {\n      const reader = new FileReader()\n      reader.onload = (ev) => {\n        if (ev.target?.result) {\n          setImages((prev) => [...prev, ev.target!.result as string])\n        }\n      }\n      reader.readAsDataURL(files[i])\n    }\n    // Reset input so re-uploading the same file works\n    e.target.value = ''\n  }\n\n  function handleSend() {\n    if (!canSend) return\n    setMessage('')\n    setImages([])\n    if (textareaRef.current) {\n      textareaRef.current.style.height = 'auto'\n    }\n  }\n\n  function handleKeyDown(e: React.KeyboardEvent) {\n    if (e.key === 'Enter' && !e.shiftKey) {\n      e.preventDefault()\n      handleSend()\n    }\n  }\n\n  const springOrFade = reducedMotion\n    ? { duration: 0.15 }\n    : { type: 'spring' as const, stiffness: 350, damping: 28 }\n\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image */}\n      <img\n        src={BACKGROUND}\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n\n      {/* Compose container */}\n      <div\n        ref={containerRef}\n        className=\"relative z-10 w-[calc(100%-2rem)] max-w-[420px]\"\n      >\n        <motion.div\n          animate={{\n            boxShadow: isActive ? ACTIVE_GLOW : glassPanel.boxShadow,\n          }}\n          transition={springOrFade}\n          className=\"relative isolate overflow-hidden rounded-2xl\"\n          style={{\n            background: glassPanel.background,\n            border: glassPanel.border,\n          }}\n        >\n          {/* Blur layer */}\n          <div\n            className=\"pointer-events-none absolute inset-0 z-[-1] rounded-2xl\"\n            style={glassBlur}\n          />\n\n          {/* Top edge highlight */}\n          <div\n            className=\"absolute left-6 right-6 top-0 z-10 h-[1px]\"\n            style={{\n              background:\n                'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',\n            }}\n          />\n\n          {/* Compose area */}\n          <div className=\"relative z-10 flex flex-col gap-6 p-4 pb-2\">\n            {/* Textarea */}\n            <textarea\n              ref={textareaRef}\n              value={message}\n              onChange={(e) => {\n                setMessage(e.target.value)\n                resizeTextarea()\n              }}\n              onFocus={() => setIsActive(true)}\n              onKeyDown={handleKeyDown}\n              placeholder=\"Ask anything...\"\n              rows={1}\n              className=\"w-full resize-none bg-transparent font-sans text-sm font-medium text-white/90 placeholder-white/40 outline-none\"\n              style={{\n                caretColor: activeModel.color,\n                maxHeight: MAX_TEXTAREA_HEIGHT,\n              }}\n            />\n\n            {/* Image thumbnails */}\n            <AnimatePresence>\n              {images.length > 0 && (\n                <motion.div\n                  initial={{ opacity: 0, height: 0 }}\n                  animate={{ opacity: 1, height: 'auto' }}\n                  exit={{ opacity: 0, height: 0 }}\n                  transition={springOrFade}\n                  className=\"flex gap-2 overflow-hidden\"\n                >\n                  <AnimatePresence>\n                    {images.map((src, i) => (\n                      <ImageThumbnail\n                        key={`${i}-${src.slice(-20)}`}\n                        src={src}\n                        onRemove={() =>\n                          setImages((prev) => prev.filter((_, idx) => idx !== i))\n                        }\n                      />\n                    ))}\n                  </AnimatePresence>\n                </motion.div>\n              )}\n            </AnimatePresence>\n\n            {/* Toolbar — upload + send */}\n            <div className=\"flex items-center justify-between\">\n              {/* Left — upload */}\n              <div className=\"flex items-center gap-2\">\n                <motion.button\n                  onClick={() => fileInputRef.current?.click()}\n                  whileHover={reducedMotion ? undefined : { scale: 1.08, background: 'rgba(255, 255, 255, 0.14)' }}\n                  whileTap={reducedMotion ? undefined : { scale: 0.88 }}\n                  transition={{ type: 'spring', stiffness: 320, damping: 20 }}\n                  className=\"flex cursor-pointer items-center justify-center rounded-xl\"\n                  style={{\n                    width: 32,\n                    height: 32,\n                    background: 'rgba(255, 255, 255, 0.08)',\n                    border: '1px solid rgba(255, 255, 255, 0.12)',\n                  }}\n                >\n                  <ImageSquare\n                    size={16}\n                    weight=\"regular\"\n                    style={{\n                      color: 'rgba(255, 255, 255, 0.5)',\n                      transition: 'color 0.15s',\n                    }}\n                  />\n                </motion.button>\n                <input\n                  ref={fileInputRef}\n                  type=\"file\"\n                  accept=\"image/*\"\n                  multiple\n                  onChange={handleImageUpload}\n                  className=\"hidden\"\n                />\n\n                {/* Web search toggle */}\n                <motion.button\n                  onClick={() => setWebSearch((v) => !v)}\n                  whileHover={reducedMotion ? undefined : { scale: 1.08, background: webSearch ? `${activeModel.color}28` : 'rgba(255, 255, 255, 0.14)' }}\n                  whileTap={reducedMotion ? undefined : { scale: 0.88 }}\n                  transition={{ type: 'spring', stiffness: 320, damping: 20 }}\n                  className=\"flex cursor-pointer items-center justify-center rounded-xl\"\n                  style={{\n                    width: 32,\n                    height: 32,\n                    background: webSearch ? `${activeModel.color}18` : 'rgba(255, 255, 255, 0.08)',\n                    border: webSearch ? `1px solid ${activeModel.color}22` : '1px solid rgba(255, 255, 255, 0.12)',\n                    transition: 'background 0.15s, border 0.15s',\n                  }}\n                >\n                  <GlobeSimple\n                    size={16}\n                    weight=\"regular\"\n                    style={{\n                      color: webSearch ? activeModel.color : 'rgba(255, 255, 255, 0.5)',\n                      transition: 'color 0.15s',\n                    }}\n                  />\n                </motion.button>\n\n                {/* Web search label */}\n                <AnimatePresence>\n                  {showWebLabel && (\n                    <motion.span\n                      initial={{ opacity: 0, x: -4 }}\n                      animate={{ opacity: 1, x: 0 }}\n                      exit={{ opacity: 0, x: -4 }}\n                      transition={{ duration: 0.15 }}\n                      className=\"text-[10px] font-semibold\"\n                      style={{ color: `${activeModel.color}88` }}\n                    >\n                      Web search on\n                    </motion.span>\n                  )}\n                </AnimatePresence>\n              </div>\n\n              {/* Right — send */}\n              <motion.button\n                onClick={handleSend}\n                disabled={!canSend}\n                animate={{\n                  background: canSend\n                    ? `${activeModel.color}40`\n                    : 'rgba(255, 255, 255, 0.06)',\n                  border: canSend\n                    ? `1px solid ${activeModel.color}66`\n                    : '1px solid rgba(255, 255, 255, 0.08)',\n                }}\n                whileHover={\n                  canSend && !reducedMotion ? { scale: 1.08 } : undefined\n                }\n                whileTap={\n                  canSend && !reducedMotion ? { scale: 0.88 } : undefined\n                }\n                transition={{ type: 'spring', stiffness: 320, damping: 20 }}\n                className=\"flex cursor-pointer items-center justify-center rounded-xl\"\n                style={{\n                  width: 36,\n                  height: 36,\n                  opacity: canSend ? 1 : 0.4,\n                  pointerEvents: canSend ? 'auto' : 'none',\n                }}\n              >\n                <PaperPlaneRight\n                  size={16}\n                  weight=\"regular\"\n                  style={{\n                    color: canSend\n                      ? activeModel.color\n                      : 'rgba(255, 255, 255, 0.3)',\n                    transition: 'color 0.15s',\n                  }}\n                />\n              </motion.button>\n            </div>\n          </div>\n\n          {/* Divider */}\n          <div\n            className=\"mx-4 h-[1px]\"\n            style={{ background: 'rgba(255, 255, 255, 0.07)' }}\n          />\n\n          {/* Model switcher */}\n          <div className=\"relative z-10 px-3 py-2.5\">\n            <ModelSwitcher activeModel={activeModel} onSelect={setActiveModel} />\n          </div>\n        </motion.div>\n      </div>\n    </div>\n  )\n}\n"
 const GLASS_STEPPER_CODE = "'use client'\n\nimport { useState, useRef } from 'react'\nimport { motion, AnimatePresence, useReducedMotion } from 'framer-motion'\nimport { Minus, Plus } from '@phosphor-icons/react'\n\n// ─── Glass family shared styles ─────────────────────────────────────────────\n\nconst glassBlur = {\n  backdropFilter: 'blur(24px) saturate(1.8)',\n  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',\n} as const\n\nconst glassPanel = {\n  background: 'rgba(255, 255, 255, 0.08)',\n  border: '1px solid rgba(255, 255, 255, 0.1)',\n  boxShadow:\n    '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',\n} as const\n\nconst BACKGROUND_IMAGE =\n  'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'\n\n// ─── Spring configs ──────────────────────────────────────────────────────────\n\nconst BUTTON_SPRING = { type: 'spring' as const, stiffness: 300, damping: 20 }\n\n// ─── Types ───────────────────────────────────────────────────────────────────\n\ninterface GlassStepperFieldProps {\n  min?: number\n  max?: number\n  step?: number\n  initialValue?: number\n  label?: string\n  color: string\n  gradient: string\n}\n\n// ─── GlassStepperField ──────────────────────────────────────────────────────\n\nfunction GlassStepperField({\n  min = 0,\n  max = 10,\n  step = 1,\n  initialValue,\n  label,\n  color,\n  gradient,\n}: GlassStepperFieldProps) {\n  const prefersReduced = useReducedMotion()\n  const [value, setValue] = useState(initialValue ?? min)\n  const directionRef = useRef<1 | -1>(1)\n\n  const atMin = value <= min\n  const atMax = value >= max\n\n  function increment() {\n    if (atMax) return\n    directionRef.current = 1\n    setValue((prev) => Math.min(prev + step, max))\n  }\n\n  function decrement() {\n    if (atMin) return\n    directionRef.current = -1\n    setValue((prev) => Math.max(prev - step, min))\n  }\n\n  const slideOffset = prefersReduced ? 0 : 24\n  const direction = directionRef.current\n\n  return (\n    <div className=\"flex w-[132px] flex-col\">\n      {/* Label + value readout */}\n      {label && (\n        <div className=\"mb-2 flex items-baseline justify-between px-1\">\n          <span className=\"font-sans text-[10px] font-semibold uppercase tracking-widest text-white/40\">\n            {label}\n          </span>\n          <span\n            className=\"font-sans text-[10px] font-semibold tabular-nums\"\n            style={{ color: `${color}88` }}\n          >\n            {value} / {max}\n          </span>\n        </div>\n      )}\n\n      {/* Stepper pill */}\n      <div\n        className=\"relative isolate overflow-hidden rounded-2xl\"\n        style={glassPanel}\n      >\n        {/* Blur layer — non-animating, behind content */}\n        <div\n          className=\"pointer-events-none absolute inset-0 z-[-1] rounded-2xl\"\n          style={glassBlur}\n        />\n\n        {/* Top edge highlight */}\n        <div\n          className=\"absolute left-4 right-4 top-0 z-10 h-[1px]\"\n          style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)' }}\n        />\n\n        {/* Content row */}\n        <div className=\"relative z-10 flex items-stretch justify-between p-2\">\n          {/* Minus button — notification-style tinted */}\n          <motion.button\n            onClick={decrement}\n            whileHover={atMin || prefersReduced ? undefined : { scale: 1.08 }}\n            whileTap={atMin || prefersReduced ? undefined : { scale: 0.88 }}\n            transition={BUTTON_SPRING}\n            disabled={atMin}\n            aria-label=\"Decrease\"\n            className=\"flex cursor-pointer items-center justify-center rounded-xl\"\n            style={{\n              width: 36,\n              outline: 'none',\n              background: `${color}${atMin ? '0a' : '18'}`,\n              border: `1px solid ${color}${atMin ? '0a' : '22'}`,\n              opacity: atMin ? 0.4 : 1,\n              pointerEvents: atMin ? 'none' : 'auto',\n            }}\n          >\n            <Minus size={16} weight=\"regular\" style={{ color: atMin ? 'rgba(255,255,255,0.3)' : color }} />\n          </motion.button>\n\n          {/* Number display */}\n          <div\n            className=\"flex items-center justify-center overflow-hidden\"\n            style={{ width: 36 }}\n          >\n            <AnimatePresence mode=\"popLayout\" initial={false}>\n              <motion.span\n                key={value}\n                initial={{\n                  opacity: 0,\n                  y: direction * slideOffset,\n                  scale: 0.5,\n                }}\n                animate={{\n                  opacity: 1,\n                  y: 0,\n                  scale: 1,\n                }}\n                exit={{\n                  opacity: 0,\n                  y: direction * -slideOffset,\n                  scale: 1.4,\n                }}\n                transition={\n                  prefersReduced\n                    ? { duration: 0.15 }\n                    : { type: 'spring', stiffness: 260, damping: 18 }\n                }\n                className=\"font-sans text-base font-bold tabular-nums\"\n                style={{\n                  background: `linear-gradient(135deg, ${gradient})`,\n                  WebkitBackgroundClip: 'text',\n                  WebkitTextFillColor: 'transparent',\n                  backgroundClip: 'text',\n                }}\n              >\n                {value}\n              </motion.span>\n            </AnimatePresence>\n          </div>\n\n          {/* Plus button — notification-style tinted */}\n          <motion.button\n            onClick={increment}\n            whileHover={atMax || prefersReduced ? undefined : { scale: 1.08 }}\n            whileTap={atMax || prefersReduced ? undefined : { scale: 0.88 }}\n            transition={BUTTON_SPRING}\n            disabled={atMax}\n            aria-label=\"Increase\"\n            className=\"flex cursor-pointer items-center justify-center rounded-xl\"\n            style={{\n              width: 36,\n              outline: 'none',\n              background: `${color}${atMax ? '0a' : '18'}`,\n              border: `1px solid ${color}${atMax ? '0a' : '22'}`,\n              opacity: atMax ? 0.4 : 1,\n              pointerEvents: atMax ? 'none' : 'auto',\n            }}\n          >\n            <Plus size={16} weight=\"regular\" style={{ color: atMax ? 'rgba(255,255,255,0.3)' : color }} />\n          </motion.button>\n        </div>\n      </div>\n    </div>\n  )\n}\n\n// ─── Main export ─────────────────────────────────────────────────────────────\n\nexport function GlassStepper() {\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image */}\n      <img\n        src={BACKGROUND_IMAGE}\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n\n      {/* Steppers container */}\n      <div className=\"relative z-10 flex flex-wrap items-start justify-center gap-5 px-4\">\n        <GlassStepperField\n          label=\"Quantity\"\n          min={0}\n          max={10}\n          step={1}\n          initialValue={0}\n          color=\"#3A86FF\"\n          gradient=\"#3A86FF, #2962FF\"\n        />\n        <GlassStepperField\n          label=\"Guests\"\n          min={1}\n          max={8}\n          step={1}\n          initialValue={1}\n          color=\"#FF5C8A\"\n          gradient=\"#FF5C8A, #FF1744\"\n        />\n        <GlassStepperField\n          label=\"Volume\"\n          min={0}\n          max={100}\n          step={5}\n          initialValue={50}\n          color=\"#06D6A0\"\n          gradient=\"#06D6A0, #00BFA5\"\n        />\n      </div>\n    </div>\n  )\n}\n"
 const GLASS_TOAST_CODE = "'use client'\n\nimport { useState, useRef, useEffect, useCallback } from 'react'\nimport { motion, AnimatePresence, useReducedMotion } from 'framer-motion'\nimport {\n  CheckCircle,\n  XCircle,\n  Warning,\n  Info,\n  X,\n} from '@phosphor-icons/react'\n\n// ─── Constants ────────────────────────────────────────────────────────────────\n\nconst GLASS_BLUR = {\n  backdropFilter: 'blur(24px) saturate(1.8)',\n  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',\n} as const\n\nconst GLASS_PANEL = {\n  background: 'rgba(255, 255, 255, 0.06)',\n  border: '1px solid rgba(255, 255, 255, 0.1)',\n  boxShadow:\n    '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',\n} as const\n\nconst BACKGROUND_IMAGE =\n  'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png'\n\nconst TOAST_DURATION = 4000\nconst MAX_TOASTS = 3\n\n// ─── Types ────────────────────────────────────────────────────────────────────\n\ntype ToastVariant = 'success' | 'error' | 'warning' | 'info'\n\ninterface Toast {\n  id: string\n  variant: ToastVariant\n  title: string\n  description?: string\n}\n\ninterface VariantConfig {\n  color: string\n  gradient: string\n  icon: typeof CheckCircle\n  label: string\n}\n\nconst VARIANTS: Record<ToastVariant, VariantConfig> = {\n  success: { color: '#06D6A0', gradient: '#06D6A0, #00BFA5', icon: CheckCircle, label: 'Success' },\n  error:   { color: '#FF5C8A', gradient: '#FF5C8A, #FF1744', icon: XCircle,     label: 'Error' },\n  warning: { color: '#FFBE0B', gradient: '#FFBE0B, #FF9800', icon: Warning,     label: 'Warning' },\n  info:    { color: '#3A86FF', gradient: '#3A86FF, #2962FF', icon: Info,        label: 'Info' },\n}\n\nconst DEMO_TOASTS: Record<ToastVariant, { title: string; description: string }> = {\n  success: { title: 'Changes saved', description: 'Your settings have been updated successfully' },\n  error:   { title: 'Upload failed', description: 'The file exceeds the maximum size limit' },\n  warning: { title: 'Low storage', description: 'You have less than 100MB remaining' },\n  info:    { title: 'New update', description: 'Version 2.4 is now available' },\n}\n\n// ─── Spring configs ───────────────────────────────────────────────────────────\n\nconst ENTER_SPRING = { type: 'spring' as const, stiffness: 300, damping: 26 }\nconst BUTTON_SPRING = { type: 'spring' as const, stiffness: 300, damping: 20 }\n\n// ─── Progress bar — RAF-based with pause/resume ──────────────────────────────\n\nfunction useToastProgress(\n  id: string,\n  isPaused: boolean,\n  onComplete: (id: string) => void,\n) {\n  const progressRef = useRef<HTMLDivElement>(null)\n  const elapsedRef = useRef(0)\n  const lastTimeRef = useRef(0)\n  const rafRef = useRef(0)\n\n  useEffect(() => {\n    let alive = true\n    lastTimeRef.current = performance.now()\n\n    function tick(now: number) {\n      if (!alive) return\n\n      if (!isPaused) {\n        const delta = now - lastTimeRef.current\n        elapsedRef.current += delta\n      }\n\n      lastTimeRef.current = now\n\n      const fraction = Math.max(0, 1 - elapsedRef.current / TOAST_DURATION)\n\n      if (progressRef.current) {\n        progressRef.current.style.transform = `scaleX(${fraction})`\n      }\n\n      if (fraction <= 0) {\n        onComplete(id)\n        return\n      }\n\n      rafRef.current = requestAnimationFrame(tick)\n    }\n\n    rafRef.current = requestAnimationFrame(tick)\n\n    return () => {\n      alive = false\n      cancelAnimationFrame(rafRef.current)\n    }\n  }, [id, isPaused, onComplete])\n\n  return progressRef\n}\n\n// ─── Individual toast card ───────────────────────────────────────────────────\n\nfunction ToastCard({\n  toast,\n  onDismiss,\n  prefersReduced,\n}: {\n  toast: Toast\n  onDismiss: (id: string) => void\n  prefersReduced: boolean | null\n}) {\n  const [hovered, setHovered] = useState(false)\n  const variant = VARIANTS[toast.variant]\n  const Icon = variant.icon\n\n  const handleComplete = useCallback(\n    (id: string) => onDismiss(id),\n    [onDismiss],\n  )\n\n  const progressRef = useToastProgress(toast.id, hovered, handleComplete)\n\n  const enterAnim = prefersReduced\n    ? { opacity: 0 }\n    : { opacity: 0, x: 80, scale: 0.95 }\n\n  const showAnim = prefersReduced\n    ? { opacity: 1 }\n    : { opacity: 1, x: 0, scale: 1 }\n\n  const exitAnim = prefersReduced\n    ? { opacity: 0 }\n    : { opacity: 0, x: 80, scale: 0.95 }\n\n  return (\n    <motion.div\n      layout\n      initial={enterAnim}\n      animate={{\n        ...showAnim,\n        scale: hovered && !prefersReduced ? 1.01 : 1,\n      }}\n      exit={exitAnim}\n      transition={ENTER_SPRING}\n      onMouseEnter={() => setHovered(true)}\n      onMouseLeave={() => setHovered(false)}\n      className=\"relative w-full overflow-hidden rounded-2xl\"\n      style={{ ...GLASS_PANEL }}\n    >\n      {/* Blur layer — non-animating */}\n      <div\n        className=\"pointer-events-none absolute inset-0 z-0 rounded-2xl\"\n        style={GLASS_BLUR}\n      />\n\n      {/* Content row */}\n      <div className=\"relative z-10 flex items-center gap-3 py-3.5 pl-4 pr-10\">\n        {/* Icon tile — notification-style tinted badge */}\n        <div\n          className=\"flex shrink-0 items-center justify-center rounded-xl\"\n          style={{\n            width: 36,\n            height: 36,\n            background: `${variant.color}18`,\n            border: `1px solid ${variant.color}22`,\n          }}\n        >\n          <Icon size={18} weight=\"regular\" style={{ color: variant.color }} />\n        </div>\n\n        {/* Text area */}\n        <div className=\"flex min-w-0 flex-1 flex-col\">\n          <span className=\"truncate text-sm font-semibold text-white/90 font-sans\">\n            {toast.title}\n          </span>\n          {toast.description && (\n            <span className=\"mt-0.5 truncate text-xs text-white/50 font-sans\">\n              {toast.description}\n            </span>\n          )}\n        </div>\n      </div>\n\n      {/* Close button — matches glass-search-bar X button */}\n      {/* Outer div provides 44px touch target; inner styled circle is 20×20 visual */}\n      <div\n        className=\"absolute right-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center\"\n        style={{ width: 44, height: 44 }}\n        onClick={() => onDismiss(toast.id)}\n      >\n        <motion.div\n          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.14)' }}\n          whileTap={{ scale: 0.88 }}\n          className=\"flex items-center justify-center rounded-full\"\n          style={{\n            width: 20,\n            height: 20,\n            background: 'rgba(255, 255, 255, 0.08)',\n            border: '1px solid rgba(255, 255, 255, 0.12)',\n          }}\n          role=\"button\"\n          aria-label=\"Dismiss toast\"\n        >\n          <X size={10} weight=\"regular\" className=\"text-white/60\" />\n        </motion.div>\n      </div>\n\n      {/* Progress bar */}\n      <div className=\"absolute bottom-0 left-0 right-0 h-[2px]\">\n        <div\n          ref={progressRef}\n          className=\"h-full w-full origin-left\"\n          style={{ background: `${variant.color}99` }}\n        />\n      </div>\n    </motion.div>\n  )\n}\n\n// ─── Trigger button ──────────────────────────────────────────────────────────\n\nfunction TriggerButton({\n  variant,\n  onTrigger,\n}: {\n  variant: ToastVariant\n  onTrigger: () => void\n}) {\n  const config = VARIANTS[variant]\n  const Icon = config.icon\n\n  return (\n    <motion.button\n      onClick={onTrigger}\n      whileHover={{ scale: 1.08 }}\n      whileTap={{ scale: 0.90 }}\n      transition={BUTTON_SPRING}\n      className=\"relative isolate flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-2xl px-3 py-2 font-sans\"\n      style={{\n        ...GLASS_PANEL,\n        outline: 'none',\n        minHeight: 44,\n      }}\n    >\n      {/* Blur layer — non-animating */}\n      <div\n        className=\"pointer-events-none absolute inset-0 z-[-1] rounded-2xl\"\n        style={GLASS_BLUR}\n      />\n\n      {/* Icon badge — notification-style tinted */}\n      <div\n        className=\"flex shrink-0 items-center justify-center rounded-xl\"\n        style={{\n          width: 32,\n          height: 32,\n          background: `${config.color}18`,\n          border: `1px solid ${config.color}22`,\n        }}\n      >\n        <Icon size={16} weight=\"regular\" style={{ color: config.color }} />\n      </div>\n\n      <span className=\"text-sm font-semibold text-white/70\">{config.label}</span>\n    </motion.button>\n  )\n}\n\n// ─── Main component ──────────────────────────────────────────────────────────\n\nexport function GlassToast() {\n  const [toasts, setToasts] = useState<Toast[]>([])\n  const prefersReduced = useReducedMotion()\n  const idCounter = useRef(0)\n\n  const dismissToast = useCallback((id: string) => {\n    setToasts((prev) => prev.filter((t) => t.id !== id))\n  }, [])\n\n  const addToast = useCallback((variant: ToastVariant) => {\n    const demo = DEMO_TOASTS[variant]\n    const id = `toast-${++idCounter.current}`\n    setToasts((prev) => {\n      const next = [...prev, { id, variant, ...demo }]\n      // Enforce max visible — remove oldest first\n      if (next.length > MAX_TOASTS) {\n        return next.slice(next.length - MAX_TOASTS)\n      }\n      return next\n    })\n  }, [])\n\n  return (\n    <div className=\"flex h-full w-full items-center justify-center bg-sand-950\">\n      {/* Background image */}\n      <img\n        src={BACKGROUND_IMAGE}\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n\n      {/* Trigger buttons — centered, wrap on mobile */}\n      <div className=\"relative z-10 flex flex-wrap items-center justify-center gap-3 px-4\">\n        {(Object.keys(VARIANTS) as ToastVariant[]).map((variant) => (\n          <TriggerButton\n            key={variant}\n            variant={variant}\n            onTrigger={() => addToast(variant)}\n          />\n        ))}\n      </div>\n\n      {/* Toast container — full width on mobile, 380px on desktop */}\n      <div className=\"fixed bottom-4 left-4 right-4 z-50 flex flex-col-reverse gap-3 sm:bottom-6 sm:left-auto sm:right-6 sm:w-[380px]\">\n        <AnimatePresence mode=\"popLayout\" initial={false}>\n          {toasts.map((toast) => (\n            <ToastCard\n              key={toast.id}\n              toast={toast}\n              onDismiss={dismissToast}\n              prefersReduced={prefersReduced}\n            />\n          ))}\n        </AnimatePresence>\n      </div>\n    </div>\n  )\n}\n"
 const GLASS_SEARCH_BAR_CODE = "'use client'\n\nimport { useState, useRef, useEffect, useCallback } from 'react'\nimport { motion, AnimatePresence, useReducedMotion } from 'framer-motion'\nimport {\n  MagnifyingGlass,\n  X,\n  MusicNote,\n  File,\n  Lightning,\n} from '@phosphor-icons/react'\n\n// ─── Types ───────────────────────────────────────────────────────────────────\n\ninterface Suggestion {\n  icon: typeof MusicNote\n  label: string\n  color: string\n}\n\n// ─── Constants ───────────────────────────────────────────────────────────────\n\nconst BACKGROUND =\n  'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png'\n\nconst SUGGESTIONS: Suggestion[] = [\n  { icon: MusicNote, label: 'Audio visualizers',   color: '#FF5C8A' },\n  { icon: File,      label: 'Documentation files', color: '#3A86FF' },\n  { icon: Lightning, label: 'Quick actions',       color: '#06D6A0' },\n]\n\nconst BAR_HEIGHT = 48\nconst MIN_TOUCH_TARGET = 44\n\n// ─── Glass family shared styles ─────────────────────────────────────────────\n\nconst glassBlur = {\n  backdropFilter: 'blur(24px) saturate(1.8)',\n  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',\n} as const\n\nconst glassPanel = {\n  background: 'rgba(255, 255, 255, 0.08)',\n  border: '1px solid rgba(255, 255, 255, 0.1)',\n  boxShadow:\n    '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',\n} as const\n\n// Active glow — warm orange border + ambient glow\nconst ACTIVE_GLOW =\n  '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 160, 50, 0.5), 0 0 20px rgba(255, 160, 50, 0.12)'\n\n// ─── Suggestion Row ──────────────────────────────────────────────────────────\n\nfunction SuggestionRow({\n  suggestion,\n  index,\n  reducedMotion,\n  onSelect,\n  onClear,\n}: {\n  suggestion: Suggestion\n  index: number\n  reducedMotion: boolean\n  onSelect: (label: string) => void\n  onClear: (label: string) => void\n}) {\n  const [hovered, setHovered] = useState(false)\n  const Icon = suggestion.icon\n\n  return (\n    <motion.div\n      initial={reducedMotion ? { opacity: 0 } : { opacity: 0 }}\n      animate={{ opacity: 1 }}\n      exit={{ opacity: 0 }}\n      transition={\n        reducedMotion\n          ? { duration: 0.15 }\n          : { duration: 0.15, delay: 0.06 + index * 0.04 }\n      }\n      onMouseEnter={() => setHovered(true)}\n      onMouseLeave={() => setHovered(false)}\n      className=\"flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-sans\"\n      style={{\n        minHeight: MIN_TOUCH_TARGET,\n        background: 'transparent',\n      }}\n    >\n      {/* Animated row: icon + label — scales and nudges right on hover */}\n      <motion.button\n        onClick={() => onSelect(suggestion.label)}\n        animate={\n          reducedMotion\n            ? {}\n            : {\n                x: hovered ? 3 : 0,\n                scale: hovered ? 1.08 : 1,\n              }\n        }\n        whileTap={{ scale: 0.90 }}\n        transition={{ type: 'spring', stiffness: 320, damping: 20 }}\n        className=\"flex min-w-0 flex-1 cursor-pointer items-center gap-3\"\n        style={{ background: 'transparent', transformOrigin: 'left center' }}\n      >\n        {/* Icon badge — notification-style tinted */}\n        <div\n          className=\"flex shrink-0 items-center justify-center rounded-xl\"\n          style={{\n            width: 32,\n            height: 32,\n            background: `${suggestion.color}18`,\n            border: `1px solid ${suggestion.color}22`,\n          }}\n        >\n          <Icon size={16} weight=\"regular\" style={{ color: suggestion.color }} />\n        </div>\n\n        <span\n          className=\"text-sm font-semibold font-sans\"\n          style={{\n            color: hovered ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.75)',\n            transition: 'color 0.15s',\n          }}\n        >\n          {suggestion.label}\n        </span>\n      </motion.button>\n\n      {/* Clear button — stays completely still */}\n      <button\n        onClick={(e) => { e.stopPropagation(); onClear(suggestion.label) }}\n        className=\"shrink-0 cursor-pointer rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/40 font-sans\"\n        style={{ background: 'rgba(255, 255, 255, 0.06)' }}\n        aria-label={`Clear ${suggestion.label}`}\n      >\n        Clear\n      </button>\n    </motion.div>\n  )\n}\n\n// ─── Main Component ──────────────────────────────────────────────────────────\n\nexport default function GlassSearchBar() {\n  const [isActive, setIsActive] = useState(false)\n  const [query, setQuery] = useState('')\n  const [hiddenSuggestions, setHiddenSuggestions] = useState<Set<string>>(new Set())\n\n  const containerRef = useRef<HTMLDivElement>(null)\n  const inputRef = useRef<HTMLInputElement>(null)\n\n  const prefersReduced = useReducedMotion()\n  const reducedMotion = prefersReduced ?? false\n\n  // Filtered suggestions based on query + hidden\n  const filteredSuggestions = SUGGESTIONS\n    .filter((s) => !hiddenSuggestions.has(s.label))\n    .filter((s) =>\n      query.trim() ? s.label.toLowerCase().includes(query.toLowerCase()) : true\n    )\n\n  // ─── Activate ────────────────────────────────────────────────────────\n\n  const activate = useCallback(() => {\n    setIsActive(true)\n    requestAnimationFrame(() => {\n      inputRef.current?.focus()\n    })\n  }, [])\n\n  // ─── Deactivate ──────────────────────────────────────────────────────\n\n  const deactivate = useCallback(() => {\n    setIsActive(false)\n    setQuery('')\n    inputRef.current?.blur()\n  }, [])\n\n  // ─── Click outside to deactivate ─────────────────────────────────────\n\n  useEffect(() => {\n    if (!isActive) return\n\n    function handleClickOutside(e: MouseEvent | TouchEvent) {\n      if (\n        containerRef.current &&\n        !containerRef.current.contains(e.target as Node)\n      ) {\n        deactivate()\n      }\n    }\n\n    document.addEventListener('mousedown', handleClickOutside)\n    document.addEventListener('touchstart', handleClickOutside)\n    return () => {\n      document.removeEventListener('mousedown', handleClickOutside)\n      document.removeEventListener('touchstart', handleClickOutside)\n    }\n  }, [isActive, deactivate])\n\n  // ─── Escape key to deactivate ────────────────────────────────────────\n\n  useEffect(() => {\n    if (!isActive) return\n\n    function handleKeyDown(e: KeyboardEvent) {\n      if (e.key === 'Escape') deactivate()\n    }\n\n    document.addEventListener('keydown', handleKeyDown)\n    return () => document.removeEventListener('keydown', handleKeyDown)\n  }, [isActive, deactivate])\n\n  // ─── Handlers ────────────────────────────────────────────────────────\n\n  function handleClear() {\n    setQuery('')\n    inputRef.current?.focus()\n  }\n\n  function handleSuggestionSelect(label: string) {\n    setQuery(label)\n    inputRef.current?.focus()\n  }\n\n  function handleSuggestionClear(label: string) {\n    setHiddenSuggestions((prev) => new Set(prev).add(label))\n  }\n\n  const springOrFade = reducedMotion\n    ? { duration: 0.15 }\n    : ({ type: 'spring', stiffness: 400, damping: 30 } as const)\n\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image — consistent with glass family */}\n      <img\n        src={BACKGROUND}\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n\n      {/* Outer container */}\n      <div\n        ref={containerRef}\n        className=\"relative w-[calc(100%-2rem)] max-w-[380px]\"\n        style={{ marginTop: -90 }}\n      >\n        {/* ─── Search bar ─────────────────────────────────────────── */}\n        <motion.div\n          animate={{\n            boxShadow: isActive ? ACTIVE_GLOW : glassPanel.boxShadow,\n          }}\n          transition={springOrFade}\n          onClick={!isActive ? activate : undefined}\n          className=\"relative isolate flex w-full cursor-text items-center rounded-3xl\"\n          style={{\n            height: BAR_HEIGHT,\n            ...glassPanel,\n            borderRadius: 24,\n          }}\n        >\n          {/* Blur layer */}\n          <div\n            className=\"pointer-events-none absolute inset-0 z-[-1]\"\n            style={{ ...glassBlur, borderRadius: 24 }}\n          />\n\n          {/* Search icon */}\n          <div\n            className=\"flex shrink-0 items-center justify-center\"\n            style={{\n              width: BAR_HEIGHT,\n              height: BAR_HEIGHT,\n              minWidth: MIN_TOUCH_TARGET,\n              minHeight: MIN_TOUCH_TARGET,\n            }}\n          >\n            <MagnifyingGlass\n              size={20}\n              weight=\"regular\"\n              className=\"text-white/50\"\n            />\n          </div>\n\n          {/* Input — always visible */}\n          <input\n            ref={inputRef}\n            value={query}\n            onChange={(e) => setQuery(e.target.value)}\n            onFocus={activate}\n            placeholder=\"Search components...\"\n            className=\"min-w-0 flex-1 bg-transparent font-sans text-sm font-medium text-white/90 placeholder-white/30 outline-none\"\n            style={{ caretColor: '#7D8D41' }}\n            aria-label=\"Search components\"\n          />\n\n          {/* Clear button — springs in when text is present */}\n          <AnimatePresence>\n            {query.length > 0 && (\n              <motion.button\n                key=\"clear\"\n                initial={\n                  reducedMotion\n                    ? { opacity: 0 }\n                    : { opacity: 0, scale: 0.5 }\n                }\n                animate={\n                  reducedMotion\n                    ? { opacity: 1 }\n                    : { opacity: 1, scale: 1 }\n                }\n                exit={\n                  reducedMotion\n                    ? { opacity: 0 }\n                    : { opacity: 0, scale: 0.5 }\n                }\n                transition={springOrFade}\n                onClick={handleClear}\n                className=\"flex shrink-0 cursor-pointer items-center justify-center rounded-full\"\n                style={{\n                  width: 20,\n                  height: 20,\n                  marginRight: 14,\n                  background: 'rgba(255, 255, 255, 0.08)',\n                  border: '1px solid rgba(255, 255, 255, 0.12)',\n                }}\n                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.14)' }}\n                whileTap={{ scale: 0.88 }}\n                aria-label=\"Clear search\"\n              >\n                <X size={10} weight=\"regular\" className=\"text-white/60\" />\n              </motion.button>\n            )}\n          </AnimatePresence>\n        </motion.div>\n\n        {/* ─── Dropdown ───────────────────────────────────────────── */}\n        <AnimatePresence>\n          {isActive && filteredSuggestions.length > 0 && (\n            <motion.div\n              key=\"dropdown\"\n              initial={\n                reducedMotion\n                  ? { opacity: 0 }\n                  : { opacity: 0, scale: 0.95, y: -8, filter: 'blur(4px)' }\n              }\n              animate={\n                reducedMotion\n                  ? { opacity: 1 }\n                  : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }\n              }\n              exit={\n                reducedMotion\n                  ? { opacity: 0 }\n                  : { opacity: 0, scale: 0.95, y: -8, filter: 'blur(4px)' }\n              }\n              transition={\n                reducedMotion\n                  ? { duration: 0.15 }\n                  : { type: 'spring', stiffness: 350, damping: 28 }\n              }\n              className=\"absolute left-0 right-0 isolate rounded-2xl p-2\"\n              style={{ ...glassPanel, transformOrigin: 'top center', top: BAR_HEIGHT + 8 }}\n            >\n              {/* Blur layer */}\n              <div\n                className=\"pointer-events-none absolute inset-0 z-[-1] rounded-2xl\"\n                style={glassBlur}\n              />\n\n              {/* Top edge highlight */}\n              <div\n                className=\"absolute left-6 right-6 top-0 h-[1px]\"\n                style={{\n                  background:\n                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',\n                }}\n              />\n\n              {/* Section label */}\n              <p className=\"mb-0.5 px-3 pt-1 text-[10px] font-semibold uppercase tracking-widest text-white/25 font-sans\">\n                {query.trim() ? 'Results' : 'Suggestions'}\n              </p>\n\n              {/* Suggestion rows */}\n              {filteredSuggestions.map((suggestion, i) => (\n                <SuggestionRow\n                  key={suggestion.label}\n                  suggestion={suggestion}\n                  index={i}\n                  reducedMotion={reducedMotion}\n                  onSelect={handleSuggestionSelect}\n                  onClear={handleSuggestionClear}\n                />\n              ))}\n            </motion.div>\n          )}\n        </AnimatePresence>\n      </div>\n    </div>\n  )\n}\n"
@@ -3136,7 +3147,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Wave Lines',
     description: 'Dense vertical lines that undulate like draped silk — two layered sine waves create organic cloth-fold bunching. Hover to send the lines into extreme waves across the whole canvas.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3151,7 +3162,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Distortion Grid',
     description: 'A canvas grid of thin lines that slowly undulate with large sweeping waves. Hovering repels the grid fabric outward from the cursor, amplifying the distortion across the entire canvas.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3166,7 +3177,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Grid Lines',
     description: 'A dot grid connected by thin lines. On hover, a radial wave pulses outward from the cursor, illuminating lines and dots as it spreads.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3181,7 +3192,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Bubble Field',
     description: 'A grid of outline circles that burst on hover — each expanding and fading like a soap bubble popping, then reforming, with a soft pastel blue palette.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3196,7 +3207,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Noise Background',
     description: 'A canvas-based grain background of randomly scattered dots that illuminate with a soft Gaussian glow and organic connection lines on hover.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3211,7 +3222,7 @@ export const COMPONENTS: ComponentEntry[] = [
     name: 'Pill Toggle',
     description: 'A minimal iOS-style slider toggle — thumb glides between off (grey) and on (green) with a snappy spring. Fully responsive.',
     tags: [
-      { label: 'Toggles', accent: true },
+      { label: 'Buttons & Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3308,7 +3319,7 @@ export function PillToggle() {
     name: 'Mark Toggle',
     description: 'An iOS-style pill toggle in warm earth and sand tones — the thumb carries a small icon that morphs from X to checkmark as it slides across.',
     tags: [
-      { label: 'Toggles', accent: true },
+      { label: 'Buttons & Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3423,7 +3434,7 @@ export function MarkToggle() {
     name: 'Taga Toggle',
     description: 'A playful pill toggle with an expressive face on the thumb — dead (×× eyes, flat mouth) when off, happy (arc eyes, big smile) when on. Track warms from grey to yellow.',
     tags: [
-      { label: 'Toggles', accent: true },
+      { label: 'Buttons & Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3541,7 +3552,7 @@ export function TagaToggle() {
     name: 'Blind Pull Toggle',
     description: 'A dark/light mode toggle styled as a window-blind pull cord — click to yank the cord and watch the icon swap through a venetian-blind slat animation.',
     tags: [
-      { label: 'Toggles', accent: true },
+      { label: 'Buttons & Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3556,7 +3567,7 @@ export function TagaToggle() {
     name: 'X Grid',
     description: 'A canvas-based interactive background of × marks that illuminate and connect to neighbours with constellation lines on hover.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3571,7 +3582,7 @@ export function TagaToggle() {
     name: 'Radial Toolbar',
     description: 'A radial context menu that fans out formatting tools around a centre button, with active toggle states and an animated label pill.',
     tags: [
-      { label: 'Interactive', accent: true },
+      { label: 'Inputs & Controls', accent: true },
       { label: 'Framer Motion' },
       { label: 'SVG' },
     ],
@@ -3587,7 +3598,7 @@ export function TagaToggle() {
     description:
       'A canvas-based dot grid background where hovering illuminates nearby dots with a smooth radial glow and organic fade.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -3603,7 +3614,7 @@ export function TagaToggle() {
     description:
       'Circular battery indicator with animated liquid waves that rise as the percentage counts up, looping continuously.',
     tags: [
-      { label: 'Animation', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Framer Motion' },
       { label: 'SVG' },
     ],
@@ -3618,7 +3629,7 @@ export function TagaToggle() {
     name: 'Runway Loader',
     description: 'An airplane taxis down a runway progress bar, nose tilting up and taking off at 100%.',
     tags: [
-      { label: 'Loading', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Framer Motion' },
       { label: 'Animation' },
     ],
@@ -3633,7 +3644,7 @@ export function TagaToggle() {
     name: 'Flip Calendar',
     description: 'A desk-calendar widget showing dates 1–31 with a satisfying flip-clock page-turn animation.',
     tags: [
-      { label: 'Calendar', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Framer Motion' },
       { label: 'Interactive' },
     ],
@@ -3648,7 +3659,7 @@ export function TagaToggle() {
     name: 'Glitch Button',
     description: 'A terminal-inspired button with a text scramble glitch effect on hover.',
     tags: [
-      { label: 'Button', accent: true },
+      { label: 'Buttons & Toggles', accent: true },
       { label: 'Framer Motion' },
       { label: 'Terminal' },
     ],
@@ -3664,7 +3675,7 @@ export function TagaToggle() {
     description:
       'Three equal-width feature cards floating with staggered animations, Phosphor icons, and a violet ambient glow.',
     tags: [
-      { label: 'Animation', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Framer Motion' },
     ],
     dualTheme: true,
@@ -3764,7 +3775,7 @@ After creating the file, render <TextBlurReveal /> in the appropriate page.`,
     description:
       '9,000 particles arranged on a sphere with warm gold and cool silver tones, slowly spinning in Three.js.',
     tags: [
-      { label: '3D / WebGL', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Three.js' },
     ],
     PreviewComponent: ParticleSphere,
@@ -3840,7 +3851,7 @@ Cleanup: cancelAnimationFrame + dispose all Three.js objects + removeChild`,
     description:
       'Five polaroid photo cards stacked in a casual pile — click to fan them out in a spring-animated arc, hover to lift, click a card to spotlight it.',
     tags: [
-      { label: 'Interactive', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Framer Motion' },
     ],
     PreviewComponent: PolaroidStack,
@@ -3995,7 +4006,7 @@ After creating, import <TextLayout /> and add to the cards array in page.tsx.`,
     name: 'Living Sphere',
     description: 'A wire-frame globe that breathes on its own — a narrow wave band drifts quietly across the surface. Hover to ripple the lines right where your cursor lands.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -4155,7 +4166,7 @@ export function SphereLines() {
     name: 'Magnetic Dots',
     description: 'A dense grid of dots that get magnetically pulled toward the cursor, snapping back with a satisfying elastic bounce when you leave.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -4277,7 +4288,7 @@ export function MagneticDots() {
     name: 'Elastic String',
     description: 'A single taut line that bends toward the cursor like a guitar string being plucked, then snaps back with a satisfying elastic oscillation.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -4379,7 +4390,7 @@ export function ElasticString() {
     name: 'Spider Web',
     description: 'An organic silk web that breathes with a slow idle bow. Hover to physically push the nodes — each intersection bounces back with tension, fading the strings near your cursor.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -4476,7 +4487,7 @@ export function ParticleConstellation() {
     name: 'Encrypted Text',
     description: 'Characters scramble continuously in an encrypted loop. Hover to decrypt them one by one — mouse out and they go back to cipher.',
     tags: [
-      { label: 'Text', accent: true },
+      { label: 'Typography', accent: true },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -4592,7 +4603,7 @@ export function ScrambleText() {
     name: 'LCD Clock',
     description: 'A retro 7-segment LCD clock with pixel-grid overlay. Shows live HH:MM:SS with blinking colon, AM/PM indicator, day of week row, and full date.',
     tags: [
-      { label: 'Display', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Clock' },
       { label: 'Interactive' },
     ],
@@ -4664,7 +4675,7 @@ export function NeonClock() {
     name: 'Noise Field',
     description: 'A grid of flowing arrows driven by layered sine-wave noise — like wind mapped on a weather chart. Hover to create a swirling vortex at the cursor.',
     tags: [
-      { label: 'Background', accent: true },
+      { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
       { label: 'Interactive' },
     ],
@@ -4748,7 +4759,7 @@ export function NoiseField() {
     image: 'https://ik.imagekit.io/aitoolkit/emoji-burst.png',
     name: 'Emoji Burst',
     description: 'A button that explodes emojis outward in all directions. Five emoji sets cycle on each click.',
-    tags: [{ label: 'Interactive' }, { label: 'Animation' }, { label: 'Fun', accent: true }],
+    tags: [{ label: 'Buttons & Toggles', accent: true }, { label: 'Interactive' }, { label: 'Animation' }],
     dualTheme: true,
     PreviewComponent: EmojiBurst,
     code: `'use client'
@@ -4851,7 +4862,7 @@ export function EmojiBurst() {
     description: "Frosted glass navigation bar with animated active tab indicator, ambient color blobs, and spring-physics entrance.",
     tags: [
       { label: 'Navigation', accent: true },
-      { label: 'Glass' },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassNavbar,
@@ -4865,7 +4876,7 @@ export function EmojiBurst() {
     description: "Frosted glass pill tab bar with a sliding active indicator. Edge tabs snap flush to the container wall.",
     tags: [
       { label: 'Navigation', accent: true },
-      { label: 'Glass' },
+      { label: 'Glass', accent: true },
       { label: 'Mobile' },
     ],
     PreviewComponent: GlassTabBar,
@@ -4878,8 +4889,8 @@ export function EmojiBurst() {
     name: 'Glass Tags',
     description: "Selectable pill-shaped tags with glass surfaces, unique color accents, and spring-animated check marks.",
     tags: [
-      { label: 'Tags', accent: true },
-      { label: 'Glass' },
+      { label: 'Notifications', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassTags,
@@ -4892,8 +4903,8 @@ export function EmojiBurst() {
     name: 'Glass Card',
     description: "Content cards with 3D tilt-on-hover powered by spring physics and cursor-following glare highlight.",
     tags: [
-      { label: 'Card', accent: true },
-      { label: 'Glass' },
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Glass', accent: true },
       { label: '3D' },
     ],
     PreviewComponent: GlassCard,
@@ -4906,8 +4917,8 @@ export function EmojiBurst() {
     name: 'Glass Modal',
     description: "Centered dialog with deep glass blur, scale-spring entrance, and staggered content reveal.",
     tags: [
-      { label: 'Modal', accent: true },
-      { label: 'Glass' },
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassModal,
@@ -4921,7 +4932,7 @@ export function EmojiBurst() {
     image: 'https://ik.imagekit.io/aitoolkit/glass-dock.png?updatedAt=1775599200',
     tags: [
       { label: 'Navigation', accent: true },
-      { label: 'Glass' },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassDock,
@@ -4934,8 +4945,8 @@ export function EmojiBurst() {
     description: "Range sliders with glass tracks, glowing colored fills, and spring-animated thumbs that scale on drag.",
     image: 'https://ik.imagekit.io/aitoolkit/glass-slider.png',
     tags: [
-      { label: 'Slider', accent: true },
-      { label: 'Glass' },
+      { label: 'Inputs & Controls', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassSlider,
@@ -4947,8 +4958,8 @@ export function EmojiBurst() {
     name: 'Glass Toggle',
     description: "On/off toggles with glass housing and liquid-feel spring animation. Track color transitions smoothly.",
     tags: [
-      { label: 'Toggles', accent: true },
-      { label: 'Glass' },
+      { label: 'Buttons & Toggles', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     image: 'https://ik.imagekit.io/aitoolkit/glass-toggle.png',
@@ -4962,8 +4973,8 @@ export function EmojiBurst() {
     name: 'Glass Music Player',
     description: "Mini music player with glass surface, spinning vinyl art, animated progress bar, and ambient glow.",
     tags: [
-      { label: 'Widget', accent: true },
-      { label: 'Glass' },
+      { label: 'Widgets', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassMusicPlayer,
@@ -4976,8 +4987,8 @@ export function EmojiBurst() {
     name: 'Glass Notifications',
     description: "Swipe-to-dismiss notification stack with glass cards and spring-animated layout transitions.",
     tags: [
-      { label: 'Notification', accent: true },
-      { label: 'Glass' },
+      { label: 'Notifications', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassNotification,
@@ -4991,8 +5002,8 @@ export function EmojiBurst() {
     description: 'A collapsible glassmorphism sidebar with icon-only and expanded label states.',
     tags: [
       { label: 'Navigation', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Framer Motion' },
-      { label: 'Glassmorphism' },
     ],
     PreviewComponent: GlassSidebar,
     code: GLASS_SIDEBAR_CODE,
@@ -5005,7 +5016,7 @@ export function EmojiBurst() {
     image: 'https://ik.imagekit.io/aitoolkit/glass-user-menu.png',
     tags: [
       { label: 'Navigation', accent: true },
-      { label: 'Glass' },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassUserMenu,
@@ -5018,8 +5029,8 @@ export function EmojiBurst() {
     description: 'Frosted glassmorphism toast notification stack with 4 variants, auto-dismiss progress bar, and spring-animated stacking.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-toast.png?updatedAt=1775460137',
     tags: [
-      { label: 'Notification', accent: true },
-      { label: 'Glass' },
+      { label: 'Notifications', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassToast,
@@ -5032,8 +5043,8 @@ export function EmojiBurst() {
     description: 'Glassmorphism search bar with animated suggestion dropdown, active state glow, and reduced-motion support.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-search-bar.png?updatedAt=1775460137',
     tags: [
-      { label: 'Search', accent: true },
-      { label: 'Glass' },
+      { label: 'Inputs & Controls', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassSearchBar,
@@ -5046,8 +5057,8 @@ export function EmojiBurst() {
     description: 'Glassmorphism numeric stepper with spring number flip, notification-style tinted buttons, and configurable min/max/step.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-stepper.png',
     tags: [
-      { label: 'Input', accent: true },
-      { label: 'Glass' },
+      { label: 'Inputs & Controls', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassStepper,
@@ -5060,13 +5071,27 @@ export function EmojiBurst() {
     description: 'Glassmorphism progress bar panel with glowing gradient fills, spring-animated counters, staggered reveal, and replay button.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-progress.png',
     tags: [
-      { label: 'Data Display', accent: true },
-      { label: 'Glass' },
+      { label: 'Widgets', accent: true },
+      { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: GlassProgress,
     code: GLASS_PROGRESS_CODE,
     prompts: glassProgressPrompts,
+  },
+  {
+    slug: 'glass-ai-compose',
+    name: 'Glass AI Chat',
+    description: 'Glassmorphism AI chat input with image upload, web search toggle, and model switcher.',
+    image: 'https://ik.imagekit.io/aitoolkit/glass-ai-compose.png',
+    tags: [
+      { label: 'AI', accent: true },
+      { label: 'Glass', accent: true },
+      { label: 'Interactive' },
+    ],
+    PreviewComponent: GlassAiCompose,
+    code: GLASS_AI_COMPOSE_CODE,
+    prompts: glassAiComposePrompts,
   },
 ]
 

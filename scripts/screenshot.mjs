@@ -64,6 +64,7 @@ const ALL_SLUGS = [
   'glass-user-menu',
   'glass-stepper',
   'glass-progress',
+  'glass-ai-compose',
 ]
 
 const arg   = process.argv[2]
@@ -204,6 +205,14 @@ const INTERACTIONS = {
     const input = preview.locator('input').first()
     await input.click()
     await preview.page().waitForTimeout(800)
+  },
+
+  // Glass AI Compose — click textarea to activate glow
+  'glass-ai-compose': async (preview, page) => {
+    await preview.page().waitForTimeout(400)
+    const textarea = preview.locator('textarea').first()
+    await textarea.click()
+    await preview.page().waitForTimeout(600)
   },
 
   // Glass sidebar — click the toggle button to expand the sidebar

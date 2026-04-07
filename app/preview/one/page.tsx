@@ -1,11 +1,11 @@
 'use client'
 
-import { GlassStepper } from '../../../components-workspace/glass-stepper'
+import { GlassAiCompose } from '../../../components-workspace/glass-ai-compose'
 
 export default function PreviewOnePage() {
   return (
     <div className="h-screen w-full bg-sand-950">
-      <GlassStepper />
+      <GlassAiCompose />
     </div>
   )
 }
