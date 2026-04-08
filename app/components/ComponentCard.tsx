@@ -5,8 +5,8 @@ import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
-export type Platform = 'V0' | 'Bolt' | 'Lovable' | 'Claude Code' | 'Cursor'
-export const PLATFORMS: Platform[] = ['V0', 'Bolt', 'Lovable', 'Claude Code', 'Cursor']
+export type Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'
+export const PLATFORMS: Platform[] = ['Claude', 'GPT', 'Gemini', 'V0']
 
 export interface Tag {
   label: string
