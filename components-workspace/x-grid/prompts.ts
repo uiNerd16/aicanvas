@@ -1,169 +1,76 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Record<Platform, string> = {
-  V0: `Create an interactive X Grid background component in React. It fills its container with a grid of × marks drawn on an HTML canvas. When you hover over the canvas, the × marks near your cursor light up with a smooth, organic glow that fades out as you move away.
+export const prompts: Partial<Record<Platform, string>> = {
+  Claude: `Create \`components-workspace/x-grid/index.tsx\`. TypeScript strict, no \`any\`. \`'use client'\`. Export named function \`XGrid\`.
 
-The grid uses 20px spacing between each × mark centre. The hover influence radius is 130px. Each × has a resting opacity of 0.13 and peaks at 0.92 when fully illuminated.
+## Constants
+\`\`\`
+const SPACING = 20   // px between × centres
+const RADIUS  = 340  // px hover influence radius
+const BASE_A  = 0.13 // resting alpha (dark)
+const PEAK_A  = 0.92 // fully lit alpha
+\`\`\`
+Light-mode baseA override: \`0.25\` (branch on \`isDarkRef.current\` inside the frame loop).
 
-Each × mark is drawn with canvas stroke operations: two diagonal lines crossing at the mark's centre. At rest, each arm is 3px long and the stroke is 1px wide. When lit, the arm grows to 4.5px and the stroke reaches 1.8px. The animation uses a fast attack (lerp factor 0.16) and a slow release (0.07) so the effect feels fluid.
+## Refs & state
+- \`containerRef\` → HTMLDivElement
+- \`canvasRef\` → HTMLCanvasElement
+- \`mouseRef\` → \`{ x: number; y: number } | null\` (initial null)
+- \`isDarkRef\` → boolean (initial true) — mirror of state for sync reads inside the RAF loop
+- \`const [isDark, setIsDark] = useState(true)\` — drives background/label colours in JSX
 
-The component detects dark/light mode by checking for a [data-card-theme] wrapper element first, then falls back to the document's class. In dark mode the background is #110F0C and marks are white. In light mode the background is #F5F1EA and marks are #1C1916.
+## Theme detection effect
+On mount, resolve theme: \`const card = containerRef.current.closest('[data-card-theme]')\`; if card, \`dark = card.classList.contains('dark')\`, else \`document.documentElement.classList.contains('dark')\`. Call setIsDark and set isDarkRef.current. MutationObserver (\`attributeFilter: ['class']\`) observing both \`document.documentElement\` and the card wrapper (if any). Cleanup: \`observer.disconnect()\`.
 
-A centred label overlay shows "X Grid" (22px, bold) and "hover to illuminate" (11px, uppercase, wide tracking) in semi-transparent text. Touch events are supported alongside mouse events.`,
+## Canvas render effect (runs once, deps [])
+Locals: \`type Mark = { x: number; y: number; b: number; col: number; row: number }\`, \`let marks: Mark[] = []\`, \`let grid: Mark[][] = []\`, \`let animId = 0\`, \`let alive = true\`, \`let cw = 0, ch = 0\`, \`const t0 = performance.now()\`.
 
-  Bolt: `Build a React component called XGrid that renders an interactive canvas-based × mark grid.
+\`build()\`:
+1. \`dpr = window.devicePixelRatio || 1\`
+2. \`rect = canvas.getBoundingClientRect()\`; set cw/ch; early-return if zero.
+3. \`canvas.width = round(cw*dpr)\`, \`canvas.height = round(ch*dpr)\`.
+4. \`ctx.setTransform(dpr,0,0,dpr,0,0)\`.
+5. Reset \`marks = []\`, \`grid = []\`.
+6. \`cols = floor(cw/SPACING)+2\`, \`rows = floor(ch/SPACING)+2\`, \`ox = (cw%SPACING)/2\`, \`oy = (ch%SPACING)/2\`.
+7. Nested loop r,c: \`m = { x: ox + c*SPACING, y: oy + r*SPACING, b: 0, col: c, row: r }\`; push to marks; assign \`grid[r][c] = m\`.
 
-Setup:
-- 'use client' directive
-- useRef for canvas, container, mouse position, and isDark (for sync-safe canvas reads)
-- useState + MutationObserver for theme detection via [data-card-theme] attribute, falling back to document.documentElement
-- ResizeObserver on canvas.parentElement to rebuild the grid on resize
+\`frame()\`:
+1. If \`!alive\` return. \`ctx.clearRect(0, 0, cw, ch)\`.
+2. \`ctx.lineWidth = 0.5\` — explicit reset before the mark loop so state doesn't bleed from the connection pass.
+3. \`mx = mouseRef.current?.x ?? -99999\`, same for my. \`r2 = RADIUS*RADIUS\`. \`dotRGB = isDarkRef.current ? '255,255,255' : '28,25,22'\`. \`t = (performance.now() - t0) / 1000\`.
+4. For each d in marks:
+   - \`dx=d.x-mx, dy=d.y-my, dist2=dx*dx+dy*dy\`
+   - \`tgt = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2)/RADIUS, 1.5) : 0\`
+   - Brightness lerp: \`d.b += (tgt > d.b ? 0.16 : 0.05) * (tgt - d.b)\` (attack 0.16, release 0.05 — ~1s trail decay). If \`d.b < 0.004\` set to 0.
+   - \`arm = 2 + d.b * 1.0\` (2px resting → 3px lit)
+   - \`sw  = 0.5 + d.b * 0.3\` (0.5px resting → 0.8px lit)
+   - \`baseA = isDarkRef.current ? BASE_A : 0.25\`
+   - \`wave = Math.sin(d.col*0.3 + d.row*0.3 - t*0.5)\`
+   - \`restingAlpha = baseA * (1 + wave * 0.3)\`
+   - \`alpha = restingAlpha + (PEAK_A - restingAlpha) * d.b\`
+   - \`ctx.strokeStyle = \\\`rgba(\${dotRGB},\${alpha.toFixed(2)})\\\`\`; \`ctx.lineWidth = sw\`.
+   - Draw × via two diagonals, axis-aligned (no rotate/translate): \`moveTo(x-arm,y-arm); lineTo(x+arm,y+arm); moveTo(x+arm,y-arm); lineTo(x-arm,y+arm); stroke()\`.
+5. Connection pass: \`ctx.lineWidth = 0.5\`. For each d with \`d.b >= 0.05\`, look up four neighbours from grid: right \`[row][col+1]\`, below \`[row+1][col]\`, down-right \`[row+1][col+1]\`, down-left \`[row+1][col-1]\`. For each defined neighbour with \`n.b >= 0.05\`: \`lineAlpha = Math.min(d.b, n.b) * 0.4\`, stroke the segment d→n.
+6. \`animId = requestAnimationFrame(frame)\`.
 
-Grid config:
-- SPACING = 20px, RADIUS = 130px, BASE_A = 0.13, PEAK_A = 0.92
+After defining build/frame: call \`build()\`, \`frame()\`. Create \`ro = new ResizeObserver(build)\` and \`ro.observe(canvas.parentElement!)\`. Cleanup: \`alive = false; cancelAnimationFrame(animId); ro.disconnect()\`.
 
-Mark rendering (per × in the rAF loop):
-  const arm = 3 + d.b * 1.5   // 3px resting, 4.5px fully lit
-  const sw  = 1 + d.b * 0.8   // 1px resting, 1.8px fully lit
-  const alpha = BASE_A + (PEAK_A - BASE_A) * d.b
-  ctx.strokeStyle = \`rgba(\${dotRGB},\${alpha.toFixed(2)})\`
-  ctx.lineWidth = sw
-  ctx.beginPath()
-  ctx.moveTo(d.x - arm, d.y - arm)
-  ctx.lineTo(d.x + arm, d.y + arm)
-  ctx.moveTo(d.x + arm, d.y - arm)
-  ctx.lineTo(d.x - arm, d.y + arm)
-  ctx.stroke()
+## Mouse + touch
+\`updateMouse(cx, cy)\`: read \`canvas.getBoundingClientRect()\`, set \`mouseRef.current = { x: cx - rect.left, y: cy - rect.top }\`. Handlers on the outer div: \`onMouseMove\` calls updateMouse; \`onMouseLeave\` → \`mouseRef.current = null\`; \`onTouchMove\` uses \`e.touches[0]\` if present; \`onTouchEnd\` → null.
 
-Reset ctx.lineWidth = 1 at the top of each frame before the mark loop.
+## JSX
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span style={{ color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,25,22,0.45)', fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>X Grid</span>
+    <span style={{ color: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(28,25,22,0.22)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em' }}>hover to illuminate</span>
+  </div>
+</div>
+\`\`\`
 
-Brightness lerp:
-  d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
-  if (d.b < 0.004) d.b = 0
-
-DPR: use ctx.setTransform(dpr, 0, 0, dpr, 0, 0) after resizing.
-
-Backgrounds: dark → #110F0C, light → #F5F1EA. Mark color: dark → '255,255,255', light → '28,25,22'.
-
-Label overlay (pointer-events-none, centered): "X Grid" at 22px/700 weight and "hover to illuminate" at 11px/600/uppercase/0.12em tracking. Both semi-transparent matching the theme.
-
-Export as: export function XGrid()`,
-
-  Lovable: `I want an interactive canvas component where the background is covered in a grid of tiny × marks that light up as you move your mouse over them.
-
-Each × should glow brighter and grow slightly as my cursor passes nearby — like illuminating a field of crosses. The effect should feel smooth: fast to light up, slow to fade back.
-
-Design details:
-- Grid spacing: 20px between each × centre
-- Hover radius: 130px — marks inside this circle respond to the cursor
-- At rest: each × is faint (opacity 0.13) with 3px arms and 1px stroke
-- When lit: opacity rises to 0.92, arms extend to 4.5px, stroke thickens to 1.8px
-- Animation: quick attack (lerp 0.16), gentle release (0.07)
-
-Theme-aware: dark mode uses a near-black background (#110F0C) with white marks; light mode uses an off-white background (#F5F1EA) with near-black marks (#1C1916). Theme is read from a [data-card-theme] class wrapper if present, otherwise from the document.
-
-A subtle centered label reads "X Grid" with a smaller "hover to illuminate" hint below it — both in semi-transparent text that matches the current theme.
-
-The component should also work on touch devices.`,
-
-  'Claude Code': `Create components-workspace/x-grid/index.tsx with 'use client' at the top.
-
-Export: export function XGrid()
-
-Constants:
-  const SPACING = 20
-  const RADIUS  = 130
-  const BASE_A  = 0.13
-  const PEAK_A  = 0.92
-
-Refs: containerRef (div), canvasRef (canvas), mouseRef ({ x, y } | null), isDarkRef (boolean, init true)
-State: isDark (boolean, init true)
-
-Theme effect (runs once):
-  - el.closest('[data-card-theme]') → check .dark class → setIsDark + isDarkRef.current
-  - MutationObserver on document.documentElement { attributes, attributeFilter: ['class'] }
-  - Also observe cardWrapper if found
-  - Cleanup: observer.disconnect()
-
-Canvas effect (runs once):
-  type Mark = { x: number; y: number; b: number }
-
-  build():
-    - dpr = window.devicePixelRatio || 1
-    - getBoundingClientRect → cw, ch
-    - canvas.width/height = Math.round(cw/ch * dpr)
-    - ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    - Populate marks: offset centred grid, SPACING gap
-
-  frame():
-    - Guard: if (!alive) return
-    - ctx.clearRect(0, 0, cw, ch)
-    - ctx.lineWidth = 1  ← reset before loop
-    - mx/my from mouseRef (-99999 if null)
-    - r2 = RADIUS * RADIUS
-    - dotRGB: isDarkRef.current ? '255,255,255' : '28,25,22'
-    - For each mark d:
-        dist2 = squared distance to mouse
-        tgt = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2) / RADIUS, 1.5) : 0
-        d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
-        if (d.b < 0.004) d.b = 0
-        arm = 3 + d.b * 1.5
-        sw  = 1 + d.b * 0.8
-        baseA = isDarkRef.current ? BASE_A : 0.25
-        alpha = baseA + (PEAK_A - baseA) * d.b
-        ctx.strokeStyle = \`rgba(\${dotRGB},\${alpha.toFixed(2)})\`
-        ctx.lineWidth = sw
-        ctx.beginPath()
-        ctx.moveTo(d.x - arm, d.y - arm)
-        ctx.lineTo(d.x + arm, d.y + arm)
-        ctx.moveTo(d.x + arm, d.y - arm)
-        ctx.lineTo(d.x - arm, d.y + arm)
-        ctx.stroke()
-    - animId = requestAnimationFrame(frame)
-
-  ResizeObserver on canvas.parentElement!
-  Cleanup: alive = false, cancelAnimationFrame, ro.disconnect()
-
-updateMouse(clientX, clientY): subtract canvas getBoundingClientRect() left/top
-
-JSX:
-  - Root div: ref={containerRef}, relative h-full w-full overflow-hidden, style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
-  - Events: onMouseMove, onMouseLeave (null), onTouchMove (touches[0]), onTouchEnd (null)
-  - Canvas: ref={canvasRef}, absolute inset-0, style width/height 100%
-  - Label div: pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2
-      "X Grid" — 22px, 700, letterSpacing -0.02em
-      "hover to illuminate" — 11px, 600, uppercase, letterSpacing 0.12em
-  - Label colors: dark → rgba(255,255,255,0.45) / rgba(255,255,255,0.18), light → rgba(28,25,22,0.45) / rgba(28,25,22,0.22)
-
-No any types. No TypeScript errors.`,
-
-  Cursor: `Implement XGrid in components-workspace/x-grid/index.tsx — a canvas-based interactive × mark grid, identical in structure to an InteractiveDotGrid but replacing filled squares with stroked × marks.
-
-Key differences from a dot grid:
-1. Drawing: instead of ctx.fillRect, draw two crossing diagonal lines per mark:
-     ctx.lineWidth = sw          // sw = 1 + d.b * 0.8
-     ctx.beginPath()
-     ctx.moveTo(d.x - arm, d.y - arm)   // arm = 3 + d.b * 1.5
-     ctx.lineTo(d.x + arm, d.y + arm)
-     ctx.moveTo(d.x + arm, d.y - arm)
-     ctx.lineTo(d.x - arm, d.y + arm)
-     ctx.stroke()
-2. Reset ctx.lineWidth = 1 at the start of every frame (before the mark loop)
-3. Use ctx.strokeStyle instead of ctx.fillStyle
-4. Label reads "X Grid"
-
-Everything else is identical:
-- SPACING=20, RADIUS=130, BASE_A=0.13, PEAK_A=0.92
-- isDarkRef pattern for theme-safe canvas reads
-- Theme detection: [data-card-theme] wrapper → document.documentElement, MutationObserver
-- Brightness lerp: fast attack 0.16, slow release 0.07; clamp < 0.004 to 0
-- DPR: ctx.setTransform after canvas resize
-- ResizeObserver on canvas.parentElement!
-- Background: #110F0C dark / #F5F1EA light
-- Mark color: '255,255,255' dark / '28,25,22' light
-- Touch support: onTouchMove / onTouchEnd
-- Label overlay: centered, pointer-events-none, semi-transparent
-
-Export: export function XGrid()
-No any types.`,
+## Cleanup checklist
+- \`alive\` flag, \`cancelAnimationFrame(animId)\`, \`ro.disconnect()\` in the render effect return
+- \`observer.disconnect()\` in the theme effect return
+- No \`any\`; only \`canvasRef.current!\` / \`canvas.parentElement!\` assertions, which are safe inside the mount effect.`,
 }

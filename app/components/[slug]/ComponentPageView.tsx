@@ -32,7 +32,7 @@ interface ComponentPageViewProps {
   description: string
   tags: Tag[]
   code: string
-  prompts: Record<Platform, string>
+  prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
   related: ComponentMeta[]
   children: ReactNode
@@ -64,8 +64,10 @@ export default function ComponentPageView({
 
   // Prompt drawer — replaces the old click-blind dropdown.
   const [promptDrawerOpen, setPromptDrawerOpen] = useState(false)
-  const [selectedPlatform, setSelectedPlatform] =
-    useState<Platform>('Claude Code')
+  const availablePlatforms = PLATFORMS.filter((p) => prompts[p])
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>(
+    availablePlatforms[0] ?? 'Claude',
+  )
 
   // Related pagination — sliding window of RELATED_PAGE_SIZE cards advancing
   // ONE card at a time. The exiting card stays in place but drops behind the
@@ -118,7 +120,9 @@ export default function ComponentPageView({
 
   async function copyPrompt(platform: Platform) {
     try {
-      await navigator.clipboard.writeText(prompts[platform])
+      const text = prompts[platform]
+      if (!text) return
+      await navigator.clipboard.writeText(text)
       setPromptCopied(platform)
       setTimeout(() => setPromptCopied(null), 2000)
     } catch {}
@@ -507,7 +511,7 @@ export default function ComponentPageView({
 
               {/* Platform tabs */}
               <div className="flex shrink-0 flex-wrap gap-1.5 border-b border-sand-300 px-5 py-3 dark:border-sand-800">
-                {PLATFORMS.map((platform) => {
+                {availablePlatforms.map((platform) => {
                   const isActive = selectedPlatform === platform
                   return (
                     <button

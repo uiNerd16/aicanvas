@@ -1,75 +1,7 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Record<Platform, string> = {
-  V0: `Create a frosted glass modal card called "Glass Modal" centered over a blurred background image on a dark scene (bg-sand-950).
-
-The modal is a 340px-wide rounded-3xl card with a glass effect: semi-transparent white background (rgba 255,255,255,0.08), a subtle white border (rgba 255,255,255,0.12), heavy box-shadow, and a 40px backdrop blur with 1.8 saturation. A faint top-edge highlight line runs across the top.
-
-Content from top to bottom:
-1. A close button (X icon) in the top-right corner — small circle with semi-transparent bg. On hover it rotates 90 degrees, scales up, and glows warm orange.
-2. A notification-style icon badge — 64x64 rounded-xl box with a tinted amber background (#FFA03218), a matching subtle border (#FFA03222), and a ShieldCheck icon in solid amber (#FFA032). It enters with a spring pop animation (scale from 0, slight rotation).
-3. "Upgrade to Pro" heading in white.
-4. A short description paragraph in muted white.
-5. Three feature bullet points ("Unlimited components", "Source code access", "Priority support"), each with a small round checkmark badge using the same warm orange tint.
-6. Two buttons: a gradient CTA "Upgrade Now" (warm orange-to-red gradient with glow) and a subtle "Maybe Later" ghost button.
-
-All text and elements fade/slide in with staggered delays. Use Framer Motion for all animations. Use Phosphor icons (ShieldCheck, X, Check) with weight="regular".`,
-
-  Bolt: `Build a GlassModal React component using Framer Motion and Phosphor icons (@phosphor-icons/react).
-
-ICONS: ShieldCheck, X, Check — all weight="regular"
-
-STRUCTURE:
-- Root: h-full w-full centered, bg-sand-950, background image with opacity-60
-- Modal card: 340px wide, rounded-3xl, glass effect
-
-GLASS CARD STYLE:
-background: rgba(255,255,255,0.08)
-border: 1px solid rgba(255,255,255,0.12)
-boxShadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)
-Separate blur layer (pointer-events-none, z-[-1]): backdropFilter blur(40px) saturate(1.8)
-Top edge highlight: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent), h-[1px]
-
-CONTENT (top to bottom):
-1. Close button — absolute right-4 top-4, 32px circle, X icon 14px.
-   whileHover: scale 1.15, rotate 90, bg rgba(255,155,50,0.2), warm orange glow + border.
-   whileTap: scale 0.9
-
-2. Main icon — notification-style tinted badge, NOT gradient:
-   64x64 (h-16 w-16), rounded-xl
-   background: #FFA03218 (amber with ~9% alpha)
-   border: 1px solid #FFA03222 (amber with ~13% alpha)
-   ShieldCheck icon 28px in solid #FFA032
-   Entrance: spring scale 0→1, rotate -20→0, stiffness 300, damping 18, delay 0.15s
-
-3. Heading: "Upgrade to Pro" — text-lg font-semibold text-white/90, fade in delay 0.2s
-4. Description: text-sm text-white/40, fade in delay 0.25s
-
-5. Three features with staggered slide-in (delay 0.35 + i*0.08):
-   Each has a 20px round badge: bg rgba(255,155,50,0.18), Check icon 10px in rgba(255,155,50,1)
-   Text: "Unlimited components", "Source code access", "Priority support"
-
-6. Two buttons:
-   CTA: gradient(135deg, rgba(255,160,50,0.75), rgba(220,60,40,0.6)), rounded-full
-   Ghost: rgba(255,255,255,0.06) bg, text-white/50
-
-Card entrance: spring scale 0.9→1, y 16→0, stiffness 350, damping 28.`,
-
-  Lovable: `I'd love a premium "Upgrade to Pro" modal that feels like frosted glass floating over a beautiful dark scene.
-
-The modal should be a softly glowing card with a deep glass effect — you can see the blurred background through it. It needs a warm, inviting amber color accent throughout.
-
-At the top, there's a notification-style icon badge — a rounded square with a very subtle amber tint and a shield-check icon in warm amber. It should pop in with a playful spring animation, like it's bouncing into view.
-
-Below that: an "Upgrade to Pro" heading, a short description, and three feature checkmarks (each with its own tiny amber circle badge). Everything fades in with gentle staggered timing.
-
-At the bottom, two buttons: a gorgeous warm gradient CTA that glows on hover (amber to coral), and a subtle ghost "Maybe Later" button.
-
-A close button in the top corner should rotate and glow warm orange when you hover over it — a delightful little detail.
-
-The whole thing should feel warm, premium, and alive with subtle motion. Spring animations everywhere. Use Framer Motion and Phosphor icons.`,
-
-  'Claude Code': `Create \`components-workspace/glass-modal/index.tsx\`. Export a named function \`GlassModal\` ('use client').
+export const prompts: Partial<Record<Platform, string>> = {
+  Claude: `Create \`components-workspace/glass-modal/index.tsx\`. Export a named function \`GlassModal\` ('use client').
 
 Icons: ShieldCheck, X, Check from @phosphor-icons/react, all weight="regular".
 
@@ -128,49 +60,17 @@ GHOST BUTTON (motion.button): rounded-full py-3 w-full, text-sm font-medium text
   whileHover: { scale: 1.04, background: rgba(255,255,255,0.1) }
   whileTap: { scale: 0.96 }`,
 
-  Cursor: `File: \`components-workspace/glass-modal/index.tsx\`
-- Export \`GlassModal\` ('use client')
-- Icons: ShieldCheck, X, Check from @phosphor-icons/react, weight="regular"
+  V0: `Create a frosted glass modal card called "Glass Modal" centered over a blurred background image on a dark scene (bg-sand-950).
 
-ROOT:
-- h-full w-full centered, bg-sand-950, overflow-hidden
-- Background img: absolute inset-0, object-cover, opacity-60
+The modal is a 340px-wide rounded-3xl card with a glass effect: semi-transparent white background (rgba 255,255,255,0.08), a subtle white border (rgba 255,255,255,0.12), heavy box-shadow, and a 40px backdrop blur with 1.8 saturation. A faint top-edge highlight line runs across the top.
 
-MODAL CARD (motion.div):
-- w-[340px], rounded-3xl, overflow-hidden, isolate
-- Entrance spring: scale 0.9→1, y 16→0, stiffness 350, damping 28
-- bg: rgba(255,255,255,0.08), border: 1px solid rgba(255,255,255,0.12)
-- boxShadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)
-- Separate blur layer: absolute inset-0 z-[-1], backdropFilter blur(40px) saturate(1.8)
-- Top highlight: h-[1px] left-8 right-8, gradient transparent→white/25→transparent
+Content from top to bottom:
+1. A close button (X icon) in the top-right corner — small circle with semi-transparent bg. On hover it rotates 90 degrees, scales up, and glows warm orange.
+2. A notification-style icon badge — 64x64 rounded-xl box with a tinted amber background (#FFA03218), a matching subtle border (#FFA03222), and a ShieldCheck icon in solid amber (#FFA032). It enters with a spring pop animation (scale from 0, slight rotation).
+3. "Upgrade to Pro" heading in white.
+4. A short description paragraph in muted white.
+5. Three feature bullet points ("Unlimited components", "Source code access", "Priority support"), each with a small round checkmark badge using the same warm orange tint.
+6. Two buttons: a gradient CTA "Upgrade Now" (warm orange-to-red gradient with glow) and a subtle "Maybe Later" ghost button.
 
-CLOSE BUTTON:
-- absolute right-4 top-4, h-8 w-8 rounded-full
-- bg rgba(255,255,255,0.08), border 1px solid rgba(255,255,255,0.08)
-- X icon size=14, text-white/60
-- whileHover: scale 1.15, rotate 90, bg rgba(255,155,50,0.2), glow boxShadow 0 0 14px rgba(255,140,40,0.45)
-- whileTap: scale 0.9, transition duration 0.2
-
-MAIN ICON — notification-style tinted badge:
-- h-16 w-16 (64x64), rounded-xl, flex centered
-- background: #FFA03218 (amber ~9% alpha)
-- border: 1px solid #FFA03222 (amber ~13% alpha)
-- ShieldCheck size=28, color #FFA032
-- Entrance: scale 0→1, rotate -20→0, spring stiffness 300 damping 18, delay 0.15s
-
-TEXT:
-- h2 "Upgrade to Pro": text-lg font-semibold text-white/90, fade+slide delay 0.2
-- p description: text-sm text-white/40 text-center, fade+slide delay 0.25
-
-FEATURES (3 items, staggered):
-- Each: delay 0.35 + i*0.08, slide from x:-12
-- Badge: h-5 w-5 rounded-full, bg rgba(255,155,50,0.18), Check size=10 color rgba(255,155,50,1)
-- Labels: "Unlimited components", "Source code access", "Priority support"
-
-BUTTONS:
-- CTA: gradient(135deg, rgba(255,160,50,0.75)→rgba(220,60,40,0.6)), border rgba(255,180,80,0.25), glow shadow
-  whileHover: scale 1.04, brighter gradient, stronger shadow
-- Ghost: bg rgba(255,255,255,0.06), border rgba(255,255,255,0.1), text-white/50
-  whileHover: scale 1.04, bg rgba(255,255,255,0.1)
-- Both: whileTap scale 0.96, rounded-full, py-3, transition 0.25s`,
+All text and elements fade/slide in with staggered delays. Use Framer Motion for all animations. Use Phosphor icons (ShieldCheck, X, Check) with weight="regular".`,
 }

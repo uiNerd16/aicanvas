@@ -1,88 +1,7 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Record<Platform, string> = {
-  V0: `Create a glass card component called GlassCard that shows three frosted-glass cards side by side against a vivid background image.
-
-The background is a full-bleed photo of an ethereal orange flower (ImageKit URL: https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133, opacity 60%). The cards float on top of it with a real glass effect.
-
-Each card has:
-- A notification-style icon badge — a 48x48 rounded-xl box with a very subtle tinted background and border in the card's accent colour, with the icon rendered in that same accent colour (not white)
-- A bold title and a short muted subtitle
-- A tinted CTA button at the bottom with a right-arrow icon
-
-The three cards are:
-1. Analytics — accent colour #5B8FF9, gradient pair #5B8FF9 to #A78BFA, ChartLineUp icon, "View Dashboard" button
-2. Automation — accent colour #FF6BF5, gradient pair #FF6BF5 to #FF6680, Lightning icon, "Create Workflow" button
-3. Security — accent colour #FF7B54, gradient pair #FF7B54 to #FFBE0B, ShieldCheck icon, "View Report" button
-
-The icon badge for each card uses the card's accent colour at very low opacity for the background (roughly 9%) and an even subtler border (roughly 13% opacity). The icon inside is rendered in the full accent colour. On hover the badge scales to 1.1 and rotates 5° with a springy feel.
-
-Glass effect on each card body: white at 8% opacity, backdrop blur 24px with saturation 1.8, a subtle outer shadow, and a 1px white inner top border. There is also a 1px gradient line running along the very top edge of the card body to add a highlight.
-
-Each card also has a rotating gradient border (the card's gradient pair at 30% opacity) that slowly spins 360° over 20 seconds on a continuous loop.
-
-On mouse hover the card tilts in 3D — rotating up to 8° on both axes following the cursor position. A glare highlight (a soft white radial gradient) also tracks the mouse across the card surface, so it looks like light reflecting off glass.
-
-The CTA button scales up very slightly on hover.
-
-No entrance animations — cards appear instantly when the page loads.
-
-Build this with Next.js, Tailwind CSS, and Framer Motion. Use Phosphor Icons (ChartLineUp, Lightning, ShieldCheck, ArrowRight) with weight="regular".`,
-
-  Bolt: `Build a React component using Framer Motion that displays three interactive glass cards in a horizontal row over a full-bleed background image.
-
-**Background:** Full-bleed image (https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133), absolute inset-0, object-cover, opacity 60%.
-
-**Card data (CARDS array):** Each card has a \`color\` (single accent hex) AND a \`gradient\` (two-color string for the border and CTA):
-- { title: 'Analytics',  color: '#5B8FF9', gradient: '#5B8FF9, #A78BFA', cta: 'View Dashboard',  Icon: ChartLineUp,  subtitle: 'Real-time metrics and insights for your application.' }
-- { title: 'Automation', color: '#FF6BF5', gradient: '#FF6BF5, #FF6680', cta: 'Create Workflow',  Icon: Lightning,    subtitle: 'Streamline your workflows with intelligent triggers.' }
-- { title: 'Security',   color: '#FF7B54', gradient: '#FF7B54, #FFBE0B', cta: 'View Report',      Icon: ShieldCheck,  subtitle: 'Enterprise-grade protection for your data.' }
-
-**Glass surface (card body div):**
-- background: rgba(255, 255, 255, 0.08)
-- backdropFilter: blur(24px) saturate(1.8) (also set WebkitBackdropFilter)
-- boxShadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)
-
-**Rotating border gradient:** absolute motion.div, opacity-30, linear-gradient(135deg, color1, transparent 60%), animate={{ rotate: [0, 360] }}, duration 20s, ease linear, repeat Infinity.
-
-**3D tilt on hover:**
-- useMotionValue for mouseX / mouseY (normalised 0–1 from mouse position over card rect)
-- useTransform: rotateX maps mouseY [0,1] → [8,-8]; rotateY maps mouseX [0,1] → [-8,8]
-- Wrap both in useSpring({ stiffness: 200, damping: 20 })
-- Apply via style={{ rotateX, rotateY, transformPerspective: 800 }} on the outer card motion.div
-- On mouse leave reset mouseX/mouseY to 0.5
-
-**Glare highlight:**
-- useTransform maps mouseX → glareX [0, 100] and mouseY → glareY [0, 100]
-- useMotionTemplate to compose: radial-gradient(circle at \${glareX}% \${glareY}%, rgba(255,255,255,0.4), transparent 50%)
-- Apply as background on a pointer-events-none absolute motion.div, opacity 40%
-- Do NOT call useMotionValue() or useMotionTemplate() inline inside JSX — call them at the top of the component function
-
-**Icon badge (notification-style, NOT gradient-filled):** motion.div, 48x48 (h-12 w-12), rounded-xl. Background: \`\${color}18\` (accent at ~9% opacity). Border: \`1px solid \${color}22\` (~13% opacity). Icon rendered in the card's accent \`color\` (not white). whileHover={{ scale: 1.1, rotate: 5 }}, spring stiffness 400, damping 15.
-
-**CTA button (motion.button):** whileHover={{ scale: 1.03 }}, whileTap={{ scale: 0.97 }}, gradient tint background (color1 at 40% opacity → color2 at 28%), coloured border at 33% opacity, ArrowRight icon on the right.
-
-**Top edge highlight:** 1px absolute div at top of card body, linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent).
-
-No entrance animations. Use @phosphor-icons/react with weight="regular". Stack: React, Tailwind CSS, Framer Motion.`,
-
-  Lovable: `I'd love a component that feels like holding panels of frosted glass up to a window filled with warm golden light.
-
-Imagine three glass panels sitting side by side in front of an ethereal photo of a flower bathed in orange and gold. Each panel is slightly translucent — you can sense the colours of the flower bleeding through — but each also has its own personality through a gentle colour tint and a slowly spinning gradient border that breathes around its edge like a living aurora.
-
-The first panel glows in cool blue fading into soft lavender and it's all about Analytics. The second pulses with electric pink melting into rose, representing Automation. The third shimmers in warm coral shifting to amber, evoking Security and trust.
-
-When you move your mouse over a card, it tilts gently toward you in three dimensions — like picking up a real card from a table. And as your cursor moves across its surface, a soft white light follows, catching the glass and creating a specular glare, as if sunlight is reflecting off the panel in real time.
-
-Each card has a small notification-style icon badge — a softly tinted square with rounded corners. The background of the badge is just a whisper of the card's accent colour (barely there, like a coloured fog), and the icon itself is rendered in that accent colour rather than white. It feels modern and understated — like the notification badges you see in premium dashboards. When you hover over the badge, it gives a little bounce and rotation — it feels alive. At the bottom of every card is a CTA button that subtly scales up when you move your cursor to it.
-
-The whole thing feels premium and futuristic — like a product dashboard from the near future. The background flower image bleeds warmth through the glass, making the cool blues and pinks feel alive and grounded at the same time.
-
-No dramatic entrance animations — the cards simply exist, calm and confident, waiting for interaction.
-
-Build it with Next.js, Tailwind CSS, and Framer Motion. Use Phosphor Icons (ChartLineUp for Analytics, Lightning for Automation, ShieldCheck for Security, ArrowRight for the CTA buttons) with regular weight.`,
-
-  'Claude Code': `Create \`components-workspace/glass-card/index.tsx\`. Export a named function \`GlassCard\`.
+export const prompts: Partial<Record<Platform, string>> = {
+  Claude: `Create \`components-workspace/glass-card/index.tsx\`. Export a named function \`GlassCard\`.
 
 **File header:** \`'use client'\`
 
@@ -150,43 +69,31 @@ Inside the card body:
 
 No entrance animations. No dark: Tailwind variants — component is always dark-themed.`,
 
-  Cursor: `File: \`components-workspace/glass-card/index.tsx\`
+  V0: `Create a glass card component called GlassCard that shows three frosted-glass cards side by side against a vivid background image.
 
-- \`'use client'\` at top
-- Export named function \`GlassCard\`; internal component \`GlassCardItem\`
+The background is a full-bleed photo of an ethereal orange flower (ImageKit URL: https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133, opacity 60%). The cards float on top of it with a real glass effect.
 
-**Imports:** \`motion, useMotionValue, useMotionTemplate, useTransform, useSpring\` from framer-motion; \`ChartLineUp, Lightning, ShieldCheck, ArrowRight, type Icon\` from @phosphor-icons/react; \`useRef\` from react
+Each card has:
+- A notification-style icon badge — a 48x48 rounded-xl box with a very subtle tinted background and border in the card's accent colour, with the icon rendered in that same accent colour (not white)
+- A bold title and a short muted subtitle
+- A tinted CTA button at the bottom with a right-arrow icon
 
-**CARDS constant (module-level, 3 items — each has \`color\` AND \`gradient\`):**
-- Analytics: color \`'#5B8FF9'\`, gradient \`'#5B8FF9, #A78BFA'\`, Icon ChartLineUp, cta \`'View Dashboard'\`, subtitle \`'Real-time metrics and insights for your application.'\`
-- Automation: color \`'#FF6BF5'\`, gradient \`'#FF6BF5, #FF6680'\`, Icon Lightning, cta \`'Create Workflow'\`, subtitle \`'Streamline your workflows with intelligent triggers.'\`
-- Security: color \`'#FF7B54'\`, gradient \`'#FF7B54, #FFBE0B'\`, Icon ShieldCheck, cta \`'View Report'\`, subtitle \`'Enterprise-grade protection for your data.'\`
+The three cards are:
+1. Analytics — accent colour #5B8FF9, gradient pair #5B8FF9 to #A78BFA, ChartLineUp icon, "View Dashboard" button
+2. Automation — accent colour #FF6BF5, gradient pair #FF6BF5 to #FF6680, Lightning icon, "Create Workflow" button
+3. Security — accent colour #FF7B54, gradient pair #FF7B54 to #FFBE0B, ShieldCheck icon, "View Report" button
 
-**BACKGROUND constant:** ImageKit URL for "Ethereal Orange Flower 4" (\`https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133\`)
+The icon badge for each card uses the card's accent colour at very low opacity for the background (roughly 9%) and an even subtler border (roughly 13% opacity). The icon inside is rendered in the full accent colour. On hover the badge scales to 1.1 and rotates 5° with a springy feel.
 
-**GlassCardItem — motion values (all declared in function body, never inline in JSX):**
-- \`mouseX = useMotionValue(0.5)\`, \`mouseY = useMotionValue(0.5)\` — normalised 0–1
-- onMouseMove: set mouseX/mouseY from rect-relative position; onMouseLeave: reset both to 0.5
-- \`rotateX = useSpring(useTransform(mouseY, [0,1], [8,-8]), { stiffness: 200, damping: 20 })\`
-- \`rotateY = useSpring(useTransform(mouseX, [0,1], [-8,8]), { stiffness: 200, damping: 20 })\`
-- \`glareX = useTransform(mouseX, [0,1], [0,100])\`; \`glareY = useTransform(mouseY, [0,1], [0,100])\`
-- \`glareBackground = useMotionTemplate\\\`radial-gradient(circle at \${glareX}% \${glareY}%, rgba(255,255,255,0.4), transparent 50%)\\\`\`
+Glass effect on each card body: white at 8% opacity, backdrop blur 24px with saturation 1.8, a subtle outer shadow, and a 1px white inner top border. There is also a 1px gradient line running along the very top edge of the card body to add a highlight.
 
-**Outer card \`motion.div\`:** \`style={{ rotateX, rotateY, transformPerspective: 800 }}\`, class \`relative w-64 cursor-pointer overflow-hidden rounded-3xl p-[1px]\`
+Each card also has a rotating gradient border (the card's gradient pair at 30% opacity) that slowly spins 360° over 20 seconds on a continuous loop.
 
-**Rotating border \`motion.div\`:** absolute, opacity-30, \`linear-gradient(135deg, gradient, transparent 60%)\`, \`animate={{ rotate: [0,360] }}\`, transition duration 20s linear repeat Infinity
+On mouse hover the card tilts in 3D — rotating up to 8° on both axes following the cursor position. A glare highlight (a soft white radial gradient) also tracks the mouse across the card surface, so it looks like light reflecting off glass.
 
-**Card body \`div\`:** \`background: rgba(255,255,255,0.08)\`, \`backdropFilter: blur(24px) saturate(1.8)\`, WebkitBackdropFilter same, \`boxShadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)\`
+The CTA button scales up very slightly on hover.
 
-**Glare layer \`motion.div\`:** pointer-events-none, absolute inset-0, opacity-40, \`style={{ background: glareBackground }}\`
+No entrance animations — cards appear instantly when the page loads.
 
-**Icon badge \`motion.div\` — notification-style (NOT gradient-filled):** h-12 w-12 (48x48), rounded-xl. \`background: \${color}18\` (~9% opacity tint). \`border: 1px solid \${color}22\` (~13% opacity). No boxShadow. Icon rendered via \`style={{ color }}\` (accent colour, not white), size 22. \`whileHover={{ scale: 1.1, rotate: 5 }}\`, spring stiffness 400 damping 15
-
-**CTA \`motion.button\`:** \`whileHover={{ scale: 1.03 }}\`, \`whileTap={{ scale: 0.97 }}\`, gradient tint bg (color1+40 → color2+28), border color1+55, flex row between label span and ArrowRight icon
-
-**Top edge highlight:** absolute 1px div, left-6 right-6 top-0, \`linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)\`
-
-**GlassCard root:** \`relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\`; background img absolute inset-0 object-cover opacity-60; flex-wrap card row with gap-6
-
-No entrance animations. Always dark-themed (no dark: variants).`,
+Build this with Next.js, Tailwind CSS, and Framer Motion. Use Phosphor Icons (ChartLineUp, Lightning, ShieldCheck, ArrowRight) with weight="regular".`,
 }
