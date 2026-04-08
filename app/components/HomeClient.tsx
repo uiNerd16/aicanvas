@@ -44,7 +44,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
       </div>
 
       {/* ── Grid ── */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 bg-sand-200 p-6 dark:bg-sand-950">
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((entry) => (

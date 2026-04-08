@@ -7,8 +7,8 @@ const SPACING     = 20    // px between circle centres
 const RADIUS      = 200
 const BASE_R      = 1.5
 const BURST_R     = 16
-const BASE_A_DARK  = 0.18
-const BASE_A_LIGHT = 0.28
+const BASE_A_DARK  = 0.55
+const BASE_A_LIGHT = 0.75
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Bubble = { x: number; y: number; b: number; phase: number }

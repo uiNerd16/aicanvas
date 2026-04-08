@@ -121,3 +121,4 @@ export const prompts: Record<Platform, string> = {
 - `generateStaticParams()` required for all `[slug]` routes
 - Server components pass `<PreviewComponent />` JSX as `children` to client components (never store JSX in module-level data)
 - `'use client'` required on all interactive components
+"Do not invoke superpowers skills automatically. Only use them when I explicitly ask."

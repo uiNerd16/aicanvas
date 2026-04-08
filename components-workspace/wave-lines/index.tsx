@@ -14,7 +14,7 @@ const LOCAL_RADIUS = 220    // px — repulsion radius
 const LINE_A_DARK  = 0.55
 const LINE_A_LIGHT = 0.75
 
-export function SilkLines() {
+export function WaveLines() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)

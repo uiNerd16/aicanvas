@@ -1,9 +1,9 @@
-# Silk Lines
+# Wave Lines
 
 ## Brief
-Component: Silk Lines
-Slug: silk-lines
-Description: Dense vertical lines deformed by a single slow, large-amplitude sine wave — like a piece of silk cloth draped over a curved surface. Hovering pushes lines outward from the cursor, deepening the fold.
+Component: Wave Lines
+Slug: wave-lines
+Description: Dense vertical lines deformed by a slow, large-amplitude sine wave that ripples across the canvas. Hovering pushes lines outward from the cursor, deepening the wave.
 
 ## Visual (default)
 - Vertical lines only — no horizontal lines, no grid
@@ -11,7 +11,7 @@ Description: Dense vertical lines deformed by a single slow, large-amplitude sin
 - Each line is a sampled sine curve: x-displacement varies with Y position
 - Formula: dx = AMP * sin(ry * FREQ_Y + rx * FREQ_X + t)
   - FREQ_Y drives the curve shape along each line (~1.5 waves top to bottom)
-  - FREQ_X creates a phase offset per column — produces the cloth fold / bunching effect
+  - FREQ_X creates a phase offset per column — produces the rippling / bunching effect
 - AMP 44px — high amplitude, dramatic curves
 - Animation: t += 0.003 — very slow drift
 - Opacity: 0.55 dark / 0.75 light — lines clearly visible
@@ -30,4 +30,4 @@ Description: Dense vertical lines deformed by a single slow, large-amplitude sin
 - Draw one ctx.beginPath per column, moveTo first point, lineTo rest, stroke
 - isDark via [data-card-theme] pattern
 - ResizeObserver, DPR, zero-size guard, touch events
-- Label: "Silk Lines" + "hover to fold"
+- Label: "Wave Lines" + "hover to fold"
