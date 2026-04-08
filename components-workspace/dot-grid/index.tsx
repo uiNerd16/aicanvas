@@ -8,7 +8,7 @@ const RADIUS  = 130    // px — hover influence radius
 const BASE_A  = 0.13   // resting dot opacity
 const PEAK_A  = 0.92   // fully-lit dot opacity
 
-export function InteractiveDotGrid() {
+export function InteractiveDotGrid({ showLabel = true }: { showLabel?: boolean } = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -33,6 +33,45 @@ export function InteractiveDotGrid() {
     const cardWrapper = el.closest('[data-card-theme]')
     if (cardWrapper) observer.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
     return () => observer.disconnect()
+  }, [])
+
+  // ── Pointer tracking ───────────────────────────────────────────────────────
+  // Listens at the window level so the cursor is tracked even when the
+  // dot grid is rendered behind other elements (e.g. as a background under
+  // a `pointer-events: none` wrapper). Only writes to a ref — no React
+  // state, no re-renders. Listeners are passive so the browser never
+  // blocks scroll/touch on this handler.
+  useEffect(() => {
+    const updateFromClient = (clientX: number, clientY: number) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      // getBoundingClientRect is fast on a stable layout — modern browsers
+      // serve it from the cached layout box without triggering reflow.
+      const rect = canvas.getBoundingClientRect()
+      mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }
+    }
+
+    const onMouseMove = (e: MouseEvent) => updateFromClient(e.clientX, e.clientY)
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0]
+      if (t) updateFromClient(t.clientX, t.clientY)
+    }
+    const clearPointer = () => { mouseRef.current = null }
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchend', clearPointer, { passive: true })
+    window.addEventListener('touchcancel', clearPointer, { passive: true })
+    // Fires when the cursor leaves the browser viewport entirely.
+    document.addEventListener('mouseleave', clearPointer)
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', clearPointer)
+      window.removeEventListener('touchcancel', clearPointer)
+      document.removeEventListener('mouseleave', clearPointer)
+    }
   }, [])
 
   // ── Canvas render loop ─────────────────────────────────────────────────────
@@ -110,12 +149,6 @@ export function InteractiveDotGrid() {
     }
   }, [])
 
-  function updateMouse(clientX: number, clientY: number) {
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-    mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }
-  }
-
   const bg        = isDark ? '#110F0C' : '#F5F1EA'
   const labelColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,25,22,0.45)'
   const hintColor  = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(28,25,22,0.22)'
@@ -125,24 +158,22 @@ export function InteractiveDotGrid() {
       ref={containerRef}
       className="relative h-full w-full overflow-hidden"
       style={{ background: bg }}
-      onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
-      onMouseLeave={() => { mouseRef.current = null }}
-      onTouchMove={(e) => { const t = e.touches[0]; if (t) updateMouse(t.clientX, t.clientY) }}
-      onTouchEnd={() => { mouseRef.current = null }}
     >
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
         style={{ width: '100%', height: '100%' }}
       />
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <span style={{ color: labelColor, fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>
-          Dot Grid
-        </span>
-        <span style={{ color: hintColor, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-          hover to illuminate
-        </span>
-      </div>
+      {showLabel && (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <span style={{ color: labelColor, fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>
+            Dot Grid
+          </span>
+          <span style={{ color: hintColor, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+            hover to illuminate
+          </span>
+        </div>
+      )}
     </div>
   )
 }

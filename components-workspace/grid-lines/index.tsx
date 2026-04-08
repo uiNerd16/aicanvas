@@ -4,14 +4,18 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const SPACING      = 20     // px between dot/node centres
-const RADIUS       = 160    // px — hover influence radius
+const RADIUS_FRAC  = 0.30   // hover influence radius — fraction of max(cw, ch)
+const LENS_FRAC    = 0.06   // lens push strength — fraction of R
 const BASE_A       = 0.13   // resting dot opacity
-const PEAK_A       = 0.92   // fully-lit opacity
+const PEAK_A       = 0.95   // fully-lit opacity
 const LINE_A_DARK  = 0.07   // resting line opacity (dark theme)
 const LINE_A_LIGHT = 0.12   // resting line opacity (light theme)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Dot     = { x: number; y: number; b: number }
+// b  = brightness (0..1, smoothed)
+// l  = lens influence (0..1, smoothed) — bell curve over distance from cursor
+// px/py = current displaced position (recomputed each frame)
+type Dot     = { x: number; y: number; b: number; l: number; px: number; py: number }
 type Segment = { a: Dot; b: Dot }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -19,7 +23,6 @@ export function GridLines() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
-  const waveRef      = useRef<number>(0)
   const isDarkRef    = useRef(true)
   const [isDark, setIsDark] = useState(true)
 
@@ -76,7 +79,9 @@ export function GridLines() {
       for (let r = 0; r < rows; r++) {
         grid[r] = []
         for (let c = 0; c < cols; c++) {
-          const d: Dot = { x: ox + c * SPACING, y: oy + r * SPACING, b: 0 }
+          const x = ox + c * SPACING
+          const y = oy + r * SPACING
+          const d: Dot = { x, y, b: 0, l: 0, px: x, py: y }
           dots.push(d)
           grid[r][c] = d
         }
@@ -99,86 +104,68 @@ export function GridLines() {
 
       const mx        = mouseRef.current?.x ?? -99999
       const my        = mouseRef.current?.y ?? -99999
-      const r2        = RADIUS * RADIUS
+      const R         = RADIUS_FRAC * Math.max(cw, ch)
+      const r2        = R * R
+      const lensPush  = LENS_FRAC * R
       const dotRGB    = isDarkRef.current ? '255,255,255' : '28,25,22'
-      const baseA     = isDarkRef.current ? BASE_A : 0.25
+      const baseA     = isDarkRef.current ? BASE_A : 0.22
       const lineRestA = isDarkRef.current ? LINE_A_DARK : LINE_A_LIGHT
 
-      // ── 1. Update dot brightness ────────────────────────────────────────────
+      // ── 1. Per-dot update: brightness, lens influence, displaced position ──
+      // Brightness uses a Gaussian halo (soft blend into the background).
+      // Lens uses a sin(πt) bell curve so dots at mid-distance get the
+      // strongest outward push, dots at the cursor and at the edge of R
+      // stay put — the grid bulges around the cursor like a lens.
       for (const d of dots) {
         const dx    = d.x - mx
         const dy    = d.y - my
         const dist2 = dx * dx + dy * dy
-        const tgt   = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2) / RADIUS, 1.5) : 0
-        d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
+        const dist  = Math.sqrt(dist2)
+
+        // Brightness — Gaussian
+        const tgtB = dist2 < r2 ? Math.exp(-dist2 / (r2 * 0.45)) : 0
+        d.b += (tgtB > d.b ? 0.16 : 0.07) * (tgtB - d.b)
         if (d.b < 0.004) d.b = 0
-      }
 
-      // ── 2. Advance wave + draw lines with radial overlay ──────────────
-      const mouseActive = mouseRef.current !== null
-      if (mouseActive) {
-        waveRef.current = (waveRef.current + 1.8) % (RADIUS * 2)
-      } else {
-        // Decay wave back to 0 when mouse leaves
-        if (waveRef.current > 0) waveRef.current = Math.max(0, waveRef.current - 4)
-      }
-      const waveR = waveRef.current
-      const WAVE_WIDTH = 28   // px — how wide the fill front is per segment
+        // Lens influence — bell curve, peaks at mid-distance
+        const tgtL = dist < R ? Math.sin(Math.PI * (dist / R)) : 0
+        d.l += (tgtL > d.l ? 0.18 : 0.08) * (tgtL - d.l)
+        if (d.l < 0.004) d.l = 0
 
-      const allSegs = [...hSegs, ...vSegs]
-      for (const seg of allSegs) {
-        const segB = (seg.a.b + seg.b.b) / 2
-
-        // Base line brightness
-        const lineA = lineRestA + (PEAK_A - lineRestA) * segB
-        ctx.strokeStyle = `rgba(${dotRGB},${lineA.toFixed(3)})`
-        ctx.lineWidth = 0.5
-        ctx.beginPath()
-        ctx.moveTo(seg.a.x, seg.a.y)
-        ctx.lineTo(seg.b.x, seg.b.y)
-        ctx.stroke()
-
-        // Radial wave overlay — only when wave is active
-        if (waveR > 0 && segB > 0.04) {
-          // Midpoint distance from cursor
-          const midX = (seg.a.x + seg.b.x) / 2
-          const midY = (seg.a.y + seg.b.y) / 2
-          const segDist = Math.sqrt((midX - mx) * (midX - mx) + (midY - my) * (midY - my))
-
-          // How far the wave has passed over this segment
-          const wavePast = waveR - segDist
-
-          if (wavePast > 0 && wavePast < WAVE_WIDTH) {
-            // t: 0 = wave just arrived, 1 = wave fully passed
-            const t = wavePast / WAVE_WIDTH
-
-            // Determine near/far endpoint relative to cursor
-            const distA = Math.sqrt((seg.a.x - mx) ** 2 + (seg.a.y - my) ** 2)
-            const distB = Math.sqrt((seg.b.x - mx) ** 2 + (seg.b.y - my) ** 2)
-            const near  = distA <= distB ? seg.a : seg.b
-            const far   = distA <= distB ? seg.b : seg.a
-
-            // Overlay extends from near endpoint toward far endpoint as t increases
-            const ex = near.x + (far.x - near.x) * t
-            const ey = near.y + (far.y - near.y) * t
-
-            const overlayA = segB * 0.85
-            ctx.strokeStyle = `rgba(${dotRGB},${overlayA.toFixed(3)})`
-            ctx.lineWidth = 1.2
-            ctx.beginPath()
-            ctx.moveTo(near.x, near.y)
-            ctx.lineTo(ex, ey)
-            ctx.stroke()
-          }
+        // Displaced position — push outward along the cursor→dot ray
+        if (dist > 0.5 && d.l > 0.004) {
+          const push = lensPush * d.l
+          const ux   = dx / dist
+          const uy   = dy / dist
+          d.px = d.x + ux * push
+          d.py = d.y + uy * push
+        } else {
+          d.px = d.x
+          d.py = d.y
         }
       }
 
-      // ── 3. Draw dots on top ─────────────────────────────────────────────────
+      // ── 2. Draw lines through displaced dot positions ──────────────────────
+      // Because both endpoints move, lines bend as they cross the lens area,
+      // making the grid visibly warp.
+      const allSegs = [...hSegs, ...vSegs]
+      for (const seg of allSegs) {
+        const segB  = (seg.a.b + seg.b.b) / 2
+        const lineA = lineRestA + (PEAK_A - lineRestA) * segB
+        ctx.strokeStyle = `rgba(${dotRGB},${lineA.toFixed(3)})`
+        ctx.lineWidth   = 0.5 + segB * 0.6
+        ctx.beginPath()
+        ctx.moveTo(seg.a.px, seg.a.py)
+        ctx.lineTo(seg.b.px, seg.b.py)
+        ctx.stroke()
+      }
+
+      // ── 3. Draw dots on top, at displaced positions ────────────────────────
       for (const d of dots) {
         const alpha = baseA + (PEAK_A - baseA) * d.b
-        const sz    = 1 + d.b * 1.2
+        const sz    = 1 + d.b * 2.2
         ctx.fillStyle = `rgba(${dotRGB},${alpha.toFixed(2)})`
-        ctx.fillRect(d.x - sz / 2, d.y - sz / 2, sz, sz)
+        ctx.fillRect(d.px - sz / 2, d.py - sz / 2, sz, sz)
       }
 
       animId = requestAnimationFrame(frame)

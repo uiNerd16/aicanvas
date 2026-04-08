@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { CaretDown, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { COMPONENTS } from '../lib/component-registry'
 
@@ -45,7 +45,12 @@ function countByLabel(label: string) {
 export function Sidebar() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const activeCategory = searchParams.get('category') ?? 'All Components'
+
+  // Hide the global sidebar on design-system preview routes so the design
+  // system gets the full viewport.
+  const hideSidebar = pathname?.startsWith('/design-systems/')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   const toggle = (title: string) =>
@@ -91,6 +96,8 @@ export function Sidebar() {
     updateQuery('')
     searchInputRef.current?.focus()
   }
+
+  if (hideSidebar) return null
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sand-300 bg-sand-200 dark:border-sand-800 dark:bg-sand-950">

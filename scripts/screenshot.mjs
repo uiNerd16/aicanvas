@@ -16,8 +16,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const ALL_SLUGS = [
-  'silk-lines',
-  'wave-grid',
+  'wave-lines',
+  'distortion-grid',
   'grid-lines',
   'bubble-field',
   'noise-bg',
@@ -100,13 +100,18 @@ const INTERACTIONS = {
   },
 
   // Grids — move mouse to centre to trigger the hover glow / warp
-  'silk-lines':   hoverCenter,
-  'grid-lines':   hoverCenter,
+  'wave-lines':   hoverCenter,
+  // Grid Lines — hover off-centre so the lens warp's bend is visible (centre = symmetric)
+  'grid-lines':   async (preview, page) => {
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width * 0.62, box.y + box.height * 0.42)
+    await page.waitForTimeout(900)
+  },
   'bubble-field': hoverCenter,
   'noise-bg':     hoverCenter,
   'x-grid':       hoverCenter,
   'dot-grid':     hoverCenter,
-  'wave-grid':    hoverCenter,
+  'distortion-grid':    hoverCenter,
   'sphere-lines': hoverCenter,
 
   // Button — hover to trigger the glitch effect

@@ -9,10 +9,10 @@ const WAVE_FREQ    = 0.007  // low frequency → ~900px wavelength
 const HOVER_BOOST  = 1.5    // amp multiplier on full hover (waves grow 2.5×)
 const LOCAL_AMP    = 60     // px — push away from cursor at centre
 const LOCAL_RADIUS = 260    // px — repulsion radius
-const LINE_A_DARK  = 0.18
-const LINE_A_LIGHT = 0.28
+const LINE_A_DARK  = 0.55
+const LINE_A_LIGHT = 0.75
 
-export function WaveGrid() {
+export function DistortionGrid() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)

@@ -22,9 +22,9 @@
 | noise-bg | integrated | Random grain dots, Gaussian glow, cached neighbour connections on hover, dualTheme |
 | circle-field | abandoned | Replaced by bubble-field concept |
 | bubble-field | integrated | Grid circles burst+reform on hover, cyclic phase animation, pastel blue palette, dualTheme |
-| silk-lines | integrated | Vertical sine-wave lines, cloth-fold effect, extreme hover waves, dualTheme — displayed as "Wave Lines" |
-| wave-grid | integrated | Slow sweeping sine waves, cursor repels grid outward triggering big wave across canvas, dualTheme |
-| grid-lines | integrated | 20px dot grid with H/V lines, radial wave pulse on hover, dualTheme |
+| wave-lines | integrated | Vertical sine-wave lines, layered waves + Y-drift, extreme hover waves, dualTheme — renamed from silk-lines |
+| distortion-grid | integrated | Slow sweeping sine waves, cursor repels grid outward, dualTheme — renamed from wave-grid, line alpha bumped to 0.55/0.75 |
+| grid-lines | integrated | 20px dot grid with H/V lines, viewport-relative Gaussian halo (30% of max dim) + radial wave pulse on hover, dualTheme |
 | origami-card | deleted | Removed by user request |
 | kinetic-vortex | deleted | Removed by user request |
 | glass-sidebar | integrated | Two-state glassmorphism sidebar, squircle icons, spring width, staggered labels, pink flower bg |
