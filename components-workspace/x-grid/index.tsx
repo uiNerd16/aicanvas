@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const SPACING = 20     // px between × centres
-const RADIUS  = 130    // px — hover influence radius
+const RADIUS  = 340    // px — hover influence radius
 const BASE_A  = 0.13   // resting × opacity
 const PEAK_A  = 0.92   // fully-lit × opacity
 
@@ -46,6 +46,7 @@ export function XGrid() {
     let animId = 0
     let alive  = true
     let cw = 0, ch = 0
+    const t0 = performance.now()
 
     function build() {
       const dpr  = window.devicePixelRatio || 1
@@ -84,6 +85,7 @@ export function XGrid() {
       const my      = mouseRef.current?.y ?? -99999
       const r2      = RADIUS * RADIUS
       const dotRGB  = isDarkRef.current ? '255,255,255' : '28,25,22'
+      const t       = (performance.now() - t0) / 1000
 
       for (const d of marks) {
         const dx    = d.x - mx
@@ -91,16 +93,18 @@ export function XGrid() {
         const dist2 = dx * dx + dy * dy
         const tgt   = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2) / RADIUS, 1.5) : 0
 
-        // Fast attack, slow release — feels organic
-        d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
+        d.b += (tgt > d.b ? 0.16 : 0.05) * (tgt - d.b)
         if (d.b < 0.004) d.b = 0
 
         const arm   = 2 + d.b * 1.0   // arm length: 2px resting → 3px lit
         const sw    = 0.5 + d.b * 0.3 // stroke width: 0.5px resting → 0.8px lit
         const baseA = isDarkRef.current ? BASE_A : 0.25
-        const alpha = baseA + (PEAK_A - baseA) * d.b
+        const wave  = Math.sin(d.col * 0.3 + d.row * 0.3 - t * 0.5)
+        const restingAlpha = baseA * (1 + wave * 0.3)
+        const alpha = restingAlpha + (PEAK_A - restingAlpha) * d.b
         ctx.strokeStyle = `rgba(${dotRGB},${alpha.toFixed(2)})`
         ctx.lineWidth = sw
+
         ctx.beginPath()
         ctx.moveTo(d.x - arm, d.y - arm)
         ctx.lineTo(d.x + arm, d.y + arm)

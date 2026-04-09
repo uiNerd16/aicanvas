@@ -143,7 +143,15 @@ export function Sidebar() {
       </div>
 
       {/* ── Navigation ── */}
-      <nav className="flex-1 overflow-y-auto px-3 pt-4 pb-2">
+      <nav
+        className="flex-1 overflow-y-auto px-3 pt-4 pb-2"
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)',
+        }}
+      >
         {/* Tiered sections */}
         {SECTIONS.map((section) => {
           const isCollapsed = collapsed[section.title] ?? false
