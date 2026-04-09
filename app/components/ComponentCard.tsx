@@ -27,14 +27,12 @@ export function ComponentCard({ name, description, href, image }: ComponentCardP
   return (
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
     >
-      <div className="relative aspect-video overflow-hidden bg-sand-950">
+      {/* Image — extends slightly behind the content panel */}
+      <div className="relative aspect-video overflow-hidden bg-sand-900">
         {image ? (
-          <>
-            <img src={image} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-sand-900 to-transparent dark:from-sand-900" />
-          </>
+          <img src={image} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
@@ -48,8 +46,8 @@ export function ComponentCard({ name, description, href, image }: ComponentCardP
         )}
       </div>
 
-      {/* Card body */}
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      {/* Card body — floats over image with rounded top corners */}
+      <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.25)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.5)]">
         <div>
           <h3 className="font-bold text-sand-900 dark:text-sand-50">{name}</h3>
           <p className="mt-1 line-clamp-2 text-sm font-normal text-sand-600 dark:text-sand-400">

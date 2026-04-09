@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { CaretDown, MagnifyingGlass, X } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, MagnifyingGlass, SquareHalf, X } from '@phosphor-icons/react'
+import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 
 // ── Tier structure ────────────────────────────────────────────────────────
@@ -25,15 +26,15 @@ const DESIGN_SYSTEM_LABELS = ['Glass'] as const
 
 type Section = {
   title: string
+  icon: ReactNode
   labels: readonly string[]
   disabled?: boolean
 }
 
 const SECTIONS: Section[] = [
-  { title: 'Components', labels: COMPONENTS_LABELS },
-  { title: 'Design Systems', labels: DESIGN_SYSTEM_LABELS, disabled: true },
-  { title: 'Hero Sections', labels: [], disabled: true },
-  { title: 'Landing Pages', labels: [], disabled: true },
+  { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
+  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
+  { title: 'Hero Sections', icon: <SquareHalf weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 function countByLabel(label: string) {
@@ -46,7 +47,8 @@ export function Sidebar() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
-  const activeCategory = searchParams.get('category') ?? 'All Components'
+  const isHome = pathname === '/'
+  const activeCategory = isHome ? (searchParams.get('category') ?? 'All Components') : null
 
   // Hide the global sidebar on design-system preview routes so the design
   // system gets the full viewport.
@@ -144,12 +146,12 @@ export function Sidebar() {
 
       {/* ── Navigation ── */}
       <nav
-        className="flex-1 overflow-y-auto px-3 pt-4 pb-2"
+        className="flex-1 overflow-y-auto px-3 pt-2 pb-2"
         style={{
           maskImage:
-            'linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)',
+            'linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - 16px), transparent 100%)',
           WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)',
+            'linear-gradient(to bottom, transparent 0, #000 8px, #000 calc(100% - 16px), transparent 100%)',
         }}
       >
         {/* Tiered sections */}
@@ -159,54 +161,41 @@ export function Sidebar() {
 
           return (
             <div key={section.title} className="mb-3">
-              <button
-                type="button"
-                onClick={() => !isDisabled && toggle(section.title)}
-                disabled={isDisabled}
-                className={`mb-1 flex w-full items-center justify-between px-2 py-1 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
-                  isDisabled
-                    ? 'cursor-not-allowed text-sand-400/60 dark:text-sand-600/60'
-                    : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
-                }`}
-              >
-                <span>
-                  {section.title}
-                  {isDisabled && <span className="ml-1 normal-case tracking-normal text-sand-400 dark:text-sand-700">· soon</span>}
-                </span>
-                {!isDisabled && (
-                  <CaretDown
-                    size={10}
-                    weight="regular"
-                    className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
-                  />
-                )}
-              </button>
+              {section.title === 'Components' ? (
+                <Link
+                  href="/"
+                  className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                    activeCategory === 'All Components'
+                      ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                  }`}
+                >
+                  <span>{section.icon}</span>
+                  <span className="flex-1">{section.title}</span>
+                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{COMPONENTS.length}</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => !isDisabled && toggle(section.title)}
+                  disabled={isDisabled}
+                  className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                    isDisabled
+                      ? 'cursor-not-allowed text-sand-400/60 dark:text-sand-600/60'
+                      : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                  }`}
+                >
+                  <span className={isDisabled ? 'opacity-40' : ''}>{section.icon}</span>
+                  <span className="flex-1 text-left">
+                    {section.title}
+                    {isDisabled && <span className="ml-1 text-xs font-normal text-sand-400 dark:text-sand-700">· soon</span>}
+                  </span>
+                  {!isDisabled && <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />}
+                </button>
+              )}
 
               {!isCollapsed && !isDisabled && (
                 <ul className="space-y-0.5">
-                  {section.title === 'Components' && (
-                    <li>
-                      <Link
-                        href="/"
-                        className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
-                          activeCategory === 'All Components'
-                            ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                            : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
-                        }`}
-                      >
-                        <span>All Components</span>
-                        <span
-                          className={`tabular-nums text-xs ${
-                            activeCategory === 'All Components'
-                              ? 'text-sand-600 dark:text-sand-400'
-                              : 'text-sand-400 dark:text-sand-600'
-                          }`}
-                        >
-                          {COMPONENTS.length}
-                        </span>
-                      </Link>
-                    </li>
-                  )}
                   {section.labels.map((label) => {
                     const isActive = label === activeCategory
                     const href = `/?category=${encodeURIComponent(label)}`
@@ -215,13 +204,14 @@ export function Sidebar() {
                       <li key={label}>
                         <Link
                           href={href}
-                          className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+                          className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
                             isActive
                               ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                               : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                           }`}
                         >
-                          <span>{label}</span>
+                          <ArrowElbowDownRight weight="regular" size={12} className="shrink-0 text-sand-300 dark:text-sand-700" />
+                          <span className="flex-1">{label}</span>
                           <span
                             className={`tabular-nums text-xs ${
                               isActive
@@ -247,16 +237,12 @@ export function Sidebar() {
         <div className="overflow-hidden rounded-xl border border-olive-500/20 bg-gradient-to-b from-olive-500/10 to-transparent p-4 ring-1 ring-inset ring-olive-500/10 dark:from-olive-500/8 dark:to-transparent">
 
           {/* Icon badge */}
-          <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-olive-500/15 dark:bg-olive-500/10">
-            <span className="text-sm leading-none text-olive-600 dark:text-olive-400">✦</span>
-          </div>
-
           {/* Copy */}
           <p className="text-sm font-bold leading-snug text-sand-900 dark:text-sand-100">
-            Built with love
+            Love what you see?
           </p>
           <p className="mt-0.5 text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-            for today's workflow
+            Every coffee keeps this project alive and growing.
           </p>
 
           {/* CTA */}
@@ -264,9 +250,9 @@ export function Sidebar() {
             href="https://buymeacoffee.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-sand-900 px-3 py-2 text-xs font-semibold text-sand-50 transition-colors hover:bg-sand-800 dark:bg-sand-100 dark:text-sand-900 dark:hover:bg-sand-200"
+            className="mt-3 flex w-full items-center justify-center rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
           >
-            ☕ Buy me a coffee
+            Buy me a coffee
           </a>
         </div>
       </div>

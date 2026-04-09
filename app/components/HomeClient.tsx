@@ -1,9 +1,14 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { MagnifyingGlass } from '@phosphor-icons/react'
+import { motion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ComponentCard } from './ComponentCard'
 import { HeaderSocials } from './HeaderSocials'
+import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
+import { LoadMore } from './LoadMore'
 import type { ComponentEntry } from '../lib/component-registry'
 
 // ─── HomeClient ───────────────────────────────────────────────────────────────
@@ -12,6 +17,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
   const query         = searchParams.get('q') ?? ''
+  const category      = searchParams.get('category') ?? ''
 
   const q = query.trim().toLowerCase()
   const filtered = q
@@ -22,6 +28,21 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
           c.tags.some((t) => t.label.toLowerCase().includes(q)),
       )
     : components
+
+  // ── Load more ──────────────────────────────────────────────────────────────
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
+  const visible = filtered.slice(0, visibleCount)
+  const hasMore = visibleCount < filtered.length
+  const remaining = filtered.length - visibleCount
+
+  // Reset visible count when search query changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_LOAD)
+  }, [q])
+
+  function handleLoadMore() {
+    setVisibleCount((v) => Math.min(v + LOAD_MORE_SIZE, filtered.length))
+  }
 
   const clearSearch = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,11 +55,16 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
     <div className="flex min-h-full flex-col">
 
       {/* ── Top bar ── */}
-      <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
-        <h1 className="shrink-0 text-sm font-semibold text-sand-900 dark:text-sand-50">Components</h1>
-        <span className="shrink-0 text-sm text-sand-400 dark:text-sand-600">{filtered.length}</span>
+      <div className="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+        <Link href="/" className="shrink-0 text-sm font-semibold text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">
+          Components
+        </Link>
 
-        <div className="ml-auto">
+        <span className="text-sm font-semibold text-olive-500">
+          {category ? `//${category}` : ''}
+        </span>
+
+        <div className="flex justify-end">
           <HeaderSocials />
         </div>
       </div>
@@ -46,18 +72,31 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
       {/* ── Grid ── */}
       <div className="flex-1 bg-sand-200 p-6 dark:bg-sand-950">
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((entry) => (
-              <ComponentCard
-                key={entry.slug}
-                name={entry.name}
-                description={entry.description}
-                tags={entry.tags}
-                image={entry.image}
-                href={`/components/${entry.slug}`}
-              />
-            ))}
-          </div>
+          <>
+            <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {visible.map((entry, i) => (
+                <motion.div
+                  key={entry.slug}
+                  initial={i >= visibleCount - LOAD_MORE_SIZE ? { opacity: 0, y: 16 } : false}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i >= visibleCount - LOAD_MORE_SIZE ? (i % LOAD_MORE_SIZE) * 0.03 : 0 }}
+                >
+                  <ComponentCard
+                    name={entry.name}
+                    description={entry.description}
+                    tags={entry.tags}
+                    image={entry.image}
+                    href={`/components/${entry.slug}`}
+                  />
+                </motion.div>
+              ))}
+            </div>
+            <LoadMore
+              hasMore={hasMore}
+              remaining={remaining}
+              onLoadMore={handleLoadMore}
+            />
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <MagnifyingGlass weight="regular" size={32} className="mb-4 text-sand-400 dark:text-sand-600" />
