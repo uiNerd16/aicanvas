@@ -43,27 +43,27 @@ AI Canvas (aicanvas.me) is an open component marketplace where every component s
 
 All colors come from two custom scales defined in `globals.css` via `@theme inline`.
 
-#### Sand scale — warm neutral (replaces zinc)
+#### Sand scale — neutral (replaces zinc)
 | Token         | Hex       | Usage                                      |
 |---------------|-----------|--------------------------------------------|
-| `sand-50`     | `#FAF7F2` | Elevated surfaces (dropdowns, hover fills) |
-| `sand-100`    | `#F5F1EA` | Card backgrounds (light), input fills      |
-| `sand-200`    | `#EDEAE5` | Page background (light)                    |
-| `sand-300`    | `#DDD8CE` | Borders (light), dividers                  |
-| `sand-400`    | `#C8C2B8` | Muted borders, placeholder icons           |
-| `sand-500`    | `#9E9890` | Muted / secondary text (light)             |
-| `sand-600`    | `#736D65` | Body text, descriptions (light)            |
-| `sand-700`    | `#4A453F` | UI labels, buttons (light)                 |
-| `sand-800`    | `#2E2A24` | Card backgrounds (dark)                    |
-| `sand-900`    | `#1C1916` | Page background (dark)                     |
-| `sand-950`    | `#110F0C` | Deepest dark — component preview bg        |
+| `sand-50`     | `#FAFAF0` | Elevated surfaces (dropdowns, hover fills) |
+| `sand-100`    | `#E8E8DF` | Card backgrounds (light), input fills      |
+| `sand-200`    | `#D4D4CC` | Page background (light)                    |
+| `sand-300`    | `#BABAB4` | Borders (light), dividers                  |
+| `sand-400`    | `#9E9E98` | Muted borders, placeholder icons           |
+| `sand-500`    | `#7D7D78` | Muted / secondary text (light)             |
+| `sand-600`    | `#666662` | Body text, descriptions (light)            |
+| `sand-700`    | `#4F4F4C` | UI labels, buttons (light)                 |
+| `sand-800`    | `#383836` | Card backgrounds (dark)                    |
+| `sand-900`    | `#21211F` | Page background (dark)                     |
+| `sand-950`    | `#1A1A19` | Deepest dark — component preview bg        |
 
-#### Olive scale — muted green accent (replaces violet)
+#### Olive scale — lime-green accent
 | Token         | Hex       | Usage                                   |
 |---------------|-----------|-----------------------------------------|
-| `olive-400`   | `#96A452` | Hover accent, gradient end              |
-| `olive-500`   | `#7D8D41` | Primary accent — buttons, badges, logo  |
-| `olive-600`   | `#697535` | Pressed / darker accent state           |
+| `olive-400`   | `#E5F2A2` | Hover accent, gradient end              |
+| `olive-500`   | `#BECF5D` | Primary accent — buttons, badges, logo  |
+| `olive-600`   | `#A8B94D` | Pressed / darker accent state           |
 
 > **Note:** olive buttons use `text-sand-950` (not white) — the olive background has insufficient contrast with white text.
 

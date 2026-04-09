@@ -20,22 +20,22 @@
   --font-mono: var(--font-geist-mono), monospace;
 
   /* ── Sand scale — warm neutral (Phosphor-inspired) ── */
-  --color-sand-50:  #FAF7F2;
-  --color-sand-100: #F5F1EA;
-  --color-sand-200: #EDEAE5;
-  --color-sand-300: #DDD8CE;
-  --color-sand-400: #C8C2B8;
-  --color-sand-500: #9E9890;
-  --color-sand-600: #736D65;
-  --color-sand-700: #4A453F;
-  --color-sand-800: #2E2A24;
-  --color-sand-900: #1C1916;
-  --color-sand-950: #110F0C;
+  --color-sand-50:  #FAFAF0;
+  --color-sand-100: #E8E8DF;
+  --color-sand-200: #D4D4CC;
+  --color-sand-300: #BABAB4;
+  --color-sand-400: #9E9E98;
+  --color-sand-500: #7D7D78;
+  --color-sand-600: #666662;
+  --color-sand-700: #4F4F4C;
+  --color-sand-800: #383836;
+  --color-sand-900: #21211F;
+  --color-sand-950: #1A1A19;
 
   /* ── Olive accent ── */
-  --color-olive-400: #96A452;
-  --color-olive-500: #7D8D41;
-  --color-olive-600: #697535;
+  --color-olive-400: #E5F2A2;
+  --color-olive-500: #BECF5D;
+  --color-olive-600: #A8B94D;
 }
 
 body {

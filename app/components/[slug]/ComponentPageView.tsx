@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -71,6 +72,7 @@ export default function ComponentPageView({
   related,
   children,
 }: ComponentPageViewProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [codeCopied, setCodeCopied] = useState(false)
@@ -151,16 +153,20 @@ export default function ComponentPageView({
   return (
     <>
       {/* Top stripe — sticky */}
-      <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
-        <Link
-          href="/"
+      <div className="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+        <button
+          onClick={() => router.back()}
           className="flex items-center gap-2 text-sm font-semibold text-sand-700 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-200"
         >
           <ArrowLeft weight="regular" size={15} />
-          Back to components
-        </Link>
+          Back
+        </button>
 
-        <HeaderSocials />
+        <span className="text-sm font-semibold text-olive-500">//{name}</span>
+
+        <div className="flex justify-end">
+          <HeaderSocials />
+        </div>
       </div>
 
       <main className="bg-sand-200 dark:bg-sand-950">
@@ -236,7 +242,7 @@ export default function ComponentPageView({
                       <ArrowClockwise weight="regular" size={16} />
                     </button>
                     <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/refresh:block">
-                      Restart animation
+                      Reset
                     </div>
                   </div>
                 )}

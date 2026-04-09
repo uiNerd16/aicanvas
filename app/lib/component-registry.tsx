@@ -3,7 +3,6 @@ import type { Tag, Platform } from '../components/ComponentCard'
 import { FloatingCards } from '../../components-workspace/floating-cards'
 import { TextBlurReveal } from '../../components-workspace/text-blur-reveal'
 import { ParticleSphere } from '../../components-workspace/particle-sphere'
-import { TextLayoutCard } from '../../components-workspace/text-layout'
 import { PolaroidStack } from '../../components-workspace/polaroid-stack'
 import { prompts as polaroidStackPrompts } from '../../components-workspace/polaroid-stack/prompts'
 import { GlitchButton } from '../../components-workspace/glitch-button'
@@ -730,62 +729,6 @@ export function ParticleSphere() {
   return <div ref={ref} className="h-full w-full" />
 }`
 
-const TEXT_LAYOUT_CODE = `'use client'
-
-import { useEffect, useRef } from 'react'
-import { animate, motion, useMotionValue, useTransform } from 'framer-motion'
-import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext'
-import type { AnimationPlaybackControls } from 'framer-motion'
-
-// Font must exactly match your CSS font declaration
-const TEXT   = 'Pretext computes wrap and height via canvas. No DOM reflow. ~0.09ms per layout call.'
-const FONT   = '14px "Courier New"'
-const LINE_H = 22   // must match CSS line-height
-const W_MIN  = 160
-const W_MAX  = 320
-
-export function TextLayout() {
-  const motionWidth  = useMotionValue(W_MIN)
-  const widthRef     = useRef<HTMLSpanElement>(null)
-  const heightRef    = useRef<HTMLSpanElement>(null)
-  const lineCountRef = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    let controls: AnimationPlaybackControls | undefined
-    let unsub: (() => void) | undefined
-
-    const prepared = prepareWithSegments(TEXT, FONT)
-
-    function flush(w: number) {
-      const rw = Math.round(w)
-      const { height, lineCount } = layoutWithLines(prepared, rw, LINE_H)
-      if (widthRef.current)     widthRef.current.textContent     = String(rw)
-      if (heightRef.current)    heightRef.current.textContent    = String(height)
-      if (lineCountRef.current) lineCountRef.current.textContent = String(lineCount)
-    }
-
-    flush(W_MIN)
-    unsub    = motionWidth.on('change', flush)
-    controls = animate(motionWidth, [W_MIN, W_MAX, W_MIN], {
-      duration: 5, ease: 'easeInOut', repeat: Infinity,
-    })
-
-    return () => { unsub?.(); controls?.stop() }
-  }, [motionWidth])
-
-  const progress = useTransform(motionWidth, [W_MIN, W_MAX], ['0%', '100%'])
-
-  return (
-    <div style={{ fontFamily: '"Courier New", monospace', fontSize: 14, lineHeight: '22px' }}>
-      <motion.div style={{ width: motionWidth }} className="border rounded p-3">
-        {TEXT}
-      </motion.div>
-      <motion.div style={{ width: progress }} className="h-1 bg-amber-400 mt-2" />
-      <p>width: <span ref={widthRef} /> px</p>
-      <p>height: <span ref={heightRef} /> px &nbsp; lines: <span ref={lineCountRef} /></p>
-    </div>
-  )
-}`
 
 const POLAROID_STACK_CODE = `'use client'
 
@@ -3757,73 +3700,6 @@ Requirements:
     PreviewComponent: PolaroidStack,
     code: POLAROID_STACK_CODE,
     prompts: polaroidStackPrompts,
-  },
-  {
-    slug: 'text-layout',
-    image: 'https://ik.imagekit.io/aitoolkit/text-layout.png',
-    name: 'Text Layout',
-    description:
-      'Live demo of zero-reflow text measurement — container width animates while Pretext recomputes layout at 60fps.',
-    tags: [
-      { label: 'Typography', accent: true },
-      { label: '@chenglou/pretext' },
-    ],
-    PreviewComponent: TextLayoutCard,
-    code: TEXT_LAYOUT_CODE,
-    prompts: {
-      Claude: `Create app/components/TextLayout.tsx demonstrating @chenglou/pretext for zero-reflow text measurement.
-
-Install first: npm install @chenglou/pretext
-
-File requirements:
-- 'use client' at top
-- Dynamic import of '@chenglou/pretext' inside useEffect (prepare() uses browser canvas, can't run server-side)
-- Import animate, motion, useMotionValue, useTransform from 'framer-motion'
-- Import AnimationPlaybackControls type from 'framer-motion'
-
-Constants (MUST be kept in sync with CSS):
-  FONT    = '14px "Courier New"'  // must match CSS font shorthand exactly
-  LINE_H  = 22                    // must match CSS line-height exactly
-  W_MIN   = 160
-  W_MAX   = 320
-
-useEffect logic:
-  1. let alive=true, controls: AnimationPlaybackControls | undefined, unsub: (() => void) | undefined
-  2. import('@chenglou/pretext').then(({ prepareWithSegments, layoutWithLines }) => {
-       if (!alive) return
-       const prepared = prepareWithSegments(TEXT, FONT)  // one-time ~19ms step
-       function flush(w: number) {
-         const { height, lineCount, lines } = layoutWithLines(prepared, Math.round(w), LINE_H)
-         // update DOM refs directly — no setState, no re-renders
-         heightRef.current!.textContent  = String(height)
-         linesRef.current!.textContent   = String(lineCount)
-         // update linesListRef.current.innerHTML with bar + text per line
-       }
-       flush(W_MIN)
-       unsub    = motionWidth.on('change', flush)
-       controls = animate(motionWidth, [W_MIN, W_MAX, W_MIN], { duration: 5, ease: 'easeInOut', repeat: Infinity })
-     })
-  3. return () => { alive=false; unsub?.(); controls?.stop() }
-
-JSX structure:
-- Left: motion.div with style={{ width: motionWidth, fontFamily:'"Courier New",monospace', fontSize:'14px', lineHeight:'22px' }}
-- Progress bar: motion.div style={{ width: useTransform(motionWidth,[W_MIN,W_MAX],['0%','100%']) }}
-- Right: div with ref={linesListRef} + stats row with ref={heightRef} and ref={linesRef}`,
-      V0: `Create a React component that demonstrates the @chenglou/pretext library for measuring text layout without DOM reflow.
-
-Install: npm install @chenglou/pretext framer-motion
-
-The component should:
-1. Call prepareWithSegments(text, '14px "Courier New"') once on mount inside useEffect — this is the expensive one-time step that measures glyph widths via canvas (~19ms)
-2. Call layoutWithLines(prepared, width, 22) on every animation frame — this is the fast hot path (~0.09ms, pure arithmetic, no DOM)
-3. Animate the container width between 160px and 320px using Framer Motion's animate() utility driving a useMotionValue
-4. Display the live-updating height (px) and lineCount returned by layoutWithLines
-5. Show each measured line as a horizontal bar proportional to its width vs container width
-
-Key constraint: the font passed to prepareWithSegments must exactly match the CSS font declaration (family + size) and lineHeight must match CSS line-height. Use "Courier New" at 14px and 22px line height.
-
-Style: dark theme, zinc-950 background, amber accents for Pretext output values, monospace font throughout.`,
-    },
   },
   {
     slug: 'sphere-lines',
