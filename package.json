@@ -10,6 +10,7 @@
     "screenshot": "node scripts/screenshot.mjs"
   },
   "dependencies": {
+    "@carbon/icons-react": "^11.78.0",
     "@chenglou/pretext": "^0.0.3",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-slot": "^1.2.4",
