@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   List,
   X,
+  Info,
+  GithubLogo,
+  XLogo,
   ArrowElbowDownRight,
   CaretDown,
   Cube,
@@ -14,9 +17,9 @@ import {
   MagnifyingGlass,
   SquareHalf,
 } from '@phosphor-icons/react'
+import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
-import { HeaderSocials } from './HeaderSocials'
 
 // ── Tier structure (mirrors Sidebar) ──────────────────────────────────────
 const COMPONENTS_LABELS = [
@@ -113,7 +116,12 @@ export function MobileNav() {
   return (
     <>
       {/* ── Mobile top bar ── */}
-      <div className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:hidden">
+      <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:hidden">
+        <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
+          <img src="/aicanvas.svg" alt="" width={18} height={15} className="shrink-0" />
+          AI Canvas
+        </Link>
+
         <button
           onClick={() => setOpen(true)}
           aria-label="Open menu"
@@ -121,15 +129,6 @@ export function MobileNav() {
         >
           <List weight="regular" size={20} />
         </button>
-
-        <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
-          <img src="/aicanvas.svg" alt="" width={18} height={15} className="shrink-0" />
-          AI Canvas
-        </Link>
-
-        <div className="flex h-9 w-9 items-center justify-center">
-          <HeaderSocials compact />
-        </div>
       </div>
 
       {/* ── Slide-in drawer ── */}
@@ -157,7 +156,7 @@ export function MobileNav() {
               className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sand-200 shadow-2xl dark:bg-sand-950 md:hidden"
             >
               {/* Drawer header */}
-              <div className="flex h-12 shrink-0 items-center justify-between border-b border-sand-300 px-4 dark:border-sand-800">
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-sand-300 px-4 dark:border-sand-800">
                 <Link
                   href="/"
                   className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
@@ -285,7 +284,46 @@ export function MobileNav() {
                     </div>
                   )
                 })}
+
+                {/* About — follows same pattern as section headers */}
+                <div className="mb-3 h-px bg-sand-300 dark:bg-sand-800" />
+                <div className="mb-3">
+                  <Link
+                    href="/about"
+                    onClick={() => setOpen(false)}
+                    className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                      pathname === '/about'
+                        ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                        : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                    }`}
+                  >
+                    <span><Info weight="regular" size={16} /></span>
+                    <span className="flex-1">About</span>
+                  </Link>
+                </div>
               </nav>
+
+              {/* Social links */}
+              <div className="shrink-0 flex items-center gap-1 px-3 pb-2">
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub repository"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                >
+                  <GithubLogo weight="regular" size={20} />
+                </a>
+                <a
+                  href={X_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X profile"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                >
+                  <XLogo weight="regular" size={20} />
+                </a>
+              </div>
 
               {/* Bottom card */}
               <div className="shrink-0 p-3">

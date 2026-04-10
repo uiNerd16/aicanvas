@@ -61,7 +61,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
         </Link>
 
         <span className="text-sm font-semibold text-olive-500">
-          {category ? `//${category}` : ''}
+          {category ? `/${category}` : ''}
         </span>
 
         <div className="flex justify-end">
@@ -71,6 +71,11 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
 
       {/* ── Grid ── */}
       <div className="flex-1 bg-sand-200 p-4 dark:bg-sand-950 md:p-6">
+        {/* Mobile breadcrumb — shown above cards on small screens */}
+        <p className="mb-4 text-sm font-semibold md:hidden">
+          <Link href="/" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
+          {category && <span className="text-olive-500">/{category}</span>}
+        </p>
         {filtered.length > 0 ? (
           <>
             <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
