@@ -46,9 +46,9 @@ const glassPanel = {
     '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 } as const
 
-// Active glow — warm orange border + ambient glow
+// Active glow — white border + ambient glow
 const ACTIVE_GLOW =
-  '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 160, 50, 0.5), 0 0 20px rgba(255, 160, 50, 0.12)'
+  '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.08)'
 
 // ─── Suggestion Row ──────────────────────────────────────────────────────────
 
@@ -240,11 +240,11 @@ export default function GlassSearchBar() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Outer container */}
+      {/* Outer container — fixed vertical position so bar doesn't jump when dropdown opens */}
       <div
         ref={containerRef}
-        className="relative w-[calc(100%-2rem)] max-w-[380px]"
-        style={{ marginTop: -90 }}
+        className="absolute w-[calc(100%-2rem)] max-w-[380px]"
+        style={{ top: '30%', left: '50%', transform: 'translateX(-50%)' }}
       >
         {/* ─── Search bar ─────────────────────────────────────────── */}
         <motion.div
@@ -360,14 +360,9 @@ export default function GlassSearchBar() {
                   ? { duration: 0.15 }
                   : { type: 'spring', stiffness: 350, damping: 28 }
               }
-              className="absolute left-0 right-0 isolate rounded-2xl p-2"
-              style={{ ...glassPanel, transformOrigin: 'top center', top: BAR_HEIGHT + 8 }}
+              className="absolute left-0 right-0 rounded-2xl p-2"
+              style={{ ...glassPanel, ...glassBlur, transformOrigin: 'top center', top: BAR_HEIGHT + 8 }}
             >
-              {/* Blur layer */}
-              <div
-                className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl"
-                style={glassBlur}
-              />
 
               {/* Top edge highlight */}
               <div

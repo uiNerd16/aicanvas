@@ -65,6 +65,7 @@ const ALL_SLUGS = [
   'glass-stepper',
   'glass-progress',
   'glass-ai-compose',
+  'card-wheel',
 ]
 
 const arg   = process.argv[2]
@@ -125,6 +126,11 @@ const INTERACTIONS = {
   'polaroid-stack': async (preview) => {
     await preview.locator('div[style]').first().click()
     await preview.page().waitForTimeout(700)
+  },
+
+  // Text Blur Reveal — wait for CTA button to appear (1300ms) + extra settle
+  'text-blur-reveal': async (preview, page) => {
+    await page.waitForTimeout(1800)
   },
 
   // Floating cards — hover over the middle card to lift it
@@ -218,6 +224,14 @@ const INTERACTIONS = {
     const textarea = preview.locator('textarea').first()
     await textarea.click()
     await preview.page().waitForTimeout(600)
+  },
+
+  // Card Wheel — wait for spin animation to settle then hover center card
+  'card-wheel': async (preview, page) => {
+    await preview.page().waitForTimeout(1200)
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 - 118)
+    await preview.page().waitForTimeout(400)
   },
 
   // Glass sidebar — click the toggle button to expand the sidebar

@@ -35,3 +35,4 @@
 | glass-stepper | integrated | Glass numeric stepper, spring number flip, notification-style tinted buttons, configurable min/max/step |
 | glass-progress | integrated | Glass progress bar panel, glowing gradient fills, spring counters, staggered reveal, replay button |
 | glass-ai-compose | integrated | Glass AI Chat — model switcher (Claude/ChatGPT/Perplexity/Gemini), image upload, web search toggle |
+| elastic-string | deleted | Removed by user request |

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useMotionValue, useMotionTemplate, useTransform, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { ChartLineUp, Lightning, ShieldCheck, ArrowRight } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
 
@@ -38,9 +38,6 @@ function GlassCardItem({
 
   const rotateX = useSpring(useTransform(mouseY, [0, 1], [8, -8]), { stiffness: 200, damping: 20 })
   const rotateY = useSpring(useTransform(mouseX, [0, 1], [-8, 8]), { stiffness: 200, damping: 20 })
-  const glareX  = useTransform(mouseX, [0, 1], [0, 100])
-  const glareY  = useTransform(mouseY, [0, 1], [0, 100])
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.4), transparent 50%)`
 
   const handleMouse = (e: React.MouseEvent) => {
     const el = cardRef.current
@@ -81,12 +78,6 @@ function GlassCardItem({
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
         }}
       >
-        {/* Glare highlight */}
-        <motion.div
-          className="pointer-events-none absolute inset-0 rounded-3xl opacity-40"
-          style={{ background: glareBackground }}
-        />
-
         {/* Icon — notification-style tinted badge */}
         <motion.div
           className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
@@ -119,14 +110,14 @@ function GlassCardItem({
         >
           <span
             className="text-sm font-semibold"
-            style={{ color: `${gradient.split(',')[0]}ee` }}
+            style={{ color: 'rgba(255,255,255,0.75)' }}
           >
             {cta}
           </span>
           <ArrowRight
             size={16}
             weight="regular"
-            style={{ color: `${gradient.split(',')[0]}cc` }}
+            style={{ color: 'rgba(255,255,255,0.55)' }}
           />
         </motion.button>
 

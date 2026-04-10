@@ -10,24 +10,15 @@ const ACCENTED = new Set([1, 5]) // "interfaces", "magic."
 const STAGGER = 100
 const DURATION = 650
 const LAST_WORD_END = (WORDS.length - 1) * STAGGER + DURATION // 1150 ms
-const SHOW_BUTTON_AT = LAST_WORD_END + 350                     // 1500 ms
-const AUTO_REPLAY_AT = LAST_WORD_END + 2500                    // 3650 ms
+const SHOW_BUTTON_AT = LAST_WORD_END + 150                     // 1300 ms
 
 export function TextBlurReveal() {
-  const [cycle, setCycle] = useState(0)
-  const [showReplay, setShowReplay] = useState(false)
+  const [showCTA, setShowCTA] = useState(false)
 
   useEffect(() => {
-    setShowReplay(false)
-    const t1 = setTimeout(() => setShowReplay(true), SHOW_BUTTON_AT)
-    const t2 = setTimeout(() => setCycle((c) => c + 1), AUTO_REPLAY_AT)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [cycle])
-
-  function replay() {
-    setShowReplay(false)
-    setCycle((c) => c + 1)
-  }
+    const t = setTimeout(() => setShowCTA(true), SHOW_BUTTON_AT)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden">
@@ -50,7 +41,7 @@ export function TextBlurReveal() {
       <div className="relative flex flex-wrap justify-center gap-x-[0.4em] gap-y-1">
         {WORDS.map((word, i) => (
           <motion.span
-            key={`${cycle}-${i}`}
+            key={i}
             initial={{ opacity: 0, y: 22, filter: 'blur(14px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{
@@ -60,9 +51,10 @@ export function TextBlurReveal() {
             }}
             className={
               ACCENTED.has(i)
-                ? 'bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent'
-                : 'text-4xl font-bold tracking-tight text-white'
+                ? 'bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-4xl tracking-tight text-transparent'
+                : 'text-4xl tracking-tight text-white'
             }
+            style={{ fontFamily: 'var(--font-geist-pixel-circle)' }}
           >
             {word}
           </motion.span>
@@ -71,7 +63,7 @@ export function TextBlurReveal() {
 
       {/* Subtext */}
       <motion.p
-        key={`sub-${cycle}`}
+        key="sub"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -79,30 +71,29 @@ export function TextBlurReveal() {
           delay: ((WORDS.length - 1) * STAGGER + 200) / 1000,
           ease: 'easeOut',
         }}
-        className="relative text-sm text-zinc-500"
+        className="relative text-base text-zinc-400"
       >
         Drop any phrase. Works with any text.
       </motion.p>
 
-      {/* Replay button */}
+      {/* Fixed-height CTA slot — prevents layout shift when button appears */}
+      <div className="flex h-10 items-center justify-center">
       <AnimatePresence>
-        {showReplay && (
+        {showCTA && (
           <motion.button
-            initial={{ opacity: 0, y: 4 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.25 }}
-            onClick={replay}
-            className="relative flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-800/70 px-3.5 py-1.5 text-xs text-zinc-400 backdrop-blur-sm transition-colors hover:border-zinc-500 hover:text-zinc-200"
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            className="relative rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-opacity hover:opacity-90"
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-            Replay
+            Start building
           </motion.button>
         )}
       </AnimatePresence>
+      </div>
 
     </div>
   )

@@ -18,7 +18,7 @@ Modal card (motion.div):
 - Top highlight: absolute left-8 right-8 top-0 h-[1px], background 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)'.
 
 Close button (motion.button): absolute right-4 top-4 z-10 h-8 w-8 rounded-full, bg 'rgba(255,255,255,0.08)', border '1px solid rgba(255,255,255,0.08)'.
-- whileHover { scale:1.15, rotate:90, background:'rgba(255,155,50,0.2)', boxShadow:'0 0 14px rgba(255,140,40,0.45)', border:'1px solid rgba(255,180,80,0.3)' }
+- whileHover { scale:1.15, rotate:90 }
 - whileTap {scale:0.9}, transition {duration:0.2, ease:[0.25,0.1,0.25,1]}
 - X icon size={14} weight="regular" className="text-white/60"
 
@@ -63,7 +63,7 @@ Ghost button: "Maybe Later"
 
 ## Framer Motion
 - Modal entrance: initial {scale:0.9, y:16}, animate {scale:1, y:0}, transition {type:'spring', stiffness:350, damping:28}.
-- Close button: whileHover {scale:1.15, rotate:90, background:'rgba(255,155,50,0.2)', boxShadow:'0 0 14px rgba(255,140,40,0.45)', border:'1px solid rgba(255,180,80,0.3)'}, whileTap {scale:0.9}, transition {duration:0.2, ease:[0.25,0.1,0.25,1]}.
+- Close button: whileHover {scale:1.15, rotate:90}, whileTap {scale:0.9}, transition {duration:0.2, ease:[0.25,0.1,0.25,1]}.
 - Icon badge: initial {scale:0, rotate:-20}, animate {scale:1, rotate:0}, {type:'spring', stiffness:300, damping:18, delay:0.15}.
 - Heading: initial {opacity:0, y:8} animate {opacity:1, y:0} transition {delay:0.2}.
 - Description: same but delay:0.25.
@@ -73,7 +73,7 @@ Ghost button: "Maybe Later"
 - Ghost button: whileHover {scale:1.04, background:'rgba(255,255,255,0.1)'}, whileTap {scale:0.96}, same ease.
 
 ## Hover state
-Close button glows warm amber on hover. Primary button brightens and deepens its drop shadow. Ghost button lifts to white/10 background.
+Close button scales up and rotates 90° on hover (no color change). Primary button brightens and deepens its drop shadow. Ghost button lifts to white/10 background.
 
 ## JSX structure
 Root div: relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950. Background <img>.
@@ -114,7 +114,7 @@ Background URL: https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%2
     <div className="absolute left-8 right-8 top-0 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)' }} />
 
     {/* Close button */}
-    <motion.button whileHover={{ scale: 1.15, rotate: 90, background: 'rgba(255, 155, 50, 0.2)', boxShadow: '0 0 14px rgba(255, 140, 40, 0.45)', border: '1px solid rgba(255, 180, 80, 0.3)' }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }} className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <motion.button whileHover={{ scale: 1.15, rotate: 90 }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }} className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)' }}>
       <X size={14} weight="regular" className="text-white/60" />
     </motion.button>
 
@@ -153,7 +153,7 @@ Named export: \`GlassModal\`. No props.`,
 
 The modal is a 340px-wide rounded-3xl glass card with a real 40px backdrop blur (saturation 1.8), a semi-transparent white fill (~8%), a thin 1px white border, and a deep 24px drop shadow plus subtle inset top highlight. A fine gradient highlight line runs across the top edge. It enters with a spring pop (scale 0.9 → 1, y 16 → 0).
 
-Top-right corner: a small circular close button (X icon) with a neutral glass fill. On hover it rotates 90°, scales up, and glows warm amber (orange tint, soft glow).
+Top-right corner: a small circular close button (X icon) with a neutral glass fill. On hover it rotates 90° and scales up slightly (no color change).
 
 Center column (top to bottom):
 - A notification-style icon badge: 64×64 rounded-xl box with background color #FFA032 at low opacity (roughly 9%) and a matching faint border (roughly 13%), containing a ShieldCheck icon in solid #FFA032. It enters with a spring pop from scale 0 and a slight rotation.

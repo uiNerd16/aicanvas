@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Geist_Mono } from 'next/font/google'
-const geistMono = Geist_Mono({ subsets: ['latin'], weight: ['500'] })
+import localFont from 'next/font/local'
+const GeistPixelGrid = localFont({ src: '../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2' })
 
 // ─── ScrambleText ──────────────────────────────────────────────────────────────
 // Idle: all characters continuously scramble (olive random chars) in a loop.
@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({ subsets: ['latin'], weight: ['500'] })
 // Mouse leave: immediately back to scrambled loop.
 
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&!'
-const TARGET_TEXT = 'ENCRYPTED'
+const WORDS = ['DECRYPT', 'ACCESS']
 
 function randomChar(): string {
   return CHARSET[Math.floor(Math.random() * CHARSET.length)] ?? 'X'
@@ -22,13 +22,11 @@ interface CharState {
   resolved: boolean
 }
 
-const SCRAMBLED = (): CharState[] =>
-  TARGET_TEXT.split('').map(() => ({ display: randomChar(), resolved: false }))
+const makeScrambled = (word: string): CharState[] =>
+  word.split('').map(() => ({ display: randomChar(), resolved: false }))
 
-
-export function ScrambleText() {
-  const [chars, setChars] = useState<CharState[]>(SCRAMBLED)
-  const [isHovered, setIsHovered] = useState(false)
+function useScramble(word: string, isHovered: boolean) {
+  const [chars, setChars] = useState<CharState[]>(() => makeScrambled(word))
 
   useEffect(() => {
     let cancelled = false
@@ -39,10 +37,8 @@ export function ScrambleText() {
       if (scrambleInterval) clearInterval(scrambleInterval)
       scrambleInterval = setInterval(() => {
         if (cancelled) return
-        setChars((prev) =>
-          prev.map((ch, i) =>
-            resolvedSet.has(i) ? ch : { display: randomChar(), resolved: false }
-          )
+        setChars(prev =>
+          prev.map((ch, i) => resolvedSet.has(i) ? ch : { display: randomChar(), resolved: false })
         )
       }, 60)
     }
@@ -50,15 +46,14 @@ export function ScrambleText() {
     if (isHovered) {
       const resolvedSet = new Set<number>()
       startScrambleInterval(resolvedSet)
-
-      TARGET_TEXT.split('').forEach((letter, i) => {
+      word.split('').forEach((letter, i) => {
         const t = setTimeout(() => {
           if (cancelled) return
           resolvedSet.add(i)
-          setChars((prev) =>
-            prev.map((ch, idx) => (idx === i ? { display: letter, resolved: true } : ch))
+          setChars(prev =>
+            prev.map((ch, idx) => idx === i ? { display: letter, resolved: true } : ch)
           )
-          if (resolvedSet.size === TARGET_TEXT.length && scrambleInterval) {
+          if (resolvedSet.size === word.length && scrambleInterval) {
             clearInterval(scrambleInterval)
             scrambleInterval = null
           }
@@ -66,7 +61,7 @@ export function ScrambleText() {
         timeouts.push(t)
       })
     } else {
-      setChars(SCRAMBLED())
+      setChars(makeScrambled(word))
       startScrambleInterval(new Set<number>())
     }
 
@@ -75,35 +70,79 @@ export function ScrambleText() {
       timeouts.forEach(clearTimeout)
       if (scrambleInterval) clearInterval(scrambleInterval)
     }
-  }, [isHovered])
+  }, [isHovered, word])
+
+  return chars
+}
+
+function Crosshair({ style }: { style: React.CSSProperties }) {
+  const color = 'rgba(190,207,93,0.35)'
+  const arm = 14   // arm length in px
+  const gap = 3    // gap from center to arm start
+  const thick = 1  // line thickness
+  return (
+    <div className="pointer-events-none absolute" style={{ width: arm * 2 + gap * 2, height: arm * 2 + gap * 2, ...style }}>
+      <svg width="100%" height="100%" viewBox={`0 0 ${arm * 2 + gap * 2} ${arm * 2 + gap * 2}`} fill="none">
+        {/* top arm */}
+        <line x1={arm + gap} y1={0} x2={arm + gap} y2={arm} stroke={color} strokeWidth={thick} />
+        {/* bottom arm */}
+        <line x1={arm + gap} y1={arm + gap * 2} x2={arm + gap} y2={arm * 2 + gap * 2} stroke={color} strokeWidth={thick} />
+        {/* left arm */}
+        <line x1={0} y1={arm + gap} x2={arm} y2={arm + gap} stroke={color} strokeWidth={thick} />
+        {/* right arm */}
+        <line x1={arm + gap * 2} y1={arm + gap} x2={arm * 2 + gap * 2} y2={arm + gap} stroke={color} strokeWidth={thick} />
+        {/* center dot */}
+        <circle cx={arm + gap} cy={arm + gap} r={1.5} fill={color} />
+      </svg>
+    </div>
+  )
+}
+
+export function ScrambleText() {
+  const [isHovered, setIsHovered] = useState(false)
+  const chars0 = useScramble(WORDS[0]!, isHovered)
+  const chars1 = useScramble(WORDS[1]!, isHovered)
+  const rows = [chars0, chars1]
 
   return (
     <div
-      className="flex h-full w-full cursor-default items-center justify-center bg-sand-100 dark:bg-sand-950"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative flex h-full w-full cursor-default items-center justify-center"
+      style={{ background: '#292929' }}
     >
-      <div className="flex select-none flex-col items-center gap-6">
-        {/* Character row */}
-        <div className={`flex items-center gap-1 ${geistMono.className}`}>
-          {chars.map((ch, i) => (
-            <span
-              key={i}
-              className={[
-                'text-5xl font-medium leading-none tracking-widest transition-colors duration-100',
-                ch.resolved
-                  ? 'text-sand-900 dark:text-sand-50'
-                  : 'text-olive-500 dark:text-olive-400',
-              ].join(' ')}
-            >
-              {ch.display}
-            </span>
-          ))}
-        </div>
+      {/* Crosshair — top right */}
+      <Crosshair style={{ top: '10%', right: '8%' }} />
+      {/* Crosshair — bottom left */}
+      <Crosshair style={{ bottom: '10%', left: '8%' }} />
+      <div
+        className="flex select-none flex-col items-center gap-4"
+        style={{ padding: '60px 80px' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {rows.map((chars, rowIdx) => (
+          <div key={rowIdx} className={`flex items-center gap-1 ${GeistPixelGrid.className}`}>
+            {rowIdx === 0 && (
+              <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>/</span>
+            )}
+            {chars.map((ch, i) => (
+              <span
+                key={i}
+                className="text-6xl leading-none tracking-widest"
+                style={{ color: '#BECF5D' }}
+              >
+                {ch.display}
+              </span>
+            ))}
+            {rowIdx === rows.length - 1 && (
+              <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>_</span>
+            )}
+          </div>
+        ))}
 
-        {/* Hint — always visible */}
+        {/* Hint */}
         <motion.p
-          className={`text-xs font-medium uppercase tracking-[0.2em] text-sand-400 dark:text-sand-600 ${geistMono.className}`}
+          className={`mt-2 text-xs font-medium uppercase tracking-[0.2em] ${GeistPixelGrid.className}`}
+          style={{ color: 'rgba(190,207,93,0.45)' }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut', delay: 0.8 }}

@@ -1,122 +1,75 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Partial<Record<Platform, string>> = {
-  Claude: `Create a React client component named \`ScrambleText\`: idle state shows all characters continuously scrambling (olive random chars); on hover, characters decrypt one by one left-to-right revealing the word "ENCRYPTED". Mouse leave instantly resets to scrambled loop. Hint text below: "hover to decrypt".
+export const prompts: Record<Platform, string> = {
+  V0: `Create a ScrambleText component — a dark terminal-style display that shows two stacked words "DECRYPT" and "ACCESS" in a chunky pixel/grid font, all in olive green (#BECF5D), against a near-black background (#292929). The whole thing has a cyberpunk-access-terminal vibe.
 
-Write this as a single self-contained React client component. Inline everything. Do not extract helper hooks, utility functions, or separate files. 'use client' at the top. No 'any' types.
+Idle state: all characters continuously cycle through random glitch characters (uppercase letters, digits, and symbols like @#$%&!) every 60ms — the text never sits still.
 
-Imports: useState, useEffect from 'react'; motion from 'framer-motion'; Geist_Mono from 'next/font/google'. Initialize const geistMono = Geist_Mono({ subsets:['latin'], weight:['500'] }).
+Hover: when the user hovers over a padded hit zone around the words, both rows start revealing their actual letters left-to-right simultaneously. Each character snaps into place one at a time with staggered timing (first character at 80ms, each subsequent character 100ms later). While some characters are still scrambling the unrevealed ones keep glitching. Once fully revealed, the scrambling stops.
 
-Constants:
-- CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&!'
-- TARGET_TEXT = 'ENCRYPTED'
+Mouse leave: immediately resets back to full scramble mode.
 
-Helper randomChar(): CHARSET[Math.floor(Math.random()*CHARSET.length)] ?? 'X'.
+Layout: a "/" prefix symbol precedes the first word (DECRYPT) and a "_" suffix follows the last word (ACCESS). The two rows are centered and stacked with a gap between them. The hover zone has generous padding (60px top/bottom, 80px left/right) so the interaction feels natural.
 
-Type: interface CharState { display:string; resolved:boolean }
-SCRAMBLED(): CharState[] — TARGET_TEXT.split('').map(() => ({display:randomChar(), resolved:false})).
+Decorative crosshair SVG markers sit at top-right and bottom-left corners of the overall container — each one an olive-colored crosshair (4 short arms radiating from a center dot, with a small gap at the center), rendered at 35% opacity.
 
-State: chars useState<CharState[]>(SCRAMBLED), isHovered useState(false).
+Below the words, a small hint text "hover to decrypt" in the same pixel font, olive at 45% opacity, fades in upward on mount.
 
-Effect depending on [isHovered]:
-- let cancelled=false
-- const timeouts: ReturnType<typeof setTimeout>[] = []
-- let scrambleInterval: ReturnType<typeof setInterval> | null = null
-- function startScrambleInterval(resolvedSet: Set<number>): clear existing, then setInterval every 60ms: if cancelled return; setChars(prev => prev.map((ch,i) => resolvedSet.has(i) ? ch : { display:randomChar(), resolved:false })).
-- if isHovered: const resolvedSet=new Set<number>(); startScrambleInterval(resolvedSet); TARGET_TEXT.split('').forEach((letter,i) => { t=setTimeout(()=>{ if(cancelled) return; resolvedSet.add(i); setChars(prev => prev.map((ch,idx) => idx===i ? {display:letter,resolved:true} : ch)); if(resolvedSet.size===TARGET_TEXT.length && scrambleInterval){ clearInterval(scrambleInterval); scrambleInterval=null } }, 80 + i*100); timeouts.push(t) })
-- else: setChars(SCRAMBLED()); startScrambleInterval(new Set<number>())
-- cleanup: cancelled=true; clear all timeouts; if scrambleInterval clearInterval.
+Use the GeistPixelGrid font loaded with next/font/local from node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2. All text is text-6xl. The component never changes based on light/dark theme — it always uses the fixed dark background.`,
 
-JSX root: <div className="flex h-full w-full cursor-default items-center justify-center bg-sand-100 dark:bg-sand-950" onMouseEnter={()=>setIsHovered(true)} onMouseLeave={()=>setIsHovered(false)}>
+  GPT: `Build a React client component named \`ScrambleText\`. Single file, TypeScript strict, no \`any\`. 'use client' at top. Self-contained, no props. Implement exactly what is specified.
 
-Inside: flex select-none flex-col items-center gap-6.
-
-Character row: flex items-center gap-1 \${geistMono.className}. Map chars: <span className={['text-5xl font-medium leading-none tracking-widest transition-colors duration-100', ch.resolved ? 'text-sand-900 dark:text-sand-50' : 'text-olive-500 dark:text-olive-400'].join(' ')}>{ch.display}</span>
-
-Hint: motion.p className="text-xs font-medium uppercase tracking-[0.2em] text-sand-400 dark:text-sand-600 \${geistMono.className}" initial {opacity:0,y:8} animate {opacity:1,y:0} transition duration 0.3 easeOut delay 0.8. Text: "hover to decrypt".`,
-
-  GPT: `Build a React client component named \`ScrambleText\`. Single file. TypeScript strict, no \`any\`.
-
-Do not add feature flags, error boundaries, or prop interfaces. This is a self-contained showcase component with no props. Implement exactly what is specified — no more, no less.
-
-## Imports
-'use client'
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Geist_Mono } from 'next/font/google'
-const geistMono = Geist_Mono({ subsets:['latin'], weight:['500'] })
+## Font
+import localFont from 'next/font/local'
+const GeistPixelGrid = localFont({ src: '../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2' })
 
 ## Constants
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&!'
-const TARGET_TEXT = 'ENCRYPTED'
+const WORDS = ['DECRYPT', 'ACCESS']
+const OLIVE = '#BECF5D'
+const OLIVE_35 = 'rgba(190,207,93,0.35)'
+const OLIVE_45 = 'rgba(190,207,93,0.45)'
 
-function randomChar(): string { return CHARSET[Math.floor(Math.random() * CHARSET.length)] ?? 'X' }
-
+## Types
 interface CharState { display: string; resolved: boolean }
-const SCRAMBLED = (): CharState[] => TARGET_TEXT.split('').map(() => ({ display: randomChar(), resolved: false }))
 
-## State
-const [chars, setChars] = useState<CharState[]>(SCRAMBLED)
-const [isHovered, setIsHovered] = useState(false)
+## Helpers
+function randomChar(): string { return CHARSET[Math.floor(Math.random() * CHARSET.length)] ?? 'X' }
+const makeScrambled = (word: string): CharState[] => word.split('').map(() => ({ display: randomChar(), resolved: false }))
 
-## Effect on [isHovered]
-let cancelled = false
-const timeouts: ReturnType<typeof setTimeout>[] = []
-let scrambleInterval: ReturnType<typeof setInterval> | null = null
+## useScramble hook
+function useScramble(word: string, isHovered: boolean): CharState[] — extracts the scramble/reveal logic into a reusable hook:
+- State: chars = useState<CharState[]>(() => makeScrambled(word))
+- Effect on [isHovered, word]:
+  - let cancelled = false; const timeouts: ReturnType<typeof setTimeout>[] = []; let scrambleInterval: ReturnType<typeof setInterval> | null = null
+  - startScrambleInterval(resolvedSet: Set<number>): clears existing interval, then every 60ms sets chars replacing unresolved indices with randomChar()
+  - if isHovered: startScrambleInterval(resolvedSet); for each letter at index i, setTimeout at 80 + i*100ms: add i to resolvedSet, update char to { display: letter, resolved: true }; when resolvedSet.size === word.length, stop interval
+  - else: setChars(makeScrambled(word)); startScrambleInterval(empty Set)
+  - cleanup: cancelled=true, clear timeouts, clear interval
+- Returns chars
 
-function startScrambleInterval(resolvedSet: Set<number>) {
-  if (scrambleInterval) clearInterval(scrambleInterval)
-  scrambleInterval = setInterval(() => {
-    if (cancelled) return
-    setChars(prev => prev.map((ch, i) => resolvedSet.has(i) ? ch : { display: randomChar(), resolved: false }))
-  }, 60)
-}
+## Crosshair component
+function Crosshair({ style }: { style: React.CSSProperties }) — renders a pointer-events-none absolute SVG crosshair:
+- arm=14, gap=3, thick=1 (px), color = OLIVE_35
+- SVG viewBox: 0 0 34 34 (arm*2 + gap*2 = 34)
+- Lines: top arm (x1=17,y1=0 to x1=17,y1=14), bottom arm (17,17+6=17 to 17,34), left arm (0,17 to 14,17), right arm (20,17 to 34,17) — where center offset = arm+gap = 17 and gap*2 = 6
+- Center dot: circle cx=17 cy=17 r=1.5 fill={color}
 
-if (isHovered) {
-  const resolvedSet = new Set<number>()
-  startScrambleInterval(resolvedSet)
-  TARGET_TEXT.split('').forEach((letter, i) => {
-    const t = setTimeout(() => {
-      if (cancelled) return
-      resolvedSet.add(i)
-      setChars(prev => prev.map((ch, idx) => idx === i ? { display: letter, resolved: true } : ch))
-      if (resolvedSet.size === TARGET_TEXT.length && scrambleInterval) {
-        clearInterval(scrambleInterval); scrambleInterval = null
-      }
-    }, 80 + i * 100)
-    timeouts.push(t)
-  })
-} else {
-  setChars(SCRAMBLED())
-  startScrambleInterval(new Set<number>())
-}
+## Main component ScrambleText
+- isHovered state; chars0 = useScramble(WORDS[0]!, isHovered); chars1 = useScramble(WORDS[1]!, isHovered); rows = [chars0, chars1]
+- Root: relative flex h-full w-full cursor-default items-center justify-center, style {{ background: '#292929' }}
+- Crosshair top-right: style {{ top:'10%', right:'8%' }}
+- Crosshair bottom-left: style {{ bottom:'10%', left:'8%' }}
+- Inner container: flex select-none flex-col items-center gap-4, style {{ padding:'60px 80px' }}, onMouseEnter/Leave toggle isHovered
+- Rows: for each rowIdx, a flex items-center gap-1 div with GeistPixelGrid.className:
+  - rowIdx===0: render <span text-6xl leading-none tracking-widest color OLIVE>/</span> before chars
+  - chars.map each <span text-6xl leading-none tracking-widest color OLIVE>{ch.display}</span>
+  - rowIdx===rows.length-1: render <span text-6xl leading-none tracking-widest color OLIVE>_</span> after chars
+- Hint: <motion.p> mt-2 text-xs font-medium uppercase tracking-[0.2em] GeistPixelGrid.className, color OLIVE_45, initial {{opacity:0,y:8}} animate {{opacity:1,y:0}} transition {{duration:0.3,ease:'easeOut',delay:0.8}}> hover to decrypt </motion.p>
 
-return () => {
-  cancelled = true
-  timeouts.forEach(clearTimeout)
-  if (scrambleInterval) clearInterval(scrambleInterval)
-}
+Imports: useState, useEffect from 'react'; motion from 'framer-motion'; localFont from 'next/font/local'. No phosphor icons needed. Always dark — no dark: variants.`,
 
-## Timings
-- Scramble tick: 60ms
-- Per-character reveal delay: 80 + i*100 ms (first reveals at 80ms, last reveals at 80 + 8*100 = 880ms)
-
-## JSX structure
-<div className="flex h-full w-full cursor-default items-center justify-center bg-sand-100 dark:bg-sand-950" onMouseEnter={()=>setIsHovered(true)} onMouseLeave={()=>setIsHovered(false)}>
-  <div className="flex select-none flex-col items-center gap-6">
-    <div className={\`flex items-center gap-1 \${geistMono.className}\`}>
-      {chars.map((ch, i) => (
-        <span key={i} className={[
-          'text-5xl font-medium leading-none tracking-widest transition-colors duration-100',
-          ch.resolved ? 'text-sand-900 dark:text-sand-50' : 'text-olive-500 dark:text-olive-400',
-        ].join(' ')}>{ch.display}</span>
-      ))}
-    </div>
-    <motion.p className={\`text-xs font-medium uppercase tracking-[0.2em] text-sand-400 dark:text-sand-600 \${geistMono.className}\`} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:0.3,ease:'easeOut',delay:0.8}}>hover to decrypt</motion.p>
-  </div>
-</div>`,
-
-  Gemini: `Implement a React client component named \`ScrambleText\` as a single TypeScript file. Idle: all characters continuously scramble through a random charset in olive color. On hover: characters decrypt one by one, left to right, revealing 'ENCRYPTED'. Mouse leave: immediately back to scrambling.
+  Gemini: `Implement a React client component named \`ScrambleText\` as a single TypeScript file. Idle state: two stacked words DECRYPT and ACCESS continuously glitch through random characters. On hover: characters reveal left-to-right simultaneously across both rows. Mouse leave: instantly back to full scramble.
 
 Implement the complete component in one response. Do not abbreviate any section.
 
@@ -124,14 +77,12 @@ Implement the complete component in one response. Do not abbreviate any section.
 'use client'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Geist_Mono } from 'next/font/google'
-const geistMono = Geist_Mono({ subsets: ['latin'], weight: ['500'] })
-
-USE these hooks and no others. DO NOT invent hooks not shown above. Only use motion.p from framer-motion.
+import localFont from 'next/font/local'
+const GeistPixelGrid = localFont({ src: '../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2' })
 
 ## Constants (copy verbatim)
 const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&!'
-const TARGET_TEXT = 'ENCRYPTED'
+const WORDS = ['DECRYPT', 'ACCESS']
 
 function randomChar(): string {
   return CHARSET[Math.floor(Math.random() * CHARSET.length)] ?? 'X'
@@ -139,79 +90,100 @@ function randomChar(): string {
 
 interface CharState { display: string; resolved: boolean }
 
-const SCRAMBLED = (): CharState[] =>
-  TARGET_TEXT.split('').map(() => ({ display: randomChar(), resolved: false }))
+const makeScrambled = (word: string): CharState[] =>
+  word.split('').map(() => ({ display: randomChar(), resolved: false }))
 
-## State
-const [chars, setChars] = useState<CharState[]>(SCRAMBLED)
-const [isHovered, setIsHovered] = useState(false)
+## useScramble hook
+function useScramble(word: string, isHovered: boolean): CharState[] {
+  const [chars, setChars] = useState<CharState[]>(() => makeScrambled(word))
 
-## Effect (depends on isHovered)
-useEffect(() => {
-  let cancelled = false
-  const timeouts: ReturnType<typeof setTimeout>[] = []
-  let scrambleInterval: ReturnType<typeof setInterval> | null = null
+  useEffect(() => {
+    let cancelled = false
+    const timeouts: ReturnType<typeof setTimeout>[] = []
+    let scrambleInterval: ReturnType<typeof setInterval> | null = null
 
-  function startScrambleInterval(resolvedSet: Set<number>) {
-    if (scrambleInterval) clearInterval(scrambleInterval)
-    scrambleInterval = setInterval(() => {
-      if (cancelled) return
-      setChars((prev) =>
-        prev.map((ch, i) =>
-          resolvedSet.has(i) ? ch : { display: randomChar(), resolved: false }
-        )
-      )
-    }, 60)
-  }
-
-  if (isHovered) {
-    const resolvedSet = new Set<number>()
-    startScrambleInterval(resolvedSet)
-
-    TARGET_TEXT.split('').forEach((letter, i) => {
-      const t = setTimeout(() => {
+    function startScrambleInterval(resolvedSet: Set<number>) {
+      if (scrambleInterval) clearInterval(scrambleInterval)
+      scrambleInterval = setInterval(() => {
         if (cancelled) return
-        resolvedSet.add(i)
-        setChars((prev) =>
-          prev.map((ch, idx) => (idx === i ? { display: letter, resolved: true } : ch))
+        setChars(prev =>
+          prev.map((ch, i) => resolvedSet.has(i) ? ch : { display: randomChar(), resolved: false })
         )
-        if (resolvedSet.size === TARGET_TEXT.length && scrambleInterval) {
-          clearInterval(scrambleInterval)
-          scrambleInterval = null
-        }
-      }, 80 + i * 100)
-      timeouts.push(t)
-    })
-  } else {
-    setChars(SCRAMBLED())
-    startScrambleInterval(new Set<number>())
-  }
+      }, 60)
+    }
 
-  return () => {
-    cancelled = true
-    timeouts.forEach(clearTimeout)
-    if (scrambleInterval) clearInterval(scrambleInterval)
-  }
-}, [isHovered])
+    if (isHovered) {
+      const resolvedSet = new Set<number>()
+      startScrambleInterval(resolvedSet)
+      word.split('').forEach((letter, i) => {
+        const t = setTimeout(() => {
+          if (cancelled) return
+          resolvedSet.add(i)
+          setChars(prev =>
+            prev.map((ch, idx) => idx === i ? { display: letter, resolved: true } : ch)
+          )
+          if (resolvedSet.size === word.length && scrambleInterval) {
+            clearInterval(scrambleInterval)
+            scrambleInterval = null
+          }
+        }, 80 + i * 100)
+        timeouts.push(t)
+      })
+    } else {
+      setChars(makeScrambled(word))
+      startScrambleInterval(new Set<number>())
+    }
 
-## JSX
-<div className="flex h-full w-full cursor-default items-center justify-center bg-sand-100 dark:bg-sand-950" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-  <div className="flex select-none flex-col items-center gap-6">
-    <div className={\`flex items-center gap-1 \${geistMono.className}\`}>
-      {chars.map((ch, i) => (
-        <span
-          key={i}
-          className={[
-            'text-5xl font-medium leading-none tracking-widest transition-colors duration-100',
-            ch.resolved ? 'text-sand-900 dark:text-sand-50' : 'text-olive-500 dark:text-olive-400',
-          ].join(' ')}
-        >
-          {ch.display}
-        </span>
-      ))}
+    return () => {
+      cancelled = true
+      timeouts.forEach(clearTimeout)
+      if (scrambleInterval) clearInterval(scrambleInterval)
+    }
+  }, [isHovered, word])
+
+  return chars
+}
+
+## Crosshair component
+function Crosshair({ style }: { style: React.CSSProperties }) {
+  const color = 'rgba(190,207,93,0.35)'
+  const arm = 14; const gap = 3; const thick = 1
+  const size = arm * 2 + gap * 2  // = 34
+  return (
+    <div className="pointer-events-none absolute" style={{ width: size, height: size, ...style }}>
+      <svg width="100%" height="100%" viewBox={\`0 0 \${size} \${size}\`} fill="none">
+        <line x1={arm+gap} y1={0} x2={arm+gap} y2={arm} stroke={color} strokeWidth={thick} />
+        <line x1={arm+gap} y1={arm+gap*2} x2={arm+gap} y2={size} stroke={color} strokeWidth={thick} />
+        <line x1={0} y1={arm+gap} x2={arm} y2={arm+gap} stroke={color} strokeWidth={thick} />
+        <line x1={arm+gap*2} y1={arm+gap} x2={size} y2={arm+gap} stroke={color} strokeWidth={thick} />
+        <circle cx={arm+gap} cy={arm+gap} r={1.5} fill={color} />
+      </svg>
     </div>
+  )
+}
+
+## ScrambleText component JSX
+<div className="relative flex h-full w-full cursor-default items-center justify-center" style={{ background: '#292929' }}>
+  <Crosshair style={{ top: '10%', right: '8%' }} />
+  <Crosshair style={{ bottom: '10%', left: '8%' }} />
+  <div
+    className="flex select-none flex-col items-center gap-4"
+    style={{ padding: '60px 80px' }}
+    onMouseEnter={() => setIsHovered(true)}
+    onMouseLeave={() => setIsHovered(false)}
+  >
+    {rows.map((chars, rowIdx) => (
+      <div key={rowIdx} className={\`flex items-center gap-1 \${GeistPixelGrid.className}\`}>
+        {rowIdx === 0 && <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>/</span>}
+        {chars.map((ch, i) => (
+          <span key={i} className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>{ch.display}</span>
+        ))}
+        {rowIdx === rows.length - 1 && <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>_</span>}
+      </div>
+    ))}
     <motion.p
-      className={\`text-xs font-medium uppercase tracking-[0.2em] text-sand-400 dark:text-sand-600 \${geistMono.className}\`}
+      className={\`mt-2 text-xs font-medium uppercase tracking-[0.2em] \${GeistPixelGrid.className}\`}
+      style={{ color: 'rgba(190,207,93,0.45)' }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut', delay: 0.8 }}
@@ -221,8 +193,60 @@ useEffect(() => {
   </div>
 </div>
 
-## Exact behavior notes
-- Scramble interval: 60ms, picks a new random char from CHARSET for every index not in resolvedSet.
-- Reveal schedule: letter i resolves at 80 + i*100 ms after hover starts.
-- On unhover, the effect re-runs, cancelling timeouts, resetting chars to fresh SCRAMBLED(), and restarting the scramble interval with an empty resolvedSet.`,
+State: const [isHovered, setIsHovered] = useState(false); const chars0 = useScramble(WORDS[0]!, isHovered); const chars1 = useScramble(WORDS[1]!, isHovered); const rows = [chars0, chars1]
+
+No dark: variants. Fixed background always #292929. All text color #BECF5D.`,
+
+  Claude: `Create a React client component named \`ScrambleText\`. 'use client' at the top. TypeScript strict, no \`any\`. Extract a \`useScramble\` hook and a \`Crosshair\` component — do not inline everything.
+
+## Font
+import localFont from 'next/font/local'
+const GeistPixelGrid = localFont({ src: '../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2' })
+
+## Constants
+const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&!'
+const WORDS = ['DECRYPT', 'ACCESS']
+
+## Types and helpers
+interface CharState { display: string; resolved: boolean }
+function randomChar(): string — picks a random char from CHARSET, fallback 'X'
+const makeScrambled = (word: string): CharState[] — maps each char to { display: randomChar(), resolved: false }
+
+## useScramble(word: string, isHovered: boolean): CharState[]
+- State: chars initialized with makeScrambled(word)
+- Effect on [isHovered, word]:
+  - Declare cancelled, timeouts array, scrambleInterval
+  - startScrambleInterval(resolvedSet: Set<number>): clears old interval, starts new one at 60ms — on each tick, replaces unresolved chars with randomChar()
+  - if isHovered: startScrambleInterval with empty resolvedSet; then forEach char of word, schedule a timeout at 80 + i*100ms that adds i to resolvedSet, sets that char to { display: letter, resolved: true }, and stops the interval once all chars are resolved
+  - else: reset chars to makeScrambled(word), startScrambleInterval with empty Set
+  - cleanup: cancelled=true, clear all timeouts, clear interval
+- Returns chars
+
+## Crosshair({ style: React.CSSProperties })
+- pointer-events-none absolute div, dimensions: arm*2 + gap*2 square
+- arm=14, gap=3, thick=1, color='rgba(190,207,93,0.35)'
+- SVG with 4 arms (top, bottom, left, right) and a center circle r=1.5
+- Arms start at gap distance from center: e.g. top arm goes from (arm+gap, 0) to (arm+gap, arm)
+- Center at (arm+gap, arm+gap) = (17, 17)
+
+## ScrambleText component
+- State: isHovered
+- chars0 = useScramble(WORDS[0]!, isHovered); chars1 = useScramble(WORDS[1]!, isHovered); rows = [chars0, chars1]
+- Root: relative flex h-full w-full cursor-default items-center justify-center, style={{ background: '#292929' }}
+- Crosshair at top-right: style={{ top:'10%', right:'8%' }}
+- Crosshair at bottom-left: style={{ bottom:'10%', left:'8%' }}
+- Inner flex-col div: select-none, items-center, gap-4, padding '60px 80px', mouse enter/leave handlers
+- Rows: for each rowIdx, a flex items-center gap-1 div using GeistPixelGrid.className:
+  - If rowIdx===0: prepend <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>/</span>
+  - Each char: <span key={i} className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>{ch.display}</span>
+  - If rowIdx===rows.length-1: append <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>_</span>
+- Hint <motion.p>: mt-2 text-xs font-medium uppercase tracking-[0.2em] GeistPixelGrid.className, style={{ color:'rgba(190,207,93,0.45)' }}, initial {{opacity:0,y:8}} animate {{opacity:1,y:0}} transition {{duration:0.3,ease:'easeOut',delay:0.8}}, text "hover to decrypt"
+
+## Visual spec
+- Background: always #292929 (never theme-dependent)
+- All text/symbols: #BECF5D (olive)
+- Hint opacity: 45% (rgba(190,207,93,0.45))
+- Crosshair opacity: 35% (rgba(190,207,93,0.35))
+- Font size: text-6xl for all word characters and prefix/suffix symbols
+- No Phosphor icons, no light/dark variants`,
 }

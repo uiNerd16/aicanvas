@@ -2,91 +2,66 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Rocket, Brain, Sparkle } from '@phosphor-icons/react'
+import { Sun, Snowflake, Boat, ArrowUpRight } from '@phosphor-icons/react'
+
+const CARD_W = 280
+const CARD_H = 200
 
 const CARDS = [
-  { Icon: Rocket,  title: 'Ship Fast',   sub: 'Drop-in components', delay: 0    },
-  { Icon: Brain,   title: 'AI Prompts',  sub: 'For 5 platforms',    delay: 0.25 },
-  { Icon: Sparkle, title: 'Open Source', sub: 'MIT licensed',       delay: 0.5  },
-]
+  { Icon: Sun,       title: 'Maldives',   sub: 'Crystal waters',    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&q=80&fit=crop&crop=center', dist: 8420 },
+  { Icon: Snowflake, title: 'Swiss Alps', sub: 'Powder & peaks',    img: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=520&q=80&fit=crop&crop=center', dist: 1640 },
+  { Icon: Boat,      title: 'Bali',       sub: 'Sun-soaked shores', img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', dist: 11200 },
+] as const
 
-type PhosphorIcon = typeof Rocket
+// Deck slots: index 0 = back, index 1 = middle, index 2 = front
+const POSITIONS = [
+  { x:  12, y: -32, rotate:  6, zIndex: 1, opacity: 1.00 }, // back  — peeks top-right
+  { x:   6, y: -18, rotate:  4, zIndex: 2, opacity: 1.00 }, // middle — peeks top-right
+  { x:   0, y:   0, rotate:  0, zIndex: 3, opacity: 1.00 }, // front  — no rotation, full opacity
+] as const
 
-function FloatingCard({
-  Icon,
-  title,
-  sub,
-  delay,
-  isDark,
-}: {
-  Icon: PhosphorIcon
-  title: string
-  sub: string
-  delay: number
-  isDark: boolean
-}) {
-  const [hovered, setHovered] = useState(false)
+type PhosphorIcon = typeof Sun | typeof Snowflake | typeof Boat
 
+function useCountUp(target: number, active: boolean) {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    if (!active) { setValue(0); return }
+    const duration = 900
+    const steps = 40
+    const interval = duration / steps
+    let step = 0
+    const id = setInterval(() => {
+      step++
+      setValue(Math.round((step / steps) * target))
+      if (step >= steps) clearInterval(id)
+    }, interval)
+    return () => clearInterval(id)
+  }, [active, target])
+  return value
+}
+
+function DistanceCounter({ target, active }: { target: number; active: boolean }) {
+  const value = useCountUp(target, active)
   return (
-    <motion.div
-      animate={{ y: [0, -14, 0] }}
-      transition={{ duration: 3.5, delay, repeat: Infinity, ease: 'easeInOut' }}
-      whileHover={{ scale: 1.06, transition: { duration: 0.2, ease: 'easeOut' } }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="flex flex-1 cursor-default flex-col items-center gap-2 rounded-2xl px-2 py-4 backdrop-blur-sm sm:gap-3 sm:px-4 sm:py-6"
-      style={{
-        background: hovered
-          ? (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.96)')
-          : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.65)'),
-        border: `1px solid ${hovered ? 'rgba(167,139,250,0.40)' : (isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.09)')}`,
-        transition: 'background 0.3s, border-color 0.3s',
-      }}
-    >
-      <div
-        className="flex h-8 w-8 items-center justify-center rounded-xl sm:h-10 sm:w-10"
-        style={{
-          background: hovered ? 'rgba(139,92,246,0.25)' : 'rgba(139,92,246,0.15)',
-          transition: 'background 0.3s',
-        }}
-      >
-        <Icon
-          weight="duotone"
-          size={18}
-          style={{
-            color: hovered
-              ? (isDark ? '#c4b5fd' : '#7c3aed')
-              : (isDark ? '#a78bfa' : '#8b5cf6'),
-            transition: 'color 0.3s',
-          }}
-        />
-      </div>
-      <div className="flex flex-col items-center gap-0.5 text-center">
-        <span
-          className="text-xs font-semibold sm:text-sm"
-          style={{ color: isDark ? '#ffffff' : '#1C1916' }}
-        >
-          {title}
-        </span>
-        <span
-          className="hidden text-[11px] sm:block"
-          style={{
-            color: hovered
-              ? (isDark ? '#a1a1aa' : '#4A453F')
-              : (isDark ? '#71717a' : '#736D65'),
-            transition: 'color 0.3s',
-          }}
-        >
-          {sub}
-        </span>
-      </div>
-    </motion.div>
+    <span style={{
+      fontSize: 10,
+      fontWeight: 500,
+      color: 'rgba(255,255,255,0.45)',
+      letterSpacing: '0.04em',
+      fontVariantNumeric: 'tabular-nums',
+    }}>
+      {value.toLocaleString()} km
+    </span>
   )
 }
 
 export function FloatingCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
+  // order[positionIndex] = cardIndex
+  const [order, setOrder] = useState<[number, number, number]>([0, 1, 2])
+  const [isShuffling, setIsShuffling] = useState(false)
+  const [exitingCard, setExitingCard] = useState<number | null>(null)
 
   useEffect(() => {
     const el = containerRef.current
@@ -103,6 +78,7 @@ export function FloatingCards() {
     return () => observer.disconnect()
   }, [])
 
+
   return (
     <div
       ref={containerRef}
@@ -118,27 +94,130 @@ export function FloatingCards() {
         }}
       />
 
-      {/* Violet glow */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div
-          className="h-64 w-64 rounded-full blur-3xl"
-          style={{ background: isDark ? 'rgba(124,58,237,0.20)' : 'rgba(109,81,160,0.12)' }}
-        />
+
+      {/* Deck */}
+      <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
+        {CARDS.map((card, i) => {
+          const posIndex = order.indexOf(i)
+          const pos = POSITIONS[posIndex]
+          const CardIcon: PhosphorIcon = card.Icon
+          const isFront = posIndex === 2
+          const isExiting = exitingCard === i
+          return (
+            <motion.div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: CARD_W,
+                height: CARD_H,
+                cursor: isFront ? 'grab' : 'default',
+                borderRadius: 16,
+                background: '#2A2825',
+                border: '1px solid rgba(255,255,255,0.10)',
+                boxShadow: '8px -8px 24px rgba(0,0,0,0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                overflow: 'hidden',
+                padding: 0,
+              }}
+              drag={isFront && !isShuffling ? 'y' : false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.6 }}
+              dragMomentum={false}
+              onDragEnd={(_e, info) => {
+                if (!isFront || isShuffling) return
+                if (info.offset.y > 80 || info.velocity.y > 400) {
+                  setIsShuffling(true)
+                  setExitingCard(i)
+                }
+              }}
+              animate={isExiting
+                ? { y: 600, rotate: 8, opacity: 0 }
+                : { x: pos.x, y: pos.y, rotate: pos.rotate, zIndex: pos.zIndex, opacity: pos.opacity }
+              }
+              transition={isExiting
+                ? { duration: 0.45, ease: 'easeIn' }
+                : { type: 'spring', stiffness: 80, damping: 16 }
+              }
+              onAnimationComplete={() => {
+                if (isExiting) {
+                  setExitingCard(null)
+                  setOrder(prev => [prev[2], prev[0], prev[1]])
+                  setTimeout(() => setIsShuffling(false), 400)
+                }
+              }}
+            >
+              {/* ── Top section ───────────────────────────── */}
+              <div style={{
+                padding: '10px 10px 0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                flex: '0 0 auto',
+              }}>
+                {/* Header row: icon tag left, arrow button right */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* Icon */}
+                  <CardIcon weight="regular" size={18} style={{ color: '#E8E8DF', opacity: 0.55 }} />
+
+                  {/* Arrow button */}
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: '#BECF5D',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <ArrowUpRight weight="bold" size={13} style={{ color: '#1A1A19' }} />
+                  </div>
+                </div>
+
+                {/* Title + distance */}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                  <p style={{
+                    fontSize: 17,
+                    fontWeight: 800,
+                    lineHeight: 1.15,
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.02em',
+                    margin: 0,
+                  }}>
+                    {card.title}
+                  </p>
+                  <DistanceCounter target={card.dist} active={isFront && !isExiting} />
+                </div>
+              </div>
+
+              {/* ── Visual block ──────────────────────────── */}
+              <div style={{
+                margin: '8px 6px 6px',
+                borderRadius: 12,
+                flex: 1,
+                position: 'relative',
+                overflow: 'hidden',
+                backgroundImage: `url(${card.img})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}>
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
 
-      {/* Floating cards */}
-      <div className="relative flex w-full items-center gap-3 px-4 sm:gap-5 sm:px-8">
-        {CARDS.map(({ Icon, title, sub, delay }) => (
-          <FloatingCard
-            key={title}
-            Icon={Icon}
-            title={title}
-            sub={sub}
-            delay={delay}
-            isDark={isDark}
-          />
-        ))}
-      </div>
+      {/* Hint */}
+      <p
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          fontSize: 11,
+          color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
+          letterSpacing: '0.05em',
+        }}
+      >
+        swipe down to shuffle
+      </p>
     </div>
   )
 }

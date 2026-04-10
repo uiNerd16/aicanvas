@@ -38,13 +38,7 @@ export function GlassModal() {
 
         {/* Close button */}
         <motion.button
-          whileHover={{
-            scale: 1.15,
-            rotate: 90,
-            background: 'rgba(255, 155, 50, 0.2)',
-            boxShadow: '0 0 14px rgba(255, 140, 40, 0.45)',
-            border: '1px solid rgba(255, 180, 80, 0.3)',
-          }}
+          whileHover={{ scale: 1.15, rotate: 90 }}
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"

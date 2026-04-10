@@ -8,17 +8,17 @@ import {
   SignOut,
   Users,
   CreditCard,
-  CaretDown,
+  CaretUpDown,
 } from '@phosphor-icons/react'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
+const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866'
 
 const USER = {
   name: 'Jennifer Rivera',
   email: 'jennifer@studio.io',
-  initials: 'JR',
+  avatar: 'https://ik.imagekit.io/aitoolkit/Miscellaneous/Avatars/Silhouette%20Profile%20Against%20Gradient%20Background%201.webp',
 }
 
 const MENU_GROUPS = [
@@ -51,9 +51,9 @@ const glassPanelBlur = {
   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
 }
 
-// Active glow — warm orange border + ambient glow (matches glass-search-bar)
+// Active glow — white border + ambient glow (matches glass-search-bar)
 const ACTIVE_GLOW =
-  '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1.5px rgba(255, 160, 50, 0.5), 0 0 20px rgba(255, 160, 50, 0.12)'
+  '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.08)'
 
 // ─── MenuItem ─────────────────────────────────────────────────────────────────
 
@@ -148,9 +148,9 @@ export function GlassUserMenu() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      <div ref={ref} className="relative flex flex-col items-center px-4" style={{ marginTop: -150 }}>
+      <div ref={ref} className="relative flex flex-col items-center" style={{ marginTop: -150 }}>
 
-        {/* Trigger — orange glow when open */}
+        {/* Trigger — white glow when open */}
         <motion.button
           onClick={() => setOpen(v => !v)}
           whileHover={{ scale: 1.02 }}
@@ -164,37 +164,30 @@ export function GlassUserMenu() {
           }}
         >
           <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassPanelBlur} />
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #FF7B54, #FF6BF5)' }}
-          >
-            {USER.initials}
-          </div>
+          <img
+            src={USER.avatar}
+            alt={USER.name}
+            className="h-8 w-8 shrink-0 rounded-full object-cover"
+          />
           <span className="text-sm font-semibold text-white/80">{USER.name}</span>
-          <motion.div
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-          >
-            <CaretDown size={18} weight="regular" className="text-white/40" />
-          </motion.div>
+          <CaretUpDown size={16} weight="regular" className="text-white/40" />
         </motion.button>
 
         {/* Dropdown */}
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -8, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.95, y: -8, filter: 'blur(4px)' }}
+              initial={{ opacity: 0, scale: 0.95, x: -8, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.95, x: -8, filter: 'blur(4px)' }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="absolute isolate top-full mt-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
-              style={{ ...glassPanel, transformOrigin: 'top center' }}
+              className="absolute left-full top-0 ml-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
+              style={{ ...glassPanel, ...glassPanelBlur, transformOrigin: 'top left' }}
             >
-              <div className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl" style={glassPanelBlur} />
-              {/* Top edge highlight */}
+              {/* Left edge highlight */}
               <div
-                className="absolute left-6 right-6 top-0 h-[1px]"
-                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)' }}
+                className="absolute bottom-6 left-0 top-6 w-[1px]"
+                style={{ background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.18), transparent)' }}
               />
 
               {/* Menu groups */}

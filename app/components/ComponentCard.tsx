@@ -47,7 +47,7 @@ export function ComponentCard({ name, description, href, image }: ComponentCardP
       </div>
 
       {/* Card body — floats over image with rounded top corners */}
-      <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.25)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.5)]">
+      <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)]">
         <div>
           <h3 className="font-bold text-sand-900 dark:text-sand-50">{name}</h3>
           <p className="mt-1 line-clamp-2 text-sm font-normal text-sand-600 dark:text-sand-400">
