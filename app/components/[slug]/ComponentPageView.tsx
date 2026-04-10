@@ -22,6 +22,8 @@ import {
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
+import { HeaderSocials } from '../HeaderSocials'
+import type { ComponentMeta } from '../../lib/component-registry'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -42,8 +44,6 @@ const PLATFORM_ICONS: Partial<Record<Platform, React.ReactNode>> = {
     </svg>
   ),
 }
-import { HeaderSocials } from '../HeaderSocials'
-import type { ComponentMeta } from '../../lib/component-registry'
 
 // ─── ComponentPageView ────────────────────────────────────────────────────────
 
@@ -162,7 +162,7 @@ export default function ComponentPageView({
           Back
         </button>
 
-        <span className="text-sm font-semibold text-olive-500">//{name}</span>
+        <span className="text-sm font-semibold text-olive-500">/{name}</span>
 
         <div className="flex justify-end">
           <HeaderSocials />
@@ -171,6 +171,15 @@ export default function ComponentPageView({
 
       <main className="bg-sand-200 dark:bg-sand-950">
         <div className="relative mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
+
+          {/* Mobile back button */}
+          <button
+            onClick={() => router.back()}
+            className="mb-4 flex items-center gap-2 text-sm font-semibold text-sand-700 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-200 md:hidden"
+          >
+            <ArrowLeft weight="regular" size={15} />
+            Back
+          </button>
 
           {/* Header */}
           <div className="mb-8">
@@ -229,7 +238,7 @@ export default function ComponentPageView({
               </div>
 
               {/* Right-side controls */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-0.5 sm:gap-2">
 
                 {/* Refresh icon button — only visible during preview tab */}
                 {activeTab === 'preview' && (
@@ -476,10 +485,10 @@ export default function ComponentPageView({
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               data-card-theme={cardTheme}
-              className={`absolute inset-10 overflow-hidden rounded-2xl border shadow-2xl transition-colors duration-300 ${
+              className={`absolute inset-0 overflow-hidden transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl ${
                 cardTheme === 'dark'
-                  ? 'dark border-sand-800 bg-sand-950'
-                  : 'border-sand-300 bg-sand-100'
+                  ? 'dark bg-sand-950 sm:border-sand-800'
+                  : 'bg-sand-100 sm:border-sand-300'
               }`}
               onClick={(e) => e.stopPropagation()}
             >

@@ -46,7 +46,7 @@ export default function AboutPage() {
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:grid">
         <div />
         <Link href="/" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
-          //About
+          /About
         </Link>
         <div className="flex items-center justify-end gap-1">
           <Link href="/about" aria-label="About" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
@@ -64,7 +64,12 @@ export default function AboutPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-20 sm:px-8 sm:py-28">
+      <main className="mx-auto max-w-2xl px-6 py-8 sm:px-8 sm:py-28">
+        {/* Mobile breadcrumb */}
+        <p className="mb-6 text-sm font-semibold md:hidden">
+          <span className="text-olive-500">/About</span>
+        </p>
+
         {/* ── The story ── */}
         <Section>
           <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
@@ -128,7 +133,7 @@ export default function AboutPage() {
 
         {/* ── CTA ── */}
         <Section className="mt-20 sm:mt-28">
-          <div className="-mx-6 rounded-2xl bg-sand-900 px-8 py-10 sm:-mx-8 sm:px-10 sm:py-12">
+          <div className="rounded-2xl bg-sand-900 px-6 py-10 sm:-mx-8 sm:px-10 sm:py-12">
             <p className="text-xl leading-relaxed text-sand-300 sm:text-2xl">
               This is an open-source project, still early, still growing.
               If any of this resonates, come take a look.
