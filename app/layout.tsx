@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from './components/ThemeProvider'
 import { Sidebar } from './components/Sidebar'
+import { MobileNav } from './components/MobileNav'
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -36,10 +37,17 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark')` }} />
       </head>
-      <body className="flex h-full overflow-hidden bg-sand-200 dark:bg-sand-950">
+      <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
         <ThemeProvider>
+          {/* Desktop sidebar — hidden on mobile */}
           <Suspense fallback={null}>
-            <Sidebar />
+            <div className="hidden md:flex">
+              <Sidebar />
+            </div>
+          </Suspense>
+          {/* Mobile nav — visible only below md */}
+          <Suspense fallback={null}>
+            <MobileNav />
           </Suspense>
           {/* Content area scrolls independently of the sidebar */}
           <div className="flex flex-1 flex-col overflow-y-auto">

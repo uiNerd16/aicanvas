@@ -152,8 +152,8 @@ export default function ComponentPageView({
 
   return (
     <>
-      {/* Top stripe — sticky */}
-      <div className="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+      {/* Top stripe — sticky (desktop only; mobile uses MobileNav) */}
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:grid">
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-sm font-semibold text-sand-700 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-200"
@@ -170,7 +170,7 @@ export default function ComponentPageView({
       </div>
 
       <main className="bg-sand-200 dark:bg-sand-950">
-        <div className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6">
+        <div className="relative mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
 
           {/* Header */}
           <div className="mb-8">
@@ -200,7 +200,7 @@ export default function ComponentPageView({
           <div className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm dark:border-sand-800 dark:bg-sand-900 dark:shadow-none">
 
             {/* Tab bar — tabs left, card theme toggle right */}
-            <div className="flex items-center justify-between border-b border-sand-300 px-5 py-4 dark:border-sand-800">
+            <div className="flex items-center justify-between border-b border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Preview / Code tabs */}
               <div className="flex items-center gap-0.5">
@@ -289,7 +289,7 @@ export default function ComponentPageView({
             {/* Content area — background controlled by cardTheme, isolated from global theme */}
             <div
               data-card-theme={cardTheme}
-              className={`relative h-[480px] overflow-hidden transition-colors duration-300 ${
+              className={`relative h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
                 cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
               }`}
             >
@@ -331,7 +331,7 @@ export default function ComponentPageView({
             </div>
 
             {/* Action bar */}
-            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-5 py-4 dark:border-sand-800">
+            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Copy Code — semibold (600) */}
               <button
@@ -385,7 +385,7 @@ export default function ComponentPageView({
                 )}
               </div>
               <div className="relative overflow-hidden">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <AnimatePresence
                     mode="popLayout"
                     custom={relatedDir}

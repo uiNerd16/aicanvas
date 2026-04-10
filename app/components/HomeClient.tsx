@@ -54,8 +54,8 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
   return (
     <div className="flex min-h-full flex-col">
 
-      {/* ── Top bar ── */}
-      <div className="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+      {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:grid">
         <Link href="/" className="shrink-0 text-sm font-semibold text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">
           Components
         </Link>
@@ -70,7 +70,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
       </div>
 
       {/* ── Grid ── */}
-      <div className="flex-1 bg-sand-200 p-6 dark:bg-sand-950">
+      <div className="flex-1 bg-sand-200 p-4 dark:bg-sand-950 md:p-6">
         {filtered.length > 0 ? (
           <>
             <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
