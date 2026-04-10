@@ -70,7 +70,7 @@ export function GlassTabBar() {
 
               {/* Shift content to pill center for edge tabs (pill is asymmetric by 8px → offset 4px) */}
               <div
-                className="relative z-10 flex flex-col items-center gap-[3px]"
+                className="relative z-10 flex flex-col items-center gap-px"
                 style={{
                   transform: i === 0 ? 'translateX(-4px)' : i === TABS.length - 1 ? 'translateX(4px)' : undefined,
                 }}
@@ -78,14 +78,6 @@ export function GlassTabBar() {
                 <motion.div
                   animate={{ scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="flex items-center justify-center rounded-xl"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    background: isActive ? `${tab.color}28` : isHover ? `${tab.color}12` : 'transparent',
-                    border: isActive ? `1px solid ${tab.color}44` : isHover ? `1px solid ${tab.color}18` : '1px solid transparent',
-                    transition: 'background 0.2s, border-color 0.2s',
-                  }}
                 >
                   <Icon
                     size={20}

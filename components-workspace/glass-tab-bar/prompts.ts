@@ -21,7 +21,7 @@ Pill container: \`motion.div\` \`relative isolate flex w-[380px] items-center ju
 - Separate non-animating blur layer (\`absolute inset-0 z-[-1] rounded-full\`): \`backdrop-filter: blur(24px) saturate(1.8)\`
 - Entrance \`initial { y: 20 }\` → \`animate { y: 0 }\`, spring \`{ stiffness: 200, damping: 24 }\`.
 
-Each tab: \`motion.button\` \`relative flex cursor-pointer flex-col items-center gap-[3px] px-3 py-1\`, \`whileTap { scale: 0.85 }\`, state: \`hovered\` per index + global \`active\` index.
+Each tab: \`motion.button\` \`relative flex cursor-pointer flex-col items-center gap-px px-3 py-1\`, \`whileTap { scale: 0.85 }\`, state: \`hovered\` per index + global \`active\` index.
 
 Active background: a \`motion.div layoutId="tab-glow"\` that slides between tabs via spring \`{ stiffness: 350, damping: 30 }\`:
 - Middle tabs: \`-inset-x-3\`
@@ -31,7 +31,7 @@ Active background: a \`motion.div layoutId="tab-glow"\` that slides between tabs
 
 Edge tabs' inner content is shifted \`translateX(-4px)\` (first) or \`translateX(4px)\` (last) so it stays centered inside the asymmetric glow.
 
-Icon tile: 36x36 \`rounded-xl\`, tinted. Active: bg \`\${color}28\`, border \`\${color}44\`. Hovered-not-active: bg \`\${color}12\`, border \`\${color}18\`. Idle: transparent. CSS \`transition: background 0.2s, border-color 0.2s\`. Tile scales \`{ scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }\` via spring \`{ stiffness: 400, damping: 20 }\`. Icon size 20, color: active → \`tab.color\`, hovered → \`rgba(255,255,255,0.7)\`, idle → \`rgba(255,255,255,0.32)\` (CSS transition).
+Icon: wrapped in a bare \`motion.div\` (no background or border) that animates \`{ scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }\` via spring \`{ stiffness: 400, damping: 20 }\`. Icon size 20, color: active → \`tab.color\`, hovered → \`rgba(255,255,255,0.7)\`, idle → \`rgba(255,255,255,0.32)\` (CSS transition).
 
 Label under icon: \`text-[10px] font-medium\`, same color ramp as icon.
 
@@ -60,18 +60,16 @@ Tabs (in order):
 - \`whileTap { scale: 0.85 }\` on the tab button.
 
 ## Hover state
-- Icon tile bg: active \`\${color}28\`, hovered \`\${color}12\`, idle transparent.
-- Tile border: active \`\${color}44\`, hovered \`\${color}18\`, idle \`transparent\`.
 - Icon + label color: active \`tab.color\`, hovered \`rgba(255,255,255,0.7)\`, idle \`rgba(255,255,255,0.32)\` — CSS \`transition: color 0.2s ease\`.
 - Hover state applies only when not active.
 
 ## JSX structure
 - Root: \`relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\` + background img \`opacity-60\`.
 - Pill: \`motion.div relative isolate flex w-[380px] items-center justify-around rounded-full px-5 py-2.5\` + glass style. Separate \`z-[-1]\` absolute blur layer.
-- Each tab: \`motion.button key={tab.label} relative flex cursor-pointer flex-col items-center gap-[3px] px-3 py-1\` \`whileTap={{ scale: 0.85 }}\` \`onClick\` sets active, \`onHoverStart/End\` toggles \`hovered\` state (\`number | null\`).
+- Each tab: \`motion.button key={tab.label} relative flex cursor-pointer flex-col items-center gap-px px-3 py-1\` \`whileTap={{ scale: 0.85 }}\` \`onClick\` sets active, \`onHoverStart/End\` toggles \`hovered\` state (\`number | null\`).
 - If active, render \`<motion.div layoutId="tab-glow">\` absolute with asymmetric insets for edge tabs: i===0 → \`-left-5 -right-3\`, i===last → \`-left-3 -right-5\`, middle → \`-inset-x-3\`; all \`-inset-y-1 rounded-full\`, bg \`rgba(255,255,255,0.1)\`, border \`rgba(255,255,255,0.08)\`.
-- Content wrapper \`relative z-10 flex flex-col items-center gap-[3px]\`: transform \`translateX(-4px)\` on first tab, \`translateX(4px)\` on last, undefined otherwise.
-- Icon tile \`motion.div\` 36x36 \`rounded-xl\`. Icon size 20 \`weight="regular"\`.
+- Content wrapper \`relative z-10 flex flex-col items-center gap-px\`: transform \`translateX(-4px)\` on first tab, \`translateX(4px)\` on last, undefined otherwise.
+- Icon wrapped in bare \`motion.div\` (no container styles). Icon size 20 \`weight="regular"\`.
 - Label span \`text-[10px] font-medium\` below icon.
 
 ## Behavior
@@ -120,18 +118,16 @@ State: \`const [active, setActive] = useState(0)\`, \`const [hovered, setHovered
 Map TABS to \`motion.button\`:
 - \`onClick={() => setActive(i)}\`
 - \`onHoverStart={() => setHovered(i)}\`, \`onHoverEnd={() => setHovered(null)}\`
-- \`className="relative flex cursor-pointer flex-col items-center gap-[3px] px-3 py-1"\`
+- \`className="relative flex cursor-pointer flex-col items-center gap-px px-3 py-1"\`
 - \`whileTap={{ scale: 0.85 }}\`
 
 Compute \`isActive = active === i\`, \`isHover = hovered === i && !isActive\`.
 
 Inside, if \`isActive\` render \`<motion.div layoutId="tab-glow">\` with className built from: first tab \`-left-5 -right-3\`, last tab \`-left-3 -right-5\`, else \`-inset-x-3\`; always add \`absolute -inset-y-1 rounded-full\`. Style \`background: rgba(255,255,255,0.1)\`, \`border: 1px solid rgba(255,255,255,0.08)\`. Transition \`{ type: 'spring', stiffness: 350, damping: 30 }\`.
 
-Content wrapper: \`relative z-10 flex flex-col items-center gap-[3px]\` with inline \`transform\`: first → \`translateX(-4px)\`, last → \`translateX(4px)\`, else undefined.
+Content wrapper: \`relative z-10 flex flex-col items-center gap-px\` with inline \`transform\`: first → \`translateX(-4px)\`, last → \`translateX(4px)\`, else undefined.
 
-Icon tile: \`motion.div\` with \`animate { scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }\`, \`{ type: 'spring', stiffness: 400, damping: 20 }\`. className \`flex items-center justify-center rounded-xl\`. Style: \`width: 36\`, \`height: 36\`, \`background\` = active \`\${tab.color}28\` / hover \`\${tab.color}12\` / idle \`transparent\`; \`border\` = active \`1px solid \${tab.color}44\` / hover \`1px solid \${tab.color}18\` / idle \`1px solid transparent\`; \`transition: 'background 0.2s, border-color 0.2s'\`.
-
-Inside: \`<Icon size={20} weight="regular" style={{ color: isActive ? tab.color : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)', transition: 'color 0.2s ease' }} />\`.
+Icon: bare \`motion.div\` (no background, border, or fixed size) with \`animate { scale: isActive ? 1.15 : 1, y: isActive ? -1 : 0 }\`, \`{ type: 'spring', stiffness: 400, damping: 20 }\`. Inside: \`<Icon size={20} weight="regular" style={{ color: isActive ? tab.color : isHover ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.32)', transition: 'color 0.2s ease' }} />\`.
 
 Label: \`<span className="text-[10px] font-medium" style={{ color: ..., transition: 'color 0.2s ease' }}>{tab.label}</span>\` (same color ramp).
 
@@ -141,9 +137,9 @@ Label: \`<span className="text-[10px] font-medium" style={{ color: ..., transiti
 
   V0: `Create a \`GlassTabBar\` component — a floating 380px wide glass-morphism pill tab bar with five icon tabs and a sliding active glow.
 
-Over a dreamy orange floral background, show a translucent white pill with a soft drop shadow and 24px backdrop blur on a separate non-animating layer. Inside, five evenly-spaced tabs using Phosphor icons (weight='regular'): Home (blue House #3A86FF), Explore (orange Compass #FF7B54), Create (green PlusCircle #06D6A0), Messages (pink ChatCircle #FF5C8A), Profile (purple User #B388FF). Each tab is a 36×36 rounded-xl icon tile above a tiny 10px label.
+Over a dreamy orange floral background, show a translucent white pill with a soft drop shadow and 24px backdrop blur on a separate non-animating layer. Inside, five evenly-spaced tabs using Phosphor icons (weight='regular'): Home (blue House #3A86FF), Explore (orange Compass #FF7B54), Create (green PlusCircle #06D6A0), Messages (pink ChatCircle #FF5C8A), Profile (purple User #B388FF). Each tab shows the icon directly (no container box) above a tiny 10px label.
 
-The active tab has a frosted highlight pill behind it that slides between tabs using Framer Motion \`layoutId\` with a spring — for first and last tabs the glow extends slightly toward the bar edges so it's never clipped. The active tile gets a tinted background, brighter border, and its icon and label take the tab's accent color; the active tile also scales up ~1.15x and nudges up by 1px. Hovering a non-active tab shows a subtle tinted highlight. Tapping scales the tab down slightly.
+The active tab has a frosted highlight pill behind it that slides between tabs using Framer Motion \`layoutId\` with a spring — for first and last tabs the glow extends slightly toward the bar edges so it's never clipped. The active icon and label take the tab's accent color; the active icon also scales up ~1.15x and nudges up by 1px. Hovering a non-active tab brightens the icon and label to white/70. Tapping scales the tab down slightly.
 
 Use Tailwind CSS, Framer Motion, and Phosphor Icons (weight='regular'). Manrope font. Center the bar over \`bg-sand-950\` with the background image at \`https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png\` at 60% opacity.`,
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Manrope, Geist_Mono } from 'next/font/google'
+import { GeistPixelCircle } from 'geist/font/pixel'
 import { Suspense } from 'react'
 import './globals.css'
 import { ThemeProvider } from './components/ThemeProvider'
@@ -31,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} h-full antialiased`}
     >
       {/* Apply saved theme before first paint to prevent flash */}
       <head>
