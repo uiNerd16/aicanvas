@@ -89,6 +89,8 @@ import { GlassAiCompose } from '../../components-workspace/glass-ai-compose'
 import { prompts as glassAiComposePrompts } from '../../components-workspace/glass-ai-compose/prompts'
 import { CardWheel } from '../../components-workspace/card-wheel'
 import { prompts as cardWheelPrompts } from '../../components-workspace/card-wheel/prompts'
+import { AndromedaButton } from '../../components-workspace/andromeda-button'
+import { prompts as andromedaButtonPrompts } from '../../components-workspace/andromeda-button/prompts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -3503,6 +3505,102 @@ export function CardWheel() {
   )
 }`
 
+const ANDROMEDA_BUTTON_CODE = `'use client'
+
+import type { ComponentType, ReactNode } from 'react'
+import { JetBrains_Mono } from 'next/font/google'
+import { Notification, Settings } from '@carbon/icons-react'
+import { Button as RawButton } from '../../design-systems/andromeda/components/Button'
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
+
+// Andromeda Button has no explicit TS prop types — retype at the boundary.
+type AndromedaButtonProps = {
+  variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'link'
+  size?: 'sm' | 'md' | 'lg'
+  icon?: ComponentType<{ size?: number }>
+  children?: ReactNode
+  className?: string
+  onClick?: () => void
+  disabled?: boolean
+}
+const Button = RawButton as unknown as ComponentType<AndromedaButtonProps>
+
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div
+        style={{
+          marginBottom: 12,
+          fontFamily: "var(--andromeda-font-mono, 'JetBrains Mono', monospace)",
+          fontSize: 10,
+          color: 'rgba(255,255,255,0.22)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.22em',
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+export function AndromedaButton() {
+  return (
+    <div
+      className={'relative flex h-full w-full items-center justify-center ' + jetbrainsMono.variable}
+      style={{ background: '#0E0E0F' }}
+    >
+      <div style={{ width: '100%', maxWidth: 640, padding: 24 }}>
+        <Row label="Variants">
+          <Button variant="default">Default</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="destructive">Destructive</Button>
+          <Button variant="link">Link</Button>
+        </Row>
+        <Row label="Sizes">
+          <Button size="sm">Small</Button>
+          <Button size="md">Medium</Button>
+          <Button size="lg">Large</Button>
+        </Row>
+        <Row label="With icon">
+          <Button icon={Notification}>Notifications</Button>
+          <Button variant="outline" icon={Settings}>
+            Settings
+          </Button>
+          <Button variant="destructive" icon={Notification}>
+            Abort
+          </Button>
+        </Row>
+        <Row label="Disabled">
+          <Button disabled>Default</Button>
+          <Button variant="outline" disabled>
+            Outline
+          </Button>
+          <Button variant="destructive" disabled>
+            Destructive
+          </Button>
+        </Row>
+      </div>
+    </div>
+  )
+}`
+
 export const COMPONENTS: ComponentEntry[] = [
   {
     slug: 'wave-lines',
@@ -5134,6 +5232,20 @@ export function EmojiBurst() {
     PreviewComponent: CardWheel,
     code: CARD_WHEEL_CODE,
     prompts: cardWheelPrompts,
+  },
+  {
+    slug: 'andromeda-button',
+    name: 'Andromeda Button',
+    description: 'A sci-fi / blueprint-aesthetic button with five variants (default, outline, ghost, destructive, link), three sizes (small, medium, large), optional leading icon, and full hover / focus / active / disabled state coverage. Transparent hairline surfaces sit on a near-black canvas, with an electric-blue accent that brightens and glows on interaction.',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda-button.png',
+    tags: [
+      { label: 'Buttons & Toggles', accent: true },
+      { label: 'Design System', accent: true },
+      { label: 'Andromeda' },
+    ],
+    PreviewComponent: AndromedaButton,
+    code: ANDROMEDA_BUTTON_CODE,
+    prompts: andromedaButtonPrompts,
   },
 ]
 

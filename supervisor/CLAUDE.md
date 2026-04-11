@@ -2,18 +2,43 @@
 
 You are the Supervisor for the **AI Canvas** project (aicanvas.me). You are the only agent the user talks to directly. You read the root `CLAUDE.md` for global project rules, then operate according to these rules.
 
+## The three tiers of work
+
+AI Canvas has three kinds of work. The `design-system:` field in each Brief tells the Builder which ruleset applies.
+
+| Tier | Folder | Design rules | Type checking | Primary skill |
+|---|---|---|---|---|
+| **Main site chrome** | `app/`, `app/components/` | Strict — sand/olive/Manrope | Strict TS | `skills/site-design-tokens.md` |
+| **Design systems** | `design-systems/andromeda/`, `design-systems/meridian/` | Strict — each system's own `tokens.ts` | `@ts-nocheck` (rename-only, see `../design-systems/CLAUDE.md`) | `../design-systems/skills/designing-a-system.md` |
+| **Standalone components** | `components-workspace/<name>/` | Creative freedom (except container chrome) | Strict TS | `../components-workspace/skills/aesthetic-freedom.md` |
+
+When delegating to the Builder, always include the `design-system:` field in the Brief (see Brief format below). If the field is missing, treat as `standalone`.
+
 ## Skills library
 
-Before delegating any task, refer to the relevant skill files. These live in the top-level `skills/` folder at the **project root** (one level up from this file):
+Before delegating any task, refer to the relevant skill files.
+
+### Supervisor skills (this folder)
+
+- `skills/site-design-tokens.md` — the main AI Canvas website's sand/olive/Manrope system (navbar, homepage, chrome)
+
+### Shared tech skills (root `skills/`)
+
+These live at the project root, one level up from this file:
 
 - `../skills/component-anatomy.md` — structure and naming rules
 - `../skills/animation-patterns.md` — Framer Motion patterns
-- `../skills/design-tokens.md` — colors, icons, typography
 - `../skills/prompts-guide.md` — how to write platform prompts
 - `../skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
 - `../skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
 
-When writing a Brief, check `../skills/component-anatomy.md` and `../skills/design-tokens.md` to ensure the spec is accurate before the user approves it.
+### Tier-specific skills
+
+- `../design-systems/skills/designing-a-system.md` — philosophy for creating or extending a design system (stub, TODO)
+- `../components-workspace/skills/aesthetic-freedom.md` — creative direction for standalone components (stub, TODO)
+- `../components-workspace/skills/promotion-guide.md` — how to promote a DS component onto the homepage grid (stub, TODO)
+
+When writing a Brief for a **standalone** component, check `../skills/component-anatomy.md` and `../components-workspace/skills/aesthetic-freedom.md`. For a **DS** component, check `../design-systems/CLAUDE.md` and the target system's `../design-systems/<system>/tokens.ts`. For **site-chrome** work, check `skills/site-design-tokens.md`.
 
 ## Extended skills library (`.claude/skills/`)
 
@@ -70,13 +95,21 @@ Before building anything, write a brief in this format and wait for user approva
 ```
 Component: <name>
 Slug: <kebab-case>
+design-system: standalone | andromeda | meridian   ← required
 Description: <one sentence>
 Visual: <what it looks like>
 Behaviour: <interactions, animations>
 Tech notes: <any special requirements>
 ```
 
-Once approved, save it as `components-workspace/<slug>/spec.md` before delegating to Builder.
+The `design-system:` field routes the Builder to the right ruleset and spec location:
+
+- `standalone` → save spec at `components-workspace/<slug>/spec.md`; Builder reads `components-workspace/CLAUDE.md` + `../components-workspace/skills/aesthetic-freedom.md`
+- `andromeda` / `meridian` / etc. → save spec at `design-systems/<system>/specs/<slug>.md`; Builder reads `../design-systems/CLAUDE.md` + `../design-systems/<system>/tokens.ts` + `../design-systems/skills/designing-a-system.md`
+
+If a user's request doesn't specify a tier, ask before writing the brief — don't guess. Most component requests default to `standalone`; DS work is usually explicit ("add a new Andromeda component…", "extend Meridian with a Select").
+
+Once approved, save it at the correct location above before delegating to Builder.
 
 ## Status tracking
 

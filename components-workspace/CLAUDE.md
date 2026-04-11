@@ -1,17 +1,35 @@
-# Builder Agent Rules
+# Builder Agent Rules — Standalone Components
 
 You build new components in isolation. Your job ends when the component works. Integration into the website is handled by a separate agent.
 
+## Scope of this file
+
+**This file covers STANDALONE components only.** Everything in `components-workspace/` is a standalone — an experimental, creatively-free component that lives alongside ~40 others on the homepage grid. Standalones follow the rules in this file.
+
+If your brief has `design-system: andromeda` (or `meridian`, etc.) — you are NOT working on a standalone. Stop reading this file and go to [`../design-systems/CLAUDE.md`](../design-systems/CLAUDE.md). Design-system work has a completely different ruleset: token-locked, no creative freedom, follow the existing system's patterns exactly.
+
+If your brief has `design-system: standalone` (or omits the field), continue.
+
 ## Skills library — read before building
 
-These live in the top-level `skills/` folder at the **project root** (one level up from this file):
+### Standalone-specific skills (this folder)
+
+- [`skills/aesthetic-freedom.md`](skills/aesthetic-freedom.md) — your primary creative guide (stub, TODO: flesh out). Permission-giving direction: use any colors/gradients/motion you want; the only hard constraint is container chrome (`bg-sand-100 dark:bg-sand-950`).
+- [`skills/promotion-guide.md`](skills/promotion-guide.md) — how to promote a design-system component to a standalone via a re-export wrapper (stub, TODO).
+
+### Shared tech skills (root `skills/`)
+
+These live at the project root, one level up from this file:
 
 - `../skills/component-anatomy.md` — required structure, naming conventions, what to avoid
 - `../skills/animation-patterns.md` — Framer Motion patterns, spring presets, cleanup patterns
-- `../skills/design-tokens.md` — colors, typography, icon rules (quick reference)
 - `../skills/prompts-guide.md` — how to write the 4 platform prompts
 - `../skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
 - `../skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
+
+### Site design tokens (when you need them)
+
+- `../supervisor/skills/site-design-tokens.md` — the main AI Canvas sand/olive/Manrope system. You rarely need this for a standalone's internals (creative freedom), but the **container chrome** uses sand-100/sand-950 from this file, and if a standalone deliberately echoes the site's look you can reference it here.
 
 ## Extended skills (`.claude/skills/`) — read for complex visual components
 

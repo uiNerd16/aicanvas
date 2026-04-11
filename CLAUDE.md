@@ -8,14 +8,19 @@ This project uses a structured multi-agent system. All agents inherit these glob
 
 ```
 CLAUDE.md (root) ← you are here — global rules for everyone
-└── supervisor/CLAUDE.md     ← Supervisor: the only agent you talk to directly
-    ├── components-workspace/CLAUDE.md   ← Builder: builds components in isolation
-    ├── reviewer/CLAUDE.md               ← Reviewer: checks quality before preview
-    └── integration/CLAUDE.md            ← Integrator: wires components into the website
+└── supervisor/CLAUDE.md              ← Supervisor: the only agent you talk to directly
+    │                                   routes work based on the brief's `design-system:` field
+    ├── Builder — two modes:
+    │   ├── components-workspace/CLAUDE.md   ← STANDALONES (creative freedom)
+    │   └── design-systems/CLAUDE.md         ← DESIGN SYSTEMS (strict tokens)
+    ├── reviewer/CLAUDE.md            ← Reviewer: checks quality before preview
+    └── integration/CLAUDE.md         ← Integrator: wires components into the website
 ```
 
 **Always start a session by loading the Supervisor.** It manages the full pipeline:
 `Brief → Build → Review → Preview → Adjust → Integrate`
+
+The Builder is a single agent with two modes. The brief's `design-system:` field decides which mode applies: `standalone` (read `components-workspace/CLAUDE.md`) or a named system like `andromeda` / `meridian` (read `design-systems/CLAUDE.md`). See `supervisor/CLAUDE.md` for the full routing table.
 
 Component status is tracked in `supervisor/component-status.md`.
 Known recurring mistakes are logged in `supervisor/mistakes.md`.
@@ -86,8 +91,13 @@ All colors come from two custom scales defined in `globals.css` via `@theme inli
 - **Typography weights**: 800 hero h1, 700 section headings, 600 UI labels/buttons, 400 body/description
 - **Component preview backgrounds**: always `bg-sand-950` regardless of theme
 
-## Component structure
-Every component lives in its own folder under `components-workspace/`:
+## Component structure — three tiers
+
+AI Canvas has three tiers of component work. Every brief is routed to exactly one.
+
+### 1. Standalone components — `components-workspace/`
+
+Experimental, creatively-free components that appear on the homepage grid. Each lives in its own folder:
 ```
 components-workspace/
   my-component/
@@ -96,7 +106,26 @@ components-workspace/
     spec.md      ← brief approved by user before building
 ```
 
-Existing components (built before this structure) live in `app/components/` and are already registered in `app/lib/component-registry.tsx`.
+### 2. Design systems — `design-systems/`
+
+Strict, token-driven visual languages. Each system has its own folder:
+```
+design-systems/
+  andromeda/          ← sci-fi / blueprint, 19 components, /design-systems/andromeda
+    tokens.ts         ← source of truth for every color, spacing, radius
+    components/       ← 20 .tsx files + lib/utils.ts
+    examples/         ← mission-control dashboard showing the system composed
+  meridian/           ← editorial dashboard, 9 components, /design-systems/meridian
+    tokens.ts
+    components/
+    examples/
+```
+
+Files in `design-systems/` currently carry a `// @ts-nocheck` header (the folder is rename-only — proper typing is a future pass). See `design-systems/CLAUDE.md` for details.
+
+### 3. Site chrome — `app/`, `app/components/`
+
+The AI Canvas website itself — navbar, homepage, component grid, component preview pages. Governed by the sand/olive/Manrope system documented in this file and in `supervisor/skills/site-design-tokens.md`. Existing components built before the new structure live in `app/components/` and are registered in `app/lib/component-registry.tsx`.
 
 ## Prompt file contract
 Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
