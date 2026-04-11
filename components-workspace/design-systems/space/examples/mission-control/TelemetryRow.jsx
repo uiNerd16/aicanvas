@@ -8,8 +8,8 @@ import { telemetryStats } from './data';
 
 export function TelemetryRow() {
   return (
-    <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
-      {telemetryStats.map(stat => (
+    <div style={{ display: 'flex', gap: 0 }}>
+      {telemetryStats.map((stat, i) => (
         <StatTile
           key={stat.code}
           code={stat.code}
@@ -18,6 +18,7 @@ export function TelemetryRow() {
           unit={stat.unit}
           delta={stat.delta}
           deltaLabel={stat.deltaLabel}
+          style={{ marginLeft: i > 0 ? -1 : 0 }}
         />
       ))}
     </div>

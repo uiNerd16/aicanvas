@@ -2,15 +2,15 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Snowflake, Boat, ArrowUpRight } from '@phosphor-icons/react'
+import { Buildings, ArrowUpRight } from '@phosphor-icons/react'
 
 const CARD_W = 280
 const CARD_H = 200
 
 const CARDS = [
-  { Icon: Sun,       title: 'Maldives',   sub: 'Crystal waters',    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&q=80&fit=crop&crop=center', dist: 8420 },
-  { Icon: Snowflake, title: 'Swiss Alps', sub: 'Powder & peaks',    img: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=520&q=80&fit=crop&crop=center', dist: 1640 },
-  { Icon: Boat,      title: 'Bali',       sub: 'Sun-soaked shores', img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', dist: 11200 },
+  { title: 'Maafushi',   sub: 'Crystal waters',    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&q=80&fit=crop&crop=center', country: 'Maldives',    hotels: 120 },
+  { title: 'Swiss Alps', sub: 'Powder & peaks',    img: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=520&q=80&fit=crop&crop=center', country: 'Switzerland', hotels: 87  },
+  { title: 'Bali',       sub: 'Sun-soaked shores', img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', country: 'Indonesia',   hotels: 250 },
 ] as const
 
 // Deck slots: index 0 = back, index 1 = middle, index 2 = front
@@ -19,8 +19,6 @@ const POSITIONS = [
   { x:   6, y: -18, rotate:  4, zIndex: 2, opacity: 1.00 }, // middle — peeks top-right
   { x:   0, y:   0, rotate:  0, zIndex: 3, opacity: 1.00 }, // front  — no rotation, full opacity
 ] as const
-
-type PhosphorIcon = typeof Sun | typeof Snowflake | typeof Boat
 
 function useCountUp(target: number, active: boolean) {
   const [value, setValue] = useState(0)
@@ -40,18 +38,25 @@ function useCountUp(target: number, active: boolean) {
   return value
 }
 
-function DistanceCounter({ target, active }: { target: number; active: boolean }) {
+function HotelsCounter({ target, active }: { target: number; active: boolean }) {
   const value = useCountUp(target, active)
   return (
-    <span style={{
-      fontSize: 10,
-      fontWeight: 500,
-      color: 'rgba(255,255,255,0.45)',
-      letterSpacing: '0.04em',
-      fontVariantNumeric: 'tabular-nums',
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5,
     }}>
-      {value.toLocaleString()} km
-    </span>
+      <Buildings weight="regular" size={16} style={{ color: '#E8E8DF', opacity: 0.55 }} />
+      <span style={{
+        fontSize: 10,
+        fontWeight: 500,
+        color: 'rgba(255,255,255,0.55)',
+        letterSpacing: '0.04em',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        hotels <span style={{ color: 'rgba(255,255,255,0.85)', marginLeft: 2 }}>{value}</span>
+      </span>
+    </div>
   )
 }
 
@@ -100,7 +105,6 @@ export function FloatingCards() {
         {CARDS.map((card, i) => {
           const posIndex = order.indexOf(i)
           const pos = POSITIONS[posIndex]
-          const CardIcon: PhosphorIcon = card.Icon
           const isFront = posIndex === 2
           const isExiting = exitingCard === i
           return (
@@ -116,7 +120,9 @@ export function FloatingCards() {
                 borderRadius: 16,
                 background: '#2A2825',
                 border: '1px solid rgba(255,255,255,0.10)',
-                boxShadow: '8px -8px 24px rgba(0,0,0,0.35)',
+                boxShadow: isDark
+                  ? '8px -8px 24px rgba(0,0,0,0.35)'
+                  : '8px -8px 24px rgba(0,0,0,0.15)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
@@ -158,10 +164,10 @@ export function FloatingCards() {
                 gap: 8,
                 flex: '0 0 auto',
               }}>
-                {/* Header row: icon tag left, arrow button right */}
+                {/* Header row: hotels counter left, arrow button right */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {/* Icon */}
-                  <CardIcon weight="regular" size={18} style={{ color: '#E8E8DF', opacity: 0.55 }} />
+                  {/* Left cluster: hotels counter */}
+                  <HotelsCounter target={card.hotels} active={isFront && !isExiting} />
 
                   {/* Arrow button */}
                   <div style={{
@@ -185,7 +191,14 @@ export function FloatingCards() {
                   }}>
                     {card.title}
                   </p>
-                  <DistanceCounter target={card.dist} active={isFront && !isExiting} />
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: 'rgba(255,255,255,0.45)',
+                    letterSpacing: '0.04em',
+                  }}>
+                    {card.country}
+                  </span>
                 </div>
               </div>
 
