@@ -23,7 +23,7 @@ Known recurring mistakes are logged in `supervisor/mistakes.md`.
 ## What this project is
 AI Canvas (aicanvas.me) is an open component marketplace where every component ships with:
 - Its full source code
-- Expert-crafted prompts for 5 AI coding tools: V0, Bolt, Lovable, Claude Code, Cursor
+- Expert-crafted prompts for 4 AI platforms: Claude, GPT, Gemini, V0
 
 ## Tech stack
 - **Framework**: Next.js 16 App Router (`app/` directory)
@@ -92,24 +92,23 @@ Every component lives in its own folder under `components-workspace/`:
 components-workspace/
   my-component/
     index.tsx    ← the React component (export named function)
-    prompts.ts   ← prompts for all 5 platforms
+    prompts.ts   ← prompts for the 4 platforms (any subset allowed)
     spec.md      ← brief approved by user before building
 ```
 
 Existing components (built before this structure) live in `app/components/` and are already registered in `app/lib/component-registry.tsx`.
 
 ## Prompt file contract
-Every `prompts.ts` must export a `prompts` object typed as `Record<Platform, string>` where `Platform = 'V0' | 'Bolt' | 'Lovable' | 'Claude Code' | 'Cursor'`.
+Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
 
 ```ts
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Record<Platform, string> = {
+export const prompts: Partial<Record<Platform, string>> = {
+  Claude: `...`,
+  GPT: `...`,
+  Gemini: `...`,
   V0: `...`,
-  Bolt: `...`,
-  Lovable: `...`,
-  'Claude Code': `...`,
-  Cursor: `...`,
 }
 ```
 

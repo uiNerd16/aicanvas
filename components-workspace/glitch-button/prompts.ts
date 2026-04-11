@@ -189,4 +189,78 @@ Outer div: <div ref={containerRef} className="flex h-full w-full items-center ju
 Render 4 corner brackets via (['tl','tr','bl','br'] as const).map(corner => <span key={corner} className="pointer-events-none absolute" style={{ width:10, height:10, top:corner.startsWith('t')?0:'auto', bottom:corner.startsWith('b')?0:'auto', left:corner.endsWith('l')?0:'auto', right:corner.endsWith('r')?0:'auto', borderColor:isHovered?colors.textDim:colors.borderDefault, borderTopWidth:corner.startsWith('t')?1.5:0, borderBottomWidth:corner.startsWith('b')?1.5:0, borderLeftWidth:corner.endsWith('l')?1.5:0, borderRightWidth:corner.endsWith('r')?1.5:0, borderStyle:'solid', transition:'border-color 0.3s' }}/>)
 
 Then <span className="relative z-10">{displayText}</span>. Close button, motion.div, outer div.`,
+
+  V0: `Create a React client component named \`GlitchButton\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useState\`, \`useRef\`, \`useEffect\`, and \`useCallback\` from React, plus \`motion\` from \`framer-motion\`. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A single terminal-style button sitting dead-centre on a warm, almost-black canvas. The button has no background fill and no rounded corners — instead, four tiny L-shaped corner brackets frame it, one in each corner, drawn as thin 1.5px border segments about 10px long. The label reads exactly \`INITIALIZE\` in a mono font, semibold, uppercase, with wide tracking — it should feel like something you'd see on an old CRT.
+
+When the cursor enters the button, two things happen at once:
+1. The corner brackets brighten from a dim neutral to the accent colour.
+2. The label scrambles. Each character flickers through random glitch symbols, then characters resolve one-by-one left to right until the full word \`INITIALIZE\` is back. The whole scramble completes in 700ms. Character updates happen every 40ms — fast enough to feel hectic but slow enough that the eye can track individual flips.
+
+A soft glow also appears when hovered: a 20px outer box-shadow plus a 12px inset shadow, both in the accent colour at low alpha. The shadow transitions in over 0.3s so hover-in/hover-out feels smooth rather than binary. On click, the button scales down to 0.97 with a snappy spring (stiffness 400, damping 30).
+
+On mouse leave the label snaps instantly back to \`INITIALIZE\`, the glow fades, and the brackets return to their dim colour.
+
+On mount, the whole button slides up 16px and fades in over 0.5s (easeOut) — a quiet entrance.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Watch both for class attribute changes with a \`MutationObserver\`. Keep it in \`useState isDark\`.
+
+Backgrounds — set as inline style on both the outer container AND the button (they match so the button reads as a cutout rather than a filled shape):
+- Dark: \`#110F0C\`
+- Light: \`#F5F1EA\`
+
+Palettes (as plain JS objects):
+- **Dark**: text \`#00ff41\` (classic terminal green), textDim \`rgba(0, 255, 65, 0.6)\`, glow \`rgba(0, 255, 65, 0.15)\`, borderDefault \`#2E2A24\` (a muted brown that almost disappears into the background).
+- **Light**: text \`#2a6b0a\` (a deep forest green with enough contrast for a warm cream background), textDim \`rgba(42, 107, 10, 0.7)\`, glow \`rgba(42, 107, 10, 0.12)\`, borderDefault \`#DDD8CE\`.
+
+## Key constants
+- \`LABEL = 'INITIALIZE'\`
+- \`GLITCH_CHARS = '@#$%&!*^~<>?+='\` — the pool of junk symbols
+- \`SCRAMBLE_DURATION = 700\` (ms, total time for the full resolve)
+- \`SCRAMBLE_INTERVAL = 40\` (ms between character updates inside the loop)
+
+## Scramble logic
+Drive the scramble with \`requestAnimationFrame\`. Keep a \`rafRef\` for the frame id, an \`isHoveredRef\` mirror of the hover boolean (so the tick closure always reads the current state), a \`startTimeRef\` captured at hover enter via \`performance.now()\`, and a \`lastUpdateRef\` to throttle updates to every 40ms.
+
+Inside the tick:
+1. If \`isHoveredRef\` is false, bail out entirely.
+2. Compute \`elapsed = timestamp - startTimeRef\` and \`resolvePerChar = 700 / LABEL.length\` (comes out to ~64ms per character).
+3. If \`timestamp - lastUpdateRef < 40\`, just schedule the next frame and return — this throttles the visible update rate without starving the RAF loop.
+4. Otherwise stamp \`lastUpdateRef = timestamp\` and compute \`resolvedCount = Math.min(Math.floor(elapsed / resolvePerChar), LABEL.length)\`. That's how many characters from the left should already be locked to their final letter.
+5. If \`resolvedCount >= LABEL.length\`, set the display text to \`LABEL\` and stop (don't reschedule).
+6. Otherwise build a char array: for \`i < resolvedCount\` use \`LABEL[i]\`, for the rest use a random pick from \`GLITCH_CHARS\`. Join into a string and push to state. Schedule the next frame.
+
+Hold the displayed text in \`useState displayText\` (init to \`LABEL\`).
+
+## Handlers
+- **mouse enter**: set both \`isHoveredRef.current = true\` and \`setIsHovered(true)\`, stamp \`startTimeRef = performance.now()\`, reset \`lastUpdateRef = 0\`, cancel any in-flight RAF, then kick off a fresh \`requestAnimationFrame(scrambleTick)\`.
+- **mouse leave**: flip \`isHoveredRef.current = false\` and \`setIsHovered(false)\`, cancel the RAF, and snap \`displayText\` back to \`LABEL\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="flex h-full w-full items-center justify-center" style={{ background }}>
+  <motion.div initial={{opacity:0, y:16}} animate={{opacity:1, y:0}} transition={{duration:0.5, ease:'easeOut'}}>
+    <motion.button
+      onMouseEnter={...} onMouseLeave={...}
+      className="relative cursor-pointer px-8 py-4 font-mono text-lg font-semibold tracking-widest"
+      style={{ background, color: colors.text, boxShadow: isHovered ? \`0 0 20px \${colors.glow}, inset 0 0 12px \${colors.glow}\` : 'none', transition:'box-shadow 0.3s' }}
+      whileTap={{scale:0.97}} transition={{type:'spring', stiffness:400, damping:30}}
+    >
+      {/* four absolute-positioned corner bracket spans */}
+      <span className="relative z-10">{displayText}</span>
+    </motion.button>
+  </motion.div>
+</div>
+\`\`\`
+
+## Corner brackets
+Map over \`['tl','tr','bl','br'] as const\`. Each bracket is a pointer-events-none absolute span, 10px × 10px, pinned to the matching corner (\`top:0\` or \`bottom:0\`, \`left:0\` or \`right:0\`, the other two set to \`'auto'\`). Only two of its four borders are drawn — the two that form the L — at 1.5px solid. The border colour is \`colors.textDim\` when hovered, else \`colors.borderDefault\`, with a \`transition: 'border-color 0.3s'\` so they fade in/out with the glow rather than popping.
+
+## Cleanup
+Store the RAF id in \`rafRef\` and clear it inside a \`cleanup\` \`useCallback\`. Run that cleanup on unmount via a \`useEffect\` return. Also disconnect the theme MutationObserver.
+
+The finished piece should feel like a single authoritative CRT button — quiet and minimal at rest, then kicking into a brief, tightly-timed terminal scramble the instant you hover, with a soft green glow breathing in underneath.`,
 }

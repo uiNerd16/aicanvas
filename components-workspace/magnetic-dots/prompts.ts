@@ -147,4 +147,58 @@ update sets mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }
 
 ## Cleanup
 let alive=true; cancelAnimationFrame(animId); ResizeObserver.observe(canvas.parentElement) calling build on change — disconnect on unmount.`,
+
+  V0: `Create a React client component named \`MagneticDots\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\` and \`useRef\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes. There is no overlay text — this one is all about the dots.
+
+## The visual
+A full-bleed canvas covered in a quiet, perfectly-regular grid of tiny dots. At rest the grid is still and orderly. When the cursor enters, the dots near it lean toward the pointer like iron filings pulled toward a magnet — the closer they are, the harder they're yanked. When the cursor leaves, every dot glides back to its home position on a soft spring, slightly overshooting and settling. The feeling should be gooey and physical, not snappy: think a slow-motion magnet dragging through a bed of sand. Fast cursor swipes should feel smooth, not jittery — the field lags and catches up rather than teleporting.
+
+## Theme and background
+Detect theme by looking up \`.closest('[data-card-theme]')\` on the container and checking for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Watch for changes with a \`MutationObserver\` on both \`documentElement\` and the card wrapper (if present) listening for class attribute changes. Store the current theme in an \`isDarkRef\` so the render loop can read it without rerendering.
+
+Background is set as an inline style on the outer container: \`#110F0C\` on dark (a very deep warm near-black), \`#F5F1EA\` on light (a warm off-white). The dots themselves are drawn as \`rgba(255,255,255,0.5)\` on dark and \`rgba(28,25,22,0.4)\` on light — soft but clearly visible against the backgrounds.
+
+## Key constants (use these exact numbers)
+- \`SPACING = 22\` — pixels between dot centres
+- \`DOT_RADIUS = 1.5\` — canvas arc radius
+- \`INFLUENCE_R = 180\` — magnetic pull radius in pixels
+- \`SPRING_K = 0.055\` — spring stiffness toward rest (soft, so dots float back rather than snap)
+- \`DAMPING = 0.11\` — velocity decays by 11% per frame, so \`vx *= 0.89\` each step (lets the dots glide)
+- \`MAG_STRENGTH = 16\` — peak magnetic force at the cursor centre
+- \`LERP_FACTOR = 0.06\` — ease factor for the overall hover strength on enter/leave (a gentle fade in and out of magnetism)
+- \`MOUSE_LERP = 0.14\` — ease factor for the smoothed cursor position, so fast swipes drag the field instead of teleporting it
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+## Building the dot grid
+Each dot is an object \`{ restX, restY, x, y, vx, vy }\` — its rest position (its home) plus its live position and velocity. Compute \`cols = Math.ceil(cw/SPACING) + 1\` and \`rows = Math.ceil(ch/SPACING) + 1\` (one extra row/column so the grid fully bleeds past the edges), then offset by \`ox = (cw % SPACING) / 2\` and \`oy = (ch % SPACING) / 2\` so the grid sits visually centred. On rebuild (resize), preserve any existing dots by keying a \`Map\` on \`\${restX},\${restY}\` and reusing matching entries — this keeps the physics state continuous through resizes instead of snapping everything back to rest.
+
+## The frame loop
+On every animation frame:
+
+1. Ease an overall \`hoverStr\` value toward \`1\` when the pointer is present and toward \`0\` when it isn't, using \`hoverStr += (target - hoverStr) * 0.06\`. This gives a gentle fade-in and fade-out of the whole magnetic effect so it never pops on or off.
+2. Smooth the cursor position: keep two variables \`smoothMx\` / \`smoothMy\` initialised to an off-screen sentinel like \`-99999\`. On the first frame the pointer is present, snap them to the raw cursor so there's no initial lag. On subsequent frames, \`smoothMx += (raw.x - smoothMx) * 0.14\` and the same for Y. When the pointer leaves, reset both to the sentinel. This is what makes fast swipes feel like dragging a heavy magnet through the field rather than snapping to it.
+3. Clear the canvas. Set \`fillStyle\` to the theme-appropriate dot colour above.
+4. For each dot, compute the squared distance to the smoothed cursor. If \`hoverStr > 0.001\` and the dot is within \`INFLUENCE_R\` (and not sitting exactly on the cursor), compute a soft falloff \`t = 1 - dist/INFLUENCE_R\` and a force of \`t * t * MAG_STRENGTH * hoverStr\`. Add \`(-dx/dist) * force\` to \`vx\` and \`(-dy/dist) * force\` to \`vy\` — the negative sign pulls the dot toward the cursor. The squared falloff means dots right under the cursor get a hard tug while dots near the edge of the radius barely feel anything.
+5. Always apply the spring pull back toward rest: \`vx += (restX - x) * 0.055\`, \`vy += (restY - y) * 0.055\`. Then apply damping: \`vx *= 0.89\`, \`vy *= 0.89\`. Then integrate: \`x += vx\`, \`y += vy\`.
+6. Draw the dot as a filled circle at its current \`(x, y)\` with radius \`1.5\`.
+
+The combination of soft stiffness, gentle damping, and the eased hover strength is what gives the grid its floaty, gooey settle — don't be tempted to stiffen it up.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, and \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\` so the frame loop knows to ease \`hoverStr\` back to 0 and reset the smoothed cursor sentinel. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: '#110F0C' }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+</div>
+\`\`\`
+The initial inline background is fine as \`#110F0C\` — the theme detection effect will immediately overwrite it to match the current theme.
+
+## Cleanup
+Use an \`alive\` flag inside the physics effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should feel like a quiet magnetic field — orderly and still until you enter it, then a soft local warp that follows the cursor and exhales back to rest when you leave.`,
 }

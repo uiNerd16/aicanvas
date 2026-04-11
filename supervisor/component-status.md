@@ -3,7 +3,7 @@
 | Component | Stage | Notes |
 |---|---|---|
 | easter-rabbit | deleted | Removed by user request |
-| floating-cards | integrated | Built before agent system |
+| traveldeck | integrated | Built before agent system — slug renamed from floating-cards (folder unchanged) |
 | text-blur-reveal | integrated | Built before agent system |
 | particle-sphere | integrated | Built before agent system |
 | polaroid-stack | integrated | Built before agent system |
@@ -18,7 +18,7 @@
 | pill-toggle | integrated | iOS-style pill slider, grey→green track, spring thumb, responsive — dualTheme |
 | mark-toggle | integrated | Earth/sand pill toggle, X→checkmark icon morph on thumb, spring animation — dualTheme |
 | taga-toggle | integrated | Playful pill toggle, dead face (×× eyes) → happy face (arc eyes, smile), grey→yellow — dualTheme |
-| x-grid | reviewed | v2 update pending re-integration: breathing wave (sin diagonal ±30%), RADIUS 340, ~1s trail decay, connection mesh, dualTheme — ready to push |
+| x-grid | integrated | v2 live: breathing diagonal wave (±30%), RADIUS 340, ~1s trail decay, connection mesh, dualTheme, V0 prompt lane added |
 | noise-bg | integrated | Random grain dots, Gaussian glow, cached neighbour connections on hover, dualTheme |
 | circle-field | abandoned | Replaced by bubble-field concept |
 | bubble-field | integrated | Grid circles burst+reform on hover, cyclic phase animation, pastel blue palette, dualTheme |

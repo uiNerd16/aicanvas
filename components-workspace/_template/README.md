@@ -10,15 +10,15 @@ Use **kebab-case** for the folder name (e.g. `glowing-button`, `wave-text`).
 
 ### 2. Edit `index.tsx`
 - Rename `ComponentName` to the PascalCase version of your folder name
-- Build the component inside `<div className="flex h-full w-full items-center justify-center bg-zinc-950">`
+- Build the component inside `<div className="flex h-full w-full items-center justify-center bg-sand-100 dark:bg-sand-950">`
 - The preview container is **480×480px** — design for this viewport
 - Use **Framer Motion** for all animations
-- Use `@phosphor-icons/react` with `weight="duotone"` for icons
+- Use `@phosphor-icons/react` with `weight="regular"` for icons (never `duotone` or `fill` — known mistake #002)
 - Mark the file `'use client'`
 - Clean up all effects (cancel RAF, stop animations, unsubscribe MotionValues)
 
 ### 3. Edit `prompts.ts`
-Fill in all 5 platform prompts. Each prompt must be **fully self-contained** — the AI reading it should be able to recreate the component without seeing your code. Include:
+Fill in up to 4 platform prompts (Claude, GPT, Gemini, V0 — any subset applicable to the component). Each prompt must be **fully self-contained** — the AI reading it should be able to recreate the component without seeing your code. Include:
 - All constants and their values
 - Animation timing, easing, and keyframes
 - Color values and class names

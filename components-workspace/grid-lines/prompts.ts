@@ -397,4 +397,95 @@ Outer div: className "relative h-full w-full overflow-hidden", style background 
 
 ## Cleanup
 alive=false; cancelAnimationFrame(animId); ro.disconnect(); observer.disconnect().`,
+
+  V0: `Create a React client component named \`GridLines\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. Pure canvas. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A quiet, architectural dot-grid lattice drawn on a full-bleed canvas: small dots sit at every intersection, with thin horizontal and vertical lines running between them — like graph paper. At rest the whole thing is barely-there, just a hint of structure in the background. When you move the cursor over it, two things happen at once:
+
+1. A soft Gaussian halo of illumination follows the pointer. Dots inside it brighten and fatten, and the connecting lines brighten with them — so hovering reveals a warm patch of graph paper inside an otherwise dim field.
+2. The grid physically bulges outward around the cursor, like a magnifying lens pressed against it. Dots at mid-distance from the pointer get the strongest outward push, while dots directly under the cursor and dots at the very edge of the influence radius don't move at all — the push follows a \`sin(π·t)\` bell curve. Because both endpoints of every line are being shoved around, the lines bend as they cross the halo. The lattice visibly warps.
+
+When the cursor leaves, everything smoothly settles back into place over about a second.
+
+Centered in the frame are two overlay labels:
+- A title reading exactly \`Grid Lines\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to illuminate\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both labels sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, they use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` for the render loop. Watch for theme changes with a \`MutationObserver\` listening for class attribute changes on \`documentElement\` (and on the card wrapper if present).
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The dots and lines themselves are drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light.
+
+## Key constants
+- \`SPACING = 20\` — pixels between dot centres
+- \`RADIUS_FRAC = 0.30\` — hover influence radius as a fraction of \`max(cw, ch)\` (so on a 480px preview the halo is ~144px wide)
+- \`LENS_FRAC = 0.06\` — maximum outward lens push, as a fraction of the radius (subtle warp, not a fisheye)
+- resting dot alpha: \`0.13\` on dark, \`0.22\` on light
+- resting line alpha: \`0.07\` on dark, \`0.12\` on light
+- peak lit alpha: \`0.95\`
+- mouse smoothing factor: \`0.14\` (easing the raw cursor position toward its target every frame so the warp glides rather than snaps)
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+Build a flat \`dots\` array plus a 2D \`grid[row][col]\` lookup at the same time. Use \`Math.floor(cw/SPACING)+2\` columns and rows so the grid fully overruns the bleed, offset by \`(cw%SPACING)/2\` and \`(ch%SPACING)/2\` so it sits visually centred. Each dot stores \`{ x, y, b, l, px, py }\`:
+- \`x, y\` — the dot's rest position
+- \`b\` — smoothed brightness (0→1)
+- \`l\` — smoothed lens influence (0→1)
+- \`px, py\` — current displaced position, recomputed every frame
+
+After the dot pass, build two segment arrays: \`hSegs\` (each dot paired with its right neighbour, when one exists) and \`vSegs\` (each dot paired with the dot below). Each segment is just \`{ a: Dot, b: Dot }\` — store references, not copies, so the draw pass automatically picks up the displaced positions.
+
+On resize, map the old dots by their rounded \`x,y\` string key so their brightness and lens values persist across the rebuild — no flicker when the preview box changes size.
+
+## The frame loop
+On every animation frame, clear the canvas, then:
+
+1. Smooth the mouse. Keep a \`smoothMx, smoothMy\` pair in the effect closure. If there's a raw cursor position, ease the smoothed values toward it by \`0.14\` per frame. If the cursor left, reset both smoothed values to an off-screen sentinel like \`-99999\` so the distance math naturally excludes every dot.
+2. Compute \`R = RADIUS_FRAC * max(cw, ch)\`, \`r2 = R*R\`, and \`lensPush = LENS_FRAC * R\`. Pick \`dotRGB\`, \`baseA\` (resting dot alpha) and \`lineRestA\` (resting line alpha) from the current theme.
+
+### Pass 1 — update every dot
+For each dot, compute \`dx = x - mx\`, \`dy = y - my\`, and both \`dist2\` and \`dist\`.
+
+- **Brightness target** — a Gaussian halo: \`tgtB = dist2 < r2 ? Math.exp(-dist2 / (r2 * 0.45)) : 0\`. This gives a soft, creamy falloff rather than a hard circle.
+- **Lens target** — a sine bell curve: \`tgtL = dist < R ? Math.sin(Math.PI * (dist / R)) : 0\`. Peaks at mid-radius, hits zero at the cursor itself and at the edge of R.
+
+Ease both values toward their targets asymmetrically — fast on the way up, slow on the way down. Use \`0.16\` rising / \`0.07\` falling for brightness, and \`0.18\` rising / \`0.08\` falling for lens influence. Snap either one to 0 when it drops below \`0.004\` so idle dots don't keep burning cycles.
+
+Then compute the displaced position. If \`dist > 0.5\` and \`l > 0.004\`, push the dot outward along the cursor→dot unit ray by \`lensPush * l\` pixels:
+\`\`\`
+push = lensPush * d.l
+ux = dx / dist; uy = dy / dist
+d.px = d.x + ux * push
+d.py = d.y + uy * push
+\`\`\`
+Otherwise \`px = x\`, \`py = y\`.
+
+### Pass 2 — draw the lines through the displaced positions
+Iterate all segments (\`[...hSegs, ...vSegs]\`). For each segment, average the brightness of its two endpoints: \`segB = (a.b + b.b) / 2\`. Line alpha lerps from \`lineRestA\` toward \`0.95\` by \`segB\`. Line width grows from \`0.5\` to \`1.1\` (\`0.5 + segB * 0.6\`). Draw from \`a.px, a.py\` to \`b.px, b.py\` — because both endpoints have been displaced, the lines naturally bend as they cross the halo.
+
+### Pass 3 — draw the dots on top at their displaced positions
+For each dot: \`alpha = baseA + (0.95 - baseA) * b\`, \`sz = 1 + b * 2.2\`. Fill a small square at \`(px - sz/2, py - sz/2)\` using \`ctx.fillRect\`. Dots land on top of their own lines.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\`. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: ... }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span>Grid Lines</span>
+    <span>hover to illuminate</span>
+  </div>
+</div>
+\`\`\`
+
+## Cleanup
+Use an \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should read as a quiet piece of graph paper most of the time, and as a warm, magnified lens that gently warps the lattice whenever the cursor passes over it.`,
 }

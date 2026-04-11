@@ -292,4 +292,61 @@ useEffect(() => {
   </div>
   <div className="pointer-events-none absolute inset-0" style={{backgroundImage:'radial-gradient(circle, rgba(0,0,0,0.48) 1.3px, transparent 1.3px)', backgroundSize:'3.8px 3.8px'}}/>
 </div>`,
+
+  V0: `Create a React client component named \`NeonClock\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useState\` and \`useEffect\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and is intentionally dark-only — it's a glowing LCD fixture, so the background stays the same in both light and dark site themes.
+
+## The visual
+A retro cyan 7-segment LCD clock that looks like it's been lifted out of an 80s alarm radio and polished. Big \`HH:MM\` digits dominate the display, a steady colon separates hours from minutes, then a smaller \`SS\` seconds readout sits to the right at roughly half the height. Between the minutes and the seconds there's a tiny blinking colon that ticks on and off once per second. Floating just above the seconds, right-aligned to them, are two small \`AM\` and \`PM\` labels — whichever one is active glows bright cyan, the other sits dim. Below the whole time row, spanning exactly the same width, a row of weekday abbreviations \`SUN MON TUE WED THU FRI SAT\` is distributed edge-to-edge; the current day glows, the rest are ghosted. Under that, centered, a long-form date like \`APRIL 11, 2026\` in dimmed cyan.
+
+A subtle LCD pixel-grid overlay sits on top of everything — a fine dotted darkening pattern that makes the display feel like a real screen with visible sub-pixels rather than a flat SVG.
+
+## Overlay text (exact strings)
+- Weekday row: \`SUN\`, \`MON\`, \`TUE\`, \`WED\`, \`THU\`, \`FRI\`, \`SAT\`
+- \`AM\` and \`PM\`
+- Date formatted like \`APRIL 11, 2026\` (month name uppercase, day numeric, year numeric)
+
+## Colors (dark-only — same in both themes)
+- Background: \`#060a0a\` — nearly black with a hint of cyan shadow
+- Primary cyan (lit segments, active labels): \`#55E8E2\`
+- Inactive segments of a digit (the "off" bars that make the whole 8 shape ghost-visible): \`rgba(85,232,226,0.055)\` — barely there
+- Inactive text labels (dim AM/PM, dim weekdays): \`rgba(85,232,226,0.28)\`
+- Date row text: \`rgba(85,232,226,0.65)\`
+- Glow on lit SVG shapes: CSS filter \`drop-shadow(0 0 3px #55E8E2) drop-shadow(0 0 8px #55E8E299)\`
+- Glow on lit text: \`textShadow: '0 0 5px #55E8E2, 0 0 11px #55E8E288'\`
+
+Font family for the whole component: \`"Courier New", Courier, monospace\`.
+
+## Digit rendering — build these as inline SVG
+Don't use a font for the digits. Draw each digit as a 7-segment SVG with custom bevelled polygon segments so it looks like a real LCD, not a rendered number. Use a viewBox of \`0 0 42 80\`. Each segment is a hexagonal polygon 6 units thick with a 3-unit bevel at each tip (so the corners of the bars kiss at angled cuts, the way a real LCD is cut). Leave a 2-unit gap at the outside edges and around the middle bar.
+
+A horizontal bar at vertical position \`y\` has six points: left tip, top-left shoulder, top-right shoulder, right tip, bottom-right shoulder, bottom-left shoulder. A vertical bar at horizontal position \`x\` spanning \`y1\` to \`y2\` is the same hexagon rotated 90 degrees. The top bar sits at y=2, the middle bar at y=37, the bottom bar at y=72. The left vertical lives at x=2, the right vertical at x=34. The top and bottom verticals span the full height from the top bar to the middle and from the middle to the bottom bar respectively, so a "1" is exactly as tall as an "8".
+
+Use a standard 7-segment lookup (segments \`a,b,c,d,e,f,g\` = top, top-right, bot-right, bottom, bot-left, top-left, middle) and fill lit segments with the primary cyan + glow filter, unlit segments with the very faint \`rgba(85,232,226,0.055)\`. The unlit segments being barely visible is what gives the display its "ghost 8" character — every digit subtly shows the full 8 behind it. The SVG should render with \`overflow: visible\` so the glow isn't clipped by the viewBox.
+
+## Colon dots
+Colons are their own SVG, sized about 44% the width of a digit at the same height. Two circles stacked — one at roughly 30% down the display, one at 68% down — each with radius ~12.5% of the digit width. The steady colon between \`HH\` and \`MM\` is always lit (cyan + glow). The colon between \`MM\` and \`SS\` toggles on/off every second; when off, render the dots in the same faint \`rgba(85,232,226,0.055)\` as unlit digit segments so they dim rather than vanish.
+
+## Sizes (in pixels)
+- Big digits (\`HH\` and \`MM\`): 50 wide
+- Small digits (\`SS\`): 24 wide (about half)
+- Gap between every flex child in the time row: 3
+- AM/PM labels: fontSize 13, letterSpacing 0.08em, with a 6px gap between AM and PM, sitting 3px above the seconds digits
+- Weekday row and date row: fontSize 13, letterSpacing 0.05em and 0.1em respectively
+- The weekday row is 13px below the time row; the date row is 5px below the weekday row
+- The weekday and date rows should have their width locked to the exact measured width of the \`HH:MM:SS\` time row so the edges line up perfectly. Compute it as \`4*50 + round(50*0.44) + round(24*0.44) + 2*24 + 7*3\` which comes out to 302px.
+
+## Layout
+Root is a full-size flex container, items centred, with the cyan-black background and the monospace font family set inline. Inside, put a single left-anchored column (\`alignItems: 'flex-start'\`) so the whole assembly — time row, weekday row, date row — shares a consistent left edge and gets centred together as one block.
+
+The time row itself is a flex row with \`alignItems: 'flex-end'\` so the small seconds digits hug the baseline of the big digits: big \`H H\`, big steady colon, big \`M M\`, small blinking colon, then a small vertical stack containing the AM/PM row on top and the small \`S S\` digits below. The AM/PM stack is right-aligned so the labels hang off the right edge of the seconds.
+
+Below that row, the weekday row uses \`justify-content: space-between\` with its fixed 302px width so \`SUN\` and \`SAT\` pin to the edges and the others distribute evenly. The date row is centred inside the same 302px.
+
+## LCD overlay
+Drop a \`pointer-events-none\` \`absolute inset-0\` div on top of everything with a repeating radial-gradient background: \`radial-gradient(circle, rgba(0,0,0,0.48) 1.3px, transparent 1.3px)\` with \`backgroundSize: '3.8px 3.8px'\`. This produces the fine dotted darkening that reads as LCD sub-pixels.
+
+## The tick
+One piece of state tracks the current time, another tracks whether the MM:SS colon is currently on. A single \`setInterval\` at 1000ms reads the fresh time via \`new Date()\`, pads hours/minutes/seconds to 2 digits, converts hours to 12-hour format (\`h % 12 || 12\`), records whether the hour is PM, reads \`getDay()\` for the weekday index, and formats the date with \`toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()\`. On every tick also flip the blinking colon. Clean up the interval in the effect's teardown.
+
+The finished piece should feel like a quiet, confident LCD artefact — barely-there ghost segments behind bright digits, a steady heartbeat on the colon, and the tiny dot grid making it feel less like SVG and more like glass.`,
 }

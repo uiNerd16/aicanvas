@@ -4,12 +4,14 @@ You build new components in isolation. Your job ends when the component works. I
 
 ## Skills library — read before building
 
-- `skills/component-anatomy.md` — required structure, naming conventions, what to avoid
-- `skills/animation-patterns.md` — Framer Motion patterns, spring presets, cleanup patterns
-- `skills/design-tokens.md` — colors, typography, icon rules (quick reference)
-- `skills/prompts-guide.md` — how to write the 5 platform prompts
-- `skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
-- `skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
+These live in the top-level `skills/` folder at the **project root** (one level up from this file):
+
+- `../skills/component-anatomy.md` — required structure, naming conventions, what to avoid
+- `../skills/animation-patterns.md` — Framer Motion patterns, spring presets, cleanup patterns
+- `../skills/design-tokens.md` — colors, typography, icon rules (quick reference)
+- `../skills/prompts-guide.md` — how to write the 4 platform prompts
+- `../skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
+- `../skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
 
 ## Extended skills (`.claude/skills/`) — read for complex visual components
 
@@ -18,7 +20,7 @@ You build new components in isolation. Your job ends when the component works. I
 
 ## Your scope
 - Build inside `components-workspace/<component-name>/` only
-- Create `index.tsx` (the component) and `prompts.ts` (5 platform prompts)
+- Create `index.tsx` (the component) and `prompts.ts` (4 platform prompts: Claude, GPT, Gemini, V0 — any subset applicable to the component)
 - Do NOT touch `app/`, routing, the navbar, or any website logic
 
 ## Component requirements
@@ -36,10 +38,14 @@ You build new components in isolation. Your job ends when the component works. I
 - No hardcoded widths/heights — components must look good in a 480×480 preview box
 
 ### prompts.ts
-- Must export `prompts: Record<Platform, string>` (import `Platform` type from `../../app/components/ComponentCard`)
-- Write 5 distinct, high-quality prompts — one per platform
+- Must export `prompts: Partial<Record<Platform, string>>` (import `Platform` type from `../../app/components/ComponentCard`). `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent.
+- Write up to 4 distinct, high-quality prompts — one per platform you're providing
 - Each prompt must be self-contained: include all constants, animation specs, and implementation details so the target AI can recreate the component from scratch without seeing the code
-- Tailor tone per platform: V0/Lovable = natural language, Bolt/Cursor/Claude Code = technical spec
+- Tailor tone per platform:
+  - **Claude** — mid-density spec, trust Claude on idiomatic React + Framer Motion, "inline everything, single file"
+  - **GPT** — highest density, exact constants, easing curves, spring params, pseudo-code blocks, treat as precise executor
+  - **Gemini** — defensive and explicit, exact imports, "use these hooks and no others", inline DPR/canvas scaffolding
+  - **V0** — natural language, UI-framed, no math, prose descriptions with key constants as labelled numbers
 
 ## Coding standards
 - TypeScript throughout — no `any`, no type assertions unless unavoidable
@@ -57,7 +63,7 @@ You build new components in isolation. Your job ends when the component works. I
 When the Supervisor delegates a prompts-only task (after the user has approved the component):
 1. Read the FINAL `index.tsx` carefully — the component may have changed since the spec
 2. Write `prompts.ts` based on what the component ACTUALLY does, not what the spec says
-3. Verify all 5 platforms are filled in and each prompt is self-contained
+3. Verify the platforms specified in the brief are filled in and each prompt is self-contained (components may legitimately omit some platforms — check the brief)
 
 ## Template
 Copy from `components-workspace/_template/` to get started.
