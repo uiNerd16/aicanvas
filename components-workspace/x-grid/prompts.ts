@@ -212,4 +212,66 @@ update(cx,cy): rect = canvas.getBoundingClientRect(); mouseRef.current = { x:cx-
 
 ## Cleanup
 alive=false; cancelAnimationFrame; ResizeObserver(canvas.parentElement) → disconnect; observer.disconnect.`,
+
+  V0: `Create a React client component named \`XGrid\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A dense, quiet grid of small × marks drawn on a full-bleed canvas. At rest, every × breathes: a slow diagonal sine wave ripples across the whole field, very subtle — think "the grid is gently alive, not flashy." When you move the cursor over it, a soft circular halo of illumination follows the pointer: marks inside the halo brighten, grow slightly, and thicken. As neighbouring marks both light up, thin lines connect them — so hovering draws a faint, constellation-like mesh that decays back to nothing in about a second after the cursor leaves.
+
+Centered in the frame are two overlay labels:
+- A title reading exactly \`X Grid\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to illuminate\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both labels sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, the labels use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, use \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` for the render loop. Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The marks themselves are drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light.
+
+## Key constants
+- \`SPACING = 20\` — pixels between × centres
+- \`RADIUS = 340\` — hover influence radius in pixels (generous — roughly two-thirds of a 480px preview)
+- resting alpha: \`0.13\` on dark, \`0.25\` on light
+- peak lit alpha: \`0.92\`
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+Build a flat \`marks\` array and a 2D \`grid[row][col]\` lookup at the same time. Use \`Math.floor(cw/SPACING)+2\` columns and rows so the grid fully covers the bleed, offset by \`(cw%SPACING)/2\` and \`(ch%SPACING)/2\` to keep it visually centred. Each mark stores \`{ x, y, b, col, row }\` — \`b\` is its 0→1 brightness. Capture \`t0 = performance.now()\` for the wave clock.
+
+## The frame loop
+On every animation frame:
+
+1. Clear the canvas and reset \`ctx.lineWidth = 0.5\` first thing (this matters — the connection pass at the end of the previous frame left \`lineWidth\` in a different state, and without this reset the first few marks of each frame render with the wrong stroke).
+2. Read the mouse position from a ref (fall back to an off-screen coordinate like \`-99999\` when there's no hover, so the distance math naturally excludes everything).
+3. Compute \`t = (performance.now() - t0) / 1000\` for the breathing wave.
+4. For each mark, compute its squared distance to the cursor. If it's within \`RADIUS\`, its target brightness is \`Math.pow(1 - Math.sqrt(dist2)/RADIUS, 1.5)\` — a soft power-curve falloff that feels wide and creamy rather than a hard circle. Outside the radius, target is 0.
+5. Ease \`b\` toward its target asymmetrically: fast on the way up (\`0.16\`), slow on the way down (\`0.05\`). This gives the ~1 second tail after the cursor leaves. Snap \`b\` to 0 once it drops below \`0.004\`.
+6. Arm length grows from \`2\` to \`3\` pixels with brightness (\`arm = 2 + b\`). Stroke width grows from \`0.5\` to \`0.8\` (\`sw = 0.5 + b*0.3\`).
+7. The resting breathing wave: \`wave = Math.sin(col*0.3 + row*0.3 - t*0.5)\`. Note the diagonal — both axes contribute with the same frequency, so the ripple travels along the grid diagonal rather than straight across. Apply it as \`restingAlpha = baseA * (1 + wave*0.3)\`.
+8. Final alpha blends resting toward peak by brightness: \`alpha = restingAlpha + (0.92 - restingAlpha) * b\`.
+9. Draw the × itself: \`beginPath\`, two diagonal strokes (\`moveTo/lineTo\` from each corner of the arm box to the opposite corner), \`stroke\`.
+
+## Connection mesh
+After the mark loop, do a second pass. Reset \`ctx.lineWidth = 0.5\`. For each mark with \`b >= 0.05\`, look up four neighbours via the grid: right (\`[row][col+1]\`), below (\`[row+1][col]\`), diagonal down-right (\`[row+1][col+1]\`), and diagonal down-left (\`[row+1][col-1]\`). Using only down-and-right neighbours is important — it prevents drawing every connection twice. For each neighbour that exists and also has \`b >= 0.05\`, draw a thin line between the two mark centres at \`lineAlpha = min(d.b, n.b) * 0.4\`. Same white/near-black colour as the marks. This produces the fading constellation mesh inside the hover halo.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\`. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: ... }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span>X Grid</span>
+    <span>hover to illuminate</span>
+  </div>
+</div>
+\`\`\`
+
+## Cleanup
+Use an \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should feel quiet and architectural at rest, with the cursor acting like a soft lamp that reveals a constellation inside a sea of faint marks.`,
 }

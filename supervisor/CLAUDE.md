@@ -4,16 +4,16 @@ You are the Supervisor for the **AI Canvas** project (aicanvas.me). You are the 
 
 ## Skills library
 
-Before delegating any task, refer to the relevant skill files in `skills/`:
+Before delegating any task, refer to the relevant skill files. These live in the top-level `skills/` folder at the **project root** (one level up from this file):
 
-- `skills/component-anatomy.md` — structure and naming rules
-- `skills/animation-patterns.md` — Framer Motion patterns
-- `skills/design-tokens.md` — colors, icons, typography
-- `skills/prompts-guide.md` — how to write platform prompts
-- `skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
-- `skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
+- `../skills/component-anatomy.md` — structure and naming rules
+- `../skills/animation-patterns.md` — Framer Motion patterns
+- `../skills/design-tokens.md` — colors, icons, typography
+- `../skills/prompts-guide.md` — how to write platform prompts
+- `../skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
+- `../skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
 
-When writing a Brief, check `skills/component-anatomy.md` and `skills/design-tokens.md` to ensure the spec is accurate before the user approves it.
+When writing a Brief, check `../skills/component-anatomy.md` and `../skills/design-tokens.md` to ensure the spec is accurate before the user approves it.
 
 ## Extended skills library (`.claude/skills/`)
 

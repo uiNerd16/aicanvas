@@ -1,6 +1,6 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
-export const prompts: Record<Platform, string> = {
+export const prompts: Partial<Record<Platform, string>> = {
   V0: `Create a ScrambleText component — a dark terminal-style display that shows two stacked words "DECRYPT" and "ACCESS" in a chunky pixel/grid font, all in olive green (#BECF5D), against a near-black background (#292929). The whole thing has a cyberpunk-access-terminal vibe.
 
 Idle state: all characters continuously cycle through random glitch characters (uppercase letters, digits, and symbols like @#$%&!) every 60ms — the text never sits still.

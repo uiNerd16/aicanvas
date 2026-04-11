@@ -177,4 +177,81 @@ update(): rect = canvas.getBoundingClientRect(); mouseRef.current = { x: cx-rect
 
 ## Cleanup
 alive=false; cancelAnimationFrame; ResizeObserver.observe(canvas.parentElement) → disconnect; observer.disconnect.`,
+
+  V0: `Create a React client component named \`NoiseBg\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A full-bleed canvas dusted with tiny square pixels scattered at random — think "starfield" but quieter and more uniform, like film grain frozen in place. At rest the grain is nearly invisible: a faint static hum across the whole frame, just enough that you can tell something is there. When the cursor enters, a soft circular pool of light follows it — pixels inside the pool brighten and swell very slightly, and any two lit pixels that happen to sit close to each other get connected by a thin hair-line. The effect is a travelling constellation of tiny links that forms under the cursor and fades out in about a second after you leave.
+
+Centered in the frame are two overlay labels:
+- A title reading exactly \`Noise\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to illuminate\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both labels sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, the labels use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, use \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` (drives background + label colours) plus an \`isDarkRef\` read inside the render loop (so the RAF closure stays current without re-creating the effect). Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The grain itself is drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light.
+
+## Key constants
+- \`DENSITY = 1 / 120\` — roughly one dot per 120 square pixels of canvas area
+- \`MAX_DOTS = 3000\` — hard cap so very large previews don't tank performance
+- \`RADIUS = 200\` — hover influence radius in pixels
+- \`NEIGHBOUR_D = 35\` — maximum distance between two dots that may ever share a connection line
+- resting alpha: \`0.18\` on dark, \`0.28\` on light (the light theme needs a touch more weight to be visible on the cream background)
+- peak alpha under the cursor: \`0.14\`
+
+Note that peak alpha is actually *lower* than the resting alpha — this is intentional. The lit dots grow in size from 0.8px to 1.4px, so they read as brighter even at slightly lower opacity, and the reduced alpha keeps them from feeling harsh. Don't "fix" this.
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+## Building the dot field
+On mount (and whenever the canvas resizes), generate a fresh random dot field:
+
+1. Compute \`count = Math.min(Math.round(cw * ch * DENSITY), MAX_DOTS)\`.
+2. Create an array of that many dots, each with a random \`x\` in \`[0, cw]\`, random \`y\` in \`[0, ch]\`, and \`b = 0\` (its 0→1 brightness).
+3. Pre-compute and cache neighbour pairs *once* here, not every frame. Walk every \`(i, j)\` with \`i < j\`, compute squared distance, and if it's less than \`NEIGHBOUR_D * NEIGHBOUR_D\` (1225) push \`[dots[i], dots[j]]\` into a \`pairs\` array. This is the most important optimisation in the whole component — the inner loop is O(n²) and would be unusable every frame, but because the dots never move it only needs to run on build. Each frame then just iterates the cached pair list.
+
+Types: \`type Dot = { x: number; y: number; b: number }\` and \`type Pair = [Dot, Dot]\`.
+
+## The frame loop
+On every animation frame:
+
+1. Clear the canvas.
+2. Read the mouse position from a ref, falling back to an off-screen coordinate like \`-99999\` when there's no hover so the distance math naturally excludes everything.
+3. Pick \`dotRGB\` (\`'255,255,255'\` or \`'28,25,22'\`) and \`baseA\` (\`0.18\` or \`0.28\`) from the current dark/light ref.
+4. For each dot, compute squared distance to the cursor. If it's within \`RADIUS\`, the target brightness is \`Math.exp(-dist2 / (RADIUS * RADIUS * 0.25))\` — a gaussian-style falloff that gives a soft fuzzy pool rather than a hard circle. Outside the radius, target is 0.
+5. Ease \`b\` toward its target asymmetrically: fast on the way up (\`0.16\`), slower on the way down (\`0.07\`). This gives the soft ~1 second fade-out after the cursor leaves. Snap \`b\` to 0 once it drops below \`0.004\`.
+6. Alpha blends resting toward peak by brightness: \`alpha = baseA + (0.14 - baseA) * b\`.
+7. Size grows from \`0.8\` to \`1.4\` pixels: \`sz = 0.8 + b * 0.6\`.
+8. Draw each dot as a tiny filled square, *not* a circle: \`ctx.fillRect(x - sz/2, y - sz/2, sz, sz)\`. Rectangles are dramatically cheaper than arc/fill and at sub-2px sizes they read identically. Set \`fillStyle = \`rgba(\${dotRGB},\${alpha.toFixed(2)})\`\` for each dot.
+
+## Connection lines
+After the dot loop, walk the cached \`pairs\` array. For each \`[a, b]\`:
+- Skip the pair entirely if either dot's brightness is below \`0.05\` — this is what confines the mesh to the hover halo.
+- Compute \`lineAlpha = Math.min(a.b, b.b) * 0.10\` — lines are much fainter than the dots themselves, and they fade in and out with the weaker of the two endpoints.
+- Set \`strokeStyle\` to the same colour as the dots at that alpha, \`lineWidth = 0.5\`, and draw a single line segment from \`a\` to \`b\`.
+
+Because the pair list was filtered by distance once at build time, you never need to re-check distances in the loop — just brightness. Only dots near each other could possibly be paired, so every surviving line is guaranteed short.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\`. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: ... }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span>Noise</span>
+    <span>hover to illuminate</span>
+  </div>
+</div>
+\`\`\`
+
+## Cleanup
+Use an \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should feel like looking at a dim field of static that wakes up only where you touch it — quiet at rest, responsive but never flashy, the connection lines appearing like a whispered web under the cursor.`,
 }

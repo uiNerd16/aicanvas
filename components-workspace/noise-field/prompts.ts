@@ -212,4 +212,71 @@ Mouse listeners attach to canvas (not div) in their own useEffect; mousemove set
 
 ## Cleanup
 cancelAnimationFrame(rafId); ro.disconnect(); observer.disconnect(); listeners removed.`,
+
+  V0: `Create a React client component named \`NoiseField\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion, no canvas wrappers. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A dense grid of tiny arrow glyphs drawn on a full-bleed canvas. At rest, every arrow drifts lazily along an invisible noise flow — the whole field looks like wind-blown grass seen from above, slow and almost still, with each arrow pointing in its own slightly-different direction. When you move the cursor over it, every arrow gently turns to point AT the cursor. Arrows close to the pointer snap into alignment faster and brighter; far-away arrows lag and stay dim. As you move, there's a soft bright halo around the pointer where arrows clearly converge, fading out to a barely-visible sea of near-aligned flecks. When the cursor leaves, arrows slowly unwind back to their idle noise flow over a second or two. There are no overlay labels — just the canvas.
+
+Each arrow has a personal "wobble" — a tiny random sine phase so even when they're all pointing at the cursor they still jitter with organic life, like compass needles in a weak field. No two arrows wobble in sync.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` so the render loop always reads the current value. Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container AND also painted into the canvas each frame as the fill. Arrows are drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light — alpha varies per arrow.
+
+## Key constants
+- \`GRID_SPACING = 24\` — pixels between arrow centres
+- \`SHAFT_LEN = 8\` — half the length of the arrow's line (so the full shaft spans 16px tail-to-tip)
+- \`HEAD_SIZE = 4\` — length of each arrowhead branch
+- \`DECAY_DIST = 320\` — influence radius in pixels for the cursor's turning force (wide, roughly two-thirds of a 480px preview)
+- \`LERP_FAST = 0.12\` — per-frame rotation speed right under the cursor
+- \`LERP_MIN = 0.006\` — floor rotation speed far from the cursor
+- \`IDLE_LERP = 0.010\` — speed at which arrows drift back toward the noise flow when no cursor
+- \`WOBBLE_AMP = 0.18\` radians, \`WOBBLE_FREQ = 0.7\` — organic per-arrow jitter
+
+## Canvas setup
+Standard DPR scaffolding: read \`container.clientWidth\`/\`clientHeight\` (fall back to 480), read \`window.devicePixelRatio\`, set \`canvas.width = w*dpr\` and \`canvas.height = h*dpr\`, then \`canvas.style.width = \${w}px\` and the same for height, then \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on the container.
+
+## The grid
+Build a flat \`arrows\` array. For \`gx\` from \`GRID_SPACING/2\` up to the width, stepping by \`GRID_SPACING\`, and \`gy\` the same way, push one arrow \`{ gx, gy, angle, phase }\`. The \`angle\` starts as the noise flow's angle at that point; \`phase\` is a random value in \`[0, 2π)\` used for the arrow's personal wobble.
+
+Important: on resize, PRESERVE the existing angles and phases so the whole field doesn't snap back to the flow state. Keep a \`Map\` keyed by the string \`"gx,gy"\` from the previous arrows, and reuse \`existing.angle\`/\`existing.phase\` when rebuilding.
+
+## Two tiny helpers (inline in the module)
+- \`flowAngle(gx, gy, t)\` returns \`Math.sin(gx*0.007 + t) * Math.PI + Math.cos(gy*0.007 + t*0.6) * Math.PI\`. This is the idle "wind" — slowly varying across the grid, slowly varying in time.
+- \`lerpAngle(current, target, speed)\` takes the shortest path: compute \`diff = target - current\`, wrap it into \`(-π, π]\` with two while-loops (\`-= 2π\` while too big, \`+= 2π\` while too small), then return \`current + diff * speed\`. This prevents arrows from spinning the long way round when they cross the ±π seam.
+
+## The frame loop
+Keep a time accumulator \`t\` starting at 0 that increments by \`0.004\` every frame — this is the clock for both the flow and the wobble.
+
+On every frame:
+1. Fill the entire canvas with the theme background colour (don't \`clearRect\` — paint over it so the previous frame's arrows wipe cleanly).
+2. Set \`ctx.lineCap = 'round'\` and \`ctx.lineJoin = 'round'\` so the tiny strokes look soft rather than rectangular.
+3. Read the mouse position from a ref (may be \`null\`).
+4. For each arrow, compute its target angle:
+   - If the mouse is present: take \`dx = mouse.x - gx\`, \`dy = mouse.y - gy\`, \`dist = sqrt(dx² + dy²)\`. The proximity factor is \`Math.exp(-dist / DECAY_DIST)\` — a smooth exponential that's ~1 right at the cursor and near 0 far away. The target angle is \`Math.atan2(dy, dx)\` plus a per-arrow wobble of \`WOBBLE_AMP * (1 - proximityFactor * 0.7) * Math.sin(t * WOBBLE_FREQ + arrow.phase)\` (note: wobble shrinks near the cursor so close arrows look more "locked on"). The rotation speed is \`LERP_FAST * proximityFactor + LERP_MIN\` — fast under the cursor, a slow minimum drift elsewhere.
+   - If no mouse: target angle is \`flowAngle(gx, gy, t) + WOBBLE_AMP * 0.5 * Math.sin(t * WOBBLE_FREQ * 0.8 + arrow.phase)\`, with speed \`IDLE_LERP\`.
+   - Apply \`arrow.angle = lerpAngle(arrow.angle, target, speed)\`.
+5. Compute alpha (brightness):
+   - If mouse is present, use a TIGHTER gaussian than the one used for steering — \`proximity = Math.exp(-(dx² + dy²) / (200 * 200))\`. Dark: \`alpha = 0.06 + proximity * 0.84\`. Light: \`alpha = 0.05 + proximity * 0.75\`. This creates a small bright halo even though the turning radius is much wider — far arrows steer subtly but stay near-invisible.
+   - If no mouse, use a flat resting alpha: \`0.18\` on dark, \`0.15\` on light. The idle field is deliberately barely there.
+6. Draw the arrow. Precompute \`cos = Math.cos(angle)\`, \`sin = Math.sin(angle)\`. The tip is at \`(gx + cos*SHAFT_LEN, gy + sin*SHAFT_LEN)\`, the tail at \`(gx - cos*SHAFT_LEN, gy - sin*SHAFT_LEN)\`. Set \`strokeStyle\` to \`rgba(255,255,255,alpha)\` (dark) or \`rgba(28,25,22,alpha)\` (light). Set \`lineWidth = 1.2\` and draw the shaft as a single line from tail to tip.
+7. Then the arrowhead — a tight V at the tip, opening angle roughly 144° (i.e. \`headAngle = Math.PI - Math.PI/5\`). Set \`lineWidth = 1.0\` and draw two short lines from the tip, each of length \`HEAD_SIZE\`, at \`angle ± headAngle\` from the shaft direction. Use \`Math.cos(angle + headAngle)\` / \`Math.sin(angle + headAngle)\` for one branch and the minus version for the other.
+
+## Interaction
+Attach \`mousemove\` and \`mouseleave\` listeners directly to the CANVAS (not the outer div) inside a dedicated \`useEffect\`. On move, read \`canvas.getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave, set it to \`null\`. Remove both listeners on cleanup.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+  <canvas ref={canvasRef} className="absolute inset-0" />
+</div>
+\`\`\`
+No overlay text, no icons, no labels. Just the canvas.
+
+## Cleanup
+On unmount: \`cancelAnimationFrame\` the loop, disconnect the \`ResizeObserver\`, disconnect the theme \`MutationObserver\`, and remove the canvas mouse listeners. No leaks.
+
+The finished piece should feel like a quiet field of tiny compass needles — mostly still and barely visible, secretly alive with slow wind, then swivelling in a soft halo toward the cursor whenever you sweep across it.`,
 }

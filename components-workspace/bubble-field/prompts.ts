@@ -258,4 +258,74 @@ Outer div: className "relative h-full w-full overflow-hidden", style background 
 
 ## Cleanup
 Use an \`alive\` flag. On unmount: alive=false, cancelAnimationFrame(animId), ro.disconnect(), observer.disconnect() (in its own effect).`,
+
+  V0: `Create a React client component named \`BubbleField\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A full-bleed canvas covered by a dense uniform grid of tiny stroked circles — like graph paper made of rings. At rest, every ring just sits there at a small fixed radius and a calm opacity. Nothing breathes, nothing drifts. The stillness is the point.
+
+When the cursor enters, the nearest rings "burst": each one smoothly expands outward from its resting size, fading as it grows, until it pops out of existence entirely. There's a brief dark beat where that cell holds nothing at all, and then the ring quietly reforms — shrinks back into its original small circle, alpha climbing from zero. The bursts don't all fire in sync: each ring has its own phase offset, so the hover halo looks like a soft bubbling boil of popping and re-emerging circles. Circles furthest from the cursor pop slowly; ones right under the pointer pop fastest. When you move the cursor away, the whole area relaxes back to its quiet grid within roughly a second.
+
+Centered in the frame are two overlay labels:
+- A title reading exactly \`Bubble Field\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to burst\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both labels sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, the labels use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, use \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` for the render loop. Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The rings themselves are drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light. Resting alpha is slightly stronger on light than on dark (\`0.75\` vs \`0.55\`) so the grid reads clearly against the cream background.
+
+## Key constants
+- \`SPACING = 20\` — pixels between ring centres
+- \`RADIUS = 200\` — hover influence radius in pixels
+- \`BASE_R = 1.5\` — resting ring radius
+- \`BURST_R = 16\` — how much the ring grows during its burst expansion
+- resting alpha: \`0.55\` on dark, \`0.75\` on light
+- stroke width: always \`0.5\`
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+Build a flat \`bubbles\` array. Use \`Math.floor(cw/SPACING)+2\` columns and rows so the grid fully covers the bleed, offset by \`(cw%SPACING)/2\` and \`(ch%SPACING)/2\` to keep it centred. Each bubble stores \`{ x, y, b, phase }\` where \`b\` is its 0→1 hover brightness and \`phase\` is a 0→1 cycle pointer seeded with \`Math.random()\` — critical, the random seed is what makes the bursts desynchronised and organic instead of a synchronised sheet.
+
+## The frame loop
+On every animation frame:
+
+1. Clear the canvas.
+2. Read the mouse position from a ref (fall back to an off-screen coordinate like \`-99999\` when there's no hover, so nothing bursts when the cursor isn't there).
+3. For each bubble, compute its squared distance to the cursor. If it's within \`RADIUS\`, its target brightness is \`Math.exp(-dist2 / (RADIUS*RADIUS*0.25))\` — a gaussian falloff that feels creamy and soft, not a hard disc. Outside the radius, target is 0.
+4. Ease \`b\` toward its target asymmetrically: fast on the way up (\`0.16\`), slow on the way down (\`0.07\`). This gives the gentle ~1s tail after the cursor leaves. Snap \`b\` to 0 once it drops below \`0.004\`.
+5. Advance the burst phase only when the bubble is meaningfully lit (\`b > 0.08\`): \`phase = (phase + 0.025 * b) % 1\`. Multiplying by \`b\` means bubbles right at the cursor cycle faster and bubbles at the edge of the halo cycle slower — so the boil visibly slows down toward the rim of the hover radius.
+6. Interpret \`phase\` as a three-part cycle and draw the bubble accordingly.
+
+## The burst cycle
+With \`p = bubble.phase\` and \`baseA\` = the theme's resting alpha:
+
+- If \`b <= 0.08\` (resting): draw a simple circle at radius \`BASE_R\` with alpha \`baseA\`. This is the quiet default state and applies to almost every bubble almost all the time.
+- If \`b > 0.08\` and \`p < 0.55\` — the **expand + fade** phase. Compute \`t = p / 0.55\` (a local 0→1), radius \`r = BASE_R + t * BURST_R\` (grows from 1.5 to 17.5), alpha \`baseA * (1 - t)\` (fades to zero). Skip the draw entirely if alpha drops below \`0.004\`.
+- If \`b > 0.08\` and \`0.55 <= p < 0.72\` — the **gap**. Draw absolutely nothing. The bubble has popped. This tiny void is what sells the burst as a real "pop" rather than a crossfade.
+- If \`b > 0.08\` and \`p >= 0.72\` — the **reform** phase. Compute \`t = (p - 0.72) / 0.28\` (local 0→1), radius \`r = BASE_R * t\` (grows from 0 to 1.5), alpha \`baseA * t\` (grows from 0 to baseA). Skip if \`r <= 0.2\` or alpha below \`0.004\`. The bubble shrinks back into existence at its original size, then resumes its cycle.
+
+Every stroked circle: \`ctx.strokeStyle = \\\`rgba(\${dotRGB},\${alpha.toFixed(3)})\\\`\`, \`ctx.lineWidth = 0.5\`, \`beginPath\`, \`arc(x, y, r, 0, Math.PI*2)\`, \`stroke\`. \`dotRGB\` is \`'255,255,255'\` on dark, \`'28,25,22'\` on light.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\`. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: ... }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span>Bubble Field</span>
+    <span>hover to burst</span>
+  </div>
+</div>
+\`\`\`
+
+## Cleanup
+Use an \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should feel like a quiet lattice of ink rings at rest, and like a pot of gently boiling bubbles wherever the cursor touches — soft, organic, never frantic.`,
 }

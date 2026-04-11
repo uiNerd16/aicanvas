@@ -297,4 +297,73 @@ Outer div: className "relative h-full w-full overflow-hidden", style background 
 
 ## Cleanup
 alive=false; cancelAnimationFrame(animId); ro.disconnect(); observer.disconnect().`,
+
+  V0: `Create a React client component named \`DistortionGrid\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A full-bleed canvas draws a warping grid of thin horizontal and vertical lines — imagine graph paper caught in a slow ocean swell. The whole field is always undulating: long-wavelength sine waves (think one or two visible peaks across the frame, not a dense ripple) push each grid intersection off its resting position in both x and y, so the lines curve and sway instead of staying straight. The motion is quiet and continuous at rest — just enough to feel alive.
+
+When the cursor enters the canvas, two things happen together. First, the global wave amplitude swells: what was a gentle sway grows into a dramatic warp across the entire grid, easing in over roughly half a second. Second, a gaussian "dent" appears directly under the cursor — lines within about 260px of the pointer are pushed radially outward, creating a visible bulge or void that tracks the mouse. When the cursor leaves, amplitude relaxes back down over about a second and the void fades away. No hard circle, no snap — everything is smoothly lerped.
+
+Centered in the frame are two overlay labels:
+- A title reading exactly \`Distortion Grid\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to warp\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, the labels use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, use \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` for the render loop. Watch for changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The grid lines are drawn white (\`255,255,255\`) on dark at alpha \`0.55\`, and near-black (\`28,25,22\`) on light at alpha \`0.75\` (light needs a touch more contrast to read against the warm parchment background).
+
+## Key constants
+- \`SPACING = 32\` — pixels between grid points at rest
+- \`BASE_AMP = 30\` — resting wave amplitude in pixels (already dramatic — you want one or two full sine peaks visible)
+- \`WAVE_FREQ = 0.007\` — roughly a 900px wavelength, deliberately long
+- \`HOVER_BOOST = 1.5\` — amplitude multiplier at full hover (waves grow 2.5× from rest)
+- \`LOCAL_AMP = 60\` — repulsion strength at the cursor centre
+- \`LOCAL_RADIUS = 260\` — repulsion radius in pixels
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+Compute \`cols = Math.floor(cw/SPACING)+2\` and \`rows = Math.floor(ch/SPACING)+2\` so the grid overshoots the bleed and has no visible edges. Offset by \`ox = (cw%SPACING)/2\` and \`oy = (ch%SPACING)/2\` to keep it visually centred. There's no per-point state — grid positions are computed on the fly each frame from \`(col, row)\`.
+
+## Effect-scoped animation state
+Inside the effect, keep four locals: \`t = 0\` (time accumulator), \`hoverStr = 0\` (smoothed 0-to-1 hover strength), \`animId = 0\` (RAF handle), \`alive = true\` (cleanup guard).
+
+## The frame loop
+On every animation frame:
+
+1. Bail out if \`!alive\`. Advance \`t += 0.002\` (this is the internal clock for the undulation — small and slow on purpose).
+2. Check whether \`mouseRef.current\` is non-null. Lerp \`hoverStr\` toward 1 when hovered, toward 0 when not, with asymmetric rates: \`0.018\` on the way up, \`0.010\` on the way down. That gives roughly a half-second ramp in and a one-second ramp out.
+3. Clear the canvas. Pick \`dotRGB = '255,255,255'\` on dark or \`'28,25,22'\` on light, and \`lineA = 0.55\` on dark or \`0.75\` on light.
+4. Read the mouse from a ref, falling back to \`-99999\` for both axes when there's no hover (this pushes the repulsion term out of range naturally instead of branching around it).
+5. Compute the current global amplitude: \`amp = BASE_AMP * (1 + hoverStr * HOVER_BOOST)\`. At rest that's 30px; at full hover it's 75px.
+6. Define a \`displaced(col, row)\` helper that returns the final \`[x, y]\` for a given grid index. It builds the rest position \`rx = ox + col*SPACING\`, \`ry = oy + row*SPACING\`, then adds two layered sine waves for \`wx\` and two layered cosines for \`wy\` — each layer uses slightly different frequency and time coefficients so the x and y displacements drift out of sync and the motion looks organic instead of a pure checkerboard swing. The second layer of each is weighted at \`0.55\` of the first. Finally it adds a gaussian radial push: squared distance from the cursor, and if it's within \`4 * LOCAL_RADIUS²\`, add \`LOCAL_AMP * Math.exp(-dist2 / (LOCAL_RADIUS² * 0.5))\` along the unit vector pointing from cursor to grid point. Outside that threshold, no push.
+7. Set \`strokeStyle\` to \`rgba(\${dotRGB},\${lineA.toFixed(3)})\` and \`lineWidth = 0.5\`.
+8. Draw the horizontal lines: for each row, \`beginPath\`, \`moveTo\` the displaced \`(0, row)\`, then \`lineTo\` each displaced \`(col, row)\` for \`col = 1..cols-1\`, then \`stroke\`. Each row becomes a single smooth polyline that curves across the frame.
+9. Draw the vertical lines the same way: for each col, walk down the rows with \`lineTo\` and stroke.
+10. Schedule the next frame.
+
+The layered waves are the important bit — they're what turn "a grid bouncing on a sine" into "a grid rippling like fabric." Keep the layer weights and time multipliers distinct per axis.
+
+## Interaction
+Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\` so \`hoverStr\` starts easing back to 0. Touch follows the same pattern using \`e.touches[0]\`.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: ... }} ...handlers>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+    <span>Distortion Grid</span>
+    <span>hover to warp</span>
+  </div>
+</div>
+\`\`\`
+
+## Cleanup
+Use the \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
+
+The finished piece should feel like a calm, slowly breathing grid at rest that comes suddenly alive under the cursor — swelling, bulging around the pointer, and settling back down when you leave.`,
 }

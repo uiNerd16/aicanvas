@@ -264,4 +264,74 @@ Outer div with NO pointer handlers (tracking is window-level), className "relati
 
 ## Cleanup
 alive=false; cancelAnimationFrame(animId); ro.disconnect(); observer.disconnect(); remove all five window/document listeners.`,
+
+  V0: `Create a React client component named \`InteractiveDotGrid\`. Single file, TypeScript, \`'use client'\` at the top. Use only \`useEffect\`, \`useRef\`, and \`useState\` from React — no framer-motion, no other libraries. The component accepts one optional prop: \`{ showLabel = true }: { showLabel?: boolean }\`. It fills its parent via \`h-full w-full\` and supports both light and dark themes.
+
+## The visual
+A quiet, architectural field of tiny square dots laid out on a perfectly regular grid, drawn on a full-bleed canvas. At rest the dots are barely there — just enough to read as a surface texture. As the cursor moves across the field, a soft circular halo of illumination tracks underneath it: dots inside the halo brighten toward near-white, and each lit dot grows very slightly (from 1 pixel square up to about 2.2 pixels). After the cursor leaves, the halo doesn't snap off — it decays gently over roughly a second, so the grid feels like it's gradually forgetting where the pointer was. No connections between dots, no waves, no colour shifts — just a pure light-follows-cursor effect on a static grid.
+
+Centered in the frame are two overlay labels (only shown when \`showLabel\` is true):
+- A title reading exactly \`Dot Grid\` — 22px, font-weight 700, letter-spacing -0.02em.
+- Below it, a hint reading exactly \`hover to illuminate\` — 11px, font-weight 600, uppercase, letter-spacing 0.12em.
+
+Both labels sit above the canvas with \`pointer-events-none\` so they never block the hover. On dark, they use \`rgba(255,255,255,0.45)\` and \`rgba(255,255,255,0.18)\`. On light, use \`rgba(28,25,22,0.45)\` and \`rgba(28,25,22,0.22)\`.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` on the container for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` (default true) plus an \`isDarkRef\` that the render loop reads on every frame. Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes. Mirror updates into both the state and the ref.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container. The dots themselves are drawn white (\`255,255,255\`) on dark and near-black (\`28,25,22\`) on light.
+
+## Key constants
+- \`SPACING = 20\` — pixels between dot centres
+- \`RADIUS = 130\` — hover influence radius in pixels (tight and intimate — a small pool of light, not a floodlight)
+- resting alpha: \`0.13\` on dark, \`0.25\` on light (the light theme's resting alpha is hardcoded, not the same \`BASE_A\` constant — it's intentionally a bit stronger because near-black on cream reads softer than white on near-black)
+- peak lit alpha: \`0.92\`
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, then \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
+
+Build a flat \`dots\` array. Use \`Math.floor(cw/SPACING)+2\` columns and rows so the grid fully covers the bleed, offset by \`(cw%SPACING)/2\` and \`(ch%SPACING)/2\` to keep it visually centred. Each dot stores \`{ x, y, b }\` where \`b\` is its 0→1 brightness.
+
+## The frame loop
+On every animation frame:
+
+1. Clear the canvas.
+2. Read the mouse position from a ref. Fall back to an off-screen coordinate like \`-99999\` when there's no hover, so the distance math naturally excludes everything without a branch.
+3. For each dot, compute its squared distance to the cursor. If it's within \`RADIUS\`, its target brightness is \`Math.pow(1 - Math.sqrt(dist2)/RADIUS, 1.5)\` — a soft power-curve falloff that feels creamy at the edge rather than a hard circle cutout. Outside the radius, target is 0.
+4. Ease \`b\` toward its target asymmetrically: fast attack on the way up (a factor of \`0.16\`), slower release on the way down (a factor of \`0.07\`). This gives the organic ~1 second tail after the cursor leaves. Snap \`b\` to 0 once it drops below \`0.004\` so idle dots cost nothing.
+5. Size: \`sz = 1 + b * 1.2\` — resting dots are 1×1 pixel squares, fully lit dots are 2.2×2.2. This subtle size bloom, combined with the brightening, is what sells the illumination.
+6. Alpha: blend the resting value toward peak by brightness. \`alpha = baseA + (0.92 - baseA) * b\`, where \`baseA\` is 0.13 on dark and 0.25 on light.
+7. Draw the dot with \`fillRect(x - sz/2, y - sz/2, sz, sz)\` using \`fillStyle = \`rgba(\${dotRGB},\${alpha.toFixed(2)})\`\`. No circles, no paths — flat pixel squares are exactly right for the crisp architectural look.
+
+## Pointer tracking — WINDOW LEVEL
+This is the critical detail that makes this component different from most canvas hover effects. Do NOT attach mouse/touch handlers to the outer container div. Instead, in a dedicated effect, register passive listeners at the \`window\` and \`document\` level:
+
+- \`window.addEventListener('mousemove', ...)\`
+- \`window.addEventListener('touchmove', ...)\` — read \`e.touches[0]\`
+- \`window.addEventListener('touchend', clear)\` and \`touchcancel\`
+- \`document.addEventListener('mouseleave', clear)\` — fires when the cursor leaves the viewport entirely
+
+On move, read \`canvasRef.current.getBoundingClientRect()\` and write \`{ x: clientX - rect.left, y: clientY - rect.top }\` to a mouseRef. On touchend/touchcancel/mouseleave, set the ref to null. All mouse/touch listeners should be passive. Remove every listener in the cleanup.
+
+Why window-level: this lets the grid stay reactive even when it's rendered as a background behind other UI layers that use \`pointer-events: none\`. The grid always knows where the real cursor is, regardless of what's sitting above it.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+  {showLabel && (
+    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2">
+      <span>Dot Grid</span>
+      <span>hover to illuminate</span>
+    </div>
+  )}
+</div>
+\`\`\`
+
+Note that the outer div has NO pointer handlers — all tracking is on window/document.
+
+## Cleanup
+Use an \`alive\` flag inside the render effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, disconnect the theme \`MutationObserver\`, and remove all five window/document event listeners. No leaks.
+
+The finished piece should feel like staring at a sheet of graph paper where the cursor is a soft torch — quiet, precise, and just playful enough to invite a second pass.`,
 }

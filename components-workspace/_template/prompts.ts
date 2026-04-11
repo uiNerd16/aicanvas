@@ -13,9 +13,12 @@ import type { Platform } from '../../app/components/ComponentCard'
 //   Gemini  — defensive and explicit. Include exact imports. Call out "use these
 //             hooks and no others". Inline DPR/canvas scaffolding for creative
 //             components (Gemini has the biggest gap on Framer Motion's surface).
-//   V0      — natural language, UI-framed, no math. ONLY for non-canvas
-//             components (glass, buttons, toggles, cards, modals, typography).
-//             Omit entirely for canvas/WebGL/Three.js components.
+//   V0      — natural language, UI-framed, no math. Describe the component as
+//             prose: visual intent, animation behaviour in plain words, key
+//             constants as labelled numbers (e.g. "RADIUS = 340"). Works for
+//             every component type — canvas, particles, waves, 3D, buttons,
+//             glass, etc. V0 has been validated on Claude-style prose prompts
+//             even for heavy canvas/hover/wave work; don't omit it.
 
 export const prompts: Partial<Record<Platform, string>> = {
   Claude: ``,

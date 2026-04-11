@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { Tag, Platform } from '../components/ComponentCard'
 import { FloatingCards } from '../../components-workspace/floating-cards'
+import { prompts as floatingCardsPrompts } from '../../components-workspace/floating-cards/prompts'
 import { TextBlurReveal } from '../../components-workspace/text-blur-reveal'
 import { prompts as textBlurRevealPrompts } from '../../components-workspace/text-blur-reveal/prompts'
 import { ParticleSphere } from '../../components-workspace/particle-sphere'
@@ -426,30 +427,31 @@ const FLOATING_CARDS_CODE = `'use client'
 
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Snowflake, Boat, ArrowUpRight } from '@phosphor-icons/react'
+import { Buildings, ArrowUpRight } from '@phosphor-icons/react'
 
 const CARD_W = 280
 const CARD_H = 200
 
 const CARDS = [
-  { Icon: Sun,       title: 'Maldives',   img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&q=80&fit=crop&crop=center', dist: 8420 },
-  { Icon: Snowflake, title: 'Swiss Alps', img: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=520&q=80&fit=crop&crop=center', dist: 1640 },
-  { Icon: Boat,      title: 'Bali',       img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', dist: 11200 },
+  { title: 'Maafushi',   sub: 'Crystal waters',    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&q=80&fit=crop&crop=center', country: 'Maldives',    hotels: 120 },
+  { title: 'Swiss Alps', sub: 'Powder & peaks',    img: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=520&q=80&fit=crop&crop=center', country: 'Switzerland', hotels: 87  },
+  { title: 'Bali',       sub: 'Sun-soaked shores', img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', country: 'Indonesia',   hotels: 250 },
 ] as const
 
+// Deck slots: index 0 = back, index 1 = middle, index 2 = front
 const POSITIONS = [
-  { x: 12, y: -32, rotate:  6, zIndex: 1, opacity: 1 },
-  { x:  6, y: -18, rotate:  4, zIndex: 2, opacity: 1 },
-  { x:  0, y:   0, rotate:  0, zIndex: 3, opacity: 1 },
+  { x:  12, y: -32, rotate:  6, zIndex: 1, opacity: 1.00 }, // back  — peeks top-right
+  { x:   6, y: -18, rotate:  4, zIndex: 2, opacity: 1.00 }, // middle — peeks top-right
+  { x:   0, y:   0, rotate:  0, zIndex: 3, opacity: 1.00 }, // front  — no rotation, full opacity
 ] as const
-
-type PhosphorIcon = typeof Sun | typeof Snowflake | typeof Boat
 
 function useCountUp(target: number, active: boolean) {
   const [value, setValue] = useState(0)
   useEffect(() => {
     if (!active) { setValue(0); return }
-    const steps = 40, interval = 900 / steps
+    const duration = 900
+    const steps = 40
+    const interval = duration / steps
     let step = 0
     const id = setInterval(() => {
       step++
@@ -461,18 +463,32 @@ function useCountUp(target: number, active: boolean) {
   return value
 }
 
-function DistanceCounter({ target, active }: { target: number; active: boolean }) {
+function HotelsCounter({ target, active }: { target: number; active: boolean }) {
   const value = useCountUp(target, active)
   return (
-    <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums' }}>
-      {value.toLocaleString()} km
-    </span>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 5,
+    }}>
+      <Buildings weight="regular" size={16} style={{ color: '#E8E8DF', opacity: 0.55 }} />
+      <span style={{
+        fontSize: 10,
+        fontWeight: 500,
+        color: 'rgba(255,255,255,0.55)',
+        letterSpacing: '0.04em',
+        fontVariantNumeric: 'tabular-nums',
+      }}>
+        hotels <span style={{ color: 'rgba(255,255,255,0.85)', marginLeft: 2 }}>{value}</span>
+      </span>
+    </div>
   )
 }
 
 export function FloatingCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
+  // order[positionIndex] = cardIndex
   const [order, setOrder] = useState<[number, number, number]>([0, 1, 2])
   const [isShuffling, setIsShuffling] = useState(false)
   const [exitingCard, setExitingCard] = useState<number | null>(null)
@@ -492,60 +508,152 @@ export function FloatingCards() {
     return () => observer.disconnect()
   }, [])
 
+
   return (
-    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center overflow-hidden"
-      style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
-      <div className="absolute inset-0" style={{
-        backgroundImage: \`radial-gradient(circle, \${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'} 1px, transparent 1px)\`,
-        backgroundSize: '24px 24px',
-      }} />
+    <div
+      ref={containerRef}
+      className="relative flex h-full w-full items-center justify-center overflow-hidden"
+      style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
+    >
+      {/* Dot grid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: \`radial-gradient(circle, \${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'} 1px, transparent 1px)\`,
+          backgroundSize: '24px 24px',
+        }}
+      />
+
+
+      {/* Deck */}
       <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
         {CARDS.map((card, i) => {
           const posIndex = order.indexOf(i)
           const pos = POSITIONS[posIndex]
-          const CardIcon: PhosphorIcon = card.Icon
           const isFront = posIndex === 2
           const isExiting = exitingCard === i
           return (
-            <motion.div key={i}
-              style={{ position: 'absolute', top: 0, left: 0, width: CARD_W, height: CARD_H,
-                cursor: isFront ? 'grab' : 'default', borderRadius: 16,
-                background: '#2A2825', border: '1px solid rgba(255,255,255,0.10)',
-                boxShadow: '8px -8px 24px rgba(0,0,0,0.35)',
-                display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', overflow: 'hidden', padding: 0 }}
+            <motion.div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: CARD_W,
+                height: CARD_H,
+                cursor: isFront ? 'grab' : 'default',
+                borderRadius: 16,
+                background: '#2A2825',
+                border: '1px solid rgba(255,255,255,0.10)',
+                boxShadow: isDark
+                  ? '8px -8px 24px rgba(0,0,0,0.35)'
+                  : '8px -8px 24px rgba(0,0,0,0.15)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                overflow: 'hidden',
+                padding: 0,
+              }}
               drag={isFront && !isShuffling ? 'y' : false}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.6 }}
               dragMomentum={false}
               onDragEnd={(_e, info) => {
                 if (!isFront || isShuffling) return
-                if (info.offset.y > 80 || info.velocity.y > 400) { setIsShuffling(true); setExitingCard(i) }
+                if (info.offset.y > 80 || info.velocity.y > 400) {
+                  setIsShuffling(true)
+                  setExitingCard(i)
+                }
               }}
-              animate={isExiting ? { y: 600, rotate: 8, opacity: 0 } : { x: pos.x, y: pos.y, rotate: pos.rotate, zIndex: pos.zIndex, opacity: pos.opacity }}
-              transition={isExiting ? { duration: 0.45, ease: 'easeIn' } : { type: 'spring', stiffness: 80, damping: 16 }}
+              animate={isExiting
+                ? { y: 600, rotate: 8, opacity: 0 }
+                : { x: pos.x, y: pos.y, rotate: pos.rotate, zIndex: pos.zIndex, opacity: pos.opacity }
+              }
+              transition={isExiting
+                ? { duration: 0.45, ease: 'easeIn' }
+                : { type: 'spring', stiffness: 80, damping: 16 }
+              }
               onAnimationComplete={() => {
-                if (isExiting) { setExitingCard(null); setOrder(prev => [prev[2], prev[0], prev[1]]); setTimeout(() => setIsShuffling(false), 400) }
+                if (isExiting) {
+                  setExitingCard(null)
+                  setOrder(prev => [prev[2], prev[0], prev[1]])
+                  setTimeout(() => setIsShuffling(false), 400)
+                }
               }}
             >
-              <div style={{ padding: '10px 10px 0', display: 'flex', flexDirection: 'column', gap: 8, flex: '0 0 auto' }}>
+              {/* ── Top section ───────────────────────────── */}
+              <div style={{
+                padding: '10px 10px 0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                flex: '0 0 auto',
+              }}>
+                {/* Header row: hotels counter left, arrow button right */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <CardIcon weight="regular" size={18} style={{ color: '#E8E8DF', opacity: 0.55 }} />
-                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#BECF5D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {/* Left cluster: hotels counter */}
+                  <HotelsCounter target={card.hotels} active={isFront && !isExiting} />
+
+                  {/* Arrow button */}
+                  <div style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: '#BECF5D',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
                     <ArrowUpRight weight="bold" size={13} style={{ color: '#1A1A19' }} />
                   </div>
                 </div>
+
+                {/* Title + distance */}
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                  <p style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.15, color: '#FFFFFF', letterSpacing: '-0.02em', margin: 0 }}>{card.title}</p>
-                  <DistanceCounter target={card.dist} active={isFront && !isExiting} />
+                  <p style={{
+                    fontSize: 17,
+                    fontWeight: 800,
+                    lineHeight: 1.15,
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.02em',
+                    margin: 0,
+                  }}>
+                    {card.title}
+                  </p>
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: 'rgba(255,255,255,0.45)',
+                    letterSpacing: '0.04em',
+                  }}>
+                    {card.country}
+                  </span>
                 </div>
               </div>
-              <div style={{ margin: '8px 6px 6px', borderRadius: 12, flex: 1, overflow: 'hidden',
-                backgroundImage: \`url(\${card.img})\`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+
+              {/* ── Visual block ──────────────────────────── */}
+              <div style={{
+                margin: '8px 6px 6px',
+                borderRadius: 12,
+                flex: 1,
+                position: 'relative',
+                overflow: 'hidden',
+                backgroundImage: \`url(\${card.img})\`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}>
+              </div>
             </motion.div>
           )
         })}
       </div>
-      <p style={{ position: 'absolute', bottom: 24, fontSize: 11, color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)', letterSpacing: '0.05em' }}>
+
+      {/* Hint */}
+      <p
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          fontSize: 11,
+          color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
+          letterSpacing: '0.05em',
+        }}
+      >
         swipe down to shuffle
       </p>
     </div>
@@ -1931,7 +2039,7 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const SPACING = 20     // px between × centres
-const RADIUS  = 130    // px — hover influence radius
+const RADIUS  = 340    // px — hover influence radius
 const BASE_A  = 0.13   // resting × opacity
 const PEAK_A  = 0.92   // fully-lit × opacity
 
@@ -1973,6 +2081,7 @@ export function XGrid() {
     let animId = 0
     let alive  = true
     let cw = 0, ch = 0
+    const t0 = performance.now()
 
     function build() {
       const dpr  = window.devicePixelRatio || 1
@@ -2011,6 +2120,7 @@ export function XGrid() {
       const my      = mouseRef.current?.y ?? -99999
       const r2      = RADIUS * RADIUS
       const dotRGB  = isDarkRef.current ? '255,255,255' : '28,25,22'
+      const t       = (performance.now() - t0) / 1000
 
       for (const d of marks) {
         const dx    = d.x - mx
@@ -2018,16 +2128,18 @@ export function XGrid() {
         const dist2 = dx * dx + dy * dy
         const tgt   = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2) / RADIUS, 1.5) : 0
 
-        // Fast attack, slow release — feels organic
-        d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
+        d.b += (tgt > d.b ? 0.16 : 0.05) * (tgt - d.b)
         if (d.b < 0.004) d.b = 0
 
         const arm   = 2 + d.b * 1.0   // arm length: 2px resting → 3px lit
         const sw    = 0.5 + d.b * 0.3 // stroke width: 0.5px resting → 0.8px lit
         const baseA = isDarkRef.current ? BASE_A : 0.25
-        const alpha = baseA + (PEAK_A - baseA) * d.b
+        const wave  = Math.sin(d.col * 0.3 + d.row * 0.3 - t * 0.5)
+        const restingAlpha = baseA * (1 + wave * 0.3)
+        const alpha = restingAlpha + (PEAK_A - restingAlpha) * d.b
         ctx.strokeStyle = \`rgba(\${dotRGB},\${alpha.toFixed(2)})\`
         ctx.lineWidth = sw
+
         ctx.beginPath()
         ctx.moveTo(d.x - arm, d.y - arm)
         ctx.lineTo(d.x + arm, d.y + arm)
@@ -3920,11 +4032,11 @@ export function TagaToggle() {
     prompts: glitchButtonPrompts,
   },
   {
-    slug: 'floating-cards',
-    image: 'https://ik.imagekit.io/aitoolkit/floating-cards.png?v=2',
+    slug: 'traveldeck',
+    image: 'https://ik.imagekit.io/aitoolkit/floating-cards.png?v=3',
     name: 'Travel Deck',
     description:
-      'A swipeable deck of destination cards. Drag the front card down to send it to the back — each card reveals an animated distance counter as it comes forward.',
+      'A swipeable deck of destination cards. Drag the front card down to send it to the back — each card reveals an animated hotels counter as it comes forward.',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Framer Motion' },
@@ -3933,19 +4045,7 @@ export function TagaToggle() {
     dualTheme: true,
     PreviewComponent: FloatingCards,
     code: FLOATING_CARDS_CODE,
-    prompts: {
-      Claude: `Create a new file called FloatingCards.tsx. It should export a React client component named FloatingCards that renders 3 stat cards with continuous floating animations using Framer Motion. Requirements:
-- Mark the file with 'use client' at the top
-- Import motion from 'framer-motion'
-- Define a CARDS array: { label: 'Components', value: '2,847', symbol: '◈', delay: 0 }, { label: 'Downloads', value: '94.2k', symbol: '↓', delay: 0.2 }, { label: 'Stars', value: '12.1k', symbol: '★', delay: 0.4 }
-- Each card is a motion.div with animate={{ y: [0, -14, 0] }}, transition { duration: 3.5, delay: card.delay, repeat: Infinity, ease: 'easeInOut' }
-- Wrapper: relative flex h-full w-full items-center justify-center overflow-hidden
-- Glow: pointer-events-none absolute inset-0 flex items-center justify-center > div h-56 w-56 rounded-full bg-violet-600/25 blur-3xl
-- Card className: flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-sm
-- Symbol: text-2xl text-violet-400 | Value: text-xl font-bold text-white | Label: text-xs text-zinc-500
-TypeScript throughout. No extra dependencies.`,
-      V0: `Create a FloatingCards component using React, Framer Motion, and Tailwind CSS. Display 3 stat cards (Components: 2,847 | Downloads: 94.2k | Stars: 12.1k) that continuously float up and down with staggered delays using animate={{ y: [0, -14, 0] }} and repeat: Infinity. Use a dark zinc-950 background, glass morphism cards (bg-white/5, border border-white/10, backdrop-blur-sm, rounded-2xl), and a violet radial glow (bg-violet-600/25 blur-3xl) centered behind the cards. TypeScript only.`,
-    },
+    prompts: floatingCardsPrompts,
   },
   {
     slug: 'text-blur-reveal',

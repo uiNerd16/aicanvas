@@ -234,4 +234,71 @@ Mouse events attach on container: mousemove → mouseRef = { x: e.clientX-rect.l
 
 ## Cleanup
 alive=false; cancelAnimationFrame; ro.disconnect; mo.disconnect; remove listeners.`,
+
+  V0: `Create a React client component named \`ParticleConstellation\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\`, \`useRef\`, and \`useState\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes.
+
+## The visual
+A full-bleed canvas spider web. Picture a dense mandala: one node at the dead centre, then fourteen concentric rings fanning outward, each ring carrying twenty-four nodes spaced evenly around it. The nodes are connected two ways — radial threads running from the centre outward like spokes, and ring threads running around each circle linking neighbours. The outermost ring extends past the edges of the frame so you never see a hard circular boundary; the web just bleeds off into the background.
+
+Nothing is ever a straight line. Every single strand is a slightly bowed quadratic curve, and the bow gently oscillates on its own small sine clock — so at rest the whole web looks like it's breathing underwater, all the threads flexing in and out of curvature independently. On top of that, every node has its own slow idle sway (a few pixels of drift) driven by its own phase, so the intersections of the web shift constantly without any single dominant motion.
+
+When the cursor enters the frame, two things happen together:
+1. Nearby nodes get shoved away from the pointer with a real spring — they overshoot, wobble, and spring back. It's not a smoothed follow, it's a physical repulsion with bounce.
+2. Strands near the cursor bend their control points further away from the pointer (a small additive push on top of the resting bow), and their opacity fades out inside the halo — so the web appears to "part" around the cursor, revealing the darker background underneath.
+
+There is no overlay text. No labels, no title, no hint. The web is the whole thing.
+
+## Theme
+Detect theme by checking \`.closest('[data-card-theme]')\` for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Track it with \`useState isDark\` plus an \`isDarkRef\` for the render loop. Watch for theme changes with a \`MutationObserver\` on \`documentElement\` (and the card wrapper if present) listening for class attribute changes.
+
+Background: \`#110F0C\` on dark, \`#F5F1EA\` on light — set as an inline style on the outer container and also filled on the canvas every frame. Strand and node colour: \`255,255,255\` on dark, \`28,25,22\` on light.
+
+## Key constants
+- 24 radials and 14 rings. The max radius is \`Math.sqrt(W*W + H*H) * 0.56\` so the outermost ring comfortably extends past the corners of the frame.
+- Node idle sway: about 3.5 pixels of drift, driven by a slow time clock that advances at \`0.00045\` per frame.
+- Strand idle bow: about 6 pixels of perpendicular bow amplitude, oscillating at a noticeably faster rate than the node sway — multiply time by roughly \`0.55 * 60\` inside the sine so the bow feels alive while the nodes drift gently.
+- Cursor node-repulsion radius: 90 pixels. Push strength: 3.2. Only nodes inside this radius get an impulse added to their spring velocity.
+- Spring return stiffness: 0.07. Damping (velocity retention per frame): 0.84. This combination gives a bouncy, slightly under-damped return — nodes should visibly wobble before settling.
+- Strand hover push radius: 280 pixels, max bend 18 pixels. Gaussian falloff (\`exp(-dist²/radius²)\`) so it's very wide and smooth — the node springs do the heavy lifting, this is just an extra nudge to make the strands visibly follow.
+
+## Geometry build
+Build the web once per resize. Place node zero at the centre \`(W/2, H/2)\`. Then for each ring \`r\` from 1 to 14, compute \`baseR = maxR * (r / 14)\`, and for each radial slot \`s\` from 0 to 23, place a node at angle \`s * (2π/24) - π/2\` (so slot zero points straight up), radius \`baseR\` multiplied by a small random jitter in the range \`1 ± 0.09\`. Give each node a random \`phase\` in \`[0, 2π)\` and zero out its spring offsets and velocities.
+
+Strands come in two flavours. For each radial slot, connect the centre node to the innermost ring node, then chain outward ring to ring along the same slot — that's 24 chains of 14 strands each. For the ring strands, connect each node on ring \`r\` to its right-hand neighbour on the same ring (wrapping \`(s+1) % 24\`). When you add a strand, precompute and store its bow phase (the average of the two endpoint phases) and its unit perpendicular vector — that's the strand direction rotated 90 degrees, so \`{-dy/len, dx/len}\`. You'll use this every frame to push the control point sideways by the bow amount.
+
+## Canvas setup
+Standard DPR scaffolding: read \`devicePixelRatio\`, set \`canvas.width = w*dpr\` and \`canvas.height = h*dpr\`, set the CSS size to the container's client size, then \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild the web whenever a \`ResizeObserver\` on the container fires.
+
+## The frame loop
+On every animation frame, advance \`time += 0.00045\`.
+
+Node spring step: for each node, first compute its current sway position: \`swayX = bx + sin(time*1.1 + phase) * 3.5\` and \`swayY = by + cos(time*0.9 + phase*1.4) * 3.5\`. Note the different multipliers on the two axes and the \`phase*1.4\` on the y-axis — the asymmetry is what makes the drift feel organic rather than circular. If there's a mouse position, compute the node's live position (\`swayX + sx\`, \`swayY + sy\`), measure its distance to the cursor, and if that distance is under 90 pixels add a radial impulse \`(1 - dist/90) * 3.2\` pointing away from the cursor into the node's velocity. Then always apply the spring return (\`svx += -sx * 0.07\`, same for y), apply damping (\`svx *= 0.84\`), and integrate position (\`sx += svx\`).
+
+Then compute every node's final draw position for this frame: \`pos[i] = { x: bx + sin(...)*3.5 + sx, y: by + cos(...)*3.5 + sy }\`. Cache it as an array; you'll read it twice.
+
+Draw: clear the canvas, fill the background colour, set \`lineCap\` and \`lineJoin\` to \`'round'\`.
+
+For each strand:
+1. Read \`pa\` and \`pb\` from the position cache. Compute midpoint \`(mx, my)\`.
+2. The resting bow: \`bow = 6 * Math.sin(time * 0.55 * 60 + bowPhase)\`. Offset the control point from the midpoint along the strand's stored perpendicular by that amount: \`cpx = mx + bowPerpX*bow\`, \`cpy = my + bowPerpY*bow\`. This alone guarantees no strand is ever a straight line.
+3. If there's a mouse, compute vector from cursor to midpoint, falloff \`exp(-dist²/(280*280))\`, and subtract \`18 * falloff\` worth of that direction from the control point — pushing the curve away from the pointer.
+4. Depth fade: \`depthFade = 1 - (ring - 1) / 16\` — outer rings fade slightly compared to inner ones. Base alpha is \`0.42 * depthFade\` for radials and \`0.20 * depthFade\` for rings (ring threads are quieter). If there's a mouse, multiply alpha by \`(1 - proximity * 0.82)\` where \`proximity = exp(-dist²/(280² * 0.35))\` — so strands fade out strongly inside the hover halo.
+5. Line width: 0.75 for radials, 0.5 for rings. Draw with \`beginPath\`, \`moveTo(pa)\`, \`quadraticCurveTo(cpx, cpy, pb.x, pb.y)\`, \`stroke\`.
+
+For each node: draw a tiny filled circle. The centre node (index 0) is 1.8px radius with 0.45 base alpha; every other node is 1.1px with 0.16 base alpha. Fade them out near the cursor too — proximity \`exp(-dist²/(160*160))\`, multiply alpha by \`(1 - prox*0.82)\`.
+
+## Interaction
+Attach \`mousemove\` and \`mouseleave\` listeners to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave, set it to \`null\`. Don't use React state for the cursor — the 60fps loop reads it directly from the ref.
+
+## Structure
+\`\`\`
+<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+  <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+</div>
+\`\`\`
+
+## Cleanup
+Use an \`alive\` flag inside the effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, disconnect the theme \`MutationObserver\`, and remove the mousemove/mouseleave listeners. No leaks.
+
+The finished piece should feel like a living, breathing web of silk — always in motion even untouched, parting visibly around your cursor with a soft spring bounce, and quietly returning to its resting sway the moment you leave.`,
 }
