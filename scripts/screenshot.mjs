@@ -32,7 +32,7 @@ const ALL_SLUGS = [
   'runway-loader',
   'flip-calendar',
   'glitch-button',
-  'floating-cards',
+  'traveldeck',
   'text-blur-reveal',
   'particle-sphere',
   'polaroid-stack',
@@ -133,8 +133,8 @@ const INTERACTIONS = {
     await page.waitForTimeout(1800)
   },
 
-  // Floating cards — hover over the middle card to lift it
-  'floating-cards': async (preview, page) => {
+  // Travel deck — hover over the middle card to lift it
+  'traveldeck': async (preview, page) => {
     const box = await preview.boundingBox()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.waitForTimeout(400)

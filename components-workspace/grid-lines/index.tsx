@@ -3,27 +3,28 @@
 import { useEffect, useRef, useState } from 'react'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING      = 20     // px between dot/node centres
-const RADIUS_FRAC  = 0.30   // hover influence radius — fraction of max(cw, ch)
-const LENS_FRAC    = 0.06   // lens push strength — fraction of R
-const BASE_A       = 0.13   // resting dot opacity
-const PEAK_A       = 0.95   // fully-lit opacity
-const LINE_A_DARK  = 0.07   // resting line opacity (dark theme)
+const SPACING = 20     // px between dot/node centres
+const RADIUS_FRAC = 0.30   // hover influence radius — fraction of max(cw, ch)
+const LENS_FRAC = 0.06   // lens push strength — fraction of R
+const BASE_A = 0.13   // resting dot opacity
+const PEAK_A = 0.95   // fully-lit opacity
+const LINE_A_DARK = 0.07   // resting line opacity (dark theme)
 const LINE_A_LIGHT = 0.12   // resting line opacity (light theme)
+const MOUSE_LERP = 0.14   // smoothed mouse movement
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 // b  = brightness (0..1, smoothed)
 // l  = lens influence (0..1, smoothed) — bell curve over distance from cursor
 // px/py = current displaced position (recomputed each frame)
-type Dot     = { x: number; y: number; b: number; l: number; px: number; py: number }
+type Dot = { x: number; y: number; b: number; l: number; px: number; py: number }
 type Segment = { a: Dot; b: Dot }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function GridLines() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const mouseRef     = useRef<{ x: number; y: number } | null>(null)
-  const isDarkRef    = useRef(true)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mouseRef = useRef<{ x: number; y: number } | null>(null)
+  const isDarkRef = useRef(true)
   const [isDark, setIsDark] = useState(true)
 
   // ── Theme detection ──────────────────────────────────────────────────────────
@@ -51,27 +52,36 @@ export function GridLines() {
     const canvas: HTMLCanvasElement = canvasRef.current!
     const ctx = canvas.getContext('2d')!
 
-    let dots: Dot[]     = []
+    let dots: Dot[] = []
     let hSegs: Segment[] = []
     let vSegs: Segment[] = []
     let animId = 0
-    let alive  = true
+    let alive = true
     let cw = 0, ch = 0
 
+    let smoothMx = -99999
+    let smoothMy = -99999
+
     function build() {
-      const dpr  = window.devicePixelRatio || 1
+      const dpr = window.devicePixelRatio || 1
       const rect = canvas.getBoundingClientRect()
       cw = rect.width
       ch = rect.height
       if (!cw || !ch) return
-      canvas.width  = Math.round(cw * dpr)
+      canvas.width = Math.round(cw * dpr)
       canvas.height = Math.round(ch * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
       const cols = Math.floor(cw / SPACING) + 2
       const rows = Math.floor(ch / SPACING) + 2
-      const ox   = (cw % SPACING) / 2
-      const oy   = (ch % SPACING) / 2
+      const ox = (cw % SPACING) / 2
+      const oy = (ch % SPACING) / 2
+
+      // Map existing dots by position to persist state during resize
+      const prev = new Map<string, Dot>()
+      for (const d of dots) {
+        prev.set(`${d.x.toFixed(0)},${d.y.toFixed(0)}`, d)
+      }
 
       // Build dot grid as 2D array for easy neighbour lookup
       const grid: Dot[][] = []
@@ -81,7 +91,9 @@ export function GridLines() {
         for (let c = 0; c < cols; c++) {
           const x = ox + c * SPACING
           const y = oy + r * SPACING
-          const d: Dot = { x, y, b: 0, l: 0, px: x, py: y }
+          const key = `${x.toFixed(0)},${y.toFixed(0)}`
+          const d: Dot = prev.get(key) ?? { x, y, b: 0, l: 0, px: x, py: y }
+
           dots.push(d)
           grid[r][c] = d
         }
@@ -102,13 +114,23 @@ export function GridLines() {
       if (!alive) return
       ctx.clearRect(0, 0, cw, ch)
 
-      const mx        = mouseRef.current?.x ?? -99999
-      const my        = mouseRef.current?.y ?? -99999
-      const R         = RADIUS_FRAC * Math.max(cw, ch)
-      const r2        = R * R
-      const lensPush  = LENS_FRAC * R
-      const dotRGB    = isDarkRef.current ? '255,255,255' : '28,25,22'
-      const baseA     = isDarkRef.current ? BASE_A : 0.22
+      const raw = mouseRef.current
+      if (raw) {
+        if (smoothMx === -99999) { smoothMx = raw.x; smoothMy = raw.y }
+        smoothMx += (raw.x - smoothMx) * MOUSE_LERP
+        smoothMy += (raw.y - smoothMy) * MOUSE_LERP
+      } else {
+        smoothMx = -99999
+        smoothMy = -99999
+      }
+
+      const mx = smoothMx
+      const my = smoothMy
+      const R = RADIUS_FRAC * Math.max(cw, ch)
+      const r2 = R * R
+      const lensPush = LENS_FRAC * R
+      const dotRGB = isDarkRef.current ? '255,255,255' : '28,25,22'
+      const baseA = isDarkRef.current ? BASE_A : 0.22
       const lineRestA = isDarkRef.current ? LINE_A_DARK : LINE_A_LIGHT
 
       // ── 1. Per-dot update: brightness, lens influence, displaced position ──
@@ -117,10 +139,10 @@ export function GridLines() {
       // strongest outward push, dots at the cursor and at the edge of R
       // stay put — the grid bulges around the cursor like a lens.
       for (const d of dots) {
-        const dx    = d.x - mx
-        const dy    = d.y - my
+        const dx = d.x - mx
+        const dy = d.y - my
         const dist2 = dx * dx + dy * dy
-        const dist  = Math.sqrt(dist2)
+        const dist = Math.sqrt(dist2)
 
         // Brightness — Gaussian
         const tgtB = dist2 < r2 ? Math.exp(-dist2 / (r2 * 0.45)) : 0
@@ -135,8 +157,8 @@ export function GridLines() {
         // Displaced position — push outward along the cursor→dot ray
         if (dist > 0.5 && d.l > 0.004) {
           const push = lensPush * d.l
-          const ux   = dx / dist
-          const uy   = dy / dist
+          const ux = dx / dist
+          const uy = dy / dist
           d.px = d.x + ux * push
           d.py = d.y + uy * push
         } else {
@@ -150,10 +172,10 @@ export function GridLines() {
       // making the grid visibly warp.
       const allSegs = [...hSegs, ...vSegs]
       for (const seg of allSegs) {
-        const segB  = (seg.a.b + seg.b.b) / 2
+        const segB = (seg.a.b + seg.b.b) / 2
         const lineA = lineRestA + (PEAK_A - lineRestA) * segB
         ctx.strokeStyle = `rgba(${dotRGB},${lineA.toFixed(3)})`
-        ctx.lineWidth   = 0.5 + segB * 0.6
+        ctx.lineWidth = 0.5 + segB * 0.6
         ctx.beginPath()
         ctx.moveTo(seg.a.px, seg.a.py)
         ctx.lineTo(seg.b.px, seg.b.py)
@@ -163,7 +185,7 @@ export function GridLines() {
       // ── 3. Draw dots on top, at displaced positions ────────────────────────
       for (const d of dots) {
         const alpha = baseA + (PEAK_A - baseA) * d.b
-        const sz    = 1 + d.b * 2.2
+        const sz = 1 + d.b * 2.2
         ctx.fillStyle = `rgba(${dotRGB},${alpha.toFixed(2)})`
         ctx.fillRect(d.px - sz / 2, d.py - sz / 2, sz, sz)
       }
@@ -190,9 +212,9 @@ export function GridLines() {
     mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }
   }
 
-  const bg         = isDark ? '#110F0C' : '#F5F1EA'
+  const bg = isDark ? '#110F0C' : '#F5F1EA'
   const labelColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,25,22,0.45)'
-  const hintColor  = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(28,25,22,0.22)'
+  const hintColor = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(28,25,22,0.22)'
 
   return (
     <div

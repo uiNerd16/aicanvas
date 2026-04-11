@@ -1,13 +1,12 @@
 // ============================================================
 // MISSION CONTROL: Header
-// Title left, mission clock center, status + bell + avatar right.
+// Title left, mission clock center, status + bell right.
 // ============================================================
 
 import { useState, useEffect } from 'react';
 import { Notification } from '@carbon/icons-react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
-import { Avatar } from '../../components/Avatar';
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -103,7 +102,7 @@ export function Header() {
         <MissionClock />
       </div>
 
-      {/* Right: status + bell + avatar */}
+      {/* Right: status + bell */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -165,8 +164,6 @@ export function Header() {
             boxShadow: `0 0 4px rgba(245, 165, 36, 0.6)`,
           }} />
         </button>
-
-        <Avatar name="Reza Quinn" size="md" />
       </div>
     </header>
   );

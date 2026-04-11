@@ -19,11 +19,6 @@ export default function SpacePage() {
       style={{
         minHeight: '100vh',
         backgroundColor: '#0E0E0F',
-        backgroundImage: 'url(https://ik.imagekit.io/aitoolkit/design%20systems/universe%20bg%202.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
       }}
     >
       <MissionControl />
