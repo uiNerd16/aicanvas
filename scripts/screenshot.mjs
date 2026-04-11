@@ -66,6 +66,7 @@ const ALL_SLUGS = [
   'glass-progress',
   'glass-ai-compose',
   'card-wheel',
+  'andromeda-button',
 ]
 
 const arg   = process.argv[2]
