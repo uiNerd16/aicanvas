@@ -91,7 +91,7 @@ export default function RootLayout({
             <MobileNav />
           </Suspense>
           {/* Content area scrolls independently of the sidebar */}
-          <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="flex flex-1 flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">
             {children}
           </div>
         </ThemeProvider>

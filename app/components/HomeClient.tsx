@@ -52,7 +52,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
   }
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col bg-sand-200 dark:bg-sand-950">
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
       <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:grid">
