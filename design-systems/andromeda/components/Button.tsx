@@ -142,7 +142,7 @@ export const Button = forwardRef(function Button(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {Icon ? <Icon size={iconSize} strokeWidth={1.5} /> : null}
+      {Icon ? <Icon size={iconSize} weight="light" /> : null}
       {children}
     </Comp>
   );

@@ -4,8 +4,7 @@
 // Title left, mission clock center, status + bell right.
 // ============================================================
 
-import { useState, useEffect } from 'react';
-import { Notification } from '@carbon/icons-react';
+import { useEffect, useState } from 'react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 
@@ -58,8 +57,6 @@ function MissionClock() {
 }
 
 export function Header() {
-  const [notifHovered, setNotifHovered] = useState(false);
-
   return (
     <header style={{
       position: 'relative',
@@ -103,68 +100,30 @@ export function Header() {
         <MissionClock />
       </div>
 
-      {/* Right: status + bell */}
+      {/* Right: status only — dot + label, no box */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: tokens.spacing[3],
+        gap: tokens.spacing[2],
         flexShrink: 0,
       }}>
-        {/* Status indicator */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: tokens.spacing[2],
-          padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-          border: `${tokens.border.thin} ${tokens.color.border.base}`,
-          background: tokens.color.surface.raised,
+          width: '6px',
+          height: '6px',
+          flexShrink: 0,
+          background: tokens.color.accent.dim,
+          border: `1px solid ${tokens.color.accent.dim}`,
+          boxShadow: `0 0 6px ${tokens.color.accent.glow}`,
+        }} />
+        <span style={{
+          fontFamily: tokens.typography.fontMono,
+          fontSize: tokens.typography.size.xs,
+          color: tokens.color.accent.bright,
+          textTransform: 'uppercase',
+          letterSpacing: tokens.typography.tracking.wider,
         }}>
-          <div style={{
-            width: '6px',
-            height: '6px',
-            background: tokens.color.accent.base,
-            boxShadow: `0 0 6px ${tokens.color.accent.glow}`,
-          }} />
-          <span style={{
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.xs,
-            color: tokens.color.accent.bright,
-            textTransform: 'uppercase',
-            letterSpacing: tokens.typography.tracking.wider,
-          }}>
-            Nominal
-          </span>
-        </div>
-
-        {/* Notification bell */}
-        <button
-          onMouseEnter={() => setNotifHovered(true)}
-          onMouseLeave={() => setNotifHovered(false)}
-          style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '36px',
-            height: '36px',
-            border: `${tokens.border.thin} ${notifHovered ? tokens.color.border.bright : tokens.color.border.base}`,
-            background: notifHovered ? tokens.color.surface.hover : tokens.color.surface.raised,
-            cursor: 'pointer',
-            color: tokens.color.text.secondary,
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <Notification size={20} />
-          <div style={{
-            position: 'absolute',
-            top: '6px',
-            right: '6px',
-            width: '5px',
-            height: '5px',
-            background: tokens.color.warning,
-            boxShadow: `0 0 4px rgba(245, 165, 36, 0.6)`,
-          }} />
-        </button>
+          Nominal
+        </span>
       </div>
     </header>
   );

@@ -114,7 +114,7 @@ export const Input = forwardRef(function Input(
               'text-[color:var(--andromeda-text-muted)]',
             )}
           >
-            <Icon size={20} strokeWidth={1.5} />
+            <Icon size={20} weight="light" />
           </div>
         ) : null}
 

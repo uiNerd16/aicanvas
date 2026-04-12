@@ -31,13 +31,13 @@ export const tokens = {
       bright: 'rgba(255, 255, 255, 0.32)',
       strong: 'rgba(255, 255, 255, 0.55)',
     },
-    // The single hue accent — electric blue
+    // The single hue accent — turquoise
     accent: {
-      base:    '#60A5FA',
-      bright:  '#93C5FD',
-      dim:     'rgba(96, 165, 250, 0.55)',
-      glow:    'rgba(96, 165, 250, 0.18)',
-      glowSoft:'rgba(96, 165, 250, 0.08)',
+      base:    '#2DD4BF',
+      bright:  '#5EEAD4',
+      dim:     'rgba(45, 212, 191, 0.55)',
+      glow:    'rgba(45, 212, 191, 0.18)',
+      glowSoft:'rgba(45, 212, 191, 0.08)',
     },
     // Two semantic colors — that's it
     warning: '#F5A524',
@@ -52,8 +52,8 @@ export const tokens = {
     faultRing:   'rgba(239, 68, 68, 0.25)',
     // Soft gradients (used for accent fills, glow sweeps)
     gradient: {
-      accentFade:  'linear-gradient(180deg, rgba(96,165,250,0.25) 0%, rgba(96,165,250,0) 100%)',
-      accentSweep: 'linear-gradient(135deg, rgba(96,165,250,0.18) 0%, rgba(96,165,250,0.02) 50%, transparent 100%)',
+      accentFade:  'linear-gradient(180deg, rgba(45,212,191,0.25) 0%, rgba(45,212,191,0) 100%)',
+      accentSweep: 'linear-gradient(135deg, rgba(45,212,191,0.18) 0%, rgba(45,212,191,0.02) 50%, transparent 100%)',
       surfaceSoft: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
     },
   },

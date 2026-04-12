@@ -2,7 +2,8 @@
 // ============================================================
 // COMPONENT: NavItem
 // shadcn/ui-aligned API: variant/state, asChild, forwardRef, cva.
-// Active state: accent text + accent.glowSoft bg + 2px left bar.
+// Active state: accent text + accent.glowSoft bg + 6px square on the right
+// that glows leftward, illuminating the row.
 // Inactive: text.secondary, hover surface.hover.
 // Mono label is the default; pass `mono={false}` for sans labels.
 // ============================================================
@@ -35,7 +36,6 @@ const navItemVariants = cva(
       active: {
         true: [
           'text-[color:var(--andromeda-accent-bright)]',
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
         ],
         false: [
           'text-[color:var(--andromeda-text-secondary)]',
@@ -100,18 +100,38 @@ export const NavItem = forwardRef(function NavItem(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {/* Left accent bar — visible only when active */}
+      {/* Right accent square + gradient glow — visible only when active */}
       {active ? (
-        <span
-          aria-hidden="true"
-          className={cn(
-            'absolute left-0 top-0 bottom-0 w-[2px]',
-            'bg-[color:var(--andromeda-accent-base)]',
-            'shadow-[0_0_8px_var(--andromeda-accent-glow)]',
-          )}
-        />
+        <>
+          {/* Gradient light sweep from square leftward */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to left, rgba(45,212,191,0.10) 0%, rgba(45,212,191,0.04) 40%, transparent 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+          {/* The square itself */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              right: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '6px',
+              height: '6px',
+              flexShrink: 0,
+              background: 'var(--andromeda-accent-dim)',
+              border: '1px solid var(--andromeda-accent-dim)',
+              boxShadow: '-6px 0 12px var(--andromeda-accent-glow), -2px 0 20px var(--andromeda-accent-glowSoft)',
+            }}
+          />
+        </>
       ) : null}
-      {Icon ? <Icon size={20} strokeWidth={1.5} /> : null}
+      {Icon ? <Icon size={20} weight="light" /> : null}
       <span>{label}</span>
     </Comp>
   );
