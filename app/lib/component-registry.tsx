@@ -87,10 +87,10 @@ import { GlassProgress } from '../../components-workspace/glass-progress'
 import { prompts as glassProgressPrompts } from '../../components-workspace/glass-progress/prompts'
 import { GlassAiCompose } from '../../components-workspace/glass-ai-compose'
 import { prompts as glassAiComposePrompts } from '../../components-workspace/glass-ai-compose/prompts'
-import { CardWheel } from '../../components-workspace/card-wheel'
-import { prompts as cardWheelPrompts } from '../../components-workspace/card-wheel/prompts'
 import { AndromedaButton } from '../../components-workspace/andromeda-button'
 import { prompts as andromedaButtonPrompts } from '../../components-workspace/andromeda-button/prompts'
+import { AvatarPicker } from '../../components-workspace/avatar-picker'
+import { prompts as avatarPickerPrompts } from '../../components-workspace/avatar-picker/prompts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -3208,301 +3208,134 @@ const GLASS_SIDEBAR_CODE = "'use client'\n\nimport { useState, useEffect } from 
 
 const GLASS_PROGRESS_CODE = "'use client'\n\nimport { useState, useEffect, useCallback } from 'react'\nimport { motion, useSpring, useMotionValueEvent, useReducedMotion } from 'framer-motion'\nimport { ArrowClockwise } from '@phosphor-icons/react'\n\n// ─── Constants ────────────────────────────────────────────────────────────────\n\nconst GLASS_BLUR = {\n  backdropFilter: 'blur(24px) saturate(1.8)',\n  WebkitBackdropFilter: 'blur(24px) saturate(1.8)',\n} as const\n\nconst GLASS_PANEL = {\n  background: 'rgba(255, 255, 255, 0.06)',\n  border: '1px solid rgba(255, 255, 255, 0.1)',\n  boxShadow:\n    '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',\n} as const\n\nconst BACKGROUND_IMAGE =\n  'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866'\n\n// ─── Types ────────────────────────────────────────────────────────────────────\n\ninterface GlassProgressBarProps {\n  value: number\n  color: string\n  gradient: string\n  label?: string\n  animated?: boolean\n}\n\ninterface BarConfig {\n  label: string\n  value: number\n  color: string\n  gradient: string\n  delay: number\n}\n\n// ─── Bar data ─────────────────────────────────────────────────────────────────\n\nconst BARS: BarConfig[] = [\n  { label: 'Storage', value: 72, color: '#3A86FF', gradient: '#3A86FF, #2962FF', delay: 200 },\n  { label: 'Upload',  value: 45, color: '#FF5C8A', gradient: '#FF5C8A, #FF1744', delay: 400 },\n  { label: 'Battery', value: 88, color: '#06D6A0', gradient: '#06D6A0, #00BFA5', delay: 600 },\n  { label: 'Memory',  value: 30, color: '#FFBE0B', gradient: '#FFBE0B, #FF9800', delay: 800 },\n]\n\n// ─── Internal progress bar ──────────────────────────────────────────────────\n\nfunction GlassProgressBar({\n  value,\n  color,\n  gradient,\n  label,\n  animated = false,\n}: GlassProgressBarProps) {\n  const prefersReduced = useReducedMotion()\n\n  // Animated percentage counter via useSpring\n  const springValue = useSpring(0, { stiffness: 80, damping: 20 })\n  const [displayPercent, setDisplayPercent] = useState(0)\n\n  useEffect(() => {\n    springValue.set(value)\n  }, [value, springValue])\n\n  useMotionValueEvent(springValue, 'change', (latest) => {\n    setDisplayPercent(Math.round(latest))\n  })\n\n  // Glow intensity scales with progress\n  const glowAlpha = Math.round(40 + value * 0.4)\n    .toString(16)\n    .padStart(2, '0')\n  const glowSize = 4 + value * 0.08\n\n  // Transitions\n  const fillTransition = prefersReduced\n    ? { duration: 0.3 }\n    : { type: 'spring' as const, stiffness: 200, damping: 24 }\n\n  // Pulse animation for the fill (only when animated + no reduced motion)\n  const pulseAnimate =\n    animated && !prefersReduced\n      ? {\n          width: `${value}%`,\n          opacity: [0.85, 1, 0.85],\n        }\n      : { width: `${value}%` }\n\n  const pulseTransition =\n    animated && !prefersReduced\n      ? {\n          width: fillTransition,\n          opacity: { duration: 2, repeat: Infinity, ease: 'easeInOut' as const },\n        }\n      : fillTransition\n\n  return (\n    <div className=\"w-full\">\n      {/* Label row */}\n      <div className=\"mb-2 flex items-center justify-between px-1\">\n        {label && (\n          <span className=\"text-[10px] font-semibold uppercase tracking-widest text-white/40 font-sans\">\n            {label}\n          </span>\n        )}\n        <span\n          className=\"text-[10px] font-semibold tabular-nums font-sans\"\n          style={{ color: `${color}88` }}\n        >\n          {displayPercent}%\n        </span>\n      </div>\n\n      {/* Track */}\n      <div\n        className=\"relative h-2 w-full overflow-hidden rounded-full\"\n        style={{ ...GLASS_PANEL }}\n      >\n        {/* Blur layer — non-animating */}\n        <div\n          className=\"pointer-events-none absolute inset-0 rounded-full\"\n          style={GLASS_BLUR}\n        />\n\n        {/* Fill bar */}\n        <motion.div\n          className=\"absolute bottom-0 left-0 top-0 rounded-full\"\n          style={{\n            background: `linear-gradient(90deg, ${gradient})`,\n            filter: `drop-shadow(0 0 ${glowSize}px ${color}${glowAlpha})`,\n          }}\n          initial={{ width: '0%' }}\n          animate={pulseAnimate}\n          transition={pulseTransition}\n        />\n      </div>\n    </div>\n  )\n}\n\n// ─── Exported showcase ──────────────────────────────────────────────────────\n\nexport function GlassProgress() {\n  const [values, setValues] = useState<number[]>([0, 0, 0, 0])\n  const [resetKey, setResetKey] = useState(0)\n\n  const replay = useCallback(() => {\n    setValues([0, 0, 0, 0])\n    setResetKey((k) => k + 1)\n  }, [])\n\n  useEffect(() => {\n    const timeouts: ReturnType<typeof setTimeout>[] = []\n\n    BARS.forEach((bar, i) => {\n      const id = setTimeout(() => {\n        setValues((prev) => {\n          const next = [...prev]\n          next[i] = bar.value\n          return next\n        })\n      }, bar.delay)\n      timeouts.push(id)\n    })\n\n    return () => {\n      timeouts.forEach(clearTimeout)\n    }\n  }, [resetKey])\n\n  return (\n    <div className=\"relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950\">\n      {/* Background image */}\n      <img\n        src={BACKGROUND_IMAGE}\n        alt=\"\"\n        className=\"pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60\"\n      />\n\n      <div className=\"relative flex w-full max-w-[340px] flex-col items-center gap-4 px-4\">\n        {/* Glass panel */}\n        <motion.div\n          initial={{ scale: 0.92, y: 16 }}\n          animate={{ scale: 1, y: 0 }}\n          transition={{ type: 'spring', stiffness: 300, damping: 26 }}\n          className=\"relative isolate w-full overflow-hidden rounded-3xl\"\n          style={{ ...GLASS_PANEL }}\n        >\n          {/* Blur layer — non-animating */}\n          <div\n            className=\"pointer-events-none absolute inset-0 z-[-1] rounded-3xl\"\n            style={GLASS_BLUR}\n          />\n\n          {/* Top edge highlight */}\n          <div\n            className=\"absolute left-8 right-8 top-0 h-[1px]\"\n            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}\n          />\n\n          {/* Progress bars stack */}\n          <div className=\"flex flex-col gap-5 px-6 py-6\">\n            {BARS.map((bar, i) => (\n              <GlassProgressBar\n                key={bar.label}\n                label={bar.label}\n                value={values[i]}\n                color={bar.color}\n                gradient={bar.gradient}\n                animated\n              />\n            ))}\n          </div>\n        </motion.div>\n\n        {/* Refresh button */}\n        <motion.button\n          onClick={replay}\n          whileHover={{ scale: 1.12, background: 'rgba(255,255,255,0.12)' }}\n          whileTap={{ scale: 0.9, rotate: -90 }}\n          transition={{ type: 'spring', stiffness: 400, damping: 20 }}\n          className=\"flex h-10 w-10 cursor-pointer items-center justify-center rounded-full\"\n          style={{\n            background: 'rgba(255, 255, 255, 0.06)',\n            border: '1px solid rgba(255, 255, 255, 0.1)',\n          }}\n          aria-label=\"Replay animation\"\n        >\n          <ArrowClockwise size={18} weight=\"regular\" className=\"text-white/50\" />\n        </motion.button>\n      </div>\n    </div>\n  )\n}\n"
 
-const CARD_WHEEL_CODE = `'use client'
 
-import { useRef, useState, useEffect } from 'react'
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import type { MotionValue } from 'framer-motion'
+const AVATAR_PICKER_CODE = `'use client'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { Check, ArrowLeft, ArrowRight } from '@phosphor-icons/react'
 
-const CARD_W  = 220
-const CARD_H  = 148
-const N_CARDS = 8
-const CARD_RX = 10
+const CARD_W = 174
+const CARD_H = 218
+const RADIUS = 20
 
-// ─── Card data ────────────────────────────────────────────────────────────────
-
-interface CardData {
-  id: number
-  network: 'visa' | 'mastercard' | 'amex' | 'discover' | 'unionpay' | 'jcb' | 'maestro' | 'mir'
-  type: 'DEBIT' | 'CREDIT'
-  lastFour: string
-  bg: string
-  textColor: string
-  mutedColor: string
-}
-
-const CARDS: CardData[] = [
-  { id: 0, network: 'visa',       type: 'DEBIT',  lastFour: '4829', bg: '#F0EFE9', textColor: '#1a1a18', mutedColor: 'rgba(26,26,24,0.45)' },
-  { id: 1, network: 'mastercard', type: 'CREDIT', lastFour: '7741', bg: '#1E40AF', textColor: '#ffffff', mutedColor: 'rgba(255,255,255,0.55)' },
-  { id: 2, network: 'amex',       type: 'DEBIT',  lastFour: '3344', bg: '#93C5E8', textColor: '#0a2540', mutedColor: 'rgba(10,37,64,0.55)' },
-  { id: 3, network: 'discover',   type: 'CREDIT', lastFour: '5512', bg: '#F5C100', textColor: '#1a1000', mutedColor: 'rgba(26,16,0,0.55)' },
-  { id: 4, network: 'jcb',        type: 'CREDIT', lastFour: '0091', bg: '#E84826', textColor: '#ffffff', mutedColor: 'rgba(255,255,255,0.55)' },
-  { id: 5, network: 'unionpay',   type: 'DEBIT',  lastFour: '6673', bg: '#14532D', textColor: '#ffffff', mutedColor: 'rgba(255,255,255,0.55)' },
-  { id: 6, network: 'maestro',    type: 'DEBIT',  lastFour: '8820', bg: '#84CC16', textColor: '#1a2a00', mutedColor: 'rgba(26,42,0,0.55)' },
-  { id: 7, network: 'mir',        type: 'CREDIT', lastFour: '2255', bg: '#27272A', textColor: '#ffffff', mutedColor: 'rgba(255,255,255,0.45)' },
+const PHOTOS = [
+  { id: 0, name: 'Alex',   role: 'Designer',    url: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop&auto=format&q=80' },
+  { id: 1, name: 'Jordan', role: 'Engineer',    url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop&auto=format&q=80' },
+  { id: 2, name: 'Morgan', role: 'Manager',     url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=500&fit=crop&auto=format&q=80' },
+  { id: 3, name: 'Riley',  role: 'Lead Design', url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop&auto=format&q=80' },
 ]
 
-// ─── Payment network icons ────────────────────────────────────────────────────
+const SLOTS = [
+  { x: 0,   y: 0,   rotate: 1.5,  scale: 1,    z: 4 },
+  { x: 52,  y: -8,  rotate: 8,    scale: 0.92, z: 3 },
+  { x: -46, y: -4,  rotate: -9,   scale: 0.90, z: 2 },
+  { x: 4,   y: 26,  rotate: 3.5,  scale: 0.86, z: 1 },
+]
 
-function VisaIcon() {
-  return (
-    <svg width="38" height="13" viewBox="0 0 38 13" fill="none">
-      <text x="0" y="12" fontFamily="serif" fontStyle="italic" fontWeight="900" fontSize="14" fill="#1A1F71" letterSpacing="-0.5">VISA</text>
-    </svg>
-  )
-}
+const SPRING = { type: 'spring', stiffness: 280, damping: 26 }
 
-function MastercardIcon() {
-  return (
-    <svg width="32" height="20" viewBox="0 0 32 20">
-      <circle cx="11" cy="10" r="10" fill="#EB001B" />
-      <circle cx="21" cy="10" r="10" fill="#F79E1B" />
-      <path d="M16 3.8a10 10 0 0 1 0 12.4A10 10 0 0 1 16 3.8z" fill="#FF5F00" />
-    </svg>
-  )
-}
-
-function AmexIcon() {
-  return (
-    <svg width="32" height="20" viewBox="0 0 32 20">
-      <rect width="32" height="20" rx="3" fill="#007BC1" />
-      <text x="16" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="8" fill="white" letterSpacing="0.5">AMEX</text>
-    </svg>
-  )
-}
-
-function DiscoverIcon() {
-  return (
-    <svg width="40" height="16" viewBox="0 0 40 16">
-      <text x="0" y="12" fontFamily="sans-serif" fontWeight="700" fontSize="9" fill="#231F20" letterSpacing="0.3">DISCOVER</text>
-      <circle cx="35" cy="8" r="7" fill="#F76F20" />
-    </svg>
-  )
-}
-
-function UnionPayIcon() {
-  return (
-    <svg width="30" height="20" viewBox="0 0 30 20">
-      <rect width="14" height="20" rx="3" fill="#E21836" />
-      <rect x="16" width="14" height="20" rx="3" fill="#00447C" />
-      <text x="7" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="9" fill="white">UP</text>
-      <text x="23" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="9" fill="white">UP</text>
-    </svg>
-  )
-}
-
-function JcbIcon() {
-  return (
-    <svg width="24" height="20" viewBox="0 0 24 20">
-      <rect x="0"  width="8" height="20" rx="3" fill="#003087" />
-      <rect x="8"  width="8" height="20" rx="3" fill="#CC0000" />
-      <rect x="16" width="8" height="20" rx="3" fill="#007B40" />
-      <text x="4"  y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="9" fill="white">J</text>
-      <text x="12" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="9" fill="white">C</text>
-      <text x="20" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="9" fill="white">B</text>
-    </svg>
-  )
-}
-
-function MaestroIcon() {
-  return (
-    <svg width="36" height="24" viewBox="0 0 36 24">
-      <circle cx="13" cy="12" r="11" fill="#CC0000" />
-      <circle cx="23" cy="12" r="11" fill="#0066B2" />
-      <path d="M18 4.5a11 11 0 0 1 0 15A11 11 0 0 1 18 4.5z" fill="#7B2D8B" />
-      <text x="18" y="27" textAnchor="middle" fontFamily="sans-serif" fontStyle="italic" fontWeight="600" fontSize="7" fill="white">maestro</text>
-    </svg>
-  )
-}
-
-function MirIcon() {
-  return (
-    <svg width="36" height="20" viewBox="0 0 36 20">
-      <rect width="36" height="20" rx="3" fill="#4DAF4E" />
-      <text x="18" y="14" textAnchor="middle" fontFamily="sans-serif" fontWeight="800" fontSize="10" fill="white" letterSpacing="1">МИР</text>
-    </svg>
-  )
-}
-
-function NetworkIcon({ network }: { network: CardData['network'] }) {
-  switch (network) {
-    case 'visa':       return <VisaIcon />
-    case 'mastercard': return <MastercardIcon />
-    case 'amex':       return <AmexIcon />
-    case 'discover':   return <DiscoverIcon />
-    case 'unionpay':   return <UnionPayIcon />
-    case 'jcb':        return <JcbIcon />
-    case 'maestro':    return <MaestroIcon />
-    case 'mir':        return <MirIcon />
-  }
-}
-
-// ─── CardSpoke ────────────────────────────────────────────────────────────────
-
-function CardSpoke({
-  card,
-  index,
-  wheelRotation,
-  isSelected,
-  isHovered,
-  onHover,
-  onSelect,
-}: {
-  card: CardData
-  index: number
-  wheelRotation: MotionValue<number>
-  isSelected: boolean
-  isHovered: boolean
-  onHover: (id: number | null) => void
-  onSelect: (id: number) => void
-}) {
-  const orbitalAngle = useTransform(wheelRotation, (r) => r + index * (360 / N_CARDS))
-
-  return (
-    <motion.div
-      style={{
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        rotate: orbitalAngle,
-        zIndex: isHovered || isSelected ? 20 : N_CARDS - index,
-      }}
-    >
-      <motion.div
-        animate={{ y: isSelected ? -18 : 0, scale: isSelected ? 1.08 : 1 }}
-        whileHover={{ y: -12, scale: 1.05 }}
-        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-        style={{
-          position: 'absolute',
-          left: -CARD_W / 2,
-          top: -CARD_H,
-          width: CARD_W,
-          height: CARD_H,
-          cursor: 'pointer',
-        }}
-        onHoverStart={() => onHover(card.id)}
-        onHoverEnd={() => onHover(null)}
-        onClick={() => onSelect(card.id)}
-      >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: CARD_RX,
-            overflow: 'hidden',
-            background: card.bg,
-            boxShadow: '0 20px 56px rgba(0,0,0,0.36), 0 6px 16px rgba(0,0,0,0.20)',
-            position: 'relative',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0, left: '10%', right: '10%',
-              height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent)',
-            }}
-          />
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{
-                width: 30, height: 22, borderRadius: 5,
-                background: 'linear-gradient(135deg, #e8d48b 0%, #c9a84c 40%, #f2e09a 60%, #b8942e 100%)',
-                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.4)',
-              }} />
-              <div style={{ transform: 'scale(0.82)', transformOrigin: 'top right' }}>
-                <NetworkIcon network={card.network} />
-              </div>
-            </div>
-            <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 600, letterSpacing: 1, color: card.textColor }}>
-                •••• {card.lastFour}
-              </span>
-              <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: card.mutedColor }}>
-                {card.type}
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// ─── CardWheel ────────────────────────────────────────────────────────────────
-
-export function CardWheel() {
-  const containerRef = useRef<HTMLDivElement>(null)
+export function AvatarPicker() {
+  const containerRef = useRef(null)
   const [isDark, setIsDark] = useState(true)
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-
-  const wheelRotation = useMotionValue(0)
+  const [order, setOrder] = useState([0, 1, 2, 3])
+  const [selectedId, setSelectedId] = useState(null)
+  const [exiting, setExiting] = useState(null)
+  const [returning, setReturning] = useState(new Set())
+  const orderRef = useRef(order)
+  const dismissing = useRef(false)
+  const dragDelta = useRef(0)
+  useEffect(() => { orderRef.current = order }, [order])
 
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const check = () => {
-      const card = el.closest('[data-card-theme]')
-      setIsDark(card ? card.classList.contains('dark') : document.documentElement.classList.contains('dark'))
-    }
+    const check = () => setIsDark(document.documentElement.classList.contains('dark'))
     check()
-    const observer = new MutationObserver(check)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    const cardWrapper = el.closest('[data-card-theme]')
-    if (cardWrapper) observer.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
+    const obs = new MutationObserver(check)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
   }, [])
 
-  useEffect(() => {
-    let alive = true
-    async function spin() {
-      while (alive) {
-        const current = wheelRotation.get()
-        await animate(wheelRotation, current + 360, { duration: 22, ease: 'linear' })
-      }
-    }
-    spin()
-    return () => { alive = false }
-  }, [wheelRotation])
+  const dismiss = useCallback((dir) => {
+    if (dismissing.current) return
+    dismissing.current = true
+    const frontId = orderRef.current[0]
+    setExiting({ id: frontId, dir })
+    setTimeout(() => {
+      setReturning(prev => new Set([...prev, frontId]))
+      setOrder(prev => [...prev.slice(1), prev[0]])
+      setExiting(null)
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        setReturning(prev => { const s = new Set(prev); s.delete(frontId); return s })
+        dismissing.current = false
+      }))
+    }, 420)
+  }, [])
 
-  const handleSelect = (id: number) => {
-    setSelectedId((prev) => (prev === id ? null : id))
-  }
+  const handleSelect = useCallback(() => {
+    const frontId = orderRef.current[0]
+    setSelectedId(prev => prev === frontId ? null : frontId)
+  }, [])
 
-  const bg = isDark ? '#1A1A18' : '#E4E4E0'
-  const hintColor = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.28)'
+  const labelColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)'
+  const btnBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'
+  const btnBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'
+  const btnColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)'
 
   return (
-    <div
-      ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
-      style={{ background: bg }}
-    >
-      {CARDS.map((card, i) => (
-        <CardSpoke
-          key={card.id}
-          card={card}
-          index={i}
-          wheelRotation={wheelRotation}
-          isSelected={selectedId === card.id}
-          isHovered={hoveredId === card.id}
-          onHover={setHoveredId}
-          onSelect={handleSelect}
-        />
-      ))}
-      <p
-        className="pointer-events-none absolute bottom-5 left-0 right-0 text-center text-[10px] font-semibold uppercase tracking-widest"
-        style={{ color: hintColor }}
-      >
-        hover · click to pop
+    <div ref={containerRef} className="relative flex h-full w-full select-none flex-col items-center justify-center gap-8 bg-sand-100 dark:bg-sand-950">
+      <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: labelColor, fontFamily: 'var(--font-sans, sans-serif)' }}>
+        Choose your avatar
       </p>
+      <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
+        {PHOTOS.map(photo => {
+          const slotIndex = order.indexOf(photo.id)
+          const slot = SLOTS[slotIndex]
+          const isExiting = exiting?.id === photo.id
+          const isReturning = returning.has(photo.id)
+          const isFront = slotIndex === 0 && !isExiting
+          const isSelected = selectedId === photo.id
+          return (
+            <motion.div key={photo.id}
+              style={{ position: 'absolute', left: '50%', top: '50%', width: CARD_W, height: CARD_H, marginLeft: -CARD_W/2, marginTop: -CARD_H/2, zIndex: isExiting ? 10 : slot.z, borderRadius: RADIUS, overflow: 'hidden', cursor: isFront ? 'grab' : 'default', boxShadow: slotIndex === 0 ? '0 24px 64px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.25)' : '0 6px 20px rgba(0,0,0,0.25)' }}
+              animate={isExiting ? { x: exiting.dir === 'left' ? -460 : 460, y: 150, rotate: exiting.dir === 'left' ? -22 : 22, scale: 0.85, opacity: 0 } : { x: slot.x, y: slot.y, rotate: slot.rotate, scale: slot.scale, opacity: 1 }}
+              transition={isExiting ? { duration: 0.4, ease: [0.4,0,0.2,1] } : isReturning ? { duration: 0 } : SPRING}
+              drag={isFront ? 'x' : false} dragConstraints={{ left: 0, right: 0 }} dragElastic={0.6}
+              onDragStart={() => { dragDelta.current = 0 }}
+              onDrag={(_, info) => { dragDelta.current = info.offset.x }}
+              onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 400) dismiss(info.offset.x < 0 ? 'left' : 'right') }}
+              onClick={() => { if (isFront && Math.abs(dragDelta.current) < 8) handleSelect() }}>
+              <img src={photo.url} alt={photo.name} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '36px 14px 14px', background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
+                <div>
+                  <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, margin: 0, fontFamily: 'var(--font-sans, sans-serif)' }}>{photo.name}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, margin: '2px 0 0', fontFamily: 'var(--font-sans, sans-serif)' }}>{photo.role}</p>
+                </div>
+                {isSelected && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ width: 24, height: 24, borderRadius: '50%', background: '#2DD4BF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={13} weight="bold" color="#0f2e2b" /></motion.div>}
+              </div>
+              {isSelected && <div style={{ position: 'absolute', inset: 0, borderRadius: RADIUS, border: '2.5px solid #2DD4BF', pointerEvents: 'none' }} />}
+            </motion.div>
+          )
+        })}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <button onClick={() => dismiss('left')} disabled={!!exiting} style={{ width: 32, height: 32, borderRadius: '50%', border: \`1px solid \${btnBorder}\`, background: btnBg, color: btnColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: exiting ? 'not-allowed' : 'pointer', opacity: exiting ? 0.35 : 1 }}><ArrowLeft size={14} weight="regular" /></button>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {PHOTOS.map(photo => {
+            const isCurrent = order[0] === photo.id
+            return <motion.div key={photo.id} animate={{ width: isCurrent ? 20 : 5, opacity: isCurrent ? 1 : 0.28, background: isDark ? '#ffffff' : '#18181B' }} style={{ height: 5, borderRadius: 3 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+          })}
+        </div>
+        <button onClick={() => dismiss('right')} disabled={!!exiting} style={{ width: 32, height: 32, borderRadius: '50%', border: \`1px solid \${btnBorder}\`, background: btnBg, color: btnColor, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: exiting ? 'not-allowed' : 'pointer', opacity: exiting ? 0.35 : 1 }}><ArrowRight size={14} weight="regular" /></button>
+      </div>
+      <div style={{ height: 34, display: 'flex', alignItems: 'center' }}>
+        {selectedId !== null
+          ? <motion.button key="confirmed" initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }} onClick={() => setSelectedId(null)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#2DD4BF', borderRadius: 20, padding: '7px 18px', border: 'none', cursor: 'pointer' }}><Check size={13} weight="bold" color="#0f2e2b" /><span style={{ fontSize: 11, fontWeight: 700, color: '#0f2e2b', letterSpacing: '0.07em', textTransform: 'uppercase', fontFamily: 'var(--font-sans, sans-serif)' }}>{PHOTOS.find(p => p.id === selectedId)?.name} Selected</span></motion.button>
+          : <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ margin: 0, fontSize: 11, color: labelColor, fontFamily: 'var(--font-sans, sans-serif)', letterSpacing: '0.05em' }}>swipe or tap front card to select</motion.p>}
+      </div>
     </div>
   )
-}`
+}
+`
 
 const ANDROMEDA_BUTTON_CODE = `'use client'
 
@@ -5219,24 +5052,10 @@ export function EmojiBurst() {
     prompts: glassAiComposePrompts,
   },
   {
-    slug: 'card-wheel',
-    name: 'Card Wheel',
-    description: 'Eight credit and debit cards arranged in a continuously spinning radial wheel — hover to lift, click to pop.',
-    image: 'https://ik.imagekit.io/aitoolkit/card-wheel.png',
-    tags: [
-      { label: 'Cards', accent: true },
-      { label: 'Animation', accent: true },
-      { label: 'Interactive' },
-    ],
-    PreviewComponent: CardWheel,
-    code: CARD_WHEEL_CODE,
-    prompts: cardWheelPrompts,
-  },
-  {
     slug: 'andromeda-button',
     name: 'Andromeda Button',
     description: 'A sci-fi / blueprint-aesthetic button with five variants (default, outline, ghost, destructive, link), three sizes (small, medium, large), optional leading icon, and full hover / focus / active / disabled state coverage. Transparent hairline surfaces sit on a near-black canvas, with an electric-blue accent that brightens and glows on interaction.',
-    image: 'https://ik.imagekit.io/aitoolkit/andromeda-button.png',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda-button.png?updatedAt=1775998697243',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
       { label: 'Design System', accent: true },
@@ -5245,6 +5064,20 @@ export function EmojiBurst() {
     PreviewComponent: AndromedaButton,
     code: ANDROMEDA_BUTTON_CODE,
     prompts: andromedaButtonPrompts,
+  },
+  {
+    slug: 'meet-the-crew',
+    name: 'Meet the Crew',
+    description: 'A swipeable portrait card stack perfect for introducing a team, showcasing crew members, or picking an avatar. Four stacked cards fan out with soft rotations — drag to browse, tap to choose. Drop in your own photos and names for an About Us section, a character selector, or an onboarding profile picker.',
+    image: 'https://ik.imagekit.io/aitoolkit/meet-the-crew.png',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: AvatarPicker,
+    code: AVATAR_PICKER_CODE,
+    prompts: avatarPickerPrompts,
   },
 ]
 
