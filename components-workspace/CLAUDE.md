@@ -16,6 +16,7 @@ If your brief has `design-system: standalone` (or omits the field), continue.
 
 - [`skills/aesthetic-freedom.md`](skills/aesthetic-freedom.md) — your primary creative guide (stub, TODO: flesh out). Permission-giving direction: use any colors/gradients/motion you want; the only hard constraint is container chrome (`bg-sand-100 dark:bg-sand-950`).
 - [`skills/promotion-guide.md`](skills/promotion-guide.md) — how to promote a design-system component to a standalone via a re-export wrapper (stub, TODO).
+- [`skills/card-stack-pattern.md`](skills/card-stack-pattern.md) — slot-based card stacks: swipe-to-dismiss, fan-out, order cycling, spring constants, dot indicators. Read this for ANY component involving stacked or fanned cards.
 
 ### Shared tech skills (root `skills/`)
 
@@ -30,6 +31,7 @@ These live at the project root, one level up from this file:
 ### Site design tokens (when you need them)
 
 - `../supervisor/skills/site-design-tokens.md` — the main AI Canvas sand/olive/Manrope system. You rarely need this for a standalone's internals (creative freedom), but the **container chrome** uses sand-100/sand-950 from this file, and if a standalone deliberately echoes the site's look you can reference it here.
+- `../supervisor/skills/seo-metadata.md` — SEO rules for writing the `description` field. The description you write in `spec.md` and the registry entry becomes the component's Google meta description. Read this before writing any description.
 
 ## Extended skills (`.claude/skills/`) — read for complex visual components
 
@@ -64,6 +66,16 @@ These live at the project root, one level up from this file:
   - **GPT** — highest density, exact constants, easing curves, spring params, pseudo-code blocks, treat as precise executor
   - **Gemini** — defensive and explicit, exact imports, "use these hooks and no others", inline DPR/canvas scaffolding
   - **V0** — natural language, UI-framed, no math, prose descriptions with key constants as labelled numbers
+
+## Mobile responsiveness — mandatory
+
+Every component must work on mobile. This is not optional.
+
+- **No fixed layout dimensions** — never use `width: Xpx` or `height: Xpx` for layout elements. Use `%`, `vw/vh`, `clamp()`, or Tailwind fluid utilities. The component must fill any container from 300px to 1200px wide without breaking.
+- **Touch interactions** — if the primary interaction is hover, add a tap/touch equivalent. On mobile, hover does not fire. Use `onTap`, `onClick`, or pointer events that work on both mouse and touch.
+- **Text must be legible at small sizes** — minimum `text-sm` (14px) for any readable text. Labels can be smaller but must remain readable.
+- **Canvas/WebGL components** — DPR-aware sizing only. Never hardcode canvas `width` or `height` — derive from `container.clientWidth / clientHeight` with a ResizeObserver.
+- **Test at 320px** — before finishing, mentally verify the component at 320px wide (smallest common mobile screen). Nothing should overflow or be inaccessible.
 
 ## Coding standards
 - TypeScript throughout — no `any`, no type assertions unless unavoidable
