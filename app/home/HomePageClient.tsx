@@ -273,7 +273,7 @@ export function HomePageClient({ total, showcase }: Props) {
             transition={{ duration: 0.35, delay: 0.26 }}
             className="mt-4 max-w-xl text-base leading-relaxed text-sand-400"
           >
-            Whether you copy the code, paste the prompt, or just need inspiration —
+            Whether you copy the code, paste the prompt, or just need inspiration,
             everything here is free, open source, and ready to ship.
           </motion.p>
 
