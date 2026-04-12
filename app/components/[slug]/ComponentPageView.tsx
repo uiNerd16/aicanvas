@@ -263,21 +263,23 @@ export default function ComponentPageView({
                   </div>
                 )}
 
-                {/* Fullscreen icon button */}
-                <div className="group/fullscreen relative">
-                  <button
-                    onClick={() => setFullscreen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-                  >
-                    <CornersOut weight="regular" size={16} />
-                  </button>
-                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
-                    Full screen
+                {/* Fullscreen icon button — preview only */}
+                {activeTab === 'preview' && (
+                  <div className="group/fullscreen relative">
+                    <button
+                      onClick={() => setFullscreen(true)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                    >
+                      <CornersOut weight="regular" size={16} />
+                    </button>
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
+                      Full screen
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Theme pill — sun / moon icons, switches on click */}
-                <div className="group/toggle relative" style={{ cursor: !dualTheme ? 'not-allowed' : undefined }}>
+                {/* Theme pill — hidden on code tab, sun / moon icons on preview */}
+                <div className="group/toggle relative" style={{ cursor: !dualTheme ? 'not-allowed' : undefined, display: activeTab === 'code' ? 'none' : undefined }}>
                   <button
                     onClick={() => dualTheme && setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
                     className={`flex items-center gap-1 rounded-full border px-3.5 py-2 transition-all duration-150 ${
@@ -337,7 +339,7 @@ export default function ComponentPageView({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute inset-0 overflow-auto p-5"
+                    className="absolute inset-0 overflow-y-auto overflow-x-hidden p-5"
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}
                   >
                     {highlightedCode}
