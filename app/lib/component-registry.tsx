@@ -4859,7 +4859,7 @@ export function EmojiBurst() {
     slug: 'glass-card',
     image: 'https://ik.imagekit.io/aitoolkit/glass-card.png?updatedAt=1775460137',
     name: 'Glass Card',
-    description: "Content cards with 3D tilt-on-hover powered by spring physics and cursor-following glare highlight.",
+    description: "Glassmorphism content cards with 3D tilt-on-hover, spring physics, and a cursor-following glare highlight.",
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Glass', accent: true },
@@ -4886,7 +4886,7 @@ export function EmojiBurst() {
   {
     slug: 'glass-dock',
     name: 'Glass Dock',
-    description: "macOS-style dock with cursor-proximity magnification. Icons scale with spring physics as the mouse approaches.",
+    description: "Glassmorphism macOS-style dock with cursor-proximity magnification. Icons scale with spring physics as the mouse approaches.",
     image: 'https://ik.imagekit.io/aitoolkit/glass-dock.png?updatedAt=1775599200',
     tags: [
       { label: 'Navigation', accent: true },
@@ -4957,7 +4957,7 @@ export function EmojiBurst() {
     slug: 'glass-sidebar',
     image: 'https://ik.imagekit.io/aitoolkit/glass-sidebar.png?updatedAt=1775460137',
     name: 'Glass Sidebar',
-    description: 'A collapsible glassmorphism sidebar with icon-only and expanded label states.',
+    description: 'Collapsible glassmorphism sidebar with icon-only and full label states, spring-animated expand and collapse.',
     tags: [
       { label: 'Navigation', accent: true },
       { label: 'Glass', accent: true },

@@ -10,6 +10,14 @@ For each component to integrate, you will:
 
 That's it. The dynamic route already exists and handles all slugs automatically.
 
+## SEO skill — read this before writing any registry entry
+
+Before writing or editing a `description` field, read **`supervisor/skills/seo-metadata.md`**. It defines the exact formula for descriptions that feed into `generateMetadata` and become the component's Google meta description. Short version:
+- 75–90 characters
+- Names the visual form + the interaction
+- Includes the category's required aesthetic keyword (e.g. "glassmorphism" for Glass components)
+- Ends with a period (the suffix "Free copy-paste React code..." is appended automatically)
+
 ## Pre-flight gate — check this BEFORE doing anything else
 
 Before touching the registry or any other file, verify:
@@ -96,6 +104,7 @@ Before reporting back, verify every item:
 - [ ] Component imported in `component-registry.tsx`
 - [ ] Prompts imported in `component-registry.tsx`
 - [ ] Registry entry appended to `COMPONENTS` array
+- [ ] `description` passes SEO audit (see `supervisor/skills/seo-metadata.md`): 75–90 chars, ends with period, names the visual + interaction, includes category keyword
 - [ ] `npx tsc --noEmit` passes with no errors
 - [ ] Slug added to `ALL_SLUGS` in `scripts/screenshot.mjs`
 - [ ] Interaction added to `INTERACTIONS` map in `scripts/screenshot.mjs` (if component has active/hover state)
