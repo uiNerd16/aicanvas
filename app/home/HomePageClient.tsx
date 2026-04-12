@@ -28,17 +28,54 @@ interface Props {
 
 const PLATFORMS = ['Claude', 'GPT', 'Gemini', 'V0'] as const
 
+// ─── Hello card data ─────────────────────────────────────────────────────────
+
+const HELLO_CARDS = [
+  { text: 'Hello',      lang: 'English'  },
+  { text: 'こんにちは',  lang: 'Japanese' },
+  { text: 'Bonjour',    lang: 'French'   },
+  { text: 'Hallo',      lang: 'German'   },
+  { text: 'Ciao',       lang: 'Italian'  },
+  { text: 'Hej',        lang: 'Danish'   },
+  { text: 'Hola',       lang: 'Spanish'  },
+  { text: '你好',        lang: 'Chinese'  },
+]
+
+const BACK_POSITIONS = [
+  { rotate: -18, y: 6, zIndex: 1, opacity: 0.22 },
+  { rotate: -11, y: 3, zIndex: 2, opacity: 0.38 },
+  { rotate:  -4, y: 1, zIndex: 3, opacity: 0.52 },
+  { rotate:   4, y: 1, zIndex: 4, opacity: 0.68 },
+  { rotate:  11, y: 3, zIndex: 5, opacity: 0.82 },
+]
+
+const frontCardVariants = {
+  hidden: { opacity: 0, scale: 0.86, rotate: -20, y: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotate: 18,
+    y: -6,
+    transition: { duration: 0.48, ease: 'easeOut' },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.86,
+    rotate: -20,
+    y: 10,
+    transition: { duration: 0.26, ease: 'easeIn' },
+  },
+}
+
 // ─── Stacked cards visual ─────────────────────────────────────────────────────
 
 function StackedCards() {
-  const cards = [
-    { rotate: -18, y: 6, z: 1, opacity: 0.35 },
-    { rotate: -11, y: 3, z: 2, opacity: 0.50 },
-    { rotate:  -4, y: 1, z: 3, opacity: 0.65 },
-    { rotate:   4, y: 1, z: 4, opacity: 0.80 },
-    { rotate:  11, y: 3, z: 5, opacity: 0.90 },
-    { rotate:  18, y: 6, z: 6, opacity: 1.00 },
-  ]
+  const [frontIdx, setFrontIdx] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setFrontIdx((i) => (i + 1) % HELLO_CARDS.length), 2800)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <motion.div
@@ -47,19 +84,42 @@ function StackedCards() {
       transition={{ duration: 0.5 }}
       className="relative mx-auto mb-8 flex h-28 w-48 items-end justify-center"
     >
-      {cards.map(({ rotate, y, z, opacity }, i) => (
+      {BACK_POSITIONS.map(({ rotate, y, zIndex, opacity }, i) => (
         <div
           key={i}
           className="absolute h-20 w-28 rounded-2xl border border-sand-700 bg-sand-800"
           style={{
             transform: `rotate(${rotate}deg) translateY(${-y}px)`,
-            zIndex: z,
+            zIndex,
             opacity,
             transformOrigin: 'bottom center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
           }}
         />
       ))}
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={frontIdx}
+          variants={frontCardVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800"
+          style={{
+            zIndex: 6,
+            transformOrigin: 'bottom center',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+          }}
+        >
+          <span className="text-sm font-bold text-olive-400">
+            {HELLO_CARDS[frontIdx].text}
+          </span>
+          <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-sand-600">
+            {HELLO_CARDS[frontIdx].lang}
+          </span>
+        </motion.div>
+      </AnimatePresence>
     </motion.div>
   )
 }

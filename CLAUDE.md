@@ -66,9 +66,9 @@ All colors come from two custom scales defined in `globals.css` via `@theme inli
 #### Olive scale — lime-green accent
 | Token         | Hex       | Usage                                   |
 |---------------|-----------|-----------------------------------------|
-| `olive-400`   | `#E5F2A2` | Hover accent, gradient end              |
-| `olive-500`   | `#BECF5D` | Primary accent — buttons, badges, logo  |
-| `olive-600`   | `#A8B94D` | Pressed / darker accent state           |
+| `olive-400`   | `#DAE4A0` | Hover accent, gradient end              |
+| `olive-500`   | `#A8B94D` | Primary accent — buttons, badges, logo  |
+| `olive-600`   | `#869631` | Pressed / darker accent state           |
 
 > **Note:** olive buttons use `text-sand-950` (not white) — the olive background has insufficient contrast with white text.
 

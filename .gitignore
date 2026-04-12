@@ -47,3 +47,6 @@ next-env.d.ts
 
 # superpowers brainstorm session files
 .superpowers/
+
+# business strategy (private — never pushed to GitHub)
+/business-strategy/

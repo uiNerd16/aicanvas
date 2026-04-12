@@ -99,6 +99,7 @@ design-system: standalone | andromeda | meridian   ← required
 Description: <one sentence>
 Visual: <what it looks like>
 Behaviour: <interactions, animations>
+Mobile: <how it behaves on small screens — touch interactions, layout adjustments, min size>
 Tech notes: <any special requirements>
 ```
 
