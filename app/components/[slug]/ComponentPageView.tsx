@@ -61,6 +61,7 @@ interface ComponentPageViewProps {
   prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
   related: ComponentMeta[]
+  highlightedCode: ReactNode
   children: ReactNode
 }
 
@@ -75,6 +76,7 @@ export default function ComponentPageView({
   prompts,
   dualTheme,
   related,
+  highlightedCode,
   children,
 }: ComponentPageViewProps) {
   const router = useRouter()
@@ -338,7 +340,7 @@ export default function ComponentPageView({
                     className="absolute inset-0 overflow-auto p-5"
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}
                   >
-                    <pre className="font-mono text-[13px] leading-relaxed text-sand-400">{code}</pre>
+                    {highlightedCode}
                   </motion.div>
                 )}
               </AnimatePresence>
