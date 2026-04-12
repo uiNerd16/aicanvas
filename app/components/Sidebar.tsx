@@ -106,7 +106,7 @@ export function Sidebar() {
       {/* ── Logo ── */}
       <div className="flex h-14 shrink-0 items-center border-b border-sand-300 px-4 dark:border-sand-800">
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
         >
           <img src="/aicanvas.svg" alt="" width={20} height={17} className="shrink-0" />

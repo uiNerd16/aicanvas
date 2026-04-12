@@ -64,7 +64,7 @@ export default function AboutPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-8 sm:px-8 sm:py-28">
+      <main className="mx-auto max-w-[720px] px-6 py-8 sm:px-8 sm:py-28">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
           <span className="text-olive-500">/About</span>

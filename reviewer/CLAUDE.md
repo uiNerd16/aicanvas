@@ -42,6 +42,12 @@ Run every check in order. One FAIL stops the component from proceeding.
 - [ ] No hardcoded pixel dimensions (`w-[Xpx]`, `h-[Xpx]`) except for small decorative elements
 - [ ] No inline `style={{ width: Xpx }}` or `style={{ height: Xpx }}` for layout elements
 
+### 5b. Mobile responsiveness
+- [ ] No fixed pixel widths/heights on layout containers — fluid sizing only
+- [ ] If the primary interaction is hover-based, a tap/click equivalent exists that works on touch screens
+- [ ] Canvas/WebGL components derive size from the container (ResizeObserver or ref), never hardcoded
+- [ ] Text is at minimum 14px (text-sm) for any readable content
+
 ### 6. Icons
 - [ ] If Phosphor icons are used: import is from `@phosphor-icons/react`
 - [ ] All icon instances use `weight="regular"` — not duotone, not fill (known mistake #002)
