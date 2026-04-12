@@ -10,7 +10,7 @@
 'use client';
 
 import { forwardRef, useId, useState, useEffect } from 'react';
-import { Checkmark } from '@carbon/icons-react';
+import { Check } from '@phosphor-icons/react';
 
 function useSpacePopIn() {
   useEffect(() => {
@@ -140,10 +140,11 @@ export const Checkbox = forwardRef(function Checkbox(
           )}
         >
           {checked ? (
-            <Checkmark
+            <Check
               size={12}
+              weight="light"
               style={{
-                fill: 'var(--andromeda-accent-bright)',
+                color: 'var(--andromeda-accent-bright)',
                 animation: 'andromeda-pop-in 120ms ease-out',
               }}
             />

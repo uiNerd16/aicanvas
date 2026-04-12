@@ -9,7 +9,7 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { Close } from '@carbon/icons-react';
+import { X } from '@phosphor-icons/react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
@@ -97,7 +97,7 @@ export const Tag = forwardRef(function Tag(
           onClick={onClose}
           className={closeButtonClass}
         >
-          <Close size={12} />
+          <X size={12} weight="light" />
         </button>
       ) : null}
     </span>

@@ -5,19 +5,18 @@
 import { useState, type ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
 import {
-  Search,
-  Notification,
-  Settings,
-  Activity,
-  UserMultiple,
-  DataBase,
+  MagnifyingGlass,
+  Bell,
+  Gear,
+  Pulse,
+  Users,
+  Database,
   Compass,
-  Email,
-  MailAll,
-  WarningAltFilled,
-  WarningAlt,
-  Information,
-} from '@carbon/icons-react'
+  Envelope,
+  EnvelopeOpen,
+  Warning,
+  Info,
+} from '@phosphor-icons/react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { Button } from '../../../../design-systems/andromeda/components/Button'
 import { Badge } from '../../../../design-systems/andromeda/components/Badge'
@@ -250,6 +249,7 @@ export default function SpaceShowcasePage() {
                 </div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -267,6 +267,7 @@ export default function SpaceShowcasePage() {
                 <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.12)', marginBottom: '8px' }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -282,6 +283,7 @@ export default function SpaceShowcasePage() {
                 <div style={{ height: 48, border: `2px solid ${color}`, marginBottom: '8px' }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -298,6 +300,7 @@ export default function SpaceShowcasePage() {
                 <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.08)', marginBottom: '8px' }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -315,6 +318,7 @@ export default function SpaceShowcasePage() {
                 <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.08)', marginBottom: '8px' }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -432,11 +436,11 @@ export default function SpaceShowcasePage() {
             <Button size="lg">Large</Button>
           </Row>
           <Row label="With icon">
-            <Button icon={Notification}>Notifications</Button>
-            <Button variant="outline" icon={Settings}>
+            <Button icon={Bell}>Notifications</Button>
+            <Button variant="outline" icon={Gear}>
               Settings
             </Button>
-            <Button variant="destructive" icon={Notification}>
+            <Button variant="destructive" icon={Bell}>
               Abort
             </Button>
           </Row>
@@ -612,10 +616,10 @@ export default function SpaceShowcasePage() {
             }}
           >
             <Input label="Callsign" placeholder="ENTER CALLSIGN" />
-            <Input label="Search" icon={Search} placeholder="QUERY DATABASE" />
+            <Input label="Search" icon={MagnifyingGlass} placeholder="QUERY DATABASE" />
             <Input
               label="Operator"
-              icon={Email}
+              icon={Envelope}
               placeholder="OPERATOR@MISSION.CONTROL"
             />
             <Input
@@ -640,10 +644,10 @@ export default function SpaceShowcasePage() {
           >
             <CornerMarkers />
             <NavItem icon={Compass} label="Overview" active />
-            <NavItem icon={Activity} label="Telemetry" />
-            <NavItem icon={UserMultiple} label="Crew" />
-            <NavItem icon={DataBase} label="Logs" />
-            <NavItem icon={Settings} label="Settings" />
+            <NavItem icon={Pulse} label="Telemetry" />
+            <NavItem icon={Users} label="Crew" />
+            <NavItem icon={Database} label="Logs" />
+            <NavItem icon={Gear} label="Settings" />
           </div>
         </Section>
 
@@ -662,7 +666,7 @@ export default function SpaceShowcasePage() {
           >
             <ProgressBar label="Fuel Reserve" value={72} variant="default" />
             <ProgressBar label="Heat Shield" value={48} variant="warning" />
-            <ProgressBar label="Cabin Pressure" value={91} variant="fault" />
+            <ProgressBar label="Thermal Danger" value={91} variant="fault" />
           </div>
         </Section>
 
@@ -857,28 +861,28 @@ export default function SpaceShowcasePage() {
             }}
           >
             <Alert variant="default">
-              <AlertIcon><Information /></AlertIcon>
+              <AlertIcon><Info weight="light" /></AlertIcon>
               <AlertContent>
                 <AlertTitle>System nominal</AlertTitle>
                 <AlertDescription>All vehicles reporting in.</AlertDescription>
               </AlertContent>
             </Alert>
             <Alert variant="accent">
-              <AlertIcon><Activity /></AlertIcon>
+              <AlertIcon><Pulse weight="light" /></AlertIcon>
               <AlertContent>
                 <AlertTitle>New telemetry</AlertTitle>
                 <AlertDescription>Burst received from VHCL-04.</AlertDescription>
               </AlertContent>
             </Alert>
             <Alert variant="warning">
-              <AlertIcon><WarningAlt /></AlertIcon>
+              <AlertIcon><Warning weight="light" /></AlertIcon>
               <AlertContent>
                 <AlertTitle>Caution</AlertTitle>
                 <AlertDescription>Heat shield within 12% of operational limit.</AlertDescription>
               </AlertContent>
             </Alert>
             <Alert variant="fault">
-              <AlertIcon><WarningAltFilled /></AlertIcon>
+              <AlertIcon><Warning weight="light" /></AlertIcon>
               <AlertContent>
                 <AlertTitle>Telemetry lost</AlertTitle>
                 <AlertDescription>Reconnecting to vehicle. ETA 8 seconds.</AlertDescription>
@@ -893,7 +897,7 @@ export default function SpaceShowcasePage() {
           description="Centered icon + uppercase mono title + sans description + optional action. Built on Card so it inherits the bracket motif."
         >
           <EmptyState>
-            <EmptyStateIcon><MailAll /></EmptyStateIcon>
+            <EmptyStateIcon><EnvelopeOpen weight="light" /></EmptyStateIcon>
             <EmptyStateTitle>No transmissions</EmptyStateTitle>
             <EmptyStateDescription>
               Awaiting signal from the deep-space array. The next pass is in

@@ -3,7 +3,7 @@
 // MISSION CONTROL: Row 3 right — Comms Log
 // ============================================================
 
-import { ArrowDown, ArrowUp, WarningAlt } from '@carbon/icons-react';
+import { ArrowDown, ArrowUp, Warning } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { Card, CardHeader } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -25,7 +25,7 @@ const dirConfig = {
     border:tokens.color.border.base,
   },
   alert: {
-    icon:  WarningAlt,
+    icon:  Warning,
     label: '!',
     color: tokens.color.warning,
     bg:    tokens.color.warningGlow,
@@ -56,7 +56,7 @@ function CommsItem({ entry, isLast }) {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Icon size={20} />
+        <Icon size={20} weight="light" />
       </div>
 
       {/* Content */}

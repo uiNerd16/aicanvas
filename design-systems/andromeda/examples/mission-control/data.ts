@@ -4,22 +4,24 @@
 // ============================================================
 
 import {
-  Grid,
-  Activity,
+  SquaresFour,
+  Pulse,
   Rocket,
-  RadioButton,
-  WarningAltFilled,
-  Tools,
-} from '@carbon/icons-react';
+  Radio,
+  Warning,
+  Wrench,
+  Bell,
+} from '@phosphor-icons/react';
 
 // ---- Sidebar nav ----
 export const navItems = [
-  { id: 'overview',    label: 'Overview',    icon: Grid             },
-  { id: 'telemetry',   label: 'Telemetry',   icon: Activity         },
-  { id: 'vehicles',    label: 'Vehicles',    icon: Rocket           },
-  { id: 'comms',       label: 'Comms',       icon: RadioButton      },
-  { id: 'anomalies',   label: 'Anomalies',   icon: WarningAltFilled },
-  { id: 'maintenance', label: 'Maintenance', icon: Tools            },
+  { id: 'overview',    label: 'Overview',    icon: SquaresFour },
+  { id: 'telemetry',   label: 'Telemetry',   icon: Pulse       },
+  { id: 'vehicles',    label: 'Vehicles',    icon: Rocket      },
+  { id: 'comms',       label: 'Comms',       icon: Radio       },
+  { id: 'anomalies',   label: 'Anomalies',   icon: Warning     },
+  { id: 'maintenance', label: 'Maintenance', icon: Wrench      },
+  { id: 'notifications', label: 'Notifications', icon: Bell   },
 ];
 
 // ---- Telemetry stat tiles ----
@@ -64,7 +66,7 @@ export const systems = [
   { name: 'Navigation',   status: 'nominal', value: 100 },
   { name: 'Comms Array',  status: 'caution', value: 76  },
   { name: 'Power Grid',   status: 'nominal', value: 87  },
-  { name: 'Thermal',      status: 'nominal', value: 92  },
+  { name: 'Thermal',      status: 'fault',   value: 92  },
   { name: 'Life Support', status: 'nominal', value: 100 },
 ];
 

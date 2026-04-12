@@ -43,21 +43,22 @@ const avatarVariants = cva(
 
 const statusDotVariants = cva(
   [
-    'absolute -bottom-[1px] -right-[1px] block',
+    'absolute -right-[2px] block w-[2px]',
+    'top-[15%] h-[70%]',
     'border-0',
   ],
   {
     variants: {
       size: {
-        sm: 'w-[6px] h-[6px]',
-        md: 'w-[6px] h-[6px]',
-        lg: 'w-[8px] h-[8px]',
+        sm: '',
+        md: '',
+        lg: '',
       },
       status: {
-        online:  'bg-[color:var(--andromeda-accent-base)] shadow-[0_0_6px_var(--andromeda-accent-glow)]',
-        caution: 'bg-[color:var(--andromeda-warning)]',
-        fault:   'bg-[color:var(--andromeda-fault)]',
-        offline: 'bg-[color:var(--andromeda-text-muted)]',
+        online:  'bg-[color:var(--andromeda-accent-dim)] shadow-[-3px_0_8px_var(--andromeda-accent-glow)]',
+        caution: 'bg-[color:var(--andromeda-warning-dim)] shadow-[-3px_0_8px_var(--andromeda-warning-ring)]',
+        fault:   'bg-[color:var(--andromeda-fault-dim)] shadow-[-3px_0_8px_var(--andromeda-fault-ring)]',
+        offline: 'bg-[color:var(--andromeda-text-faint)]',
       },
     },
     defaultVariants: {
@@ -80,7 +81,8 @@ function deriveInitials(name) {
 
 /**
  * @typedef {object} AvatarProps
- * @property {string} [name='?'] Used to derive uppercase initials.
+ * @property {string} [name='?'] Used to derive uppercase initials (shown when no src).
+ * @property {string} [src] Optional image URL. When provided, renders an img instead of initials.
  * @property {'sm'|'md'|'lg'} [size='md']
  * @property {'online'|'caution'|'fault'|'offline'} [status] When set, renders a status dot.
  * @property {string} [className]
@@ -89,7 +91,7 @@ function deriveInitials(name) {
 
 /** @type {React.ForwardRefExoticComponent<AvatarProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const Avatar = forwardRef(function Avatar(
-  { className, name = '?', size = 'md', status, style, ...props },
+  { className, name = '?', src, size = 'md', status, style, ...props },
   ref,
 ) {
   const initials = deriveInitials(name);
@@ -101,7 +103,12 @@ export const Avatar = forwardRef(function Avatar(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      <div className={cn(avatarVariants({ size }), className)}>{initials}</div>
+      <div className={cn(avatarVariants({ size }), className)}>
+        {src
+          ? <img src={src} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          : initials
+        }
+      </div>
       {status ? <span className={statusDotVariants({ size, status })} aria-hidden="true" /> : null}
     </div>
   );

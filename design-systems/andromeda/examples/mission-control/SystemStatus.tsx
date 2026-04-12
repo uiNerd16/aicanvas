@@ -75,7 +75,20 @@ export function SystemStatus() {
                   {statusLabel[sys.status]}
                 </Badge>
               </div>
-              <ProgressBar value={sys.value} variant={progressVariant[sys.status]} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3] }}>
+                <ProgressBar value={sys.value} variant={progressVariant[sys.status]} style={{ flex: 1 }} />
+                <span style={{
+                  fontFamily: tokens.typography.fontMono,
+                  fontSize: tokens.typography.size.xs,
+                  color: tokens.color.text.faint,
+                  letterSpacing: tokens.typography.tracking.wider,
+                  flexShrink: 0,
+                  width: '28px',
+                  textAlign: 'right',
+                }}>
+                  {sys.value}%
+                </span>
+              </div>
             </div>
           ))}
         </div>

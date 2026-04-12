@@ -1,54 +1,41 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: ProgressBar
-// shadcn/ui-aligned API: variant, cva, forwardRef, ARIA progressbar.
+// shadcn/ui-aligned API: variant, forwardRef, ARIA progressbar.
 // Variants: default | warning | fault
-// Track uses surface.overlay; fill is an accent.dim → accent.base
-// gradient (recolored per variant) with a soft glow halo.
+// Visual: a row of bars, each bar = 3 stacked squares. All bars
+// are the same height. Filled bars glow in the variant colour.
 // ============================================================
 
 'use client';
 
 import { forwardRef } from 'react';
-import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
-const trackVariants = cva(
-  [
-    'relative h-[3px] w-full overflow-hidden',
-    'bg-[color:var(--andromeda-surface-overlay)]',
-    'border border-solid border-[color:var(--andromeda-border-subtle)]',
-    'rounded-[var(--andromeda-radius-none)]',
-  ],
-);
+const BARS       = 30;  // number of columns
+const SQUARES    = 1;   // squares per column
+const SQUARE_W   = 6;   // width in px
+const SQUARE_H   = 16;  // height in px
+const GAP_INNER  = 2;   // gap between squares within a column
+const GAP_COL    = 3;   // gap between columns
 
-const fillVariants = cva(
-  [
-    'h-full',
-    'transition-[width] duration-[400ms] ease-out',
-  ],
-  {
-    variants: {
-      variant: {
-        default: [
-          '[background:linear-gradient(90deg,var(--andromeda-accent-dim)_0%,var(--andromeda-accent-base)_100%)]',
-          'shadow-[0_0_8px_var(--andromeda-accent-glow)]',
-        ],
-        warning: [
-          '[background:linear-gradient(90deg,var(--andromeda-warning-dim)_0%,var(--andromeda-warning)_100%)]',
-          'shadow-[0_0_8px_var(--andromeda-warning-ring)]',
-        ],
-        fault: [
-          '[background:linear-gradient(90deg,var(--andromeda-fault-dim)_0%,var(--andromeda-fault)_100%)]',
-          'shadow-[0_0_8px_var(--andromeda-fault-ring)]',
-        ],
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
+const variantConfig = {
+  default: {
+    activeColor:  'var(--andromeda-accent-dim)',
+    activeGlow:   '0 0 5px var(--andromeda-accent-glow)',
+    activeBorder: 'var(--andromeda-accent-dim)',
   },
-);
+  warning: {
+    activeColor:  'var(--andromeda-warning-dim)',
+    activeGlow:   '0 0 5px var(--andromeda-warning-ring)',
+    activeBorder: 'var(--andromeda-warning-dim)',
+  },
+  fault: {
+    activeColor:  'var(--andromeda-fault-dim)',
+    activeGlow:   '0 0 5px var(--andromeda-fault-ring)',
+    activeBorder: 'var(--andromeda-fault-dim)',
+  },
+};
 
 const labelClass = cn(
   '[font-family:var(--andromeda-font-mono)]',
@@ -67,10 +54,10 @@ const valueClass = cn(
 
 /**
  * @typedef {object} ProgressBarProps
- * @property {string} [label] Optional label rendered above the track.
- * @property {number} value 0–100 percentage; clamped internally.
+ * @property {string} [label]
+ * @property {number} value 0–100; clamped internally.
  * @property {'default'|'warning'|'fault'} [variant='default']
- * @property {string} [className] Forwarded to outer wrapper.
+ * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
@@ -79,7 +66,9 @@ export const ProgressBar = forwardRef(function ProgressBar(
   { className, label, value, variant = 'default', style, ...props },
   ref,
 ) {
-  const clamped = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
+  const clamped     = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
+  const activeCount = Math.round((clamped / 100) * BARS);
+  const cfg         = variantConfig[variant] ?? variantConfig.default;
 
   return (
     <div
@@ -94,21 +83,53 @@ export const ProgressBar = forwardRef(function ProgressBar(
           <span className={valueClass}>{clamped}%</span>
         </div>
       ) : null}
+
+      {/* Grid: BARS columns × SQUARES rows */}
       <div
         role="progressbar"
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={typeof label === 'string' ? label : undefined}
-        className={trackVariants()}
+        style={{
+          display: 'flex',
+          gap: `${GAP_COL}px`,
+        }}
       >
-        <div
-          className={fillVariants({ variant })}
-          style={{ width: `${clamped}%` }}
-        />
+        {Array.from({ length: BARS }, (_, barIndex) => {
+          const active = barIndex < activeCount;
+
+          return (
+            <div
+              key={barIndex}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: `${GAP_INNER}px`,
+              }}
+            >
+              {Array.from({ length: SQUARES }, (_, sqIndex) => (
+                <div
+                  key={sqIndex}
+                  style={{
+                    width:  `${SQUARE_W}px`,
+                    height: `${SQUARE_H}px`,
+                    flexShrink: 0,
+                    background: active
+                      ? cfg.activeColor
+                      : 'var(--andromeda-surface-overlay)',
+                    border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
+                    boxShadow: active ? cfg.activeGlow : 'none',
+                    transition: 'background 250ms ease, box-shadow 250ms ease, border-color 250ms ease',
+                  }}
+                />
+              ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 });
 
-export { trackVariants, fillVariants };
+export { variantConfig };
