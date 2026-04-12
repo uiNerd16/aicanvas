@@ -171,36 +171,58 @@ function ShowcaseCard({ items }: { items: ComponentMeta[] }) {
   )
 }
 
-// ─── Cycling greeting ─────────────────────────────────────────────────────────
+// ─── Typewriter greeting ──────────────────────────────────────────────────────
 
 const GREETINGS = ['designer', 'developer', 'builder', 'vibe coder', 'creator', 'friend']
 
 function CyclingGreeting() {
-  const [index, setIndex] = useState(0)
+  const [displayText, setDisplayText] = useState('')
+  const [wordIndex, setWordIndex] = useState(0)
+  const [erasing, setErasing] = useState(false)
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % GREETINGS.length)
-    }, 2200)
-    return () => clearInterval(id)
-  }, [])
+    const word = GREETINGS[wordIndex]
+
+    if (!erasing) {
+      if (displayText.length < word.length) {
+        const id = setTimeout(
+          () => setDisplayText(word.slice(0, displayText.length + 1)),
+          80,
+        )
+        return () => clearTimeout(id)
+      } else {
+        // Fully typed — pause, then start erasing
+        const id = setTimeout(() => setErasing(true), 1400)
+        return () => clearTimeout(id)
+      }
+    } else {
+      if (displayText.length > 0) {
+        const id = setTimeout(
+          () => setDisplayText(displayText.slice(0, -1)),
+          45,
+        )
+        return () => clearTimeout(id)
+      } else {
+        // Fully erased — move to next word
+        const id = setTimeout(() => {
+          setWordIndex((i) => (i + 1) % GREETINGS.length)
+          setErasing(false)
+        }, 220)
+        return () => clearTimeout(id)
+      }
+    }
+  }, [displayText, erasing, wordIndex])
 
   return (
-    <span className="flex items-baseline gap-1.5 text-sm font-semibold text-sand-50">
+    <span className="flex items-center gap-1.5 text-sm font-semibold text-sand-50">
       Hello,
-      <span className="relative inline-block overflow-hidden" style={{ minWidth: '6rem' }}>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={index}
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: '0%', opacity: 1 }}
-            exit={{ y: '-100%', opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="block text-olive-500"
-          >
-            {GREETINGS[index]}
-          </motion.span>
-        </AnimatePresence>
+      <span className="inline-flex items-center" style={{ minWidth: '6.5rem' }}>
+        <span className="text-olive-500">{displayText}</span>
+        <motion.span
+          animate={{ opacity: [1, 1, 0, 0] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: 'linear', times: [0, 0.45, 0.55, 1] }}
+          className="ml-px inline-block h-[13px] w-[1.5px] translate-y-px rounded-full bg-olive-500"
+        />
       </span>
     </span>
   )
