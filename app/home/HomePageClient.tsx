@@ -171,6 +171,41 @@ function ShowcaseCard({ items }: { items: ComponentMeta[] }) {
   )
 }
 
+// ─── Cycling greeting ─────────────────────────────────────────────────────────
+
+const GREETINGS = ['designer', 'developer', 'builder', 'vibe coder', 'creator', 'friend']
+
+function CyclingGreeting() {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % GREETINGS.length)
+    }, 2200)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <span className="flex items-baseline gap-1.5 text-sm font-semibold text-sand-50">
+      Hello,
+      <span className="relative inline-block overflow-hidden" style={{ minWidth: '6rem' }}>
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={index}
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: '0%', opacity: 1 }}
+            exit={{ y: '-100%', opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="block text-olive-500"
+          >
+            {GREETINGS[index]}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+    </span>
+  )
+}
+
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 export function HomePageClient({ total, showcase }: Props) {
@@ -178,12 +213,9 @@ export function HomePageClient({ total, showcase }: Props) {
     <div className="flex min-h-full flex-col bg-sand-950">
 
       {/* ── Top bar ── */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:grid">
-        <span className="text-sm font-semibold text-sand-50">Overview</span>
-        <span className="text-sm font-semibold text-olive-500">aicanvas.me</span>
-        <div className="flex justify-end">
-          <HeaderSocials />
-        </div>
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:flex">
+        <CyclingGreeting />
+        <HeaderSocials />
       </div>
 
       <main className="mx-auto w-full max-w-[720px] px-6 py-12 sm:px-8 sm:py-20">
