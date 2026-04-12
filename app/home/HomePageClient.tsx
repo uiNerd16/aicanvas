@@ -271,7 +271,7 @@ export function HomePageClient({ total, showcase }: Props) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.26 }}
-            className="mt-4 max-w-md text-base leading-relaxed text-sand-400"
+            className="mt-4 max-w-2xl text-base leading-relaxed text-sand-400"
           >
             Whether you copy the code, paste the prompt, or just need inspiration —
             everything here is free, open source, and ready to ship.
