@@ -250,10 +250,9 @@ export function HomePageClient({ total, showcase }: Props) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.1 }}
-            className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
+            className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
             Free · Open source · AI-ready
-            <ArrowRight weight="regular" size={11} className="text-sand-500" />
           </motion.span>
 
           <motion.h1
