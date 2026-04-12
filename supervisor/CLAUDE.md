@@ -131,3 +131,11 @@ Do NOT proceed to preview or integration. Report the issues clearly to the user.
 - After every Reviewer FAIL, log new/recurring issues to `supervisor/mistakes.md`
 - Preserve all existing registry entries — only append, never delete
 - **When Integrator reports done, verify the `image` field in the registry entry has a real ImageKit URL before updating status to `integrated`. A missing or placeholder `image` means integration is incomplete — send Integrator back.**
+
+## Hard integration gates — never delegate to Integrator unless ALL of these are true
+
+1. **Reviewer returned PASS** for this component in this session. A PASS from a previous session does not count if the component was modified since.
+2. **`prompts.ts` exists** in `components-workspace/<slug>/` and is non-empty (at least one platform key).
+3. **`spec.md` exists** in `components-workspace/<slug>/`.
+
+If any gate fails → do not delegate to Integrator. Tell the user what is missing and complete the missing step first.

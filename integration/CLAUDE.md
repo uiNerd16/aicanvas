@@ -10,6 +10,19 @@ For each component to integrate, you will:
 
 That's it. The dynamic route already exists and handles all slugs automatically.
 
+## Pre-flight gate — check this BEFORE doing anything else
+
+Before touching the registry or any other file, verify:
+
+1. **`components-workspace/<name>/prompts.ts` exists and is non-empty.**
+   - If the file is missing → STOP. Report back to Supervisor: "prompts.ts is missing — Step 5 (Prompts) must be completed before integration."
+   - If the file exports an empty object `{}` or has no platform keys → STOP. Same message.
+
+2. **`components-workspace/<name>/spec.md` exists.**
+   - If missing → STOP. Report back to Supervisor: "spec.md is missing — the Supervisor must save the approved spec before integration can proceed."
+
+Do not proceed past this gate until both files exist and are non-empty.
+
 ## Step-by-step integration
 
 ### Step 1 — Inspect the component
