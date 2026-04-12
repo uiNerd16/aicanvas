@@ -19,7 +19,6 @@ const COMPONENTS_LABELS = [
   'Inputs & Controls',
   'Notifications',
   'Typography',
-  'AI',
 ] as const
 
 const DESIGN_SYSTEM_LABELS = ['Glass'] as const

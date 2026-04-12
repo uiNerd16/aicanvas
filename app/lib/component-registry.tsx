@@ -3065,7 +3065,6 @@ const TAGS = [
   { label: 'Design',       color: '#FF9A3C' },
   { label: 'Development',  color: '#FFBE0B' },
   { label: 'Motion',       color: '#FF6BF5' },
-  { label: 'AI',           color: '#FF7B54' },
   { label: '3D',           color: '#DC5A28' },
   { label: 'Typography',   color: '#FFD166' },
   { label: 'Branding',     color: '#FF6680' },
@@ -3601,7 +3600,7 @@ export function AndromedaButton() {
   )
 }`
 
-export const COMPONENTS: ComponentEntry[] = [
+const COMPONENTS_RAW: ComponentEntry[] = [
   {
     slug: 'wave-lines',
     image: 'https://ik.imagekit.io/aitoolkit/wave-lines.png',
@@ -4997,7 +4996,7 @@ export function EmojiBurst() {
   },
   {
     slug: 'glass-tab-bar',
-    image: 'https://ik.imagekit.io/aitoolkit/glass-tab-bar.png',
+    image: 'https://ik.imagekit.io/aitoolkit/glass-tab-bar.png?updatedAt=1775974874535',
     name: 'Glass Tab Bar',
     description: "Frosted glass pill tab bar with a sliding active indicator. Edge tabs snap flush to the container wall.",
     tags: [
@@ -5139,7 +5138,7 @@ export function EmojiBurst() {
     slug: 'glass-user-menu',
     name: 'Glass User Menu',
     description: 'Frosted glass user avatar trigger with animated dropdown, grouped menu items, and Log Out.',
-    image: 'https://ik.imagekit.io/aitoolkit/glass-user-menu.png',
+    image: 'https://ik.imagekit.io/aitoolkit/glass-user-menu.png?updatedAt=1775834492638',
     tags: [
       { label: 'Navigation', accent: true },
       { label: 'Glass', accent: true },
@@ -5211,7 +5210,7 @@ export function EmojiBurst() {
     description: 'Glassmorphism AI chat input with image upload, web search toggle, and model switcher.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-ai-compose.png',
     tags: [
-      { label: 'AI', accent: true },
+      { label: 'Inputs & Controls', accent: true },
       { label: 'Glass', accent: true },
       { label: 'Interactive' },
     ],
@@ -5248,6 +5247,9 @@ export function EmojiBurst() {
     prompts: andromedaButtonPrompts,
   },
 ]
+
+// Newest first — append new components at the bottom of COMPONENTS_RAW
+export const COMPONENTS: ComponentEntry[] = [...COMPONENTS_RAW].reverse()
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
