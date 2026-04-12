@@ -1,10 +1,56 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { COMPONENTS, type ComponentMeta } from '../../lib/component-registry'
 import ComponentPageView from './ComponentPageView'
 import { HighlightedCode } from '../../components/HighlightedCode'
 
 export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const entry = COMPONENTS.find((c) => c.slug === slug)
+  if (!entry) return {}
+
+  const accentTag = entry.tags.find((t) => t.accent)
+  const category = accentTag?.label ?? 'Component'
+  const title = `${entry.name} — Animated React Component`
+  const description = `${entry.description} Free copy-paste React code with AI prompts for Claude, GPT, V0, and Gemini.`
+
+  return {
+    title,
+    description,
+    keywords: [
+      `${entry.name.toLowerCase()} react`,
+      `${entry.name.toLowerCase()} framer motion`,
+      `${entry.name.toLowerCase()} component`,
+      `${category.toLowerCase()} react component`,
+      'animated react component',
+      'react component AI prompt',
+      'copy paste react component',
+      'framer motion tailwind',
+    ],
+    openGraph: {
+      title,
+      description,
+      url: `https://aicanvas.me/components/${slug}`,
+      type: 'website',
+      ...(entry.image
+        ? { images: [{ url: entry.image, alt: entry.name }] }
+        : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      ...(entry.image ? { images: [entry.image] } : {}),
+    },
+  }
 }
 
 // Strip a full ComponentEntry down to a serializable ComponentMeta so it
