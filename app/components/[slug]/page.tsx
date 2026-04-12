@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { COMPONENTS, type ComponentMeta } from '../../lib/component-registry'
 import ComponentPageView from './ComponentPageView'
+import { HighlightedCode } from '../../components/HighlightedCode'
 
 export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }))
@@ -52,6 +53,7 @@ export default async function Page({
       prompts={entry.prompts}
       dualTheme={entry.dualTheme ?? false}
       related={related}
+      highlightedCode={<HighlightedCode code={entry.code} />}
     >
       <PreviewComponent />
     </ComponentPageView>
