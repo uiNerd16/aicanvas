@@ -72,14 +72,14 @@ export default function AboutPage() {
           </h1>
           <p className="mt-6 text-sm leading-relaxed text-sand-400">
             We're living through a quiet shift. The way we design and build
-            interfaces is changing — not with a bang, but with a conversation.
+            interfaces is changing, not with a bang, but with a conversation.
             Today you can describe what you need in plain words and watch it
             come to life. That felt like something worth exploring.
           </p>
           <p className="mt-4 text-sm leading-relaxed text-sand-400">
             AI Canvas started as a small experiment: what if every piece of UI
             came with the right words to recreate it? Each prompt is tuned for
-            Claude, GPT, Gemini, and V0 — so you can pick the tool you're
+            Claude, GPT, Gemini, and V0, so you can pick the tool you're
             comfortable with and get something real on the first try.
           </p>
         </Section>
@@ -96,7 +96,7 @@ export default function AboutPage() {
           </p>
           <p className="mt-4 text-sm leading-relaxed text-sand-400">
             It felt like there should be a place where prompts are treated with
-            the same care as code — written thoughtfully, tested across
+            the same care as code: written thoughtfully, tested across
             platforms, and shared openly. A place built for today's workflow,
             where words are the starting point for everything you create.
           </p>
@@ -108,11 +108,11 @@ export default function AboutPage() {
             How it works
           </h2>
           <p className="mt-6 text-sm leading-relaxed text-sand-400">
-            Everything here — components, design systems (soon), and whatever comes
-            next — is built directly with words. Most of the work happens in
+            Everything here, components, design systems (soon), and whatever comes
+            next, is built directly with words. Most of the work happens in
             Claude Code, with Figma for visual tweaking when needed. Then each
             piece is distilled into prompts tuned per platform, because a Claude
-            prompt reads differently from a GPT, Gemini, or V0 prompt — the
+            prompt reads differently from a GPT, Gemini, or V0 prompt. The
             tools think differently.
           </p>
           <p className="mt-4 text-sm leading-relaxed text-sand-400">

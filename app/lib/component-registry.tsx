@@ -91,6 +91,14 @@ import { AndromedaButton } from '../../components-workspace/andromeda-button'
 import { prompts as andromedaButtonPrompts } from '../../components-workspace/andromeda-button/prompts'
 import { AvatarPicker } from '../../components-workspace/avatar-picker'
 import { prompts as avatarPickerPrompts } from '../../components-workspace/avatar-picker/prompts'
+import { TaskCards } from '../../components-workspace/task-cards'
+import { prompts as taskCardsPrompts } from '../../components-workspace/task-cards/prompts'
+import { SlideDeck } from '../../components-workspace/slide-deck'
+import { prompts as slideDeckPrompts } from '../../components-workspace/slide-deck/prompts'
+import { LabelCards } from '../../components-workspace/label-cards'
+import { prompts as labelCardsPrompts } from '../../components-workspace/label-cards/prompts'
+import { StarsPortal } from '../../components-workspace/stars-portal'
+import { prompts as starsPortalPrompts } from '../../components-workspace/stars-portal/prompts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,6 +108,7 @@ export interface ComponentEntry {
   description: string
   tags: Tag[]
   image?: string
+  badge?: string
   dualTheme?: boolean
   PreviewComponent: ComponentType
   code: string
@@ -111,7 +120,7 @@ export interface ComponentEntry {
 // (related grid, prev/next nav, etc).
 export type ComponentMeta = Pick<
   ComponentEntry,
-  'slug' | 'name' | 'description' | 'tags' | 'image'
+  'slug' | 'name' | 'description' | 'tags' | 'image' | 'badge'
 >
 
 // ─── Code strings ─────────────────────────────────────────────────────────────
@@ -3433,6 +3442,434 @@ export function AndromedaButton() {
   )
 }`
 
+const TASK_CARDS_CODE = `'use client'
+
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Clock, Tag, ArrowLeft, ArrowRight } from '@phosphor-icons/react'
+
+const CARD_W = 260
+const CARD_H = 320
+
+const TASKS = [
+  { id: 0, number: '01', title: 'Brand Overhaul', category: 'Design', status: 'In Progress', due: 'Apr 18', description: 'Complete visual identity refresh — logo, type scale, and colour system across all brand touchpoints.', accent: '#8B6CF6', bg: '#130D2B', bgLight: '#EFECFB', accentLight: '#6B4EE6' },
+  { id: 1, number: '02', title: 'Product Launch', category: 'Marketing', status: 'In Review', due: 'Apr 25', description: 'Coordinate go-to-market strategy, press kit, social assets, and launch-day campaign timeline.', accent: '#F07070', bg: '#200A0A', bgLight: '#FBEDEC', accentLight: '#D94D4D' },
+  { id: 2, number: '03', title: 'API Migration', category: 'Engineering', status: 'Blocked', due: 'Apr 30', description: 'Migrate three legacy endpoints to v3 schema with full backward-compatibility and rollback plan.', accent: '#50C8C8', bg: '#071B1B', bgLight: '#E8F8F8', accentLight: '#1A9C9C' },
+  { id: 3, number: '04', title: 'Q2 Metrics', category: 'Analytics', status: 'Planning', due: 'May 5', description: 'Build consolidated dashboard — retention, revenue, and activation funnels with weekly drill-down.', accent: '#D4A830', bg: '#1A1500', bgLight: '#FBF5E0', accentLight: '#A07A10' },
+]
+
+const SLOTS = [
+  { x: 0,  y: 0,   rotate: 0, scale: 1,    z: 4 },
+  { x: 8,  y: -10, rotate: 3, scale: 0.96, z: 3 },
+  { x: 16, y: -20, rotate: 6, scale: 0.92, z: 2 },
+  { x: 24, y: -30, rotate: 9, scale: 0.88, z: 1 },
+]
+
+const SPRING = { type: 'spring', stiffness: 280, damping: 26 }
+
+function useIsDark(ref) {
+  const [isDark, setIsDark] = useState(true)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const check = () => {
+      const card = el.closest('[data-card-theme]')
+      setIsDark(card ? card.classList.contains('dark') : document.documentElement.classList.contains('dark'))
+    }
+    check()
+    const obs = new MutationObserver(check)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    const cardWrapper = el.closest('[data-card-theme]')
+    if (cardWrapper) obs.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [ref])
+  return isDark
+}
+
+export function TaskCards() {
+  const containerRef = useRef(null)
+  const isDark = useIsDark(containerRef)
+  const [order, setOrder] = useState([0, 1, 2, 3])
+  const orderRef = useRef(order)
+  useEffect(() => { orderRef.current = order }, [order])
+  const dismissing = useRef(false)
+  const dragDelta = useRef(0)
+  const [exiting, setExiting] = useState(null)
+  const [returning, setReturning] = useState(new Set())
+
+  const dismiss = useCallback((dir) => {
+    if (dismissing.current) return
+    dismissing.current = true
+    const frontId = orderRef.current[0]
+    setExiting({ id: frontId, dir })
+    setTimeout(() => {
+      setReturning(prev => new Set([...prev, frontId]))
+      setOrder(prev => [...prev.slice(1), prev[0]])
+      setExiting(null)
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        setReturning(prev => { const s = new Set(prev); s.delete(frontId); return s })
+        dismissing.current = false
+      }))
+    }, 420)
+  }, [])
+
+  const frontTask = TASKS[order[0]]
+
+  return (
+    <div ref={containerRef} className="flex h-full w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950">
+      <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
+        {TASKS.map(task => {
+          const slotIndex = order.indexOf(task.id)
+          const slot = SLOTS[slotIndex]
+          const isFront = slotIndex === 0
+          const isExiting = exiting?.id === task.id
+          const isReturning = returning.has(task.id)
+          const cardBg = isDark ? task.bg : task.bgLight
+          const cardAccent = isDark ? task.accent : task.accentLight
+          const textPrimary = isDark ? '#FFFFFF' : '#111111'
+          const textMuted = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)'
+          return (
+            <motion.div key={task.id}
+              style={{ position: 'absolute', left: '50%', top: '50%', width: CARD_W, height: CARD_H, marginLeft: -CARD_W / 2, marginTop: -CARD_H / 2, zIndex: isExiting ? 10 : slot.z, borderRadius: 20, overflow: 'hidden', cursor: isFront ? 'grab' : 'default', background: cardBg, boxShadow: isDark ? '0 12px 40px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.12)' }}
+              animate={isExiting ? { x: exiting.dir === 'left' ? -480 : 480, y: 100, rotate: exiting.dir === 'left' ? -22 : 22, scale: 0.85, opacity: 0 } : { x: slot.x, y: slot.y, rotate: slot.rotate, scale: slot.scale, opacity: 1 }}
+              transition={isExiting ? { duration: 0.42, ease: [0.4, 0, 0.2, 1] } : isReturning ? { duration: 0 } : SPRING}
+              drag={isFront && !dismissing.current ? 'x' : false}
+              dragConstraints={{ left: 0, right: 0 }} dragElastic={0.6}
+              onDragStart={() => { dragDelta.current = 0 }}
+              onDrag={(_, info) => { dragDelta.current = info.offset.x }}
+              onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 400) dismiss(info.offset.x < 0 ? 'left' : 'right') }}
+            >
+              <div style={{ height: 4, background: cardAccent }} />
+              <div style={{ padding: '18px 20px 18px', display: 'flex', flexDirection: 'column', height: 'calc(100% - 4px)', boxSizing: 'border-box' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <Tag weight="regular" size={11} style={{ color: cardAccent }} />
+                    <span style={{ fontSize: 10, fontWeight: 700, color: cardAccent, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{task.category}</span>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: textMuted, letterSpacing: '0.04em' }}>{task.number}</span>
+                </div>
+                <h2 style={{ fontSize: 28, fontWeight: 800, color: textPrimary, lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0, marginBottom: 14 }}>{task.title}</h2>
+                <p style={{ fontSize: 13, color: textMuted, lineHeight: 1.6, margin: 0, flex: 1 }}>{task.description}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 11px', borderRadius: 30, background: isDark ? cardAccent + '18' : cardAccent + '20', border: '1.5px solid ' + (isDark ? cardAccent + '40' : cardAccent + '60') }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: cardAccent }} />
+                    <span style={{ fontSize: 11, fontWeight: 600, color: cardAccent }}>{task.status}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Clock weight="regular" size={12} style={{ color: textMuted }} />
+                    <span style={{ fontSize: 11, fontWeight: 500, color: textMuted }}>{task.due}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 28 }}>
+        <button onClick={() => dismiss('left')} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid ' + (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'), background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <ArrowLeft weight="regular" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
+        </button>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {TASKS.map(task => (
+            <motion.div key={task.id} style={{ height: 5, borderRadius: 3, background: isDark ? frontTask.accent : frontTask.accentLight }}
+              animate={{ width: order[0] === task.id ? 20 : 5, opacity: order[0] === task.id ? 1 : 0.2 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+          ))}
+        </div>
+        <button onClick={() => dismiss('right')} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid ' + (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'), background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <ArrowRight weight="regular" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
+        </button>
+      </div>
+    </div>
+  )
+}`
+
+const SLIDE_DECK_CODE = `'use client'
+
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react'
+
+const SLIDES = [
+  { id: 0, num: '01', label: 'Opportunity', title: 'Define the\\nProblem Space', accent: '#E55A2B', bg: '#111111', textPrimary: '#FFFFFF', textMuted: 'rgba(255,255,255,0.35)', shape: 'circle' },
+  { id: 1, num: '02', label: 'Strategy', title: 'Discover\\nDirection', accent: '#E55A2B', bg: '#F0EDEA', textPrimary: '#111111', textMuted: 'rgba(0,0,0,0.35)', shape: 'square' },
+  { id: 2, num: '03', label: 'Execution', title: 'Design &\\nDeliver', accent: '#111111', bg: '#E55A2B', textPrimary: '#FFFFFF', textMuted: 'rgba(255,255,255,0.5)', shape: 'line' },
+  { id: 3, num: '04', label: 'Metrics', title: 'Measure\\nImpact', accent: '#E55A2B', bg: '#1C1C1C', textPrimary: '#F0EDEA', textMuted: 'rgba(240,237,234,0.4)', shape: 'dots' },
+]
+
+const CARD_W = 260
+const CARD_H = 300
+
+export function SlideDeck() {
+  const containerRef = useRef(null)
+  const [isDark, setIsDark] = useState(true)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const check = () => {
+      const card = el.closest('[data-card-theme]')
+      setIsDark(card ? card.classList.contains('dark') : document.documentElement.classList.contains('dark'))
+    }
+    check()
+    const obs = new MutationObserver(check)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    const cardWrapper = el.closest('[data-card-theme]')
+    if (cardWrapper) obs.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+
+  const [current, setCurrent] = useState(0)
+  const [direction, setDirection] = useState(1)
+
+  const navigate = useCallback((dir) => {
+    setDirection(dir)
+    setCurrent(prev => (prev + dir + SLIDES.length) % SLIDES.length)
+  }, [])
+
+  const slide = SLIDES[current]
+  const variants = {
+    enter: (d) => ({ x: d > 0 ? 360 : -360, rotate: d > 0 ? 12 : -12, scale: 0.88, opacity: 0 }),
+    center: { x: 0, rotate: 0, scale: 1, opacity: 1 },
+    exit: (d) => ({ x: d > 0 ? -360 : 360, rotate: d > 0 ? -12 : 12, scale: 0.88, opacity: 0 }),
+  }
+
+  return (
+    <div ref={containerRef} className="flex h-full w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950">
+      <div style={{ position: 'relative', width: CARD_W, height: CARD_H, overflow: 'visible' }}>
+        <div style={{ position: 'absolute', inset: 0, borderRadius: 20, background: isDark ? '#222222' : '#DEDBD8', transform: 'translate(12px,-14px) rotate(4deg)', zIndex: 1 }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: 20, background: isDark ? '#1A1A1A' : '#E8E5E2', transform: 'translate(6px,-7px) rotate(2deg)', zIndex: 2 }} />
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div key={current} custom={direction} variants={variants} initial="enter" animate="center" exit="exit"
+            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+            style={{ position: 'absolute', inset: 0, borderRadius: 20, background: slide.bg, overflow: 'hidden', zIndex: 3, cursor: 'grab', boxShadow: isDark ? '0 20px 60px rgba(0,0,0,0.6)' : '0 12px 40px rgba(0,0,0,0.18)' }}
+            drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.5}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -60 || info.velocity.x < -400) navigate(1)
+              else if (info.offset.x > 60 || info.velocity.x > 400) navigate(-1)
+            }}
+          >
+            {slide.shape === 'circle' && <div style={{ position: 'absolute', right: -40, top: -40, width: 160, height: 160, borderRadius: '50%', border: '2px solid ' + slide.accent, opacity: 0.15 }} />}
+            {slide.shape === 'square' && <div style={{ position: 'absolute', right: 20, top: 30, width: 60, height: 60, border: '2px solid ' + slide.accent, transform: 'rotate(15deg)', opacity: 0.25 }} />}
+            {slide.shape === 'line' && <><div style={{ position: 'absolute', right: 28, top: 0, bottom: 0, width: 2, background: slide.textPrimary, opacity: 0.1 }} /><div style={{ position: 'absolute', right: 38, top: 0, bottom: 0, width: 1, background: slide.textPrimary, opacity: 0.06 }} /></>}
+            {slide.shape === 'dots' && <div style={{ position: 'absolute', right: 20, top: 20, display: 'grid', gridTemplateColumns: 'repeat(4,8px)', gap: 8, opacity: 0.18 }}>{Array.from({length:16}).map((_,i) => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: slide.textPrimary }} />)}</div>}
+            <div style={{ position: 'absolute', inset: 0, padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: slide.textMuted }}>{slide.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: slide.textMuted, letterSpacing: '0.04em' }}>{slide.num} / 04</span>
+              </div>
+              <div>
+                <div style={{ fontSize: 88, fontWeight: 900, lineHeight: 0.85, color: slide.accent, letterSpacing: '-0.05em', marginBottom: 16, fontVariantNumeric: 'tabular-nums', userSelect: 'none' }}>{slide.num}</div>
+                <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.15, color: slide.textPrimary, letterSpacing: '-0.03em', whiteSpace: 'pre-line', userSelect: 'none' }}>{slide.title}</div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32 }}>
+        <button onClick={() => navigate(-1)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid ' + (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'), background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <ArrowLeft weight="regular" size={15} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
+        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {SLIDES.map((s, i) => (
+            <motion.button key={s.id} onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i) }}
+              style={{ height: 6, borderRadius: 3, background: i === current ? '#E55A2B' : (isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'), border: 'none', cursor: 'pointer', padding: 0 }}
+              animate={{ width: i === current ? 24 : 6 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+          ))}
+        </div>
+        <button onClick={() => navigate(1)} style={{ width: 36, height: 36, borderRadius: '50%', border: '1.5px solid ' + (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'), background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <ArrowRight weight="regular" size={15} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
+        </button>
+      </div>
+    </div>
+  )
+}`
+
+const LABEL_CARDS_CODE = `'use client'
+
+import { useRef, useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+
+const BASE_CARD_W = 300
+const BASE_CARD_H = 169
+
+const CARDS = [
+  { id: 0, title: 'Mobile Apps',  sub1: 'Native iOS & Android',   sub2: 'Interaction Design',   since: '2023', bg: '#5CAD60', fg: '#162217', idle: { x: -82, y: -70, rotate: -11 } },
+  { id: 1, title: 'Web Design',   sub1: 'React & Next.js',        sub2: 'Frontend Systems',     since: '2021', bg: '#EDD540', fg: '#241F05', idle: { x: -48, y:  66, rotate:   9 } },
+  { id: 2, title: 'Branding',     sub1: 'Visual Identity',        sub2: 'Brand Strategy',       since: '2020', bg: '#1C2E8A', fg: '#E8EDF8', idle: { x:  12, y: -14, rotate:  -4 } },
+  { id: 3, title: 'Editorial',    sub1: 'Magazine & Print',       sub2: 'Typography Systems',   since: '2022', bg: '#D43C3C', fg: '#FAE8E8', idle: { x:  68, y:  62, rotate:  14 } },
+  { id: 4, title: 'Motion',       sub1: 'Animation & Micro-UX',   sub2: 'Interaction Patterns', since: '2023', bg: '#E08030', fg: '#2A1A06', idle: { x:  84, y: -86, rotate:  18 } },
+]
+
+const BAR_PATTERN = [1,2,1,1,3,1,2,1,1,3,1,1,2,1,2,1,3,1,1,2,1,3,1,2,1,1,2,1]
+const SPRING_SCATTER = { type: 'spring', stiffness: 240, damping: 24 }
+const SPRING_FOCUS   = { type: 'spring', stiffness: 340, damping: 28 }
+
+function Barcode({ color, scale }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'stretch', height: 28 * scale, gap: 1.2 * scale }}>
+      {BAR_PATTERN.map((w, i) => <div key={i} style={{ width: w * 1.5 * scale, background: color, opacity: 0.8, borderRadius: 0.5 }} />)}
+    </div>
+  )
+}
+
+function LogoMark({ color, scale }) {
+  const size = 28 * scale
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 * scale }}>
+      <div style={{ width: size, height: size, borderRadius: '50%', border: (1.5 * scale) + 'px solid ' + color, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.85 }}>
+        <span style={{ fontSize: 7.5 * scale, fontWeight: 800, color, letterSpacing: '0.02em', lineHeight: 1 }}>AI</span>
+      </div>
+      <span style={{ fontSize: 6.5 * scale, fontWeight: 700, color, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.7 }}>CANVAS</span>
+    </div>
+  )
+}
+
+export function LabelCards() {
+  const containerRef = useRef(null)
+  const [isDark, setIsDark] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [containerW, setContainerW] = useState(480)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const checkTheme = () => {
+      const card = el.closest('[data-card-theme]')
+      setIsDark(card ? card.classList.contains('dark') : document.documentElement.classList.contains('dark'))
+    }
+    checkTheme()
+    const themeObs = new MutationObserver(checkTheme)
+    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    const cardWrapper = el.closest('[data-card-theme]')
+    if (cardWrapper) themeObs.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
+    const sizeObs = new ResizeObserver(entries => setContainerW(entries[0].contentRect.width))
+    sizeObs.observe(el)
+    return () => { themeObs.disconnect(); sizeObs.disconnect() }
+  }, [])
+
+  const cardW = Math.min(BASE_CARD_W, Math.floor(containerW / 1.56))
+  const cardH = Math.round(cardW * 9 / 16)
+  const scale = cardW / BASE_CARD_W
+
+  return (
+    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-100 dark:bg-sand-950">
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, ' + (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)') + ' 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+      {CARDS.map(card => {
+        const isSelected = selected === card.id
+        return (
+          <motion.div key={card.id}
+            style={{ position: 'absolute', width: cardW, height: cardH, borderRadius: 10 * scale, overflow: 'hidden', cursor: 'pointer', background: card.bg, boxShadow: '0 10px 36px rgba(0,0,0,0.32)', userSelect: 'none' }}
+            animate={isSelected ? { x:0, y:0, rotate:0, scale:1.05, zIndex:10, opacity:1 } : { x:card.idle.x*scale, y:card.idle.y*scale, rotate:card.idle.rotate, scale:1, zIndex:2, opacity:1 }}
+            transition={isSelected ? SPRING_FOCUS : SPRING_SCATTER}
+            onClick={() => setSelected(prev => prev === card.id ? null : card.id)}
+          >
+            <div style={{ height: '100%', padding: (12*scale)+'px '+(14*scale)+'px '+(11*scale)+'px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 * scale }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 * scale }}>
+                  <span style={{ fontSize: 16 * scale, fontWeight: 900, color: card.fg, lineHeight: 1, opacity: 0.9 }}>✳</span>
+                  <span style={{ fontSize: 18 * scale, fontWeight: 800, color: card.fg, letterSpacing: '-0.025em', lineHeight: 1 }}>{card.title}</span>
+                </div>
+                <span style={{ fontSize: 9 * scale, fontWeight: 600, color: card.fg, opacity: 0.5, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Since {card.since}</span>
+              </div>
+              <div style={{ height: 1, background: card.fg, opacity: 0.22, marginBottom: 9 * scale, flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 11.5 * scale, fontWeight: 600, color: card.fg, lineHeight: 1.35 }}>{card.sub1}</p>
+                  <p style={{ margin: (3*scale)+'px 0 0', fontSize: 11 * scale, color: card.fg, opacity: 0.6, lineHeight: 1.35 }}>{card.sub2}</p>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <Barcode color={card.fg} scale={scale} />
+                  <LogoMark color={card.fg} scale={scale} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )
+      })}
+      <motion.p style={{ position: 'absolute', bottom: 20, fontSize: 11, letterSpacing: '0.05em', color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)', pointerEvents: 'none' }}
+        animate={{ opacity: selected !== null ? 0 : 1 }} transition={{ duration: 0.3 }}>
+        tap a card to focus
+      </motion.p>
+    </div>
+  )
+}`
+
+
+const STARS_PORTAL_CODE = `'use client'
+
+import { useRef, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Stars, MeshWobbleMaterial } from '@react-three/drei'
+import * as THREE from 'three'
+
+type WobbleMat = THREE.MeshStandardMaterial & { factor: number; speed: number }
+
+function PortalScene({ warping }: { warping: boolean }) {
+  const starsRef = useRef<THREE.Group>(null!)
+  const torusRef = useRef<THREE.Mesh>(null!)
+  const glowRef = useRef<THREE.Mesh>(null!)
+
+  useFrame((state, delta) => {
+    if (starsRef.current) {
+      starsRef.current.rotation.y += delta * (warping ? 1.2 : 0.04)
+      starsRef.current.rotation.x += delta * (warping ? 0.6 : 0.01)
+    }
+    const targetZ = warping ? -120 : 5
+    state.camera.position.z += (targetZ - state.camera.position.z) * delta * (warping ? 10 : 3)
+    if (torusRef.current) {
+      torusRef.current.rotation.z += delta * (warping ? 3.5 : 0.4)
+      const mat = torusRef.current.material as WobbleMat
+      mat.factor += ((warping ? 0.9 : 0.18) - mat.factor) * Math.min(delta * 5, 1)
+      mat.speed += ((warping ? 6.0 : 1.5) - mat.speed) * Math.min(delta * 5, 1)
+      ;(mat as THREE.MeshStandardMaterial).emissiveIntensity +=
+        ((warping ? 5 : 2) - (mat as THREE.MeshStandardMaterial).emissiveIntensity) * Math.min(delta * 4, 1)
+    }
+    if (glowRef.current) {
+      const mat = glowRef.current.material as THREE.MeshBasicMaterial
+      mat.opacity += ((warping ? 1 : 0.5) - mat.opacity) * Math.min(delta * 4, 1)
+    }
+  })
+
+  return (
+    <>
+      <group ref={starsRef}>
+        <Stars radius={90} depth={60} count={6000} factor={4} saturation={0.3} fade />
+      </group>
+      <mesh ref={torusRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.2, 0.07, 16, 120]} />
+        <MeshWobbleMaterial color="#00d8ff" emissive="#00d8ff" emissiveIntensity={2} factor={0.18} speed={1.5} metalness={0.9} roughness={0.05} toneMapped={false} />
+      </mesh>
+      <mesh ref={glowRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.2, 0.035, 8, 120]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.5} toneMapped={false} />
+      </mesh>
+    </>
+  )
+}
+
+export function StarsPortal() {
+  const [warping, setWarping] = useState(false)
+  return (
+    <div
+      className="flex h-full w-full items-center justify-center"
+      style={{ cursor: warping ? 'crosshair' : 'pointer', background: '#000000' }}
+      onMouseDown={() => setWarping(true)}
+      onMouseUp={() => setWarping(false)}
+      onMouseLeave={() => setWarping(false)}
+      onTouchStart={() => setWarping(true)}
+      onTouchEnd={() => setWarping(false)}
+    >
+      <Canvas camera={{ position: [0, 0, 5], fov: 60 }} gl={{ antialias: true }} style={{ width: '100%', height: '100%' }}>
+        <color attach="background" args={['#000000']} />
+        <ambientLight intensity={0.15} color="#003366" />
+        <pointLight position={[0, 0, 2]} intensity={4} color="#00d8ff" />
+        <PortalScene warping={warping} />
+      </Canvas>
+    </div>
+  )
+}`
+
 const COMPONENTS_RAW: ComponentEntry[] = [
   {
     slug: 'wave-lines',
@@ -5078,6 +5515,62 @@ export function EmojiBurst() {
     PreviewComponent: AvatarPicker,
     code: AVATAR_PICKER_CODE,
     prompts: avatarPickerPrompts,
+  },
+  {
+    slug: 'task-cards',
+    name: 'Task Cards',
+    description: 'A swipeable project task card stack where each card has a unique accent colour, status badge, and due date. Drag left or right to cycle through tasks — springs back the dismissed card to the bottom of the deck.',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: TaskCards,
+    code: TASK_CARDS_CODE,
+    prompts: taskCardsPrompts,
+  },
+  {
+    slug: 'slide-deck',
+    name: 'Slide Deck',
+    description: 'Swipeable card deck with four editorial slides. Navigate forward and back by drag or tap.',
+    image: 'https://ik.imagekit.io/aitoolkit/slide-deck.png',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Interactive' },
+      { label: 'Typography' },
+    ],
+    dualTheme: true,
+    PreviewComponent: SlideDeck,
+    code: SLIDE_DECK_CODE,
+    prompts: slideDeckPrompts,
+  },
+  {
+    slug: 'label-cards',
+    name: 'Label Cards',
+    description: 'Colour-blocked label cards scattered at random angles. Tap one to spring it to centre.',
+    image: 'https://ik.imagekit.io/aitoolkit/label-cards.png',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: LabelCards,
+    code: LABEL_CARDS_CODE,
+    prompts: labelCardsPrompts,
+  },
+  {
+    slug: 'stars-portal',
+    name: 'Stars Portal',
+    description: 'A deep-space star field with a glowing cyan portal ring. Stars drift slowly and the portal pulses with emissive glow. Hold to trigger warp speed — stars rush toward the camera. Release to drift back.',
+    badge: 'New',
+    tags: [
+      { label: '3D', accent: true },
+      { label: 'Interactive' },
+      { label: 'WebGL' },
+    ],
+    PreviewComponent: StarsPortal,
+    code: STARS_PORTAL_CODE,
+    prompts: starsPortalPrompts,
   },
 ]
 

@@ -19,11 +19,12 @@ export interface ComponentCardProps {
   tags: Tag[]
   image?: string
   href: string
+  badge?: string
 }
 
 // ─── ComponentCard ─────────────────────────────────────────────────────────────
 
-export function ComponentCard({ name, description, href, image }: ComponentCardProps) {
+export function ComponentCard({ name, description, href, image, badge }: ComponentCardProps) {
   return (
     <Link
       href={href}
@@ -31,6 +32,11 @@ export function ComponentCard({ name, description, href, image }: ComponentCardP
     >
       {/* Image — extends slightly behind the content panel */}
       <div className="relative aspect-video overflow-hidden bg-sand-900">
+        {badge && (
+          <span className="absolute right-3 top-3 z-10 rounded-full border border-olive-500 px-2.5 py-0.5 text-[11px] font-semibold text-olive-400">
+            {badge}
+          </span>
+        )}
         {image ? (
           <img src={image} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
         ) : (

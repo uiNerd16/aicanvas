@@ -12,6 +12,7 @@ import {
   Code,
   Palette,
   UsersThree,
+  HandTap,
 } from '@phosphor-icons/react'
 import { HeaderSocials } from '../components/HeaderSocials'
 import type { ComponentMeta } from '../lib/component-registry'
@@ -30,96 +31,116 @@ const PLATFORMS = ['Claude', 'GPT', 'Gemini', 'V0'] as const
 
 // ─── Hello card data ─────────────────────────────────────────────────────────
 
-const HELLO_CARDS = [
-  { text: 'Hello',      lang: 'English'  },
-  { text: 'こんにちは',  lang: 'Japanese' },
-  { text: 'Bonjour',    lang: 'French'   },
-  { text: 'Hallo',      lang: 'German'   },
-  { text: 'Ciao',       lang: 'Italian'  },
-  { text: 'Hej',        lang: 'Danish'   },
-  { text: 'Hola',       lang: 'Spanish'  },
-  { text: '你好',        lang: 'Chinese'  },
-]
+const HELLO_CARDS = ['Hello', 'こんにちは', 'Bonjour', 'Hola', 'Ciao', 'Hej', 'Hallo', '你好', ':)']
+const LANG_LABELS  = ['EN',    'JA',        'FR',      'ES',   'IT',   'SV',  'DE',   'ZH' ]
 
-const BACK_POSITIONS = [
-  { rotate: -18, y: 6, zIndex: 1, opacity: 0.22 },
-  { rotate: -11, y: 3, zIndex: 2, opacity: 0.38 },
-  { rotate:  -4, y: 1, zIndex: 3, opacity: 0.52 },
-  { rotate:   4, y: 1, zIndex: 4, opacity: 0.68 },
-  { rotate:  11, y: 3, zIndex: 5, opacity: 0.82 },
+// Position 0 = front, 1-5 = visible stack, 6-7 = parked behind stack (zIndex 0).
+// The exiting card uses a dedicated keyframe animation (swing right → arc to back)
+// rather than these positions. Positions 6-7 are the rest pose it settles into.
+const CARD_POSITIONS = [
+  { x: 0, y: -10, rotate:  24, scale: 1,    opacity: 1, zIndex: 10 },
+  { x: 0, y:  -6, rotate:  15, scale: 0.97, opacity: 1, zIndex: 5  },
+  { x: 0, y:  -3, rotate:   5, scale: 0.94, opacity: 1, zIndex: 4  },
+  { x: 0, y:  -3, rotate:  -5, scale: 0.91, opacity: 1, zIndex: 3  },
+  { x: 0, y:  -6, rotate: -15, scale: 0.88, opacity: 1, zIndex: 2  },
+  { x: 0, y: -10, rotate: -24, scale: 0.85, opacity: 1, zIndex: 1  },
+  { x: 0, y: -10, rotate: -24, scale: 0.85, opacity: 0, zIndex: 0  }, // parked behind
+  { x: 0, y: -10, rotate: -24, scale: 0.85, opacity: 0, zIndex: 0  }, // parked behind
+  { x: 0, y: -10, rotate: -24, scale: 0.85, opacity: 0, zIndex: 0  }, // parked behind
 ]
-
-const frontCardVariants = {
-  hidden: { opacity: 0, scale: 0.86, rotate: -20, y: 10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    rotate: 18,
-    y: -6,
-    transition: { duration: 0.48, ease: 'easeOut' as const },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.86,
-    rotate: -20,
-    y: 10,
-    transition: { duration: 0.26, ease: 'easeIn' as const },
-  },
-}
 
 // ─── Stacked cards visual ─────────────────────────────────────────────────────
 
 function StackedCards() {
-  const [frontIdx, setFrontIdx] = useState(0)
+  const N = HELLO_CARDS.length
+  const [startIdx, setStartIdx] = useState(0)
+  // Track which card is mid-exit so we can give it a bespoke keyframe animation
+  const [exitingCard, setExitingCard] = useState<number | null>(null)
+  const startIdxRef = useRef(0)
 
-  useEffect(() => {
-    const id = setInterval(() => setFrontIdx((i) => (i + 1) % HELLO_CARDS.length), 2800)
-    return () => clearInterval(id)
-  }, [])
+  function handleClick() {
+    if (exitingCard !== null) return // ignore clicks mid-animation
+    const exitIdx = startIdxRef.current % N
+    startIdxRef.current = (startIdxRef.current + 1) % N
+    setStartIdx(startIdxRef.current)
+    setExitingCard(exitIdx)
+    setTimeout(() => setExitingCard((c) => (c === exitIdx ? null : c)), 850)
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative mx-auto mb-8 flex h-28 w-48 items-end justify-center"
+      className="relative mx-auto mb-10 flex h-28 w-48 cursor-pointer items-end justify-center"
+      onClick={handleClick}
     >
-      {BACK_POSITIONS.map(({ rotate, y, zIndex, opacity }, i) => (
-        <div
-          key={i}
-          className="absolute h-20 w-28 rounded-2xl border border-sand-700 bg-sand-800"
-          style={{
-            transform: `rotate(${rotate}deg) translateY(${-y}px)`,
-            zIndex,
-            opacity,
-            transformOrigin: 'bottom center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-          }}
-        />
-      ))}
+      {HELLO_CARDS.map((text, cardIdx) => {
+        const relPos = (cardIdx - startIdx + N) % N
+        const pos = CARD_POSITIONS[relPos]
+        const isFront = relPos === 0
+        const isExiting = cardIdx === exitingCard
+        // Non-exiting cards wait for the exit arc to finish (~0.9 s), then cascade
+        // forward from front to back with a small stagger between each card.
+        const delay = isExiting || relPos >= 6 ? 0 : 0.1 + relPos * 0.04
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={frontIdx}
-          variants={frontCardVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800"
-          style={{
-            zIndex: 6,
-            transformOrigin: 'bottom center',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-          }}
-        >
-          <span className="text-sm font-bold text-olive-400">
-            {HELLO_CARDS[frontIdx].text}
-          </span>
-          <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-sand-600">
-            {HELLO_CARDS[frontIdx].lang}
-          </span>
-        </motion.div>
-      </AnimatePresence>
+        return (
+          <motion.div
+            key={cardIdx}
+            initial={{ opacity: 0, transform: 'translateX(0px) translateY(0px) rotateZ(0deg) scale(1)' }}
+            animate={
+              isExiting
+                ? {
+                    transform: [
+                      'translateX(0px) translateY(-10px) rotateZ(24deg) scale(1)',
+                      'translateX(80px) translateY(20px) rotateZ(60deg) scale(0.9)',
+                    ],
+                    opacity: [1, 0],
+                  }
+                : {
+                    transform: `translateX(${pos.x}px) translateY(${pos.y}px) rotateZ(${pos.rotate}deg) scale(${pos.scale})`,
+                    opacity: pos.opacity,
+                  }
+            }
+            transition={
+              isExiting
+                ? {
+                    duration: 0.8,
+                    ease: 'easeOut',
+                    opacity: { delay: 0.5, duration: 0.3 },
+                  }
+                : {
+                    duration: 0.5,
+                    ease: 'easeInOut',
+                    delay,
+                  }
+            }
+            className="absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800 transition-[border-color,box-shadow] duration-200 hover:border-sand-600 hover:shadow-lg hover:shadow-black/20"
+            style={{
+              zIndex: isExiting ? 11 : pos.zIndex,
+              transformOrigin: 'bottom center',
+              boxShadow: isFront
+                ? '0 6px 28px rgba(0,0,0,0.28)'
+                : '0 3px 10px rgba(0,0,0,0.14)',
+            }}
+          >
+            {(relPos < 6 || isExiting) && (
+              <span className={`text-sm font-bold leading-none ${
+                (isFront || isExiting) ? 'text-olive-400'
+                : relPos === 1         ? 'text-sand-300'
+                : relPos === 2         ? 'text-sand-400'
+                : relPos === 3         ? 'text-sand-500'
+                :                        'text-sand-600'
+              }`}>
+                {text}
+              </span>
+            )}
+            {isFront && !isExiting && (
+              <HandTap weight="regular" size={18} className="absolute bottom-2 right-2 text-sand-500" />
+            )}
+          </motion.div>
+        )
+      })}
     </motion.div>
   )
 }
@@ -296,7 +317,7 @@ export function HomePageClient({ total, showcase }: Props) {
 
       {/* ── Top bar ── */}
       <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:flex">
-        <CyclingGreeting />
+        <span className="text-sm font-semibold text-sand-50">Overview</span>
         <HeaderSocials />
       </div>
 
@@ -312,7 +333,7 @@ export function HomePageClient({ total, showcase }: Props) {
             transition={{ duration: 0.35, delay: 0.1 }}
             className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
-            Free · Open source · AI-ready
+            Free · Open source
           </motion.span>
 
           <motion.h1
@@ -323,7 +344,7 @@ export function HomePageClient({ total, showcase }: Props) {
           >
             UI components and design systems
             <br />
-            <span className="text-olive-500">with AI prompts built in.</span>
+            <span className="mt-2 inline-block text-olive-500">with AI prompts built in.</span>
           </motion.h1>
 
           <motion.p
@@ -362,40 +383,31 @@ export function HomePageClient({ total, showcase }: Props) {
 
         {/* ── Stats strip ── */}
         <section className="mt-16 sm:mt-24">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="flex items-center justify-center">
             {[
               { value: total, suffix: '+', label: 'Components' },
               { value: 4,     suffix: '',  label: 'AI Platforms' },
-              { value: 100,   suffix: '%', label: 'Open Source' },
-              { value: 0,     suffix: ' cost', label: 'Free forever' },
-            ].map(({ value, suffix, label }) => (
+              { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
+              { value: 0,     suffix: '',  prefix: '$', label: 'Free forever' },
+            ].map(({ value, suffix, prefix = '', label, minWidth }, i) => (
               <motion.div
                 key={label}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center rounded-xl border border-sand-800 bg-sand-900 px-4 py-5 text-center"
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                className="flex items-center"
               >
-                <span className="text-xl font-bold tabular-nums text-sand-50">
-                  <AnimatedCount to={value} suffix={suffix} />
-                </span>
-                <span className="mt-0.5 text-xs font-medium text-sand-500">{label}</span>
+                {i > 0 && <div className="h-10 w-px bg-sand-800 mx-6" />}
+                <div className="flex flex-col items-center text-center">
+                  <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
+                    {prefix}<AnimatedCount to={value} suffix={suffix} />
+                  </span>
+                  <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
+                </div>
               </motion.div>
             ))}
           </div>
-        </section>
-
-        {/* ── Showcase card ── */}
-        <section className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.4 }}
-          >
-            {showcase.length > 0 && <ShowcaseCard items={showcase} />}
-          </motion.div>
         </section>
 
         {/* ── Who it's for ── */}
@@ -412,19 +424,12 @@ export function HomePageClient({ total, showcase }: Props) {
               For designers. For developers. For everyone in between.
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-sand-400">
-              Most component libraries are built for one kind of person. AI Canvas works however you work.
+              Most component libraries are built for one audience. AI Canvas works however you work.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4">
             {[
-              {
-                icon: <Code weight="regular" size={18} />,
-                audience: 'Developers',
-                description: 'The code tab has everything. TypeScript source, Framer Motion animations, Tailwind CSS. Copy and paste directly into your project.',
-                badges: ['TypeScript', 'Framer Motion', 'Tailwind CSS'],
-                badgeStyle: 'text-sand-500 ring-sand-800',
-              },
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
@@ -433,9 +438,16 @@ export function HomePageClient({ total, showcase }: Props) {
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
+                icon: <Code weight="regular" size={18} />,
+                audience: 'Developers',
+                description: 'The code tab has everything. TypeScript source, Framer Motion animations, Tailwind CSS. Copy and paste directly into your project.',
+                badges: ['TypeScript', 'Framer Motion', 'Tailwind CSS'],
+                badgeStyle: 'text-sand-500 ring-sand-800',
+              },
+              {
                 icon: <UsersThree weight="regular" size={18} />,
                 audience: 'Everyone else',
-                description: 'Building something and not sure if you\'ll code it or prompt it? Both are always here — code and prompts, every single component.',
+                description: 'Building something and not sure if you\'ll code it or prompt it? Both are always here: code and prompts, every single component.',
                 badges: ['Code ↔ Prompts', 'Always both', 'Always free'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
@@ -483,46 +495,31 @@ export function HomePageClient({ total, showcase }: Props) {
             <h2 className="mt-1 text-xl font-bold text-sand-50">Three steps. Your way.</h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              {
-                icon: <MagnifyingGlass weight="regular" size={18} />,
-                step: '01',
-                title: 'Browse',
-                description: 'Find the perfect animated component or explore a full design system from the curated, categorized collection.',
-              },
-              {
-                icon: <CopySimple weight="regular" size={18} />,
-                step: '02',
-                title: 'Copy',
-                description: 'Grab the source code, or pick the AI prompt for your preferred platform — or take both.',
-              },
-              {
-                icon: <RocketLaunch weight="regular" size={18} />,
-                step: '03',
-                title: 'Ship',
-                description: 'Paste into your project, or let your AI tool recreate and customize it instantly.',
-              },
-            ].map(({ icon, step, title, description }, i) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.35, delay: i * 0.08 }}
-                className="relative overflow-hidden rounded-xl border border-sand-800 bg-sand-900 p-5"
-              >
-                <span className="pointer-events-none absolute right-4 top-3 text-5xl font-black tabular-nums text-sand-800">
-                  {step}
-                </span>
-                <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-sand-800 text-sand-300">
-                  {icon}
-                </div>
-                <h3 className="text-sm font-bold text-sand-50">{title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-sand-500">{description}</p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.35 }}
+            className="flex items-start"
+          >
+            <div className="flex-1">
+              <span className="text-3xl font-black tabular-nums text-sand-700">01</span>
+              <h3 className="mt-2 text-sm font-bold text-sand-50">Browse</h3>
+              <p className="mt-1 text-sm leading-relaxed text-sand-500">Find the perfect animated component or explore a full design system from the curated, categorized collection.</p>
+            </div>
+            <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
+            <div className="flex-1">
+              <span className="text-3xl font-black tabular-nums text-sand-700">02</span>
+              <h3 className="mt-2 text-sm font-bold text-sand-50">Copy</h3>
+              <p className="mt-1 text-sm leading-relaxed text-sand-500">Grab the source code, or pick the AI prompt for your preferred platform, or take both.</p>
+            </div>
+            <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
+            <div className="flex-1">
+              <span className="text-3xl font-black tabular-nums text-sand-700">03</span>
+              <h3 className="mt-2 text-sm font-bold text-sand-50">Ship</h3>
+              <p className="mt-1 text-sm leading-relaxed text-sand-500">Paste into your project, or let your AI tool recreate and customize it instantly.</p>
+            </div>
+          </motion.div>
         </section>
 
         {/* ── Component grid preview ── */}
@@ -638,10 +635,10 @@ export function HomePageClient({ total, showcase }: Props) {
               Also in AI Canvas
             </p>
             <h2 className="relative mt-1 text-xl font-bold text-sand-50">
-              Not just components — full design systems.
+              Not just components. Full design systems.
             </h2>
             <p className="relative mt-3 max-w-md text-sm leading-relaxed text-sand-400">
-              AI Canvas also ships curated design systems — complete visual languages
+              AI Canvas also ships curated design systems: complete visual languages
               with tokens, components, and AI prompts. Explore Andromeda: a sci-fi
               blueprint system built to feel like mission control.
             </p>
@@ -677,7 +674,7 @@ export function HomePageClient({ total, showcase }: Props) {
               Every component ships with prompts for your AI.
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-sand-400">
-              Not generic instructions — prompts written specifically for how each
+              Not generic instructions. Prompts written specifically for how each
               platform thinks. Use the code, use the prompt, or use both. The choice
               is always yours.
             </p>
