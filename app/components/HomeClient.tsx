@@ -10,6 +10,9 @@ import { HeaderSocials } from './HeaderSocials'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
 import type { ComponentEntry } from '../lib/component-registry'
+import { LAST_DEPLOY } from '../lib/config'
+
+const NEW_BADGE_ACTIVE = Date.now() - new Date(LAST_DEPLOY).getTime() < 96 * 60 * 60 * 1000
 
 // ─── HomeClient ───────────────────────────────────────────────────────────────
 
@@ -91,6 +94,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
                     description={entry.description}
                     tags={entry.tags}
                     image={entry.image}
+                    badge={NEW_BADGE_ACTIVE ? entry.badge : undefined}
                     href={`/components/${entry.slug}`}
                   />
                 </motion.div>
