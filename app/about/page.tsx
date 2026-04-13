@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
-import { GithubLogo, Info, XLogo } from '@phosphor-icons/react'
+import { GithubLogo, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 
 function Section({
@@ -49,18 +49,13 @@ export default function AboutPage() {
           /About
         </Link>
         <div className="flex items-center justify-end gap-1">
-          <Link href="/about" aria-label="About" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-            <Info weight="regular" size={20} />
-          </Link>
+          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
+            <GithubLogo weight="regular" size={20} />
+          </a>
           <div className="mx-1 h-4 w-px bg-sand-700" />
-          {[
-            { href: GITHUB_URL, label: 'GitHub', icon: <GithubLogo weight="regular" size={20} /> },
-            { href: X_URL, label: 'X', icon: <XLogo weight="regular" size={20} /> },
-          ].map(({ href, label, icon }) => (
-            <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-              {icon}
-            </a>
-          ))}
+          <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="X" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
+            <XLogo weight="regular" size={20} />
+          </a>
         </div>
       </header>
 
@@ -75,13 +70,13 @@ export default function AboutPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
             The Story
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-sand-400">
+          <p className="mt-6 text-sm leading-relaxed text-sand-400">
             We're living through a quiet shift. The way we design and build
             interfaces is changing — not with a bang, but with a conversation.
             Today you can describe what you need in plain words and watch it
             come to life. That felt like something worth exploring.
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-sand-400">
+          <p className="mt-4 text-sm leading-relaxed text-sand-400">
             AI Canvas started as a small experiment: what if every piece of UI
             came with the right words to recreate it? Each prompt is tuned for
             Claude, GPT, Gemini, and V0 — so you can pick the tool you're
@@ -91,15 +86,15 @@ export default function AboutPage() {
 
         {/* ── Why it exists ── */}
         <Section className="mt-20 sm:mt-28">
-          <h2 className="text-2xl font-bold tracking-tight text-sand-50 sm:text-3xl">
+          <h2 className="text-xl font-bold tracking-tight text-sand-50">
             Why it exists
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-sand-400">
+          <p className="mt-6 text-sm leading-relaxed text-sand-400">
             AI tools are getting remarkably good, but the quality of what you
             get back still depends on how you ask. A thoughtful prompt produces
             something you can actually use. A vague one wastes your time.
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-sand-400">
+          <p className="mt-4 text-sm leading-relaxed text-sand-400">
             It felt like there should be a place where prompts are treated with
             the same care as code — written thoughtfully, tested across
             platforms, and shared openly. A place built for today's workflow,
@@ -109,10 +104,10 @@ export default function AboutPage() {
 
         {/* ── How it works ── */}
         <Section className="mt-20 sm:mt-28">
-          <h2 className="text-2xl font-bold tracking-tight text-sand-50 sm:text-3xl">
+          <h2 className="text-xl font-bold tracking-tight text-sand-50">
             How it works
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-sand-400">
+          <p className="mt-6 text-sm leading-relaxed text-sand-400">
             Everything here — components, design systems (soon), and whatever comes
             next — is built directly with words. Most of the work happens in
             Claude Code, with Figma for visual tweaking when needed. Then each
@@ -120,29 +115,31 @@ export default function AboutPage() {
             prompt reads differently from a GPT, Gemini, or V0 prompt — the
             tools think differently.
           </p>
-          <p className="mt-4 text-lg leading-relaxed text-sand-400">
+          <p className="mt-4 text-sm leading-relaxed text-sand-400">
             The project itself runs on Claude Code, so the Claude prompts tend
             to give the most accurate results. But every platform is supported
             and tested. Browse, preview, pick your tool, copy the prompt.
             You can also grab the source code directly.
           </p>
-          <p className="mt-4 text-lg font-bold leading-relaxed text-sand-50">
+          <p className="mt-4 text-sm font-bold leading-relaxed text-sand-50">
             Everything is open, nothing is locked away.
           </p>
         </Section>
 
         {/* ── CTA ── */}
         <Section className="mt-20 sm:mt-28">
-          <div className="rounded-2xl bg-sand-900 px-6 py-10 sm:-mx-8 sm:px-10 sm:py-12">
-            <p className="text-xl leading-relaxed text-sand-300 sm:text-2xl">
+          <div className="rounded-2xl bg-sand-900 px-5 py-6 sm:-mx-8 sm:px-6 sm:py-8">
+            <p className="text-base leading-relaxed text-sand-300">
               This is an open-source project, still early, still growing.
+            </p>
+            <p className="mt-2 text-base leading-relaxed text-sand-300">
               If any of this resonates, come take a look.
             </p>
             <a
               href={GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-olive-500 px-6 py-3 text-base font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
             >
               <GithubLogo weight="regular" size={20} />
               View on GitHub

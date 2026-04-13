@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, MagnifyingGlass, SquareHalf, X } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, SquareHalf, X } from '@phosphor-icons/react'
+import { CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 
@@ -229,10 +230,35 @@ export function Sidebar() {
             </div>
           )
         })}
+
+        {/* ── Divider ── */}
+        <div className="my-2 border-t border-sand-300 dark:border-sand-800" />
+
+        {/* ── About & Contact ── */}
+        <div className="space-y-0.5">
+          <Link
+            href="/about"
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+              pathname === '/about'
+                ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+            }`}
+          >
+            <Info weight="regular" size={16} />
+            <span>About</span>
+          </Link>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
+          >
+            <EnvelopeSimple weight="regular" size={16} />
+            <span>Contact</span>
+          </a>
+        </div>
       </nav>
 
       {/* ── Bottom card ── */}
-      <div className="shrink-0 p-3">
+      {pathname !== '/support' && <div className="shrink-0 p-3">
         <div className="overflow-hidden rounded-xl border border-olive-500/20 bg-gradient-to-b from-olive-500/10 to-transparent p-4 ring-1 ring-inset ring-olive-500/10 dark:from-olive-500/8 dark:to-transparent">
 
           {/* Icon badge */}
@@ -246,7 +272,7 @@ export function Sidebar() {
 
           {/* CTA */}
           <a
-            href="https://buymeacoffee.com"
+            href="https://ko-fi.com/aicanvasme"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 flex w-full items-center justify-center rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
@@ -254,7 +280,7 @@ export function Sidebar() {
             Buy me a coffee
           </a>
         </div>
-      </div>
+      </div>}
 
     </aside>
   )
