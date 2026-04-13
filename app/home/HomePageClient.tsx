@@ -56,14 +56,14 @@ const frontCardVariants = {
     scale: 1,
     rotate: 18,
     y: -6,
-    transition: { duration: 0.48, ease: 'easeOut' },
+    transition: { duration: 0.48, ease: 'easeOut' as const },
   },
   exit: {
     opacity: 0,
     scale: 0.86,
     rotate: -20,
     y: 10,
-    transition: { duration: 0.26, ease: 'easeIn' },
+    transition: { duration: 0.26, ease: 'easeIn' as const },
   },
 }
 

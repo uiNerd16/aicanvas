@@ -8,6 +8,7 @@ import {
   List,
   X,
   Info,
+  EnvelopeSimple,
   GithubLogo,
   XLogo,
   ArrowElbowDownRight,
@@ -17,7 +18,7 @@ import {
   MagnifyingGlass,
   SquareHalf,
 } from '@phosphor-icons/react'
-import { GITHUB_URL, X_URL } from '../lib/config'
+import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 
@@ -299,6 +300,13 @@ export function MobileNav() {
                     <span><Info weight="regular" size={16} /></span>
                     <span className="flex-1">About</span>
                   </Link>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
+                  >
+                    <span><EnvelopeSimple weight="regular" size={16} /></span>
+                    <span className="flex-1">Contact</span>
+                  </a>
                 </div>
               </nav>
 
@@ -325,6 +333,7 @@ export function MobileNav() {
               </div>
 
               {/* Bottom card */}
+              {pathname !== '/support' && (
               <div className="shrink-0 p-3">
                 <div className="overflow-hidden rounded-xl border border-olive-500/20 bg-gradient-to-b from-olive-500/10 to-transparent p-4 ring-1 ring-inset ring-olive-500/10 dark:from-olive-500/8 dark:to-transparent">
                   <p className="text-sm font-bold leading-snug text-sand-900 dark:text-sand-100">
@@ -334,7 +343,7 @@ export function MobileNav() {
                     Every coffee keeps this project alive and growing.
                   </p>
                   <a
-                    href="https://buymeacoffee.com"
+                    href="https://ko-fi.com/aicanvasme"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-3 flex w-full items-center justify-center rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
@@ -343,6 +352,7 @@ export function MobileNav() {
                   </a>
                 </div>
               </div>
+              )}
             </motion.div>
           </>
         )}
