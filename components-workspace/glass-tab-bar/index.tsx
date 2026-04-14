@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { House, Compass, PlusCircle, ChatCircle, User } from '@phosphor-icons/react'
@@ -12,12 +14,12 @@ const TABS = [
   { icon: User,        label: 'Profile',  color: '#B388FF' },
 ]
 
-export function GlassTabBar() {
+export default function GlassTabBar() {
   const [active, setActive]   = useState(0)
   const [hovered, setHovered] = useState<number | null>(null)
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"
         alt=""

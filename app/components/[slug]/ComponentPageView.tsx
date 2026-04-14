@@ -83,8 +83,33 @@ export default function ComponentPageView({
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [codeCopied, setCodeCopied] = useState(false)
+  const [depsCopied, setDepsCopied] = useState(false)
+  const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
+  const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
   const [promptCopied, setPromptCopied] = useState<Platform | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
+
+  // Extract npm install command from code comment (e.g. "// npm install framer-motion")
+  // Extract package names from the "// npm install ..." comment
+  const depsMatch = code.match(/^\/\/ npm install (.+)$/m)
+  const depsPackages = depsMatch ? depsMatch[1] : null
+
+  const PKG_COMMANDS: Record<typeof pkgManager, string> = {
+    pnpm: `pnpm add ${depsPackages}`,
+    npm: `npm install ${depsPackages}`,
+    yarn: `yarn add ${depsPackages}`,
+    bun: `bun add ${depsPackages}`,
+  }
+  const depsCommand = depsPackages ? PKG_COMMANDS[pkgManager] : null
+
+  async function copyDeps() {
+    if (!depsCommand) return
+    try {
+      await navigator.clipboard.writeText(depsCommand)
+      setDepsCopied(true)
+      setTimeout(() => setDepsCopied(false), 2000)
+    } catch {}
+  }
 
   // Refresh button — incrementing this key remounts the preview wrapper,
   // which restarts any animations / effects / canvas inits inside the
@@ -349,7 +374,21 @@ export default function ComponentPageView({
             </div>
 
             {/* Action bar */}
-            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+
+              {/* Dependencies pill — only shown when the component has external deps */}
+              {depsCommand && (
+                <button
+                  onClick={copyDeps}
+                  className="group mr-auto flex items-center gap-2 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 font-mono text-xs text-sand-500 transition-all hover:border-sand-400 hover:text-sand-700 active:scale-95 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-500 dark:hover:border-sand-700 dark:hover:text-sand-300"
+                >
+                  <span className="text-olive-500">$</span>
+                  <span>{depsCommand}</span>
+                  {depsCopied
+                    ? <Check weight="regular" size={13} className="shrink-0 text-olive-500" />
+                    : <Copy weight="regular" size={13} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />}
+                </button>
+              )}
 
               {/* Copy Code — semibold (600) */}
               <button
@@ -373,6 +412,164 @@ export default function ComponentPageView({
 
             </div>
           </div>
+
+          {/* ── Installation ─────────────────────────────────────────────── */}
+          {depsCommand && (
+            <section className="mt-12">
+              <h2 className="mb-4 text-base font-bold text-sand-900 dark:text-sand-50">
+                Installation
+              </h2>
+
+              {/* CLI / Manual tabs */}
+              <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
+                <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+                  <button
+                    onClick={() => setInstallTab('cli')}
+                    className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      installTab === 'cli'
+                        ? 'text-sand-900 dark:text-sand-50'
+                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                    }`}
+                  >
+                    CLI
+                    {installTab === 'cli' && (
+                      <span className="absolute inset-x-0 -bottom-px h-px bg-sand-900 dark:bg-sand-50" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setInstallTab('manual')}
+                    className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      installTab === 'manual'
+                        ? 'text-sand-900 dark:text-sand-50'
+                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                    }`}
+                  >
+                    Manual
+                    {installTab === 'manual' && (
+                      <span className="absolute inset-x-0 -bottom-px h-px bg-sand-900 dark:bg-sand-50" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="bg-sand-100 px-5 py-5 dark:bg-sand-900">
+                  {installTab === 'cli' ? (
+                    <div className="space-y-5">
+                      {/* Step 1 — shadcn add */}
+                      <div className="flex gap-3.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                            Run the following command:
+                          </p>
+                          <div className="overflow-hidden rounded-lg bg-sand-950">
+                            {/* Package manager switcher */}
+                            <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                              {(['pnpm', 'npm', 'yarn', 'bun'] as const).map((pm) => (
+                                <button
+                                  key={pm}
+                                  onClick={() => { setPkgManager(pm); setDepsCopied(false) }}
+                                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    pkgManager === pm
+                                      ? 'bg-sand-800 text-sand-100'
+                                      : 'text-sand-500 hover:text-sand-300'
+                                  }`}
+                                >
+                                  {pm}
+                                </button>
+                              ))}
+                              <button
+                                onClick={() => {
+                                  const cmd = pkgManager === 'npm'
+                                    ? `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    : pkgManager === 'pnpm'
+                                    ? `pnpm dlx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    : pkgManager === 'yarn'
+                                    ? `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    : `bunx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                  navigator.clipboard.writeText(cmd)
+                                  setDepsCopied(true)
+                                  setTimeout(() => setDepsCopied(false), 2000)
+                                }}
+                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              >
+                                {depsCopied
+                                  ? <Check weight="regular" size={14} className="text-olive-500" />
+                                  : <Copy weight="regular" size={14} />}
+                              </button>
+                            </div>
+
+                            {/* Command */}
+                            <div className="px-4 py-3.5">
+                              <code className="font-mono text-sm text-sand-300">
+                                {pkgManager === 'pnpm'
+                                  ? `pnpm dlx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                  : pkgManager === 'bun'
+                                  ? `bunx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                  : `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`}
+                              </code>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-5">
+                      {/* Step 1 — Install deps */}
+                      <div className="flex gap-3.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                            Install the following dependencies:
+                          </p>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-300">
+                              {depsCommand}
+                            </code>
+                            <button
+                              onClick={copyDeps}
+                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                            >
+                              {depsCopied
+                                ? <Check weight="regular" size={14} className="text-olive-500" />
+                                : <Copy weight="regular" size={14} />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Step 2 — Copy the code */}
+                      <div className="flex gap-3.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                            Copy and paste the following code into your project:
+                          </p>
+                          <div className="relative rounded-lg bg-sand-950">
+                            <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
+                              <span className="font-mono text-xs text-sand-500">
+                                {slug}.tsx
+                              </span>
+                              <button
+                                onClick={copyCode}
+                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              >
+                                {codeCopied
+                                  ? <Check weight="regular" size={14} className="text-olive-500" />
+                                  : <Copy weight="regular" size={14} />}
+                              </button>
+                            </div>
+                            <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
+                              {highlightedCode}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* ── Related components ─────────────────────────────────────────── */}
           {related.length > 0 && (

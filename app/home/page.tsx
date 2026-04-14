@@ -50,5 +50,15 @@ export default function HomePage() {
             })),
         ]
 
-  return <HomePageClient total={total} showcase={showcase} />
+  const labelCardEntry = COMPONENTS.find((c) => c.slug === 'label-cards')
+  const labelCardMeta = labelCardEntry
+    ? { slug: labelCardEntry.slug, name: labelCardEntry.name, description: labelCardEntry.description, tags: labelCardEntry.tags, image: labelCardEntry.image, badge: labelCardEntry.badge }
+    : null
+
+  // Carousel: label-cards first, then remaining showcase items (deduped)
+  const carouselItems = labelCardMeta
+    ? [labelCardMeta, ...showcase.filter((c) => c.slug !== 'label-cards')]
+    : showcase
+
+  return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
 }

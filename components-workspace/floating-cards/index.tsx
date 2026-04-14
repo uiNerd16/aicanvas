@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Buildings, ArrowUpRight } from '@phosphor-icons/react'
@@ -60,7 +62,7 @@ function HotelsCounter({ target, active }: { target: number; active: boolean }) 
   )
 }
 
-export function FloatingCards() {
+export default function FloatingCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
   // order[positionIndex] = cardIndex
@@ -87,7 +89,7 @@ export function FloatingCards() {
   return (
     <div
       ref={containerRef}
-      className="relative flex h-full w-full items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       {/* Dot grid */}

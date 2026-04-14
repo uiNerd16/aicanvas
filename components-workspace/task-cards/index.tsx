@@ -1,75 +1,93 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useRef, useState, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Tag, ArrowLeft, ArrowRight } from '@phosphor-icons/react'
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+import { PaintBrush, Megaphone, Code, ChartBar, CaretLeft, CaretRight, ArrowUpRight } from '@phosphor-icons/react'
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
-const CARD_W = 260
+const CARD_W = 220
 const CARD_H = 280
+const DECK_W = CARD_W + 210
 
-const TASKS = [
+const TASKS: Array<{
+  id: number
+  title: string
+  category: string
+  description: string
+  progress: number
+  accent: string
+  accentLight: string
+  bg: string
+  bgLight: string
+  darkOnAccent?: boolean
+  darkLabel?: string
+  lightLabel?: string
+  icon: PhosphorIcon
+}> = [
   {
     id: 0,
-    number: '01',
     title: 'Brand Overhaul',
     category: 'Design',
-    status: 'In Progress',
-    due: 'Apr 18',
     description: 'Complete visual identity refresh — logo, type scale, and colour system across all brand touchpoints.',
-    accent: '#8B7FCC',
-    bg: '#131220',
-    bgLight: '#EEEDF6',
-    accentLight: '#7060B8',
+    progress: 45,
+    accent: '#429EBD',
+    accentLight: '#2980A0',
+    bg: '#0C1E27',
+    bgLight: '#EAF4F8',
+    icon: PaintBrush,
   },
   {
     id: 1,
-    number: '02',
     title: 'Product Launch',
     category: 'Marketing',
-    status: 'In Review',
-    due: 'Apr 25',
     description: 'Coordinate go-to-market strategy, press kit, social assets, and launch-day campaign timeline.',
-    accent: '#C49090',
-    bg: '#1C1010',
-    bgLight: '#F6EEEE',
-    accentLight: '#A87070',
+    progress: 72,
+    accent: '#053F5C',
+    accentLight: '#032F45',
+    bg: '#010810',
+    bgLight: '#B8CEDB',
+    darkLabel: '#2A9DC0',
+    lightLabel: '#0A6A8E',
+    icon: Megaphone,
   },
   {
     id: 2,
-    number: '03',
     title: 'API Migration',
     category: 'Engineering',
-    status: 'Blocked',
-    due: 'Apr 30',
     description: 'Migrate three legacy endpoints to v3 schema with full backward-compatibility and rollback plan.',
-    accent: '#70AAAA',
-    bg: '#0C1818',
-    bgLight: '#ECF4F4',
-    accentLight: '#408888',
+    progress: 28,
+    accent: '#F7AD19',
+    accentLight: '#D4900E',
+    bg: '#1E1608',
+    bgLight: '#FEF8E6',
+    darkOnAccent: true,
+    icon: Code,
   },
   {
     id: 3,
-    number: '04',
     title: 'Q2 Metrics',
     category: 'Analytics',
-    status: 'Planning',
-    due: 'May 5',
     description: 'Build consolidated dashboard — retention, revenue, and activation funnels with weekly drill-down.',
-    accent: '#C4A060',
-    bg: '#181508',
-    bgLight: '#F6F1E4',
-    accentLight: '#907840',
+    progress: 15,
+    accent: '#F27F0C',
+    accentLight: '#C96208',
+    bg: '#1C1006',
+    bgLight: '#FEF1E4',
+    darkOnAccent: true,
+    icon: ChartBar,
   },
 ]
 
-// Slot 0 = front, slot 3 = back
+// Slot 0 = front, 1 = right peek, 2 = left peek, 3 = hidden back
 const SLOTS = [
-  { x: 0,  y: 0,   rotate: 0, scale: 1,    z: 4 },
-  { x: 8,  y: -10, rotate: 3, scale: 0.96, z: 3 },
-  { x: 16, y: -20, rotate: 6, scale: 0.92, z: 2 },
-  { x: 24, y: -30, rotate: 9, scale: 0.88, z: 1 },
+  { x: 0,    y: 0, rotate: 0, scale: 1,    z: 4, opacity: 1   },
+  { x: 108,  y: 0, rotate: 0, scale: 0.88, z: 3, opacity: 0.7 },
+  { x: -108, y: 0, rotate: 0, scale: 0.88, z: 2, opacity: 0.7 },
+  { x: 0,    y: 0, rotate: 0, scale: 0.78, z: 1, opacity: 0   },
 ]
 
 const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
@@ -95,29 +113,64 @@ function useIsDark(ref: React.RefObject<HTMLElement | null>) {
   return isDark
 }
 
+// ─── Animated progress bar ───────────────────────────────────────────────────
+
+function AnimatedProgress({ progress, isActive, darkText }: { progress: number; isActive: boolean; darkText?: boolean }) {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (!isActive) {
+      setCount(0)
+      return
+    }
+    const duration = 1400
+    const delay = 300
+    let rafId: number
+    let startTime: number | null = null
+
+    const tick = (now: number) => {
+      if (startTime === null) startTime = now
+      const t = Math.min((now - startTime) / duration, 1)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setCount(Math.round(eased * progress))
+      if (t < 1) rafId = requestAnimationFrame(tick)
+    }
+
+    const timeout = setTimeout(() => { rafId = requestAnimationFrame(tick) }, delay)
+    return () => { clearTimeout(timeout); cancelAnimationFrame(rafId) }
+  }, [progress, isActive])
+
+  const labelColor = darkText ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'
+  const pctColor   = darkText ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.95)'
+  const trackBg    = darkText ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)'
+  const fillBg     = darkText ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.85)'
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: labelColor, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Progress</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: pctColor }}>{count}%</span>
+      </div>
+      <div style={{ height: 5, borderRadius: 3, background: trackBg, overflow: 'hidden' }}>
+        <motion.div
+          style={{ height: '100%', borderRadius: 3, background: fillBg }}
+          initial={{ width: '0%' }}
+          animate={{ width: isActive ? progress + '%' : '0%' }}
+          transition={isActive ? { duration: 1.4, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.3 } : { duration: 0 }}
+        />
+      </div>
+    </div>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function TaskCards() {
+export default function TaskCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const isDark = useIsDark(containerRef)
 
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const [warpSeed, setWarpSeed]   = useState(0)
-  const warpInterval = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const startWarp = useCallback((id: number) => {
-    setHoveredId(id)
-    warpInterval.current = setInterval(() => {
-      setWarpSeed(Math.floor(Math.random() * 999))
-    }, 40)
-  }, [])
-
-  const stopWarp = useCallback(() => {
-    setHoveredId(null)
-    if (warpInterval.current) { clearInterval(warpInterval.current); warpInterval.current = null }
-  }, [])
-
-  useEffect(() => () => { if (warpInterval.current) clearInterval(warpInterval.current) }, [])
+  const dragX = useMotionValue(0)
+  const cardRotateY = useTransform(dragX, [-200, 0, 200], [14, 0, -14])
 
   const [order, setOrder] = useState([0, 1, 2, 3])
   const orderRef = useRef(order)
@@ -144,294 +197,220 @@ export function TaskCards() {
     }, 420)
   }, [])
 
-  const frontTask = TASKS[order[0]]
-
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950"
+      className="flex min-h-screen w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950"
     >
-      {/* SVG paper-warp filter */}
-      <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
-        <defs>
-          <filter id="paper-warp" x="-15%" y="-15%" width="130%" height="130%">
-            <feTurbulence
-              type="turbulence"
-              baseFrequency="0.028 0.018"
-              numOctaves="2"
-              seed={warpSeed}
-              result="noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale="28"
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
-          </filter>
-        </defs>
-      </svg>
+      {/* Deck */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ position: 'relative', width: DECK_W, height: CARD_H }}>
+          {TASKS.map(task => {
+            const slotIndex = order.indexOf(task.id)
+            const slot = SLOTS[slotIndex]
+            const isFront = slotIndex === 0
+            const isExiting = exiting?.id === task.id
+            const isReturning = returning.has(task.id)
 
-      {/* Deck + side buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            // Outer card bg = footer/accent color (creates the border effect)
+            const cardBg = isDark ? task.accent : task.accentLight
+            // Top section: tinted dark bg in dark mode, light bg in light mode
+            const topBg = isDark ? task.bg : task.bgLight
+            const catColor = isDark ? (task.darkLabel ?? task.accent) : (task.lightLabel ?? task.accentLight)
+            const titleColor = isDark ? 'rgba(255,255,255,0.92)' : '#21211F'
+            const descColor = isDark ? 'rgba(255,255,255,0.48)' : '#52524E'
+            const Icon = task.icon
 
-        {/* Left arrow */}
-        <button
-          onClick={() => dismiss('left')}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
-            background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-          aria-label="Previous card"
-        >
-          <ArrowLeft weight="regular" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
-        </button>
-
-        <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
-        {TASKS.map(task => {
-          const slotIndex = order.indexOf(task.id)
-          const slot = SLOTS[slotIndex]
-          const isFront = slotIndex === 0
-          const isExiting = exiting?.id === task.id
-          const isReturning = returning.has(task.id)
-          const cardBg = isDark ? task.bg : task.bgLight
-          const cardAccent = isDark ? task.accent : task.accentLight
-          const textPrimary = isDark ? '#FFFFFF' : '#111111'
-          const textMuted = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)'
-
-          return (
-            <motion.div
-              key={task.id}
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                width: CARD_W,
-                height: CARD_H,
-                marginLeft: -CARD_W / 2,
-                marginTop: -CARD_H / 2,
-                zIndex: isExiting ? 10 : slot.z,
-                borderRadius: 20,
-                overflow: 'hidden',
-                cursor: isFront ? 'grab' : 'default',
-                background: cardBg,
-                boxShadow: isDark
-                  ? '0 4px 20px rgba(0,0,0,0.25)'
-                  : '0 4px 16px rgba(0,0,0,0.07)',
-                filter: hoveredId === task.id ? 'url(#paper-warp)' : 'none',
-              }}
-              animate={
-                isExiting
-                  ? {
-                      x: exiting!.dir === 'left' ? -480 : 480,
-                      y: 100,
-                      rotate: exiting!.dir === 'left' ? -22 : 22,
-                      scale: 0.85,
-                      opacity: 0,
-                    }
-                  : {
-                      x: slot.x,
-                      y: slot.y,
-                      rotate: slot.rotate,
-                      scale: slot.scale,
-                      opacity: 1,
-                    }
-              }
-              transition={
-                isExiting
-                  ? { duration: 0.42, ease: [0.4, 0, 0.2, 1] }
-                  : isReturning
-                  ? { duration: 0 }
-                  : SPRING
-              }
-              onHoverStart={() => startWarp(task.id)}
-              onHoverEnd={stopWarp}
-              drag={isFront && !dismissing.current ? 'x' : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.6}
-              onDragStart={() => { dragDelta.current = 0 }}
-              onDrag={(_, info) => { dragDelta.current = info.offset.x }}
-              onDragEnd={(_, info) => {
-                if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 400) {
-                  dismiss(info.offset.x < 0 ? 'left' : 'right')
-                }
-              }}
-            >
-              {/* Top accent bar */}
-              <div style={{ height: 4, background: cardAccent }} />
-
-              {/* Card content */}
-              <div
+            return (
+              <motion.div
+                key={task.id}
                 style={{
-                  padding: '18px 20px 18px',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  width: CARD_W,
+                  height: CARD_H,
+                  marginLeft: -CARD_W / 2,
+                  marginTop: -CARD_H / 2,
+                  zIndex: isExiting ? 10 : slot.z,
+                  borderRadius: 24,
+                  overflow: 'hidden',
+                  cursor: isFront ? 'grab' : 'default',
                   display: 'flex',
                   flexDirection: 'column',
-                  height: 'calc(100% - 4px)',
-                  boxSizing: 'border-box',
+                  background: cardBg,
+                  ...(isFront ? { rotateY: cardRotateY, transformPerspective: 900 } : {}),
+                }}
+                animate={
+                  isExiting
+                    ? {
+                        x: exiting!.dir === 'left' ? -480 : 480,
+                        y: 100,
+                        rotate: exiting!.dir === 'left' ? -22 : 22,
+                        scale: 0.85,
+                        opacity: 0,
+                      }
+                    : {
+                        x: slot.x,
+                        y: slot.y,
+                        rotate: slot.rotate,
+                        scale: slot.scale,
+                        opacity: slot.opacity,
+                      }
+                }
+                transition={
+                  isExiting
+                    ? { duration: 0.42, ease: [0.4, 0, 0.2, 1] }
+                    : isReturning
+                    ? { duration: 0 }
+                    : SPRING
+                }
+                whileHover={
+                  isExiting ? undefined :
+                  isFront
+                    ? { scale: 1.03, boxShadow: `0 10px 36px ${cardBg}30` }
+                    : slotIndex === 1 || slotIndex === 2
+                    ? { opacity: 0.88, scale: slot.scale + 0.015 }
+                    : undefined
+                }
+                whileTap={isFront ? { scale: 0.98 } : undefined}
+                drag={isFront && !dismissing.current ? 'x' : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.6}
+                onDragStart={() => { dragDelta.current = 0; dragX.set(0) }}
+                onDrag={(_, info) => { dragDelta.current = info.offset.x; dragX.set(info.offset.x) }}
+                onDragEnd={(_, info) => {
+                  dragX.set(0)
+                  if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 400) {
+                    dismiss(info.offset.x < 0 ? 'left' : 'right')
+                  }
                 }}
               >
-                {/* Category + number row */}
+                {/* Top content area — has its own border that matches the card bg */}
                 <div
                   style={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflow: 'hidden',
+                    background: topBg,
+                    border: `2px solid ${cardBg}`,
+                    borderRadius: 24,
+                    padding: '28px 20px 16px',
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 18,
+                    flexDirection: 'column',
+                    boxSizing: 'border-box',
+                    position: 'relative',
                   }}
                 >
-                  <div
+                  {/* Top-right arrow button */}
+                  <motion.button
                     style={{
+                      position: 'absolute',
+                      top: 14,
+                      right: 14,
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      border: `1.5px solid ${catColor}`,
+                      background: 'transparent',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 5,
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: catColor,
+                      flexShrink: 0,
                     }}
+                    whileHover={{ scale: 1.1, opacity: 0.7 }}
+                    whileTap={{ scale: 0.92 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   >
-                    <Tag weight="regular" size={11} style={{ color: cardAccent }} />
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: cardAccent,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
+                    <ArrowUpRight weight="regular" size={13} />
+                  </motion.button>
+                  {/* Category row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    <Icon weight="regular" size={11} style={{ color: catColor }} />
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: catColor,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}>
                       {task.category}
                     </span>
                   </div>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      color: textMuted,
-                      letterSpacing: '0.02em',
-                    }}
-                  >
-                    {task.due}
-                  </span>
-                </div>
 
-                {/* Title */}
-                <h2
-                  style={{
-                    fontSize: 28,
+                  {/* Spacer */}
+                  <div style={{ height: 28, flexShrink: 0 }} />
+
+                  {/* Title */}
+                  <h2 style={{
+                    fontSize: 20,
                     fontWeight: 800,
-                    color: textPrimary,
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.03em',
+                    color: titleColor,
+                    lineHeight: 1.15,
+                    letterSpacing: '-0.02em',
                     margin: 0,
-                    marginBottom: 14,
-                  }}
-                >
-                  {task.title}
-                </h2>
+                    flexShrink: 0,
+                  }}>
+                    {task.title}
+                  </h2>
 
-                {/* Description */}
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: textMuted,
+                  {/* Spacer */}
+                  <div style={{ height: 10, flexShrink: 0 }} />
+
+                  {/* Description */}
+                  <p style={{
+                    fontSize: 12,
+                    color: descColor,
                     lineHeight: 1.6,
                     margin: 0,
                     flex: 1,
-                  }}
-                >
-                  {task.description}
-                </p>
-
-                {/* Bottom row */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 20,
-                  }}
-                >
-                  {/* Status badge */}
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '5px 11px',
-                      borderRadius: 30,
-                      background: isDark ? `${cardAccent}18` : `${cardAccent}20`,
-                      border: `1.5px solid ${isDark ? `${cardAccent}40` : `${cardAccent}60`}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: '50%',
-                        background: cardAccent,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: cardAccent,
-                      }}
-                    >
-                      {task.status}
-                    </span>
-                  </div>
-
+                    minHeight: 0,
+                    overflow: 'hidden',
+                  }}>
+                    {task.description}
+                  </p>
                 </div>
-              </div>
-            </motion.div>
-          )
-        })}
-        </div>
 
-        {/* Right arrow */}
-        <button
-          onClick={() => dismiss('right')}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
-            background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-          aria-label="Next card"
-        >
-          <ArrowRight weight="regular" size={14} style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }} />
-        </button>
+                {/* Bottom accent footer */}
+                <div style={{ padding: '12px 20px 14px', flexShrink: 0 }}>
+                  <AnimatedProgress progress={task.progress} isActive={isFront} darkText={task.darkOnAccent} />
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Dot indicators */}
-      <div style={{ display: 'flex', gap: 5, marginTop: 24 }}>
-        {TASKS.map(task => (
-          <motion.div
-            key={task.id}
+      {/* Chevron navigation */}
+      <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+        {([
+          { dir: 'left' as const, icon: <CaretLeft weight="regular" size={16} />, label: 'Previous' },
+          { dir: 'right' as const, icon: <CaretRight weight="regular" size={16} />, label: 'Next' },
+        ] as const).map(({ dir, icon, label }) => (
+          <motion.button
+            key={dir}
+            onClick={() => dismiss(dir)}
+            aria-label={label}
             style={{
-              height: 5,
-              borderRadius: 3,
-              background: isDark ? frontTask.accent : frontTask.accentLight,
+              width: 36, height: 36, borderRadius: '50%',
+              border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.08)'}`,
+              background: 'rgba(0,0,0,0)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.28)',
             }}
-            animate={{
-              width: order[0] === task.id ? 20 : 5,
-              opacity: order[0] === task.id ? 1 : 0.2,
+            whileHover={{
+              scale: 1.1,
+              background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+              borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.18)',
+              color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.55)',
             }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          />
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            {icon}
+          </motion.button>
         ))}
       </div>
     </div>

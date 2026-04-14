@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
@@ -113,9 +115,9 @@ function GlassTag({ label, color, index }: { label: string; color: string; index
   )
 }
 
-export function GlassTags() {
+export default function GlassTags() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       <img
         src={BACKGROUND}
         alt=""

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useEffect, useRef, useState } from 'react'
 import { useMotionValue, animate } from 'framer-motion'
 
@@ -12,7 +14,7 @@ const TARGET_PERCENT = 78
 const COUNT_DURATION = 4 // seconds
 const PAUSE_DURATION = 1 // seconds between loops
 
-export function ChargingWidget() {
+export default function ChargingWidget() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
 
@@ -127,7 +129,7 @@ export function ChargingWidget() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full items-center justify-center"
+      className="flex min-h-screen w-full items-center justify-center"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       <svg

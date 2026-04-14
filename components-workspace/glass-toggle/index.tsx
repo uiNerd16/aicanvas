@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useEffect } from 'react'
 import { motion, useSpring, useTransform } from 'framer-motion'
 
@@ -99,9 +101,9 @@ function Toggle({
   )
 }
 
-export function GlassToggle() {
+export default function GlassToggle() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png"

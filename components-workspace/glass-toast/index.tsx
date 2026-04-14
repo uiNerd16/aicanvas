@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
@@ -288,7 +290,7 @@ function TriggerButton({
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export function GlassToast() {
+export default function GlassToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
   const prefersReduced = useReducedMotion()
   const idCounter = useRef(0)

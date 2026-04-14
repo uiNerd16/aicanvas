@@ -1,5 +1,7 @@
 'use client'
 
+// npm install three
+
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
@@ -33,7 +35,7 @@ function colorFromY(ny: number): [number, number, number] {
   }
 }
 
-export function ParticleSphere() {
+export default function ParticleSphere() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -119,5 +121,5 @@ export function ParticleSphere() {
     }
   }, [])
 
-  return <div ref={containerRef} className="h-full w-full" />
+  return <div ref={containerRef} className="min-h-screen w-full" />
 }

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
@@ -112,7 +114,7 @@ function LogoMark({ color, scale }: { color: string; scale: number }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function LabelCards() {
+export default function LabelCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
   const [selected, setSelected] = useState<number | null>(null)
@@ -153,7 +155,7 @@ export function LabelCards() {
   return (
     <div
       ref={containerRef}
-      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-100 dark:bg-sand-950"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-100 dark:bg-sand-950"
     >
       {/* Dot grid */}
       <div

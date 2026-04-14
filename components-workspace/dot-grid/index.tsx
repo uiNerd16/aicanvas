@@ -8,7 +8,7 @@ const RADIUS  = 130    // px — hover influence radius
 const BASE_A  = 0.13   // resting dot opacity
 const PEAK_A  = 0.92   // fully-lit dot opacity
 
-export function InteractiveDotGrid({ showLabel = true }: { showLabel?: boolean } = {}) {
+export default function InteractiveDotGrid({ showLabel = true }: { showLabel?: boolean } = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -156,7 +156,7 @@ export function InteractiveDotGrid({ showLabel = true }: { showLabel?: boolean }
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
     >
       <canvas

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Minus, Plus } from '@phosphor-icons/react'
@@ -196,9 +198,9 @@ function GlassStepperField({
 
 // ─── Main export ─────────────────────────────────────────────────────────────
 
-export function GlassStepper() {
+export default function GlassStepper() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src={BACKGROUND_IMAGE}

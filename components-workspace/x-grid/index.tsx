@@ -8,7 +8,7 @@ const RADIUS  = 340    // px — hover influence radius
 const BASE_A  = 0.13   // resting × opacity
 const PEAK_A  = 0.92   // fully-lit × opacity
 
-export function XGrid() {
+export default function XGrid() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -164,7 +164,7 @@ export function XGrid() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
@@ -66,7 +68,7 @@ const OFFSCREEN = { x: 0, y: 30, scale: 0.88, opacity: 0 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function SlideDeck() {
+export default function SlideDeck() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
 
@@ -113,7 +115,7 @@ export function SlideDeck() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950"
+      className="flex min-h-screen w-full flex-col items-center justify-center bg-sand-100 dark:bg-sand-950"
       style={{ isolation: 'isolate' }}
     >
       {/* Card stage — always render all slides, no key conflicts possible */}

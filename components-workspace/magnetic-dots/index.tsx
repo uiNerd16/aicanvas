@@ -23,7 +23,7 @@ type Dot = {
 }
 
 // ─── MagneticDots ─────────────────────────────────────────────────────────────
-export function MagneticDots() {
+export default function MagneticDots() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -213,7 +213,7 @@ export function MagneticDots() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: '#110F0C' }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

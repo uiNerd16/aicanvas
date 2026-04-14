@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Check } from '@phosphor-icons/react'
@@ -56,7 +58,7 @@ const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
 
 // ─── AvatarPicker ─────────────────────────────────────────────────────────────
 
-export function AvatarPicker() {
+export default function AvatarPicker() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
 
@@ -115,7 +117,7 @@ export function AvatarPicker() {
   return (
     <div
       ref={containerRef}
-      className="relative flex h-full w-full select-none flex-col items-center justify-center gap-8 bg-sand-100 dark:bg-sand-950"
+      className="relative flex min-h-screen w-full select-none flex-col items-center justify-center gap-8 bg-sand-100 dark:bg-sand-950"
     >
       {/* Label */}
       <p

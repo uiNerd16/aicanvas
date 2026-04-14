@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useRef } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { ChartLineUp, Lightning, ShieldCheck, ArrowRight } from '@phosphor-icons/react'
@@ -131,9 +133,9 @@ function GlassCardItem({
   )
 }
 
-export function GlassCard() {
+export default function GlassCard() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       <img
         src={BACKGROUND}
         alt=""

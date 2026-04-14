@@ -101,7 +101,7 @@ Experimental, creatively-free components that appear on the homepage grid. Each 
 ```
 components-workspace/
   my-component/
-    index.tsx    ← the React component (export named function)
+    index.tsx    ← the React component (export default function)
     prompts.ts   ← prompts for the 4 platforms (any subset allowed)
     spec.md      ← brief approved by user before building
 ```

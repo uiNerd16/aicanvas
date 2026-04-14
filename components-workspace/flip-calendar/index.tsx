@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useRef, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import type { PanInfo } from 'framer-motion'
@@ -11,7 +13,7 @@ const FLIP_MS = 220
 
 function fmt(n: number) { return String(n).padStart(2, '0') }
 
-export function FlipCalendar() {
+export default function FlipCalendar() {
   // ── State ──────────────────────────────────────────────────────────────────
   const [topDisplay,    setTopDisplay   ] = useState(1)
   const [bottomDisplay, setBottomDisplay] = useState(1)
@@ -161,7 +163,7 @@ export function FlipCalendar() {
     : '0 4px 24px rgba(0,0,0,0.3),  0 2px 8px rgba(0,0,0,0.22)'
 
   return (
-    <div ref={rootRef} className="flex h-full w-full flex-col items-center justify-center gap-6" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+    <div ref={rootRef} className="flex min-h-screen w-full flex-col items-center justify-center gap-6" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
 
       {/* ── Parallax wrapper — provides CSS perspective for 3D tilt ── */}
       <div

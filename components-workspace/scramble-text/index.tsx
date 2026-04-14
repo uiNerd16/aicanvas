@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import localFont from 'next/font/local'
@@ -98,7 +100,7 @@ function Crosshair({ style }: { style: React.CSSProperties }) {
   )
 }
 
-export function ScrambleText() {
+export default function ScrambleText() {
   const [isHovered, setIsHovered] = useState(false)
   const chars0 = useScramble(WORDS[0]!, isHovered)
   const chars1 = useScramble(WORDS[1]!, isHovered)
@@ -106,7 +108,7 @@ export function ScrambleText() {
 
   return (
     <div
-      className="relative flex h-full w-full cursor-default items-center justify-center"
+      className="relative flex min-h-screen w-full cursor-default items-center justify-center"
       style={{ background: '#292929' }}
     >
       {/* Crosshair — top right */}

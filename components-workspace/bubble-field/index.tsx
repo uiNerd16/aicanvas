@@ -13,7 +13,7 @@ const BASE_A_LIGHT = 0.75
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Bubble = { x: number; y: number; b: number; phase: number }
 
-export function BubbleField() {
+export default function BubbleField() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -166,7 +166,7 @@ export function BubbleField() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

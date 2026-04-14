@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, ChatCircle, Heart, ShieldCheck, X, ArrowUp } from '@phosphor-icons/react'
@@ -143,7 +145,7 @@ function NotificationCard({
   )
 }
 
-export function GlassNotification() {
+export default function GlassNotification() {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
 
   const dismiss = (id: number) => {
@@ -153,7 +155,7 @@ export function GlassNotification() {
   const reset = () => setNotifications(INITIAL_NOTIFICATIONS)
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png"

@@ -1,12 +1,14 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { List, X } from '@phosphor-icons/react'
 
 const NAV_ITEMS = ['Products', 'About', 'Blog']
 
-export function GlassNavbar() {
+export default function GlassNavbar() {
   const [active, setActive]     = useState<number | null>(null)
   const [hovered, setHovered]   = useState<number | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -35,7 +37,7 @@ export function GlassNavbar() {
   }
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"

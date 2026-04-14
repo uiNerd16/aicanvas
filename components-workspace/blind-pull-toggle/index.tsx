@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, useAnimate, stagger } from 'framer-motion'
 import { Moon, Sun } from '@phosphor-icons/react'
@@ -12,7 +14,7 @@ const SLATS      = 6
 const MAX_SIZE   = 80  // button px cap
 const MIN_SIZE   = 48  // button px floor
 
-export function BlindPullToggle() {
+export default function BlindPullToggle() {
   const [toggleDark, setToggleDark] = useState(true)
   const [pageIsDark, setPageIsDark] = useState(true)
   const [animating, setAnimating]   = useState(false)
@@ -105,7 +107,7 @@ export function BlindPullToggle() {
   return (
     <div
       ref={scope}
-      className="flex h-full w-full items-center justify-center"
+      className="flex min-h-screen w-full items-center justify-center"
       style={{ background: previewBg }}
     >
       <motion.div

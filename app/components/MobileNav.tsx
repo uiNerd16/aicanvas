@@ -118,7 +118,7 @@ export function MobileNav() {
       {/* ── Mobile top bar ── */}
       <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:hidden">
         <Link href="/home" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
-          <img src="/aicanvas.svg" alt="" width={18} height={15} className="shrink-0" />
+          <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
           AI Canvas
         </Link>
 
@@ -162,7 +162,7 @@ export function MobileNav() {
                   className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
                   onClick={() => setOpen(false)}
                 >
-                  <img src="/aicanvas.svg" alt="" width={18} height={15} className="shrink-0" />
+                  <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
                   AI Canvas
                 </Link>
                 <button

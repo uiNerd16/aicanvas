@@ -48,5 +48,9 @@ next-env.d.ts
 # superpowers brainstorm session files
 .superpowers/
 
+# auto-generated (rebuilt on every dev/build)
+app/lib/component-codes.generated.ts
+/public/r/
+
 # business strategy (private — never pushed to GitHub)
 /business-strategy/

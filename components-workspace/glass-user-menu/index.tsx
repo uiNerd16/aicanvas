@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -120,7 +122,7 @@ function MenuItem({
 
 // ─── GlassUserMenu ────────────────────────────────────────────────────────────
 
-export function GlassUserMenu() {
+export default function GlassUserMenu() {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -141,7 +143,7 @@ export function GlassUserMenu() {
   let itemIndex = 0
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       <img
         src={BACKGROUND}
         alt=""

@@ -67,6 +67,8 @@ const ALL_SLUGS = [
   'glass-ai-compose',
   'andromeda-button',
   'meet-the-crew',
+  'ai-job-cards',
+  'task-cards',
 ]
 
 const arg   = process.argv[2]
@@ -232,6 +234,23 @@ const INTERACTIONS = {
     // Click the toggle button to expand the sidebar
     await page.click('button[aria-label="Expand sidebar"]')
     await page.waitForTimeout(600) // wait for spring animation to settle
+  },
+
+  // Task Cards — wait for progress bar animation then hover the front card
+  'task-cards': async (preview, page) => {
+    await preview.page().waitForTimeout(1800) // let progress bar count up
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await preview.page().waitForTimeout(300)
+  },
+
+  // AI Job Cards — hover the front card of the first stack to lift it
+  'ai-job-cards': async (preview, page) => {
+    await preview.page().waitForTimeout(600)
+    const box = await preview.boundingBox()
+    // Hover over the front card in the first column (left third)
+    await page.mouse.move(box.x + box.width * 0.17, box.y + box.height * 0.45)
+    await preview.page().waitForTimeout(400)
   },
 }
 

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useRef } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 
@@ -136,7 +138,7 @@ function Slider({
 
 // ─── GlassSlider ──────────────────────────────────────────────────────────────
 
-export function GlassSlider() {
+export default function GlassSlider() {
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
       <img
