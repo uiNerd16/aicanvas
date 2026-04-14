@@ -1,11 +1,13 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { motion } from 'framer-motion'
 import { X, Check, ShieldCheck } from '@phosphor-icons/react'
 
-export function GlassModal() {
+export default function GlassModal() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"

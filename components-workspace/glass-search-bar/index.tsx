@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
@@ -232,7 +234,7 @@ export default function GlassSearchBar() {
     : ({ type: 'spring', stiffness: 400, damping: 30 } as const)
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image — consistent with glass family */}
       <img
         src={BACKGROUND}

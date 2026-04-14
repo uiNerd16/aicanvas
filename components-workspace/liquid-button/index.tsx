@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useRef, useEffect, useId } from 'react'
 import { motion } from 'framer-motion'
 
@@ -69,7 +71,7 @@ const HOVER_TRANSITION = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function LiquidButton() {
+export default function LiquidButton() {
   const containerRef  = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark]       = useState(true)
   const [isHovered, setIsHovered] = useState(false)
@@ -156,7 +158,7 @@ export function LiquidButton() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full items-center justify-center bg-sand-100 dark:bg-sand-950"
+      className="flex min-h-screen w-full items-center justify-center bg-sand-100 dark:bg-sand-950"
     >
       {/* Entrance animation */}
       <motion.div

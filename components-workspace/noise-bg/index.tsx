@@ -15,7 +15,7 @@ const PEAK_A      = 0.14
 type Dot  = { x: number; y: number; b: number }
 type Pair = [Dot, Dot]
 
-export function NoiseBg() {
+export default function NoiseBg() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -150,7 +150,7 @@ export function NoiseBg() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useEffect } from 'react'
 import { motion, useSpring, AnimatePresence } from 'framer-motion'
 import {
@@ -142,7 +144,7 @@ function NavItemRow({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function GlassSidebar() {
+export default function GlassSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [toggleHovered, setToggleHovered] = useState(false)
@@ -157,7 +159,7 @@ export function GlassSidebar() {
   }
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png"

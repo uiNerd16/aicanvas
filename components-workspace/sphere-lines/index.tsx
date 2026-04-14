@@ -23,7 +23,7 @@ const HOVER_RADIUS = 90     // px — radius of local cursor distortion
 const HOVER_AMP    = 0.45   // strength of the local hover wave
 const TWO_PI      = Math.PI * 2
 
-export function SphereLines() {
+export default function SphereLines() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -226,7 +226,7 @@ export function SphereLines() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

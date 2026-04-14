@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -12,7 +14,7 @@ const DURATION = 650
 const LAST_WORD_END = (WORDS.length - 1) * STAGGER + DURATION // 1150 ms
 const SHOW_BUTTON_AT = LAST_WORD_END + 150                     // 1300 ms
 
-export function TextBlurReveal() {
+export default function TextBlurReveal() {
   const [showCTA, setShowCTA] = useState(false)
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function TextBlurReveal() {
   }, [])
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center gap-5 overflow-hidden">
 
       {/* Dot grid */}
       <div

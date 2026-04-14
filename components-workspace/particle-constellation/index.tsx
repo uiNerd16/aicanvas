@@ -113,7 +113,7 @@ function detectDark(el: HTMLElement): boolean {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export function ParticleConstellation() {
+export default function ParticleConstellation() {
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
@@ -311,7 +311,7 @@ export function ParticleConstellation() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />

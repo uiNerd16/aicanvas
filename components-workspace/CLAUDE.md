@@ -47,8 +47,9 @@ These live at the project root, one level up from this file:
 
 ### index.tsx
 - `'use client'` at the top (always)
-- Export a single named function that matches the folder name in PascalCase (e.g. folder `glowing-button` → `export function GlowingButton()`)
-- Root element must fill its container: `className="flex h-full w-full items-center justify-center bg-sand-100 dark:bg-sand-950"`
+- Export a single **default** function that matches the folder name in PascalCase (e.g. folder `glowing-button` → `export default function GlowingButton()`)
+- Add a `// npm install` comment after `'use client'` listing external npm packages (e.g. `// npm install framer-motion @phosphor-icons/react`). Omit for React-only components. This gives users a copy-pasteable install command.
+- Root element must fill the viewport standalone: `className="flex min-h-screen w-full items-center justify-center bg-sand-100 dark:bg-sand-950"` — use `min-h-screen` (not `h-full`) so the component works when copy-pasted into any project without a parent height chain
 - **Support both light AND dark mode** — always use `dark:` Tailwind variants so the component looks great in both themes. The preview page has a theme toggle; the user will check both modes.
 - For colors set via inline styles (e.g. custom hex values), import `useTheme` from `../../app/components/ThemeProvider` and pick different values per theme.
 - Design a distinct but cohesive light version — lighter surface, darker/adjusted accent colors that maintain contrast on light backgrounds.
@@ -84,7 +85,7 @@ Every component must work on mobile. This is not optional.
 - Dynamic import browser-only APIs (e.g. Three.js, canvas) with `alive` guard pattern
 
 ## Before finishing a BUILD task
-1. Verify `index.tsx` exports the correct named function
+1. Verify `index.tsx` exports the correct **default** function
 2. Verify there are no TypeScript errors in the files you created
 3. Do NOT write `prompts.ts` during the initial build — prompts are written in a separate step AFTER the user approves the final visual
 4. Do NOT register the component in the registry — that is the integrator's job

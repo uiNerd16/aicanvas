@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 
@@ -11,7 +13,7 @@ const MAX_TRACK_W = 80
 const MIN_TRACK_W = 48
 const FACE_COLOR  = '#4A3F35'  // warm dark — legible on white in both themes
 
-export function TagaToggle() {
+export default function TagaToggle() {
   const [isOn, setIsOn]             = useState(false)
   const [animating, setAnimating]   = useState(false)
   const [pageIsDark, setPageIsDark] = useState(true)
@@ -101,7 +103,7 @@ export function TagaToggle() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full items-center justify-center"
+      className="flex min-h-screen w-full items-center justify-center"
       style={{ background: previewBg }}
     >
       <motion.div

@@ -133,7 +133,7 @@ const TIME_W    = 4 * BIG + COLON_BIG + COLON_SML + 2 * SML + 7 * GAP
 //              = 200     + 22         + 11         + 48     + 21  = 302
 
 // ─── NeonClock ────────────────────────────────────────────────────────────────
-export function NeonClock() {
+export default function NeonClock() {
   const [now,     setNow]     = useState(getNow)
   const [colonOn, setColonOn] = useState(true)
 
@@ -147,7 +147,7 @@ export function NeonClock() {
 
   return (
     <div
-      className="relative flex h-full w-full select-none items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen w-full select-none items-center justify-center overflow-hidden"
       style={{ background: BG, fontFamily: '"Courier New", Courier, monospace' }}
     >
       {/* ── Left-anchored block — centered as a whole in the viewport ─────── */}

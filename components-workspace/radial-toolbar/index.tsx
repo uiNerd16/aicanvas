@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
@@ -58,7 +60,7 @@ function iconXY(midDeg: number) {
 
 // ─── RadialToolbar ────────────────────────────────────────────────────────────
 
-export function RadialToolbar() {
+export default function RadialToolbar() {
   const [open, setOpen]       = useState(false)
   const [hoveredId, setHover] = useState<string | null>(null)
   const [activeId,  setActive]= useState<string | null>(null)
@@ -87,7 +89,7 @@ export function RadialToolbar() {
   const labelTool = TOOLS.find(t => t.id === hoveredId) ?? TOOLS.find(t => t.id === activeId)
 
   return (
-    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
+    <div ref={containerRef} className="relative flex min-h-screen w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
 
       {/* ── Wheel — fades in around the persistent circle ─────────────────── */}
       <AnimatePresence>

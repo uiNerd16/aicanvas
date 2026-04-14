@@ -110,7 +110,7 @@ export function Sidebar() {
           href="/home"
           className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
         >
-          <img src="/aicanvas.svg" alt="" width={20} height={17} className="shrink-0" />
+          <img src="/ai-canvas-icon.svg" alt="" width={20} height={17} className="shrink-0" />
           AI Canvas
         </Link>
       </div>

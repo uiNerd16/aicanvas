@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
@@ -132,7 +134,7 @@ function ImageThumbnail({
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export function GlassAiCompose() {
+export default function GlassAiCompose() {
   const [isActive, setIsActive] = useState(false)
   const [message, setMessage] = useState('')
   const [activeModel, setActiveModel] = useState<Model>(MODELS[0]) // Claude default

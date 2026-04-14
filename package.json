@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev",
+    "build": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "screenshot": "node scripts/screenshot.mjs"

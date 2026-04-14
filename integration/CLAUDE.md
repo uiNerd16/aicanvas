@@ -42,7 +42,7 @@ In `app/lib/component-registry.tsx`:
 
 1. Import the component at the top:
    ```ts
-   import { ComponentName } from '../../components-workspace/component-name'
+   import ComponentName from '../../components-workspace/component-name'
    ```
 
 2. Import the prompts:

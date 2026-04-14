@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @react-three/drei @react-three/fiber three
+
 import { useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Stars, MeshWobbleMaterial } from '@react-three/drei'
@@ -81,12 +83,12 @@ function PortalScene({ warping }: { warping: boolean }) {
 
 // ─── StarsPortal ──────────────────────────────────────────────────────────────
 
-export function StarsPortal() {
+export default function StarsPortal() {
   const [warping, setWarping] = useState(false)
 
   return (
     <div
-      className="flex h-full w-full items-center justify-center"
+      className="flex min-h-screen w-full items-center justify-center"
       style={{ cursor: warping ? 'crosshair' : 'pointer', background: '#000000' }}
       onMouseDown={() => setWarping(true)}
       onMouseUp={() => setWarping(false)}

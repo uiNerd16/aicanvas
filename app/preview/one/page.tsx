@@ -1,6 +1,6 @@
 'use client'
 
-import { GlassAiCompose } from '../../../components-workspace/glass-ai-compose'
+import GlassAiCompose from '../../../components-workspace/glass-ai-compose'
 
 export default function PreviewOnePage() {
   return (

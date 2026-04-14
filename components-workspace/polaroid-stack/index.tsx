@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
@@ -51,7 +53,7 @@ const FANNED: Pos[] = [
 
 // ─── PolaroidStack ─────────────────────────────────────────────────────────────
 
-export function PolaroidStack() {
+export default function PolaroidStack() {
   const [fanned, setFanned] = useState(false)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -68,7 +70,7 @@ export function PolaroidStack() {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');`}</style>
 
       <div
-        className="relative flex h-full w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
+        className="relative flex min-h-screen w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
         onClick={toggle}
       >
         {/* Fixed-size stage so cards don't overflow the preview */}

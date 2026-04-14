@@ -44,7 +44,7 @@ function lerpAngle(current: number, target: number, speed: number): number {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export function NoiseField() {
+export default function NoiseField() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const [isDark, setIsDark] = useState(true)
@@ -239,7 +239,7 @@ export function NoiseField() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       <canvas ref={canvasRef} className="absolute inset-0" />

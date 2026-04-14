@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
@@ -31,7 +33,7 @@ function getRandomChar(): string {
   return GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
 }
 
-export function GlitchButton() {
+export default function GlitchButton() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
 
@@ -118,7 +120,7 @@ export function GlitchButton() {
   }
 
   return (
-    <div ref={containerRef} className="flex h-full w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+    <div ref={containerRef} className="flex min-h-screen w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

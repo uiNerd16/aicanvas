@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import { X, Check } from '@phosphor-icons/react'
@@ -11,7 +13,7 @@ import { X, Check } from '@phosphor-icons/react'
 const MAX_TRACK_W = 80
 const MIN_TRACK_W = 48
 
-export function MarkToggle() {
+export default function MarkToggle() {
   const [isOn, setIsOn]             = useState(false)
   const [animating, setAnimating]   = useState(false)
   const [pageIsDark, setPageIsDark] = useState(true)
@@ -98,7 +100,7 @@ export function MarkToggle() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full items-center justify-center"
+      className="flex min-h-screen w-full items-center justify-center"
       style={{ background: previewBg }}
     >
       <motion.div

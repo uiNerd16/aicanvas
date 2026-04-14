@@ -20,7 +20,7 @@ type Dot = { x: number; y: number; b: number; l: number; px: number; py: number 
 type Segment = { a: Dot; b: Dot }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export function GridLines() {
+export default function GridLines() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
@@ -219,7 +219,7 @@ export function GridLines() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden"
+      className="relative min-h-screen w-full overflow-hidden"
       style={{ background: bg }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

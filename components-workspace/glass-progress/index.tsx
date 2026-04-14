@@ -1,5 +1,7 @@
 'use client'
 
+// npm install @phosphor-icons/react framer-motion
+
 import { useState, useEffect, useCallback } from 'react'
 import { motion, useSpring, useMotionValueEvent, useReducedMotion } from 'framer-motion'
 import { ArrowClockwise } from '@phosphor-icons/react'
@@ -145,7 +147,7 @@ function GlassProgressBar({
 
 // ─── Exported showcase ──────────────────────────────────────────────────────
 
-export function GlassProgress() {
+export default function GlassProgress() {
   const [values, setValues] = useState<number[]>([0, 0, 0, 0])
   const [resetKey, setResetKey] = useState(0)
 
@@ -174,7 +176,7 @@ export function GlassProgress() {
   }, [resetKey])
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
       {/* Background image */}
       <img
         src={BACKGROUND_IMAGE}

@@ -1,5 +1,7 @@
 'use client'
 
+// npm install framer-motion
+
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -96,7 +98,7 @@ function EmojiParticle({ p }: { p: Particle }) {
 
 // ─── EmojiBurst ───────────────────────────────────────────────────────────────
 
-export function EmojiBurst() {
+export default function EmojiBurst() {
   const [particles, setParticles] = useState<Particle[]>([])
   const [setIdx, setSetIdx]       = useState(0)
   const [isPopping, setIsPopping] = useState(false)
@@ -135,7 +137,7 @@ export function EmojiBurst() {
   }, [setIdx, isPopping])
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-sand-100 dark:bg-sand-950">
+    <div className="flex min-h-screen w-full items-center justify-center bg-sand-100 dark:bg-sand-950">
       <div className="relative flex items-center justify-center">
 
         {/* Particles */}
