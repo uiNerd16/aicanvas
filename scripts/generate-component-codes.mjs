@@ -8,6 +8,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs'
 import { join } from 'path'
+import { execSync } from 'child_process'
 
 const wsDir = 'components-workspace'
 const outFile = 'app/lib/component-codes.generated.ts'
@@ -55,3 +56,11 @@ lines.push('')
 
 writeFileSync(outFile, lines.join('\n'))
 console.log(`Generated ${outFile} with ${count} components`)
+
+// Automatically lint after generating — catches missing npm/font comments
+// before the agent can proceed. Non-zero exit stops the pipeline.
+try {
+  execSync('node scripts/lint-components.mjs', { stdio: 'inherit' })
+} catch {
+  process.exit(1)
+}
