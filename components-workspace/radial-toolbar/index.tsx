@@ -2,7 +2,7 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
 import {
@@ -14,6 +14,8 @@ import {
   LinkSimple,
   Palette,
 } from '@phosphor-icons/react'
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 // ─── Types & Constants ────────────────────────────────────────────────────────
 
@@ -66,9 +68,9 @@ export default function RadialToolbar() {
   const [activeId,  setActive]= useState<string | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -147,10 +149,10 @@ function LogoMark({ color }: { color: string }) {
 
 export default function ScatterField() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [selected, setSelected] = useState<number | null>(null)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

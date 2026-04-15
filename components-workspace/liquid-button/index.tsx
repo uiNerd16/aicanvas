@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useState, useRef, useEffect, useId } from 'react'
+import { useState, useRef, useLayoutEffect, useEffect, useId } from 'react'
 import { motion } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── LiquidButton ──────────────────────────────────────────────────────────────
 // A CTA button with an organic liquid blob inside it, clipped to the button
@@ -73,7 +75,7 @@ const HOVER_TRANSITION = {
 
 export default function LiquidButton() {
   const containerRef  = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark]       = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isHovered, setIsHovered] = useState(false)
 
   // Unique clip-path ID — avoids collisions when multiple instances render
@@ -81,7 +83,7 @@ export default function LiquidButton() {
   const clipId = `lbclip-${uid}`
 
   // Detect theme from [data-card-theme] wrapper, then <html>
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
 

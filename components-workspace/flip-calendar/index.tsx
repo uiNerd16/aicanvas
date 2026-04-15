@@ -2,9 +2,11 @@
 
 // npm install framer-motion
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import type { PanInfo } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── FlipCalendar ─────────────────────────────────────────────────────────────
 // Magic edition: rich gradients, mouse parallax, shimmer, glowing scan line.
@@ -22,7 +24,7 @@ export default function FlipCalendar() {
   const [flapping,      setFlapping     ] = useState(false)
   const currentRef = useRef(1)
   const rootRef    = useRef<HTMLDivElement>(null)
-  const [isDark,   setIsDark           ] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
   // ── Motion values ──────────────────────────────────────────────────────────
   const rotateX     = useMotionValue(0)
@@ -37,7 +39,7 @@ export default function FlipCalendar() {
   const aliveRef = useRef(true)
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     aliveRef.current = true
     return () => {
       aliveRef.current = false
@@ -46,7 +48,7 @@ export default function FlipCalendar() {
   }, [])
 
   // ── Theme detection — responds to card-local preview toggle + global theme ──
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = rootRef.current
     if (!el) return
     const check = () => {

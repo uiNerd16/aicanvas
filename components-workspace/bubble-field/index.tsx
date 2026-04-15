@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useEffect, useRef, useState } from 'react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const SPACING     = 20    // px between circle centres
@@ -17,11 +19,11 @@ export default function BubbleField() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
-  const isDarkRef    = useRef(true)
-  const [isDark, setIsDark] = useState(true)
+  const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
   // ── Theme detection ────────────────────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

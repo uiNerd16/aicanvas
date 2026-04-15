@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { useMotionValue, animate } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── ChargingWidget ───────────────────────────────────────────────────────────
 // Circular battery-charging indicator with animated liquid waves that rise
@@ -16,9 +18,9 @@ const PAUSE_DURATION = 1 // seconds between loops
 
 export default function ChargingWidget() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

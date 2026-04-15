@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useEffect, useRef, useState } from 'react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const N_RADIALS = 24
@@ -119,11 +121,11 @@ export default function ParticleConstellation() {
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
   const webRef       = useRef<{ nodes: WebNode[]; strands: Strand[] } | null>(null)
   const rafRef       = useRef<number>(0)
-  const [isDark, setIsDark] = useState(true)
-  const isDarkRef = useRef(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
+  const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
   // ── Theme ──────────────────────────────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => { const d = detectDark(el); setIsDark(d); isDarkRef.current = d }
@@ -136,7 +138,7 @@ export default function ParticleConstellation() {
   }, [])
 
   // ── Main loop ──────────────────────────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const canvas    = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return

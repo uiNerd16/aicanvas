@@ -2,9 +2,11 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useLayoutEffect, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Check } from '@phosphor-icons/react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -60,7 +62,7 @@ const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
 
 export default function AvatarPicker() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
   // order[i] = photo ID at slot i (0 = front, 3 = back)
   const [order, setOrder] = useState<number[]>([0, 1, 2, 3])
@@ -73,10 +75,10 @@ export default function AvatarPicker() {
   const orderRef = useRef(order)
   const dismissing = useRef(false)
   const dragDelta = useRef(0)
-  useEffect(() => { orderRef.current = order }, [order])
+  useIsomorphicLayoutEffect(() => { orderRef.current = order }, [order])
 
   // Theme detection
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'))
     check()
     const obs = new MutationObserver(check)

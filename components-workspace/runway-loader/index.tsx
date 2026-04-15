@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Airplane SVG — top-down view, pointing right ─────────────────────────────
 
@@ -74,9 +76,9 @@ type Phase = 'taxiing' | 'takeoff' | 'resetting'
 
 export default function RunwayLoader() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {
