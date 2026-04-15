@@ -90,10 +90,15 @@ export default function ComponentPageView({
   const [fontCopied, setFontCopied] = useState(false)
   const [fontFramework, setFontFramework] = useState<'html' | 'nextjs'>('html')
 
-  const FONT_SNIPPETS = {
-    html: `<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">`,
-    nextjs: `import { Manrope } from 'next/font/google'\nconst manrope = Manrope({ subsets: ['latin'] })`,
-  }
+  // Extract font name from code comment (e.g. "// font: Manrope")
+  const fontMatch = code.match(/^\/\/ font: (.+)$/m)
+  const fontName = fontMatch ? fontMatch[1].trim() : null
+  const fontGoogleId = fontName ? fontName.replace(/ /g, '+') : null
+  const fontImportId = fontName ? fontName.replace(/ /g, '_') : null
+  const FONT_SNIPPETS = fontName ? {
+    html: `<link href="https://fonts.googleapis.com/css2?family=${fontGoogleId}:wght@400;500;600;700;800&display=swap" rel="stylesheet">`,
+    nextjs: `import { ${fontImportId} } from 'next/font/google'\nconst font = ${fontImportId}({ subsets: ['latin'] })`,
+  } : null
   const [promptCopied, setPromptCopied] = useState<Platform | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -534,46 +539,48 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 3 — Font (optional) */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2.5 flex items-center gap-2">
-                            <p className="text-sm text-sand-600 dark:text-sand-400">
-                              This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">Manrope</span>. Add it to your project:
-                            </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
-                          </div>
-                          <div className="overflow-hidden rounded-lg bg-sand-950">
-                            <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
-                              {(['html', 'nextjs'] as const).map((fw) => (
-                                <button
-                                  key={fw}
-                                  onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
-                                >
-                                  {fw === 'html' ? 'HTML' : 'Next.js'}
-                                </button>
-                              ))}
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
-                                  setFontCopied(true)
-                                  setTimeout(() => setFontCopied(false), 2000)
-                                }}
-                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                              >
-                                {fontCopied
-                                  ? <Check weight="regular" size={14} className="text-olive-500" />
-                                  : <Copy weight="regular" size={14} />}
-                              </button>
+                      {/* Step 3 — Font (optional, only when component specifies a font) */}
+                      {FONT_SNIPPETS && (
+                        <div className="flex gap-3.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2.5 flex items-center gap-2">
+                              <p className="text-sm text-sand-600 dark:text-sand-400">
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
+                              </p>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className="px-4 py-3.5">
-                              <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                            <div className="overflow-hidden rounded-lg bg-sand-950">
+                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                                {(['html', 'nextjs'] as const).map((fw) => (
+                                  <button
+                                    key={fw}
+                                    onClick={() => { setFontFramework(fw); setFontCopied(false) }}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
+                                  >
+                                    {fw === 'html' ? 'HTML' : 'Next.js'}
+                                  </button>
+                                ))}
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
+                                    setFontCopied(true)
+                                    setTimeout(() => setFontCopied(false), 2000)
+                                  }}
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                >
+                                  {fontCopied
+                                    ? <Check weight="regular" size={14} className="text-olive-500" />
+                                    : <Copy weight="regular" size={14} />}
+                                </button>
+                              </div>
+                              <div className="px-4 py-3.5">
+                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-5">
@@ -656,46 +663,48 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 4 — Font (optional) */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">4</span>
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2.5 flex items-center gap-2">
-                            <p className="text-sm text-sand-600 dark:text-sand-400">
-                              This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">Manrope</span>. Add it to your project:
-                            </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
-                          </div>
-                          <div className="overflow-hidden rounded-lg bg-sand-950">
-                            <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
-                              {(['html', 'nextjs'] as const).map((fw) => (
-                                <button
-                                  key={fw}
-                                  onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
-                                >
-                                  {fw === 'html' ? 'HTML' : 'Next.js'}
-                                </button>
-                              ))}
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
-                                  setFontCopied(true)
-                                  setTimeout(() => setFontCopied(false), 2000)
-                                }}
-                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                              >
-                                {fontCopied
-                                  ? <Check weight="regular" size={14} className="text-olive-500" />
-                                  : <Copy weight="regular" size={14} />}
-                              </button>
+                      {/* Step 4 — Font (optional, only when component specifies a font) */}
+                      {FONT_SNIPPETS && (
+                        <div className="flex gap-3.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">4</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2.5 flex items-center gap-2">
+                              <p className="text-sm text-sand-600 dark:text-sand-400">
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
+                              </p>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className="px-4 py-3.5">
-                              <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                            <div className="overflow-hidden rounded-lg bg-sand-950">
+                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                                {(['html', 'nextjs'] as const).map((fw) => (
+                                  <button
+                                    key={fw}
+                                    onClick={() => { setFontFramework(fw); setFontCopied(false) }}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
+                                  >
+                                    {fw === 'html' ? 'HTML' : 'Next.js'}
+                                  </button>
+                                ))}
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
+                                    setFontCopied(true)
+                                    setTimeout(() => setFontCopied(false), 2000)
+                                  }}
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                >
+                                  {fontCopied
+                                    ? <Check weight="regular" size={14} className="text-olive-500" />
+                                    : <Copy weight="regular" size={14} />}
+                                </button>
+                              </div>
+                              <div className="px-4 py-3.5">
+                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
