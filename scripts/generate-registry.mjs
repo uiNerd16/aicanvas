@@ -5,7 +5,7 @@
  * Usage: node scripts/generate-registry.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
 import { join } from 'path'
 
 const wsDir = 'components-workspace'
@@ -63,6 +63,21 @@ mkdirSync(outDir, { recursive: true })
 
 const metadata = parseRegistryMetadata()
 
+// Build the set of expected output filenames (slug-based) so we can
+// delete any stale folder-named files left over from previous runs.
+const expectedNames = new Set(
+  readdirSync(wsDir)
+    .filter(d => statSync(join(wsDir, d)).isDirectory() && d !== '_template')
+    .map(d => (metadata[d]?.slug ?? d))
+)
+expectedNames.add('registry') // keep the root index
+for (const existing of readdirSync(outDir).filter(f => f.endsWith('.json'))) {
+  const stem = existing.replace(/\.json$/, '')
+  if (!expectedNames.has(stem)) {
+    unlinkSync(join(outDir, existing))
+  }
+}
+
 const dirs = readdirSync(wsDir).filter(d => {
   const p = join(wsDir, d)
   return statSync(p).isDirectory() && d !== '_template'
@@ -77,7 +92,10 @@ for (const dir of dirs) {
   try { content = readFileSync(file, 'utf-8') } catch { continue }
 
   const meta = metadata[dir] || {}
-  const name = dir // registry name = folder name
+  // Use the registry slug as the output name — if slug differs from folder (e.g.
+  // traveldeck → floating-cards) the JSON file must be named after the slug so the
+  // CLI URL on the component page resolves correctly.
+  const name = meta.slug || dir
   const title = meta.name || toTitle(dir)
   const description = meta.description || ''
   const deps = getDeps(content)
@@ -96,10 +114,10 @@ for (const dir of dirs) {
     dependencies: deps,
     files: [
       {
-        path: `components/aicanvas/${dir}.tsx`,
+        path: `components/aicanvas/${name}.tsx`,
         content: copyPasteReady,
         type: 'registry:ui',
-        target: `components/aicanvas/${dir}.tsx`,
+        target: `components/aicanvas/${name}.tsx`,
       },
     ],
   }
@@ -116,9 +134,9 @@ for (const dir of dirs) {
     dependencies: deps,
     files: [
       {
-        path: `components/aicanvas/${dir}.tsx`,
+        path: `components/aicanvas/${name}.tsx`,
         type: 'registry:ui',
-        target: `components/aicanvas/${dir}.tsx`,
+        target: `components/aicanvas/${name}.tsx`,
       },
     ],
   })
