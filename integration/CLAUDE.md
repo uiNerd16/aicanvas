@@ -87,6 +87,7 @@ In `app/lib/component-registry.tsx`:
 4. Add the code string constant (`COMPONENT_NAME_CODE`) by reading the source file and storing it as a template literal string. Escape any backticks in the source with `\``.
 
 ### Step 3 — Verify
+- Run `node scripts/lint-components.mjs` to check for missing `// npm install` packages and missing font comments. Fix any warnings before continuing.
 - Run `npx tsc --noEmit` to check for TypeScript errors
 - The component page is automatically available at `/components/<slug>` via the existing dynamic route
 - The homepage grid automatically includes the new card (it reads from `COMPONENTS`)
@@ -124,6 +125,7 @@ Before reporting back, verify every item:
 - [ ] Prompts imported in `component-registry.tsx`
 - [ ] Registry entry appended to `COMPONENTS` array
 - [ ] `description` passes SEO audit (see `supervisor/skills/seo-metadata.md`): 75–90 chars, ends with period, names the visual + interaction, includes category keyword
+- [ ] `node scripts/lint-components.mjs` passes with no warnings
 - [ ] `npx tsc --noEmit` passes with no errors
 - [ ] Slug added to `ALL_SLUGS` in `scripts/screenshot.mjs`
 - [ ] Interaction added to `INTERACTIONS` map in `scripts/screenshot.mjs` (if component has active/hover state)
