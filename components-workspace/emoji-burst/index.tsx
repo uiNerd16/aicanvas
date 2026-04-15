@@ -137,7 +137,7 @@ export default function EmojiBurst() {
   }, [setIdx, isPopping])
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]">
+    <div className="flex h-full w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]">
       <div className="relative flex items-center justify-center">
 
         {/* Particles */}

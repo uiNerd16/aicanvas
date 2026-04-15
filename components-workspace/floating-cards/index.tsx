@@ -89,7 +89,7 @@ export default function FloatingCards() {
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden"
+      className="relative flex h-full w-full items-center justify-center overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       {/* Dot grid */}

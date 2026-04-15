@@ -121,5 +121,5 @@ export default function ParticleSphere() {
     }
   }, [])
 
-  return <div ref={containerRef} className="min-h-screen w-full" />
+  return <div ref={containerRef} className="h-full w-full" />
 }

@@ -96,7 +96,7 @@ export default function PillToggle() {
   return (
     <div
       ref={containerRef}
-      className="flex min-h-screen w-full items-center justify-center"
+      className="flex h-full w-full items-center justify-center"
       style={{ background: previewBg }}
     >
       <motion.div

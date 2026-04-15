@@ -200,7 +200,7 @@ export default function TaskCards() {
   return (
     <div
       ref={containerRef}
-      className="flex min-h-screen w-full flex-col items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
+      className="flex h-full w-full flex-col items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
       {/* Deck */}
       <div style={{ display: 'flex', alignItems: 'center' }}>

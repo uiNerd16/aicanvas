@@ -168,7 +168,7 @@ export default function RunwayLoader() {
     : 'rgba(255,255,255,0.42)'
 
   return (
-    <div ref={containerRef} className="flex min-h-screen w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+    <div ref={containerRef} className="flex h-full w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
       <div className="flex w-full max-w-[440px] flex-col items-center gap-4 px-4 sm:gap-6 sm:px-6">
 
         {/* ── Runway track ── */}

@@ -117,7 +117,7 @@ export default function AvatarPicker() {
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen w-full select-none flex-col items-center justify-center gap-8 bg-[#E8E8DF] dark:bg-[#1A1A19]"
+      className="relative flex h-full w-full select-none flex-col items-center justify-center gap-8 bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
       {/* Label */}
       <p

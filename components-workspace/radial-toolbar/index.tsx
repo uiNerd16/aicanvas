@@ -89,7 +89,7 @@ export default function RadialToolbar() {
   const labelTool = TOOLS.find(t => t.id === hoveredId) ?? TOOLS.find(t => t.id === activeId)
 
   return (
-    <div ref={containerRef} className="relative flex min-h-screen w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
+    <div ref={containerRef} className="relative flex h-full w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
 
       {/* ── Wheel — fades in around the persistent circle ─────────────────── */}
       <AnimatePresence>

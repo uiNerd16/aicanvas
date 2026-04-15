@@ -120,7 +120,7 @@ export default function GlitchButton() {
   }
 
   return (
-    <div ref={containerRef} className="flex min-h-screen w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
+    <div ref={containerRef} className="flex h-full w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

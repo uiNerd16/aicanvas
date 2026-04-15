@@ -88,7 +88,7 @@ export default function StarsPortal() {
 
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center"
+      className="flex h-full w-full items-center justify-center"
       style={{ cursor: warping ? 'crosshair' : 'pointer', background: '#000000' }}
       onMouseDown={() => setWarping(true)}
       onMouseUp={() => setWarping(false)}

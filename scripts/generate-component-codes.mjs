@@ -36,8 +36,11 @@ for (const dir of dirs) {
     continue
   }
 
+  // Make copy-paste ready: h-full → min-h-screen so it fills the viewport standalone
+  const copyPasteReady = content.replace(/\bh-full\b/g, 'min-h-screen')
+
   // Escape for template literal embedding
-  const escaped = content
+  const escaped = copyPasteReady
     .replace(/\\/g, '\\\\')
     .replace(/`/g, '\\`')
     .replace(/\$\{/g, '\\${')
