@@ -515,14 +515,14 @@ export default function ComponentPageView({
 
                       {/* Step 2 — Dark mode (optional) */}
                       <div className="flex gap-3.5">
-                        <div className="flex shrink-0 items-center gap-2">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
-                          <span className="rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-500 dark:bg-sand-800 dark:text-sand-400">Optional</span>
-                        </div>
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
                         <div className="min-w-0 flex-1">
-                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                            For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
-                          </p>
+                          <div className="mb-2.5 flex items-center gap-2">
+                            <p className="text-sm text-sand-600 dark:text-sand-400">
+                              For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                            </p>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                          </div>
                           <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
                             <button
