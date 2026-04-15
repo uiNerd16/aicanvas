@@ -1,6 +1,7 @@
 'use client'
 
 // npm install @carbon/icons-react
+// font: JetBrains Mono
 
 import type { ComponentType, ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
