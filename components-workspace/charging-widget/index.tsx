@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion
+// font: Manrope
 
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { useMotionValue, animate } from 'framer-motion'
