@@ -37,6 +37,23 @@ Do not proceed past this gate until both files exist and are non-empty.
 Read `components-workspace/<name>/index.tsx` and `components-workspace/<name>/prompts.ts`.
 Note the exported function name and the slug you'll assign (kebab-case of the name).
 
+### Step 1b — Add font comment if missing
+
+Scan `index.tsx` for font usage. If a specific named font is used and no `// font:` or `// font-pkg:` comment exists yet, add the correct comment on the line after `// npm install`.
+
+**Detection rules:**
+
+| What you find in the source | Comment to add |
+|---|---|
+| `import { X } from 'next/font/google'` | `// font: X` (replace `_` with space, e.g. `DM_Sans` → `DM Sans`) |
+| `fontFamily: "FontName, sans-serif"` or `fontFamily="FontName, ..."` | `// font: FontName` |
+| `import { X } from 'geist/font/pixel'` using `.className` | `// font-pkg: geist/font/pixel\|X` |
+| `import { X } from 'geist/font/pixel'` + CSS variable `var(--font-Y)` | `// font-pkg: geist/font/pixel\|X\|--font-Y` |
+| `localFont` pointing to `node_modules/geist/...` | Replace with proper `geist/font/pixel` import and add `// font-pkg:` comment |
+| `font-sans`, `font-mono`, or `font-serif` Tailwind classes only | No comment needed — these inherit from the project |
+
+After adding or confirming the comment, run `node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs` to regenerate the exported code.
+
 ### Step 2 — Add to the registry
 In `app/lib/component-registry.tsx`:
 
@@ -101,6 +118,8 @@ Copy the URL printed by the script and set it as the `image` field in the regist
 
 Before reporting back, verify every item:
 
+- [ ] Font comment (`// font:` or `// font-pkg:`) added to `index.tsx` if component uses a specific named font
+- [ ] `node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs` ran after any `index.tsx` change
 - [ ] Component imported in `component-registry.tsx`
 - [ ] Prompts imported in `component-registry.tsx`
 - [ ] Registry entry appended to `COMPONENTS` array
@@ -114,7 +133,8 @@ Before reporting back, verify every item:
 **If any item is unchecked, do not report back. Complete it first.**
 
 ## Rules
-- **Never** modify `index.tsx` or `prompts.ts` in `components-workspace/`
+- **Never** modify the logic or JSX in `index.tsx` — the one allowed exception is adding `// font:` or `// font-pkg:` comments at the top (Step 1b)
+- **Never** modify `prompts.ts` in `components-workspace/`
 - **Never** modify `app/components/[slug]/page.tsx` or `app/components/[slug]/ComponentPageView.tsx` — they are generic and handle all components
 - **Never** add routing files — the catch-all dynamic route handles everything
 - If the component needs a new npm package, add it via `npm install` before registering
