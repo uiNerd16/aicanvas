@@ -106,6 +106,26 @@ function checkFontImports(source) {
   return issues
 }
 
+function checkInternalImports(source) {
+  // Standalone components must never import from inside the project's
+  // design-systems/ or app/ folders — those paths don't exist in a user's project.
+  const issues = []
+  const re = /^import\s[\s\S]*?from\s+['"]([^'"]+)['"]/gm
+  let m
+  while ((m = re.exec(source)) !== null) {
+    const path = m[1]
+    if (
+      path.includes('/design-systems/') ||
+      path.includes('/app/') ||
+      path.match(/^\.\.\/.*design-systems/) ||
+      path.match(/^\.\.\/.*\/app\//)
+    ) {
+      issues.push(`imports from internal project path '${path}' — inline the dependency instead`)
+    }
+  }
+  return issues
+}
+
 function checkDesignTokens(source) {
   // Strip single-line comments so // sand-100 or // olive-500 in comments don't fire
   const stripped = source.replace(/\/\/[^\n]*/g, '')
@@ -178,7 +198,10 @@ for (const entry of entries) {
     }
   }
 
-  // 2. Site design token check — components must use hex colors, not sand-*/olive-*
+  // 2. Internal project path imports — breaks copy-paste
+  warnings.push(...checkInternalImports(source))
+
+  // 3. Site design token check — components must use hex colors, not sand-*/olive-*
   warnings.push(...checkDesignTokens(source))
 
   // 3. Font import → comment check
