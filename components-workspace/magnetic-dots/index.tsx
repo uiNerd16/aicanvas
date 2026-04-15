@@ -213,7 +213,7 @@ export default function MagneticDots() {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden"
       style={{ background: '#110F0C' }}
       onMouseMove={(e) => updateMouse(e.clientX, e.clientY)}
       onMouseLeave={() => { mouseRef.current = null }}

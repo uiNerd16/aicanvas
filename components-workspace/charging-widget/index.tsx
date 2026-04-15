@@ -129,7 +129,7 @@ export default function ChargingWidget() {
   return (
     <div
       ref={containerRef}
-      className="flex min-h-screen w-full items-center justify-center"
+      className="flex h-full w-full items-center justify-center"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       <svg

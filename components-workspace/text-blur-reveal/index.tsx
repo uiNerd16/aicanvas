@@ -23,7 +23,7 @@ export default function TextBlurReveal() {
   }, [])
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center gap-5 overflow-hidden">
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden">
 
       {/* Dot grid */}
       <div

@@ -70,7 +70,7 @@ export default function PolaroidStack() {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');`}</style>
 
       <div
-        className="relative flex min-h-screen w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
+        className="relative flex h-full w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
         onClick={toggle}
       >
         {/* Fixed-size stage so cards don't overflow the preview */}

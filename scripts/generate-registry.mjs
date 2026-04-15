@@ -82,6 +82,9 @@ for (const dir of dirs) {
   const description = meta.description || ''
   const deps = getDeps(content)
 
+  // Make copy-paste ready: h-full → min-h-screen so it fills the viewport standalone
+  const copyPasteReady = content.replace(/\bh-full\b/g, 'min-h-screen')
+
   // Build the registry item JSON
   const item = {
     $schema: SCHEMA,
@@ -94,7 +97,7 @@ for (const dir of dirs) {
     files: [
       {
         path: `components/aicanvas/${dir}.tsx`,
-        content,
+        content: copyPasteReady,
         type: 'registry:ui',
         target: `components/aicanvas/${dir}.tsx`,
       },

@@ -172,7 +172,7 @@ export default function ScatterField() {
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#E8E8DF] dark:bg-[#1A1A19]"
+      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
       {/* Subtle dot grid */}
       <div

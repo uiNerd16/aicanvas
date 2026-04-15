@@ -147,7 +147,7 @@ export default function NeonClock() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full select-none items-center justify-center overflow-hidden"
+      className="relative flex h-full w-full select-none items-center justify-center overflow-hidden"
       style={{ background: BG, fontFamily: '"Courier New", Courier, monospace' }}
     >
       {/* ── Left-anchored block — centered as a whole in the viewport ─────── */}

@@ -239,7 +239,7 @@ export default function NoiseField() {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
       <canvas ref={canvasRef} className="absolute inset-0" />

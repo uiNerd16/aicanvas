@@ -57,7 +57,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 export default function AndromedaButton() {
   return (
     <div
-      className={'relative flex min-h-screen w-full items-center justify-center ' + jetbrainsMono.variable}
+      className={'relative flex h-full w-full items-center justify-center ' + jetbrainsMono.variable}
       style={{ background: '#0E0E0F' }}
     >
       <div style={{ width: '100%', maxWidth: 640, padding: 24 }}>

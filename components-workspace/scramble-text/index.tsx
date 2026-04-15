@@ -108,7 +108,7 @@ export default function ScrambleText() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full cursor-default items-center justify-center"
+      className="relative flex h-full w-full cursor-default items-center justify-center"
       style={{ background: '#292929' }}
     >
       {/* Crosshair — top right */}

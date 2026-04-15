@@ -469,7 +469,7 @@ export default function AiJobCards() {
   return (
     <div
       ref={containerRef}
-      className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
+      className="flex h-full w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
       <div
         style={{
