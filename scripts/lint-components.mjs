@@ -106,6 +106,23 @@ function checkFontImports(source) {
   return issues
 }
 
+function checkDesignTokens(source) {
+  // Strip single-line comments so // sand-100 or // olive-500 in comments don't fire
+  const stripped = source.replace(/\/\/[^\n]*/g, '')
+
+  const sandMatches = [...stripped.matchAll(/\bsand-\d+/g)]
+  const oliveMatches = [...stripped.matchAll(/\bolive-\d+/g)]
+
+  const issues = []
+  for (const m of sandMatches) {
+    issues.push(`uses site token class "${m[0]}" — replace with a hardcoded hex color`)
+  }
+  for (const m of oliveMatches) {
+    issues.push(`uses site token class "${m[0]}" — replace with a hardcoded hex color`)
+  }
+  return issues
+}
+
 function checkInlineFont(source) {
   const issues = []
   if (hasFontComment(source)) return issues
@@ -161,10 +178,13 @@ for (const entry of entries) {
     }
   }
 
-  // 2. Font import → comment check
+  // 2. Site design token check — components must use hex colors, not sand-*/olive-*
+  warnings.push(...checkDesignTokens(source))
+
+  // 3. Font import → comment check
   warnings.push(...checkFontImports(source))
 
-  // 3. Inline fontFamily → comment check
+  // 4. Inline fontFamily → comment check
   warnings.push(...checkInlineFont(source))
 
   checkedCount++
