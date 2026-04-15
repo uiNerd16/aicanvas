@@ -377,20 +377,6 @@ export default function ComponentPageView({
             {/* Action bar */}
             <div className="flex items-center gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
-              {/* Dependencies pill — only shown when the component has external deps */}
-              {depsCommand && (
-                <button
-                  onClick={copyDeps}
-                  className="group mr-auto flex items-center gap-2 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 font-mono text-xs text-sand-500 transition-all hover:border-sand-400 hover:text-sand-700 active:scale-95 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-500 dark:hover:border-sand-700 dark:hover:text-sand-300"
-                >
-                  <span className="text-olive-500">$</span>
-                  <span>{depsCommand}</span>
-                  {depsCopied
-                    ? <Check weight="regular" size={13} className="shrink-0 text-olive-500" />
-                    : <Copy weight="regular" size={13} className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />}
-                </button>
-              )}
-
               {/* Copy Code — semibold (600) */}
               <button
                 onClick={copyCode}
