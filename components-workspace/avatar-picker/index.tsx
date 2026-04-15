@@ -117,11 +117,11 @@ export default function AvatarPicker() {
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen w-full select-none flex-col items-center justify-center gap-8 bg-sand-100 dark:bg-sand-950"
+      className="relative flex min-h-screen w-full select-none flex-col items-center justify-center gap-8 bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
       {/* Label */}
       <p
-        className="text-sand-900 dark:text-white/35"
+        className="text-[#21211F] dark:text-white/35"
         style={{
           margin: 0,
           fontSize: 11,
@@ -286,7 +286,7 @@ export default function AvatarPicker() {
           return (
             <motion.div
               key={photo.id}
-              className="bg-sand-900 dark:bg-white"
+              className="bg-[#21211F] dark:bg-white"
               animate={{
                 width: isCurrent ? 20 : 5,
                 opacity: isCurrent ? 1 : 0.28,
@@ -332,7 +332,7 @@ export default function AvatarPicker() {
             key="hint"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-sand-900 dark:text-white/35"
+            className="text-[#21211F] dark:text-white/35"
             style={{
               margin: 0,
               fontSize: 11,

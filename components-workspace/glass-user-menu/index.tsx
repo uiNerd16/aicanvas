@@ -143,7 +143,7 @@ export default function GlassUserMenu() {
   let itemIndex = 0
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
       <img
         src={BACKGROUND}
         alt=""

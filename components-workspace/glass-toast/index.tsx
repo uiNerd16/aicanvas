@@ -313,7 +313,7 @@ export default function GlassToast() {
   }, [])
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-sand-950">
+    <div className="flex h-full w-full items-center justify-center bg-[#1A1A19]">
       {/* Background image */}
       <img
         src={BACKGROUND_IMAGE}
