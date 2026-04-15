@@ -513,9 +513,12 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 2 — Dark mode */}
+                      {/* Step 2 — Dark mode (optional) */}
                       <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
+                          <span className="rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-500 dark:bg-sand-800 dark:text-sand-400">Optional</span>
+                        </div>
                         <div className="min-w-0 flex-1">
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
@@ -591,9 +594,12 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 3 — Dark mode */}
+                      {/* Step 3 — Dark mode (optional) */}
                       <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                          <span className="rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-500 dark:bg-sand-800 dark:text-sand-400">Optional</span>
+                        </div>
                         <div className="min-w-0 flex-1">
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
