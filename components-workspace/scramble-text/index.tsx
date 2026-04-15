@@ -1,11 +1,11 @@
 'use client'
 
-// npm install framer-motion
+// npm install framer-motion geist
+// font-pkg: geist/font/pixel|GeistPixelGrid
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import localFont from 'next/font/local'
-const GeistPixelGrid = localFont({ src: '../../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2' })
+import { GeistPixelGrid } from 'geist/font/pixel'
 
 // ─── ScrambleText ──────────────────────────────────────────────────────────────
 // Idle: all characters continuously scramble (olive random chars) in a loop.
