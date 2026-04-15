@@ -375,7 +375,7 @@ export default function ComponentPageView({
             </div>
 
             {/* Action bar */}
-            <div className="flex items-center gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Copy Code — semibold (600) */}
               <button
