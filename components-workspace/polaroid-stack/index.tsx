@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion
+// font: Caveat
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
