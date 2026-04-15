@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion
+// font-pkg: geist/font/pixel|GeistPixelCircle|--font-geist-pixel-circle
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
