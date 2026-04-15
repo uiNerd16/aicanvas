@@ -86,6 +86,7 @@ export default function ComponentPageView({
   const [depsCopied, setDepsCopied] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
+  const [darkCopied, setDarkCopied] = useState(false)
   const [promptCopied, setPromptCopied] = useState<Platform | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -511,6 +512,31 @@ export default function ComponentPageView({
                           </div>
                         </div>
                       </div>
+
+                      {/* Step 2 — Dark mode */}
+                      <div className="flex gap-3.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                            For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                          </p>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('<html class="dark">')
+                                setDarkCopied(true)
+                                setTimeout(() => setDarkCopied(false), 2000)
+                              }}
+                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                            >
+                              {darkCopied
+                                ? <Check weight="regular" size={14} className="text-olive-500" />
+                                : <Copy weight="regular" size={14} />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-5">
@@ -561,6 +587,31 @@ export default function ComponentPageView({
                             <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
                               {highlightedCode}
                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Step 3 — Dark mode */}
+                      <div className="flex gap-3.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                            For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                          </p>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('<html class="dark">')
+                                setDarkCopied(true)
+                                setTimeout(() => setDarkCopied(false), 2000)
+                              }}
+                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                            >
+                              {darkCopied
+                                ? <Check weight="regular" size={14} className="text-olive-500" />
+                                : <Copy weight="regular" size={14} />}
+                            </button>
                           </div>
                         </div>
                       </div>
