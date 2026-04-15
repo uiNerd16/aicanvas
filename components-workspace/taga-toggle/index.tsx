@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── TagaToggle ────────────────────────────────────────────────────────────────
 // A playful pill toggle with a face on the thumb.
@@ -16,7 +18,7 @@ const FACE_COLOR  = '#4A3F35'  // warm dark — legible on white in both themes
 export default function TagaToggle() {
   const [isOn, setIsOn]             = useState(false)
   const [animating, setAnimating]   = useState(false)
-  const [pageIsDark, setPageIsDark] = useState(true)
+  const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [trackW, setTrackW]         = useState(MAX_TRACK_W)
   const containerRef                = useRef<HTMLDivElement>(null)
   const isOnRef                     = useRef(false)
@@ -31,7 +33,7 @@ export default function TagaToggle() {
   const thumbX = useMotionValue(offX)
 
   // ── Theme detection + resize observer ────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

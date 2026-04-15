@@ -2,7 +2,7 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect, useLayoutEffect } from 'react'
 import { motion, useMotionValue, useTransform } from 'framer-motion'
 import { PaintBrush, Megaphone, Code, ChartBar, CaretLeft, CaretRight, ArrowUpRight } from '@phosphor-icons/react'
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react'
@@ -94,9 +94,17 @@ const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
 
 // ─── Theme detection hook ─────────────────────────────────────────────────────
 
+// Fires before paint on the client, falls back to useEffect on the server
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 function useIsDark(ref: React.RefObject<HTMLElement | null>) {
-  const [isDark, setIsDark] = useState(true)
-  useEffect(() => {
+  // Lazy initializer reads the real DOM on first render — no default dark flash
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return document.documentElement.classList.contains('dark')
+  })
+
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const check = () => {

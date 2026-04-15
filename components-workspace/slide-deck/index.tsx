@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -70,9 +72,9 @@ const OFFSCREEN = { x: 0, y: 30, scale: 0.88, opacity: 0 }
 
 export default function SlideDeck() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

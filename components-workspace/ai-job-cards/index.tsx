@@ -2,9 +2,11 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useLayoutEffect, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { BookmarkSimple } from '@phosphor-icons/react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -169,8 +171,8 @@ function BrandLogo({ logo, isDark }: { logo: LogoKey; isDark: boolean }) {
 // ─── Theme hook ───────────────────────────────────────────────────────────────
 
 function useIsDark(ref: React.RefObject<HTMLElement | null>) {
-  const [isDark, setIsDark] = useState(true)
-  useEffect(() => {
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const check = () => {
@@ -469,18 +471,16 @@ export default function AiJobCards() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
+      className="flex min-h-screen w-full items-center justify-center"
+      style={{ background: outerBg }}
     >
       <div
         style={{
           width: '100%',
-          height: '100%',
-          background: outerBg,
           padding: 'clamp(16px, 5%, 40px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'hidden',
         }}
       >
         <div
@@ -490,7 +490,7 @@ export default function AiJobCards() {
             gap: 16,
             width: '100%',
             maxWidth: 760,
-            alignItems: 'flex-start',
+            alignItems: narrow ? 'stretch' : 'flex-start',
           }}
         >
           {STACKS.map((stack, i) => (

@@ -2,9 +2,11 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 import { X, Check } from '@phosphor-icons/react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── MarkToggle ───────────────────────────────────────────────────────────────
 // iOS-style pill toggle in earth/sand tones. The thumb carries a small icon
@@ -16,7 +18,7 @@ const MIN_TRACK_W = 48
 export default function MarkToggle() {
   const [isOn, setIsOn]             = useState(false)
   const [animating, setAnimating]   = useState(false)
-  const [pageIsDark, setPageIsDark] = useState(true)
+  const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [trackW, setTrackW]         = useState(MAX_TRACK_W)
   const containerRef                = useRef<HTMLDivElement>(null)
   const isOnRef                     = useRef(false)
@@ -32,7 +34,7 @@ export default function MarkToggle() {
   const thumbX = useMotionValue(offX)
 
   // ── Theme detection + resize observer ────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
 

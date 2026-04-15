@@ -2,8 +2,10 @@
 
 // npm install framer-motion
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── PillToggle ───────────────────────────────────────────────────────────────
 // iOS-style slider toggle. All dimensions derived from container size so the
@@ -15,7 +17,7 @@ const MIN_TRACK_W = 48   // px floor
 export default function PillToggle() {
   const [isOn, setIsOn]             = useState(false)
   const [animating, setAnimating]   = useState(false)
-  const [pageIsDark, setPageIsDark] = useState(true)
+  const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [trackW, setTrackW]         = useState(MAX_TRACK_W)
   const containerRef                = useRef<HTMLDivElement>(null)
   const isOnRef                     = useRef(false) // stable for resize effect
@@ -30,7 +32,7 @@ export default function PillToggle() {
   const thumbX = useMotionValue(offX)
 
   // ── Theme detection + resize observer (combined to share one ref) ────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
 

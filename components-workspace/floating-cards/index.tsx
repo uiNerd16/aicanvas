@@ -2,9 +2,11 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Buildings, ArrowUpRight } from '@phosphor-icons/react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 const CARD_W = 280
 const CARD_H = 200
@@ -24,7 +26,7 @@ const POSITIONS = [
 
 function useCountUp(target: number, active: boolean) {
   const [value, setValue] = useState(0)
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!active) { setValue(0); return }
     const duration = 900
     const steps = 40
@@ -64,13 +66,13 @@ function HotelsCounter({ target, active }: { target: number; active: boolean }) 
 
 export default function FloatingCards() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   // order[positionIndex] = cardIndex
   const [order, setOrder] = useState<[number, number, number]>([0, 1, 2])
   const [isShuffling, setIsShuffling] = useState(false)
   const [exitingCard, setExitingCard] = useState<number | null>(null)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {

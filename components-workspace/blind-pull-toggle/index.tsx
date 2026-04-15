@@ -2,9 +2,11 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, useAnimate, stagger } from 'framer-motion'
 import { Moon, Sun } from '@phosphor-icons/react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── BlindPullToggle ──────────────────────────────────────────────────────────
 // A dark/light toggle styled as a window-blind pull cord.
@@ -16,14 +18,14 @@ const MIN_SIZE   = 48  // button px floor
 
 export default function BlindPullToggle() {
   const [toggleDark, setToggleDark] = useState(true)
-  const [pageIsDark, setPageIsDark] = useState(true)
+  const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [animating, setAnimating]   = useState(false)
   const [size, setSize]             = useState(MAX_SIZE) // button px, reactive
   const sizeRef                     = useRef(MAX_SIZE)   // stable ref for async handler
   const [scope, animate]            = useAnimate()
 
   // ── Theme detection ──────────────────────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = scope.current
     if (!el) return
     const check = () => {

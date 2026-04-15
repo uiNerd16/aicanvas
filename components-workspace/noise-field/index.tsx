@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useEffect, useRef, useState } from 'react'
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const GRID_SPACING = 24    // px between arrows
@@ -47,15 +49,15 @@ function lerpAngle(current: number, target: number, speed: number): number {
 export default function NoiseField() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const isDarkRef   = useRef(isDark)
   const mouseRef    = useRef<{ x: number; y: number } | null>(null)
   const arrowsRef   = useRef<Arrow[]>([])
 
-  useEffect(() => { isDarkRef.current = isDark }, [isDark])
+  useIsomorphicLayoutEffect(() => { isDarkRef.current = isDark }, [isDark])
 
   // ── Theme detection ───────────────────────────────────────────────────────
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
     const check = () => {
