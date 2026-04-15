@@ -89,8 +89,10 @@ export default function ComponentPageView({
   const [darkCopied, setDarkCopied] = useState(false)
   const [fontCopied, setFontCopied] = useState(false)
   const [fontFramework, setFontFramework] = useState<'html' | 'nextjs'>('html')
+  const [fontPkgInstallCopied, setFontPkgInstallCopied] = useState(false)
+  const [fontPkgSnippetCopied, setFontPkgSnippetCopied] = useState(false)
 
-  // Extract font name from code comment (e.g. "// font: Manrope")
+  // Extract font name from code comment (e.g. "// font: Manrope") — Google Fonts
   const fontMatch = code.match(/^\/\/ font: (.+)$/m)
   const fontName = fontMatch ? fontMatch[1].trim() : null
   const fontGoogleId = fontName ? fontName.replace(/ /g, '+') : null
@@ -99,6 +101,18 @@ export default function ComponentPageView({
     html: `<link href="https://fonts.googleapis.com/css2?family=${fontGoogleId}:wght@400;500;600;700;800&display=swap" rel="stylesheet">`,
     nextjs: `import { ${fontImportId} } from 'next/font/google'\nconst font = ${fontImportId}({ subsets: ['latin'] })`,
   } : null
+
+  // Extract package font from code comment (e.g. "// font-pkg: geist/font/pixel|GeistPixelCircle|--font-geist-pixel-circle")
+  const fontPkgMatch = code.match(/^\/\/ font-pkg: (.+)$/m)
+  const fontPkgInfo = fontPkgMatch ? fontPkgMatch[1].trim().split('|') : null
+  const fontPkgPath = fontPkgInfo?.[0] ?? null        // e.g. "geist/font/pixel"
+  const fontPkgClass = fontPkgInfo?.[1] ?? null       // e.g. "GeistPixelCircle"
+  const fontPkgVar = fontPkgInfo?.[2] ?? null         // e.g. "--font-geist-pixel-circle"
+  const fontPkgName = fontPkgPath ? fontPkgPath.split('/')[0] : null  // e.g. "geist"
+  const FONT_PKG_INSTALL = fontPkgName ? `npm install ${fontPkgName}` : null
+  const FONT_PKG_SNIPPET = fontPkgPath && fontPkgClass && fontPkgVar
+    ? `import { ${fontPkgClass} } from '${fontPkgPath}'\n\nconst font = ${fontPkgClass}({ variable: '${fontPkgVar}' })\n\n// Add font.variable to your <html> className`
+    : null
   const [promptCopied, setPromptCopied] = useState<Platform | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -581,6 +595,44 @@ export default function ComponentPageView({
                           </div>
                         </div>
                       )}
+
+                      {/* Step 3 — Package font (optional, only when component specifies a font-pkg) */}
+                      {FONT_PKG_SNIPPET && (
+                        <div className="flex gap-3.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2.5 flex items-center gap-2">
+                              <p className="text-sm text-sand-600 dark:text-sand-400">
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
+                              </p>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
+                              <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              >
+                                {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
+                              </button>
+                            </div>
+                            <div className="overflow-hidden rounded-lg bg-sand-950">
+                              <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
+                                <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                                <button
+                                  onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                  className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                >
+                                  {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
+                                </button>
+                              </div>
+                              <div className="px-4 py-3.5">
+                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_PKG_SNIPPET}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-5">
@@ -700,6 +752,44 @@ export default function ComponentPageView({
                               </div>
                               <div className="px-4 py-3.5">
                                 <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Step 4 — Package font (optional, only when component specifies a font-pkg) */}
+                      {FONT_PKG_SNIPPET && (
+                        <div className="flex gap-3.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">4</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2.5 flex items-center gap-2">
+                              <p className="text-sm text-sand-600 dark:text-sand-400">
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
+                              </p>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
+                              <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              >
+                                {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
+                              </button>
+                            </div>
+                            <div className="overflow-hidden rounded-lg bg-sand-950">
+                              <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
+                                <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                                <button
+                                  onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                  className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                >
+                                  {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
+                                </button>
+                              </div>
+                              <div className="px-4 py-3.5">
+                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_PKG_SNIPPET}</code>
                               </div>
                             </div>
                           </div>
