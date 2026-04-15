@@ -35,6 +35,14 @@ The Reviewer checks this list on every review. The Supervisor logs here after ev
 - **Affected files**: `integration/CLAUDE.md`, `supervisor/CLAUDE.md` (both updated with hard gates)
 - **Detected**: 2026-04-02
 
+## #007 — Component covers the preview back button on mobile
+
+- **Issue**: Components that fill the viewport with a background and start content at y=0 can visually cover or block interaction with the back button (`absolute top-4 left-4`) in the preview page. Framer Motion animated elements also create stacking contexts that can elevate component content above overlays with no explicit z-index.
+- **Root cause**: The back button had no z-index, and components with transformed children (Framer Motion) can generate stacking contexts that render above it.
+- **Fix applied**: Added `z-[100]` to the back button in `app/preview/[slug]/page.tsx`. This is a systemic fix — all future components are covered.
+- **Component rule**: Components must use `items-center` (not `items-start`) on the root so content is vertically centred and doesn't crowd y=0 where the back button lives.
+- **Detected**: 2026-04-15
+
 ## #006 — Prompts file out of sync with actual component
 - **Issue**: `silk-lines/prompts.ts` (now `wave-lines/prompts.ts`) described constants and behaviour that no longer matched `index.tsx`. The prompts said `SPACING=8, AMP=44, HOVER_BOOST=1.3` and a single sine wave; the real component had `SPACING=32, AMP=18, HOVER_BOOST=5.0`, a layered secondary wave, a Y-drift breath, and quadratic-curve smoothing through midpoints. An AI given those prompts would have produced a meaningfully different component than what's deployed.
 - **Rule**: Whenever a component is adjusted after `prompts.ts` is written, the prompts MUST be regenerated against the FINAL `index.tsx`. The Builder rule already says "Read the FINAL `index.tsx` carefully — the component may have changed since the spec" — but this needs to be enforced for *adjustments*, not just initial builds. Reviewer should diff the prompts against the component on every review and fail if constants or core behaviour drift.

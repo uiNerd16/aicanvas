@@ -429,7 +429,15 @@ export default function ComponentPageView({
           </div>
 
           {/* ── Installation ─────────────────────────────────────────────── */}
-          {depsCommand && (
+          {(() => {
+            // Dynamic step numbers for Manual tab — deps step is optional
+            const manualStep = {
+              deps: depsCommand ? 1 : null,
+              code: depsCommand ? 2 : 1,
+              dark: depsCommand ? 3 : 2,
+              font: depsCommand ? 4 : 3,
+            }
+            return (
             <section className="mt-12">
               <h2 className="mb-4 text-base font-bold text-sand-900 dark:text-sand-50">
                 Installation
@@ -640,7 +648,8 @@ export default function ComponentPageView({
                     </div>
                   ) : (
                     <div className="space-y-5">
-                      {/* Step 1 — Install deps */}
+                      {/* Step 1 — Install deps (only when component has deps) */}
+                      {depsCommand && (
                       <div className="flex gap-3.5">
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
                         <div className="min-w-0 flex-1">
@@ -662,10 +671,11 @@ export default function ComponentPageView({
                           </div>
                         </div>
                       </div>
+                      )}
 
-                      {/* Step 2 — Copy the code */}
+                      {/* Step — Copy the code */}
                       <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.code}</span>
                         <div className="min-w-0 flex-1">
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Copy and paste the following code into your project:
@@ -691,9 +701,9 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 3 — Dark mode (optional) */}
+                      {/* Step — Dark mode (optional) */}
                       <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.dark}</span>
                         <div className="min-w-0 flex-1">
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
@@ -719,10 +729,10 @@ export default function ComponentPageView({
                         </div>
                       </div>
 
-                      {/* Step 4 — Font (optional, only when component specifies a font) */}
+                      {/* Step — Font (optional, only when component specifies a font) */}
                       {FONT_SNIPPETS && (
                         <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">4</span>
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.font}</span>
                           <div className="min-w-0 flex-1">
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
@@ -762,10 +772,10 @@ export default function ComponentPageView({
                         </div>
                       )}
 
-                      {/* Step 4 — Package font (optional, only when component specifies a font-pkg) */}
+                      {/* Step — Package font (optional, only when component specifies a font-pkg) */}
                       {FONT_PKG_SNIPPET && (
                         <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">4</span>
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.font}</span>
                           <div className="min-w-0 flex-1">
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
@@ -804,7 +814,7 @@ export default function ComponentPageView({
                 </div>
               </div>
             </section>
-          )}
+          )})()}
 
           {/* ── Related components ─────────────────────────────────────────── */}
           {related.length > 0 && (

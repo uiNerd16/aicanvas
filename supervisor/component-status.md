@@ -37,3 +37,4 @@
 | glass-ai-compose | integrated | Glass AI Chat — model switcher (Claude/ChatGPT/Perplexity/Gemini), image upload, web search toggle |
 | elastic-string | deleted | Removed by user request |
 | andromeda-button | integrated | First DS promotion — re-export wrapper around Andromeda design system Button, full showcase layout (Variants/Sizes/With icon/Disabled), boundary retyping pattern |
+| ai-job-cards | integrated | Three swipeable card stacks (Anthropic/Perplexity/Google), brand logos, bookmark toggle, spring animations — mobile fix applied (h-full→min-h-screen, alignItems:stretch on narrow) |
