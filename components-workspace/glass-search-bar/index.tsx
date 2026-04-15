@@ -234,7 +234,7 @@ export default function GlassSearchBar() {
     : ({ type: 'spring', stiffness: 400, damping: 30 } as const)
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
       {/* Background image — consistent with glass family */}
       <img
         src={BACKGROUND}

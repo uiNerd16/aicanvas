@@ -140,7 +140,7 @@ function Slider({
 
 export default function GlassSlider() {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-sand-950">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
       <img
         src={BACKGROUND}
         alt=""
