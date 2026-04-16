@@ -26,6 +26,7 @@ import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
 import { HeaderSocials } from '../HeaderSocials'
 import type { ComponentMeta } from '../../lib/component-registry'
+import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -220,13 +221,37 @@ export default function ComponentPageView({
     } catch {}
   }
 
-  async function copyPrompt(platform: Platform) {
+  async function handlePlatformClick(platform: Platform) {
     try {
       const text = prompts[platform]
       if (!text) return
+
+      // Always copy to clipboard
       await navigator.clipboard.writeText(text)
       setPromptCopied(platform)
       setTimeout(() => setPromptCopied(null), 2000)
+
+      // Deep link for V0
+      if (platform === 'V0') {
+        const { baseUrl, affiliateParam, affiliateId } = AFFILIATE_CONFIG.v0
+        const url = new URL(baseUrl)
+        url.searchParams.set('q', text)
+        if (affiliateId !== 'PLACEHOLDER') {
+          url.searchParams.set(affiliateParam, affiliateId)
+        }
+        window.open(url.toString(), '_blank')
+      }
+
+      // Deep link for Lovable
+      if (platform === 'Lovable') {
+        const { baseUrl, affiliateParam, affiliateId } = AFFILIATE_CONFIG.lovable
+        let url = `${baseUrl}?autosubmit=true`
+        if (affiliateParam && affiliateId !== 'PLACEHOLDER') {
+          url += `&${affiliateParam}=${affiliateId}`
+        }
+        url += `#prompt=${encodeURIComponent(text)}`
+        window.open(url, '_blank')
+      }
     } catch {}
   }
 
@@ -469,7 +494,7 @@ export default function ComponentPageView({
                       <button
                         key={platform}
                         onClick={() => {
-                          copyPrompt(platform)
+                          handlePlatformClick(platform)
                           setPromptDropdownOpen(false)
                         }}
                         className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-sand-700 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
