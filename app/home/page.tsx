@@ -50,15 +50,12 @@ export default function HomePage() {
             })),
         ]
 
-  const labelCardEntry = COMPONENTS.find((c) => c.slug === 'label-cards')
-  const labelCardMeta = labelCardEntry
-    ? { slug: labelCardEntry.slug, name: labelCardEntry.name, description: labelCardEntry.description, tags: labelCardEntry.tags, image: labelCardEntry.image, badge: labelCardEntry.badge }
-    : null
-
-  // Carousel: label-cards first, then remaining showcase items (deduped)
-  const carouselItems = labelCardMeta
-    ? [labelCardMeta, ...showcase.filter((c) => c.slug !== 'label-cards')]
-    : showcase
+  // Featured carousel — fixed 5 components, order matters (center starts at index 0)
+  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const carouselItems = FEATURED_SLUGS
+    .map((slug) => COMPONENTS.find((c) => c.slug === slug))
+    .filter(Boolean)
+    .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
 
   return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
 }

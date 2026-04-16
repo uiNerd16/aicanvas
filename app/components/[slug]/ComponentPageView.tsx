@@ -324,17 +324,35 @@ export default function ComponentPageView({
                 <div className="group/toggle relative" style={{ cursor: !dualTheme ? 'not-allowed' : undefined, display: activeTab === 'code' ? 'none' : undefined }}>
                   <button
                     onClick={() => dualTheme && setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-                    className={`flex h-9 items-center gap-1 rounded-lg border px-2.5 transition-all duration-150 ${
+                    className={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border transition-all duration-150 ${
                       dualTheme
-                        ? cardTheme === 'dark'
-                          ? 'border-sand-300 bg-sand-200 text-sand-700 hover:border-sand-400 hover:bg-sand-300 active:scale-95 active:bg-sand-400 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:bg-sand-700 dark:active:bg-sand-600'
-                          : 'border-olive-500/40 bg-olive-500/10 text-olive-600 hover:bg-olive-500/20 active:scale-95 active:bg-olive-500/30 dark:border-olive-500/40 dark:text-olive-400 dark:hover:bg-olive-500/20 dark:active:bg-olive-500/30'
-                        : 'pointer-events-none border-sand-300 bg-sand-200 text-sand-400 opacity-40 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-600'
+                        ? 'border-sand-300 text-sand-500 hover:border-sand-400 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-600 dark:hover:text-sand-100'
+                        : 'pointer-events-none border-sand-300 text-sand-400 opacity-40 dark:border-sand-700 dark:text-sand-600'
                     }`}
                   >
-                    <Moon weight="regular" size={15} className={cardTheme === 'light' ? 'opacity-40' : ''} />
-                    <span className="h-3.5 w-px bg-current opacity-20" />
-                    <Sun weight="regular" size={15} className={cardTheme === 'dark' ? 'opacity-40' : ''} />
+                    <AnimatePresence mode="wait" initial={false}>
+                      {cardTheme === 'dark' ? (
+                        <motion.span
+                          key="moon"
+                          initial={{ y: 12, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -12, opacity: 0 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          <Moon weight="regular" size={16} />
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="sun"
+                          initial={{ y: 12, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -12, opacity: 0 }}
+                          transition={{ duration: 0.18 }}
+                        >
+                          <Sun weight="regular" size={16} />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </button>
                   <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/toggle:block">
                     {dualTheme
@@ -359,12 +377,12 @@ export default function ComponentPageView({
                   </div>
                 )}
 
-                {/* Fullscreen — preview only */}
+                {/* Fullscreen — preview only, accented */}
                 {activeTab === 'preview' && (
                   <div className="group/fullscreen relative">
                     <button
                       onClick={() => setFullscreen(true)}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 text-sand-500 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-600 dark:hover:text-sand-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 bg-sand-200 text-sand-700 transition-colors hover:border-sand-400 hover:bg-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:bg-sand-700 dark:hover:text-sand-100"
                     >
                       <CornersOut weight="regular" size={16} />
                     </button>
@@ -457,7 +475,7 @@ export default function ComponentPageView({
                         className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-sand-700 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
                       >
                         {PLATFORM_ICONS[platform]}
-                        Open in {platform}
+                        Try in {platform}
                       </button>
                     ))}
                   </div>
