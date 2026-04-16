@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: '%s | AI Canvas',
   },
   description:
-    'Free animated React components with copy-paste code and AI prompts for Claude, GPT, V0, and Gemini. Built for designers, developers, and everyone in between.',
+    'Free animated React components with copy-paste code and AI prompts for Claude Code, V0, and Lovable. Built for designers, developers, and everyone in between.',
   keywords: [
     'animated react components',
     'react component library',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     siteName: 'AI Canvas',
     title: 'AI Canvas — Animated React Component Library',
     description:
-      'Free animated React components with copy-paste code and AI prompts for Claude, GPT, V0, and Gemini. Built for designers, developers, and everyone in between.',
+      'Free animated React components with copy-paste code and AI prompts for Claude Code, V0, and Lovable. Built for designers, developers, and everyone in between.',
     url: 'https://aicanvas.me',
   },
   twitter: {

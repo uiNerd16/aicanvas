@@ -59,14 +59,13 @@ These live at the project root, one level up from this file:
 - No hardcoded widths/heights — components must look good in a 480×480 preview box
 
 ### prompts.ts
-- Must export `prompts: Partial<Record<Platform, string>>` (import `Platform` type from `../../app/components/ComponentCard`). `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent.
-- Write up to 4 distinct, high-quality prompts — one per platform you're providing
+- Must export `prompts: Partial<Record<Platform, string>>` (import `Platform` type from `../../app/components/ComponentCard`). `Platform = 'Claude Code' | 'Lovable' | 'V0'`. Lanes can be legitimately absent.
+- Write 3 prompts — one per platform
 - Each prompt must be self-contained: include all constants, animation specs, and implementation details so the target AI can recreate the component from scratch without seeing the code
-- Tailor tone per platform:
-  - **Claude** — mid-density spec, trust Claude on idiomatic React + Framer Motion, "inline everything, single file"
-  - **GPT** — highest density, exact constants, easing curves, spring params, pseudo-code blocks, treat as precise executor
-  - **Gemini** — defensive and explicit, exact imports, "use these hooks and no others", inline DPR/canvas scaffolding
-  - **V0** — natural language, UI-framed, no math, prose descriptions with key constants as labelled numbers
+- Prompt strategy:
+  - **'Claude Code'** — mid-density spec, trust Claude on idiomatic React + Framer Motion, "inline everything, single file". Prepend the env-check preamble: verify Tailwind CSS v4 + TypeScript + React are set up (shadcn CLI if missing).
+  - **'Lovable'** — same content as Claude Code prompt, without the env preamble. Works universally for designers in Lovable.
+  - **'V0'** — same content as Claude Code prompt. Claude-style prompts outperform V0-specific prompts even in V0.
 
 ## Mobile responsiveness — mandatory
 

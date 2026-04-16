@@ -20,7 +20,7 @@ export async function generateMetadata({
   const accentTag = entry.tags.find((t) => t.accent)
   const category = accentTag?.label ?? 'Component'
   const title = `${entry.name} — Animated React Component`
-  const description = `${entry.description} Free copy-paste React code with AI prompts for Claude, GPT, V0, and Gemini.`
+  const description = `${entry.description} Free copy-paste React code with AI prompts for Claude Code, V0, and Lovable.`
 
   return {
     title,
