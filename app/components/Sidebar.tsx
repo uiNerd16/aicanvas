@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, SquareHalf, X } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, X } from '@phosphor-icons/react'
 import { CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
@@ -34,7 +34,6 @@ type Section = {
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
   { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
-  { title: 'Hero Sections', icon: <SquareHalf weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 function countByLabel(label: string) {

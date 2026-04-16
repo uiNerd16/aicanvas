@@ -32,10 +32,15 @@
   --color-sand-900: #21211F;
   --color-sand-950: #1A1A19;
 
-  /* ── Olive accent ── */
+  /* ── Olive accent — primary (actions) ── */
   --color-olive-400: #DAE4A0;
   --color-olive-500: #A8B94D;
   --color-olive-600: #869631;
+
+  /* ── Ember accent — secondary (attention, rhythm) ── */
+  --color-ember-400: #FFB574;
+  --color-ember-500: #F59E42;
+  --color-ember-600: #D97B1A;
 }
 
 body {

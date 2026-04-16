@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView, useMotionValue, useMotionTemplate, useSpring } from 'framer-motion'
 import {
   ArrowRight,
   MagnifyingGlass,
@@ -19,7 +19,6 @@ import {
 import { HeaderSocials } from '../components/HeaderSocials'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL } from '../lib/config'
-import LabelCards from '../../components-workspace/label-cards'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,7 +118,15 @@ function StackedCards() {
                     delay,
                   }
             }
-            className="absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800 transition-[border-color,box-shadow] duration-200 hover:border-sand-600 hover:shadow-lg hover:shadow-black/20"
+            drag={isFront && !isExiting ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={isFront ? (_e: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+              if (Math.abs(info.offset.x) > 40 || Math.abs(info.velocity.x) > 300) {
+                handleClick()
+              }
+            } : undefined}
+            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800 transition-[border-color,box-shadow] duration-200 hover:border-sand-600 hover:shadow-lg hover:shadow-black/20 ${isFront ? 'touch-none' : ''}`}
             style={{
               zIndex: isExiting ? 11 : pos.zIndex,
               transformOrigin: 'bottom center',
@@ -390,17 +397,72 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
           </div>
         )}
       </div>
-      <div className="px-4 py-5">
-        <p className="text-sm font-semibold text-sand-50">{entry.name}</p>
-        <p className="text-xs text-sand-500">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
+      <div className="flex items-center justify-between px-4 py-5">
+        <div>
+          <p className="text-sm font-semibold text-sand-50">{entry.name}</p>
+          <p className="text-xs text-sand-500">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
+        </div>
+        <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
       </div>
     </div>
   )
 }
 
+function TiltCard({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const rawGlowX = useMotionValue(50)
+  const rawGlowY = useMotionValue(50)
+  const rawStripeOpacity = useMotionValue(0)
+  const springConfig = { stiffness: 150, damping: 18, mass: 0.5 }
+  const rotateX = useSpring(rawX, springConfig)
+  const rotateY = useSpring(rawY, springConfig)
+  const glowX = useSpring(rawGlowX, { stiffness: 100, damping: 22 })
+  const glowY = useSpring(rawGlowY, { stiffness: 100, damping: 22 })
+  const stripeOpacity = useSpring(rawStripeOpacity, { stiffness: 200, damping: 26 })
+
+  function handleMouse(e: React.MouseEvent) {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    rawX.set(y * -16)
+    rawY.set(x * 16)
+    rawGlowX.set(((e.clientX - rect.left) / rect.width) * 100)
+    rawGlowY.set(((e.clientY - rect.top) / rect.height) * 100)
+    rawStripeOpacity.set(1)
+  }
+
+  function handleLeave() {
+    rawX.set(0)
+    rawY.set(0)
+    rawStripeOpacity.set(0)
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={handleLeave}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', position: 'relative' }}
+    >
+      {children}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-xl"
+        style={{
+          opacity: stripeOpacity,
+          background: useMotionTemplate`radial-gradient(ellipse 600px 300px at ${glowX}% ${glowY}%, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+        }}
+      />
+    </motion.div>
+  )
+}
+
 function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   const count = items.length
-  const [idx, setIdx] = useState(() => Math.max(0, items.findIndex((c) => c.slug === 'label-cards')))
+  const [idx, setIdx] = useState(0)
   const [dir, setDir] = useState(0)
 
   function goNext() { setDir(1);  setIdx((i) => (i + 1) % count) }
@@ -409,7 +471,8 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   const current  = items[idx]
   const prevItem = items[(idx - 1 + count) % count]
   const nextItem = items[(idx + 1) % count]
-  const isLive   = current?.slug === 'label-cards'
+  const prevPrev = items[(idx - 2 + count) % count]
+  const nextNext = items[(idx + 2) % count]
 
   return (
     <section className="mt-16 sm:mt-24">
@@ -442,22 +505,18 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
       {/* Track — breaks out of the 720px container */}
       <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-        {/* Dark radial glow behind cards */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse 40% 35% at center, rgba(0,0,0,0.65) 0%, transparent 100%)' }}
-        />
-        {/* Top edge fade — masks the hard clip */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-12"
-          style={{ background: 'linear-gradient(to bottom, #1A1A19, transparent)' }}
-        />
-        {/* Bottom edge fade — masks the hard clip */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-12"
-          style={{ background: 'linear-gradient(to top, #1A1A19, transparent)' }}
-        />
         <div className="flex items-center justify-center py-4">
+
+          {/* Far prev — outermost left, smallest */}
+          <motion.div
+            className="relative z-[1] -mr-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
+            animate={{ opacity: 0.3, scale: 0.75 }}
+            transition={{ duration: 0.2 }}
+            style={{ filter: 'blur(5px)' }}
+            onClick={() => { goPrev(); goPrev() }}
+          >
+            <CarouselCard entry={prevPrev} />
+          </motion.div>
 
           {/* Prev — behind center, peeking left */}
           <motion.div
@@ -471,48 +530,45 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
             <CarouselCard entry={prevItem} />
           </motion.div>
 
-          {/* Center — on top */}
+          {/* Center — on top, with 3D tilt, links to component */}
           <div className="relative z-10 w-[min(480px,calc(100vw-80px))] flex-shrink-0">
-            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-              <motion.div
-                key={current.slug}
-                custom={dir}
-                variants={{
-                  enter: (d: number) => ({ x: d > 0 ? 180 : -180, opacity: 0 }),
-                  center: { x: 0, opacity: 1 },
-                  exit:  (d: number) => ({ x: d > 0 ? -180 : 180, opacity: 0 }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={CAROUSEL_SPRING}
-                className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  {isLive ? (
-                    <LabelCards />
-                  ) : current.image ? (
-                    <img src={current.image} alt={current.name} className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-sand-900">
-                      <ImageSquare weight="regular" size={22} className="text-sand-700" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between px-4 py-5">
-                  <div>
-                    <p className="text-sm font-semibold text-sand-50">{current.name}</p>
-                    <p className="text-xs text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
+            <TiltCard>
+              <Link href={`/components/${current.slug}`}>
+              <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+                <motion.div
+                  key={current.slug}
+                  custom={dir}
+                  variants={{
+                    enter: (d: number) => ({ x: d > 0 ? 180 : -180, opacity: 0 }),
+                    center: { x: 0, opacity: 1 },
+                    exit:  (d: number) => ({ x: d > 0 ? -180 : 180, opacity: 0 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={CAROUSEL_SPRING}
+                  className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    {current.image ? (
+                      <img src={current.image} alt={current.name} className="absolute inset-0 h-full w-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-sand-900">
+                        <ImageSquare weight="regular" size={22} className="text-sand-700" />
+                      </div>
+                    )}
                   </div>
-                  <Link
-                    href={`/components/${current.slug}`}
-                    className="flex items-center gap-1 text-xs font-semibold text-olive-500 transition-colors hover:text-olive-400"
-                  >
-                    View <ArrowRight weight="regular" size={12} />
-                  </Link>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                  <div className="flex items-center justify-between px-4 py-5">
+                    <div>
+                      <p className="text-sm font-semibold text-sand-50">{current.name}</p>
+                      <p className="text-xs text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
+                    </div>
+                    <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+              </Link>
+            </TiltCard>
           </div>
 
           {/* Next — behind center, peeking right */}
@@ -527,282 +583,15 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
             <CarouselCard entry={nextItem} />
           </motion.div>
 
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Shared chevron buttons ───────────────────────────────────────────────────
-
-function ChevronButtons({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
-  const cls = 'flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200'
-  return (
-    <div className="flex items-center gap-2">
-      <button onClick={onPrev} className={cls}><CaretLeft  weight="regular" size={14} /></button>
-      <button onClick={onNext} className={cls}><CaretRight weight="regular" size={14} /></button>
-    </div>
-  )
-}
-
-// ─── Deck carousel ────────────────────────────────────────────────────────────
-
-function DeckCarousel({ items }: { items: ComponentMeta[] }) {
-  const count = items.length
-  const [idx, setIdx] = useState(() => Math.max(0, items.findIndex((c) => c.slug === 'label-cards')))
-  const [dir, setDir] = useState(0)
-
-  function goNext() { setDir(1);  setIdx((i) => (i + 1) % count) }
-  function goPrev() { setDir(-1); setIdx((i) => (i - 1 + count) % count) }
-
-  const front  = items[idx]
-  const middle = items[(idx + 1) % count]
-  const back   = items[(idx + 2) % count]
-  const isLive = front.slug === 'label-cards'
-
-  return (
-    <section className="mt-16 sm:mt-24">
-      <div className="mb-6 flex items-end justify-between">
-        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Stack</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">Layered perspective.</h2>
-        </motion.div>
-        <ChevronButtons onPrev={goPrev} onNext={goNext} />
-      </div>
-
-      <div className="relative" style={{ height: '320px' }}>
-        {/* Back card */}
-        <motion.div
-          className="absolute inset-x-0 z-[1]"
-          animate={{ y: 22, scale: 0.91, opacity: 0.28 }}
-          transition={CAROUSEL_SPRING}
-        >
-          <CarouselCard entry={back} />
-        </motion.div>
-
-        {/* Middle card */}
-        <motion.div
-          className="absolute inset-x-0 z-[2]"
-          animate={{ y: 11, scale: 0.95, opacity: 0.55 }}
-          transition={CAROUSEL_SPRING}
-        >
-          <CarouselCard entry={middle} />
-        </motion.div>
-
-        {/* Front card */}
-        <div className="absolute inset-x-0 z-10">
-          <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-            <motion.div
-              key={front.slug}
-              custom={dir}
-              variants={{
-                enter:  (d: number) => ({ x: d > 0 ? 220 : -220, opacity: 0, scale: 0.92 }),
-                center: { x: 0, opacity: 1, scale: 1 },
-                exit:   (d: number) => ({ x: d > 0 ? -220 : 220, opacity: 0, scale: 0.92 }),
-              }}
-              initial="enter" animate="center" exit="exit"
-              transition={CAROUSEL_SPRING}
-              className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900"
-            >
-              <div className="relative h-56 overflow-hidden">
-                {isLive ? <LabelCards /> : front.image ? (
-                  <img src={front.image} alt={front.name} className="absolute inset-0 h-full w-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-sand-900"><ImageSquare weight="regular" size={22} className="text-sand-700" /></div>
-                )}
-              </div>
-              <div className="flex items-center justify-between px-4 py-5">
-                <div>
-                  <p className="text-sm font-semibold text-sand-50">{front.name}</p>
-                  <p className="text-xs text-sand-500">{front.tags.find((t) => t.accent)?.label ?? ''}</p>
-                </div>
-                <Link href={`/components/${front.slug}`} className="flex items-center gap-1 text-xs font-semibold text-olive-500 transition-colors hover:text-olive-400">View <ArrowRight weight="regular" size={12} /></Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Spotlight carousel ───────────────────────────────────────────────────────
-
-function SpotlightCarousel({ items }: { items: ComponentMeta[] }) {
-  const count = items.length
-  const [idx, setIdx] = useState(() => Math.max(0, items.findIndex((c) => c.slug === 'label-cards')))
-  const [dir, setDir] = useState(0)
-
-  function goNext() { setDir(1);  setIdx((i) => (i + 1) % count) }
-  function goPrev() { setDir(-1); setIdx((i) => (i - 1 + count) % count) }
-
-  const current  = items[idx]
-  const prevItem = items[(idx - 1 + count) % count]
-  const nextItem = items[(idx + 1) % count]
-  const isLive   = current.slug === 'label-cards'
-
-  return (
-    <section className="mt-16 sm:mt-24">
-      <div className="mb-6 flex items-end justify-between">
-        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Spotlight</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">Under the light.</h2>
-        </motion.div>
-        <ChevronButtons onPrev={goPrev} onNext={goNext} />
-      </div>
-
-      <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#0c0c0b] py-10">
-        {/* Olive glow */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-[280px] w-[480px] rounded-full bg-olive-500/10 blur-3xl" />
-        </div>
-
-        <div className="flex items-center justify-center">
-          {/* Prev */}
+          {/* Far next — outermost right, smallest */}
           <motion.div
-            className="w-[240px] flex-shrink-0 cursor-pointer"
-            style={{ filter: 'blur(4px)' }}
-            animate={{ opacity: 0.15, scale: 0.82, x: 24 }}
-            whileHover={{ opacity: 0.28 }}
-            transition={{ duration: 0.25 }}
-            onClick={goPrev}
+            className="relative z-[1] -ml-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
+            animate={{ opacity: 0.3, scale: 0.75 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => { goNext(); goNext() }}
+            style={{ filter: 'blur(5px)' }}
           >
-            <CarouselCard entry={prevItem} />
-          </motion.div>
-
-          {/* Center */}
-          <div className="relative z-10 mx-[-24px] w-[min(460px,calc(100vw-80px))] flex-shrink-0">
-            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-              <motion.div
-                key={current.slug}
-                custom={dir}
-                variants={{
-                  enter:  (d: number) => ({ x: d > 0 ? 160 : -160, opacity: 0 }),
-                  center: { x: 0, opacity: 1 },
-                  exit:   (d: number) => ({ x: d > 0 ? -160 : 160, opacity: 0 }),
-                }}
-                initial="enter" animate="center" exit="exit"
-                transition={CAROUSEL_SPRING}
-                className="flex flex-col overflow-hidden rounded-xl border border-sand-700/30 bg-sand-900 shadow-2xl shadow-black/60"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  {isLive ? <LabelCards /> : current.image ? (
-                    <img src={current.image} alt={current.name} className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-sand-800"><ImageSquare weight="regular" size={22} className="text-sand-700" /></div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between px-4 py-5">
-                  <div>
-                    <p className="text-sm font-semibold text-sand-50">{current.name}</p>
-                    <p className="text-xs text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
-                  </div>
-                  <Link href={`/components/${current.slug}`} className="flex items-center gap-1 text-xs font-semibold text-olive-500 transition-colors hover:text-olive-400">View <ArrowRight weight="regular" size={12} /></Link>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Next */}
-          <motion.div
-            className="w-[240px] flex-shrink-0 cursor-pointer"
-            style={{ filter: 'blur(4px)' }}
-            animate={{ opacity: 0.15, scale: 0.82, x: -24 }}
-            whileHover={{ opacity: 0.28 }}
-            transition={{ duration: 0.25 }}
-            onClick={goNext}
-          >
-            <CarouselCard entry={nextItem} />
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Coverflow carousel ───────────────────────────────────────────────────────
-
-function CoverflowCarousel({ items }: { items: ComponentMeta[] }) {
-  const count = items.length
-  const [idx, setIdx] = useState(() => Math.max(0, items.findIndex((c) => c.slug === 'label-cards')))
-  const [dir, setDir] = useState(0)
-
-  function goNext() { setDir(1);  setIdx((i) => (i + 1) % count) }
-  function goPrev() { setDir(-1); setIdx((i) => (i - 1 + count) % count) }
-
-  const current  = items[idx]
-  const prevItem = items[(idx - 1 + count) % count]
-  const nextItem = items[(idx + 1) % count]
-  const isLive   = current.slug === 'label-cards'
-
-  return (
-    <section className="mt-16 sm:mt-24">
-      <div className="mb-6 flex items-end justify-between">
-        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Cover Flow</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">Flip through.</h2>
-        </motion.div>
-        <ChevronButtons onPrev={goPrev} onNext={goNext} />
-      </div>
-
-      <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-        <div className="flex items-center justify-center py-6" style={{ perspective: '1200px' }}>
-
-          {/* Prev — tilted */}
-          <motion.div
-            className="relative z-[5] -mr-[160px] w-[280px] flex-shrink-0 cursor-pointer"
-            animate={{ rotateY: -38, opacity: 0.6, scale: 0.88 }}
-            whileHover={{ opacity: 0.82 }}
-            transition={CAROUSEL_SPRING}
-            style={{ transformOrigin: 'right center' }}
-            onClick={goPrev}
-          >
-            <CarouselCard entry={prevItem} />
-          </motion.div>
-
-          {/* Center */}
-          <div className="relative z-10 w-[min(460px,calc(100vw-80px))] flex-shrink-0">
-            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-              <motion.div
-                key={current.slug}
-                custom={dir}
-                variants={{
-                  enter:  (d: number) => ({ rotateY: d > 0 ? 28 : -28, opacity: 0, scale: 0.92 }),
-                  center: { rotateY: 0, opacity: 1, scale: 1 },
-                  exit:   (d: number) => ({ rotateY: d > 0 ? -28 : 28, opacity: 0, scale: 0.92 }),
-                }}
-                initial="enter" animate="center" exit="exit"
-                transition={CAROUSEL_SPRING}
-                className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900 shadow-2xl shadow-black/40"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  {isLive ? <LabelCards /> : current.image ? (
-                    <img src={current.image} alt={current.name} className="absolute inset-0 h-full w-full object-cover" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-sand-900"><ImageSquare weight="regular" size={22} className="text-sand-700" /></div>
-                  )}
-                </div>
-                <div className="flex items-center justify-between px-4 py-5">
-                  <div>
-                    <p className="text-sm font-semibold text-sand-50">{current.name}</p>
-                    <p className="text-xs text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
-                  </div>
-                  <Link href={`/components/${current.slug}`} className="flex items-center gap-1 text-xs font-semibold text-olive-500 transition-colors hover:text-olive-400">View <ArrowRight weight="regular" size={12} /></Link>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Next — tilted */}
-          <motion.div
-            className="relative z-[5] -ml-[160px] w-[280px] flex-shrink-0 cursor-pointer"
-            animate={{ rotateY: 38, opacity: 0.6, scale: 0.88 }}
-            whileHover={{ opacity: 0.82 }}
-            transition={CAROUSEL_SPRING}
-            style={{ transformOrigin: 'left center' }}
-            onClick={goNext}
-          >
-            <CarouselCard entry={nextItem} />
+            <CarouselCard entry={nextNext} />
           </motion.div>
 
         </div>
@@ -811,6 +600,10 @@ function CoverflowCarousel({ items }: { items: ComponentMeta[] }) {
   )
 }
 
+// ─── HomePageClient ────────────────────────────────────────────────────────────
+
+// ─── HomePageClient ────────────────────────────────────────────────────────────
+// (DeckCarousel, SpotlightCarousel, CoverflowCarousel removed)
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 export function HomePageClient({ total, showcase, carouselItems }: Props) {
@@ -844,9 +637,9 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.18 }}
             className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
           >
-            UI components and design systems
+            AI native components
             <br />
-            <span className="mt-2 inline-block text-olive-500">with AI prompts built in.</span>
+            <span className="mt-2 inline-block text-olive-500">for designers and developers.</span>
           </motion.h1>
 
           <motion.p
@@ -855,8 +648,8 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.26 }}
             className="mt-4 max-w-xl text-base leading-relaxed text-sand-400"
           >
-            Whether you copy the code, paste the prompt, or just need inspiration,
-            everything here is free, open source, and ready to ship.
+            Install with one command, remix with AI, or just get inspired.
+            Everything here is free, open source, and ready to ship.
           </motion.p>
 
           <motion.div
@@ -918,103 +711,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         {/* ── Featured carousel ── */}
         <FeaturedCarousel items={carouselItems} />
 
-        {/* ── Deck carousel ── */}
-        <DeckCarousel items={carouselItems} />
 
-        {/* ── Spotlight carousel ── */}
-        <SpotlightCarousel items={carouselItems} />
-
-        {/* ── Coverflow carousel ── */}
-        <CoverflowCarousel items={carouselItems} />
-
-        {/* ── Component grid preview ── */}
-        <section className="mt-16 sm:mt-24">
-          <div className="mb-6 flex items-end justify-between">
-            <div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3 }}
-                className="text-xs font-semibold uppercase tracking-wider text-sand-600"
-              >
-                Featured
-              </motion.p>
-              <motion.h2
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: 0.05 }}
-                className="mt-1 text-xl font-bold text-sand-50"
-              >
-                A taste of what&apos;s inside.
-              </motion.h2>
-            </div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <Link
-                href="/"
-                className="flex items-center gap-1 text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400"
-              >
-                Browse all <ArrowRight weight="regular" size={13} />
-              </Link>
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {showcase.slice(0, 4).map((entry, i) => (
-              <motion.div
-                key={entry.slug}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-20px' }}
-                transition={{ duration: 0.3, delay: i * 0.06 }}
-              >
-                <Link
-                  href={`/components/${entry.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-950 transition-all duration-200 hover:border-sand-700 hover:shadow-lg hover:shadow-black/30"
-                >
-                  <div className="relative aspect-video overflow-hidden bg-sand-900">
-                    {entry.image ? (
-                      <img
-                        src={entry.image}
-                        alt={entry.name}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
-                          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-                          backgroundSize: '20px 20px',
-                        }}
-                      >
-                        <ImageSquare weight="regular" size={22} className="text-sand-700" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <div>
-                      <p className="text-sm font-semibold text-sand-50">{entry.name}</p>
-                      <p className="text-xs text-sand-500">
-                        {entry.tags.find((t) => t.accent)?.label ?? ''}
-                      </p>
-                    </div>
-                    <ArrowRight
-                      weight="regular"
-                      size={14}
-                      className="text-sand-600 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-olive-500"
-                    />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </section>
 
         {/* ── Who it's for ── */}
         <section className="mt-16 sm:mt-24">
@@ -1039,22 +736,22 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
-                description: 'Every component ships with expert-crafted prompts for the AI tools you already use. Describe what you want, generate, customize.',
+                description: 'Hit "Remix with AI" and try the component in Claude Code, Lovable, or V0. One click copies the prompt — paste it and go.',
                 badges: ['Claude Code', 'Lovable', 'V0'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'The code tab has everything. TypeScript source, Framer Motion animations, Tailwind CSS. Copy and paste directly into your project.',
+                description: 'One CLI command installs any component into your project. TypeScript, Framer Motion, Tailwind CSS — all included, ready to run.',
                 badges: ['TypeScript', 'Framer Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
                 icon: <UsersThree weight="regular" size={18} />,
                 audience: 'Everyone else',
-                description: 'Building something and not sure if you\'ll code it or prompt it? Both are always here: code and prompts, every single component.',
-                badges: ['Code ↔ Prompts', 'Always both', 'Always free'],
+                description: 'Not sure if you\'ll install it or remix it? Every component gives you both paths — CLI install and AI prompts, always.',
+                badges: ['CLI + AI', 'Always both', 'Always free'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
             ].map(({ icon, audience, description, badges, badgeStyle }, i) => (
@@ -1116,64 +813,18 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
             <div className="flex-1">
               <span className="text-3xl font-black tabular-nums text-sand-700">02</span>
-              <h3 className="mt-2 text-sm font-bold text-sand-50">Copy</h3>
-              <p className="mt-1 text-sm leading-relaxed text-sand-500">Grab the source code, or pick the AI prompt for your preferred platform, or take both.</p>
+              <h3 className="mt-2 text-sm font-bold text-sand-50">Install or remix</h3>
+              <p className="mt-1 text-sm leading-relaxed text-sand-500">Copy the CLI command to install directly, or hit Remix with AI to try it in Claude Code, Lovable, or V0.</p>
             </div>
             <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
             <div className="flex-1">
               <span className="text-3xl font-black tabular-nums text-sand-700">03</span>
               <h3 className="mt-2 text-sm font-bold text-sand-50">Ship</h3>
-              <p className="mt-1 text-sm leading-relaxed text-sand-500">Paste into your project, or let your AI tool recreate and customize it instantly.</p>
+              <p className="mt-1 text-sm leading-relaxed text-sand-500">The component is in your project. Customize it, extend it, or ship it as-is.</p>
             </div>
           </motion.div>
         </section>
 
-        {/* ── Design systems teaser ── */}
-        <section className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.4 }}
-            className="relative overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 sm:p-8"
-          >
-            {/* Blueprint grid decoration */}
-            <div
-              className="pointer-events-none absolute inset-0 opacity-20"
-              style={{
-                backgroundImage:
-                  'linear-gradient(rgba(190,207,93,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(190,207,93,0.15) 1px, transparent 1px)',
-                backgroundSize: '40px 40px',
-              }}
-            />
-            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-olive-500/8 blur-3xl" />
-
-            <p className="relative text-xs font-semibold uppercase tracking-wider text-sand-600">
-              Also in AI Canvas
-            </p>
-            <h2 className="relative mt-1 text-xl font-bold text-sand-50">
-              Not just components. Full design systems.
-            </h2>
-            <p className="relative mt-3 max-w-md text-sm leading-relaxed text-sand-400">
-              AI Canvas also ships curated design systems: complete visual languages
-              with tokens, components, and AI prompts. Explore Andromeda: a sci-fi
-              blueprint system built to feel like mission control.
-            </p>
-
-            <div className="relative mt-5 flex flex-wrap gap-3">
-              <Link
-                href="/design-systems/andromeda"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
-              >
-                Explore Andromeda
-                <ArrowRight weight="regular" size={13} />
-              </Link>
-              <span className="inline-flex items-center rounded-xl border border-sand-700 px-4 py-2 text-sm text-sand-500">
-                Glass system · Meridian · more coming
-              </span>
-            </div>
-          </motion.div>
-        </section>
 
         {/* ── Prompt differentiator ── */}
         <section className="mt-16 sm:mt-24">
@@ -1188,12 +839,12 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               The AI prompts
             </p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              Every component ships with prompts for your AI.
+              Every component ships with prompts for three AI platforms.
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-sand-400">
-              Not generic instructions. Prompts written specifically for how each
-              platform thinks. Use the code, use the prompt, or use both. The choice
-              is always yours.
+              Not generic instructions. Each prompt is a precise reproduction brief —
+              tested to recreate the component faithfully. Pick your platform,
+              paste, and go.
             </p>
           </motion.div>
 
