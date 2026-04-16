@@ -79,7 +79,7 @@ export default function AboutPage() {
           <p className="mt-4 text-sm leading-relaxed text-sand-400">
             AI Canvas started as a small experiment: what if every piece of UI
             came with the right words to recreate it? Each prompt is tuned for
-            Claude, GPT, Gemini, and V0, so you can pick the tool you're
+            Claude Code, V0, and Lovable, so you can pick the tool you're
             comfortable with and get something real on the first try.
           </p>
         </Section>
@@ -112,7 +112,7 @@ export default function AboutPage() {
             next, is built directly with words. Most of the work happens in
             Claude Code, with Figma for visual tweaking when needed. Then each
             piece is distilled into prompts tuned per platform, because a Claude
-            prompt reads differently from a GPT, Gemini, or V0 prompt. The
+            prompt reads differently from a V0 or Lovable prompt. The
             tools think differently.
           </p>
           <p className="mt-4 text-sm leading-relaxed text-sand-400">

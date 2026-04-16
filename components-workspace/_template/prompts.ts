@@ -1,31 +1,23 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
 // ─── Prompts ──────────────────────────────────────────────────────────────────
-// Write one prompt per model family. Each prompt must be fully self-contained —
-// the model receiving it should be able to recreate the component from scratch.
+// Write one prompt per platform. Each prompt must be fully self-contained —
+// the AI receiving it should be able to recreate the component from scratch.
 //
-// Guidelines per lane:
-//   Claude  — mid-density spec. Constants + core math, trust Claude on idiomatic
-//             React + Framer Motion. "Inline everything, single file, no helper
-//             hooks" to defend against over-engineering.
-//   GPT     — highest density. Exact constants, easing curves, spring params,
-//             phase thresholds. Pseudo-code blocks. Treat as precise executor.
-//   Gemini  — defensive and explicit. Include exact imports. Call out "use these
-//             hooks and no others". Inline DPR/canvas scaffolding for creative
-//             components (Gemini has the biggest gap on Framer Motion's surface).
-//   V0      — natural language, UI-framed, no math. Describe the component as
-//             prose: visual intent, animation behaviour in plain words, key
-//             constants as labelled numbers (e.g. "RADIUS = 340"). Works for
-//             every component type — canvas, particles, waves, 3D, buttons,
-//             glass, etc. V0 has been validated on Claude-style prose prompts
-//             even for heavy canvas/hover/wave work; don't omit it.
+// Guidelines per platform:
+//   'Claude Code'  — mid-density spec. Constants + core math, trust Claude on
+//                   idiomatic React + Framer Motion. "Inline everything, single
+//                   file." Prepend an env-check preamble: verify Tailwind CSS v4,
+//                   TypeScript, React are set up (shadcn CLI if missing).
+//   'Lovable'   — same content as Claude Code prompt but without the env preamble.
+//                   Lovable builds a full working app from the prompt.
+//   'V0'           — same content as Claude Code prompt. Claude-style prompts
+//                   outperform V0-specific prompts even in V0.
 
 export const prompts: Partial<Record<Platform, string>> = {
-  Claude: ``,
+  'Claude Code': ``,
 
-  GPT: ``,
+  'Lovable': ``,
 
-  Gemini: ``,
-
-  V0: ``,
+  'V0': ``,
 }

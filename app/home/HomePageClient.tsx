@@ -31,7 +31,7 @@ interface Props {
 
 // ─── Platform labels ──────────────────────────────────────────────────────────
 
-const PLATFORMS = ['Claude', 'GPT', 'Gemini', 'V0'] as const
+const PLATFORMS = ['Claude Code', 'Lovable', 'V0'] as const
 
 // ─── Hello card data ─────────────────────────────────────────────────────────
 
@@ -888,7 +888,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           <div className="flex items-center justify-center">
             {[
               { value: total, suffix: '+', label: 'Components' },
-              { value: 4,     suffix: '',  label: 'AI Platforms' },
+              { value: 3,     suffix: '',  label: 'AI Platforms' },
               { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
               { value: 0,     suffix: '',  prefix: '$', label: 'Free forever' },
             ].map(({ value, suffix, prefix = '', label, minWidth }, i) => (
@@ -1040,7 +1040,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
                 description: 'Every component ships with expert-crafted prompts for the AI tools you already use. Describe what you want, generate, customize.',
-                badges: ['Claude', 'GPT', 'Gemini', 'V0'],
+                badges: ['Claude Code', 'Lovable', 'V0'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
@@ -1197,12 +1197,11 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              { name: 'Claude',  description: "Tuned for Anthropic's reasoning strengths." },
-              { name: 'GPT',     description: 'Optimized for ChatGPT and the API.' },
-              { name: 'Gemini',  description: "Calibrated for Google Gemini's output." },
-              { name: 'V0',      description: 'Ready for instant Vercel V0 generation.' },
+              { name: 'Claude Code',  description: "Builds the component in your existing project with full environment setup." },
+              { name: 'Lovable',   description: 'Builds a full working app from the prompt — no setup needed.' },
+              { name: 'V0',           description: 'Ready for instant Vercel V0 generation.' },
             ].map(({ name, description }, i) => (
               <motion.div
                 key={name}

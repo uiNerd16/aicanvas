@@ -1,7 +1,17 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
 export const prompts: Partial<Record<Platform, string>> = {
-  Claude: `Create a React client component named \`MagneticDots\`.
+  'Claude Code': `Before building, verify your project has the following setup:
+- React / Next.js
+- TypeScript
+- Tailwind CSS v4
+
+If any are missing, set up via the shadcn CLI:
+  npx shadcn@latest init
+
+---
+
+Create a React client component named \`MagneticDots\`.
 
 Write this as a single self-contained React client component. Inline everything. Do not extract helper hooks, utility functions, or separate files. 'use client' at the top. No 'any' types.
 
@@ -34,171 +44,84 @@ Theme: detect via closest('[data-card-theme]').classList.contains('dark'), fallb
 
 Root: div ref relative h-full w-full overflow-hidden with mouse/touch handlers updating mouseRef to { x: clientX-rect.left, y: clientY-rect.top }; leave/end sets null. Canvas absolute inset-0 100%/100%.
 
-Cleanup: alive flag, cancelAnimationFrame, ResizeObserver on parentElement, observer.disconnect.`,
+Cleanup: alive flag, cancelAnimationFrame, ResizeObserver on parentElement, observer.disconnect.
 
-  GPT: `Build a React client component named \`MagneticDots\`. Single file. TypeScript strict, no \`any\`. Do not add feature flags, error boundaries, or prop interfaces. This is a self-contained showcase component with no props. Implement exactly what is specified — no more, no less.
+## Typography
+- Font: project default sans-serif`,
 
-Full-bleed canvas dot grid. Dots are magnetically pulled toward the cursor via spring physics and glide back when it leaves. No overlay text.
+  'Lovable': `Create a React client component named \`MagneticDots\`.
 
-## Constants
-- SPACING = 22, DOT_RADIUS = 1.5
+Write this as a single self-contained React client component. Inline everything. Do not extract helper hooks, utility functions, or separate files. 'use client' at the top. No 'any' types.
+
+A full-bleed canvas dot grid where dots are magnetically pulled toward the cursor and spring back when it leaves. No overlay text.
+
+Constants (exact):
+- SPACING = 22 (px between dot centres)
+- DOT_RADIUS = 1.5
 - INFLUENCE_R = 180
-- SPRING_K = 0.055, DAMPING = 0.11
+- SPRING_K = 0.055
+- DAMPING = 0.11 (velocity *= 1 - DAMPING)
 - MAG_STRENGTH = 16
-- LERP_FACTOR = 0.06 (hoverStr), MOUSE_LERP = 0.14
+- LERP_FACTOR = 0.06 (hoverStr ease)
+- MOUSE_LERP = 0.14 (smoothed mouse)
 
-## Types
-Dot = { restX, restY, x, y, vx, vy } — all numbers.
+Dot: { restX, restY, x, y, vx, vy }. Build grid: cols = ceil(w/SPACING)+1, rows = ceil(h/SPACING)+1, ox = (w%SPACING)/2, oy = (h%SPACING)/2. Preserve existing dots across resizes via a Map keyed on \`restX,restY\`.
 
-## Canvas setup
-dpr = devicePixelRatio || 1; rect = canvas.getBoundingClientRect(); cw = rect.width; ch = rect.height; canvas.width = round(cw*dpr); canvas.height = round(ch*dpr); ctx.setTransform(dpr,0,0,dpr,0,0).
+Canvas DPR: rect = getBoundingClientRect; canvas.width = round(rect.width*dpr); canvas.height = round(rect.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0).
 
-## Grid build
-cols = ceil(cw/SPACING)+1; rows = ceil(ch/SPACING)+1; ox = (cw%SPACING)/2; oy = (ch%SPACING)/2. For each (r,c): rx = ox+c*SPACING, ry = oy+r*SPACING. On rebuild (resize), keep old dot state via Map keyed \`rx,ry\`.
+Per frame:
+- hoverStr += (target - hoverStr) * LERP_FACTOR, target = 1 if pointer else 0
+- If pointer: smoothMx += (rawX - smoothMx) * MOUSE_LERP (snap on first contact via a -99999 sentinel). Else reset sentinel.
+- clearRect. fillStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(28,25,22,0.4)'.
+- For each dot:
+  - If hoverStr > 0.001 and dist2 < INFLUENCE_R^2 and dist2 > 0.01: t = 1 - dist/INFLUENCE_R; force = t*t*MAG_STRENGTH*hoverStr; vx += (-dx/dist)*force; vy += (-dy/dist)*force (pulls toward cursor).
+  - Spring: vx += (restX - x)*SPRING_K; vy += (restY - y)*SPRING_K.
+  - vx *= 1 - DAMPING; vy *= 1 - DAMPING. Integrate. Draw arc radius DOT_RADIUS.
 
-## Per-frame loop
-hasPointer = mouseRef != null
-targetStr = hasPointer ? 1 : 0
-hoverStr += (targetStr - hoverStr) * 0.06
-if hasPointer:
-  if smoothMx == -99999: smoothMx = raw.x; smoothMy = raw.y
-  smoothMx += (raw.x - smoothMx) * 0.14
-  smoothMy += (raw.y - smoothMy) * 0.14
-else: smoothMx = smoothMy = -99999
-mx = smoothMx; my = smoothMy; r2 = 180*180
-clearRect. fillStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(28,25,22,0.4)'
-for each dot d:
-  if hoverStr > 0.001:
-    dx = d.x - mx; dy = d.y - my; dist2 = dx*dx + dy*dy
-    if dist2 < r2 and dist2 > 0.01:
-      dist = sqrt(dist2); t = 1 - dist/180; force = t*t*16*hoverStr
-      d.vx += (-dx/dist)*force; d.vy += (-dy/dist)*force
-  d.vx += (d.restX - d.x)*0.055
-  d.vy += (d.restY - d.y)*0.055
-  d.vx *= 0.89; d.vy *= 0.89
-  d.x += d.vx; d.y += d.vy
-  arc(d.x,d.y,1.5,0,2π); fill()
+Theme: detect via closest('[data-card-theme]').classList.contains('dark'), fallback documentElement. MutationObserver on both. Background: dark '#110F0C', light '#F5F1EA' — set via container inline style.
 
-## Theme detection
-isDarkRef + bgRef. Check closest('[data-card-theme]') class 'dark', fallback documentElement. MutationObserver on both (attributeFilter ['class']). Apply: isDarkRef.current + container.style.background = dark ? '#110F0C' : '#F5F1EA'.
+Root: div ref relative h-full w-full overflow-hidden with mouse/touch handlers updating mouseRef to { x: clientX-rect.left, y: clientY-rect.top }; leave/end sets null. Canvas absolute inset-0 100%/100%.
 
-## JSX structure
-div ref relative h-full w-full overflow-hidden, inline background '#110F0C' initial. Handlers onMouseMove/onMouseLeave/onTouchMove/onTouchEnd setting mouseRef = { x: clientX-rect.left, y: clientY-rect.top } or null. Canvas absolute inset-0, style width 100% height 100%.
+Cleanup: alive flag, cancelAnimationFrame, ResizeObserver on parentElement, observer.disconnect.
 
-## Cleanup
-alive=false; cancelAnimationFrame; ResizeObserver.observe(canvas.parentElement) → disconnect.`,
+## Typography
+- Font: project default sans-serif`,
 
-  Gemini: `Implement a React client component named \`MagneticDots\` as a single TypeScript file. Implement the complete component in one response. Do not abbreviate any section.
+  'V0': `Create a React client component named \`MagneticDots\`.
 
-A canvas full-bleed grid of dots that are pulled toward the cursor like magnets and spring-glide back to rest when the cursor leaves. No overlay text.
+Write this as a single self-contained React client component. Inline everything. Do not extract helper hooks, utility functions, or separate files. 'use client' at the top. No 'any' types.
 
-## Required imports (use these exact names, no substitutions)
-\`\`\`
-'use client'
-import { useEffect, useRef } from 'react'
-\`\`\`
-USE these hooks and no others. DO NOT invent useSpringValue, useAnimatedValue, or helpers not shown above. No framer-motion.
+A full-bleed canvas dot grid where dots are magnetically pulled toward the cursor and spring back when it leaves. No overlay text.
 
-## Constants (exact)
-SPACING=22, DOT_RADIUS=1.5, INFLUENCE_R=180, SPRING_K=0.055, DAMPING=0.11, MAG_STRENGTH=16, LERP_FACTOR=0.06, MOUSE_LERP=0.14.
+Constants (exact):
+- SPACING = 22 (px between dot centres)
+- DOT_RADIUS = 1.5
+- INFLUENCE_R = 180
+- SPRING_K = 0.055
+- DAMPING = 0.11 (velocity *= 1 - DAMPING)
+- MAG_STRENGTH = 16
+- LERP_FACTOR = 0.06 (hoverStr ease)
+- MOUSE_LERP = 0.14 (smoothed mouse)
 
-## Refs
-containerRef<HTMLDivElement>, canvasRef<HTMLCanvasElement>, mouseRef<{x,y}|null>, hoverStrRef (number, 0), isDarkRef (bool, true).
+Dot: { restX, restY, x, y, vx, vy }. Build grid: cols = ceil(w/SPACING)+1, rows = ceil(h/SPACING)+1, ox = (w%SPACING)/2, oy = (h%SPACING)/2. Preserve existing dots across resizes via a Map keyed on \`restX,restY\`.
 
-## Canvas DPR scaffolding (inline exactly)
-\`\`\`
-const dpr = window.devicePixelRatio || 1
-const rect = canvas.getBoundingClientRect()
-const cw = rect.width, ch = rect.height
-canvas.width = Math.round(cw * dpr)
-canvas.height = Math.round(ch * dpr)
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-\`\`\`
+Canvas DPR: rect = getBoundingClientRect; canvas.width = round(rect.width*dpr); canvas.height = round(rect.height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0).
 
-## Grid build
-cols = ceil(cw/22)+1; rows = ceil(ch/22)+1; ox = (cw%22)/2; oy = (ch%22)/2. Each dot: { restX, restY, x, y, vx, vy }. On rebuild preserve prior dots via Map keyed \`\${rx},\${ry}\`.
+Per frame:
+- hoverStr += (target - hoverStr) * LERP_FACTOR, target = 1 if pointer else 0
+- If pointer: smoothMx += (rawX - smoothMx) * MOUSE_LERP (snap on first contact via a -99999 sentinel). Else reset sentinel.
+- clearRect. fillStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(28,25,22,0.4)'.
+- For each dot:
+  - If hoverStr > 0.001 and dist2 < INFLUENCE_R^2 and dist2 > 0.01: t = 1 - dist/INFLUENCE_R; force = t*t*MAG_STRENGTH*hoverStr; vx += (-dx/dist)*force; vy += (-dy/dist)*force (pulls toward cursor).
+  - Spring: vx += (restX - x)*SPRING_K; vy += (restY - y)*SPRING_K.
+  - vx *= 1 - DAMPING; vy *= 1 - DAMPING. Integrate. Draw arc radius DOT_RADIUS.
 
-## Animation loop
-target = mouseRef.current ? 1 : 0; hoverStr += (target - hoverStr) * 0.06.
-Smoothed mouse: sentinel smoothMx = smoothMy = -99999; on first contact snap to raw, then lerp by 0.14; on leave reset sentinel.
-clearRect. fillStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(28,25,22,0.4)'.
-For each dot:
-- if hoverStr > 0.001: dx=d.x-mx, dy=d.y-my, dist2=dx²+dy². If dist2 < 180² and > 0.01: dist=sqrt(dist2); t = 1 - dist/180; force = t*t*16*hoverStr; d.vx += (-dx/dist)*force; d.vy += (-dy/dist)*force.
-- d.vx += (restX-x)*0.055; d.vy += (restY-y)*0.055
-- d.vx *= 0.89; d.vy *= 0.89
-- d.x += d.vx; d.y += d.vy
-- ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2); ctx.fill()
+Theme: detect via closest('[data-card-theme]').classList.contains('dark'), fallback documentElement. MutationObserver on both. Background: dark '#110F0C', light '#F5F1EA' — set via container inline style.
 
-## Theme detection
-Check el.closest('[data-card-theme]'); if present use its class 'dark', else documentElement.classList.contains('dark'). Apply → isDarkRef.current; set containerRef.current.style.background = dark ? '#110F0C' : '#F5F1EA'. MutationObserver(attributeFilter ['class']) on documentElement and on the card wrapper if present. Disconnect on unmount.
+Root: div ref relative h-full w-full overflow-hidden with mouse/touch handlers updating mouseRef to { x: clientX-rect.left, y: clientY-rect.top }; leave/end sets null. Canvas absolute inset-0 100%/100%.
 
-## JSX
-\`\`\`
-<div ref={containerRef} className="relative h-full w-full overflow-hidden"
-     style={{ background: '#110F0C' }}
-     onMouseMove={e => update(e.clientX,e.clientY)}
-     onMouseLeave={() => { mouseRef.current = null }}
-     onTouchMove={e => { const t = e.touches[0]; if (t) update(t.clientX,t.clientY) }}
-     onTouchEnd={() => { mouseRef.current = null }}>
-  <canvas ref={canvasRef} className="absolute inset-0" style={{ width:'100%', height:'100%' }} />
-</div>
-\`\`\`
-update sets mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }.
+Cleanup: alive flag, cancelAnimationFrame, ResizeObserver on parentElement, observer.disconnect.
 
-## Cleanup
-let alive=true; cancelAnimationFrame(animId); ResizeObserver.observe(canvas.parentElement) calling build on change — disconnect on unmount.`,
-
-  V0: `Create a React client component named \`MagneticDots\`. Single file, TypeScript, \`'use client'\` at the top. Use \`useEffect\` and \`useRef\` from React — no other libraries, no framer-motion. The component fills its parent (\`h-full w-full\`) and supports both light and dark themes. There is no overlay text — this one is all about the dots.
-
-## The visual
-A full-bleed canvas covered in a quiet, perfectly-regular grid of tiny dots. At rest the grid is still and orderly. When the cursor enters, the dots near it lean toward the pointer like iron filings pulled toward a magnet — the closer they are, the harder they're yanked. When the cursor leaves, every dot glides back to its home position on a soft spring, slightly overshooting and settling. The feeling should be gooey and physical, not snappy: think a slow-motion magnet dragging through a bed of sand. Fast cursor swipes should feel smooth, not jittery — the field lags and catches up rather than teleporting.
-
-## Theme and background
-Detect theme by looking up \`.closest('[data-card-theme]')\` on the container and checking for a \`.dark\` class, falling back to \`document.documentElement.classList.contains('dark')\`. Watch for changes with a \`MutationObserver\` on both \`documentElement\` and the card wrapper (if present) listening for class attribute changes. Store the current theme in an \`isDarkRef\` so the render loop can read it without rerendering.
-
-Background is set as an inline style on the outer container: \`#110F0C\` on dark (a very deep warm near-black), \`#F5F1EA\` on light (a warm off-white). The dots themselves are drawn as \`rgba(255,255,255,0.5)\` on dark and \`rgba(28,25,22,0.4)\` on light — soft but clearly visible against the backgrounds.
-
-## Key constants (use these exact numbers)
-- \`SPACING = 22\` — pixels between dot centres
-- \`DOT_RADIUS = 1.5\` — canvas arc radius
-- \`INFLUENCE_R = 180\` — magnetic pull radius in pixels
-- \`SPRING_K = 0.055\` — spring stiffness toward rest (soft, so dots float back rather than snap)
-- \`DAMPING = 0.11\` — velocity decays by 11% per frame, so \`vx *= 0.89\` each step (lets the dots glide)
-- \`MAG_STRENGTH = 16\` — peak magnetic force at the cursor centre
-- \`LERP_FACTOR = 0.06\` — ease factor for the overall hover strength on enter/leave (a gentle fade in and out of magnetism)
-- \`MOUSE_LERP = 0.14\` — ease factor for the smoothed cursor position, so fast swipes drag the field instead of teleporting it
-
-## Canvas setup
-Standard DPR scaffolding: read \`devicePixelRatio\`, measure the canvas with \`getBoundingClientRect\`, set \`canvas.width/height\` to the rounded scaled pixels, and \`ctx.setTransform(dpr,0,0,dpr,0,0)\`. Rebuild on resize via a \`ResizeObserver\` on \`canvas.parentElement\`.
-
-## Building the dot grid
-Each dot is an object \`{ restX, restY, x, y, vx, vy }\` — its rest position (its home) plus its live position and velocity. Compute \`cols = Math.ceil(cw/SPACING) + 1\` and \`rows = Math.ceil(ch/SPACING) + 1\` (one extra row/column so the grid fully bleeds past the edges), then offset by \`ox = (cw % SPACING) / 2\` and \`oy = (ch % SPACING) / 2\` so the grid sits visually centred. On rebuild (resize), preserve any existing dots by keying a \`Map\` on \`\${restX},\${restY}\` and reusing matching entries — this keeps the physics state continuous through resizes instead of snapping everything back to rest.
-
-## The frame loop
-On every animation frame:
-
-1. Ease an overall \`hoverStr\` value toward \`1\` when the pointer is present and toward \`0\` when it isn't, using \`hoverStr += (target - hoverStr) * 0.06\`. This gives a gentle fade-in and fade-out of the whole magnetic effect so it never pops on or off.
-2. Smooth the cursor position: keep two variables \`smoothMx\` / \`smoothMy\` initialised to an off-screen sentinel like \`-99999\`. On the first frame the pointer is present, snap them to the raw cursor so there's no initial lag. On subsequent frames, \`smoothMx += (raw.x - smoothMx) * 0.14\` and the same for Y. When the pointer leaves, reset both to the sentinel. This is what makes fast swipes feel like dragging a heavy magnet through the field rather than snapping to it.
-3. Clear the canvas. Set \`fillStyle\` to the theme-appropriate dot colour above.
-4. For each dot, compute the squared distance to the smoothed cursor. If \`hoverStr > 0.001\` and the dot is within \`INFLUENCE_R\` (and not sitting exactly on the cursor), compute a soft falloff \`t = 1 - dist/INFLUENCE_R\` and a force of \`t * t * MAG_STRENGTH * hoverStr\`. Add \`(-dx/dist) * force\` to \`vx\` and \`(-dy/dist) * force\` to \`vy\` — the negative sign pulls the dot toward the cursor. The squared falloff means dots right under the cursor get a hard tug while dots near the edge of the radius barely feel anything.
-5. Always apply the spring pull back toward rest: \`vx += (restX - x) * 0.055\`, \`vy += (restY - y) * 0.055\`. Then apply damping: \`vx *= 0.89\`, \`vy *= 0.89\`. Then integrate: \`x += vx\`, \`y += vy\`.
-6. Draw the dot as a filled circle at its current \`(x, y)\` with radius \`1.5\`.
-
-The combination of soft stiffness, gentle damping, and the eased hover strength is what gives the grid its floaty, gooey settle — don't be tempted to stiffen it up.
-
-## Interaction
-Attach \`onMouseMove\`, \`onMouseLeave\`, \`onTouchMove\`, and \`onTouchEnd\` to the outer container. On move, read the canvas's \`getBoundingClientRect\` and store \`{ x: clientX - rect.left, y: clientY - rect.top }\` in \`mouseRef.current\`. On leave/end, set it to \`null\` so the frame loop knows to ease \`hoverStr\` back to 0 and reset the smoothed cursor sentinel. Touch follows the same pattern using \`e.touches[0]\`.
-
-## Structure
-\`\`\`
-<div ref={containerRef} className="relative h-full w-full overflow-hidden" style={{ background: '#110F0C' }} ...handlers>
-  <canvas ref={canvasRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
-</div>
-\`\`\`
-The initial inline background is fine as \`#110F0C\` — the theme detection effect will immediately overwrite it to match the current theme.
-
-## Cleanup
-Use an \`alive\` flag inside the physics effect and guard the frame loop with it. On unmount: set \`alive = false\`, \`cancelAnimationFrame\`, disconnect the \`ResizeObserver\`, and disconnect the theme \`MutationObserver\`. No leaks.
-
-The finished piece should feel like a quiet magnetic field — orderly and still until you enter it, then a soft local warp that follows the cursor and exhales back to rest when you leave.`,
+## Typography
+- Font: project default sans-serif`,
 }

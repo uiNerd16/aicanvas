@@ -66,9 +66,15 @@ export function Sidebar() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [, startTransition] = useTransition()
 
-  // Sync local state when the URL changes from outside (back/forward, clear button).
+  // Sync local state when the URL changes from outside (back/forward, clear button)
+  // but NOT when we're the ones who changed it (typing). Compare against a ref
+  // to avoid overwriting fast keystrokes with stale URL state.
+  const lastPushed = useRef(urlQuery)
   useEffect(() => {
-    setSearchValue(urlQuery)
+    if (urlQuery !== lastPushed.current) {
+      setSearchValue(urlQuery)
+    }
+    lastPushed.current = urlQuery
   }, [urlQuery])
 
   // ⌘K / Ctrl+K focuses the search input.
@@ -85,6 +91,7 @@ export function Sidebar() {
 
   const updateQuery = (next: string) => {
     setSearchValue(next)
+    lastPushed.current = next
     const params = new URLSearchParams(searchParams.toString())
     if (next) params.set('q', next)
     else params.delete('q')
