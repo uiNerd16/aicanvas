@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, X } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, PenNib, X } from '@phosphor-icons/react'
 import { CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
@@ -33,6 +33,7 @@ type Section = {
 
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
+  { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
   { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
 ]
 
@@ -46,7 +47,7 @@ export function Sidebar() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
-  const isHome = pathname === '/'
+  const isHome = pathname === '/components'
   const activeCategory = isHome ? (searchParams.get('category') ?? 'All Components') : null
 
   // Hide the global sidebar on design-system preview routes so the design
@@ -96,7 +97,7 @@ export function Sidebar() {
     else params.delete('q')
     const qs = params.toString()
     startTransition(() => {
-      router.replace(qs ? `/?${qs}` : '/', { scroll: false })
+      router.replace(qs ? `/components?${qs}` : '/components', { scroll: false })
     })
   }
 
@@ -113,7 +114,7 @@ export function Sidebar() {
       {/* ── Logo ── */}
       <div className="flex h-14 shrink-0 items-center border-b border-sand-300 px-4 dark:border-sand-800">
         <Link
-          href="/home"
+          href="/"
           className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
         >
           <img src="/ai-canvas-icon.svg" alt="" width={20} height={17} className="shrink-0" />
@@ -169,7 +170,7 @@ export function Sidebar() {
             <div key={section.title} className="mb-3">
               {section.title === 'Components' ? (
                 <Link
-                  href="/"
+                  href="/components"
                   className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
                     activeCategory === 'All Components'
                       ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
@@ -204,7 +205,7 @@ export function Sidebar() {
                 <ul className="space-y-0.5">
                   {section.labels.map((label) => {
                     const isActive = label === activeCategory
-                    const href = `/?category=${encodeURIComponent(label)}`
+                    const href = `/components?category=${encodeURIComponent(label)}`
                     const count = countByLabel(label)
                     return (
                       <li key={label}>

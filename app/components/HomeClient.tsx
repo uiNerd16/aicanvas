@@ -59,7 +59,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
       <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:grid">
-        <Link href="/" className="shrink-0 text-sm font-semibold text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">
+        <Link href="/components" className="shrink-0 text-sm font-semibold text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">
           Components
         </Link>
 
@@ -76,7 +76,7 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
       <div className="flex-1 bg-sand-200 p-4 dark:bg-sand-950 md:p-6">
         {/* Mobile breadcrumb — shown above cards on small screens */}
         <p className="mb-4 text-sm font-semibold md:hidden">
-          <Link href="/" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
+          <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
           {category && <span className="text-olive-500">/{category}</span>}
         </p>
         {filtered.length > 0 ? (

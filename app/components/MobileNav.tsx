@@ -16,7 +16,7 @@ import {
   Cube,
   DiamondsFour,
   MagnifyingGlass,
-  SquareHalf,
+  PenNib,
 } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
@@ -45,8 +45,8 @@ type Section = {
 
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
+  { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
   { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
-  { title: 'Hero Sections', icon: <SquareHalf weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 function countByLabel(label: string) {
@@ -61,7 +61,7 @@ export function MobileNav() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const isHome = pathname === '/'
+  const isHome = pathname === '/components'
   const activeCategory = isHome ? (searchParams.get('category') ?? 'All Components') : null
 
   const [open, setOpen] = useState(false)
@@ -117,7 +117,7 @@ export function MobileNav() {
     <>
       {/* ── Mobile top bar ── */}
       <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:hidden">
-        <Link href="/home" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
+        <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
           <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
           AI Canvas
         </Link>
@@ -158,7 +158,7 @@ export function MobileNav() {
               {/* Drawer header */}
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-sand-300 px-4 dark:border-sand-800">
                 <Link
-                  href="/home"
+                  href="/"
                   className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
                   onClick={() => setOpen(false)}
                 >
@@ -221,7 +221,7 @@ export function MobileNav() {
                     <div key={section.title} className="mb-3">
                       {section.title === 'Components' ? (
                         <Link
-                          href="/"
+                          href="/components"
                           onClick={() => setOpen(false)}
                           className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
                             activeCategory === 'All Components'
@@ -257,7 +257,7 @@ export function MobileNav() {
                         <ul className="space-y-0.5">
                           {section.labels.map((label) => {
                             const isActive = label === activeCategory
-                            const href = `/?category=${encodeURIComponent(label)}`
+                            const href = `/components?category=${encodeURIComponent(label)}`
                             const count = countByLabel(label)
                             return (
                               <li key={label}>

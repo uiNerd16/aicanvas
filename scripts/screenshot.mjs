@@ -69,6 +69,7 @@ const ALL_SLUGS = [
   'meet-the-crew',
   'ai-job-cards',
   'task-cards',
+  'danger-stripes',
 ]
 
 const arg   = process.argv[2]
@@ -251,6 +252,13 @@ const INTERACTIONS = {
     // Hover over the front card in the first column (left third)
     await page.mouse.move(box.x + box.width * 0.17, box.y + box.height * 0.45)
     await preview.page().waitForTimeout(400)
+  },
+
+  // Danger Stripes — hover over the middle stripe to trigger jitter
+  'danger-stripes': async (preview, page) => {
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.47)
+    await preview.page().waitForTimeout(300)
   },
 }
 
