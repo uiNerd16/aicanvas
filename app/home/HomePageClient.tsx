@@ -15,10 +15,13 @@ import {
   HandTap,
   CaretLeft,
   CaretRight,
+  Terminal,
+  GithubLogo,
+  XLogo,
 } from '@phosphor-icons/react'
 import { HeaderSocials } from '../components/HeaderSocials'
 import type { ComponentMeta } from '../lib/component-registry'
-import { GITHUB_URL } from '../lib/config'
+import { GITHUB_URL, X_URL } from '../lib/config'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -608,7 +611,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
 export function HomePageClient({ total, showcase, carouselItems }: Props) {
   return (
-    <div className="flex min-h-full flex-col bg-sand-950">
+    <div className="flex min-h-full flex-col overflow-x-hidden bg-sand-950">
 
       {/* ── Top bar ── */}
       <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:flex">
@@ -616,7 +619,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         <HeaderSocials />
       </div>
 
-      <main className="mx-auto w-full max-w-[720px] px-6 py-12 sm:px-8 sm:py-20">
+      <main className="mx-auto w-full max-w-[720px] px-6 pt-12 pb-0 sm:px-8 sm:pt-20">
 
         {/* ── Hero ── */}
         <section className="flex flex-col items-center text-center">
@@ -659,7 +662,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             className="mt-7 flex flex-wrap items-center justify-center gap-3"
           >
             <Link
-              href="/"
+              href="/components"
               className="flex items-center gap-1.5 rounded-xl bg-olive-500 px-5 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
             >
               Browse Components
@@ -785,44 +788,74 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           </div>
         </section>
 
-        {/* ── How it works ── */}
-        <section className="mt-16 sm:mt-24">
+        {/* ── How it works — vertical timeline ── */}
+        <section id="how-remix" className="mt-16 sm:mt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.35 }}
-            className="mb-6"
+            className="mb-8"
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">How it works</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">Three steps. Your way.</h2>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.35 }}
-            className="flex items-start"
-          >
-            <div className="flex-1">
-              <span className="text-3xl font-black tabular-nums text-sand-700">01</span>
-              <h3 className="mt-2 text-sm font-bold text-sand-50">Browse</h3>
-              <p className="mt-1 text-sm leading-relaxed text-sand-500">Find the perfect animated component or explore a full design system from the curated, categorized collection.</p>
-            </div>
-            <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
-            <div className="flex-1">
-              <span className="text-3xl font-black tabular-nums text-sand-700">02</span>
-              <h3 className="mt-2 text-sm font-bold text-sand-50">Install or remix</h3>
-              <p className="mt-1 text-sm leading-relaxed text-sand-500">Copy the CLI command to install directly, or hit Remix with AI to try it in Claude Code, Lovable, or V0.</p>
-            </div>
-            <ArrowRight weight="regular" size={16} className="mx-4 mt-5 shrink-0 text-sand-600" />
-            <div className="flex-1">
-              <span className="text-3xl font-black tabular-nums text-sand-700">03</span>
-              <h3 className="mt-2 text-sm font-bold text-sand-50">Ship</h3>
-              <p className="mt-1 text-sm leading-relaxed text-sand-500">The component is in your project. Customize it, extend it, or ship it as-is.</p>
-            </div>
-          </motion.div>
+          <div className="relative flex flex-col gap-0">
+            {/* Connecting dotted line */}
+            <div
+              className="absolute left-[19px] top-6 bottom-16 w-px overflow-hidden"
+              style={{
+                backgroundImage: 'radial-gradient(circle, rgba(79,79,76,0.5) 1px, transparent 1px)',
+                backgroundSize: '1px 8px',
+                animation: 'dotFlow 1.5s linear infinite',
+              }}
+            />
+            <style>{`@keyframes dotFlow { from { background-position-y: 0; } to { background-position-y: 8px; } }`}</style>
+
+            {[
+              {
+                num: '01',
+                icon: <MagnifyingGlass weight="regular" size={16} />,
+                title: 'Browse',
+                desc: 'Find the perfect animated component from the curated, categorized collection.',
+              },
+              {
+                num: '02',
+                icon: <Terminal weight="regular" size={16} />,
+                title: 'Install or remix',
+                desc: 'Copy the CLI command to install directly, or hit Remix with AI to try it in Claude Code, Lovable, or V0.',
+              },
+              {
+                num: '03',
+                icon: <RocketLaunch weight="regular" size={16} />,
+                title: 'Ship',
+                desc: 'The component is in your project. Customize it, extend it, or ship it as-is.',
+              },
+            ].map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.4, delay: i * 0.12 }}
+                className="flex items-start gap-5 py-5"
+              >
+                {/* Node on the timeline */}
+                <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-700 bg-sand-900 text-sand-300 shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+                  {step.icon}
+                </div>
+                {/* Content */}
+                <div className="flex-1 pt-0.5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base font-bold tabular-nums text-olive-500">{step.num}</span>
+                    <h3 className="text-base font-bold text-sand-50">{step.title}</h3>
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-sand-500">{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </section>
 
 
@@ -890,10 +923,10 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               Everything is free. Everything is open source.
             </h2>
             <p className="relative mt-2 text-sm text-sand-500">
-              {total}+ components and design systems. Code and AI prompts. Always.
+              {total}+ AI-native components with prompts for Claude Code, Lovable, and V0. Design systems coming soon.
             </p>
             <Link
-              href="/"
+              href="/components"
               className="relative mt-6 inline-flex items-center gap-1.5 rounded-xl bg-olive-500 px-5 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
             >
               Browse Components
@@ -902,7 +935,31 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           </motion.div>
         </section>
 
-        <div className="h-16" />
+        {/* ── Footer ── */}
+        <footer className="mt-20 pt-8 pb-6">
+          <div className="flex items-center justify-between">
+            <img src="/icon.svg" alt="AI Canvas" className="h-5 w-5" />
+            <p className="text-xs text-sand-500">AI native components. Free and open source.</p>
+            <div className="flex items-center gap-3">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sand-500 transition-colors hover:text-sand-200"
+              >
+                <GithubLogo weight="regular" size={18} />
+              </a>
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sand-500 transition-colors hover:text-sand-200"
+              >
+                <XLogo weight="regular" size={18} />
+              </a>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   )

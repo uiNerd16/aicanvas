@@ -99,6 +99,8 @@ import LabelCards from '../../components-workspace/label-cards'
 import { prompts as labelCardsPrompts } from '../../components-workspace/label-cards/prompts'
 import AiJobCards from '../../components-workspace/ai-job-cards'
 import { prompts as aiJobCardsPrompts } from '../../components-workspace/ai-job-cards/prompts'
+import DangerStripes from '../../components-workspace/danger-stripes'
+import { prompts as dangerStripesPrompts } from '../../components-workspace/danger-stripes/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -896,6 +898,20 @@ Requirements:
     PreviewComponent: AiJobCards,
     code: componentCodes['ai-job-cards'],
     prompts: aiJobCardsPrompts,
+  },
+  {
+    slug: 'danger-stripes',
+    name: 'Danger Stripes',
+    image: 'https://ik.imagekit.io/aitoolkit/danger-stripes.png',
+    description: 'Three animated caution-tape stripes on a dark canvas. Hover to trigger chaotic jitter, click to intensify.',
+    badge: 'New',
+    tags: [
+      { label: 'Creative', accent: true },
+      { label: 'Interactive' },
+    ],
+    PreviewComponent: DangerStripes,
+    code: componentCodes['danger-stripes'],
+    prompts: dangerStripesPrompts,
   },
 ]
 

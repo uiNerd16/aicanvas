@@ -45,7 +45,7 @@ export default function AboutPage() {
       {/* ── Top bar ── */}
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:grid">
         <div />
-        <Link href="/" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
+        <Link href="/components" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
           /About
         </Link>
         <div className="flex items-center justify-end gap-1">
@@ -147,8 +147,31 @@ export default function AboutPage() {
           </div>
         </Section>
 
-        {/* Bottom spacing */}
-        <div className="h-20" />
+        {/* ── Footer ── */}
+        <footer className="mt-20 pt-8 pb-6">
+          <div className="flex items-center justify-between">
+            <img src="/icon.svg" alt="AI Canvas" className="h-5 w-5" />
+            <p className="text-xs text-sand-500">AI native components. Free and open source.</p>
+            <div className="flex items-center gap-3">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sand-500 transition-colors hover:text-sand-200"
+              >
+                <GithubLogo weight="regular" size={18} />
+              </a>
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sand-500 transition-colors hover:text-sand-200"
+              >
+                <XLogo weight="regular" size={18} />
+              </a>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   )
