@@ -70,6 +70,8 @@ const ALL_SLUGS = [
   'ai-job-cards',
   'task-cards',
   'danger-stripes',
+  'sticker-wall',
+  'peel-corner-reveal',
 ]
 
 const arg   = process.argv[2]
@@ -259,6 +261,11 @@ const INTERACTIONS = {
     const box = await preview.boundingBox()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.47)
     await preview.page().waitForTimeout(300)
+  },
+
+  // Sticker Wall — let the physics simulation settle so stickers form a natural pile
+  'sticker-wall': async (preview) => {
+    await preview.page().waitForTimeout(3500)
   },
 }
 

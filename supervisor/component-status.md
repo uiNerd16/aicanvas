@@ -2,6 +2,8 @@
 
 | Component | Stage | Notes |
 |---|---|---|
+| murmuration | idea | Underwater fish school — boids flocking (600 cap), countershaded fish, shark cursor with tail sway, caustics, bubbles. Parked at /preview/idea-one for revision — not integrated. |
+| sticker-wall | integrated | Feedback Wall — matter.js physics, 10 quote + 12 emoji seeds, pastel stickers with 32px radius, periwinkle Send key, dual-theme, title + subtitle, settled-pile screenshot. Promoted from /preview/idea-two. |
 | easter-rabbit | deleted | Removed by user request |
 | traveldeck | integrated | Built before agent system — slug renamed from floating-cards (folder unchanged) |
 | text-blur-reveal | integrated | Built before agent system |
@@ -38,3 +40,4 @@
 | elastic-string | deleted | Removed by user request |
 | andromeda-button | integrated | First DS promotion — re-export wrapper around Andromeda design system Button, full showcase layout (Variants/Sizes/With icon/Disabled), boundary retyping pattern |
 | ai-job-cards | integrated | Three swipeable card stacks (Anthropic/Perplexity/Google), brand logos, bookmark toggle, spring animations — mobile fix applied (h-full→min-h-screen, alignItems:stretch on narrow) |
+| peel-corner-reveal | integrated | "Peel to Scan" — 2D SVG peel, tap-toggle with hover-peek, Wi-Fi QR reveal (qrcode.react), inverted light/dark card, pulsing Wi-Fi arcs, +31° QR rotation, inlined useTheme for copy-paste readiness. Registry + screenshot live. |
