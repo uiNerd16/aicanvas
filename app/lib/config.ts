@@ -5,4 +5,4 @@ export const CONTACT_EMAIL = 'aicanvas.me@gmail.com'
 
 // Update this date whenever you push new components to production.
 // Any component with badge: 'New' will show the badge for 96 hours from this date.
-export const LAST_DEPLOY = '2026-04-14'
+export const LAST_DEPLOY = '2026-04-18'

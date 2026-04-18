@@ -101,6 +101,10 @@ import AiJobCards from '../../components-workspace/ai-job-cards'
 import { prompts as aiJobCardsPrompts } from '../../components-workspace/ai-job-cards/prompts'
 import DangerStripes from '../../components-workspace/danger-stripes'
 import { prompts as dangerStripesPrompts } from '../../components-workspace/danger-stripes/prompts'
+import StickerWall from '../../components-workspace/sticker-wall'
+import { prompts as stickerWallPrompts } from '../../components-workspace/sticker-wall/prompts'
+import PeelCornerReveal from '../../components-workspace/peel-corner-reveal'
+import { prompts as peelCornerRevealPrompts } from '../../components-workspace/peel-corner-reveal/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -903,7 +907,7 @@ Requirements:
     slug: 'danger-stripes',
     name: 'Danger Stripes',
     image: 'https://ik.imagekit.io/aitoolkit/danger-stripes.png',
-    description: 'Three animated caution-tape stripes on a dark canvas. Hover to trigger chaotic jitter, click to intensify.',
+    description: 'Three crossing caution-tape stripes on orange. Hover to shake, click to intensify.',
     badge: 'New',
     tags: [
       { label: 'Creative', accent: true },
@@ -912,6 +916,37 @@ Requirements:
     PreviewComponent: DangerStripes,
     code: componentCodes['danger-stripes'],
     prompts: dangerStripesPrompts,
+  },
+  {
+    slug: 'sticker-wall',
+    name: 'Sticker Wall',
+    image: 'https://ik.imagekit.io/aitoolkit/sticker-wall.png',
+    description: 'A draggable sticker card wall. Drop notes, toss emoji, pile them up with real 2D physics.',
+    badge: 'New',
+    tags: [
+      { label: 'Interactive', accent: true },
+      { label: 'Framer Motion' },
+      { label: 'Matter.js' },
+    ],
+    PreviewComponent: StickerWall,
+    code: componentCodes['sticker-wall'],
+    prompts: stickerWallPrompts,
+  },
+  {
+    slug: 'peel-corner-reveal',
+    name: 'Peel to Scan',
+    image: 'https://ik.imagekit.io/aitoolkit/peel-corner-reveal.png',
+    description: 'A portrait card whose corner peels on tap, revealing a scannable Wi-Fi QR code.',
+    badge: 'New',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Framer Motion' },
+      { label: 'SVG' },
+    ],
+    dualTheme: true,
+    PreviewComponent: PeelCornerReveal,
+    code: componentCodes['peel-corner-reveal'],
+    prompts: peelCornerRevealPrompts,
   },
 ]
 

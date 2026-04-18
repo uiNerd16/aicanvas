@@ -5,21 +5,34 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
-const STRIPE_TEXT = 'WORK IN PROGRESS \u00A0\u2022\u00A0 DO NOT CLICK OR HOVER \u00A0\u2022\u00A0 DANGER'
+const STRIPE_TEXT = 'WORK IN PROGRESS \u00A0\u2715\u00A0 DO NOT CLICK OR HOVER \u00A0\u2715\u00A0 DANGER'
 
 const STRIPES = [
-  { rotate: -20, top: '40%' },
-  { rotate: 12, top: '47%' },
-  { rotate: -8, top: '54%' },
+  { rotate: -20, top: '40%', bg: '#0a0a0a', fg: '#ffffff' },
+  { rotate: 12, top: '47%', bg: '#ffffff', fg: '#0a0a0a' },
+  { rotate: -8, top: '54%', bg: '#2a2a2a', fg: '#ffffff' },
 ]
 
-function RepeatingText() {
-  const repeated = `${STRIPE_TEXT} \u00A0\u2022\u00A0 `.repeat(10)
+const ACCENT_COLOR = '#FF6B1A'
+
+function RepeatingText({ color }: { color: string }) {
   return (
-    <div className="flex items-center whitespace-nowrap">
-      <span className="text-sm font-black tracking-widest text-black uppercase sm:text-base">
-        {repeated}
-      </span>
+    <div className="flex items-center whitespace-nowrap text-sm font-black tracking-widest uppercase sm:text-base">
+      {Array.from({ length: 10 }, (_, i) => (
+        <span key={i} style={{ color }}>
+          {STRIPE_TEXT.split('\u2715').map((chunk, j, arr) => (
+            <span key={j}>
+              {chunk}
+              {j < arr.length - 1 && (
+                <span style={{ color: ACCENT_COLOR, fontSize: '1.4em' }}>{'\u2715'}</span>
+              )}
+            </span>
+          ))}
+          {'\u00A0'}
+          <span style={{ color: ACCENT_COLOR, fontSize: '1.4em' }}>{'\u2715'}</span>
+          {'\u00A0 '}
+        </span>
+      ))}
     </div>
   )
 }
@@ -36,15 +49,13 @@ export default function DangerStripes() {
   const stripesRef = useRef<(HTMLDivElement | null)[]>([])
 
   const animateStripes = useCallback(() => {
-    // Ramp intensity up or down
     if (hoveringRef.current || clickedRef.current) {
       const target = clickedRef.current ? 3 : 1
       intensityRef.current += (target - intensityRef.current) * 0.15
     } else {
-      intensityRef.current *= 0.92 // decay
+      intensityRef.current *= 0.92
     }
 
-    // Stop when fully settled
     if (intensityRef.current < 0.005 && !hoveringRef.current && !clickedRef.current) {
       intensityRef.current = 0
       stripesRef.current.forEach((el, idx) => {
@@ -98,7 +109,7 @@ export default function DangerStripes() {
   }, [])
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#0a0a0a]">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#FF6B1A]">
       <div
         className="relative h-full w-full overflow-hidden select-none"
         style={{ minHeight: '100vh' }}
@@ -107,11 +118,11 @@ export default function DangerStripes() {
           <motion.div
             key={i}
             ref={(el) => { stripesRef.current[i] = el }}
-            className="absolute left-[-40%] flex h-[44px] w-[180%] items-center overflow-hidden sm:h-[52px]"
+            className="absolute left-[-40%] flex h-[60px] w-[180%] items-center overflow-hidden sm:h-[72px]"
             style={{
               top: stripe.top,
-              background: 'linear-gradient(180deg, #FFE44D 0%, #FFD600 50%, #E6BF00 100%)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.8), 0 1px 8px rgba(0,0,0,0.6)',
+              background: stripe.bg,
+              boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 8px rgba(0,0,0,0.3)',
               willChange: 'transform',
               cursor: 'pointer',
             }}
@@ -131,7 +142,7 @@ export default function DangerStripes() {
               setTimeout(triggerLeave, 600)
             }}
           >
-            <RepeatingText />
+            <RepeatingText color={stripe.fg} />
           </motion.div>
         ))}
       </div>
