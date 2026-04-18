@@ -2,7 +2,7 @@
 // npm install framer-motion qrcode.react
 
 import { useEffect, useRef, useState } from 'react'
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react'
 import {
   motion,
   useMotionTemplate,
@@ -13,21 +13,27 @@ import {
 } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 
-function useTheme(): 'light' | 'dark' {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof document === 'undefined') return 'dark'
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  })
+function useTheme(ref: RefObject<HTMLElement | null>): 'light' | 'dark' {
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   useEffect(() => {
     if (typeof document === 'undefined') return
-    const root = document.documentElement
-    const update = () =>
-      setTheme(root.classList.contains('dark') ? 'dark' : 'light')
+    const el = ref.current
+    const update = () => {
+      const card = el?.closest('[data-card-theme]') ?? null
+      const dark = card
+        ? card.classList.contains('dark')
+        : document.documentElement.classList.contains('dark')
+      setTheme(dark ? 'dark' : 'light')
+    }
     update()
     const observer = new MutationObserver(update)
-    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    const cardWrapper = el?.closest('[data-card-theme]')
+    if (cardWrapper) {
+      observer.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
+    }
     return () => observer.disconnect()
-  }, [])
+  }, [ref])
   return theme
 }
 
@@ -66,7 +72,8 @@ const OPEN_H_PCT = 0.9
 const BOB_AMPLITUDE = 2.4
 
 export default function PeelCornerReveal() {
-  const theme = useTheme()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const theme = useTheme(containerRef)
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const qrGroupRef = useRef<SVGGElement>(null)
@@ -195,11 +202,6 @@ export default function PeelCornerReveal() {
     ([b, g]) => b * g,
   )
 
-  // Drop-shadow depth grows with progress (applied via CSS filter on the card group)
-  const shadowOffsetY = useTransform(progress, [0, 1], [10, 18])
-  const shadowBlur = useTransform(progress, [0, 1], [14, 26])
-  const shadowAlpha = useTransform(progress, [0, 1], [0.35, 0.5])
-  const shadowFilter = useMotionTemplate`drop-shadow(0px ${shadowOffsetY}px ${shadowBlur}px rgba(0,0,0,${shadowAlpha}))`
 
   function handleToggle() {
     setIsOpen((v) => !v)
@@ -251,6 +253,7 @@ export default function PeelCornerReveal() {
 
   return (
     <div
+      ref={containerRef}
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-6 py-10"
       style={{ background: PAGE_BG }}
     >
@@ -303,8 +306,8 @@ export default function PeelCornerReveal() {
             </clipPath>
           </defs>
 
-          {/* Card body (with BR corner carved off) — CSS drop-shadow via motion filter */}
-          <motion.g style={{ filter: shadowFilter }}>
+          {/* Card body (with BR corner carved off) */}
+          <motion.g>
             <motion.polygon points={cardPoints} fill={CARD_FILL} />
           </motion.g>
 
@@ -314,7 +317,7 @@ export default function PeelCornerReveal() {
                 from the dot on a continuous loop, staggered so the signal
                 visibly radiates. */}
             <g
-              transform={`translate(${CARD_X + 24}, ${CARD_Y + 22}) scale(1.8)`}
+              transform={`translate(${CARD_X + 24}, ${CARD_Y + 22}) scale(1.5)`}
               stroke={PEEL_FILL}
               strokeWidth={1.6}
               strokeLinecap="round"
@@ -408,12 +411,8 @@ export default function PeelCornerReveal() {
             </text>
           </g>
 
-          {/* Peel triangle (green flap) — drop shadow simulates light from top-left */}
-          <motion.g
-            style={{
-              filter: 'drop-shadow(6px 8px 10px rgba(0,0,0,0.28))',
-            }}
-          >
+          {/* Peel triangle (green flap) */}
+          <motion.g>
             <motion.polygon
               points={peelPoints}
               fill="url(#pcr-peel-gradient)"

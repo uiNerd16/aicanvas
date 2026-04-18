@@ -72,6 +72,7 @@ const ALL_SLUGS = [
   'danger-stripes',
   'sticker-wall',
   'peel-corner-reveal',
+  'jar-of-emotions',
 ]
 
 const arg   = process.argv[2]
@@ -267,6 +268,17 @@ const INTERACTIONS = {
   'sticker-wall': async (preview) => {
     await preview.page().waitForTimeout(3500)
   },
+
+  // Jar of Emotions — wait for physics to settle, then click a couple of buttons
+  'jar-of-emotions': async (preview, page) => {
+    await preview.page().waitForTimeout(2000)
+    const box = await preview.boundingBox()
+    // Click the first button (roughly left side of button row, near bottom)
+    await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.88)
+    await preview.page().waitForTimeout(400)
+    await page.mouse.click(box.x + box.width * 0.55, box.y + box.height * 0.88)
+    await preview.page().waitForTimeout(800)
+  },
 }
 
 async function hoverCenter(preview, page) {
@@ -296,6 +308,17 @@ async function upload(localPath, fileName) {
 
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
   const { url } = await res.json()
+
+  // Purge CDN cache so the new image is served immediately
+  await fetch('https://api.imagekit.io/v1/files/purge', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url }),
+  })
+
   return url
 }
 

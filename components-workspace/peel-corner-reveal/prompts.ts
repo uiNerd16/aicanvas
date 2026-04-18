@@ -2,12 +2,34 @@ import type { Platform } from '../../app/components/ComponentCard'
 
 const CORE_SPEC = `A single-file React client component called \`PeelCornerReveal\`. It renders a tall portrait card with the BR (bottom-right) corner folded up as a green triangular flap, revealing a scannable Wi-Fi QR code underneath. The peel is driven entirely by a spring and responds to hover (peek) and tap/click/keyboard (toggle fully open).
 
-Deps: \`framer-motion\` and \`qrcode.react\`. Add \`// npm install framer-motion qrcode.react\` right after \`'use client'\`. Use \`useTheme\` from \`../../app/components/ThemeProvider\` to read \`'light' | 'dark'\` reactively.
+Deps: \`framer-motion\` and \`qrcode.react\`. Add \`// npm install framer-motion qrcode.react\` right after \`'use client'\`.
 
 # File & export
 - Path: \`components-workspace/peel-corner-reveal/index.tsx\`
-- \`'use client'\`
+- \`'use client'\` at the very top
 - \`export default function PeelCornerReveal()\`
+
+# Theme detection (inline hook — no external imports)
+Define an inline \`useTheme\` hook at the top of the file that returns \`'light' | 'dark'\` and reacts to theme changes. It reads \`document.documentElement.classList.contains('dark')\` on mount and subscribes to class-attribute changes on \`<html>\` via a single \`MutationObserver\`:
+
+\`\`\`tsx
+function useTheme(): 'light' | 'dark' {
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const update = () => {
+      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+    }
+    update()
+    const observer = new MutationObserver(update)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return theme
+}
+\`\`\`
+
+Do NOT import \`useTheme\` from any external path. The hook must live in the same file as the component.
 
 # Palette
 Module-level constants (do not change with theme):
@@ -15,11 +37,11 @@ Module-level constants (do not change with theme):
 - \`PEEL_FILL_DEEP = '#127A3D'\` — darker band along the fold (gradient stop 0%)
 - \`PEEL_INK = '#FFFFFF'\`
 
-Theme-aware values derived inside the component from \`const { theme } = useTheme()\`:
+Theme-aware values derived inside the component from \`const theme = useTheme()\`:
 - \`PAGE_BG\` = dark? \`'#1A1A19'\` : \`'#E8E4DC'\` (warm off-white)
 - \`CARD_FILL\` = dark? \`'#FFFFFF'\` : \`'#121212'\` (card inverts: white in dark mode, near-black in light mode)
 - \`CARD_INK\` = dark? \`'#0A0A0A'\` : \`'#F5F5F0'\` (ink always reads against the card)
-- \`FOLD_STROKE\` = dark? \`'rgba(0,0,0,0.28)'\` : \`'rgba(255,255,255,0.22)'\` — the thin highlight line drawn along the fold edge
+- \`FOLD_STROKE\` = dark? \`'rgba(0,0,0,0.28)'\` : \`'rgba(255,255,255,0.22)'\` — thin highlight line along the fold
 - \`DIVIDER_STROKE\` = dark? \`CARD_INK\` : \`'#FFFFFF'\` — always rendered at \`opacity={0.15}\`
 
 # Layout & geometry constants (all SVG units)
@@ -41,7 +63,7 @@ OPEN_W_PCT = 0.78   OPEN_H_PCT = 0.9
 Idle bob amplitude: \`BOB_AMPLITUDE = 2.4\` (SVG units of vertical travel).
 
 # Root wrapper
-Outer \`<div>\` with Tailwind \`relative flex min-h-screen w-full items-center justify-center overflow-hidden px-6 py-10\` and inline \`style={{ background: PAGE_BG }}\`. No separate dark-mode overlay — the page background is one theme-aware value.
+Outer \`<div>\` with Tailwind classes \`flex min-h-screen w-full items-center justify-center bg-sand-100 dark:bg-sand-950\` plus \`relative overflow-hidden px-6 py-10\`, and an inline \`style={{ background: PAGE_BG }}\` (the inline color wins so the page background stays theme-aware even outside the preview chrome). Use \`useRef<HTMLDivElement>(null)\` on this container if you want, but theme detection is global — no ref is needed.
 
 Inside it, a \`motion.div\` that wraps the SVG:
 - \`role="button"\`, \`tabIndex={0}\`, \`aria-pressed={isOpen}\`, \`aria-label\` reads "Show Wi-Fi credentials" / "Hide Wi-Fi credentials"
@@ -53,9 +75,9 @@ Inside it, a \`motion.div\` that wraps the SVG:
 
 # Interaction → progress
 Keep a plain \`target = useMotionValue(0)\`. In a \`useEffect([isOpen, isHovered])\`:
-- if \`isOpen\` → target.set(1)
-- else if \`isHovered\` → target.set(0.18) (small peek)
-- else → target.set(0)
+- if \`isOpen\` → \`target.set(1)\`
+- else if \`isHovered\` → \`target.set(0.18)\` (small peek)
+- else → \`target.set(0)\`
 
 Then \`const progress = useSpring(target, { stiffness: 170, damping: 22, mass: 0.9 })\`. This single 0..1 MotionValue drives every animated SVG attribute.
 
@@ -92,9 +114,9 @@ Polygons (built with \`useMotionTemplate\`):
 - \`peelPoints = useMotionTemplate\\\`\${Ax},\${Ay} \${Bx},\${By} \${Cx},\${Cy}\\\`\` — the visible green flap.
 
 Render order (painter's algorithm):
-1. **Card drop shadow** — \`<motion.g style={{ filter: shadowFilter }}>\` wrapping a \`motion.polygon points={cardPoints} fill={CARD_FILL}\`. \`shadowFilter\` is a useMotionTemplate building \`drop-shadow(0px \${shadowOffsetY}px \${shadowBlur}px rgba(0,0,0,\${shadowAlpha}))\` from three useTransforms: \`shadowOffsetY = useTransform(progress,[0,1],[10,18])\`, \`shadowBlur = [14,26]\`, \`shadowAlpha = [0.35,0.5]\`. Shadow deepens as the card opens.
+1. **Card drop shadow** — \`<motion.g style={{ filter: shadowFilter }}>\` wrapping \`<motion.polygon points={cardPoints} fill={CARD_FILL} />\`. \`shadowFilter\` is a useMotionTemplate building \`drop-shadow(0px \${shadowOffsetY}px \${shadowBlur}px rgba(0,0,0,\${shadowAlpha}))\` from three useTransforms: \`shadowOffsetY = useTransform(progress,[0,1],[10,18])\`, \`shadowBlur = [14,26]\`, \`shadowAlpha = [0.35,0.5]\`. Shadow deepens as the card opens.
 2. **Card front content** — a \`<g clipPath="url(#pcr-card-clip)">\` containing:
-   - **Pulsing Wi-Fi icon** at top-left of the card. Wrap in \`<g transform={\\\`translate(\${CARD_X + 24}, \${CARD_Y + 22}) scale(1.8)\\\`} stroke={PEEL_FILL} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" fill="none">\`. Inside:
+   - **Pulsing Wi-Fi icon** at top-left of the card. Wrap in \`<g transform={\\\`translate(\${CARD_X + 24}, \${CARD_Y + 22}) scale(1.5)\\\`} stroke={PEEL_FILL} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" fill="none">\`. Inside:
      - a filled dot: \`<circle cx="8" cy="12.5" r="1.4" fill={PEEL_FILL} />\`
      - three nested arcs that pulse on a staggered 2.2-second loop, all using custom easing \`[0.22, 1, 0.36, 1]\`:
        - \`d="M4 9 Q8 5 12 9"\` — \`opacity: [0.15, 1, 0.15]\`, \`times: [0, 0.2, 1]\`, delay 0
@@ -154,8 +176,9 @@ Below the SVG, a small \`<div>\` reading \`Tap the card\` in tracked uppercase (
 
 # Cleanup / correctness
 - Cancel the bob RAF on unmount.
+- Disconnect the theme MutationObserver on unmount.
 - Use \`useMotionValue\` / \`useTransform\` for animation state — no \`useState\` for numeric animation values.
-- TypeScript strict: event type is \`React.KeyboardEvent<HTMLDivElement>\`, refs are \`useRef<SVGGElement>(null)\`. No \`any\`.`
+- TypeScript strict: event type is \`React.KeyboardEvent<HTMLDivElement>\`, QR group ref is \`useRef<SVGGElement>(null)\`. No \`any\`.`
 
 const ENV_PREAMBLE = `Before writing code: verify this project has Tailwind CSS v4, TypeScript, and React set up. If any are missing, run the shadcn CLI to scaffold them (\`npx shadcn@latest init\`). This component relies on Tailwind utilities for layout and inline SVG styles for the theme-aware palette.
 
@@ -164,5 +187,5 @@ const ENV_PREAMBLE = `Before writing code: verify this project has Tailwind CSS 
 export const prompts: Partial<Record<Platform, string>> = {
   'Claude Code': ENV_PREAMBLE + CORE_SPEC,
   Lovable: CORE_SPEC,
-  V0: CORE_SPEC,
+  V0: ENV_PREAMBLE + CORE_SPEC,
 }

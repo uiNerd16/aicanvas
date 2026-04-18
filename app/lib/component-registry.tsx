@@ -105,6 +105,8 @@ import StickerWall from '../../components-workspace/sticker-wall'
 import { prompts as stickerWallPrompts } from '../../components-workspace/sticker-wall/prompts'
 import PeelCornerReveal from '../../components-workspace/peel-corner-reveal'
 import { prompts as peelCornerRevealPrompts } from '../../components-workspace/peel-corner-reveal/prompts'
+import JarOfEmotions from '../../components-workspace/jar-of-emotions'
+import { prompts as jarOfEmotionsPrompts } from '../../components-workspace/jar-of-emotions/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -923,6 +925,7 @@ Requirements:
     image: 'https://ik.imagekit.io/aitoolkit/sticker-wall.png',
     description: 'A draggable sticker card wall. Drop notes, toss emoji, pile them up with real 2D physics.',
     badge: 'New',
+    dualTheme: true,
     tags: [
       { label: 'Interactive', accent: true },
       { label: 'Framer Motion' },
@@ -947,6 +950,21 @@ Requirements:
     PreviewComponent: PeelCornerReveal,
     code: componentCodes['peel-corner-reveal'],
     prompts: peelCornerRevealPrompts,
+  },
+  {
+    slug: 'jar-of-emotions',
+    name: 'The Verdict Jar',
+    image: 'https://ik.imagekit.io/aitoolkit/jar-of-emotions.png',
+    description: 'Glass jar widget — click a reaction to spring the lid and watch the emoji bounce down.',
+    badge: 'New',
+    tags: [
+      { label: 'Interactive', accent: true },
+      { label: 'Matter.js' },
+    ],
+    dualTheme: true,
+    PreviewComponent: JarOfEmotions,
+    code: componentCodes['jar-of-emotions'],
+    prompts: jarOfEmotionsPrompts,
   },
 ]
 
