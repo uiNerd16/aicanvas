@@ -41,3 +41,5 @@
 | andromeda-button | integrated | First DS promotion — re-export wrapper around Andromeda design system Button, full showcase layout (Variants/Sizes/With icon/Disabled), boundary retyping pattern |
 | ai-job-cards | integrated | Three swipeable card stacks (Anthropic/Perplexity/Google), brand logos, bookmark toggle, spring animations — mobile fix applied (h-full→min-h-screen, alignItems:stretch on narrow) |
 | peel-corner-reveal | integrated | "Peel to Scan" — 2D SVG peel, tap-toggle with hover-peek, Wi-Fi QR reveal (qrcode.react), inverted light/dark card, pulsing Wi-Fi arcs, +31° QR rotation, inlined useTheme for copy-paste readiness. Registry + screenshot live. |
+| jar-of-emotions | integrated | SVG glass jar + spring-hinged lid (Framer Motion), 6 reaction emojis (🔥👌😄😭🧑‍🍳🐐), matter.js physics floor + walls, ballistic aim to clicked button, 30-tap "Full. Please Stop." banner, dualTheme. |
+| flip-grid | previewing | 3×2 grid of bold colored cards, continuous staggered CSS 3D flips per row axis (rotateX/rotateY/rotateX-reversed), hover holds on reframe face, touch tap-to-hold. Live at /preview/flip-grid. |

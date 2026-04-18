@@ -36,7 +36,8 @@ const BORDER_WIDTH   = 2
 const PALETTE_DARK = ['#FDE68A', '#BBF7D0', '#FBCFE8', '#C7D2FE', '#BAE6FD', '#FED7AA']
 const PALETTE_LIGHT = ['#F59E0B', '#34D399', '#F472B6', '#A78BFA', '#38BDF8', '#FB923C']
 
-const STICKER_TEXT_COLOR = '#111827'
+const STICKER_TEXT_COLOR_DARK = '#111827'
+const STICKER_TEXT_COLOR_LIGHT = '#FFFFFF'
 const BG_DARK  = '#0F0F12'
 const BG_LIGHT = '#F5F1E8'
 
@@ -166,6 +167,13 @@ export default function StickerWall() {
   useIsomorphicLayoutEffect(() => {
     isDarkRef.current = isDark
     paletteRef.current = pickPalette(isDark)
+  }, [isDark])
+
+  useEffect(() => {
+    const palette = pickPalette(isDark)
+    stickersRef.current.forEach((sticker, i) => {
+      sticker.color = palette[i % palette.length]
+    })
   }, [isDark])
 
   // ── Theme detection (follows murmuration pattern) ──────────────────────────
@@ -393,11 +401,6 @@ export default function StickerWall() {
         ctx!.translate(body.position.x, body.position.y)
         ctx!.rotate(body.angle)
 
-        // Shadow — drawn BEFORE the fill, offset in rotated local space.
-        ctx!.fillStyle = 'rgba(0,0,0,0.25)'
-        roundedRect(ctx!, -w / 2 + 2, -h / 2 + 5, w, h, CARD_RADIUS)
-        ctx!.fill()
-
         // Card fill
         ctx!.fillStyle = color
         roundedRect(ctx!, -w / 2, -h / 2, w, h, CARD_RADIUS)
@@ -418,7 +421,7 @@ export default function StickerWall() {
         ctx!.stroke()
 
         if (kind === 'text') {
-          ctx!.fillStyle = STICKER_TEXT_COLOR
+          ctx!.fillStyle = isDarkRef.current ? STICKER_TEXT_COLOR_DARK : STICKER_TEXT_COLOR_LIGHT
           ctx!.font = `600 ${TEXT_FONT_PX}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Manrope, sans-serif`
           ctx!.textAlign = 'center'
           ctx!.textBaseline = 'middle'
@@ -560,7 +563,7 @@ export default function StickerWall() {
   const inputBg = isDark ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.9)'
   const accentBg = '#8A9CF4'
   const inputText = isDark ? 'rgba(255,255,255,0.95)' : 'rgba(17,24,39,0.95)'
-  const accentText = '#111827'
+  const accentText = isDark ? '#111827' : '#FFFFFF'
   const stickerBorder = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(17,24,39,0.12)'
   const stickerShadow = isDark
     ? '0 6px 14px rgba(0,0,0,0.25), 0 2px 0 rgba(0,0,0,0.08)'
@@ -632,12 +635,10 @@ export default function StickerWall() {
           }
           .sticker-wall-send:hover {
             transform: translateY(-1px);
-            box-shadow: ${sendHoverShadow};
             filter: brightness(1.15);
           }
           .sticker-wall-send:active {
             transform: translateY(3px);
-            box-shadow: ${sendActiveShadow};
             filter: brightness(0.95);
           }
         `}</style>
@@ -705,7 +706,6 @@ export default function StickerWall() {
                 color: accentText,
                 fontWeight: 700,
                 border: '1px solid rgba(255,255,255,0.12)',
-                boxShadow: keyShadow,
               }}
             >
               Send
