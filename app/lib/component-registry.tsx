@@ -895,7 +895,6 @@ Requirements:
     name: 'AI Job Cards',
     image: 'https://ik.imagekit.io/aitoolkit/ai-job-cards.png',
     description: 'Three AI job card stacks with swipe-to-cycle. Brand logos, bookmark toggle, springs.',
-    badge: 'New',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Interactive' },
@@ -910,9 +909,8 @@ Requirements:
     name: 'Danger Stripes',
     image: 'https://ik.imagekit.io/aitoolkit/danger-stripes.png',
     description: 'Three crossing caution-tape stripes on orange. Hover to shake, click to intensify.',
-    badge: 'New',
     tags: [
-      { label: 'Creative', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Interactive' },
     ],
     PreviewComponent: DangerStripes,
@@ -924,10 +922,9 @@ Requirements:
     name: 'Sticker Wall',
     image: 'https://ik.imagekit.io/aitoolkit/sticker-wall.png',
     description: 'A draggable sticker card wall. Drop notes, toss emoji, pile them up with real 2D physics.',
-    badge: 'New',
     dualTheme: true,
     tags: [
-      { label: 'Interactive', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Framer Motion' },
       { label: 'Matter.js' },
     ],
@@ -940,7 +937,6 @@ Requirements:
     name: 'Peel to Scan',
     image: 'https://ik.imagekit.io/aitoolkit/peel-corner-reveal.png',
     description: 'A portrait card whose corner peels on tap, revealing a scannable Wi-Fi QR code.',
-    badge: 'New',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Framer Motion' },
@@ -956,9 +952,8 @@ Requirements:
     name: 'The Verdict Jar',
     image: 'https://ik.imagekit.io/aitoolkit/jar-of-emotions.png',
     description: 'Glass jar widget — click a reaction to spring the lid and watch the emoji bounce down.',
-    badge: 'New',
     tags: [
-      { label: 'Interactive', accent: true },
+      { label: 'Widgets', accent: true },
       { label: 'Matter.js' },
     ],
     dualTheme: true,
