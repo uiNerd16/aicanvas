@@ -45,7 +45,6 @@ const ALL_SLUGS = [
   'scramble-text',
   'neon-clock',
   'torus-knot',
-  'liquid-button',
   'noise-field',
   'glass-notification',
   'glass-toggle',
@@ -154,13 +153,6 @@ const INTERACTIONS = {
   'particle-constellation': hoverCenter,
   'torus-knot':             hoverCenter,
   'noise-field':            hoverCenter,
-
-  // Liquid button — hover the button
-  'liquid-button': async (preview, page) => {
-    const box = await preview.boundingBox()
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-    await page.waitForTimeout(600)
-  },
 
   // Scramble text — hover to trigger decryption in progress
   'scramble-text': async (preview, page) => {

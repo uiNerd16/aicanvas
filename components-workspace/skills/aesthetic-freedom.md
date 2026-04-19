@@ -11,6 +11,6 @@ When fleshed out, this file should cover:
 - **Dark + light support is still required.** Creative freedom doesn't mean "dark mode only." Every standalone must look great in both themes. Use `dark:` Tailwind variants or read `useTheme()` from `../../app/components/ThemeProvider` to branch.
 - **Motion as identity.** A standalone's animation is often its personality. Framer Motion is required. Plan the motion concept before picking colors — easing curves and spring stiffness decide how the component "feels" more than any palette.
 - **Composition principles for 480×480.** Components render in a square preview box. Design for that ratio. No fixed pixel dimensions on the root element. Internal rhythm should scale gracefully.
-- **Reference the "best of" standalones.** (TODO: enumerate 5–8 exemplar standalones by slug once the docs are ready. Candidates: `liquid-button`, `glass-notification`, `particle-constellation`, `wave-lines`, `magnetic-dots`, `text-blur-reveal`.)
+- **Reference the "best of" standalones.** (TODO: enumerate 5–8 exemplar standalones by slug once the docs are ready. Candidates: `glass-notification`, `particle-constellation`, `wave-lines`, `magnetic-dots`, `text-blur-reveal`.)
 
 TODO: replace this stub with real content, including screenshots and reference constants.

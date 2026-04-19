@@ -13,6 +13,11 @@ const outDir = 'public/r'
 const SCHEMA = 'https://ui.shadcn.com/schema/registry-item.json'
 const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
 
+// Folders to skip when building the public registry. `_template` is the
+// scaffold copy-source; `crumple-toss` is parked at /preview/crumple-toss
+// and is intentionally not publicly installable.
+const SKIP_FOLDERS = new Set(['_template', 'crumple-toss'])
+
 // ── Extract metadata from the component registry ──────────────────────────────
 
 function parseRegistryMetadata() {
@@ -27,13 +32,13 @@ function parseRegistryMetadata() {
     const folder = match[2]
     const block = match[0]
 
-    const nameMatch = block.match(/name:\s*'([^']+)'/)
-    const descMatch = block.match(/description:\s*'([^']*(?:\\'[^']*)*)'/)
+    const nameMatch = block.match(/name:\s*(['"])((?:(?!\1).)*)\1/)
+    const descMatch = block.match(/description:\s*(['"])((?:(?!\1).)*)\1/)
 
     metadata[folder] = {
       slug,
-      name: nameMatch ? nameMatch[1] : folder.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-      description: descMatch ? descMatch[1].replace(/\\'/g, "'") : '',
+      name: nameMatch ? nameMatch[2] : folder.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      description: descMatch ? descMatch[2].replace(/\\'/g, "'") : '',
     }
   }
 
@@ -67,7 +72,7 @@ const metadata = parseRegistryMetadata()
 // delete any stale folder-named files left over from previous runs.
 const expectedNames = new Set(
   readdirSync(wsDir)
-    .filter(d => statSync(join(wsDir, d)).isDirectory() && d !== '_template')
+    .filter(d => statSync(join(wsDir, d)).isDirectory() && !SKIP_FOLDERS.has(d))
     .map(d => (metadata[d]?.slug ?? d))
 )
 expectedNames.add('registry') // keep the root index
@@ -80,7 +85,7 @@ for (const existing of readdirSync(outDir).filter(f => f.endsWith('.json'))) {
 
 const dirs = readdirSync(wsDir).filter(d => {
   const p = join(wsDir, d)
-  return statSync(p).isDirectory() && d !== '_template'
+  return statSync(p).isDirectory() && !SKIP_FOLDERS.has(d)
 }).sort()
 
 const registryItems = []

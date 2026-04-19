@@ -2,6 +2,7 @@
   "name": "aicanvas",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev",
     "build": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
