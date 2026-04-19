@@ -1,23 +1,34 @@
 import type { Metadata } from 'next'
 import { HomePageClient } from './home/HomePageClient'
 import { COMPONENTS } from './lib/component-registry'
+import { SITE_URL } from './lib/config'
+
+const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENTS.length} Animated React Components with AI Reproduction Prompts`
+const HOMEPAGE_DESCRIPTION = `Free, open-source registry of ${COMPONENTS.length} animated React components built with Tailwind CSS and Framer Motion. Install with one command or remix with AI prompts for Claude Code, Lovable, and v0.`
 
 export const metadata: Metadata = {
-  title: { absolute: 'AI Canvas — AI Native Components for Designers and Developers' },
-  description:
-    'Free animated React components with AI prompts for Claude Code, Lovable, and V0. Install with one command or remix with AI. Always free, always open source.',
+  title: { absolute: HOMEPAGE_TITLE },
+  description: HOMEPAGE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
   openGraph: {
-    title: 'AI Canvas — AI Native Components for Designers and Developers',
-    description:
-      'Free animated React components with AI prompts for Claude Code, Lovable, and V0. Install with one command or remix with AI.',
-    url: 'https://aicanvas.me',
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
+    url: SITE_URL,
     type: 'website',
+    images: [
+      {
+        url: '/AIcanvas-OG.webp',
+        width: 1200,
+        height: 630,
+        alt: 'AI Canvas — animated React component registry',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Canvas — AI Native Components for Designers and Developers',
-    description:
-      'Free animated React components with AI prompts for Claude Code, Lovable, and V0. Install with one command or remix with AI.',
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
+    images: ['/AIcanvas-OG.webp'],
   },
 }
 

@@ -164,23 +164,27 @@ function StackedCards() {
 function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, margin: '-40px' })
-  const [count, setCount] = useState(0)
+  // Start 10% below the real number so SSR / crawlers / LLMs see real numbers in
+  // the initial HTML rather than zeros. Rounded so suffixed values (%, +) still
+  // read cleanly.
+  const initial = Math.max(0, Math.round(to * 0.9))
+  const [count, setCount] = useState(initial)
 
   useEffect(() => {
     if (!inView) return
-    let start = 0
+    let start = initial
     const duration = 900
     const step = 16
-    const increment = to / (duration / step)
+    const increment = Math.max(1, (to - initial) / (duration / step))
     const timer = setInterval(() => {
       start += increment
       if (start >= to) { setCount(to); clearInterval(timer) }
       else setCount(Math.floor(start))
     }, step)
     return () => clearInterval(timer)
-  }, [inView, to])
+  }, [inView, to, initial])
 
-  return <span ref={ref}>{inView ? count : 0}{suffix}</span>
+  return <span ref={ref}>{count}{suffix}</span>
 }
 
 // ─── Showcase cycling card ────────────────────────────────────────────────────
@@ -225,7 +229,7 @@ function ShowcaseCard({ items }: { items: ComponentMeta[] }) {
             {current.image ? (
               <img
                 src={current.image}
-                alt={current.name}
+                alt={`${current.name} — ${current.description.split('.')[0]}`}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
@@ -328,6 +332,14 @@ function CyclingGreeting() {
 const WIRE_SCALES  = [1.5, 1.2, 1.1]
 const WIRE_Y       = [-8, -4, -2]
 const WIRE_LABELS  = ['What?', 'Why?', 'How?']
+// Only the first icon carries descriptive alt text; the other two are decorative
+// duplicates and use alt="" so screen readers skip them and crawlers don't see
+// the brand name repeated three times in a row.
+const WIRE_ALTS    = [
+  'AI Canvas component registry — animated React components preview',
+  '',
+  '',
+]
 
 function WireIcons() {
   const [hovered, setHovered] = useState<number | null>(null)
@@ -368,7 +380,8 @@ function WireIcons() {
           </AnimatePresence>
           <motion.img
             src="/ai-canvas-wire.svg"
-            alt="AI Canvas"
+            alt={WIRE_ALTS[idx]}
+            aria-hidden={WIRE_ALTS[idx] === '' ? true : undefined}
             width={28}
             height={24}
             animate={{ scale: scale(idx), y: y(idx) }}
@@ -390,7 +403,11 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
     <div className="flex flex-col overflow-hidden rounded-xl border border-sand-800/60 bg-sand-900">
       <div className="relative h-56 overflow-hidden bg-sand-900">
         {entry.image ? (
-          <img src={entry.image} alt={entry.name} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={entry.image}
+            alt={`${entry.name} — ${entry.description.split('.')[0]}`}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
@@ -506,11 +523,26 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
         </div>
       </div>
 
-      {/* Track — breaks out of the 720px container */}
+      {/* Track — breaks out of the 720px container.
+          The inner row is draggable horizontally so users can swipe through
+          the carousel (great for mobile). Dragging past threshold advances
+          one step; tapping a side card also advances it in that direction.
+          The center card keeps its Link for navigation. */}
       <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-        <div className="flex items-center justify-center py-4">
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.15}
+          dragMomentum={false}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -50 || info.velocity.x < -400) goNext()
+            else if (info.offset.x > 50 || info.velocity.x > 400) goPrev()
+          }}
+          className="flex cursor-grab items-center justify-center py-4 active:cursor-grabbing"
+          style={{ touchAction: 'pan-y' }}
+        >
 
-          {/* Far prev — outermost left, smallest */}
+          {/* Far prev — outermost left, smallest. Tap cycles 2 back. */}
           <motion.div
             className="relative z-[1] -mr-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
@@ -521,7 +553,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
             <CarouselCard entry={prevPrev} />
           </motion.div>
 
-          {/* Prev — behind center, peeking left */}
+          {/* Prev — behind center, peeking left. Tap cycles back by one. */}
           <motion.div
             className="relative z-[5] -mr-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
@@ -554,7 +586,11 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                 >
                   <div className="relative h-64 overflow-hidden">
                     {current.image ? (
-                      <img src={current.image} alt={current.name} className="absolute inset-0 h-full w-full object-cover" />
+                      <img
+                        src={current.image}
+                        alt={`${current.name} — ${current.description.split('.')[0]}`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center bg-sand-900">
                         <ImageSquare weight="regular" size={22} className="text-sand-700" />
@@ -574,7 +610,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
             </TiltCard>
           </div>
 
-          {/* Next — behind center, peeking right */}
+          {/* Next — behind center, peeking right. Tap advances by one. */}
           <motion.div
             className="relative z-[5] -ml-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
@@ -586,18 +622,18 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
             <CarouselCard entry={nextItem} />
           </motion.div>
 
-          {/* Far next — outermost right, smallest */}
+          {/* Far next — outermost right, smallest. Tap cycles 2 forward. */}
           <motion.div
             className="relative z-[1] -ml-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
             transition={{ duration: 0.2 }}
-            onClick={() => { goNext(); goNext() }}
             style={{ filter: 'blur(5px)' }}
+            onClick={() => { goNext(); goNext() }}
           >
             <CarouselCard entry={nextNext} />
           </motion.div>
 
-        </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -640,9 +676,18 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.18 }}
             className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
           >
-            AI native components
+            <span className="inline-flex flex-wrap items-center justify-center gap-x-2">
+              <span>AI</span>
+              <img
+                src="/ai-canvas-icon.svg"
+                alt=""
+                aria-hidden
+                className="inline-block h-[0.6em] w-auto align-[0.02em]"
+              />
+              <span>Native Components</span>
+            </span>
             <br />
-            <span className="mt-2 inline-block text-olive-500">for designers and developers.</span>
+            <span className="mt-2 inline-block text-olive-500">for Designers and Developers.</span>
           </motion.h1>
 
           <motion.p
@@ -681,29 +726,56 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
 
         {/* ── Stats strip ── */}
         <section className="mt-16 sm:mt-24">
-          <div className="flex items-center justify-center">
-            {[
-              { value: total, suffix: '+', label: 'Components' },
-              { value: 3,     suffix: '',  label: 'AI Platforms' },
-              { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
-              { value: 0,     suffix: '',  prefix: '$', label: 'Free forever' },
-            ].map(({ value, suffix, prefix = '', label, minWidth }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.06 }}
-                className="flex items-center"
-              >
-                {i > 0 && <div className="h-10 w-px bg-sand-800 mx-6" />}
-                <div className="flex flex-col items-center text-center">
-                  <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
-                    {prefix}<AnimatedCount to={value} suffix={suffix} />
-                  </span>
-                  <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
-                </div>
-              </motion.div>
+          {/* Mobile: 2×2 grid with a vertical divider between each row's two items
+              and no divider between rows. Desktop: single flex row with three
+              dividers — the row-wrappers use `sm:contents` so they disappear from
+              layout and the inner stats become direct children of the flex row. */}
+          <div className="flex flex-col items-center gap-y-8 sm:flex-row sm:justify-center sm:gap-y-0">
+            {(
+              [
+                [
+                  { value: total, suffix: '+', label: 'Components' },
+                  { value: 3,     suffix: '',  label: 'AI Platforms' },
+                ],
+                [
+                  { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
+                  { value: 0,     suffix: '',  prefix: '$', label: 'Free Forever' },
+                ],
+              ] as {
+                value: number
+                suffix: string
+                label: string
+                prefix?: string
+                minWidth?: string
+              }[][]
+            ).map((row, rowIdx) => (
+              <div key={rowIdx} className="flex items-center sm:contents">
+                {rowIdx > 0 && (
+                  <div className="hidden h-10 w-px bg-sand-800 mx-6 sm:block" aria-hidden />
+                )}
+                {row.map(({ value, suffix, prefix = '', label, minWidth }, colIdx) => {
+                  const i = rowIdx * 2 + colIdx
+                  return (
+                    <div key={label} className="flex items-center sm:contents">
+                      {colIdx > 0 && (
+                        <div className="h-10 w-px bg-sand-800 mx-6" aria-hidden />
+                      )}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.3, delay: i * 0.06 }}
+                        className="flex flex-col items-center text-center"
+                      >
+                        <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
+                          {prefix}<AnimatedCount to={value} suffix={suffix} />
+                        </span>
+                        <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
+                      </motion.div>
+                    </div>
+                  )
+                })}
+              </div>
             ))}
           </div>
         </section>
