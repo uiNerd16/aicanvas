@@ -478,34 +478,38 @@ export default function ComponentPageView({
                 {cliCopied ? 'Copied!' : 'Copy CLI'}
               </button>
 
-              {/* Copy Prompt — dropdown with 3 platforms */}
-              <div className="relative" ref={promptDropdownRef}>
-                <button
-                  onClick={() => setPromptDropdownOpen((o) => !o)}
-                  className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
-                >
-                  {promptCopied ? <Check weight="regular" size={15} /> : <Sparkle weight="regular" size={15} />}
-                  {promptCopied ? 'Copied!' : 'Remix with AI'}
-                  {!promptCopied && <DotsThreeVertical weight="bold" size={15} />}
-                </button>
-                {promptDropdownOpen && (
-                  <div className="absolute bottom-full right-0 z-40 mb-2 w-52 overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
-                    {availablePlatforms.map((platform) => (
-                      <button
-                        key={platform}
-                        onClick={() => {
-                          handlePlatformClick(platform)
-                          setPromptDropdownOpen(false)
-                        }}
-                        className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-sand-700 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                      >
-                        {PLATFORM_ICONS[platform]}
-                        Try in {platform}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* Copy Prompt — dropdown with 3 platforms.
+                  Hidden entirely when no prompts are available so the button
+                  can never open an empty dropdown. */}
+              {availablePlatforms.length > 0 && (
+                <div className="relative" ref={promptDropdownRef}>
+                  <button
+                    onClick={() => setPromptDropdownOpen((o) => !o)}
+                    className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
+                  >
+                    {promptCopied ? <Check weight="regular" size={15} /> : <Sparkle weight="regular" size={15} />}
+                    {promptCopied ? 'Copied!' : 'Remix with AI'}
+                    {!promptCopied && <DotsThreeVertical weight="bold" size={15} />}
+                  </button>
+                  {promptDropdownOpen && (
+                    <div className="absolute bottom-full right-0 z-40 mb-2 w-52 overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
+                      {availablePlatforms.map((platform) => (
+                        <button
+                          key={platform}
+                          onClick={() => {
+                            handlePlatformClick(platform)
+                            setPromptDropdownOpen(false)
+                          }}
+                          className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-sand-700 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                        >
+                          {PLATFORM_ICONS[platform]}
+                          Try in {platform}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
           </div>

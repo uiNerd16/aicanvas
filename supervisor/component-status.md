@@ -2,7 +2,7 @@
 
 | Component | Stage | Notes |
 |---|---|---|
-| murmuration | idea | Underwater fish school — boids flocking (600 cap), countershaded fish, shark cursor with tail sway, caustics, bubbles. Parked at /preview/idea-one for revision — not integrated. |
+| murmuration | deleted | Removed by user request |
 | sticker-wall | integrated | Feedback Wall — matter.js physics, 10 quote + 12 emoji seeds, pastel stickers with 32px radius, periwinkle Send key, dual-theme, title + subtitle, settled-pile screenshot. Promoted from /preview/idea-two. |
 | easter-rabbit | deleted | Removed by user request |
 | traveldeck | integrated | Built before agent system — slug renamed from floating-cards (folder unchanged) |
@@ -22,7 +22,7 @@
 | taga-toggle | integrated | Playful pill toggle, dead face (×× eyes) → happy face (arc eyes, smile), grey→yellow — dualTheme |
 | x-grid | integrated | v2 live: breathing diagonal wave (±30%), RADIUS 340, ~1s trail decay, connection mesh, dualTheme, V0 prompt lane added |
 | noise-bg | integrated | Random grain dots, Gaussian glow, cached neighbour connections on hover, dualTheme |
-| circle-field | abandoned | Replaced by bubble-field concept |
+| circle-field | deleted | Removed by user request |
 | bubble-field | integrated | Grid circles burst+reform on hover, cyclic phase animation, pastel blue palette, dualTheme |
 | wave-lines | integrated | Vertical sine-wave lines, layered waves + Y-drift, extreme hover waves, dualTheme — renamed from silk-lines |
 | distortion-grid | integrated | Slow sweeping sine waves, cursor repels grid outward, dualTheme — renamed from wave-grid, line alpha bumped to 0.55/0.75 |
@@ -42,4 +42,6 @@
 | ai-job-cards | integrated | Three swipeable card stacks (Anthropic/Perplexity/Google), brand logos, bookmark toggle, spring animations — mobile fix applied (h-full→min-h-screen, alignItems:stretch on narrow) |
 | peel-corner-reveal | integrated | "Peel to Scan" — 2D SVG peel, tap-toggle with hover-peek, Wi-Fi QR reveal (qrcode.react), inverted light/dark card, pulsing Wi-Fi arcs, +31° QR rotation, inlined useTheme for copy-paste readiness. Registry + screenshot live. |
 | jar-of-emotions | integrated | SVG glass jar + spring-hinged lid (Framer Motion), 6 reaction emojis (🔥👌😄😭🧑‍🍳🐐), matter.js physics floor + walls, ballistic aim to clicked button, 30-tap "Full. Please Stop." banner, dualTheme. |
-| flip-grid | previewing | 3×2 grid of bold colored cards, continuous staggered CSS 3D flips per row axis (rotateX/rotateY/rotateX-reversed), hover holds on reframe face, touch tap-to-hold. Live at /preview/flip-grid. |
+| flip-grid | deleted | Removed by user request |
+| liquid-button | deleted | Removed by user request |
+| scatter-field | deleted | Removed by user request |
