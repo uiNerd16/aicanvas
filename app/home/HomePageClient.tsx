@@ -22,6 +22,7 @@ import {
 import { HeaderSocials } from '../components/HeaderSocials'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL, X_URL } from '../lib/config'
+import { track } from '../lib/analytics'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -568,7 +569,10 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
           {/* Center — on top, with 3D tilt, links to component */}
           <div className="relative z-10 w-[min(480px,calc(100vw-80px))] flex-shrink-0">
             <TiltCard>
-              <Link href={`/components/${current.slug}`}>
+              <Link
+                href={`/components/${current.slug}`}
+                onClick={() => track('Component Card Click', { component: current.slug, position: idx, source: 'homepage-hero' })}
+              >
               <AnimatePresence mode="popLayout" initial={false} custom={dir}>
                 <motion.div
                   key={current.slug}

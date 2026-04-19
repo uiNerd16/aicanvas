@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
+import { track, type CardSource } from '../lib/analytics'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
@@ -20,14 +21,18 @@ export interface ComponentCardProps {
   image?: string
   href: string
   badge?: string
+  slug: string
+  position: number
+  source: CardSource
 }
 
 // ─── ComponentCard ─────────────────────────────────────────────────────────────
 
-export function ComponentCard({ name, description, href, image, badge }: ComponentCardProps) {
+export function ComponentCard({ name, description, href, image, badge, slug, position, source }: ComponentCardProps) {
   return (
     <Link
       href={href}
+      onClick={() => track('Component Card Click', { component: slug, position, source })}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
     >
       {/* Image — extends slightly behind the content panel */}

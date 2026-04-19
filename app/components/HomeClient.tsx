@@ -96,6 +96,9 @@ export function HomeClient({ components }: { components: ComponentEntry[] }) {
                     image={entry.image}
                     badge={NEW_BADGE_ACTIVE ? entry.badge : undefined}
                     href={`/components/${entry.slug}`}
+                    slug={entry.slug}
+                    position={i}
+                    source="index"
                   />
                 </motion.div>
               ))}

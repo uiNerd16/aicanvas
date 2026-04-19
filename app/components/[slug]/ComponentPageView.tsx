@@ -27,6 +27,7 @@ import { PLATFORMS } from '../ComponentCard'
 import { HeaderSocials } from '../HeaderSocials'
 import type { ComponentMeta } from '../../lib/component-registry'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
+import { track } from '../../lib/analytics'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -217,6 +218,7 @@ export default function ComponentPageView({
 
   async function copyCli() {
     try {
+      track('CLI Copy', { component: slug })
       await navigator.clipboard.writeText(cliCommand)
       setCliCopied(true)
       setTimeout(() => setCliCopied(false), 4000)
@@ -227,6 +229,8 @@ export default function ComponentPageView({
     try {
       const text = prompts[platform]
       if (!text) return
+
+      track('Remix Platform Click', { component: slug, platform })
 
       // Always copy to clipboard
       await navigator.clipboard.writeText(text)
@@ -416,7 +420,10 @@ export default function ComponentPageView({
                 {activeTab === 'preview' && (
                   <div className="group/fullscreen relative">
                     <button
-                      onClick={() => setFullscreen(true)}
+                      onClick={() => {
+                        track('Fullscreen Open', { component: slug })
+                        setFullscreen(true)
+                      }}
                       className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 bg-sand-200 text-sand-700 transition-colors hover:border-sand-400 hover:bg-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:bg-sand-700 dark:hover:text-sand-100"
                     >
                       <CornersOut weight="regular" size={16} />
@@ -494,7 +501,10 @@ export default function ComponentPageView({
               {availablePlatforms.length > 0 && (
                 <div className="relative" ref={promptDropdownRef}>
                   <button
-                    onClick={() => setPromptDropdownOpen((o) => !o)}
+                    onClick={() => setPromptDropdownOpen((o) => {
+                      if (!o) track('Remix Open', { component: slug })
+                      return !o
+                    })}
                     className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
                   >
                     {promptCopied ? <Check weight="regular" size={15} /> : <Sparkle weight="regular" size={15} />}
@@ -546,7 +556,10 @@ export default function ComponentPageView({
               <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
                 <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
                   <button
-                    onClick={() => setInstallTab('cli')}
+                    onClick={() => {
+                      if (installTab !== 'cli') track('Install Tab Switch', { component: slug, tab: 'cli' })
+                      setInstallTab('cli')
+                    }}
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'cli'
                         ? 'text-sand-900 dark:text-sand-50'
@@ -559,7 +572,10 @@ export default function ComponentPageView({
                     )}
                   </button>
                   <button
-                    onClick={() => setInstallTab('manual')}
+                    onClick={() => {
+                      if (installTab !== 'manual') track('Install Tab Switch', { component: slug, tab: 'manual' })
+                      setInstallTab('manual')
+                    }}
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'manual'
                         ? 'text-sand-900 dark:text-sand-50'
@@ -950,7 +966,7 @@ export default function ComponentPageView({
                     custom={relatedDir}
                     initial={false}
                   >
-                    {visibleRelated.map((c) => (
+                    {visibleRelated.map((c, i) => (
                       <motion.div
                         key={c.slug}
                         layout
@@ -979,6 +995,7 @@ export default function ComponentPageView({
                       >
                         <Link
                           href={`/components/${c.slug}`}
+                          onClick={() => track('Component Card Click', { component: c.slug, position: relatedStart + i, source: 'related' })}
                           className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                         >
                           <div className="relative aspect-video overflow-hidden bg-sand-950">

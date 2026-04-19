@@ -19,6 +19,7 @@
     "@react-three/fiber": "^9.5.0",
     "@types/matter-js": "^0.20.2",
     "@types/three": "^0.183.1",
+    "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
