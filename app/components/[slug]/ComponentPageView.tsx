@@ -54,6 +54,7 @@ interface ComponentPageViewProps {
   slug: string
   name: string
   description: string
+  headingSubtitle?: string
   tags: Tag[]
   code: string
   prompts: Partial<Record<Platform, string>>
@@ -69,6 +70,7 @@ export default function ComponentPageView({
   slug,
   name,
   description,
+  headingSubtitle,
   tags,
   code,
   prompts,
@@ -288,12 +290,20 @@ export default function ComponentPageView({
 
           {/* Header */}
           <div className="mb-8">
-            {/* Page heading — bold (700) */}
+            {/* Page heading — bold (700). Subtitle is an answer-block for GEO:
+                the first 200 tokens on each page carry a definitional answer. */}
             <h1 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
-              {name}
+              <span className="block">{name}</span>
+              {headingSubtitle && (
+                <span className="mt-2 block text-base font-normal leading-relaxed text-sand-600 dark:text-sand-400 sm:text-lg">
+                  {headingSubtitle}
+                </span>
+              )}
             </h1>
-            {/* Description — normal (400) */}
-            <p className="mt-3 font-normal text-sand-600 dark:text-sand-400">{description}</p>
+            {/* Description — normal (400). Hidden when subtitle already covers it. */}
+            {!headingSubtitle && (
+              <p className="mt-3 font-normal text-sand-600 dark:text-sand-400">{description}</p>
+            )}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
               {tags.map((tag) =>
