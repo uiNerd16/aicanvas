@@ -3,6 +3,7 @@ import { Manrope, Geist_Mono } from 'next/font/google'
 import { GeistPixelCircle } from 'geist/font/pixel'
 import { Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { ThemeProvider } from './components/ThemeProvider'
 import { Sidebar } from './components/Sidebar'
@@ -147,6 +148,7 @@ export default function RootLayout({
           </div>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
