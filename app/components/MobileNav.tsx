@@ -70,10 +70,12 @@ export function MobileNav() {
   const toggle = (title: string) =>
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
 
-  // Close drawer on route change
+  // Close drawer on real route change (pathname only — NOT searchParams,
+  // since typing in search updates ?q= and would otherwise close the drawer
+  // on every keystroke).
   useEffect(() => {
     setOpen(false)
-  }, [pathname, searchParams])
+  }, [pathname])
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -84,28 +86,40 @@ export function MobileNav() {
   }, [open])
 
   // ── Search ──────────────────────────────────────────────────────────────
+  // Local state drives the input; URL is written via a debounced effect so
+  // fast keystrokes don't fight themselves. lastPushed distinguishes our
+  // own pushes from external URL changes (back/forward, category click).
   const urlQuery = searchParams.get('q') ?? ''
   const [searchValue, setSearchValue] = useState(urlQuery)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [, startTransition] = useTransition()
 
+  const lastPushed = useRef(urlQuery)
+
   useEffect(() => {
+    if (urlQuery === lastPushed.current) return
     setSearchValue(urlQuery)
+    lastPushed.current = urlQuery
   }, [urlQuery])
 
-  const updateQuery = (next: string) => {
-    setSearchValue(next)
-    const params = new URLSearchParams(searchParams.toString())
-    if (next) params.set('q', next)
-    else params.delete('q')
-    const qs = params.toString()
-    startTransition(() => {
-      router.replace(qs ? `/?${qs}` : '/', { scroll: false })
-    })
-  }
+  useEffect(() => {
+    if (searchValue === urlQuery) return
+    const timer = setTimeout(() => {
+      lastPushed.current = searchValue
+      const params = new URLSearchParams(searchParams.toString())
+      if (searchValue) params.set('q', searchValue)
+      else params.delete('q')
+      const qs = params.toString()
+      startTransition(() => {
+        router.replace(qs ? `/components?${qs}` : '/components', { scroll: false })
+      })
+    }, 150)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue])
 
   const clearSearch = () => {
-    updateQuery('')
+    setSearchValue('')
     searchInputRef.current?.focus()
   }
 
@@ -189,9 +203,11 @@ export function MobileNav() {
                     ref={searchInputRef}
                     type="text"
                     value={searchValue}
-                    onChange={(e) => updateQuery(e.target.value)}
+                    onChange={(e) => setSearchValue(e.target.value)}
                     placeholder="Search..."
-                    className="w-full rounded-lg border border-sand-300 bg-sand-100 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 hover:border-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
+                    // 16px font-size prevents iOS Safari from auto-zooming on focus.
+                    style={{ fontSize: 16 }}
+                    className="w-full rounded-lg border border-sand-300 bg-sand-100 py-1.5 pl-8 pr-8 text-sand-900 outline-none transition-colors placeholder:text-sand-400 hover:border-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
                   />
                   {searchValue && (
                     <button
