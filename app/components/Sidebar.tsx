@@ -59,23 +59,40 @@ export function Sidebar() {
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
 
   // ── Search ──────────────────────────────────────────────────────────────
-  // Local state keeps the input snappy; URL is the source of truth so the
-  // home page (HomeClient) can read `?q=` and filter the grid.
+  // Local state is the source of truth while typing; URL is written via a
+  // debounced effect so fast keystrokes can't fight themselves.
   const urlQuery = searchParams.get('q') ?? ''
   const [searchValue, setSearchValue] = useState(urlQuery)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [, startTransition] = useTransition()
 
-  // Sync local state when the URL changes from outside (back/forward, clear button)
-  // but NOT when we're the ones who changed it (typing). Compare against a ref
-  // to avoid overwriting fast keystrokes with stale URL state.
+  // Tracks the last value we pushed into the URL. When urlQuery matches, the
+  // change came from us — don't overwrite local state. When it doesn't match,
+  // it's an external change (back/forward, category click) — sync.
   const lastPushed = useRef(urlQuery)
+
   useEffect(() => {
-    if (urlQuery !== lastPushed.current) {
-      setSearchValue(urlQuery)
-    }
+    if (urlQuery === lastPushed.current) return
+    setSearchValue(urlQuery)
     lastPushed.current = urlQuery
   }, [urlQuery])
+
+  // Debounced write: local searchValue → URL.
+  useEffect(() => {
+    if (searchValue === urlQuery) return
+    const timer = setTimeout(() => {
+      lastPushed.current = searchValue
+      const params = new URLSearchParams(searchParams.toString())
+      if (searchValue) params.set('q', searchValue)
+      else params.delete('q')
+      const qs = params.toString()
+      startTransition(() => {
+        router.replace(qs ? `/components?${qs}` : '/components', { scroll: false })
+      })
+    }, 150)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue])
 
   // ⌘K / Ctrl+K focuses the search input.
   useEffect(() => {
@@ -89,20 +106,8 @@ export function Sidebar() {
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  const updateQuery = (next: string) => {
-    setSearchValue(next)
-    lastPushed.current = next
-    const params = new URLSearchParams(searchParams.toString())
-    if (next) params.set('q', next)
-    else params.delete('q')
-    const qs = params.toString()
-    startTransition(() => {
-      router.replace(qs ? `/components?${qs}` : '/components', { scroll: false })
-    })
-  }
-
   const clearSearch = () => {
-    updateQuery('')
+    setSearchValue('')
     searchInputRef.current?.focus()
   }
 
@@ -137,7 +142,7 @@ export function Sidebar() {
             ref={searchInputRef}
             type="text"
             value={searchValue}
-            onChange={(e) => updateQuery(e.target.value)}
+            onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search…"
             className="w-full rounded-lg border border-sand-300 bg-sand-100 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 hover:border-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
           />
