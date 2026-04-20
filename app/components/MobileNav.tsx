@@ -120,6 +120,9 @@ export function MobileNav() {
         <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
           <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
           AI Canvas
+          <span className="ml-0.5 rounded-md border border-sand-300 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sand-500 dark:border-sand-700 dark:text-sand-400">
+            Beta
+          </span>
         </Link>
 
         <button

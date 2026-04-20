@@ -119,6 +119,9 @@ export function Sidebar() {
         >
           <img src="/ai-canvas-icon.svg" alt="" width={20} height={17} className="shrink-0" />
           AI Canvas
+          <span className="ml-0.5 rounded-md border border-sand-300 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sand-500 dark:border-sand-700 dark:text-sand-400">
+            Beta
+          </span>
         </Link>
       </div>
 
