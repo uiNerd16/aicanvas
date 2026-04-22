@@ -73,6 +73,7 @@ const ALL_SLUGS = [
   'peel-corner-reveal',
   'jar-of-emotions',
   'responsive-letters',
+  'good-vibes',
 ]
 
 const arg   = process.argv[2]
@@ -272,6 +273,9 @@ const INTERACTIONS = {
     await page.mouse.click(box.x + box.width * 0.55, box.y + box.height * 0.88)
     await preview.page().waitForTimeout(800)
   },
+
+  // Good Vibes — hover center to show letters becoming bold and scaled
+  'good-vibes': hoverCenter,
 }
 
 async function hoverCenter(preview, page) {

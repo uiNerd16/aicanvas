@@ -1,13 +1,33 @@
 'use client'
 
-// npm install framer-motion
+// npm install framer-motion react next
+// font: Science Gothic
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Science_Gothic } from 'next/font/google'
-import { useTheme } from '../../app/components/ThemeProvider'
 
 const scienceGothic = Science_Gothic({ subsets: ['latin'] })
+
+function useTheme() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof document === 'undefined') return 'dark'
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+    if (typeof document === 'undefined') return
+    const html = document.documentElement
+    const observer = new MutationObserver(() => {
+      setTheme(html.classList.contains('dark') ? 'dark' : 'light')
+    })
+    observer.observe(html, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return { theme }
+}
 
 interface LetterSpanProps {
   letter: string

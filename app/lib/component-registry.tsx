@@ -109,6 +109,8 @@ import JarOfEmotions from '../../components-workspace/jar-of-emotions'
 import { prompts as jarOfEmotionsPrompts } from '../../components-workspace/jar-of-emotions/prompts'
 import ResponsiveLetters from '../../components-workspace/responsive-letters'
 import { prompts as responsiveLettersPrompts } from '../../components-workspace/responsive-letters/prompts'
+import GoodVibes from '../../components-workspace/good-vibes'
+import { prompts as goodVibesPrompts } from '../../components-workspace/good-vibes/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -977,6 +979,21 @@ Requirements:
     PreviewComponent: ResponsiveLetters,
     code: componentCodes['responsive-letters'],
     prompts: responsiveLettersPrompts,
+  },
+  {
+    slug: 'good-vibes',
+    name: 'Good Vibes',
+    description: 'Interactive typography where letters scale 2x and become bold on hover.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/good-vibes.png',
+    PreviewComponent: GoodVibes,
+    code: componentCodes['good-vibes'],
+    prompts: goodVibesPrompts,
   },
 ]
 
