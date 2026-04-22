@@ -6,7 +6,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Science_Gothic } from 'next/font/google'
-import { useTheme } from '../../app/components/ThemeProvider'
 
 const scienceGothic = Science_Gothic({ subsets: ['latin'] })
 
@@ -98,13 +97,51 @@ const MIN_SKEW = 0            // no skew when cursor is far
 const EASE_DURATION = 0.3     // seconds to ease back to default
 
 export default function ResponsiveLetters() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const [isDark, setIsDark] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
   const lettersRef = useRef<(HTMLSpanElement | null)[]>([])
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
   const animIdRef = useRef<number>(0)
   const aliveRef = useRef(true)
+
+  // Custom theme detection: checks parent container's data-card-theme attribute
+  // (for ComponentPageView) or falls back to document.documentElement.classList
+  useEffect(() => {
+    function detectTheme(): boolean {
+      // First, check if parent container has data-card-theme attribute
+      let element: HTMLElement | null = containerRef.current
+      while (element) {
+        const cardTheme = element.getAttribute('data-card-theme')
+        if (cardTheme) {
+          return cardTheme === 'dark'
+        }
+        element = element.parentElement
+      }
+
+      // Fallback: check document.documentElement for dark class
+      return document.documentElement.classList.contains('dark')
+    }
+
+    // Initial theme detection
+    setIsDark(detectTheme())
+
+    // Watch for changes to parent container's data-card-theme attribute
+    const observer = new MutationObserver(() => {
+      setIsDark(detectTheme())
+    })
+
+    // Observe the container and its ancestors for attribute changes
+    let element: HTMLElement | null = containerRef.current
+    while (element) {
+      observer.observe(element, { attributes: true, attributeFilter: ['data-card-theme', 'class'] })
+      element = element.parentElement
+    }
+
+    // Also watch the document.documentElement as fallback
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Track exit animation state per letter
   const exitStateRef = useRef<Array<{
