@@ -107,6 +107,8 @@ import PeelCornerReveal from '../../components-workspace/peel-corner-reveal'
 import { prompts as peelCornerRevealPrompts } from '../../components-workspace/peel-corner-reveal/prompts'
 import JarOfEmotions from '../../components-workspace/jar-of-emotions'
 import { prompts as jarOfEmotionsPrompts } from '../../components-workspace/jar-of-emotions/prompts'
+import ResponsiveLetters from '../../components-workspace/responsive-letters'
+import { prompts as responsiveLettersPrompts } from '../../components-workspace/responsive-letters/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -960,6 +962,20 @@ Requirements:
     PreviewComponent: JarOfEmotions,
     code: componentCodes['jar-of-emotions'],
     prompts: jarOfEmotionsPrompts,
+  },
+  {
+    slug: 'responsive-letters',
+    name: 'Responsive Letters',
+    description: 'Interactive text where each letter responds to cursor proximity, animating variable font properties (weight, stretch, italic, letter-spacing, skew) to create a deformation-under-pressure effect. Dark mode features neon cyan text on navy; light mode inverts to dark text on cyan.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: true,
+    PreviewComponent: ResponsiveLetters,
+    code: componentCodes['responsive-letters'],
+    prompts: responsiveLettersPrompts,
   },
 ]
 

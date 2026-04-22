@@ -2,6 +2,7 @@
 
 | Component | Stage | Notes |
 |---|---|---|
+| responsive-letters | integrated | Interactive text — cursor proximity animates weight (100→900), width (100%→200%), letter spacing (0em→0.4em), skew (±18°), italic toggle. Science Gothic font, neon cyan on dark navy (light/dark mode swapped). 300px influence radius, elastic spring animations, 5rem-9rem responsive typography. |
 | murmuration | deleted | Removed by user request |
 | sticker-wall | integrated | Feedback Wall — matter.js physics, 10 quote + 12 emoji seeds, pastel stickers with 32px radius, periwinkle Send key, dual-theme, title + subtitle, settled-pile screenshot. Promoted from /preview/idea-two. |
 | easter-rabbit | deleted | Removed by user request |
@@ -42,6 +43,7 @@
 | ai-job-cards | integrated | Three swipeable card stacks (Anthropic/Perplexity/Google), brand logos, bookmark toggle, spring animations — mobile fix applied (h-full→min-h-screen, alignItems:stretch on narrow) |
 | peel-corner-reveal | integrated | "Peel to Scan" — 2D SVG peel, tap-toggle with hover-peek, Wi-Fi QR reveal (qrcode.react), inverted light/dark card, pulsing Wi-Fi arcs, +31° QR rotation, inlined useTheme for copy-paste readiness. Registry + screenshot live. |
 | jar-of-emotions | integrated | SVG glass jar + spring-hinged lid (Framer Motion), 6 reaction emojis (🔥👌😄😭🧑‍🍳🐐), matter.js physics floor + walls, ballistic aim to clicked button, 30-tap "Full. Please Stop." banner, dualTheme. |
+| good-vibes | previewing | Interactive typography — cursor-proximity weight animation (900→100) + 2x scale, dark charcoal bg with orange text, Science Gothic font |
 | flip-grid | deleted | Removed by user request |
 | liquid-button | deleted | Removed by user request |
 | scatter-field | deleted | Removed by user request |
