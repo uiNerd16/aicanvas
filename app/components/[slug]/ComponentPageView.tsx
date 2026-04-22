@@ -206,7 +206,7 @@ export default function ComponentPageView({
     setPreviewKey((k) => k + 1)
   }
 
-  const cliCommand = `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+  const cliCommand = `npx shadcn@latest add @aicanvas/${slug}`
 
   async function copyCode() {
     try {
@@ -618,12 +618,12 @@ export default function ComponentPageView({
                               <button
                                 onClick={() => {
                                   const cmd = pkgManager === 'npm'
-                                    ? `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    ? `npx shadcn@latest add @aicanvas/${slug}`
                                     : pkgManager === 'pnpm'
-                                    ? `pnpm dlx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    ? `pnpm dlx shadcn@latest add @aicanvas/${slug}`
                                     : pkgManager === 'yarn'
-                                    ? `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
-                                    : `bunx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                    ? `npx shadcn@latest add @aicanvas/${slug}`
+                                    : `bunx shadcn@latest add @aicanvas/${slug}`
                                   navigator.clipboard.writeText(cmd)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
@@ -640,10 +640,10 @@ export default function ComponentPageView({
                             <div className="px-4 py-3.5">
                               <code className="font-mono text-sm text-sand-300">
                                 {pkgManager === 'pnpm'
-                                  ? `pnpm dlx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
+                                  ? `pnpm dlx shadcn@latest add @aicanvas/${slug}`
                                   : pkgManager === 'bun'
-                                  ? `bunx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`
-                                  : `npx shadcn@latest add "https://aicanvas.me/r/${slug}.json"`}
+                                  ? `bunx shadcn@latest add @aicanvas/${slug}`
+                                  : `npx shadcn@latest add @aicanvas/${slug}`}
                               </code>
                             </div>
                           </div>
