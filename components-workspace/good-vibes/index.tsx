@@ -35,7 +35,7 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
       className={`inline-block select-none ${textColor}`}
       style={{
         fontSize: 'clamp(2.1rem, 7vw, 5.6rem)',
-        fontWeight: 'var(--font-weight, 700)',
+        fontWeight: 'var(--font-weight, 100)',
         fontFamily,
         lineHeight: 1,
         letterSpacing: 'var(--letter-spacing, 0em)',
@@ -86,7 +86,7 @@ export default function GoodVibes() {
     TEXT.split('').forEach((_, i) => {
       if (!stateRef.current[i]) {
         stateRef.current[i] = {
-          weight: MAX_WEIGHT,
+          weight: MIN_WEIGHT,
           scale: MIN_SCALE,
           letterSpacing: MIN_LETTER_SPACING,
         }
@@ -118,8 +118,8 @@ export default function GoodVibes() {
           influence = influence * influence * (3 - 2 * influence)
         }
 
-        // Inverse: as influence increases, weight DECREASES (900 → 100)
-        const targetWeight = MAX_WEIGHT - (MAX_WEIGHT - MIN_WEIGHT) * influence
+        // As influence increases, weight INCREASES (100 → 700)
+        const targetWeight = MIN_WEIGHT + (MAX_WEIGHT - MIN_WEIGHT) * influence
         const targetScale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * influence
         const targetLetterSpacing = MIN_LETTER_SPACING + (MAX_LETTER_SPACING - MIN_LETTER_SPACING) * influence
 
@@ -154,8 +154,8 @@ export default function GoodVibes() {
     mouseRef.current = null
   }
 
-  const bgColor = isDark ? '#1a2332' : '#f0f0f0'
-  const textColor = isDark ? 'text-[#ff9b4d]' : 'text-[#2c3e50]'
+  const bgColor = isDark ? '#1a1a1a' : '#f5f5f5'
+  const textColor = isDark ? 'text-[#ed7550]' : 'text-[#ed7550]'
 
   return (
     <div

@@ -973,6 +973,7 @@ Requirements:
       { label: 'Animation' },
     ],
     dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/responsive-letters.png',
     PreviewComponent: ResponsiveLetters,
     code: componentCodes['responsive-letters'],
     prompts: responsiveLettersPrompts,
