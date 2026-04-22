@@ -805,7 +805,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             <h2 className="mt-1 text-xl font-bold text-sand-50">
               For designers. For developers. For everyone in between.
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-sand-400">
+            <p className="mt-3 text-base leading-relaxed text-sand-400">
               Most component libraries are built for one audience. AI Canvas works however you work.
             </p>
           </motion.div>
@@ -848,7 +848,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                   </div>
                   <span className="text-sm font-bold text-sand-50">{audience}</span>
                 </div>
-                <p className="flex-1 text-sm leading-relaxed text-sand-400">{description}</p>
+                <p className="flex-1 text-base leading-relaxed text-sand-400">{description}</p>
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {badges.map((badge) => (
                     <span
@@ -927,7 +927,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                     <span className="text-base font-bold tabular-nums text-olive-500">{step.num}</span>
                     <h3 className="text-base font-bold text-sand-50">{step.title}</h3>
                   </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-sand-500">{step.desc}</p>
+                  <p className="mt-1.5 text-base leading-relaxed text-sand-500">{step.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -950,7 +950,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             <h2 className="mt-1 text-xl font-bold text-sand-50">
               Every component ships with prompts for three AI platforms.
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-sand-400">
+            <p className="mt-3 text-base leading-relaxed text-sand-400">
               Not generic instructions. Each prompt is a precise reproduction brief —
               tested to recreate the component faithfully. Pick your platform,
               paste, and go.
@@ -998,7 +998,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             <h2 className="relative mt-2 text-xl font-bold text-sand-50">
               Everything is free. Everything is open source.
             </h2>
-            <p className="relative mt-2 text-sm text-sand-500">
+            <p className="relative mt-2 text-base text-sand-500">
               {total}+ AI-native components with prompts for Claude Code, Lovable, and V0. Design systems coming soon.
             </p>
             <Link

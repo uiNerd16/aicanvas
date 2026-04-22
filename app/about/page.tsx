@@ -70,13 +70,13 @@ export default function AboutPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
             The Story
           </h1>
-          <p className="mt-6 text-sm leading-relaxed text-sand-400">
+          <p className="mt-6 text-base leading-relaxed text-sand-400">
             We're living through a quiet shift. The way we design and build
             interfaces is changing, not with a bang, but with a conversation.
             Today you can describe what you need in plain words and watch it
             come to life. That felt like something worth exploring.
           </p>
-          <p className="mt-4 text-sm leading-relaxed text-sand-400">
+          <p className="mt-4 text-base leading-relaxed text-sand-400">
             AI Canvas started as a small experiment: what if every piece of UI
             came with the right words to recreate it? Each prompt is tuned for
             Claude Code, V0, and Lovable, so you can pick the tool you're
@@ -89,12 +89,12 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold tracking-tight text-sand-50">
             Why it exists
           </h2>
-          <p className="mt-6 text-sm leading-relaxed text-sand-400">
+          <p className="mt-6 text-base leading-relaxed text-sand-400">
             AI tools are getting remarkably good, but the quality of what you
             get back still depends on how you ask. A thoughtful prompt produces
             something you can actually use. A vague one wastes your time.
           </p>
-          <p className="mt-4 text-sm leading-relaxed text-sand-400">
+          <p className="mt-4 text-base leading-relaxed text-sand-400">
             It felt like there should be a place where prompts are treated with
             the same care as code: written thoughtfully, tested across
             platforms, and shared openly. A place built for today's workflow,
@@ -107,7 +107,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold tracking-tight text-sand-50">
             How it works
           </h2>
-          <p className="mt-6 text-sm leading-relaxed text-sand-400">
+          <p className="mt-6 text-base leading-relaxed text-sand-400">
             Everything here, components, design systems (soon), and whatever comes
             next, is built directly with words. Most of the work happens in
             Claude Code, with Figma for visual tweaking when needed. Then each
@@ -115,7 +115,7 @@ export default function AboutPage() {
             prompt reads differently from a V0 or Lovable prompt. The
             tools think differently.
           </p>
-          <p className="mt-4 text-sm leading-relaxed text-sand-400">
+          <p className="mt-4 text-base leading-relaxed text-sand-400">
             The project itself runs on Claude Code, so the Claude prompts tend
             to give the most accurate results. But every platform is supported
             and tested. Browse, preview, pick your tool, copy the prompt.
