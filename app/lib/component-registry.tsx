@@ -990,7 +990,7 @@ Requirements:
       { label: 'Animation' },
     ],
     dualTheme: true,
-    image: 'https://ik.imagekit.io/aitoolkit/good-vibes.png',
+    image: 'https://ik.imagekit.io/aitoolkit/good-vibes.png?v=2',
     PreviewComponent: GoodVibes,
     code: componentCodes['good-vibes'],
     prompts: goodVibesPrompts,
