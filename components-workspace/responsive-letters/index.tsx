@@ -3,27 +3,12 @@
 // npm install framer-motion react next
 // font: Science Gothic
 
-import { useEffect, useRef, useState, createContext, useContext } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Science_Gothic } from 'next/font/google'
+import { useTheme } from '../../app/components/ThemeProvider'
 
 const scienceGothic = Science_Gothic({ subsets: ['latin'] })
-
-// ─── Inline ThemeProvider ──────────────────────────────────────────────────────
-const ThemeContext = createContext<{ theme: 'light' | 'dark' }>({ theme: 'dark' })
-
-const useTheme = () => {
-  const context = useContext(ThemeContext)
-  if (!context) {
-    // Fallback: detect from window if not in provider
-    if (typeof window !== 'undefined') {
-      const isDark = document.documentElement.classList.contains('dark')
-      return { theme: isDark ? 'dark' : 'light' }
-    }
-    return { theme: 'dark' }
-  }
-  return context
-}
 
 // ─── LetterSpan Component ─────────────────────────────────────────────────────
 // Reads CSS --italic variable and applies fontStyle dynamically
@@ -81,7 +66,7 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
       ref={spanRef}
       className={`inline-block select-none ${textColor}`}
       style={{
-        fontSize: 'clamp(5rem, 12vw, 9rem)',
+        fontSize: 'clamp(4rem, 12vw, 7rem)',
         fontWeight: 'var(--font-weight, 100)',
         fontStretch: 'var(--font-stretch, 100%)',
         fontFamily,
