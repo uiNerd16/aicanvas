@@ -64,17 +64,56 @@ When writing a Brief for a complex component, tell the Builder which extended sk
 Every new component follows this exact sequence — never skip a step:
 
 ```
-1. Brief     → Write a spec from the user's description. Get approval before proceeding.
-2. Build     → Delegate to Builder to create index.tsx ONLY (no prompts yet).
-3. Preview   → Wire to preview route, run TypeScript check. User reviews visually.
-4. Adjust    → (repeat until user says "looks good") Delegate to Builder with changes.
-5. Prompts   → AFTER user approves the visual, delegate to Builder to write prompts.ts
-               based on the FINAL version of the component.
-6. Review    → Delegate to Reviewer to check everything (code + prompts).
-7. Integrate → On user approval, delegate to Integrator.
+1. Brief       → Write a spec from the user's description. Get approval before proceeding.
+2. Build       → Delegate to Builder to create index.tsx ONLY (no prompts yet).
+3. Preview     → Wire to preview route, run TypeScript check. User reviews visually.
+4. Adjust      → (repeat until user says "looks good") Delegate to Builder with changes.
+5. Prompts     → AFTER user approves the visual, delegate to Builder to write prompts.ts
+                 based on the FINAL version of the component.
+6. Review      → Delegate to Reviewer to check everything (code + prompts).
+7. Sync spec   → When user gives final approval ("this is perfect", "push it"),
+                 re-read spec.md and update it to match the shipped component if
+                 visuals, behaviour, or tech notes drifted during Adjust cycles.
+                 Supervisor's own job — do NOT delegate. Skip if already accurate.
+8. Integrate   → Delegate to Integrator to wire the component into
+                 `app/lib/component-registry.tsx` and run the registry build LOCALLY.
+                 Do NOT commit or push yet.
+9. JSON check  → Supervisor runs the registry JSON check script against the freshly
+                 built `public/r/<slug>.json`. On FAIL: STOP, surface the exact error
+                 to the user in chat ("JSON check failed: <reason>"), do NOT push.
+                 On PASS: proceed to step 10.
+10. Publish    → Integrator commits + pushes. Vercel deploys. Update status to
+                 `integrated` once the live URL `aicanvas.me/r/<slug>.json` returns 200.
 ```
 
 **Why prompts come last:** Users often adjust the component multiple times. Writing prompts early means they describe an outdated version. Always write prompts against the final, approved component.
+
+**Why sync the spec before integrating:** The brief is written once up front, but the component usually evolves across several Adjust cycles. Before the component goes live, the spec should describe what actually shipped — so months later, anyone reading it (including future-you or a future agent) sees the final intent, not the first draft. Only update fields that actually changed.
+
+## JSON check — how to run it (step 9)
+
+After the Integrator wires the component and runs the registry build locally:
+
+```bash
+npm run validate:registry -- <slug>
+```
+
+Example: `npm run validate:registry -- particle-sphere`
+
+The script validates all 5 checks:
+1. JSON file exists at `public/r/<slug>.json`
+2. Required shadcn schema fields present (`$schema`, `name`, `type`, `files`)
+3. Content parity: JSON's `files[0].content` matches `components-workspace/<slug>/index.tsx` byte-for-byte
+4. Slug match: JSON's `name` equals the folder name
+5. Target path: `files[0].target` is exactly `components/aicanvas/<slug>.tsx`
+6. Dependency completeness: every import in the component appears in the JSON's `dependencies` array
+
+**On PASS** (exit code 0): Continue to step 10 (Publish).
+
+**On FAIL** (exit code 1): The script prints the exact reason. Copy that reason verbatim into chat:
+> "JSON check failed for `<slug>`: `<exact error reason>`. Not pushing. Investigating now."
+
+Then follow the failure protocol below.
 
 ## User commands → your actions
 
@@ -83,7 +122,7 @@ Every new component follows this exact sequence — never skip a step:
 | "build a component that…" | Write brief → show to user → on approval, delegate to Builder (index.tsx only) |
 | "adjust / change / fix…" | Delegate to Builder with specific change |
 | "looks good" (visual approval) | Delegate to Builder to write prompts.ts → then delegate to Reviewer |
-| "push it / integrate" | Delegate to Integrator (only after Review passes) |
+| "push it / integrate" | Sync spec.md → delegate to Integrator to wire up LOCALLY → run registry JSON check → on PASS: Integrator commits + pushes; on FAIL: STOP, surface error in chat, investigate before pushing |
 | "what components do we have?" | Read `supervisor/component-status.md` and summarise |
 | "review the component" | Delegate to Reviewer |
 | "what went wrong before?" | Read `supervisor/mistakes.md` |
@@ -140,3 +179,42 @@ Do NOT proceed to preview or integration. Report the issues clearly to the user.
 3. **`spec.md` exists** in `components-workspace/<slug>/`.
 
 If any gate fails → do not delegate to Integrator. Tell the user what is missing and complete the missing step first.
+
+## Hard publish gate — never push to GitHub unless this is true
+
+4. **Registry JSON check passes** on the freshly built `public/r/<slug>.json` (see pipeline step 9).
+
+Run the validation script: `npm run validate:registry -- <slug>`. Exit code 0 = pass. Exit code 1 = fail (script prints the reason).
+
+**Failure protocol:** if the JSON check fails (exit code 1), STOP the pipeline immediately and tell the user in chat with a clear message — e.g. *"JSON check failed for `<slug>`: `<reason>`. Not pushing. Investigating now."* Then diagnose:
+
+1. Read the failing `public/r/<slug>.json` file.
+2. Compare against the source `components-workspace/<slug>/index.tsx`.
+3. Identify which check failed (missing dep, schema mismatch, stale content, etc.).
+4. Fix the underlying issue (usually via Builder or the registry build script), NOT by hand-editing the JSON.
+5. Re-run the registry build and re-check.
+6. Only publish once the check passes cleanly.
+
+**Never push to GitHub after a JSON check failure without fixing the root cause first.** A broken JSON that goes live breaks installs for every shadcn user who tries `@aicanvas/<slug>`.
+
+### What the JSON check verifies
+
+1. **Schema validity** — required shadcn fields present: `$schema`, `name`, `type`, `files`.
+2. **Dependency completeness** — every `import 'xxx'` in the source code that isn't a built-in or relative path appears in the JSON's `dependencies` array.
+3. **Content parity** — the JSON's `files[0].content` field matches the current `components-workspace/<slug>/index.tsx` file byte-for-byte (modulo JSON escaping).
+4. **Slug match** — the JSON's `name` matches the folder name.
+5. **Target path** — `files[0].target` is `components/aicanvas/<slug>.tsx` (namespaced to avoid collisions in user projects).
+
+## Registry is a public contract
+
+AI Canvas is officially listed in the shadcn v4 registry directory (PR #10440, merged 2026-04-20 by shadcn). That means `aicanvas.me/r/*.json` is no longer internal plumbing — it's a public API that external users depend on via `npx shadcn@latest add @aicanvas/<slug>`.
+
+Follow these rules whenever anything touches `public/r/*.json` or an integrated component:
+
+1. **Never rename the slug of an integrated component.** Every slug is permanent once it's on the homepage. If a rename is absolutely required, the old slug must remain available as an alias — otherwise any user who previously ran `shadcn add @aicanvas/<old-slug>` loses the ability to reinstall or update.
+2. **Never delete an integrated component without explicit user authorization.** Confirm the user understands this breaks external installs for that slug. Deleted slugs should ideally 410/redirect rather than 404.
+3. **Re-run the registry build after any component change that touches imports, dependencies, or the file list.** The JSON must reflect the component's current dependency array — otherwise installs succeed but crash at runtime in the user's app.
+4. **Registry build failures block integration.** If the build script can't generate valid JSON for a component, do not mark it integrated. Fix the build first.
+5. **After a deploy, sanity-check one install.** `curl https://aicanvas.me/r/registry.json` and spot-check one component's JSON. If anything is malformed or missing, treat it as a production incident.
+
+When in doubt, ask the user before making changes that could affect the registry surface.

@@ -134,6 +134,18 @@ Before reporting back, verify every item:
 
 **If any item is unchecked, do not report back. Complete it first.**
 
+## What happens next
+
+After you report completion:
+1. **Supervisor syncs spec.md** (if visuals/behavior changed during Adjust cycles)
+2. **Supervisor runs JSON validation** (`npm run validate:registry -- <slug>`)
+   - On PASS: proceeds to step 10 (publish)
+   - On FAIL: stops, surfaces error in chat, component stays local until fixed
+3. **Integrator commits + pushes** (only after JSON validation passes)
+4. Vercel deploys automatically
+
+Your job ends at the completion checklist. The Supervisor and JSON validator gate the publish.
+
 ## Rules
 - **Never** modify the logic or JSX in `index.tsx` — the one allowed exception is adding `// font:` or `// font-pkg:` comments at the top (Step 1b)
 - **Never** modify `prompts.ts` in `components-workspace/`
