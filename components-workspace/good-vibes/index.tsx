@@ -9,22 +9,34 @@ import { Science_Gothic } from 'next/font/google'
 
 const scienceGothic = Science_Gothic({ subsets: ['latin'] })
 
-function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof document === 'undefined') return 'dark'
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  })
+function useTheme(ref: React.RefObject<HTMLElement | null>) {
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
-    if (typeof document === 'undefined') return
-    const html = document.documentElement
-    const observer = new MutationObserver(() => {
-      setTheme(html.classList.contains('dark') ? 'dark' : 'light')
-    })
-    observer.observe(html, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
+    const element = ref.current
+    if (!element) return
+
+    const readTheme = () => {
+      const cardScope = element.closest('[data-card-theme]') as HTMLElement | null
+      if (cardScope) {
+        setTheme(cardScope.dataset.cardTheme === 'dark' ? 'dark' : 'light')
+        return
+      }
+      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+    }
+    readTheme()
+
+    const observers: MutationObserver[] = []
+    let current: HTMLElement | null = element
+    while (current) {
+      const observer = new MutationObserver(readTheme)
+      observer.observe(current, { attributes: true, attributeFilter: ['class', 'data-card-theme'] })
+      observers.push(observer)
+      current = current.parentElement
+    }
+
+    return () => observers.forEach((o) => o.disconnect())
+  }, [ref])
 
   return { theme }
 }
@@ -54,7 +66,7 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
       ref={spanRef}
       className={`inline-block select-none ${textColor}`}
       style={{
-        fontSize: 'clamp(2.1rem, 7vw, 5.6rem)',
+        fontSize: 'clamp(1.25rem, 7vw, 5rem)',
         fontWeight: 'var(--font-weight, 100)',
         fontFamily,
         lineHeight: 1,
@@ -82,9 +94,9 @@ const MIN_LETTER_SPACING = 0
 const EASE_DURATION = 0.15
 
 export default function GoodVibes() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
   const containerRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme(containerRef)
+  const isDark = theme === 'dark'
   const lettersRef = useRef<(HTMLSpanElement | null)[]>([])
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
   const animIdRef = useRef<number>(0)
@@ -185,7 +197,7 @@ export default function GoodVibes() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+      <div className="flex flex-nowrap items-center justify-center gap-1 sm:gap-4">
         {TEXT.split('').map((letter, i) => (
           <LetterSpan
             key={i}

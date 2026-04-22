@@ -136,7 +136,7 @@ export default async function Page({
 
   const url = `${SITE_URL}/components/${slug}`
   const firstSentence = firstSentenceOf(entry.description)
-  const headingSubtitle = `${firstSentence} Install with the shadcn CLI.`
+  const headingSubtitle = firstSentence
 
   const softwareSchema = {
     '@context': 'https://schema.org',
