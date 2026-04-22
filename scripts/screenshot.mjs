@@ -72,6 +72,7 @@ const ALL_SLUGS = [
   'sticker-wall',
   'peel-corner-reveal',
   'jar-of-emotions',
+  'responsive-letters',
 ]
 
 const arg   = process.argv[2]
