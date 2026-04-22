@@ -8,7 +8,8 @@
     "build": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "screenshot": "node scripts/screenshot.mjs"
+    "screenshot": "node scripts/screenshot.mjs",
+    "validate:registry": "npx ts-node scripts/validate-registry-json.ts"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.78.0",
