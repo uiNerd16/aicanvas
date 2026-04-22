@@ -907,7 +907,7 @@ Requirements:
   {
     slug: 'danger-stripes',
     name: 'Danger Stripes',
-    image: 'https://ik.imagekit.io/aitoolkit/danger-stripes.png',
+    image: 'https://ik.imagekit.io/aitoolkit/danger-stripes.png?v=2',
     description: 'Three crossing caution-tape stripes on orange. Hover to shake, click to intensify.',
     tags: [
       { label: 'Widgets', accent: true },

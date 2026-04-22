@@ -299,7 +299,7 @@ export default function ComponentPageView({
             <h1 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
               <span className="block">{name}</span>
               {headingSubtitle && (
-                <span className="mt-2 block text-base font-normal leading-relaxed text-sand-600 dark:text-sand-400 sm:text-lg">
+                <span className="mt-2 block text-base font-normal leading-relaxed tracking-normal text-sand-600 dark:text-sand-400 sm:text-lg">
                   {headingSubtitle}
                 </span>
               )}
@@ -597,7 +597,7 @@ export default function ComponentPageView({
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
                         <div className="min-w-0 flex-1">
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                            Run the following command:
+                            Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
                           <div className="overflow-hidden rounded-lg bg-sand-950">
                             {/* Package manager switcher */}

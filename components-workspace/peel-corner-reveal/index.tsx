@@ -55,6 +55,7 @@ const CARD_W = 320
 const CARD_H = 440
 const CARD_X = 90 // top-left x of the card within the viewBox
 const CARD_Y = 70 // top-left y of the card within the viewBox
+const CARD_RADIUS = 12 // corner radius for TL, TR, BL (BR is carved by the peel)
 
 // Card corner coordinates (derived)
 const TL = { x: CARD_X, y: CARD_Y }
@@ -81,11 +82,14 @@ export default function PeelCornerReveal() {
   // Theme-aware palette — the card inverts between modes.
   //   dark  → white card on near-black page, black ink
   //   light → dark card on warm off-white page, light ink
-  const PAGE_BG = theme === 'dark' ? '#1A1A19' : '#E8E4DC'
+  const PAGE_BG = theme === 'dark' ? '#2E2E2C' : '#D0CCC4'
   const CARD_FILL = theme === 'dark' ? '#FFFFFF' : '#121212'
   const CARD_INK = theme === 'dark' ? '#0A0A0A' : '#F5F5F0'
   const FOLD_STROKE = theme === 'dark' ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.22)'
   const DIVIDER_STROKE = theme === 'dark' ? CARD_INK : '#FFFFFF'
+  const DROP_SHADOW = theme === 'dark'
+    ? '4px 4px 24px rgba(0,0,0,0.55)'
+    : '4px 4px 24px rgba(20,15,10,0.28)'
 
   // Single progress 0..1 drives everything, smoothed by a spring.
   // Hover teases the peel open to ~0.18 (a small peek); tap locks fully open.
@@ -163,6 +167,11 @@ export default function PeelCornerReveal() {
   // Card polygon with BR corner carved off along A–B:
   //   TL → TR → B → A → BL
   const cardPoints = useMotionTemplate`${TL.x},${TL.y} ${TR.x},${TR.y} ${Bx},${By} ${Ax},${Ay} ${BL.x},${BL.y}`
+
+  // Rounded card path: same shape as cardPoints, but TL/TR/BL corners are
+  // rounded to CARD_RADIUS. The BR is still carved by the A–B fold and stays
+  // straight (no arcs) so the peel math keeps working untouched.
+  const cardPath = useMotionTemplate`M ${TL.x + CARD_RADIUS} ${TL.y} L ${TR.x - CARD_RADIUS} ${TR.y} A ${CARD_RADIUS} ${CARD_RADIUS} 0 0 1 ${TR.x} ${TR.y + CARD_RADIUS} L ${Bx} ${By} L ${Ax} ${Ay} L ${BL.x + CARD_RADIUS} ${BL.y} A ${CARD_RADIUS} ${CARD_RADIUS} 0 0 1 ${BL.x} ${BL.y - CARD_RADIUS} L ${TL.x} ${TL.y + CARD_RADIUS} A ${CARD_RADIUS} ${CARD_RADIUS} 0 0 1 ${TL.x + CARD_RADIUS} ${TL.y} Z`
 
   // Peel polygon (the visible green flap): A → B → C
   const peelPoints = useMotionTemplate`${Ax},${Ay} ${Bx},${By} ${Cx},${Cy}`
@@ -269,7 +278,7 @@ export default function PeelCornerReveal() {
         whileHover={{ scale: 1.015 }}
         transition={{ type: 'spring', stiffness: 260, damping: 22 }}
         className="relative w-full max-w-[440px] cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1A9D51] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent rounded-[20px]"
-        style={{ y: bobY }}
+        style={{ y: bobY, filter: `drop-shadow(${DROP_SHADOW})` }}
       >
 
         <motion.svg
@@ -302,13 +311,13 @@ export default function PeelCornerReveal() {
 
             {/* Clip for the front card — carves off the BR triangle */}
             <clipPath id="pcr-card-clip">
-              <motion.polygon points={cardPoints} />
+              <motion.path d={cardPath} />
             </clipPath>
           </defs>
 
           {/* Card body (with BR corner carved off) */}
           <motion.g>
-            <motion.polygon points={cardPoints} fill={CARD_FILL} />
+            <motion.path d={cardPath} fill={CARD_FILL} />
           </motion.g>
 
           {/* Card front content, clipped to the carved card polygon */}
@@ -317,7 +326,7 @@ export default function PeelCornerReveal() {
                 from the dot on a continuous loop, staggered so the signal
                 visibly radiates. */}
             <g
-              transform={`translate(${CARD_X + 24}, ${CARD_Y + 22}) scale(1.5)`}
+              transform={`translate(${CARD_X + 24}, ${CARD_Y + 62}) scale(1.5)`}
               stroke={PEEL_FILL}
               strokeWidth={1.6}
               strokeLinecap="round"
@@ -363,7 +372,7 @@ export default function PeelCornerReveal() {
             {/* Large stacked display — Free / Wi-Fi */}
             <text
               x={CARD_X + 24}
-              y={CARD_Y + 150}
+              y={CARD_Y + 190}
               fill={CARD_INK}
               fontFamily="var(--font-sans, ui-sans-serif, system-ui, sans-serif)"
               fontSize={96}
@@ -375,7 +384,7 @@ export default function PeelCornerReveal() {
             </text>
             <text
               x={CARD_X + 24}
-              y={CARD_Y + 236}
+              y={CARD_Y + 276}
               fill={CARD_INK}
               fontFamily="var(--font-sans, ui-sans-serif, system-ui, sans-serif)"
               fontSize={96}
@@ -389,9 +398,9 @@ export default function PeelCornerReveal() {
             {/* Subtle divider below the Wi-Fi title */}
             <line
               x1={CARD_X + 40}
-              y1={CARD_Y + 276}
+              y1={CARD_Y + 316}
               x2={CARD_X + 140}
-              y2={CARD_Y + 276}
+              y2={CARD_Y + 316}
               stroke={DIVIDER_STROKE}
               strokeWidth={1}
               opacity={0.15}
@@ -470,24 +479,6 @@ export default function PeelCornerReveal() {
           </motion.g>
 
         </motion.svg>
-
-        {/* Hint caption */}
-        <div
-          className="pointer-events-none mt-4 flex w-full justify-center text-[11px] font-semibold uppercase tracking-[0.32em]"
-          style={{
-            fontFamily: 'var(--font-sans, ui-sans-serif, system-ui)',
-          }}
-        >
-          <span className="dark:hidden" style={{ color: 'rgba(10,10,10,0.45)' }}>
-            Tap the card
-          </span>
-          <span
-            className="hidden dark:inline"
-            style={{ color: 'rgba(255,255,255,0.42)' }}
-          >
-            Tap the card
-          </span>
-        </div>
       </motion.div>
     </div>
   )
