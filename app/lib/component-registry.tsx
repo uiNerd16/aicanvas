@@ -966,7 +966,7 @@ Requirements:
   {
     slug: 'responsive-letters',
     name: 'Responsive Letters',
-    description: 'Interactive text where each letter responds to cursor proximity, animating variable font properties (weight, stretch, italic, letter-spacing, skew) to create a deformation-under-pressure effect. Dark mode features neon cyan text on navy; light mode inverts to dark text on cyan.',
+    description: 'Interactive text where each letter responds to cursor proximity, animating variable font properties (weight, stretch, italic, letter-spacing, skew) to create a deformation-under-pressure effect.',
     tags: [
       { label: 'Typography', accent: true },
       { label: 'Interactive' },

@@ -34,8 +34,8 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
       ref={spanRef}
       className={`inline-block select-none ${textColor}`}
       style={{
-        fontSize: 'clamp(3rem, 10vw, 8rem)',
-        fontWeight: 'var(--font-weight, 900)',
+        fontSize: 'clamp(2.1rem, 7vw, 5.6rem)',
+        fontWeight: 'var(--font-weight, 700)',
         fontFamily,
         lineHeight: 1,
         transform: 'scale(var(--scale, 1))',
@@ -52,7 +52,7 @@ const LetterSpan = motion(LetterSpanComponent)
 // Configuration
 const TEXT = 'GOOD VIBES'
 const INFLUENCE_RADIUS = 300
-const MAX_WEIGHT = 900
+const MAX_WEIGHT = 700
 const MIN_WEIGHT = 100
 const MAX_SCALE = 2
 const MIN_SCALE = 1
