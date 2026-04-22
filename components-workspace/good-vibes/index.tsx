@@ -38,6 +38,7 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
         fontWeight: 'var(--font-weight, 700)',
         fontFamily,
         lineHeight: 1,
+        letterSpacing: 'var(--letter-spacing, 0em)',
         transform: 'scale(var(--scale, 1))',
         transformOrigin: 'center',
       }}
@@ -56,6 +57,8 @@ const MAX_WEIGHT = 700
 const MIN_WEIGHT = 100
 const MAX_SCALE = 2
 const MIN_SCALE = 1
+const MAX_LETTER_SPACING = 0.3
+const MIN_LETTER_SPACING = 0
 const EASE_DURATION = 0.15
 
 export default function GoodVibes() {
@@ -71,6 +74,7 @@ export default function GoodVibes() {
     Array<{
       weight: number
       scale: number
+      letterSpacing: number
     }>
   >([])
 
@@ -84,6 +88,7 @@ export default function GoodVibes() {
         stateRef.current[i] = {
           weight: MAX_WEIGHT,
           scale: MIN_SCALE,
+          letterSpacing: MIN_LETTER_SPACING,
         }
       }
     })
@@ -116,15 +121,18 @@ export default function GoodVibes() {
         // Inverse: as influence increases, weight DECREASES (900 → 100)
         const targetWeight = MAX_WEIGHT - (MAX_WEIGHT - MIN_WEIGHT) * influence
         const targetScale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * influence
+        const targetLetterSpacing = MIN_LETTER_SPACING + (MAX_LETTER_SPACING - MIN_LETTER_SPACING) * influence
 
         const state = stateRef.current[i]
         const easing = isExiting ? 0.05 : EASE_DURATION
 
         state.weight += (targetWeight - state.weight) * easing
         state.scale += (targetScale - state.scale) * easing
+        state.letterSpacing += (targetLetterSpacing - state.letterSpacing) * easing
 
         letterEl.style.setProperty('--font-weight', Math.round(state.weight).toString())
         letterEl.style.setProperty('--scale', state.scale.toFixed(3))
+        letterEl.style.setProperty('--letter-spacing', `${state.letterSpacing.toFixed(3)}em`)
       })
 
       animIdRef.current = requestAnimationFrame(animate)
@@ -157,7 +165,7 @@ export default function GoodVibes() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
         {TEXT.split('').map((letter, i) => (
           <LetterSpan
             key={i}
