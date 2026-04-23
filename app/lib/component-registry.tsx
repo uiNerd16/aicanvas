@@ -113,6 +113,10 @@ import GoodVibes from '../../components-workspace/good-vibes'
 import { prompts as goodVibesPrompts } from '../../components-workspace/good-vibes/prompts'
 import Playful from '../../components-workspace/playful'
 import { prompts as playfulPrompts } from '../../components-workspace/playful/prompts'
+import WildMorph from '../../components-workspace/wild-morph'
+import { prompts as wildMorphPrompts } from '../../components-workspace/wild-morph/prompts'
+import Orbit from '../../components-workspace/orbit'
+import { prompts as orbitPrompts } from '../../components-workspace/orbit/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1011,6 +1015,36 @@ Requirements:
     PreviewComponent: Playful,
     code: componentCodes['playful'],
     prompts: playfulPrompts,
+  },
+  {
+    slug: 'wild-morph',
+    name: 'Wild Morph',
+    description: 'Italic SVG word that warps under the cursor — a spring-physics text animation.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: false,
+    image: 'https://ik.imagekit.io/aitoolkit/wild-morph.png',
+    PreviewComponent: WildMorph,
+    code: componentCodes['wild-morph'],
+    prompts: wildMorphPrompts,
+  },
+  {
+    slug: 'orbit',
+    name: 'Orbit',
+    description: 'Kinetic text animation arranged in a circle. Hover slows the spin; letters push outward.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/orbit.png',
+    PreviewComponent: Orbit,
+    code: componentCodes['orbit'],
+    prompts: orbitPrompts,
   },
 ]
 
