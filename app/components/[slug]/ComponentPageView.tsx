@@ -444,41 +444,42 @@ export default function ComponentPageView({
                 cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
               }`}
             >
-              <AnimatePresence mode="wait">
-                {activeTab === 'preview' ? (
-                  <motion.div
-                    key="preview"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {/* Keyed wrapper so the refresh button can force a remount.
-                        Skipped while fullscreen is open so the preview component
-                        only mounts ONCE — otherwise it runs in parallel with the
-                        fullscreen instance and tanks framerate (especially for
-                        canvas / three.js / heavy framer-motion components). */}
-                    {!fullscreen && (
-                      <div key={previewKey} className="contents">
-                        {children}
-                      </div>
-                    )}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="code"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute inset-0 overflow-y-auto overflow-x-hidden p-5"
-                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}
-                  >
-                    {highlightedCode}
-                  </motion.div>
+              {/* Both tabs stay mounted so the syntax-highlighted code is in the
+                  server-rendered HTML — Google indexes it even while the Preview
+                  tab is active. Visibility toggled via opacity + pointer-events. */}
+              <motion.div
+                initial={false}
+                animate={{ opacity: activeTab === 'preview' ? 1 : 0 }}
+                transition={{ duration: 0.18 }}
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ pointerEvents: activeTab === 'preview' ? 'auto' : 'none' }}
+                aria-hidden={activeTab !== 'preview'}
+              >
+                {/* Keyed wrapper so the refresh button can force a remount.
+                    Skipped while fullscreen is open so the preview component
+                    only mounts ONCE — otherwise it runs in parallel with the
+                    fullscreen instance and tanks framerate (especially for
+                    canvas / three.js / heavy framer-motion components). */}
+                {!fullscreen && (
+                  <div key={previewKey} className="contents">
+                    {children}
+                  </div>
                 )}
-              </AnimatePresence>
+              </motion.div>
+              <motion.div
+                initial={false}
+                animate={{ opacity: activeTab === 'code' ? 1 : 0 }}
+                transition={{ duration: 0.18 }}
+                className="absolute inset-0 overflow-y-auto overflow-x-hidden p-5"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#4A453F transparent',
+                  pointerEvents: activeTab === 'code' ? 'auto' : 'none',
+                }}
+                aria-hidden={activeTab !== 'code'}
+              >
+                {highlightedCode}
+              </motion.div>
             </div>
 
             {/* Action bar */}
