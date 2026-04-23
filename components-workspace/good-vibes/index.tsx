@@ -186,6 +186,22 @@ export default function GoodVibes() {
     mouseRef.current = null
   }
 
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0]
+    if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0]
+    if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  function handleTouchEnd() {
+    setTimeout(() => {
+      mouseRef.current = null
+    }, 600)
+  }
+
   const bgColor = isDark ? '#1a1a1a' : '#f5f5f5'
   const textColor = isDark ? 'text-[#ed7550]' : 'text-[#ed7550]'
 
@@ -196,6 +212,9 @@ export default function GoodVibes() {
       style={{ backgroundColor: bgColor }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="flex flex-nowrap items-center justify-center gap-1 sm:gap-4">
         {TEXT.split('').map((letter, i) => (

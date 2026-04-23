@@ -67,7 +67,7 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, textShadow, forwar
       ref={spanRef}
       className={`inline-block select-none ${textColor}`}
       style={{
-        fontSize: 'clamp(2rem, 20vw, 12rem)',
+        fontSize: 'clamp(1.6rem, 16vw, 9.6rem)',
         fontWeight: 700,
         fontFamily,
         lineHeight: 1,
@@ -205,14 +205,19 @@ export default function Playful() {
     if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
   }
 
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0]
+    if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
   function handleTouchEnd() {
     setTimeout(() => {
       mouseRef.current = null
     }, 600)
   }
 
-  const bgColor = isDark ? '#1A1A19' : '#A8B94D'
-  const textColor = isDark ? 'text-[#A8B94D]' : 'text-[#1A1A19]'
+  const bgColor = isDark ? '#1A1A19' : '#869631'
+  const textColor = isDark ? 'text-[#869631]' : 'text-[#1A1A19]'
   const textShadow = isDark
     ? '2px 2px 0 rgba(0, 0, 0, 0.85)'
     : '2px 2px 0 rgba(0, 0, 0, 0.25)'
@@ -225,6 +230,7 @@ export default function Playful() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       <div className="flex flex-col items-center justify-center gap-2 sm:gap-4">
