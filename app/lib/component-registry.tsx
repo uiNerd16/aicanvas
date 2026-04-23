@@ -1025,7 +1025,7 @@ Requirements:
       { label: 'Interactive' },
       { label: 'Animation' },
     ],
-    dualTheme: false,
+    dualTheme: true,
     image: 'https://ik.imagekit.io/aitoolkit/wild-morph.png',
     PreviewComponent: WildMorph,
     code: componentCodes['wild-morph'],
