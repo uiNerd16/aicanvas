@@ -44,6 +44,7 @@
 | peel-corner-reveal | integrated | "Peel to Scan" — 2D SVG peel, tap-toggle with hover-peek, Wi-Fi QR reveal (qrcode.react), inverted light/dark card, pulsing Wi-Fi arcs, +31° QR rotation, inlined useTheme for copy-paste readiness. Registry + screenshot live. |
 | jar-of-emotions | integrated | SVG glass jar + spring-hinged lid (Framer Motion), 6 reaction emojis (🔥👌😄😭🧑‍🍳🐐), matter.js physics floor + walls, ballistic aim to clicked button, 30-tap "Full. Please Stop." banner, dualTheme. |
 | good-vibes | published | Interactive typography — cursor-proximity weight animation (100→700) + 2x scale + letter-spacing, burnt sienna on charcoal/light gray, Science Gothic, three platform prompts, ImageKit live, JSON check PASS, commit ef88c43 pushed |
+| playful | published | Interactive typography STAY / WEIRD (two rows) — cursor-proximity 600px, rotation (±75°), alternating jump/drop (±100px, even up / odd down), scale (1→1.4), olive/sand-950 inverted palette, 2px sticker drop-shadow, fluid clamp(2rem, 20vw, 12rem), three platform prompts, ImageKit live, JSON check PASS |
 | flip-grid | deleted | Removed by user request |
 | liquid-button | deleted | Removed by user request |
 | scatter-field | deleted | Removed by user request |

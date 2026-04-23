@@ -111,6 +111,8 @@ import ResponsiveLetters from '../../components-workspace/responsive-letters'
 import { prompts as responsiveLettersPrompts } from '../../components-workspace/responsive-letters/prompts'
 import GoodVibes from '../../components-workspace/good-vibes'
 import { prompts as goodVibesPrompts } from '../../components-workspace/good-vibes/prompts'
+import Playful from '../../components-workspace/playful'
+import { prompts as playfulPrompts } from '../../components-workspace/playful/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -994,6 +996,21 @@ Requirements:
     PreviewComponent: GoodVibes,
     code: componentCodes['good-vibes'],
     prompts: goodVibesPrompts,
+  },
+  {
+    slug: 'playful',
+    name: 'Playful',
+    description: 'Kinetic typography where letters jump, drop, and rotate on cursor proximity.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/playful.png',
+    PreviewComponent: Playful,
+    code: componentCodes['playful'],
+    prompts: playfulPrompts,
   },
 ]
 
