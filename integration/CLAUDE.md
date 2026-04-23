@@ -54,37 +54,19 @@ Scan `index.tsx` for font usage. If a specific named font is used and no `// fon
 
 After adding or confirming the comment, run `node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs` to regenerate the exported code.
 
-### Step 2 — Add to the registry
-In `app/lib/component-registry.tsx`:
+### Step 2 — Finalize the registry entry
+The Builder already added a **preliminary entry** at Build time (imports, slug, name, placeholder description, tags, `image: ''`, `prompts: {}` or similar). Your job is to FINALIZE it:
 
-1. Import the component at the top:
-   ```ts
-   import ComponentName from '../../components-workspace/component-name'
-   ```
+1. Verify imports for the component + prompts are present at the top of `app/lib/component-registry.tsx`
+2. Review the `description` field:
+   - Passes SEO audit (75–90 chars, ends with period, names visual + interaction, category keyword)
+   - Reflects what the component ACTUALLY does (may have drifted during Adjust cycles)
+   - If it was a placeholder, rewrite it now
+3. Ensure the `prompts` field imports the real `componentNamePrompts` (it may have been `{}` during Build)
+4. Leave the `image` field empty for now — it gets set in Step 4 after the screenshot uploads
+5. Run `node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs` to regenerate the `code` and JSON
 
-2. Import the prompts:
-   ```ts
-   import { prompts as componentNamePrompts } from '../../components-workspace/component-name/prompts'
-   ```
-
-3. Add an entry to the `COMPONENTS` array — always include the `image` field with the ImageKit URL:
-   ```ts
-   {
-     slug: 'component-slug',
-     image: 'https://ik.imagekit.io/aitoolkit/component-slug.png',
-     name: 'Human Readable Name',
-     description: 'One sentence describing what it does.',
-     tags: [
-       { label: 'Category', accent: true },
-       { label: 'Framer Motion' },
-     ],
-     PreviewComponent: ComponentName,
-     code: COMPONENT_NAME_CODE,  // see note below
-     prompts: componentNamePrompts,
-   },
-   ```
-
-4. Add the code string constant (`COMPONENT_NAME_CODE`) by reading the source file and storing it as a template literal string. Escape any backticks in the source with `\``.
+If the Builder did NOT add a preliminary entry (shouldn't happen with the new flow, but as a fallback), add the full entry yourself with all fields.
 
 ### Step 3 — Verify
 - Run `node scripts/lint-components.mjs` to check for missing `// npm install` packages and missing font comments. Fix any warnings before continuing.
@@ -137,11 +119,15 @@ Before reporting back, verify every item:
 ## What happens next
 
 After you report completion:
-1. **Supervisor syncs spec.md** (if visuals/behavior changed during Adjust cycles)
+1. **Supervisor syncs spec.md** (if visuals/behavior changed during Adjust cycles — usually done before step 8)
 2. **Supervisor runs JSON validation** (`npm run validate:registry -- <slug>`)
-   - On PASS: proceeds to step 10 (publish)
+   - On PASS: proceeds to step 10 (Working confirmation)
    - On FAIL: stops, surfaces error in chat, component stays local until fixed
-3. **Integrator commits + pushes** (only after JSON validation passes)
+3. **Supervisor asks user to test at `/components/<slug>`** — user checks Light/Dark modes, title, description, and homepage card thumbnail
+4. **User says "commit"** → Integrator runs `git commit` LOCALLY ONLY. DO NOT push. Report back.
+5. **User says "push" / "go live"** → Integrator runs `git push origin main`. Vercel auto-deploys.
+
+**Never push without explicit "push" / "go live" from the user.** Committing ≠ publishing. The commit stays local until the user is ready for the Vercel deploy.
 4. Vercel deploys automatically
 
 Your job ends at the completion checklist. The Supervisor and JSON validator gate the publish.

@@ -61,34 +61,126 @@ When writing a Brief for a complex component, tell the Builder which extended sk
 
 ## The pipeline
 
-Every new component follows this exact sequence — never skip a step:
+Every new component follows this exact sequence — never skip a step. **Four user-authorization gates** are marked ⚠️.
 
 ```
-1. Brief       → Write a spec from the user's description. Get approval before proceeding.
-2. Build       → Delegate to Builder to create index.tsx ONLY (no prompts yet).
-3. Preview     → Wire to preview route, run TypeScript check. User reviews visually.
-4. Adjust      → (repeat until user says "looks good") Delegate to Builder with changes.
-5. Prompts     → AFTER user approves the visual, delegate to Builder to write prompts.ts
-                 based on the FINAL version of the component.
-6. Review      → Delegate to Reviewer to check everything (code + prompts).
-7. Sync spec   → When user gives final approval ("this is perfect", "push it"),
-                 re-read spec.md and update it to match the shipped component if
-                 visuals, behaviour, or tech notes drifted during Adjust cycles.
-                 Supervisor's own job — do NOT delegate. Skip if already accurate.
-8. Integrate   → Delegate to Integrator to wire the component into
-                 `app/lib/component-registry.tsx` and run the registry build LOCALLY.
-                 Do NOT commit or push yet.
-9. JSON check  → Supervisor runs the registry JSON check script against the freshly
-                 built `public/r/<slug>.json`. On FAIL: STOP, surface the exact error
-                 to the user in chat ("JSON check failed: <reason>"), do NOT push.
-                 On PASS: proceed to step 10.
-10. Publish    → Integrator commits + pushes. Vercel deploys. Update status to
-                 `integrated` once the live URL `aicanvas.me/r/<slug>.json` returns 200.
+ 1. Brief                    → Write a spec from the user's description.
+                               ⚠️ Get explicit approval before proceeding to Build.
+ 2. Build                    → Delegate to Builder to create index.tsx ONLY (no prompts).
+                               Wire to /preview/<slug> AND add a temporary registry entry
+                               in `app/lib/component-registry.tsx` so /components/<slug>
+                               works with full chrome (title, description, Light/Dark
+                               toggle). Run TypeScript check.
+ 3. Preview                  → User reviews at /components/<slug> — NOT /preview/<slug>.
+                               The page must show title, description, and both themes so
+                               the user can iterate with full page context.
+ 4. Adjust                   → (repeat) Delegate to Builder with changes.
+                               ⚠️ Continues until user says "looks good" / visual approval.
+ 5. Prompts                  → AFTER visual approval, delegate to Builder to write
+                               prompts.ts based on the FINAL version of the component.
+ 6. Review                   → Delegate to Reviewer to check everything (code + prompts).
+ 7. Sync spec                → Re-read spec.md and update it to match the shipped
+                               component if visuals/behaviour drifted during Adjust.
+                               Supervisor's own job — do NOT delegate. Skip if accurate.
+ 8. Integrate                → Delegate to Integrator to finalize the registry entry
+                               (description, image URL), take the screenshot, upload to
+                               ImageKit, update the image field. Run registry build
+                               LOCALLY. Do NOT commit or push yet.
+ 9. JSON check               → Supervisor runs `npm run validate:registry -- <slug>`.
+                               On FAIL: STOP, surface exact error in chat, do NOT proceed.
+                               On PASS: proceed to step 10.
+10. Working confirmation     → Supervisor tells user: "Ready to verify. Check
+                               /components/<slug> — confirm Light/Dark render correctly,
+                               title and description read well, homepage card thumbnail
+                               looks right."
+                               ⚠️ Wait for the user to explicitly say "commit" before
+                               proceeding. Do NOT commit on visual approval — commit only
+                               after the user has tested the integrated build.
+11. Commit                   → On "commit", Integrator runs `git commit` LOCALLY ONLY.
+                               DO NOT push. The commit stays on the user's machine.
+                               GitHub does not yet have it. Vercel does not yet see it.
+12. Push live                → ⚠️ Wait for the user to explicitly say "push" / "go live".
+                               On "push", Integrator runs `git push origin main`.
+                               Vercel auto-deploys. Update status to `published` once
+                               `aicanvas.me/r/<slug>.json` returns 200.
 ```
 
 **Why prompts come last:** Users often adjust the component multiple times. Writing prompts early means they describe an outdated version. Always write prompts against the final, approved component.
 
 **Why sync the spec before integrating:** The brief is written once up front, but the component usually evolves across several Adjust cycles. Before the component goes live, the spec should describe what actually shipped — so months later, anyone reading it (including future-you or a future agent) sees the final intent, not the first draft. Only update fields that actually changed.
+
+**Why Preview renders at /components/<slug>:** Bare /preview/<slug> shows only the component, with no title, description, or theme toggle. Iterating there leads to regressions when the component lands on the real page. Previewing in full page context — title above, description below, Light/Dark toggle on the card — means the user sees exactly what ships. This requires adding the registry entry early (at step 2), using a placeholder image URL until step 8 replaces it with the real ImageKit URL.
+
+**Why commit and push are separate:** "Commit locally" saves the work to git without touching GitHub or Vercel. "Push" sends it to GitHub, which triggers the Vercel deploy. Keeping them separate lets the user test the integrated build (step 10) without pressure — the commit is a checkpoint they can still discard, the push is the point of no return for the public registry.
+
+## The modify pipeline — for already-integrated components
+
+Use this pipeline when the user wants to change, fix, or tune an EXISTING component. Shorter than the create pipeline (3 gates instead of 4) because the component is already wired into the registry, but carries extra safety rules since the component is a public contract at `aicanvas.me/r/<slug>.json`.
+
+```
+ 1. Change request           → User describes what they want changed.
+                               For non-trivial changes, briefly confirm intent before editing.
+ 2. Scope check              → Determine what's affected:
+                                 • Visuals/layout/colors → needs re-screenshot + cache-bust
+                                 • Behavior/props/constants → needs prompts.ts update + screenshot
+                                 • Text copy only → needs re-screenshot, no prompts update
+                                 • Description/tags only → registry metadata, NO screenshot
+                                 • Bug fix with no visual change → no screenshot, no prompts update
+                                 • Imports changed → JSON dependencies MUST be regenerated
+ 3. Modify                   → Edit `components-workspace/<slug>/index.tsx`
+                               (and/or `prompts.ts`, `spec.md` as applicable).
+ 4. Preview                  → User reviews at `/components/<slug>` — full chrome, both themes.
+ 5. Adjust                   → Iterate until ⚠️ "looks good" (visual approval).
+ 6. Regen code + JSON        → `node scripts/generate-component-codes.mjs &&
+                                node scripts/generate-registry.mjs`
+                               Auto-regenerates the JSON, code string, and dependency list.
+ 7. Update prompts.ts        → ONLY if behavior, colors, or constants meaningfully changed.
+                               Skip if unchanged.
+ 8. Sync spec.md             → Update spec to match shipped state. Skip if still accurate.
+ 9. Re-screenshot + cache-bust   → ONLY if visuals changed:
+                                     • `rm -rf .next/cache`
+                                     • `npm run screenshot -- <slug>` (overwrites ImageKit file)
+                                     • Bump `?v=N` on the `image:` URL in the registry
+                                       (CloudFront + Next.js cache the same URL for ~1 year,
+                                        so the URL must change to force a refetch)
+10. JSON check               → `npm run validate:registry -- <slug>` — must PASS.
+                               On FAIL: STOP, surface error, do NOT proceed.
+                               A broken JSON breaks installs for every external
+                               `shadcn add @aicanvas/<slug>` user.
+11. Working confirmation     → Supervisor tells user: "Ready to verify at `/components/<slug>`.
+                               Check Light/Dark, card thumbnail refreshed, copy still reads correctly."
+                               ⚠️ Wait for user to explicitly say "commit".
+12. Commit                   → `git commit` LOCALLY ONLY. Do NOT push.
+                               GitHub doesn't have it yet. Vercel doesn't see it yet.
+13. Push live                → ⚠️ Wait for user to explicitly say "push" / "go live".
+                               On "push", `git push origin main`. Vercel auto-deploys.
+```
+
+### The 3 gates for modification
+
+1. **Visual approval** (step 5 → 6) — "looks good"
+2. **Commit** (step 11 → 12) — after user has tested the integrated build
+3. **Push** (step 12 → 13) — "push" / "go live" → Vercel deploy
+
+*(There is no "Brief approval" gate — the user's change request IS the brief. For non-trivial or ambiguous requests, I confirm intent in one line before editing.)*
+
+### Shortcuts for trivial changes
+
+- **Description-only edit** → skip 7, 8, 9. Edit the registry entry, regen JSON, validate, confirm, commit, push.
+- **Bug fix with no visual change** → skip 9 (no screenshot needed). Still regen + validate + confirm + commit + push.
+- **Prompts-only edit** → skip 6 (no source edit beyond prompts.ts), 8, 9. Regen JSON, validate, confirm, commit, push.
+- **Tag change** → same as description-only.
+
+### Extra safety rules for modifications
+
+On top of the general "Registry is a public contract" rules below, watch out for these modify-specific landmines:
+
+1. **NEVER rename the slug of an existing integrated component**, even during an "improvement" refactor. The slug is the URL. External users depend on `shadcn add @aicanvas/<slug>`. Renaming breaks all of them.
+2. **Cache-bust the image URL any time visuals change.** Plain URL reuse = CloudFront serves the old screenshot for up to a year. Bump `?v=N`.
+3. **Regenerate the JSON whenever imports change.** The `dependencies` array in the JSON must reflect every non-relative import in the current source, or installs succeed but crash at runtime in the user's project.
+4. **If the content of `index.tsx` changes even by a single byte, the JSON's `files[0].content` must be regenerated.** The JSON check enforces byte-for-byte parity — a stale JSON is a failing JSON.
+5. **Never skip the working-confirmation gate for "quick fixes".** A fix that looked trivial can regress light mode, break mobile, or break the screenshot interaction. Always let the user eyeball `/components/<slug>` before committing.
+6. **Never delete an integrated component without explicit user authorization** — even "I'll remove it and replace it" counts as deletion for the moments the slug returns 404.
 
 ## JSON check — how to run it (step 9)
 
@@ -117,12 +209,28 @@ Then follow the failure protocol below.
 
 ## User commands → your actions
 
+### Creating a new component
+
 | User says | You do |
 |---|---|
-| "build a component that…" | Write brief → show to user → on approval, delegate to Builder (index.tsx only) |
-| "adjust / change / fix…" | Delegate to Builder with specific change |
-| "looks good" (visual approval) | Delegate to Builder to write prompts.ts → then delegate to Reviewer |
-| "push it / integrate" | Sync spec.md → delegate to Integrator to wire up LOCALLY → run registry JSON check → on PASS: Integrator commits + pushes; on FAIL: STOP, surface error in chat, investigate before pushing |
+| "build a component that…" | Write brief → show to user → ⚠️ wait for approval → delegate to Builder (index.tsx + temporary registry entry so /components/<slug> works) |
+| "adjust / change / fix…" (mid-build) | Delegate to Builder with specific change |
+| "looks good" (visual approval) | Delegate to Builder to write prompts.ts → Reviewer → Sync spec → Integrator finalizes registry entry + takes screenshot → run JSON check → tell user "Ready to verify at /components/<slug>" and STOP |
+
+### Modifying an existing component
+
+| User says | You do |
+|---|---|
+| "change <slug> so that…" / "fix <slug>…" / "tweak <slug>…" | Clarify intent if ambiguous → edit the source → reload preview at /components/<slug> |
+| "adjust again" / "a bit more" (during modify iteration) | Apply the specific change → reload preview |
+| "looks good" (modify — visual approval) | Regen codes + JSON → update prompts.ts if behavior changed → sync spec.md if drifted → if visuals changed: re-screenshot + bump `?v=N` on image URL → JSON check → tell user "Ready to verify at /components/<slug>" and STOP |
+
+### Shared gates — create and modify
+
+| User says | You do |
+|---|---|
+| "commit" (working confirmation) | Integrator runs `git commit` LOCALLY. Do NOT push. Tell user commit is local; waiting for "push" before going live |
+| "push" / "go live" | Integrator runs `git push origin main` → Vercel deploys → verify `aicanvas.me/r/<slug>.json` returns 200 → update status to `published` |
 | "what components do we have?" | Read `supervisor/component-status.md` and summarise |
 | "review the component" | Delegate to Reviewer |
 | "what went wrong before?" | Read `supervisor/mistakes.md` |
@@ -155,7 +263,12 @@ Once approved, save it at the correct location above before delegating to Builde
 
 Maintain `supervisor/component-status.md`. Update it after every pipeline step.
 
-Stages: `briefed` → `built` → `previewing` → `prompts-written` → `reviewed` → `approved` → `integrated`
+Stages: `briefed` → `built` → `previewing` → `prompts-written` → `reviewed` → `integrated` → `awaiting-commit` → `committed` → `published`
+
+- `integrated` — screenshot uploaded, registry entry finalized, JSON check passed. Waiting for user to verify.
+- `awaiting-commit` — user has been told to verify at /components/<slug>. Waiting for user to say "commit".
+- `committed` — local git commit made. Not on GitHub yet. Waiting for user to say "push".
+- `published` — pushed to GitHub, Vercel deployed, live at aicanvas.me/r/<slug>.json.
 
 ## After Reviewer reports issues
 
@@ -209,12 +322,30 @@ Run the validation script: `npm run validate:registry -- <slug>`. Exit code 0 = 
 
 AI Canvas is officially listed in the shadcn v4 registry directory (PR #10440, merged 2026-04-20 by shadcn). That means `aicanvas.me/r/*.json` is no longer internal plumbing — it's a public API that external users depend on via `npx shadcn@latest add @aicanvas/<slug>`.
 
-Follow these rules whenever anything touches `public/r/*.json` or an integrated component:
+Follow these rules whenever anything touches `public/r/*.json` or an integrated component. These apply equally during **creation** and **modification**.
 
-1. **Never rename the slug of an integrated component.** Every slug is permanent once it's on the homepage. If a rename is absolutely required, the old slug must remain available as an alias — otherwise any user who previously ran `shadcn add @aicanvas/<old-slug>` loses the ability to reinstall or update.
-2. **Never delete an integrated component without explicit user authorization.** Confirm the user understands this breaks external installs for that slug. Deleted slugs should ideally 410/redirect rather than 404.
-3. **Re-run the registry build after any component change that touches imports, dependencies, or the file list.** The JSON must reflect the component's current dependency array — otherwise installs succeed but crash at runtime in the user's app.
-4. **Registry build failures block integration.** If the build script can't generate valid JSON for a component, do not mark it integrated. Fix the build first.
-5. **After a deploy, sanity-check one install.** `curl https://aicanvas.me/r/registry.json` and spot-check one component's JSON. If anything is malformed or missing, treat it as a production incident.
+### Slug and lifecycle
+
+1. **Never rename the slug of an integrated component.** Every slug is permanent once it's on the homepage. If a rename is absolutely required, the old slug must remain available as an alias — otherwise any user who previously ran `shadcn add @aicanvas/<old-slug>` loses the ability to reinstall or update. This applies during refactors and "improvements" too — renaming feels harmless; it isn't.
+2. **Never delete an integrated component without explicit user authorization.** Confirm the user understands this breaks external installs for that slug. Deleted slugs should ideally 410/redirect rather than 404. Even a short-lived "delete and replace" counts as deletion while the slug returns 404.
+3. **Never ship a component whose folder name doesn't match its slug** (JSON's `name` must equal folder name — enforced by the JSON check).
+
+### JSON integrity (create + modify)
+
+4. **Re-run the registry build after any component change that touches imports, dependencies, or the file list.** The JSON must reflect the component's current dependency array — otherwise installs succeed but crash at runtime in the user's app.
+5. **Byte-for-byte parity between `index.tsx` and JSON `files[0].content`.** Any change to `index.tsx` — even a whitespace-only tweak — requires regenerating the JSON. The JSON check enforces this; a stale JSON fails.
+6. **Registry build failures block publication.** If the build script can't generate valid JSON for a component, do not commit or push. Fix the build first.
+7. **Never hand-edit `public/r/*.json`.** Those files are generated from `components-workspace/` source + the registry entry. Edit the source, regen the JSON — never the other way around.
+
+### Screenshot + image URL (especially on modify)
+
+8. **Cache-bust the image URL when visuals change.** CloudFront and Next.js' Image component cache `ik.imagekit.io/aitoolkit/<slug>.png` for up to 1 year. Reusing the same URL after re-screenshotting serves the stale image. Bump `?v=N` (see `good-vibes` at `?v=2` as prior art).
+9. **Clear `.next/cache` before taking a new screenshot.** Prevents the dev preview from serving cached image optimization.
+10. **The `image:` field must be a real ImageKit URL before push** — never push with an empty string or placeholder. A missing image means a broken card on the homepage.
+
+### Deploy-time verification
+
+11. **After a deploy, sanity-check one install.** `curl https://aicanvas.me/r/registry.json` and spot-check one component's JSON. If anything is malformed or missing, treat it as a production incident.
+12. **If a JSON check failure reaches production, treat it as a production incident.** Roll back via Vercel or push an immediate fix — don't leave a broken JSON live.
 
 When in doubt, ask the user before making changes that could affect the registry surface.
