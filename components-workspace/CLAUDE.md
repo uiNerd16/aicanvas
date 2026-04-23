@@ -87,7 +87,12 @@ Every component must work on mobile. This is not optional.
 1. Verify `index.tsx` exports the correct **default** function
 2. Verify there are no TypeScript errors in the files you created
 3. Do NOT write `prompts.ts` during the initial build — prompts are written in a separate step AFTER the user approves the final visual
-4. Do NOT register the component in the registry — that is the integrator's job
+4. **Add a preliminary registry entry** in `app/lib/component-registry.tsx` with:
+   - Imports for the component and (empty) prompts module
+   - A temporary entry in `COMPONENTS_RAW` with: slug, name, placeholder description (can be a draft, refined at Integrate step), tags, `dualTheme: true` if applicable, `image: ''` (empty — replaced with the real ImageKit URL at step 8), `PreviewComponent`, `code: componentCodes[slug]`, `prompts: {}` (or the real prompts once written)
+   - This makes `/components/<slug>` render with full page chrome (title, description, Light/Dark toggle) so the user can iterate with real page context — the Supervisor's new Preview flow lives on `/components/<slug>`, not the bare `/preview/<slug>` route
+   - The registry is regenerated automatically when you run `node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs` — don't forget to run this
+   - The Integrator will FINALIZE this entry at step 8 (real image URL, reviewed description, real prompts)
 
 ## Before finishing a PROMPTS task
 When the Supervisor delegates a prompts-only task (after the user has approved the component):
