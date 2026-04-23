@@ -1026,7 +1026,7 @@ Requirements:
       { label: 'Animation' },
     ],
     dualTheme: true,
-    image: '',
+    image: 'https://ik.imagekit.io/aitoolkit/orbit.png',
     PreviewComponent: Orbit,
     code: componentCodes['orbit'],
     prompts: orbitPrompts,
