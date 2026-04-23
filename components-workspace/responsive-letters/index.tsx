@@ -265,8 +265,20 @@ export default function ResponsiveLetters() {
     mouseRef.current = null
   }
 
-  function handleTouchStart() {
-    // Touch detected
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0]
+    if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0]
+    if (touch) mouseRef.current = { x: touch.clientX, y: touch.clientY }
+  }
+
+  function handleTouchEnd() {
+    setTimeout(() => {
+      mouseRef.current = null
+    }, 600)
   }
 
   // Theme-aware colors
@@ -281,6 +293,8 @@ export default function ResponsiveLetters() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Main interactive text */}
       <div className="flex flex-wrap items-center justify-center gap-0.5 sm:gap-1">
