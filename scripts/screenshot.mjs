@@ -74,6 +74,7 @@ const ALL_SLUGS = [
   'jar-of-emotions',
   'responsive-letters',
   'good-vibes',
+  'playful',
 ]
 
 const arg   = process.argv[2]
@@ -276,6 +277,9 @@ const INTERACTIONS = {
 
   // Good Vibes — hover center to show letters becoming bold and scaled
   'good-vibes': hoverCenter,
+
+  // Playful — hover center to show letters jumping, dropping, and rotating
+  'playful': hoverCenter,
 }
 
 async function hoverCenter(preview, page) {
