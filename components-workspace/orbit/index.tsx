@@ -185,6 +185,13 @@ export default function Orbit() {
           isHoveredRef.current = true
         }
       }}
+      onTouchMove={(e) => {
+        const touch = e.touches[0]
+        if (touch) {
+          mouseRef.current = { x: touch.clientX, y: touch.clientY }
+          isHoveredRef.current = true
+        }
+      }}
       onTouchEnd={() => {
         setTimeout(() => {
           mouseRef.current = null
