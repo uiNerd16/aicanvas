@@ -97,6 +97,10 @@ export function MobileNav() {
   const lastPushed = useRef(urlQuery)
 
   useEffect(() => {
+    // While the input is focused, local state is sacred — fast typing can put
+    // two debounced pushes in flight, and an older Transition committing
+    // after lastPushed has advanced would otherwise clobber the input.
+    if (document.activeElement === searchInputRef.current) return
     if (urlQuery === lastPushed.current) return
     setSearchValue(urlQuery)
     lastPushed.current = urlQuery

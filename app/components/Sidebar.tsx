@@ -72,6 +72,13 @@ export function Sidebar() {
   const lastPushed = useRef(urlQuery)
 
   useEffect(() => {
+    // Never overwrite while the user is actively editing. Fast typing can put
+    // two debounced pushes in flight; if the older Transition commits after
+    // lastPushed advances to the newer value, a naive check would misread it
+    // as external and clobber the input ("last letter disappears, then
+    // reappears"). While focused, the input is the source of truth — any URL
+    // change is either our own push landing or will be reconciled on blur.
+    if (document.activeElement === searchInputRef.current) return
     if (urlQuery === lastPushed.current) return
     setSearchValue(urlQuery)
     lastPushed.current = urlQuery
