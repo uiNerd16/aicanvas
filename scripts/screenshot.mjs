@@ -75,6 +75,10 @@ const ALL_SLUGS = [
   'responsive-letters',
   'good-vibes',
   'playful',
+  'wild-morph',
+  'orbit',
+  'halo-type',
+  'stack-tower',
 ]
 
 const arg   = process.argv[2]
@@ -280,6 +284,13 @@ const INTERACTIONS = {
 
   // Playful — hover center to show letters jumping, dropping, and rotating
   'playful': hoverCenter,
+
+  // Stack Tower — hover a central row so the orange accent + scale pop is captured
+  'stack-tower': async (preview, page) => {
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(500) // wait for hover accent to ease in
+  },
 }
 
 async function hoverCenter(preview, page) {

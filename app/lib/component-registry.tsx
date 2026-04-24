@@ -117,6 +117,10 @@ import WildMorph from '../../components-workspace/wild-morph'
 import { prompts as wildMorphPrompts } from '../../components-workspace/wild-morph/prompts'
 import Orbit from '../../components-workspace/orbit'
 import { prompts as orbitPrompts } from '../../components-workspace/orbit/prompts'
+import HaloType from '../../components-workspace/halo-type'
+import { prompts as haloTypePrompts } from '../../components-workspace/halo-type/prompts'
+import StackTower from '../../components-workspace/stack-tower'
+import { prompts as stackTowerPrompts } from '../../components-workspace/stack-tower/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1045,6 +1049,36 @@ Requirements:
     PreviewComponent: Orbit,
     code: componentCodes['orbit'],
     prompts: orbitPrompts,
+  },
+  {
+    slug: 'halo-type',
+    name: 'Halo Type',
+    description: 'Rotating 3D ring text animation — the front arc reads upright, the back arc upside-down.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/halo-type.png',
+    PreviewComponent: HaloType,
+    code: componentCodes['halo-type'],
+    prompts: haloTypePrompts,
+  },
+  {
+    slug: 'stack-tower',
+    name: 'Stack Tower',
+    description: 'A column of 12 stacked words that reads as a rotating 3D cylinder — 2D transforms skew, scale and shift each row so the rotation travels down the stack. Hover lights one row in warm orange without breaking the rhythm.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/stack-tower.png?v=1',
+    PreviewComponent: StackTower,
+    code: componentCodes['stack-tower'],
+    prompts: stackTowerPrompts,
   },
 ]
 
