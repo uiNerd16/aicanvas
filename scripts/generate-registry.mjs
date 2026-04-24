@@ -15,8 +15,9 @@ const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
 
 // Folders to skip when building the public registry. `_template` is the
 // scaffold copy-source; `crumple-toss` is parked at /preview/crumple-toss
-// and is intentionally not publicly installable.
-const SKIP_FOLDERS = new Set(['_template', 'crumple-toss'])
+// and is intentionally not publicly installable. `reel-type` and
+// `ripple-type` are WIP — still iterating locally, not ready to ship.
+const SKIP_FOLDERS = new Set(['_template', 'crumple-toss', 'reel-type', 'ripple-type'])
 
 // ── Extract metadata from the component registry ──────────────────────────────
 

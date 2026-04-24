@@ -123,7 +123,6 @@ import SliceType from '../../components-workspace/slice-type'
 import { prompts as sliceTypePrompts } from '../../components-workspace/slice-type/prompts'
 import StackTower from '../../components-workspace/stack-tower'
 import { prompts as stackTowerPrompts } from '../../components-workspace/stack-tower/prompts'
-import RippleType from '../../components-workspace/ripple-type'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1097,21 +1096,6 @@ Requirements:
     PreviewComponent: StackTower,
     code: componentCodes['stack-tower'],
     prompts: stackTowerPrompts,
-  },
-  {
-    slug: 'ripple-type',
-    name: 'Ripple Type',
-    description: 'Display text rendered as SVG with an animated turbulence displacement filter — letters stretch, squash, and ripple like liquid in continuous organic motion.',
-    tags: [
-      { label: 'Typography', accent: true },
-      { label: 'Animation' },
-      { label: 'Interactive' },
-    ],
-    dualTheme: true,
-    image: '',
-    PreviewComponent: RippleType,
-    code: componentCodes['ripple-type'],
-    prompts: {},
   },
 ]
 
