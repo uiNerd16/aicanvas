@@ -78,7 +78,9 @@ const ALL_SLUGS = [
   'wild-morph',
   'orbit',
   'halo-type',
+  'slice-type',
   'stack-tower',
+  'ripple-type',
 ]
 
 const arg   = process.argv[2]
@@ -290,6 +292,13 @@ const INTERACTIONS = {
     const box = await preview.boundingBox()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.waitForTimeout(500) // wait for hover accent to ease in
+  },
+
+  // Slice Type — catch mid-reveal: words partially open, bg mid-inversion
+  'slice-type': async (preview, page) => {
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(420) // ~half-way through the spring
   },
 }
 
