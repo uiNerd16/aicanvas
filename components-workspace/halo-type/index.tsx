@@ -264,7 +264,7 @@ export default function HaloType() {
             pointerEvents: 'none',
             whiteSpace: 'pre',
             fontFamily:
-              'var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif',
+              'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
             fontWeight: 800,
             lineHeight: 1,
             letterSpacing: '-0.01em',
@@ -320,7 +320,7 @@ export default function HaloType() {
                 // SHIP look like it's on a different plane.
                 transformOrigin: '50% 50%',
                 fontFamily:
-                  'var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif',
+                  'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
                 fontWeight: 800,
                 fontSize: glyphSize,
                 lineHeight: 1,

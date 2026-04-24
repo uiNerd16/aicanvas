@@ -119,8 +119,11 @@ import Orbit from '../../components-workspace/orbit'
 import { prompts as orbitPrompts } from '../../components-workspace/orbit/prompts'
 import HaloType from '../../components-workspace/halo-type'
 import { prompts as haloTypePrompts } from '../../components-workspace/halo-type/prompts'
+import SliceType from '../../components-workspace/slice-type'
+import { prompts as sliceTypePrompts } from '../../components-workspace/slice-type/prompts'
 import StackTower from '../../components-workspace/stack-tower'
 import { prompts as stackTowerPrompts } from '../../components-workspace/stack-tower/prompts'
+import RippleType from '../../components-workspace/ripple-type'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1066,6 +1069,21 @@ Requirements:
     prompts: haloTypePrompts,
   },
   {
+    slug: 'slice-type',
+    name: 'Slice Type',
+    description: 'A typographic magic trick. At rest you read one ambiguous word; hover and it splits into two — LIGHT lifting up, NIGHT sinking down, the shared letters resolving into separate glyphs.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: false,
+    image: 'https://ik.imagekit.io/aitoolkit/slice-type.png?v=1',
+    PreviewComponent: SliceType,
+    code: componentCodes['slice-type'],
+    prompts: sliceTypePrompts,
+  },
+  {
     slug: 'stack-tower',
     name: 'Stack Tower',
     description: 'A column of 12 stacked words that reads as a rotating 3D cylinder — 2D transforms skew, scale and shift each row so the rotation travels down the stack. Hover lights one row in warm orange without breaking the rhythm.',
@@ -1079,6 +1097,21 @@ Requirements:
     PreviewComponent: StackTower,
     code: componentCodes['stack-tower'],
     prompts: stackTowerPrompts,
+  },
+  {
+    slug: 'ripple-type',
+    name: 'Ripple Type',
+    description: 'Display text rendered as SVG with an animated turbulence displacement filter — letters stretch, squash, and ripple like liquid in continuous organic motion.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: '',
+    PreviewComponent: RippleType,
+    code: componentCodes['ripple-type'],
+    prompts: {},
   },
 ]
 

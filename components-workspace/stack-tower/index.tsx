@@ -114,7 +114,7 @@ function TowerRow({
       <motion.div
         style={{
           fontFamily:
-            'var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif',
+            'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
           fontWeight: 900,
           fontSize,
           lineHeight: 0.92,
