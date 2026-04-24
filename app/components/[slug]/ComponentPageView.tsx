@@ -235,7 +235,7 @@ export default function ComponentPageView({
       // Always copy to clipboard
       await navigator.clipboard.writeText(text)
       setPromptCopied(platform)
-      setTimeout(() => setPromptCopied(null), 2000)
+      setTimeout(() => setPromptCopied(null), 3000)
 
       // Deep link for V0
       if (platform === 'V0') {
@@ -1098,6 +1098,37 @@ export default function ComponentPageView({
                 </p>
                 <p className="mt-0.5 text-xs text-sand-400">
                   Paste into your terminal to add this component.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Prompt copied toast ─────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {promptCopied && (
+          <motion.div
+            key="prompt-toast"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="fixed bottom-16 z-50 -translate-x-1/2"
+            style={{
+              left: mainCardRef.current
+                ? mainCardRef.current.getBoundingClientRect().left + mainCardRef.current.offsetWidth / 2
+                : '50%',
+            }}
+          >
+            <div className="flex items-center gap-3 rounded-xl border border-sand-700 bg-sand-800 px-4 py-3 shadow-lg">
+              <Check weight="regular" size={16} className="shrink-0 text-olive-500" />
+              <div>
+                <p className="text-sm font-semibold text-sand-50">
+                  {promptCopied} prompt copied
+                </p>
+                <p className="mt-0.5 text-xs text-sand-400">
+                  Paste into {promptCopied} to remix this component.
                 </p>
               </div>
             </div>
