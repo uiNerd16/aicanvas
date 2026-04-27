@@ -7,6 +7,7 @@ import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { NavItem } from '../../components/NavItem';
+import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems } from './data';
 
 export function Sidebar({ activeNav, onNavChange }) {
@@ -31,24 +32,7 @@ export function Sidebar({ activeNav, onNavChange }) {
         alignItems: 'center',
         gap: tokens.spacing[3],
       }}>
-        <div style={{
-          position: 'relative',
-          width: '34px',
-          height: '34px',
-          background: tokens.color.accent.glowSoft,
-          border: `${tokens.border.thin} ${tokens.color.accent.dim}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.sm,
-          fontWeight: tokens.typography.weight.bold,
-          color: tokens.color.accent.bright,
-          letterSpacing: tokens.typography.tracking.tight,
-        }}>
-          <CornerMarkers size={4} offset={2} />
-          MC
-        </div>
+        <AndromedaIcon size={28} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
@@ -58,7 +42,7 @@ export function Sidebar({ activeNav, onNavChange }) {
             letterSpacing: tokens.typography.tracking.widest,
             fontWeight: tokens.typography.weight.semibold,
           }}>
-            Mission
+            Andromeda
           </span>
           <span style={{
             fontFamily: tokens.typography.fontMono,
@@ -67,7 +51,7 @@ export function Sidebar({ activeNav, onNavChange }) {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            Control
+            Design System
           </span>
         </div>
       </div>

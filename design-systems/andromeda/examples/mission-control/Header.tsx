@@ -56,7 +56,7 @@ function MissionClock() {
   );
 }
 
-export function Header() {
+export function Header({ sectionTitle = 'Overview' }) {
   return (
     <header style={{
       position: 'relative',
@@ -72,7 +72,7 @@ export function Header() {
     }}>
       <CornerMarkers />
 
-      {/* Title block */}
+      {/* Title block — section-aware */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
@@ -91,7 +91,7 @@ export function Header() {
           color: tokens.color.text.primary,
           letterSpacing: '-0.01em',
         }}>
-          Overview
+          {sectionTitle}
         </h1>
       </div>
 
