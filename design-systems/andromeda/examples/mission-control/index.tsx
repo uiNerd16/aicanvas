@@ -1,29 +1,44 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
-// SPACE EXAMPLE: Mission Control
+// MISSION CONTROL
 // Composition shell. Background is intentionally transparent —
-// drop in any image at the page route level.
+// drop in any image at the page route level. The active sidebar
+// item drives which section renders in <main>.
 // ============================================================
 
 import { useState } from 'react';
 import { tokens } from '../../tokens';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { TelemetryRow } from './TelemetryRow';
-import { RadarChart } from '../../components/RadarChart';
-import { SystemStatus } from './SystemStatus';
-import { VehiclesTable } from './VehiclesTable';
-import { CommsLog } from './CommsLog';
+import { OverviewSection }      from './sections/OverviewSection';
+import { TelemetrySection }     from './sections/TelemetrySection';
+import { VehiclesSection }      from './sections/VehiclesSection';
+import { CommsSection }         from './sections/CommsSection';
+import { AnomaliesSection }     from './sections/AnomaliesSection';
+import { MaintenanceSection }   from './sections/MaintenanceSection';
+import { NotificationsSection } from './sections/NotificationsSection';
+
+const SECTIONS = {
+  overview:      { title: 'Overview',      Render: OverviewSection      },
+  telemetry:     { title: 'Telemetry',     Render: TelemetrySection     },
+  vehicles:      { title: 'Vehicles',      Render: VehiclesSection      },
+  comms:         { title: 'Comms',         Render: CommsSection         },
+  anomalies:     { title: 'Anomalies',     Render: AnomaliesSection     },
+  maintenance:   { title: 'Maintenance',   Render: MaintenanceSection   },
+  notifications: { title: 'Notifications', Render: NotificationsSection },
+};
 
 export default function MissionControl() {
   const [activeNav, setActiveNav] = useState('overview');
+  const section = SECTIONS[activeNav] ?? SECTIONS.overview;
+  const Render = section.Render;
 
   return (
     <div style={{
       display: 'flex',
       height: '100vh',
       width: '100vw',
-      background: 'transparent', // user provides background image at the page level
+      background: 'transparent',
       fontFamily: tokens.typography.fontSans,
       color: tokens.color.text.primary,
       overflow: 'hidden',
@@ -41,7 +56,7 @@ export default function MissionControl() {
         minWidth: 0,
         gap: tokens.spacing[4],
       }}>
-        <Header />
+        <Header sectionTitle={section.title} />
 
         <main style={{
           flex: 1,
@@ -52,22 +67,7 @@ export default function MissionControl() {
           paddingRight: tokens.spacing[2],
           boxSizing: 'border-box',
         }}>
-          <TelemetryRow />
-
-          <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
-            <RadarChart
-              style={{ flex: '0 0 calc(60% - 10px)', minWidth: 0 }}
-              label="/// Systems"
-              title="Ship Diagnostics"
-              description="Nominal vs critical thresholds"
-            />
-            <SystemStatus />
-          </div>
-
-          <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
-            <VehiclesTable />
-            <CommsLog />
-          </div>
+          <Render />
         </main>
       </div>
     </div>

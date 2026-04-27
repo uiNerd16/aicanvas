@@ -127,8 +127,11 @@ export function MobileNav() {
     searchInputRef.current?.focus()
   }
 
-  // Hide on design-system preview routes
-  const hideMobileNav = pathname?.startsWith('/design-systems/')
+  // Hide on design-system preview routes and on the /ideation/* subtree —
+  // that subtree ships its own duplicated mobile/desktop chrome.
+  const hideMobileNav =
+    pathname?.startsWith('/design-systems/') ||
+    pathname?.startsWith('/ideation')
   if (hideMobileNav) return null
 
   return (

@@ -51,8 +51,10 @@ export function Sidebar() {
   const activeCategory = isHome ? (searchParams.get('category') ?? 'All Components') : null
 
   // Hide the global sidebar on design-system preview routes so the design
-  // system gets the full viewport.
-  const hideSidebar = pathname?.startsWith('/design-systems/')
+  // system gets the full viewport. Also hidden on /ideation/* — that subtree
+  // ships its own duplicated sidebar/topbar for the new design-systems flow.
+  const hideSidebar =
+    pathname?.startsWith('/design-systems/') || pathname?.startsWith('/ideation')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   const toggle = (title: string) =>
