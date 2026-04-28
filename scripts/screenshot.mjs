@@ -81,6 +81,7 @@ const ALL_SLUGS = [
   'slice-type',
   'stack-tower',
   'ripple-type',
+  'radial-cards',
 ]
 
 const arg   = process.argv[2]
@@ -299,6 +300,22 @@ const INTERACTIONS = {
     const box = await preview.boundingBox()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.waitForTimeout(420) // ~half-way through the spring
+  },
+
+  // Ripple Type — click the fan to toggle ON, wait for ramp-up + a few morph cycles
+  'ripple-type': async (preview, page) => {
+    await preview.locator('[aria-label="Toggle fan"]').first().click()
+    await page.waitForTimeout(1400) // 1s ramp + 0.4s of peak-amplitude morph
+  },
+  'radial-cards': async (preview, page) => {
+    // Let the bouquet rotate for a moment, then click the first card (Steps)
+    await page.waitForTimeout(1200)
+    const cards = preview.locator('[style*="transformOrigin: \\"0% 100%\\""]')
+    const first = cards.first()
+    if (await first.count() > 0) {
+      await first.click()
+      await page.waitForTimeout(900) // wait for engage spring to settle
+    }
   },
 }
 
