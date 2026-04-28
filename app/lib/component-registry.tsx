@@ -123,6 +123,10 @@ import SliceType from '../../components-workspace/slice-type'
 import { prompts as sliceTypePrompts } from '../../components-workspace/slice-type/prompts'
 import StackTower from '../../components-workspace/stack-tower'
 import { prompts as stackTowerPrompts } from '../../components-workspace/stack-tower/prompts'
+import RippleType from '../../components-workspace/ripple-type'
+import { prompts as rippleTypePrompts } from '../../components-workspace/ripple-type/prompts'
+import RadialCards from '../../components-workspace/radial-cards'
+import { prompts as radialCardsPrompts } from '../../components-workspace/radial-cards/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1096,6 +1100,36 @@ Requirements:
     PreviewComponent: StackTower,
     code: componentCodes['stack-tower'],
     prompts: stackTowerPrompts,
+  },
+  {
+    slug: 'ripple-type',
+    name: 'Ripple Type',
+    description: 'SVG text animation warped by a turbulence filter. Toggle the fan — letters ripple.',
+    tags: [
+      { label: 'Typography', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/ripple-type.png?v=1',
+    PreviewComponent: RippleType,
+    code: componentCodes['ripple-type'],
+    prompts: rippleTypePrompts,
+  },
+  {
+    slug: 'radial-cards',
+    name: 'Radial Cards',
+    description: 'Seven health-metric cards bloom into a slowly rotating flower — tap any petal to pull it forward and read your stats up close.',
+    tags: [
+      { label: 'Cards', accent: true },
+      { label: 'Animation' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/radial-cards.png',
+    PreviewComponent: RadialCards,
+    code: componentCodes['radial-cards'],
+    prompts: radialCardsPrompts,
   },
 ]
 
