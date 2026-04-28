@@ -106,8 +106,9 @@ async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
     const importPath = match[1]
     // Skip relative imports (start with . or /) and built-ins (no . or /)
     if (!importPath.startsWith('.') && !importPath.startsWith('/')) {
-      // Extract package name (everything before the first /)
-      const packageName = importPath.split('/')[0]
+      // Extract package name — scoped packages (@scope/pkg) need two segments
+      const parts = importPath.split('/')
+      const packageName = importPath.startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0]
       imports.add(packageName)
     }
   }
