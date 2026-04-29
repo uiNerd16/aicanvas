@@ -15,9 +15,8 @@ const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
 
 // Folders to skip when building the public registry. `_template` is the
 // scaffold copy-source; `crumple-toss` is parked at /preview/crumple-toss
-// and is intentionally not publicly installable. `reel-type` and
-// `ripple-type` are WIP — still iterating locally, not ready to ship.
-const SKIP_FOLDERS = new Set(['_template', 'crumple-toss', 'reel-type', 'ripple-type'])
+// and is intentionally not publicly installable.
+const SKIP_FOLDERS = new Set(['_template', 'crumple-toss'])
 
 // ── Extract metadata from the component registry ──────────────────────────────
 
@@ -35,11 +34,32 @@ function parseRegistryMetadata() {
 
     const nameMatch = block.match(/name:\s*(['"])((?:(?!\1).)*)\1/)
     const descMatch = block.match(/description:\s*(['"])((?:(?!\1).)*)\1/)
+    const imageMatch = block.match(/image:\s*(['"])((?:(?!\1).)*)\1/)
+    const badgeMatch = block.match(/badge:\s*(['"])((?:(?!\1).)*)\1/)
+    const dualThemeMatch = block.match(/dualTheme:\s*true/)
+
+    // Tags are a JSX-ish array of objects: tags: [ { label: 'X', accent: true }, ... ]
+    // Capture every {...} entry inside the array.
+    const tags = []
+    const tagsBlockMatch = block.match(/tags:\s*\[([\s\S]*?)\]/)
+    if (tagsBlockMatch) {
+      const tagEntryRegex = /\{[^}]*label:\s*(['"])((?:(?!\1).)*)\1[^}]*\}/g
+      let tm
+      while ((tm = tagEntryRegex.exec(tagsBlockMatch[1])) !== null) {
+        const label = tm[2]
+        const accent = /accent:\s*true/.test(tm[0])
+        tags.push({ label, accent })
+      }
+    }
 
     metadata[folder] = {
       slug,
       name: nameMatch ? nameMatch[2] : folder.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
       description: descMatch ? descMatch[2].replace(/\\'/g, "'") : '',
+      image: imageMatch ? imageMatch[2] : '',
+      badge: badgeMatch ? badgeMatch[2] : undefined,
+      dualTheme: !!dualThemeMatch,
+      tags,
     }
   }
 
@@ -161,3 +181,58 @@ const registry = {
 writeFileSync(join(outDir, 'registry.json'), JSON.stringify(registry, null, 2) + '\n')
 
 console.log(`Generated ${count} registry items in ${outDir}/`)
+
+// ── AI Canvas MCP metadata ────────────────────────────────────────────────
+// A separate JSON the MCP server fetches at runtime. Carries fields the
+// shadcn registry schema doesn't (image, categories, dualTheme, badge,
+// homepage URL, install command). Keeps the shadcn registry strict-clean.
+
+const mcpComponents = []
+const categoryCounts = {}
+
+for (const dir of dirs) {
+  const meta = metadata[dir]
+  if (!meta) continue
+  const slug = meta.slug
+  const deps = (() => {
+    try {
+      const src = readFileSync(join(wsDir, dir, 'index.tsx'), 'utf-8')
+      return getDeps(src)
+    } catch { return [] }
+  })()
+
+  // Convention: tags with `accent: true` are the canonical category.
+  const categories = meta.tags.filter(t => t.accent).map(t => t.label)
+  const subTags = meta.tags.filter(t => !t.accent).map(t => t.label)
+  for (const c of categories) categoryCounts[c] = (categoryCounts[c] ?? 0) + 1
+
+  mcpComponents.push({
+    slug,
+    name: meta.name,
+    description: meta.description,
+    categories,
+    tags: subTags,
+    image: meta.image || undefined,
+    badge: meta.badge,
+    dualTheme: meta.dualTheme,
+    dependencies: deps,
+    homepageUrl: `https://aicanvas.me/components/${slug}`,
+    sourceUrl: `https://aicanvas.me/r/${slug}.json`,
+    installCommand: `npx shadcn@latest add @aicanvas/${slug}`,
+  })
+}
+
+const mcpMeta = {
+  $schema: 'https://aicanvas.me/r/aicanvas-mcp.schema.json',
+  name: 'aicanvas',
+  homepage: 'https://aicanvas.me',
+  generatedAt: new Date().toISOString(),
+  componentCount: mcpComponents.length,
+  categories: Object.entries(categoryCounts)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count),
+  components: mcpComponents,
+}
+
+writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')
+console.log(`Generated MCP metadata: ${mcpComponents.length} components, ${Object.keys(categoryCounts).length} categories`)
