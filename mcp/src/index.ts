@@ -100,7 +100,9 @@ function normalize(s: string): string {
 function scoreMatch(query: string, c: ComponentMeta): number {
   const q = normalize(query)
   if (!q) return 0
-  const tokens = q.split(/\s+/).filter(Boolean)
+  // Drop tokens of <=2 chars — they cause false positives via substring
+  // matches in unrelated words (e.g. "no" hits "notification").
+  const tokens = q.split(/\s+/).filter((t) => t.length > 2)
   if (tokens.length === 0) return 0
 
   // Searchable surface — slug carries the most weight, then name, then
