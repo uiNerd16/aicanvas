@@ -2,18 +2,18 @@
 'use client'
 
 import { X } from '@phosphor-icons/react'
-import { tokens } from '../../../../../../design-systems/andromeda/tokens'
+import { tokens } from '../../../../../design-systems/andromeda/tokens'
 
-// Placeholder example — second card in "See It in Action" so the row
+// Placeholder block — second tile in the Sci-Fi domain so the row
 // fills out. Every value here references design-systems/andromeda/tokens
 // so the placeholder is itself a small audit of token usage.
 
-export default function OperatorConsoleExample() {
+export default function OperatorConsoleBlock() {
   function handleExit() {
     window.close()
     setTimeout(() => {
       if (!window.closed) {
-        window.location.href = '/ideation/design-systems/andromeda'
+        window.location.href = '/design-systems/andromeda/showcase'
       }
     }, 50)
   }

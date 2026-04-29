@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
-import { IdeationSidebar } from './_components/IdeationSidebar'
-import { IdeationTopBar } from './_components/IdeationTopBar'
+import { IdeationSidebar } from '../_components/IdeationSidebar'
+import { IdeationTopBar } from '../_components/IdeationTopBar'
 
 // Make JetBrains Mono available throughout the ideation subtree so any
 // Andromeda preview that references the --font-jetbrains-mono variable

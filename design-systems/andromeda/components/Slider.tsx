@@ -199,7 +199,7 @@ export const Slider = forwardRef(function Slider(
               )}
             >
               {Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}
-              {unit ? ` ${unit}` : ''}
+              {unit ?? ''}
             </span>
           ) : null}
         </div>

@@ -97,7 +97,7 @@ export function TelemetryChart({
   return (
     <Card style={style}>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,

@@ -2,22 +2,22 @@
 'use client'
 
 import { X } from '@phosphor-icons/react'
-import MissionControl from '../../../../../../design-systems/andromeda/examples/mission-control'
-import { tokens } from '../../../../../../design-systems/andromeda/tokens'
+import MissionControl from '../../../../../design-systems/andromeda/examples/mission-control'
+import { tokens } from '../../../../../design-systems/andromeda/tokens'
 
-// Distraction-free example. The ideation sidebar/topbar are suppressed
-// for this route (see IdeationSidebar + IdeationTopBar) so the dashboard
-// fills the viewport. The example opens in a new tab — the exit button
-// closes the tab; if the browser refuses (e.g. the tab wasn't opened by
-// script and the user navigated here directly), we fall back to the
-// Andromeda landing.
+// Distraction-free block. The Andromeda sidebar/topbar are suppressed
+// for routes matching BLOCK_LEAF_RE (see IdeationSidebar + IdeationTopBar)
+// so the dashboard fills the viewport. The block opens in a new tab —
+// the exit button closes the tab; if the browser refuses (e.g. the tab
+// wasn't opened by script and the user navigated here directly), we
+// fall back to the Andromeda showcase.
 
-export default function DashboardExample() {
+export default function MissionControlBlock() {
   function handleExit() {
     window.close()
     setTimeout(() => {
       if (!window.closed) {
-        window.location.href = '/ideation/design-systems/andromeda'
+        window.location.href = '/design-systems/andromeda/showcase'
       }
     }, 50)
   }

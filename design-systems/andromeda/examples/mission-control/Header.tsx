@@ -73,7 +73,7 @@ export function Header({ sectionTitle = 'Overview' }) {
       <CornerMarkers />
 
       {/* Title block — section-aware */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], flexShrink: 0 }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,

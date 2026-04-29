@@ -9,7 +9,7 @@
 
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { cn, andromedaVars } from './lib/utils';
 
 const BARS       = 30;  // number of columns
@@ -70,6 +70,14 @@ export const ProgressBar = forwardRef(function ProgressBar(
   const activeCount = Math.round((clamped / 100) * BARS);
   const cfg         = variantConfig[variant] ?? variantConfig.default;
 
+  // Render-with-zero-then-set so the first paint shows an empty track,
+  // and per-bar transition-delay below makes them light up left→right.
+  const [displayed, setDisplayed] = useState(0);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setDisplayed(activeCount));
+    return () => cancelAnimationFrame(id);
+  }, [activeCount]);
+
   return (
     <div
       ref={ref}
@@ -97,7 +105,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
         }}
       >
         {Array.from({ length: BARS }, (_, barIndex) => {
-          const active = barIndex < activeCount;
+          const active = barIndex < displayed;
 
           return (
             <div
@@ -120,7 +128,10 @@ export const ProgressBar = forwardRef(function ProgressBar(
                       : 'var(--andromeda-surface-overlay)',
                     border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
                     boxShadow: active ? cfg.activeGlow : 'none',
-                    transition: 'background 250ms ease, box-shadow 250ms ease, border-color 250ms ease',
+                    transition: 'background 400ms ease, box-shadow 400ms ease, border-color 400ms ease',
+                    // Stagger in groups of 3 — bars 0–2 fire together, then
+                    // bars 3–5, etc. 120ms between groups for a slow cascade.
+                    transitionDelay: `${Math.floor(barIndex / 3) * 120}ms`,
                   }}
                 />
               ))}

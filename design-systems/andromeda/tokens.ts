@@ -8,53 +8,53 @@
 
 export const tokens = {
   color: {
-    // Text — pure white with alpha steps
+    // Text — pure white with alpha (#RRGGBBAA hex notation)
     text: {
-      primary:   'rgba(255, 255, 255, 0.96)',
-      secondary: 'rgba(255, 255, 255, 0.62)',
-      muted:     'rgba(255, 255, 255, 0.38)',
-      faint:     'rgba(255, 255, 255, 0.22)',
+      primary:   '#FFFFFFF5',  // 0.96 alpha
+      secondary: '#FFFFFF9E',  // 0.62
+      muted:     '#FFFFFF61',  // 0.38
+      faint:     '#FFFFFF38',  // 0.22
     },
     // Surfaces — every surface is transparent except the page background
     surface: {
-      void:    '#0E0E0F',              // Page background — the dark canvas
+      void:    '#0E0E0F',     // Page background — the opaque canvas
       base:    'transparent',
-      raised:  'rgba(255, 255, 255, 0.025)',
-      overlay: 'rgba(255, 255, 255, 0.045)',
-      hover:   'rgba(255, 255, 255, 0.06)',
-      active:  'rgba(255, 255, 255, 0.09)',
+      raised:  '#FFFFFF06',   // 0.025
+      overlay: '#FFFFFF0B',   // 0.045
+      hover:   '#FFFFFF0F',   // 0.06
+      active:  '#FFFFFF17',   // 0.09
     },
     // Borders — also white-with-alpha
     border: {
-      subtle: 'rgba(255, 255, 255, 0.04)',
-      base:   'rgba(255, 255, 255, 0.08)',
-      bright: 'rgba(255, 255, 255, 0.32)',
-      strong: 'rgba(255, 255, 255, 0.55)',
+      subtle: '#FFFFFF0A',   // 0.04
+      base:   '#FFFFFF14',   // 0.08
+      bright: '#FFFFFF52',   // 0.32
+      strong: '#FFFFFF8C',   // 0.55
     },
     // The single hue accent — turquoise
     accent: {
       base:    '#2DD4BF',
       bright:  '#5EEAD4',
-      dim:     'rgba(45, 212, 191, 0.55)',
-      glow:    'rgba(45, 212, 191, 0.18)',
-      glowSoft:'rgba(45, 212, 191, 0.08)',
+      dim:     '#2DD4BF8C',  // 0.55
+      glow:    '#2DD4BF2E',  // 0.18
+      glowSoft:'#2DD4BF14',  // 0.08
     },
     // Two semantic colors — that's it
     warning: '#F5A524',
     fault:   '#EF4444',
     // Tinted alpha variants of the semantic colors so semantic
-    // surfaces/borders don't need to hardcode rgba() literals.
-    warningDim:  'rgba(245, 165, 36, 0.45)',
-    warningGlow: 'rgba(245, 165, 36, 0.08)',
-    warningRing: 'rgba(245, 165, 36, 0.25)',
-    faultDim:    'rgba(239, 68, 68, 0.50)',
-    faultGlow:   'rgba(239, 68, 68, 0.10)',
-    faultRing:   'rgba(239, 68, 68, 0.25)',
+    // surfaces/borders don't need to hardcode color literals.
+    warningDim:  '#F5A52473',  // 0.45
+    warningGlow: '#F5A52414',  // 0.08
+    warningRing: '#F5A52440',  // 0.25
+    faultDim:    '#EF444480',  // 0.50
+    faultGlow:   '#EF44441A',  // 0.10
+    faultRing:   '#EF444440',  // 0.25
     // Soft gradients (used for accent fills, glow sweeps)
     gradient: {
-      accentFade:  'linear-gradient(180deg, rgba(45,212,191,0.25) 0%, rgba(45,212,191,0) 100%)',
-      accentSweep: 'linear-gradient(135deg, rgba(45,212,191,0.18) 0%, rgba(45,212,191,0.02) 50%, transparent 100%)',
-      surfaceSoft: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+      accentFade:  'linear-gradient(180deg, #2DD4BF40 0%, #2DD4BF00 100%)',
+      accentSweep: 'linear-gradient(135deg, #2DD4BF2E 0%, #2DD4BF05 50%, transparent 100%)',
+      surfaceSoft: 'linear-gradient(180deg, #FFFFFF0A 0%, #FFFFFF03 100%)',
     },
   },
   typography: {

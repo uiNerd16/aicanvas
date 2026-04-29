@@ -10,24 +10,30 @@ import {
   Cube,
   DiamondsFour,
   EnvelopeSimple,
-  Folder,
-  FolderOpen,
+  Hexagon,
   Info,
   MagnifyingGlass,
-  PenNib,
   X,
 } from '@phosphor-icons/react'
-import { CONTACT_EMAIL } from '../../lib/config'
-import { COMPONENTS } from '../../lib/component-registry'
-import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda-meta'
-import { AndromedaIcon } from '../../../design-systems/andromeda/AndromedaIcon'
+import { CONTACT_EMAIL } from '../lib/config'
+import { COMPONENTS } from '../lib/component-registry'
+import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
+import { AndromedaIcon } from '../../design-systems/andromeda/AndromedaIcon'
 
 // System → leading-icon mapping. Each system gets its own brand mark
 // in the sidebar nav; rendered in mono mode so the icon inherits the
 // row's text color and reads alongside DiamondsFour / Cube / etc.
 const SYSTEM_ICONS: Record<string, (props: { size?: number }) => React.ReactElement> = {
   andromeda: ({ size = 14 }) => <AndromedaIcon size={size} mono />,
+  meridian: ({ size = 14 }) => <Hexagon weight="fill" size={size} />,
 }
+
+// Disabled / placeholder systems — shown under the Design Systems pole
+// with a "Soon" chip, not yet linkable. Promoted into SYSTEMS once they
+// have at least one component.
+const PLACEHOLDER_SYSTEMS = [
+  { slug: 'meridian', name: 'Meridian' },
+] as const
 
 // Mirrors production Sidebar.tsx for spacing/styling parity. The only
 // material difference is the Design Systems pole: instead of production's
@@ -56,15 +62,16 @@ const SYSTEMS = [
     slug: 'andromeda',
     name: 'Andromeda',
     components: ANDROMEDA_COMPONENT_META.map((c) => ({ slug: c.slug, name: c.name })),
-    examples: [
-      { slug: 'dashboard', name: 'Dashboard' },
-      { slug: 'operator-console', name: 'Operator Console' },
+    blocks: [
+      { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
+      { slug: 'operator-console', name: 'Operator Console', domain: 'Sci-Fi' },
     ],
   },
 ] as const
 
-// Path looks like /ideation/design-systems/<system>/examples/<slug>
-const EXAMPLE_LEAF_RE = /^\/ideation\/design-systems\/[^/]+\/examples\/[^/]+/
+// Block routes are full-screen — chrome is suppressed to let the
+// composition fill the viewport, same way examples used to behave.
+const BLOCK_LEAF_RE = /^\/design-systems\/[^/]+\/blocks\/[^/]+/
 
 function countByLabel(label: string) {
   return COMPONENTS.filter((c) =>
@@ -116,10 +123,15 @@ export function IdeationSidebar() {
   const pathname = usePathname() ?? ''
 
   // Examples open distraction-free — no sidebar, no topbar.
-  if (EXAMPLE_LEAF_RE.test(pathname)) return null
+  if (BLOCK_LEAF_RE.test(pathname)) return null
 
   // ── Mutual-exclusion of the two poles (Components / Design Systems) ──
-  const onDesignSystems = pathname.startsWith('/ideation/design-systems')
+  // Per-component pages live at `/design-systems/<slug>/<component>` (clean
+  // URLs); the showcase + examples wrapper still lives under /ideation/.
+  // Either path counts as being inside the Design Systems pole.
+  const onDesignSystems =
+    pathname.startsWith('/ideation/design-systems') ||
+    pathname.startsWith('/design-systems')
   const onComponents = !onDesignSystems
 
   const [collapsedDS, setCollapsedDS] = useState(!onDesignSystems)
@@ -149,18 +161,27 @@ export function IdeationSidebar() {
     })
   }
 
-  // Active leaves inside the Design Systems pole.
-  const activeSystem = SYSTEMS.find((s) =>
-    pathname.startsWith(`/ideation/design-systems/${s.slug}`),
+  // Active leaves inside the Design Systems pole. Match either URL space:
+  // ideation playground (overview/showcase/examples) or clean live paths
+  // (per-component pages).
+  const activeSystem = SYSTEMS.find(
+    (s) =>
+      pathname.startsWith(`/ideation/design-systems/${s.slug}`) ||
+      pathname.startsWith(`/design-systems/${s.slug}`),
   )
   const activeAndromedaComponent = activeSystem
     ? ANDROMEDA_COMPONENT_META.find(
-        (c) => pathname === `/ideation/design-systems/${activeSystem.slug}/${c.slug}`,
+        (c) => pathname === `/design-systems/${activeSystem.slug}/${c.slug}`,
       )
     : null
-  const onExamples =
+  const onBlocks =
     activeSystem &&
-    pathname.startsWith(`/ideation/design-systems/${activeSystem.slug}/examples`)
+    pathname.startsWith(`/design-systems/${activeSystem.slug}/blocks`)
+  const activeBlock = onBlocks
+    ? activeSystem.blocks.find(
+        (b) => pathname === `/design-systems/${activeSystem.slug}/blocks/${b.slug}`,
+      )
+    : null
 
   // Active component category (mirrors production behaviour exactly).
   const activeCategory = pathname === '/components'
@@ -354,27 +375,25 @@ export function IdeationSidebar() {
           >
             <Cube weight="regular" size={16} />
             <span className="flex-1 text-left">Design Systems</span>
-            <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">
-              {String(SYSTEMS.length).padStart(2, '0')}
+            <span className="rounded-md border border-olive-500/30 bg-olive-500/10 px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
+              New
             </span>
-            <CaretDown
-              size={12}
-              weight="regular"
-              className={`shrink-0 transition-transform ${
-                collapsedDS ? '-rotate-90' : ''
-              }`}
-            />
           </button>
           {!collapsedDS && (
             <ul className="space-y-0.5">
               {SYSTEMS.map((system) => {
+                // "System root" URLs — the showcase (clean), the bare
+                // overview (clean), and the legacy ideation wrapper. All
+                // three highlight the system row as active.
                 const systemActive =
+                  pathname === `/design-systems/${system.slug}/showcase` ||
+                  pathname === `/design-systems/${system.slug}` ||
                   pathname === `/ideation/design-systems/${system.slug}`
                 const systemSelected = activeSystem?.slug === system.slug
                 return (
                   <li key={system.slug}>
                     <Link
-                      href={`/ideation/design-systems/${system.slug}`}
+                      href={`/design-systems/${system.slug}/showcase`}
                       className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
                         systemActive
                           ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
@@ -400,68 +419,56 @@ export function IdeationSidebar() {
                     </Link>
                     {systemSelected && (
                       <ul className="mt-0.5 space-y-0.5">
-                        {/* Components inside this system — pl-8 so each
-                            row's text aligns with the system's icon
-                            above (flat-list aesthetic; the hierarchy is
-                            implied by Andromeda being the only expanded
-                            row). */}
-                        {system.components.map((c) => {
-                          const isActive =
-                            activeAndromedaComponent?.slug === c.slug
-                          return (
-                            <li key={c.slug}>
-                              <Link
-                                href={`/ideation/design-systems/${system.slug}/${c.slug}`}
-                                className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
-                                  isActive
-                                    ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                                    : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
-                                }`}
-                              >
-                                {c.name}
-                              </Link>
-                            </li>
-                          )
-                        })}
-                        {/* See It in Action — examples folder. pl-8 keeps
-                            its folder icon aligned with the system icon
-                            above; example items below sit at pl-8 like
-                            the component rows. */}
+                        {/* ── Blocks (label + flat list) ──────────── */}
                         <li className="mt-1">
-                          <div className="flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2">
-                            {onExamples ? (
-                              <FolderOpen
-                                weight="regular"
-                                size={13}
-                                className="shrink-0 text-sand-500 dark:text-sand-400"
-                              />
-                            ) : (
-                              <Folder
-                                weight="regular"
-                                size={13}
-                                className="shrink-0 text-sand-400 dark:text-sand-500"
-                              />
-                            )}
-                            <span className="flex-1 text-[12px] uppercase tracking-wider text-sand-500 dark:text-sand-400">
-                              See It in Action
-                            </span>
+                          <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
+                            Blocks
                           </div>
-                          <ul className="mt-0.5 space-y-0.5">
-                            {system.examples.map((ex) => {
-                              const isActive =
-                                pathname ===
-                                `/ideation/design-systems/${system.slug}/examples/${ex.slug}`
+                          <ul className="space-y-0.5">
+                            {system.blocks.map((b) => {
+                              const isActive = activeBlock?.slug === b.slug
                               return (
-                                <li key={ex.slug}>
+                                <li key={b.slug}>
                                   <Link
-                                    href={`/ideation/design-systems/${system.slug}/examples/${ex.slug}`}
+                                    href={`/design-systems/${system.slug}/blocks/${b.slug}`}
+                                    target="_blank"
                                     className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                       isActive
                                         ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                                         : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                     }`}
                                   >
-                                    {ex.name}
+                                    <span className="flex-1 truncate">{b.name}</span>
+                                    <span className="ml-auto text-xxs uppercase tracking-wider text-sand-500 dark:text-sand-500">
+                                      {b.domain}
+                                    </span>
+                                  </Link>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </li>
+
+                        {/* ── Components (label + flat list) ──────── */}
+                        <li className="mt-1">
+                          <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
+                            Components
+                          </div>
+                          <ul className="space-y-0.5">
+                            {system.components.map((c) => {
+                              const isActive =
+                                activeAndromedaComponent?.slug === c.slug
+                              return (
+                                <li key={c.slug}>
+                                  <Link
+                                    href={`/design-systems/${system.slug}/${c.slug}`}
+                                    className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
+                                      isActive
+                                        ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                                        : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                                    }`}
+                                  >
+                                    {c.name}
                                   </Link>
                                 </li>
                               )
@@ -473,27 +480,31 @@ export function IdeationSidebar() {
                   </li>
                 )
               })}
+              {PLACEHOLDER_SYSTEMS.map((system) => (
+                <li key={system.slug}>
+                  <div
+                    aria-disabled="true"
+                    className="group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium cursor-not-allowed text-sand-400/60 dark:text-sand-600/60"
+                  >
+                    <ArrowElbowDownRight
+                      weight="regular"
+                      size={12}
+                      className="shrink-0 text-sand-300 dark:text-sand-700"
+                    />
+                    {SYSTEM_ICONS[system.slug] && (
+                      <span className="shrink-0 opacity-60">
+                        {SYSTEM_ICONS[system.slug]({ size: 14 })}
+                      </span>
+                    )}
+                    <span className="flex-1 font-semibold">{system.name}</span>
+                    <span className="rounded-md border border-sand-300/40 bg-sand-300/10 px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider text-sand-400 dark:border-sand-700/40 dark:bg-sand-800/40 dark:text-sand-500">
+                      Soon
+                    </span>
+                  </div>
+                </li>
+              ))}
             </ul>
           )}
-        </div>
-
-        {/* ── SVGs (soon) — sits below Design Systems ───────────────── */}
-        <div className="mb-3">
-          <button
-            type="button"
-            disabled
-            className="mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors cursor-not-allowed text-sand-400/60 dark:text-sand-600/60"
-          >
-            <span className="opacity-40">
-              <PenNib weight="regular" size={16} />
-            </span>
-            <span className="flex-1 text-left">
-              SVGs
-              <span className="ml-1 text-xs font-normal text-sand-400 dark:text-sand-700">
-                · soon
-              </span>
-            </span>
-          </button>
         </div>
 
         {/* ── Divider ──────────────────────────────────────────────────── */}

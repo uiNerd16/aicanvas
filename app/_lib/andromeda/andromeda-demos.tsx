@@ -50,7 +50,7 @@ function Row({ label, children }: { label?: string; children: React.ReactNode })
           style={{
             marginBottom: tokens.spacing[3],
             fontFamily: tokens.typography.fontMono,
-            fontSize: '10px',
+            fontSize: tokens.typography.size.xs,
             color: tokens.color.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
@@ -147,7 +147,7 @@ function CardDemo() {
     >
       <Card>
         <CardHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
             <span
               style={{
                 fontFamily: tokens.typography.fontMono,
@@ -159,7 +159,7 @@ function CardDemo() {
             >
               /// Default
             </span>
-            <CardTitle>Mission card</CardTitle>
+            <CardTitle>Default card</CardTitle>
           </div>
           <Badge variant="default">Idle</Badge>
         </CardHeader>
@@ -174,7 +174,7 @@ function CardDemo() {
       </Card>
       <Card variant="glow">
         <CardHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
             <span
               style={{
                 fontFamily: tokens.typography.fontMono,
@@ -253,8 +253,8 @@ function InputDemo() {
     >
       <Input label="Callsign" placeholder="ENTER CALLSIGN" />
       <Input label="Search" icon={MagnifyingGlass} placeholder="QUERY DATABASE" />
-      <Input label="Operator" icon={Envelope} placeholder="OPERATOR@MISSION.CONTROL" />
-      <Input label="Validation" defaultValue="invalid" error="Field cannot be empty" />
+      <Input label="Email" icon={Envelope} placeholder="OPERATOR@DOMAIN.COM" />
+      <Input label="Validation" defaultValue="INVALID" error="Field cannot be empty" />
     </div>
   )
 }
@@ -270,8 +270,8 @@ function NavItemDemo() {
     >
       <CornerMarkers />
       <NavItem icon={Compass} label="Overview" active />
-      <NavItem icon={Pulse} label="Telemetry" />
-      <NavItem icon={Users} label="Crew" />
+      <NavItem icon={Pulse} label="Activity" />
+      <NavItem icon={Users} label="Members" />
       <NavItem icon={Database} label="Logs" />
       <NavItem icon={Gear} label="Settings" />
     </div>
@@ -281,9 +281,9 @@ function NavItemDemo() {
 function ProgressBarDemo() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: '100%', maxWidth: 520 }}>
-      <ProgressBar label="Fuel Reserve" value={72} variant="default" />
-      <ProgressBar label="Heat Shield" value={48} variant="warning" />
-      <ProgressBar label="Thermal Danger" value={91} variant="fault" />
+      <ProgressBar label="Storage Used" value={72} variant="default" />
+      <ProgressBar label="Bandwidth" value={48} variant="warning" />
+      <ProgressBar label="Memory Critical" value={91} variant="fault" />
     </div>
   )
 }
@@ -291,9 +291,9 @@ function ProgressBarDemo() {
 function StatTileDemo() {
   return (
     <div style={{ display: 'flex', gap: tokens.spacing[5], flexWrap: 'wrap' }}>
-      <StatTile label="Velocity" code="V-01" value="7842" unit="m/s" delta={2.4} deltaLabel="vs prior cycle" />
-      <StatTile label="Altitude" code="A-02" value="412" unit="km" delta={-1.2} deltaLabel="vs prior cycle" />
-      <StatTile label="G-Force" code="G-03" value="1.04" unit="g" />
+      <StatTile label="Throughput" code="REQ-01" value="7842" unit="rps" delta={2.4} deltaLabel="vs prior period" />
+      <StatTile label="Latency" code="LAT-02" value="412" unit="ms" delta={-1.2} deltaLabel="vs prior period" />
+      <StatTile label="Errors" code="ERR-03" value="1.04" unit="%" />
     </div>
   )
 }
@@ -327,7 +327,7 @@ function CheckboxDemo() {
 }
 
 function RadioDemo() {
-  const [value, setValue] = useState('orbit')
+  const [value, setValue] = useState('default')
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
       <Row label="Group">
@@ -336,8 +336,8 @@ function RadioDemo() {
           onValueChange={setValue}
           style={{ flexDirection: 'row', gap: tokens.spacing[4] }}
         >
-          <Radio value="orbit" label="Orbital" />
-          <Radio value="suborbit" label="Suborbital" />
+          <Radio value="default" label="Default" />
+          <Radio value="alternate" label="Alternate" />
           <Radio value="ground" label="Ground" />
           <Radio value="disabled" label="Restricted" disabled />
         </RadioGroup>
@@ -402,8 +402,8 @@ function TextareaDemo() {
         maxWidth: 720,
       }}
     >
-      <Textarea label="Mission Brief" placeholder="ENTER MISSION OBJECTIVES…" rows={4} />
-      <Textarea label="Validation" defaultValue="too short" error="Brief must be at least 80 characters" rows={4} />
+      <Textarea label="Description" placeholder="ENTER DESCRIPTION…" rows={4} />
+      <Textarea label="Validation" defaultValue="TOO SHORT" error="Brief must be at least 80 characters" rows={4} />
     </div>
   )
 }
@@ -415,13 +415,13 @@ function AlertDemo() {
         <AlertIcon><Info weight="light" /></AlertIcon>
         <AlertContent>
           <AlertTitle>System nominal</AlertTitle>
-          <AlertDescription>All vehicles reporting in.</AlertDescription>
+          <AlertDescription>All systems reporting in.</AlertDescription>
         </AlertContent>
       </Alert>
       <Alert variant="accent">
         <AlertIcon><Pulse weight="light" /></AlertIcon>
         <AlertContent>
-          <AlertTitle>New telemetry</AlertTitle>
+          <AlertTitle>New activity</AlertTitle>
           <AlertDescription>Burst received from VHCL-04.</AlertDescription>
         </AlertContent>
       </Alert>
@@ -435,8 +435,8 @@ function AlertDemo() {
       <Alert variant="fault">
         <AlertIcon><Warning weight="light" /></AlertIcon>
         <AlertContent>
-          <AlertTitle>Telemetry lost</AlertTitle>
-          <AlertDescription>Reconnecting to vehicle. ETA 8 seconds.</AlertDescription>
+          <AlertTitle>Connection lost</AlertTitle>
+          <AlertDescription>Reconnecting. ETA 8 seconds.</AlertDescription>
         </AlertContent>
       </Alert>
     </div>
@@ -447,7 +447,7 @@ function EmptyStateDemo() {
   return (
     <EmptyState>
       <EmptyStateIcon><EnvelopeOpen weight="light" /></EmptyStateIcon>
-      <EmptyStateTitle>No transmissions</EmptyStateTitle>
+      <EmptyStateTitle>No activity</EmptyStateTitle>
       <EmptyStateDescription>
         Awaiting signal from the deep-space array. The next pass is in
         approximately 14 minutes.
@@ -465,18 +465,18 @@ function RadarChartDemo() {
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[5], width: '100%' }}>
       <RadarChart label="/// Systems" title="Ship Diagnostics" description="Nominal vs critical thresholds" />
       <RadarChart
-        label="/// Crew"
-        title="Crew Performance"
-        description="Current mission readiness"
+        label="/// Performance"
+        title="System Performance"
+        description="Current system readiness"
         data={[
-          { axis: 'PILOT', score: 94 },
-          { axis: 'ENG', score: 81 },
-          { axis: 'MED', score: 76 },
-          { axis: 'COMMS', score: 88 },
-          { axis: 'RECON', score: 65 },
-          { axis: 'CMD', score: 90 },
+          { axis: 'CPU', score: 94 },
+          { axis: 'MEMORY', score: 81 },
+          { axis: 'STORAGE', score: 76 },
+          { axis: 'NETWORK', score: 88 },
+          { axis: 'SECURITY', score: 65 },
+          { axis: 'API', score: 90 },
         ]}
-        series={[{ key: 'score', label: 'Readiness', color: 'rgba(96,165,250,0.9)' }]}
+        series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent.base }]}
       />
     </div>
   )
@@ -491,7 +491,7 @@ function DrawerDemo() {
       </Row>
       <Drawer open={open} onOpenChange={setOpen} side="right" size={420}>
         <DrawerHeader>
-          <DrawerTitle>Mission Parameters</DrawerTitle>
+          <DrawerTitle>System Parameters</DrawerTitle>
           <DrawerDescription>Configure flight envelope</DrawerDescription>
         </DrawerHeader>
         <DrawerBody>
@@ -500,7 +500,7 @@ function DrawerDemo() {
             <Slider label="Throttle" unit="%" defaultValue={64} />
             <Toggle label="Autopilot" defaultChecked />
             <Checkbox label="Confirm pre-flight checklist" defaultChecked />
-            <Textarea label="Notes" rows={3} placeholder="OPERATOR NOTES…" />
+            <Textarea label="Notes" rows={3} placeholder="ADD A NOTE…" />
           </div>
         </DrawerBody>
         <DrawerFooter>
