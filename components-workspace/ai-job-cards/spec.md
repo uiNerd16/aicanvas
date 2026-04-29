@@ -5,12 +5,12 @@
 **design-system:** standalone
 
 ## Description
-A responsive grid of AI-industry job listing cards. Soft rose-pink page background, warm cream card surfaces, inline AI company brand logos, bookmark toggle, and spring-based hover interactions.
+A responsive grid of AI-industry job listing cards. Soft pale blue-grey page background, warm cream card surfaces, inline AI company brand logos, bookmark toggle, and spring-based hover interactions.
 
 ## Visual
 
 ### Page / container
-- Background: rose-pink `#F9D4D1` (light), `bg-sand-950` (dark)
+- Background: pale blue-grey `#CADBDD` (light), `#0d0d0c` (dark)
 - Grid: 3-col desktop → 2-col tablet → 1-col mobile, `gap-4`
 
 ### Card anatomy (top → bottom)
