@@ -28,7 +28,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
   {
     slug: 'badge',
     name: 'Badge',
-    description: '6 variants for status, telemetry tags, and inline labels.',
+    description: '6 variants for status, metric tags, and inline labels.',
     sourceFile: 'Badge.tsx',
   },
   {
@@ -126,7 +126,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'stat-tile',
     name: 'Stat Tile',
     description:
-      'Telemetry-style readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign.',
+      'Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign.',
     sourceFile: 'StatTile.tsx',
   },
   {
@@ -154,9 +154,9 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
 
 export const ANDROMEDA_META = {
   name: 'Andromeda',
-  tagline: 'Sci-fi mission-control system',
+  tagline: 'Sci-fi blueprint design system',
   description:
-    "One typeface. Transparent surfaces over a void background. 1px corner brackets instead of card borders. Turquoise accent. Built for telemetry, dashboards, and operator UIs that need to feel like they're connected to something real.",
+    'One typeface. Transparent surfaces over a void background. 1px corner brackets instead of card borders. Turquoise accent. A domain-agnostic visual language — works for fintech, crypto, AI, ops, dev tools, and anywhere an editorial, technical, high-density feel fits.',
   font: 'JetBrains Mono',
   accent: '#2DD4BF',
   void: '#0E0E0F',

@@ -94,7 +94,7 @@ export function VehiclesTable() {
   return (
     <Card style={{ flex: '0 0 calc(65% - 10px)', minWidth: 0 }}>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,

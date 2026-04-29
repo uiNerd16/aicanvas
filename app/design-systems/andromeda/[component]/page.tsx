@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation'
 import {
   ANDROMEDA_COMPONENTS,
   getAndromedaComponent,
-} from '../../../_lib/andromeda-registry'
-import { HighlightedCode } from '../../../../components/HighlightedCode'
+} from '../../../_lib/andromeda/andromeda-registry'
+import { HighlightedCode } from '../../../components/HighlightedCode'
 import { AndromedaComponentView } from './AndromedaComponentView'
 
 export function generateStaticParams() {

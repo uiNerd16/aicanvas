@@ -34,7 +34,7 @@ function AltitudeTooltip({ active, payload, label }) {
         color: tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
-        marginBottom: '2px',
+        marginBottom: tokens.spacing[1],
       }}>
         T {label}
       </div>
@@ -54,7 +54,7 @@ export function AltitudeChart() {
   return (
     <Card style={{ flex: '0 0 calc(60% - 10px)', minWidth: 0 }}>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,

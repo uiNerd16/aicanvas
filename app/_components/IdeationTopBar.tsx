@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ArrowLeft, CaretRight } from '@phosphor-icons/react'
-import { HeaderSocials } from '../../components/HeaderSocials'
-import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda-meta'
+import { HeaderSocials } from '../components/HeaderSocials'
+import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 // Three layouts driven by the current pathname:
 //
@@ -27,10 +27,24 @@ const SEGMENT_NAMES: Record<string, string> = {
   'operator-console': 'Operator Console',
 }
 
-const EXAMPLE_LEAF_RE = /^\/ideation\/design-systems\/[^/]+\/examples\/[^/]+/
-const ANDROMEDA_OVERVIEW = '/ideation/design-systems/andromeda'
+// Block routes are full-screen — chrome is suppressed to let the
+// composition fill the viewport.
+const BLOCK_LEAF_RE = /^\/design-systems\/[^/]+\/blocks\/[^/]+/
+// Back-button target on per-component pages — the canonical Andromeda
+// component browser lives at /design-systems/andromeda/showcase.
+const ANDROMEDA_OVERVIEW = '/design-systems/andromeda/showcase'
+// Per-component pages live at /design-systems/andromeda/<slug>; the
+// `showcase`, `blocks`, and `examples` segments must be excluded so
+// they fall through to the overview branch / breadcrumb fallback.
 const ANDROMEDA_COMPONENT_RE =
-  /^\/ideation\/design-systems\/andromeda\/(?!examples)([^/]+)\/?$/
+  /^\/design-systems\/andromeda\/(?!examples|showcase|blocks)([^/]+)\/?$/
+// All paths that should render the "Design Systems / Andromeda" header
+// — the new clean overview + showcase, plus the legacy ideation wrapper.
+const ANDROMEDA_OVERVIEW_PATHS = new Set([
+  '/design-systems/andromeda',
+  '/design-systems/andromeda/showcase',
+  '/ideation/design-systems/andromeda',
+])
 
 function prettify(seg: string): string {
   if (SEGMENT_NAMES[seg]) return SEGMENT_NAMES[seg]
@@ -48,7 +62,7 @@ export function IdeationTopBar() {
 
   // Distraction-free example pages provide their own chrome (a floating
   // exit button), so the topbar disappears there.
-  if (EXAMPLE_LEAF_RE.test(pathname)) return null
+  if (BLOCK_LEAF_RE.test(pathname)) return null
 
   // ── Andromeda component leaf — Back / name / socials ────────────────
   const componentMatch = pathname.match(ANDROMEDA_COMPONENT_RE)
@@ -78,7 +92,7 @@ export function IdeationTopBar() {
   }
 
   // ── Andromeda Overview (showcase) — section / system / socials ──────
-  if (pathname === ANDROMEDA_OVERVIEW) {
+  if (ANDROMEDA_OVERVIEW_PATHS.has(pathname)) {
     return (
       <div className={headerClass}>
         <span className="text-sm font-semibold text-sand-700 dark:text-sand-300">

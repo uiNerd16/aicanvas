@@ -7,6 +7,7 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
+import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
 import {
   MagnifyingGlass,
@@ -20,9 +21,11 @@ import {
   EnvelopeOpen,
   Warning,
   Info,
+  ArrowUpRight,
 } from '@phosphor-icons/react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
-import { Button } from '../../../../design-systems/andromeda/components/Button'
+import { Button, buttonVariants } from '../../../../design-systems/andromeda/components/Button'
+import { andromedaVars } from '../../../../design-systems/andromeda/components/lib/utils'
 import { Badge } from '../../../../design-systems/andromeda/components/Badge'
 import { Avatar } from '../../../../design-systems/andromeda/components/Avatar'
 import { Input } from '../../../../design-systems/andromeda/components/Input'
@@ -86,17 +89,22 @@ function Section({
   title,
   kicker,
   description,
+  slug,
   children,
 }: {
   title: string
   kicker?: string
   description?: string
+  // When provided, renders a right-aligned "Open <title>" link in the
+  // header pointing at /design-systems/andromeda/<slug>. Foundation
+  // sections (Color Palette, Typography) omit this and have no button.
+  slug?: string
   children: ReactNode
 }) {
   return (
     <Card>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span
             style={{
               fontFamily: tokens.typography.fontMono,
@@ -110,6 +118,19 @@ function Section({
           </span>
           <CardTitle>{title}</CardTitle>
         </div>
+        {slug ? (
+          // Plain Link styled with buttonVariants — bypasses Radix Slot,
+          // which doesn't tolerate the Button's internal `{icon}{children}`
+          // rendering when asChild is true.
+          <Link
+            href={`/design-systems/andromeda/${slug}`}
+            className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            style={andromedaVars()}
+          >
+            Open {title}
+            <ArrowUpRight weight="regular" size={14} />
+          </Link>
+        ) : null}
       </CardHeader>
       <CardContent>
         {description ? (
@@ -142,7 +163,7 @@ function Row({ label, children }: { label?: string; children: ReactNode }) {
           style={{
             marginBottom: tokens.spacing[3],
             fontFamily: tokens.typography.fontMono,
-            fontSize: '10px',
+            fontSize: tokens.typography.size.xs,
             color: tokens.color.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
@@ -172,7 +193,7 @@ export default function AndromedaShowcase() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sliderValue, setSliderValue] = useState(64)
   const [thrustValue, setThrustValue] = useState(38)
-  const [radioValue, setRadioValue] = useState('orbit')
+  const [radioValue, setRadioValue] = useState('default')
 
   return (
     <div
@@ -248,12 +269,12 @@ export default function AndromedaShowcase() {
               { name: 'text.faint',     color: tokens.color.text.faint,     note: 'Labels · hints' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: '14px', color, letterSpacing: '0.1em' }}>Aa 01</span>
+                <div style={{ height: 48, border: `1px solid ${tokens.color.border.base}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: tokens.spacing[2] }}>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.md, color, letterSpacing: '0.1em' }}>Aa 01</span>
                 </div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -268,10 +289,10 @@ export default function AndromedaShowcase() {
               { name: 'surface.active',  color: tokens.color.surface.active,  note: 'Pressed state' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.12)', marginBottom: '8px' }} />
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -284,10 +305,10 @@ export default function AndromedaShowcase() {
               { name: 'border.strong', color: tokens.color.border.strong, note: 'High emphasis' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, border: `2px solid ${color}`, marginBottom: '8px' }} />
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ height: 48, border: `1px solid ${color}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -301,10 +322,10 @@ export default function AndromedaShowcase() {
               { name: 'accent.glowSoft', color: tokens.color.accent.glowSoft, note: 'Tinted fills' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.08)', marginBottom: '8px' }} />
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -319,16 +340,16 @@ export default function AndromedaShowcase() {
               { name: 'faultGlow',   color: tokens.color.faultGlow,   note: 'Fault fill' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, background: color, border: '1px solid rgba(255,255,255,0.08)', marginBottom: '8px' }} />
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '9px', color: tokens.color.accent.dim, marginTop: '4px', wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
 
           <div>
-            <div style={{ marginBottom: tokens.spacing[3], fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>
+            <div style={{ marginBottom: tokens.spacing[3], fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>
               Usage Reference
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing[2] }}>
@@ -348,8 +369,8 @@ export default function AndromedaShowcase() {
                 { role: 'Fault indicator',     token: 'fault + faultGlow' },
               ].map(({ role, token }) => (
                 <div key={role} style={{ padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`, background: tokens.color.surface.raised, border: `1px solid ${tokens.color.border.subtle}` }}>
-                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider, marginBottom: '3px' }}>{role}</div>
-                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '11px', color: tokens.color.accent.bright }}>{token}</div>
+                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>{role}</div>
+                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.bright }}>{token}</div>
                 </div>
               ))}
             </div>
@@ -363,7 +384,7 @@ export default function AndromedaShowcase() {
           description="JetBrains Mono is the only typeface. Both fontSans and fontMono resolve to it — the distinction exists only for backward compatibility. Hierarchy comes from size, weight, and letter-spacing, not from switching families."
         >
           <div style={{ marginBottom: tokens.spacing[5] }}>
-            <div style={{ marginBottom: tokens.spacing[3], fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>
+            <div style={{ marginBottom: tokens.spacing[3], fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>
               Type Scale
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -376,13 +397,13 @@ export default function AndromedaShowcase() {
                 { token: '2xl', px: '22px', usage: 'Sub-page headings' },
                 { token: '3xl', px: '28px', usage: 'Showcase page title' },
                 { token: '4xl', px: '36px', usage: 'Dashboard hero readout' },
-                { token: '5xl', px: '48px', usage: 'Telemetry primary value' },
+                { token: '5xl', px: '48px', usage: 'Stat primary value' },
               ].map(({ token, px, usage }) => (
                 <div key={token} style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[4], padding: `${tokens.spacing[2]} 0`, borderBottom: `1px solid ${tokens.color.border.subtle}` }}>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 28, flexShrink: 0 }}>{token}</span>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, width: 32, flexShrink: 0 }}>{px}</span>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: px, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wide, lineHeight: 1.1, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap' }}>MISSION</span>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>{usage}</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 28, flexShrink: 0 }}>{token}</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, width: 32, flexShrink: 0 }}>{px}</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: px, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wide, lineHeight: 1.1, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap' }}>ANDROMEDA</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>{usage}</span>
                 </div>
               ))}
             </div>
@@ -397,9 +418,9 @@ export default function AndromedaShowcase() {
               { name: 'bold',     val: 700 },
             ].map(({ name, val }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '22px', fontWeight: val, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>NOVA</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>weight.{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint }}>{val}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size['2xl'], fontWeight: val, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>NOVA</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>weight.{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint }}>{val}</div>
               </div>
             ))}
           </Row>
@@ -413,10 +434,10 @@ export default function AndromedaShowcase() {
               { name: 'widest', val: '0.22em',  usage: 'Kickers · row heads' },
             ].map(({ name, val, usage }) => (
               <div key={name} style={{ width: 160 }}>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '14px', fontWeight: 500, color: tokens.color.text.primary, letterSpacing: val, textTransform: 'uppercase', marginBottom: tokens.spacing[1] }}>LAUNCH</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>tracking.{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.muted }}>{val || '0'}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: '10px', color: tokens.color.text.faint, marginTop: '2px' }}>{usage}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.md, fontWeight: 500, color: tokens.color.text.primary, letterSpacing: val, textTransform: 'uppercase', marginBottom: tokens.spacing[1] }}>TRACKING</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>tracking.{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted }}>{val || '0'}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{usage}</div>
               </div>
             ))}
           </Row>
@@ -425,6 +446,7 @@ export default function AndromedaShowcase() {
         {/* ── Button ─────────────────────────────────────────────────────── */}
         <Section
           title="Button"
+          slug="button"
           description="5 variants × 3 sizes. Supports asChild via Radix Slot, optional leading icon, full hover / focus / active / disabled state coverage."
         >
           <Row label="Variants">
@@ -462,7 +484,8 @@ export default function AndromedaShowcase() {
         {/* ── Badge ──────────────────────────────────────────────────────── */}
         <Section
           title="Badge"
-          description="6 variants for status, telemetry tags, and inline labels."
+          slug="badge"
+          description="6 variants for status, metric tags, and inline labels."
         >
           <Row>
             <Badge variant="default">Default</Badge>
@@ -477,6 +500,7 @@ export default function AndromedaShowcase() {
         {/* ── Avatar ─────────────────────────────────────────────────────── */}
         <Section
           title="Avatar"
+          slug="avatar"
           description="3 sizes. Initials derived from `name`. Optional status dot in 4 states."
         >
           <Row label="Sizes">
@@ -495,6 +519,7 @@ export default function AndromedaShowcase() {
         {/* ── Card ───────────────────────────────────────────────────────── */}
         <Section
           title="Card"
+          slug="card"
           description="Compound primitive: Card / CardHeader / CardContent / CardFooter / CardTitle / CardDescription. No continuous border by default — corner brackets do the framing."
         >
           <div
@@ -506,7 +531,7 @@ export default function AndromedaShowcase() {
           >
             <Card>
               <CardHeader>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
                   <span
                     style={{
                       fontFamily: tokens.typography.fontMono,
@@ -518,7 +543,7 @@ export default function AndromedaShowcase() {
                   >
                     /// Default
                   </span>
-                  <CardTitle>Mission card</CardTitle>
+                  <CardTitle>Default card</CardTitle>
                 </div>
                 <Badge variant="default">Idle</Badge>
               </CardHeader>
@@ -537,7 +562,7 @@ export default function AndromedaShowcase() {
 
             <Card variant="glow">
               <CardHeader>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
                   <span
                     style={{
                       fontFamily: tokens.typography.fontMono,
@@ -556,11 +581,11 @@ export default function AndromedaShowcase() {
               <CardContent>
                 <CardDescription>
                   Tinted accent gradient surface. Use for the card you want to
-                  draw the operator's eye to first.
+                  draw the user's eye to first.
                 </CardDescription>
               </CardContent>
               <CardFooter>
-                <Button size="sm">Engage</Button>
+                <Button size="sm">Open</Button>
               </CardFooter>
             </Card>
           </div>
@@ -569,6 +594,7 @@ export default function AndromedaShowcase() {
         {/* ── CornerMarkers ──────────────────────────────────────────────── */}
         <Section
           title="CornerMarkers"
+          slug="corner-markers"
           description="The defining motif. Renders 4 L-shaped brackets at the corners of the nearest position:relative ancestor. Geometry comes from tokens.marker."
         >
           <div style={{ display: 'flex', gap: tokens.spacing[5], flexWrap: 'wrap' }}>
@@ -610,6 +636,7 @@ export default function AndromedaShowcase() {
         {/* ── Input ──────────────────────────────────────────────────────── */}
         <Section
           title="Input"
+          slug="input"
           description="Optional uppercase mono label, optional left icon, default + error states. Border transitions on focus."
         >
           <div
@@ -624,11 +651,11 @@ export default function AndromedaShowcase() {
             <Input
               label="Operator"
               icon={Envelope}
-              placeholder="OPERATOR@MISSION.CONTROL"
+              placeholder="OPERATOR@DOMAIN.COM"
             />
             <Input
               label="Validation"
-              defaultValue="invalid"
+              defaultValue="INVALID"
               error="Field cannot be empty"
             />
           </div>
@@ -637,6 +664,7 @@ export default function AndromedaShowcase() {
         {/* ── NavItem ────────────────────────────────────────────────────── */}
         <Section
           title="NavItem"
+          slug="nav-item"
           description="Sidebar item with icon, active state, accent left bar. Mono label by default; pass mono={false} for sans."
         >
           <div
@@ -648,8 +676,8 @@ export default function AndromedaShowcase() {
           >
             <CornerMarkers />
             <NavItem icon={Compass} label="Overview" active />
-            <NavItem icon={Pulse} label="Telemetry" />
-            <NavItem icon={Users} label="Crew" />
+            <NavItem icon={Pulse} label="Activity" />
+            <NavItem icon={Users} label="Members" />
             <NavItem icon={Database} label="Logs" />
             <NavItem icon={Gear} label="Settings" />
           </div>
@@ -658,6 +686,7 @@ export default function AndromedaShowcase() {
         {/* ── ProgressBar ────────────────────────────────────────────────── */}
         <Section
           title="ProgressBar"
+          slug="progress-bar"
           description="3 variants. 3px tall track with a gradient fill and soft glow halo. Smooth width transitions."
         >
           <div
@@ -668,16 +697,17 @@ export default function AndromedaShowcase() {
               maxWidth: 520,
             }}
           >
-            <ProgressBar label="Fuel Reserve" value={72} variant="default" />
-            <ProgressBar label="Heat Shield" value={48} variant="warning" />
-            <ProgressBar label="Thermal Danger" value={91} variant="fault" />
+            <ProgressBar label="Storage Used" value={72} variant="default" />
+            <ProgressBar label="Bandwidth" value={48} variant="warning" />
+            <ProgressBar label="Memory Critical" value={91} variant="fault" />
           </div>
         </Section>
 
         {/* ── StatTile ───────────────────────────────────────────────────── */}
         <Section
           title="StatTile"
-          description="Telemetry-style readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign."
+          slug="stat-tile"
+          description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign."
         >
           <div
             style={{
@@ -687,28 +717,29 @@ export default function AndromedaShowcase() {
             }}
           >
             <StatTile
-              label="Velocity"
-              code="V-01"
+              label="Throughput"
+              code="REQ-01"
               value="7842"
-              unit="m/s"
+              unit="rps"
               delta={2.4}
-              deltaLabel="vs prior cycle"
+              deltaLabel="vs prior period"
             />
             <StatTile
-              label="Altitude"
-              code="A-02"
+              label="Latency"
+              code="LAT-02"
               value="412"
-              unit="km"
+              unit="ms"
               delta={-1.2}
-              deltaLabel="vs prior cycle"
+              deltaLabel="vs prior period"
             />
-            <StatTile label="G-Force" code="G-03" value="1.04" unit="g" />
+            <StatTile label="Errors" code="ERR-03" value="1.04" unit="%" />
           </div>
         </Section>
 
         {/* ── Tag ────────────────────────────────────────────────────────── */}
         <Section
           title="Tag"
+          slug="tag"
           description="Compact uppercase mono label. 4 variants. Optional dismiss button when onClose is provided."
         >
           <Row label="Variants">
@@ -730,6 +761,7 @@ export default function AndromedaShowcase() {
         {/* ── Checkbox ───────────────────────────────────────────────────── */}
         <Section
           title="Checkbox"
+          slug="checkbox"
           description="Square boolean control. Controlled or uncontrolled. Inline label, accent fill on checked."
         >
           <Row label="States">
@@ -743,6 +775,7 @@ export default function AndromedaShowcase() {
         {/* ── Radio (Choicebox) ──────────────────────────────────────────── */}
         <Section
           title="Radio · Choicebox"
+          slug="radio"
           description="Mutually-exclusive square radio. Use standalone or inside a RadioGroup that wires up `name` / `value` / `onValueChange`."
         >
           <Row label="Group">
@@ -751,8 +784,8 @@ export default function AndromedaShowcase() {
               onValueChange={setRadioValue}
               style={{ flexDirection: 'row', gap: tokens.spacing[4] }}
             >
-              <Radio value="orbit" label="Orbital" />
-              <Radio value="suborbit" label="Suborbital" />
+              <Radio value="default" label="Default" />
+              <Radio value="alternate" label="Alternate" />
               <Radio value="ground" label="Ground" />
               <Radio value="disabled" label="Restricted" disabled />
             </RadioGroup>
@@ -766,6 +799,7 @@ export default function AndromedaShowcase() {
         {/* ── Toggle ─────────────────────────────────────────────────────── */}
         <Section
           title="Toggle · Switch"
+          slug="toggle"
           description="Sharp rectangular track + sliding rectangular thumb. Same vocabulary as Checkbox, but feels like a hardware switch."
         >
           <Row label="States">
@@ -779,6 +813,7 @@ export default function AndromedaShowcase() {
         {/* ── Spinner ────────────────────────────────────────────────────── */}
         <Section
           title="Spinner"
+          slug="spinner"
           description="SVG arc that rotates via a CSS keyframe — runs on the compositor, no React per-frame work. 4 color variants × 3 sizes."
         >
           <Row label="Sizes">
@@ -797,6 +832,7 @@ export default function AndromedaShowcase() {
         {/* ── Slider ─────────────────────────────────────────────────────── */}
         <Section
           title="Slider"
+          slug="slider"
           description="Custom horizontal range. Pointer drag + full keyboard support (←/→/↑/↓, PageUp/PageDown, Home/End). ARIA-compliant."
         >
           <div
@@ -828,6 +864,7 @@ export default function AndromedaShowcase() {
         {/* ── Textarea ───────────────────────────────────────────────────── */}
         <Section
           title="Textarea"
+          slug="textarea"
           description="Multi-line counterpart to Input. Same border / focus / error behavior, vertical resize."
         >
           <div
@@ -838,13 +875,13 @@ export default function AndromedaShowcase() {
             }}
           >
             <Textarea
-              label="Mission Brief"
-              placeholder="ENTER MISSION OBJECTIVES…"
+              label="Description"
+              placeholder="ENTER DESCRIPTION…"
               rows={4}
             />
             <Textarea
               label="Validation"
-              defaultValue="too short"
+              defaultValue="TOO SHORT"
               error="Brief must be at least 80 characters"
               rows={4}
             />
@@ -854,6 +891,7 @@ export default function AndromedaShowcase() {
         {/* ── Alert ──────────────────────────────────────────────────────── */}
         <Section
           title="Alert"
+          slug="alert"
           kicker="Component · Error"
           description="Banner-style status component for inline messages. 4 variants — default, accent, warning, fault — each with its own icon color and title color."
         >
@@ -868,13 +906,13 @@ export default function AndromedaShowcase() {
               <AlertIcon><Info weight="light" /></AlertIcon>
               <AlertContent>
                 <AlertTitle>System nominal</AlertTitle>
-                <AlertDescription>All vehicles reporting in.</AlertDescription>
+                <AlertDescription>All systems reporting in.</AlertDescription>
               </AlertContent>
             </Alert>
             <Alert variant="accent">
               <AlertIcon><Pulse weight="light" /></AlertIcon>
               <AlertContent>
-                <AlertTitle>New telemetry</AlertTitle>
+                <AlertTitle>New activity</AlertTitle>
                 <AlertDescription>Burst received from VHCL-04.</AlertDescription>
               </AlertContent>
             </Alert>
@@ -888,8 +926,8 @@ export default function AndromedaShowcase() {
             <Alert variant="fault">
               <AlertIcon><Warning weight="light" /></AlertIcon>
               <AlertContent>
-                <AlertTitle>Telemetry lost</AlertTitle>
-                <AlertDescription>Reconnecting to vehicle. ETA 8 seconds.</AlertDescription>
+                <AlertTitle>Connection lost</AlertTitle>
+                <AlertDescription>Reconnecting. ETA 8 seconds.</AlertDescription>
               </AlertContent>
             </Alert>
           </div>
@@ -898,11 +936,12 @@ export default function AndromedaShowcase() {
         {/* ── Empty State ────────────────────────────────────────────────── */}
         <Section
           title="Empty State"
+          slug="empty-state"
           description="Centered icon + uppercase mono title + sans description + optional action. Built on Card so it inherits the bracket motif."
         >
           <EmptyState>
             <EmptyStateIcon><EnvelopeOpen weight="light" /></EmptyStateIcon>
-            <EmptyStateTitle>No transmissions</EmptyStateTitle>
+            <EmptyStateTitle>No activity</EmptyStateTitle>
             <EmptyStateDescription>
               Awaiting signal from the deep-space array. The next pass is in
               approximately 14 minutes.
@@ -917,6 +956,7 @@ export default function AndromedaShowcase() {
         {/* ── Charts ─────────────────────────────────────────────────────── */}
         <Section
           title="Radar Chart"
+          slug="radar-chart"
           kicker="Component · Charts"
           description="Polygon spider chart for multi-axis system diagnostics. Supports single or multiple overlapping series. Built on recharts, fully styled with andromeda tokens."
         >
@@ -927,18 +967,18 @@ export default function AndromedaShowcase() {
               description="Nominal vs critical thresholds"
             />
             <RadarChart
-              label="/// Crew"
-              title="Crew Performance"
-              description="Current mission readiness"
+              label="/// Performance"
+              title="System Performance"
+              description="Current system readiness"
               data={[
-                { axis: 'PILOT',   score: 94 },
-                { axis: 'ENG',     score: 81 },
-                { axis: 'MED',     score: 76 },
-                { axis: 'COMMS',   score: 88 },
-                { axis: 'RECON',   score: 65 },
-                { axis: 'CMD',     score: 90 },
+                { axis: 'CPU',      score: 94 },
+                { axis: 'MEMORY',   score: 81 },
+                { axis: 'STORAGE',  score: 76 },
+                { axis: 'NETWORK',  score: 88 },
+                { axis: 'SECURITY', score: 65 },
+                { axis: 'API',      score: 90 },
               ]}
-              series={[{ key: 'score', label: 'Readiness', color: 'rgba(96,165,250,0.9)' }]}
+              series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent.base }]}
             />
           </div>
         </Section>
@@ -946,6 +986,7 @@ export default function AndromedaShowcase() {
         {/* ── Drawer ─────────────────────────────────────────────────────── */}
         <Section
           title="Drawer"
+          slug="drawer"
           description="Right-side slide-in panel with backdrop, ESC to close, body scroll lock, and the bracket motif. React Portal escapes any clipped ancestor."
         >
           <Row label="Trigger">
@@ -953,7 +994,7 @@ export default function AndromedaShowcase() {
           </Row>
           <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} side="right" size={420}>
             <DrawerHeader>
-              <DrawerTitle>Mission Parameters</DrawerTitle>
+              <DrawerTitle>System Parameters</DrawerTitle>
               <DrawerDescription>Configure flight envelope</DrawerDescription>
             </DrawerHeader>
             <DrawerBody>

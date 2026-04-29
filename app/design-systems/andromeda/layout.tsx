@@ -1,11 +1,35 @@
 import type { ReactNode } from 'react'
+import { JetBrains_Mono } from 'next/font/google'
+import { IdeationSidebar } from '../../_components/IdeationSidebar'
+import { IdeationTopBar } from '../../_components/IdeationTopBar'
 
-// Forces the scroll container background to match Andromeda's void colour
-// (#0E0E0F) so it doesn't bleed the site's sand-950 when scrolling.
+// JetBrains Mono is the only font in the Andromeda design system.
+// Loading it at the layout level makes --font-jetbrains-mono available
+// to every Andromeda route (overview, showcase, per-component pages),
+// which the tokens reference via fontMono / fontSans.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
+
+// Mirrors `app/ideation/layout.tsx` so every Andromeda route gets the
+// same sidebar + topbar chrome as the ideation playground. The content
+// column is forced to the void (#0E0E0F) background so it doesn't
+// bleed sand-950 when content is shorter than the viewport.
 export default function AndromedaLayout({ children }: { children: ReactNode }) {
   return (
-    <div style={{ minHeight: '100%', backgroundColor: '#0E0E0F' }}>
-      {children}
+    <div
+      className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
+    >
+      <IdeationSidebar />
+      <div
+        className="flex flex-1 scroll-smooth flex-col overflow-y-auto"
+        style={{ backgroundColor: '#0E0E0F' }}
+      >
+        <IdeationTopBar />
+        {children}
+      </div>
     </div>
   )
 }

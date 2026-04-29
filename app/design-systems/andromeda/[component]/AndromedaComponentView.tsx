@@ -12,7 +12,7 @@ import {
   Sparkle,
   Terminal,
 } from '@phosphor-icons/react'
-import { AndromedaDemo } from '../../../_lib/andromeda-demos'
+import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 
 type RelatedItem = { slug: string; name: string }
 
@@ -194,7 +194,7 @@ export function AndromedaComponentView({
         <nav className="mt-12 flex items-stretch justify-between gap-3 border-t border-sand-300 pt-6 dark:border-sand-800">
           {prevComponent ? (
             <Link
-              href={`/ideation/design-systems/andromeda/${prevComponent.slug}`}
+              href={`/design-systems/andromeda/${prevComponent.slug}`}
               className="group flex flex-1 items-center gap-3 rounded-xl border border-sand-300 bg-sand-100 px-4 py-3 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
             >
               <ArrowLeft
@@ -216,7 +216,7 @@ export function AndromedaComponentView({
           )}
           {nextComponent ? (
             <Link
-              href={`/ideation/design-systems/andromeda/${nextComponent.slug}`}
+              href={`/design-systems/andromeda/${nextComponent.slug}`}
               className="group flex flex-1 items-center justify-end gap-3 rounded-xl border border-sand-300 bg-sand-100 px-4 py-3 text-right transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
             >
               <div className="min-w-0">
@@ -249,7 +249,7 @@ export function AndromedaComponentView({
             {related.slice(0, 8).map((c) => (
               <Link
                 key={c.slug}
-                href={`/ideation/design-systems/andromeda/${c.slug}`}
+                href={`/design-systems/andromeda/${c.slug}`}
                 className="overflow-hidden rounded-lg border border-sand-300 bg-sand-100 px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-100"
               >
                 {c.name}

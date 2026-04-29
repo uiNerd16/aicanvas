@@ -19,6 +19,13 @@
   --font-sans: var(--font-manrope), sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
+  /* ── Type scale extension ──
+     Tailwind v4 ships text-xs (12px) and up. text-xxs adds a 10px step
+     used for sub-section labels in nested navigation, micro chips, and
+     other places where text-xs is too loud. */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.875rem;
+
   /* ── Sand scale — warm neutral (Phosphor-inspired) ── */
   --color-sand-50:  #FAFAF0;
   --color-sand-100: #E8E8DF;

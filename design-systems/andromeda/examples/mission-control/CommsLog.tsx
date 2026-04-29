@@ -65,7 +65,7 @@ function CommsItem({ entry, isLast }) {
           display: 'flex',
           justifyContent: 'space-between',
           gap: tokens.spacing[2],
-          marginBottom: '2px',
+          marginBottom: tokens.spacing[1],
         }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
@@ -104,7 +104,7 @@ export function CommsLog() {
   return (
     <Card style={{ flex: 1, minWidth: 0 }}>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,

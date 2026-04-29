@@ -175,7 +175,7 @@ export function CommsSection() {
       {/* Main log */}
       <Card style={{ flex: '1 1 auto', minWidth: 0 }}>
         <CardHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
             <span style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
@@ -234,7 +234,7 @@ export function CommsSection() {
           container instead of a magic px value. */}
       <Card style={{ flex: '0 1 28%', minWidth: 0, alignSelf: 'flex-start' }}>
         <CardHeader>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
             <span style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
