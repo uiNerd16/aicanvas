@@ -17,7 +17,7 @@ Build an AI Job Cards component in a single 'use client' TypeScript file.
 Three stacked card columns — one each for Anthropic, Perplexity, and Google. Each column is a stack of 3 overlapping job cards. The front card is fully visible; the middle and back cards peek below it like a fan. Drag or swipe the front card up or down to cycle to the next card in that column.
 
 ## Layout
-- Rose-pink outer bg (#F9D4D1 light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
+- Pale blue-grey outer bg (#CADBDD light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
 - Row of 3 stacks on wide screens, single column when container width < 480px (ResizeObserver)
 - Stacks max-width 760px
 
@@ -86,7 +86,7 @@ Inline everything. Single file. Use Framer Motion for all animation.
 Three stacked card columns — one each for Anthropic, Perplexity, and Google. Each column is a stack of 3 overlapping job cards. The front card is fully visible; the middle and back cards peek below it like a fan. Drag or swipe the front card up or down to cycle to the next card in that column.
 
 ## Layout
-- Rose-pink outer bg (#F9D4D1 light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
+- Pale blue-grey outer bg (#CADBDD light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
 - Row of 3 stacks on wide screens, single column when container width < 480px (ResizeObserver)
 - Stacks max-width 760px
 
@@ -155,7 +155,7 @@ Inline everything. Single file. Use Framer Motion for all animation.
 Three stacked card columns — one each for Anthropic, Perplexity, and Google. Each column is a stack of 3 overlapping job cards. The front card is fully visible; the middle and back cards peek below it like a fan. Drag or swipe the front card up or down to cycle to the next card in that column.
 
 ## Layout
-- Rose-pink outer bg (#F9D4D1 light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
+- Pale blue-grey outer bg (#CADBDD light / #0d0d0c dark), padding: clamp(16px, 5%, 40px)
 - Row of 3 stacks on wide screens, single column when container width < 480px (ResizeObserver)
 - Stacks max-width 760px
 
