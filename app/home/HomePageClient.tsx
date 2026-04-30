@@ -16,12 +16,11 @@ import {
   CaretLeft,
   CaretRight,
   Terminal,
-  GithubLogo,
-  XLogo,
 } from '@phosphor-icons/react'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { SiteFooter } from '../components/SiteFooter'
 import type { ComponentMeta } from '../lib/component-registry'
-import { GITHUB_URL, X_URL } from '../lib/config'
+import { GITHUB_URL } from '../lib/config'
 import { track } from '../lib/analytics'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -659,7 +658,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         <HeaderSocials />
       </div>
 
-      <main className="relative mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
+      <main className="relative mx-auto max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
 
         {/* ── Hero ── */}
         <section className="flex flex-col items-center text-center">
@@ -1011,31 +1010,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           </motion.div>
         </section>
 
-        {/* ── Footer ── */}
-        <footer className="mt-20 pt-8 pb-6">
-          <div className="flex items-center justify-between">
-            <img src="/icon.svg" alt="AI Canvas" className="h-5 w-5" />
-            <p className="text-xs text-sand-500">AI native components. Free and open source.</p>
-            <div className="flex items-center gap-3">
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sand-500 transition-colors hover:text-sand-200"
-              >
-                <GithubLogo weight="regular" size={18} />
-              </a>
-              <a
-                href={X_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sand-500 transition-colors hover:text-sand-200"
-              >
-                <XLogo weight="regular" size={18} />
-              </a>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </main>
     </div>
   )
