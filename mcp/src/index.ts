@@ -164,7 +164,7 @@ server.registerTool(
     description:
       'Return every category in the AI Canvas standalone component library, with the number of components in each. Use to orient before listing or searching — e.g. "what kinds of components are available?"',
     inputSchema: {},
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
   async () => {
     try {
@@ -218,7 +218,7 @@ server.registerTool(
         .optional()
         .describe('Number of components to skip (for pagination). Default 0.'),
     },
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
   async ({ category, limit = 25, offset = 0 }) => {
     try {
@@ -282,7 +282,7 @@ server.registerTool(
         .optional()
         .describe('Max number of matches to return. Default 10.'),
     },
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
   async ({ query, limit = 10 }) => {
     try {
@@ -325,7 +325,7 @@ server.registerTool(
           'The component slug, e.g. "ai-job-cards", "wave-lines", "halo-type". Use exact slugs from list/search results.',
         ),
     },
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
   async ({ slug }) => {
     try {
@@ -386,7 +386,7 @@ server.registerTool(
         .min(1)
         .describe('The component slug, e.g. "ai-job-cards".'),
     },
-    annotations: { readOnlyHint: true, openWorldHint: true },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
   async ({ slug }) => {
     try {
