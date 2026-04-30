@@ -528,7 +528,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
           the carousel (great for mobile). Dragging past threshold advances
           one step; tapping a side card also advances it in that direction.
           The center card keeps its Link for navigation. */}
-      <div className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+      <div className="-mx-4 overflow-hidden sm:-mx-6">
         <motion.div
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
@@ -653,7 +653,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
     <div className="flex min-h-full flex-col overflow-x-hidden bg-sand-950">
 
       {/* ── Top bar ── */}
-      <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:flex">
+      <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950 px-6 md:flex">
         <span className="text-sm font-semibold text-sand-50">Overview</span>
         <HeaderSocials />
       </div>
@@ -677,18 +677,17 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.18 }}
-            className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
+            className="text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
           >
-            <span className="inline-flex flex-wrap items-center justify-center gap-x-2">
-              <span>AI</span>
-              <img
-                src="/ai-canvas-icon.svg"
-                alt=""
-                aria-hidden
-                className="inline-block h-[0.6em] w-auto align-[0.02em]"
-              />
-              <span>Native Components</span>
-            </span>
+            AI
+            {' '}
+            <img
+              src="/ai-canvas-icon.svg"
+              alt=""
+              aria-hidden
+              className="inline-block h-[0.6em] w-auto align-[0.02em]"
+            />
+            {' '}Native Components
             <br />
             <span className="mt-2 inline-block text-olive-500">for Designers and Developers.</span>
           </motion.h1>

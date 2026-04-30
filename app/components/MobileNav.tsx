@@ -133,7 +133,7 @@ export function MobileNav() {
   return (
     <>
       {/* ── Mobile top bar ── */}
-      <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:hidden">
+      <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200 px-4 dark:border-sand-800 dark:bg-sand-950 md:hidden">
         <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
           <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
           AI Canvas
@@ -142,22 +142,13 @@ export function MobileNav() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/mcp"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-2.5 py-1.5 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
-          >
-            <img src="/ai-canvas-icon-mono.svg" alt="" width={14} height={12} className="shrink-0" />
-            Get MCP
-          </Link>
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-          >
-            <List weight="regular" size={20} />
-          </button>
-        </div>
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+        >
+          <List weight="regular" size={20} />
+        </button>
       </div>
 
       {/* ── Slide-in drawer ── */}
@@ -361,6 +352,14 @@ export function MobileNav() {
                 >
                   <XLogo weight="regular" size={20} />
                 </a>
+                <Link
+                  href="/mcp"
+                  onClick={() => setOpen(false)}
+                  className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+                >
+                  <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
+                  Get MCP
+                </Link>
               </div>
 
               {/* Bottom card */}

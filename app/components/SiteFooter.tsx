@@ -24,7 +24,7 @@ export function SiteFooter() {
           href="https://www.npmjs.com/package/@aicanvas/mcp"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-sand-500 transition-colors hover:text-sand-700 dark:hover:text-sand-200"
+          className="hidden items-center gap-1 text-xs text-sand-500 transition-colors hover:text-sand-700 dark:hover:text-sand-200 sm:inline-flex"
         >
           @aicanvas/mcp on npm
           <ArrowUpRight weight="regular" size={12} />
