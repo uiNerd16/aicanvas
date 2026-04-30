@@ -25,6 +25,7 @@ import {
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
 import { HeaderSocials } from '../HeaderSocials'
+import { Step } from '../Step'
 import type { ComponentMeta } from '../../lib/component-registry'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
@@ -590,13 +591,11 @@ export default function ComponentPageView({
                   </button>
                 </div>
 
-                <div className="bg-sand-100 px-5 py-5 dark:bg-sand-900">
+                <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
                   {installTab === 'cli' ? (
-                    <div className="space-y-5">
+                    <div className="space-y-6">
                       {/* Step 1 — shadcn add */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
-                        <div className="min-w-0 flex-1">
+                      <Step number={1}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
@@ -648,13 +647,13 @@ export default function ComponentPageView({
                               </code>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                      </Step>
 
                       {/* Step 2 — Dark mode (optional) */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">2</span>
-                        <div className="min-w-0 flex-1">
+                      <Step
+                        number={2}
+                        isLast={!FONT_SNIPPETS && !FONT_PKG_SNIPPET && !fontPkgSelfContained}
+                      >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
                               For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
@@ -676,14 +675,11 @@ export default function ComponentPageView({
                                 : <Copy weight="regular" size={14} />}
                             </button>
                           </div>
-                        </div>
-                      </div>
+                      </Step>
 
                       {/* Step 3 — Font (optional, only when component specifies a font) */}
                       {FONT_SNIPPETS && (
-                        <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
-                          <div className="min-w-0 flex-1">
+                        <Step number={3} isLast={!FONT_PKG_SNIPPET && !fontPkgSelfContained}>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
@@ -718,15 +714,12 @@ export default function ComponentPageView({
                                 <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                        </Step>
                       )}
 
                       {/* Step 3 — Package font (optional, only when component specifies a font-pkg) */}
                       {(FONT_PKG_SNIPPET || fontPkgSelfContained) && (
-                        <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">3</span>
-                          <div className="min-w-0 flex-1">
+                        <Step number={3} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
@@ -758,17 +751,14 @@ export default function ComponentPageView({
                                 </div>
                               </div>
                             )}
-                          </div>
-                        </div>
+                        </Step>
                       )}
                     </div>
                   ) : (
-                    <div className="space-y-5">
+                    <div className="space-y-6">
                       {/* Step 1 — Install deps (only when component has deps) */}
                       {depsCommand && (
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">1</span>
-                        <div className="min-w-0 flex-1">
+                      <Step number={1}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Install the following dependencies:
                           </p>
@@ -785,14 +775,11 @@ export default function ComponentPageView({
                                 : <Copy weight="regular" size={14} />}
                             </button>
                           </div>
-                        </div>
-                      </div>
+                      </Step>
                       )}
 
                       {/* Step — Copy the code */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.code}</span>
-                        <div className="min-w-0 flex-1">
+                      <Step number={manualStep.code}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Copy and paste the following code into your project:
                           </p>
@@ -814,13 +801,13 @@ export default function ComponentPageView({
                               {highlightedCode}
                             </div>
                           </div>
-                        </div>
-                      </div>
+                      </Step>
 
                       {/* Step — Dark mode (optional) */}
-                      <div className="flex gap-3.5">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.dark}</span>
-                        <div className="min-w-0 flex-1">
+                      <Step
+                        number={manualStep.dark}
+                        isLast={!FONT_SNIPPETS && !FONT_PKG_SNIPPET}
+                      >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
                               For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
@@ -842,14 +829,11 @@ export default function ComponentPageView({
                                 : <Copy weight="regular" size={14} />}
                             </button>
                           </div>
-                        </div>
-                      </div>
+                      </Step>
 
                       {/* Step — Font (optional, only when component specifies a font) */}
                       {FONT_SNIPPETS && (
-                        <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.font}</span>
-                          <div className="min-w-0 flex-1">
+                        <Step number={manualStep.font} isLast={!FONT_PKG_SNIPPET}>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
@@ -884,15 +868,12 @@ export default function ComponentPageView({
                                 <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                        </Step>
                       )}
 
                       {/* Step — Package font (optional, only when component specifies a font-pkg) */}
                       {FONT_PKG_SNIPPET && (
-                        <div className="flex gap-3.5">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-sand-300 text-xs font-semibold text-sand-500 dark:border-sand-700 dark:text-sand-400">{manualStep.font}</span>
-                          <div className="min-w-0 flex-1">
+                        <Step number={manualStep.font} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
@@ -922,8 +903,7 @@ export default function ComponentPageView({
                                 <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_PKG_SNIPPET}</code>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                        </Step>
                       )}
                     </div>
                   )}

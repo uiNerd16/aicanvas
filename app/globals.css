@@ -99,3 +99,9 @@ body {
 .dark * {
   scrollbar-color: var(--color-sand-800) transparent;
 }
+
+/* Step timeline connector — used by app/components/Step.tsx */
+@keyframes aicStepDot {
+  from { background-position-y: 0; }
+  to { background-position-y: 8px; }
+}
