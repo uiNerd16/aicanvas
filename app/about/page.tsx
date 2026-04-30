@@ -49,6 +49,13 @@ export default function AboutPage() {
           /About
         </Link>
         <div className="flex items-center justify-end gap-1">
+          <Link
+            href="/mcp"
+            className="mr-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+          >
+            <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
+            Get MCP
+          </Link>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
             <GithubLogo weight="regular" size={20} />
           </a>
@@ -59,7 +66,7 @@ export default function AboutPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[720px] px-6 py-8 sm:px-8 sm:py-28">
+      <main className="relative mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
           <span className="text-olive-500">/About</span>
