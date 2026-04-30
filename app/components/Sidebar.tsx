@@ -20,9 +20,8 @@ const COMPONENTS_LABELS = [
   'Inputs & Controls',
   'Notifications',
   'Typography',
+  'Glass',
 ] as const
-
-const DESIGN_SYSTEM_LABELS = ['Glass'] as const
 
 type Section = {
   title: string
@@ -34,7 +33,7 @@ type Section = {
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
   { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
-  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
+  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 function countByLabel(label: string) {
