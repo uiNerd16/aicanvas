@@ -54,3 +54,6 @@ app/lib/component-codes.generated.ts
 
 # business strategy (private — never pushed to GitHub)
 /business-strategy/
+
+# PUFI inspector (local-only dev tool — type "pufi" to toggle)
+/public/pufi.js
