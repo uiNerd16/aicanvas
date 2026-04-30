@@ -142,13 +142,22 @@ export function MobileNav() {
           </span>
         </Link>
 
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-        >
-          <List weight="regular" size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/mcp"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-2.5 py-1.5 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+          >
+            <img src="/ai-canvas-icon-mono.svg" alt="" width={14} height={12} className="shrink-0" />
+            Get MCP
+          </Link>
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          >
+            <List weight="regular" size={20} />
+          </button>
+        </div>
       </div>
 
       {/* ── Slide-in drawer ── */}
