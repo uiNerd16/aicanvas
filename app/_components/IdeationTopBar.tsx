@@ -55,7 +55,7 @@ function prettify(seg: string): string {
 }
 
 const headerClass =
-  'sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 md:grid'
+  'sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid'
 
 export function IdeationTopBar() {
   const pathname = usePathname() ?? '/ideation'
@@ -114,7 +114,7 @@ export function IdeationTopBar() {
     isLast: i === segments.length - 1,
   }))
   return (
-    <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-sand-300 bg-sand-200/90 px-6 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+    <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950">
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm">
         {crumbs.map((c, i) => (
           <span key={c.href} className="flex items-center gap-1">

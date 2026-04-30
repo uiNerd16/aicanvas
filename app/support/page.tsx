@@ -116,7 +116,7 @@ export default function SupportPage() {
   return (
     <div ref={ref} className="min-h-full bg-sand-950">
       {/* ── Top bar ── */}
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950/90 px-6 backdrop-blur md:grid">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
         <div />
         <Link
           href="/support"
