@@ -1,0 +1,157 @@
+// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
+// ============================================================
+// COMPONENT: IconButton
+// Square, label-less companion to Button. Same variant + size
+// vocabulary so the two compose into a single coherent toolbar.
+// Variants: default | outline | ghost | destructive
+// Sizes:    sm (24px) | md (32px) | lg (40px)
+// Optional `badge` slot for unread counters / status pips.
+// ============================================================
+
+'use client';
+
+import { forwardRef } from 'react';
+import { cva } from 'class-variance-authority';
+import { cn, andromedaVars } from './lib/utils';
+
+const iconButtonVariants = cva(
+  [
+    // structural — perfectly square, icon dead-center
+    'relative inline-flex items-center justify-center select-none flex-shrink-0',
+    'border border-solid',
+    'rounded-[var(--andromeda-radius-none)]',
+    'p-0',
+    // motion
+    'cursor-pointer transition-all duration-150 ease-out',
+    'active:scale-[0.94]',
+    '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+    // focus + disabled — match Button.tsx exactly
+    'focus-visible:outline-none',
+    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+    'disabled:cursor-not-allowed disabled:opacity-[0.35] disabled:pointer-events-none',
+  ],
+  {
+    variants: {
+      variant: {
+        default: [
+          'text-[color:var(--andromeda-accent-100)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'border-[color:var(--andromeda-accent-400)]',
+          'hover:border-[color:var(--andromeda-accent-300)]',
+          'hover:shadow-[0_0_8px_var(--andromeda-accent-500)]',
+          'active:border-[color:var(--andromeda-accent-300)]',
+        ],
+        outline: [
+          'text-[color:var(--andromeda-text-secondary)]',
+          'bg-[color:var(--andromeda-surface-hover)]',
+          'border-[color:var(--andromeda-border-base)]',
+          'hover:text-[color:var(--andromeda-accent-200)]',
+          'hover:bg-[color:var(--andromeda-surface-active)]',
+          'hover:border-[color:var(--andromeda-border-bright)]',
+          'active:bg-[color:var(--andromeda-surface-active)]',
+        ],
+        ghost: [
+          'text-[color:var(--andromeda-text-secondary)]',
+          'bg-transparent',
+          'border-transparent',
+          'hover:text-[color:var(--andromeda-text-primary)]',
+          'hover:bg-[color:var(--andromeda-surface-raised)]',
+          'active:bg-[color:var(--andromeda-surface-hover)]',
+        ],
+        destructive: [
+          'text-[color:var(--andromeda-red-100)]',
+          'bg-[color:var(--andromeda-red-500)]',
+          'border-[color:var(--andromeda-red-400)]',
+          'hover:bg-[color:var(--andromeda-red-400)]',
+          'hover:border-[color:var(--andromeda-red-300)]',
+          'hover:shadow-[0_0_8px_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-400),0_0_8px_var(--andromeda-red-400)]',
+          'active:bg-[color:var(--andromeda-red-400)]',
+        ],
+      },
+      size: {
+        // Each step matches a Button height so the two line up in a strip.
+        // Button sm = 24px, md = 32px, lg = 40px (computed from py + line-height).
+        sm: 'w-[var(--andromeda-6)] h-[var(--andromeda-6)]',
+        md: 'w-[var(--andromeda-8)] h-[var(--andromeda-8)]',
+        lg: 'w-[var(--andromeda-10)] h-[var(--andromeda-10)]',
+      },
+    },
+    defaultVariants: {
+      variant: 'outline',
+      size: 'md',
+    },
+  },
+);
+
+const ICON_SIZE = { sm: 14, md: 16, lg: 20 };
+
+/**
+ * @typedef {object} IconButtonProps
+ * @property {'default'|'outline'|'ghost'|'destructive'} [variant='outline']
+ * @property {'sm'|'md'|'lg'} [size='md']
+ * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
+ *   Phosphor / Lucide icon. Pass either `icon` OR `children` for custom glyphs.
+ * @property {React.ReactNode} [children] Custom icon content (SVG, bars, etc.)
+ * @property {React.ReactNode} [badge]  Small overlay (count / dot). Positioned top-right.
+ * @property {string} [aria-label]  Required for accessibility (no visible text).
+ * @property {string} [className]
+ * @property {React.CSSProperties} [style]
+ * @property {boolean} [disabled]
+ * @property {(e: React.MouseEvent<HTMLButtonElement>) => void} [onClick]
+ */
+
+/** @type {React.ForwardRefExoticComponent<IconButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>>} */
+export const IconButton = forwardRef(function IconButton(
+  {
+    className,
+    variant = 'outline',
+    size = 'md',
+    icon: Icon,
+    children,
+    badge,
+    style,
+    type = 'button',
+    ...props
+  },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      type={type}
+      className={cn(iconButtonVariants({ variant, size }), className)}
+      style={{ ...andromedaVars(), ...style }}
+      {...props}
+    >
+      {Icon ? <Icon size={ICON_SIZE[size]} weight="regular" /> : children}
+      {badge != null ? (
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute',
+            top: '-2px',
+            right: '-2px',
+            minWidth: '14px',
+            height: '14px',
+            padding: '0 3px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--andromeda-accent-500)',
+            color: 'var(--andromeda-accent-100)',
+            border: '1px solid var(--andromeda-accent-400)',
+            fontFamily: 'var(--andromeda-font-mono)',
+            fontSize: '9px',
+            fontWeight: 'var(--andromeda-weight-semibold)',
+            lineHeight: 1,
+          }}
+        >
+          {badge}
+        </span>
+      ) : null}
+    </button>
+  );
+});
+
+export { iconButtonVariants };
