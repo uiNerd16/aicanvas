@@ -74,6 +74,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'EmptyState.tsx',
   },
   {
+    slug: 'icon-button',
+    name: 'Icon Button',
+    description:
+      'Square label-less companion to Button. Same variant + size vocabulary so it lines up with Button on the same baseline. Optional badge slot.',
+    sourceFile: 'IconButton.tsx',
+  },
+  {
     slug: 'input',
     name: 'Input',
     description:
