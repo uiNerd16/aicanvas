@@ -25,7 +25,7 @@ export default function MissionControlBlock() {
   return (
     <div
       className="relative min-h-full"
-      style={{ backgroundColor: tokens.color.surface.void }}
+      style={{ backgroundColor: tokens.color.surface.base }}
     >
       <MissionControl />
 

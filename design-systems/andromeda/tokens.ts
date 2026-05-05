@@ -1,60 +1,75 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // ANDROMEDA DESIGN TOKENS
-// Sci-fi / blueprint aesthetic. Fully transparent surfaces
-// designed to sit on top of a background image.
-// Few colors, soft gradients, sharp 1px borders, corner markers.
+// Sci-fi / blueprint aesthetic. Solid surfaces by default — every
+// hue palette (accent, red, orange) ships as a 5-stop scale (100
+// lightest → 500 darkest). One alpha token is allowed per family
+// (color, border, surface) for cases that genuinely need layering.
 // ============================================================
 
 export const tokens = {
   color: {
-    // Text — pure white with alpha (#RRGGBBAA hex notation)
+    // Text — solid greys. No alpha. Tuned for WCAG AA on surface.base:
+    // primary 17.7:1, secondary 8.3:1, muted 6.9:1, faint 3.5:1 (AA-large).
     text: {
-      primary:   '#FFFFFFF5',  // 0.96 alpha
-      secondary: '#FFFFFF9E',  // 0.62
-      muted:     '#FFFFFF61',  // 0.38
-      faint:     '#FFFFFF38',  // 0.22
+      primary:   '#F5F5F5',
+      secondary: '#A3A3A3',
+      muted:     '#9A9A9A',
+      faint:     '#6E6E6E',
     },
-    // Surfaces — every surface is transparent except the page background
+    // Surfaces — solid colors. `base` is the page void; nothing
+    // else is transparent. `alpha` is the one allowed alpha
+    // surface (modal scrim / drawer backdrop).
     surface: {
-      void:    '#0E0E0F',     // Page background — the opaque canvas
-      base:    'transparent',
-      raised:  '#FFFFFF06',   // 0.025
-      overlay: '#FFFFFF0B',   // 0.045
-      hover:   '#FFFFFF0F',   // 0.06
-      active:  '#FFFFFF17',   // 0.09
+      base:    '#0E0E0F',
+      raised:  '#141415',
+      overlay: '#19191A',
+      hover:   '#1C1C1D',
+      active:  '#232325',
+      alpha:   'rgba(0, 0, 0, 0.65)',
     },
-    // Borders — also white-with-alpha
+    // Borders — solid greys + one alpha border for glassy edges.
     border: {
-      subtle: '#FFFFFF0A',   // 0.04
-      base:   '#FFFFFF14',   // 0.08
-      bright: '#FFFFFF52',   // 0.32
-      strong: '#FFFFFF8C',   // 0.55
+      subtle: '#181819',
+      base:   '#212122',
+      bright: '#5B5B5C',
+      strong: '#939393',
+      alpha:  'rgba(255, 255, 255, 0.18)',
     },
-    // The single hue accent — turquoise
+    // Accent — turquoise. 5 stops + 1 alpha (translucent overlay
+    // derived from the 300 base, 0.25). The 100 stop pairs with
+    // the 500 stop for body text (≥6:1 ratio).
     accent: {
-      base:    '#2DD4BF',
-      bright:  '#5EEAD4',
-      dim:     '#2DD4BF8C',  // 0.55
-      glow:    '#2DD4BF2E',  // 0.18
-      glowSoft:'#2DD4BF14',  // 0.08
+      100:   '#BAF8EC',
+      200:   '#56F0D6',
+      300:   '#0FCFB2',
+      400:   '#109380',
+      500:   '#126059',
+      alpha: 'rgba(15, 207, 178, 0.25)',
     },
-    // Two semantic colors — that's it
-    warning: '#F5A524',
-    fault:   '#EF4444',
-    // Tinted alpha variants of the semantic colors so semantic
-    // surfaces/borders don't need to hardcode color literals.
-    warningDim:  '#F5A52473',  // 0.45
-    warningGlow: '#F5A52414',  // 0.08
-    warningRing: '#F5A52440',  // 0.25
-    faultDim:    '#EF444480',  // 0.50
-    faultGlow:   '#EF44441A',  // 0.10
-    faultRing:   '#EF444440',  // 0.25
-    // Soft gradients (used for accent fills, glow sweeps)
+    // Red — 5 stops + 1 alpha. Use 100 for body text on 500 (≥7:1).
+    red: {
+      100:   '#FFCFCF',
+      200:   '#FF8B8B',
+      300:   '#FF3939',
+      400:   '#B82424',
+      500:   '#5A1818',
+      alpha: 'rgba(255, 57, 57, 0.25)',
+    },
+    // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
+    orange: {
+      100:   '#FFE5B5',
+      200:   '#FFC466',
+      300:   '#FFA000',
+      400:   '#B57009',
+      500:   '#4D3712',
+      alpha: 'rgba(255, 160, 0, 0.25)',
+    },
+    // Gradients fade to solid colors (no transparent stops).
     gradient: {
-      accentFade:  'linear-gradient(180deg, #2DD4BF40 0%, #2DD4BF00 100%)',
-      accentSweep: 'linear-gradient(135deg, #2DD4BF2E 0%, #2DD4BF05 50%, transparent 100%)',
-      surfaceSoft: 'linear-gradient(180deg, #FFFFFF0A 0%, #FFFFFF03 100%)',
+      accentFade:  'linear-gradient(180deg, #0A2422 0%, #0E0E0F 100%)',
+      accentSweep: 'linear-gradient(135deg, #0A2422 0%, #091918 50%, #0E0E0F 100%)',
+      surfaceSoft: 'linear-gradient(180deg, #181819 0%, #111111 100%)',
     },
   },
   typography: {

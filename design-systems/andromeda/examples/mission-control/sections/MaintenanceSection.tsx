@@ -15,9 +15,9 @@ import { maintenance as MAINTENANCE } from '../data';
 
 const STATE = {
   scheduled:   { badge: 'default', label: 'Scheduled',   icon: Clock,       rail: tokens.color.border.base   },
-  'in-progress': { badge: 'accent',  label: 'In Progress', icon: Wrench,      rail: tokens.color.accent.dim    },
+  'in-progress': { badge: 'accent',  label: 'In Progress', icon: Wrench,      rail: tokens.color.accent[400]    },
   completed:   { badge: 'subtle',  label: 'Completed',   icon: CheckCircle, rail: tokens.color.border.subtle },
-  failed:      { badge: 'fault',   label: 'Failed',      icon: XCircle,     rail: tokens.color.fault         },
+  failed:      { badge: 'fault',   label: 'Failed',      icon: XCircle,     rail: tokens.color.red[300]         },
 };
 
 const FILTERS = [
@@ -196,9 +196,9 @@ export function MaintenanceSection() {
               onClick={() => setFilter(f.id)}
               style={{
                 padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-                border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent.dim : tokens.color.border.base}`,
-                background: filter === f.id ? tokens.color.accent.glowSoft : tokens.color.surface.raised,
-                color: filter === f.id ? tokens.color.accent.bright : tokens.color.text.secondary,
+                border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent[400] : tokens.color.border.base}`,
+                background: filter === f.id ? tokens.color.accent[500] : tokens.color.surface.raised,
+                color: filter === f.id ? tokens.color.accent[100] : tokens.color.text.secondary,
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.xs,
                 fontWeight: tokens.typography.weight.medium,

@@ -21,7 +21,7 @@ const trackVariants = cva(
     'rounded-[var(--andromeda-radius-none)]',
     'transition-[background-color,border-color,box-shadow] duration-200 ease-out',
     'cursor-pointer',
-    'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-dim),0_0_8px_var(--andromeda-accent-glow)]',
+    'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
   {
     variants: {
@@ -32,9 +32,9 @@ const trackVariants = cva(
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         on: [
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'border-[color:var(--andromeda-accent-base)]',
-          'hover:border-[color:var(--andromeda-accent-bright)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'border-[color:var(--andromeda-accent-300)]',
+          'hover:border-[color:var(--andromeda-accent-100)]',
         ],
       },
       disabled: {
@@ -60,7 +60,7 @@ const thumbVariants = cva(
     variants: {
       state: {
         off: 'left-[2px] bg-[color:var(--andromeda-text-muted)]',
-        on:  'left-[18px] bg-[color:var(--andromeda-accent-base)] shadow-[0_0_8px_var(--andromeda-accent-glow)]',
+        on:  'left-[18px] bg-[color:var(--andromeda-accent-300)] shadow-[0_0_8px_var(--andromeda-accent-500)]',
       },
     },
     defaultVariants: { state: 'off' },

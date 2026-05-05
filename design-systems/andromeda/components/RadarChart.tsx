@@ -43,8 +43,8 @@ const DEFAULT_DATA = [
 ];
 
 const DEFAULT_SERIES = [
-  { key: 'nominal',  label: 'Nominal',  color: tokens.color.accent.base },
-  { key: 'critical', label: 'Critical', color: tokens.color.fault },
+  { key: 'nominal',  label: 'Nominal',  color: tokens.color.accent[300] },
+  { key: 'critical', label: 'Critical', color: tokens.color.red[300] },
 ];
 
 // ── Custom tooltip ───────────────────────────────────────────────────────────
@@ -57,8 +57,8 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
 
   return (
     <div style={{
-      // Near-opaque dark surface so text is always legible against any chart color
-      background: 'rgba(10, 10, 13, 0.94)',
+      // Solid raised surface so text is always legible against any chart color
+      background: tokens.color.surface.raised,
       border: `1px solid ${tokens.color.border.base}`,
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       backdropFilter: 'blur(12px)',
@@ -255,7 +255,7 @@ export const RadarChart = forwardRef(function RadarChart(
             position: 'absolute',
             left: 0, right: 0, top: 0,
             height: '1px',
-            background: `linear-gradient(90deg, transparent, ${tokens.color.accent.dim}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${tokens.color.accent[400]}, transparent)`,
             animation: 'andromeda-radar-scan 1.1s ease-out forwards',
             pointerEvents: 'none',
             zIndex: 2,
@@ -300,14 +300,14 @@ export const RadarChart = forwardRef(function RadarChart(
               <Radar
                 key={s.key}
                 dataKey={s.key}
-                stroke={s.color ?? tokens.color.accent.base}
+                stroke={s.color ?? tokens.color.accent[300]}
                 strokeWidth={1.5}
-                fill={s.color ?? tokens.color.accent.base}
+                fill={s.color ?? tokens.color.accent[300]}
                 fillOpacity={i === 0 ? 0.12 : 0.06}
                 dot={false}
                 activeDot={{
                   r: 3,
-                  fill: s.color ?? tokens.color.accent.base,
+                  fill: s.color ?? tokens.color.accent[300],
                   strokeWidth: 0,
                 }}
               />
@@ -333,7 +333,7 @@ export const RadarChart = forwardRef(function RadarChart(
               display: 'inline-block',
               width: 8,
               height: 2,
-              background: s.color ?? tokens.color.accent.base,
+              background: s.color ?? tokens.color.accent[300],
               flexShrink: 0,
             }} />
             <span style={{

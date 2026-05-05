@@ -93,7 +93,6 @@ const ICON_SIZE = { sm: 14, md: 16, lg: 20 };
  * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
  *   Phosphor / Lucide icon. Pass either `icon` OR `children` for custom glyphs.
  * @property {React.ReactNode} [children] Custom icon content (SVG, bars, etc.)
- * @property {React.ReactNode} [badge]  Small overlay (count / dot). Positioned top-right.
  * @property {string} [aria-label]  Required for accessibility (no visible text).
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -109,7 +108,6 @@ export const IconButton = forwardRef(function IconButton(
     size = 'md',
     icon: Icon,
     children,
-    badge,
     style,
     type = 'button',
     ...props
@@ -125,31 +123,6 @@ export const IconButton = forwardRef(function IconButton(
       {...props}
     >
       {Icon ? <Icon size={ICON_SIZE[size]} weight="regular" /> : children}
-      {badge != null ? (
-        <span
-          aria-hidden
-          style={{
-            position: 'absolute',
-            top: '-2px',
-            right: '-2px',
-            minWidth: '14px',
-            height: '14px',
-            padding: '0 3px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--andromeda-accent-500)',
-            color: 'var(--andromeda-accent-100)',
-            border: '1px solid var(--andromeda-accent-400)',
-            fontFamily: 'var(--andromeda-font-mono)',
-            fontSize: '9px',
-            fontWeight: 'var(--andromeda-weight-semibold)',
-            lineHeight: 1,
-          }}
-        >
-          {badge}
-        </span>
-      ) : null}
     </button>
   );
 });

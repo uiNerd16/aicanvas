@@ -33,7 +33,7 @@ function NotificationRow({ notif, isLast, onRead }) {
       <div style={{
         width: tokens.spacing[1],
         flexShrink: 0,
-        background: isUnread ? tokens.color.accent.dim : 'transparent',
+        background: isUnread ? tokens.color.accent[400] : 'transparent',
       }} />
 
       {/* Icon */}
@@ -41,9 +41,9 @@ function NotificationRow({ notif, isLast, onRead }) {
         width: tokens.spacing[10],
         height: tokens.spacing[10],
         flexShrink: 0,
-        background: isUnread ? tokens.color.accent.glowSoft : tokens.color.surface.raised,
-        border: `${tokens.border.thin} ${isUnread ? tokens.color.accent.dim : tokens.color.border.base}`,
-        color: isUnread ? tokens.color.accent.bright : tokens.color.text.muted,
+        background: isUnread ? tokens.color.accent[500] : tokens.color.surface.raised,
+        border: `${tokens.border.thin} ${isUnread ? tokens.color.accent[400] : tokens.color.border.base}`,
+        color: isUnread ? tokens.color.accent[100] : tokens.color.text.muted,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

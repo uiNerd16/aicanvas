@@ -24,7 +24,7 @@ These live at the project root, one level up from this file:
 
 - `../skills/component-anatomy.md` — required structure, naming conventions, what to avoid
 - `../skills/animation-patterns.md` — Framer Motion patterns, spring presets, cleanup patterns
-- `../skills/prompts-guide.md` — how to write the 4 platform prompts
+- `../skills/prompts-guide.md` — how to write the 3 platform prompts
 - `../skills/tailwind-v4.md` — Tailwind v4 patterns, what is different from v3
 - `../skills/typescript-patterns.md` — TypeScript patterns, event types, MotionValue types
 
@@ -40,7 +40,7 @@ These live at the project root, one level up from this file:
 
 ## Your scope
 - Build inside `components-workspace/<component-name>/` only
-- Create `index.tsx` (the component) and `prompts.ts` (4 platform prompts: Claude, GPT, Gemini, V0 — any subset applicable to the component)
+- Create `index.tsx` (the component) and `prompts.ts` (3 platform prompts: Claude Code, Lovable, V0 — any subset applicable to the component)
 - Do NOT touch `app/`, routing, the navbar, or any website logic
 
 ## Component requirements

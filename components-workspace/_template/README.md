@@ -18,7 +18,7 @@ Use **kebab-case** for the folder name (e.g. `glowing-button`, `wave-text`).
 - Clean up all effects (cancel RAF, stop animations, unsubscribe MotionValues)
 
 ### 3. Edit `prompts.ts`
-Fill in up to 4 platform prompts (Claude, GPT, Gemini, V0 — any subset applicable to the component). Each prompt must be **fully self-contained** — the AI reading it should be able to recreate the component without seeing your code. Include:
+Fill in up to 3 platform prompts (Claude Code, Lovable, V0 — any subset applicable to the component). Each prompt must be **fully self-contained** — the AI reading it should be able to recreate the component without seeing your code. Include:
 - All constants and their values
 - Animation timing, easing, and keyframes
 - Color values and class names

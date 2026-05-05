@@ -2,6 +2,7 @@
 
 import { JetBrains_Mono } from 'next/font/google'
 import MissionControl from '../../../design-systems/andromeda/examples/mission-control'
+import { tokens } from '../../../design-systems/andromeda/tokens'
 
 // JetBrains Mono is the only font in the Andromeda design system.
 // next/font self-hosts it, subsets it, and exposes it as a CSS variable
@@ -18,7 +19,7 @@ export default function SpacePage() {
       className={jetbrainsMono.variable}
       style={{
         minHeight: '100vh',
-        backgroundColor: '#0E0E0F',
+        backgroundColor: tokens.color.surface.base,
       }}
     >
       <MissionControl />

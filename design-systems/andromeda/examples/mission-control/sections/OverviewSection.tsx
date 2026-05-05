@@ -12,11 +12,14 @@ import { RadarChart } from '../../../components/RadarChart';
 import { SystemStatus } from '../SystemStatus';
 import { VehiclesTable } from '../VehiclesTable';
 import { CommsLog } from '../CommsLog';
+import { NextDestination } from '../NextDestination';
 
 export function OverviewSection() {
   return (
     <>
       <TelemetryRow />
+
+      <NextDestination />
 
       <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
         <RadarChart

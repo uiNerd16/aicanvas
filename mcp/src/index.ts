@@ -23,6 +23,8 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
+const MCP_VERSION = '0.1.1'
+const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +70,7 @@ async function fetchMeta(): Promise<MetaPayload> {
     return metaCache.data
   }
   const res = await fetch(META_URL, {
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
   })
   if (!res.ok) {
     throw new Error(
@@ -82,7 +84,9 @@ async function fetchMeta(): Promise<MetaPayload> {
 
 async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
   const url = `${REGISTRY_BASE}/${encodeURIComponent(slug)}.json`
-  const res = await fetch(url, { headers: { Accept: 'application/json' } })
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
+  })
   if (!res.ok) {
     throw new Error(
       `Failed to fetch source for "${slug}" from ${url}: ${res.status} ${res.statusText}`,
@@ -151,7 +155,7 @@ function errorResult(message: string) {
 // ── Server ───────────────────────────────────────────────────────────────────
 
 const server = new McpServer(
-  { name: 'aicanvas-mcp', version: '0.1.0' },
+  { name: 'aicanvas-mcp', version: MCP_VERSION },
   { capabilities: { tools: {}, logging: {} } },
 )
 

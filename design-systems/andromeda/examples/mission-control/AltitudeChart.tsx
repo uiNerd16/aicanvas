@@ -40,7 +40,7 @@ function AltitudeTooltip({ active, payload, label }) {
       </div>
       <div style={{
         fontSize: tokens.typography.size.md,
-        color: tokens.color.accent.bright,
+        color: tokens.color.text.primary,
         fontWeight: tokens.typography.weight.medium,
         letterSpacing: tokens.typography.tracking.wide,
       }}>
@@ -87,8 +87,8 @@ export function AltitudeChart() {
             >
               <defs>
                 <linearGradient id="altitudeFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor={tokens.color.accent.base} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={tokens.color.accent.base} stopOpacity={0}    />
+                  <stop offset="0%"   stopColor={tokens.color.text.primary} stopOpacity={0.12} />
+                  <stop offset="100%" stopColor={tokens.color.text.primary} stopOpacity={0}    />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -119,15 +119,15 @@ export function AltitudeChart() {
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip content={<AltitudeTooltip />} cursor={{ stroke: tokens.color.accent.dim, strokeWidth: 1, strokeDasharray: '2 4' }} />
+              <Tooltip content={<AltitudeTooltip />} cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }} />
               <Area
                 type="monotone"
                 dataKey="alt"
-                stroke={tokens.color.accent.base}
+                stroke={tokens.color.text.primary}
                 strokeWidth={1.5}
                 fill="url(#altitudeFill)"
                 dot={false}
-                activeDot={{ r: 4, fill: tokens.color.accent.bright, stroke: tokens.color.accent.base, strokeWidth: 1 }}
+                activeDot={{ r: 4, fill: tokens.color.text.primary, stroke: tokens.color.border.base, strokeWidth: 1 }}
               />
             </AreaChart>
           </ResponsiveContainer>

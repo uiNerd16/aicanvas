@@ -136,7 +136,7 @@ export const Drawer = forwardRef(function Drawer(
           'bg-[color:var(--andromeda-surface-raised)]',
           '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
           'rounded-[var(--andromeda-radius-none)]',
-          'shadow-[0_0_60px_rgba(0,0,0,0.5)]',
+          'shadow-[0_0_60px_var(--andromeda-surface-base)]',
           'transition-transform duration-240 ease-out',
           className,
         )}

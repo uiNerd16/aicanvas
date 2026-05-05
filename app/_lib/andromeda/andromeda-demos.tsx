@@ -5,15 +5,26 @@
 
 import { useState } from 'react'
 import {
+  ArrowClockwise,
   Bell,
+  ChartBar,
+  ChartLine,
+  Clock,
   Compass,
+  Copy,
   Database,
   EnvelopeOpen,
   Envelope,
+  Export,
+  EyeSlash,
   Gear,
   Info,
   MagnifyingGlass,
+  Pencil,
   Pulse,
+  Sliders,
+  Star,
+  Trash,
   Users,
   Warning,
 } from '@phosphor-icons/react'
@@ -26,10 +37,13 @@ import { Button } from '../../../design-systems/andromeda/components/Button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../design-systems/andromeda/components/Card'
 import { Checkbox } from '../../../design-systems/andromeda/components/Checkbox'
 import { CornerMarkers } from '../../../design-systems/andromeda/components/CornerMarkers'
+import { DateRangePicker } from '../../../design-systems/andromeda/components/DateRangePicker'
 import { Drawer, DrawerBody, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../../../design-systems/andromeda/components/Drawer'
 import { EmptyState, EmptyStateAction, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from '../../../design-systems/andromeda/components/EmptyState'
 import { Input } from '../../../design-systems/andromeda/components/Input'
 import { NavItem } from '../../../design-systems/andromeda/components/NavItem'
+import { PanelMenu } from '../../../design-systems/andromeda/components/PanelMenu'
+import { SegmentedControl } from '../../../design-systems/andromeda/components/SegmentedControl'
 import { ProgressBar } from '../../../design-systems/andromeda/components/ProgressBar'
 import { RadarChart } from '../../../design-systems/andromeda/components/RadarChart'
 import { Radio, RadioGroup } from '../../../design-systems/andromeda/components/Radio'
@@ -482,6 +496,123 @@ function RadarChartDemo() {
   )
 }
 
+function SegmentedControlDemo() {
+  const [chartType, setChartType] = useState('line')
+  const [period, setPeriod] = useState('1w')
+  return (
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="Icons · sm">
+        <SegmentedControl
+          size="sm"
+          value={chartType}
+          onChange={setChartType}
+          options={[
+            { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+            { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+          ]}
+        />
+      </Row>
+      <Row label="Icons · lg">
+        <SegmentedControl
+          size="lg"
+          value={chartType}
+          onChange={setChartType}
+          options={[
+            { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+            { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+          ]}
+        />
+      </Row>
+      <Row label="Labels">
+        <SegmentedControl
+          size="md"
+          value={period}
+          onChange={setPeriod}
+          options={[
+            { value: '1d',  label: '1D' },
+            { value: '1w',  label: '1W' },
+            { value: '1m',  label: '1M' },
+            { value: 'all', label: 'ALL' },
+          ]}
+        />
+      </Row>
+    </div>
+  )
+}
+
+function PanelMenuDemo() {
+  return (
+    <div style={{ display: 'flex', gap: tokens.spacing[6], alignItems: 'flex-start', flexWrap: 'wrap', minHeight: 280 }}>
+      <div style={{ width: 200 }}>
+        <Row label="Default · panel actions">
+          <PanelMenu
+            align="left"
+            defaultOpen
+            items={[
+              { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
+              { label: 'Configure', icon: Sliders,        onSelect: () => {} },
+              { label: 'Export',    icon: Export,         onSelect: () => {} },
+              { type: 'separator' },
+              { label: 'Hide',      icon: EyeSlash,       onSelect: () => {} },
+            ]}
+          />
+        </Row>
+      </div>
+      <div style={{ width: 200 }}>
+        <Row label="With submenu">
+          <PanelMenu
+            align="left"
+            defaultOpen
+            items={[
+              { label: 'Edit', icon: Pencil, onSelect: () => {} },
+              { label: 'Copy', icon: Copy,   onSelect: () => {} },
+              {
+                label: 'Move to',
+                icon: Database,
+                submenu: [
+                  { label: 'Starred', icon: Star,     onSelect: () => {} },
+                  { label: 'Archive', icon: Database, onSelect: () => {} },
+                  { label: 'Snoozed', icon: Clock,    onSelect: () => {} },
+                ],
+              },
+              { type: 'separator' },
+              { label: 'Delete', icon: Trash, destructive: true, onSelect: () => {} },
+            ]}
+          />
+        </Row>
+      </div>
+    </div>
+  )
+}
+
+function DateRangePickerDemo() {
+  const [range, setRange] = useState({
+    start: new Date(2026, 6, 20),
+    end:   new Date(2026, 7, 20),
+  })
+  const [presetLabel, setPresetLabel] = useState<string | null>('Last month')
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], minHeight: 360 }}>
+      <Row label="Range">
+        <DateRangePicker
+          value={range}
+          presetLabel={presetLabel}
+          onChange={(next) => {
+            setRange(next)
+            setPresetLabel(null)
+          }}
+        />
+      </Row>
+      <Row label="No preset">
+        <DateRangePicker
+          value={{ start: new Date(2026, 7, 1), end: new Date(2026, 7, 14) }}
+          onChange={() => {}}
+        />
+      </Row>
+    </div>
+  )
+}
+
 function DrawerDemo() {
   const [open, setOpen] = useState(false)
   return (
@@ -522,10 +653,13 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   card: CardDemo,
   checkbox: CheckboxDemo,
   'corner-markers': CornerMarkersDemo,
+  'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
   'empty-state': EmptyStateDemo,
   input: InputDemo,
   'nav-item': NavItemDemo,
+  'panel-menu': PanelMenuDemo,
+  'segmented-control': SegmentedControlDemo,
   'progress-bar': ProgressBarDemo,
   'radar-chart': RadarChartDemo,
   radio: RadioDemo,

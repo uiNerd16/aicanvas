@@ -55,9 +55,9 @@ const statusDotVariants = cva(
         lg: '',
       },
       status: {
-        online:  'bg-[color:var(--andromeda-accent-dim)] shadow-[-3px_0_8px_var(--andromeda-accent-glow)]',
-        caution: 'bg-[color:var(--andromeda-warning-dim)] shadow-[-3px_0_8px_var(--andromeda-warning-ring)]',
-        fault:   'bg-[color:var(--andromeda-fault-dim)] shadow-[-3px_0_8px_var(--andromeda-fault-ring)]',
+        online:  'bg-[color:var(--andromeda-accent-400)] shadow-[-3px_0_8px_var(--andromeda-accent-500)]',
+        caution: 'bg-[color:var(--andromeda-orange-400)] shadow-[-3px_0_8px_var(--andromeda-orange-400)]',
+        fault:   'bg-[color:var(--andromeda-red-400)] shadow-[-3px_0_8px_var(--andromeda-red-400)]',
         offline: 'bg-[color:var(--andromeda-text-faint)]',
       },
     },

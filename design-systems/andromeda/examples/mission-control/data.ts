@@ -10,7 +10,6 @@ import {
   Radio,
   Warning,
   Wrench,
-  Bell,
 } from '@phosphor-icons/react';
 
 // ---- Sidebar nav ----
@@ -21,7 +20,6 @@ export const navItems = [
   { id: 'comms',       label: 'Comms',       icon: Radio       },
   { id: 'anomalies',   label: 'Anomalies',   icon: Warning     },
   { id: 'maintenance', label: 'Maintenance', icon: Wrench      },
-  { id: 'notifications', label: 'Notifications', icon: Bell   },
 ];
 
 // ---- Telemetry stat tiles ----

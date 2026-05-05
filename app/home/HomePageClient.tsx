@@ -658,7 +658,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         <HeaderSocials />
       </div>
 
-      <main className="relative mx-auto max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
+      <main className="relative mx-auto w-full min-w-0 max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
 
         {/* ── Hero ── */}
         <section className="flex flex-col items-center text-center">
