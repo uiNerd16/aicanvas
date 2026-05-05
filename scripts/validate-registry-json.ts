@@ -98,6 +98,8 @@ async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
   }
 
   // Check 6: Dependency completeness (optional but recommended)
+  // Peer deps always available in a Next.js project — never listed in npm install comments
+  const PEER_DEPS = new Set(['react', 'react-dom', 'next'])
   // Extract all imports from the source file that aren't relative or built-in
   const importRegex = /import\s+(?:[^'"]+\s+)?from\s+['"]([^'"]+)['"]/g
   const imports: Set<string> = new Set()
@@ -109,7 +111,7 @@ async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
       // Extract package name — scoped packages (@scope/pkg) need two segments
       const parts = importPath.split('/')
       const packageName = importPath.startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0]
-      imports.add(packageName)
+      if (!PEER_DEPS.has(packageName)) imports.add(packageName)
     }
   }
 
