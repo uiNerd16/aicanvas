@@ -82,6 +82,7 @@ const ALL_SLUGS = [
   'stack-tower',
   'ripple-type',
   'radial-cards',
+  'new-project-modal',
 ]
 
 const arg   = process.argv[2]
@@ -316,6 +317,14 @@ const INTERACTIONS = {
       await first.click()
       await page.waitForTimeout(900) // wait for engage spring to settle
     }
+  },
+
+  // New Project Modal — click the pill to open the modal so the screenshot
+  // shows the full feature (inputs, swatches, Private toggle, Create button).
+  // The modal is fixed-positioned to the viewport so it overlays the preview.
+  'new-project-modal': async (preview, page) => {
+    await preview.locator('button').first().click()
+    await page.waitForTimeout(700) // let the morph spring settle
   },
 }
 

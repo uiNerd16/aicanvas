@@ -127,6 +127,10 @@ import RippleType from '../../components-workspace/ripple-type'
 import { prompts as rippleTypePrompts } from '../../components-workspace/ripple-type/prompts'
 import RadialCards from '../../components-workspace/radial-cards'
 import { prompts as radialCardsPrompts } from '../../components-workspace/radial-cards/prompts'
+import NewProjectModal from '../../components-workspace/new-project-modal'
+import { prompts as newProjectModalPrompts } from '../../components-workspace/new-project-modal/prompts'
+import VoiceChatPill from '../../components-workspace/voice-chat-pill'
+import { prompts as voiceChatPillPrompts } from '../../components-workspace/voice-chat-pill/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1129,6 +1133,36 @@ Requirements:
     PreviewComponent: RadialCards,
     code: componentCodes['radial-cards'],
     prompts: radialCardsPrompts,
+  },
+  {
+    slug: 'new-project-modal',
+    name: 'New Project Modal',
+    description: 'A pill button that morphs into a soft-UI project creation form — title, description, 7-swatch color label picker, Private toggle, and a checkmark-confirm Create button.',
+    tags: [
+      { label: 'UI', accent: true },
+      { label: 'Modal' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/new-projectmodal.png',
+    PreviewComponent: NewProjectModal,
+    code: componentCodes['new-project-modal'],
+    prompts: newProjectModalPrompts,
+  },
+  {
+    slug: 'voice-chat-pill',
+    name: 'Live Session Pill',
+    description: 'A compact live-session presence pill with an animated speaking indicator and overlapping avatars — clicks open a soft-UI modal showing all participants with a Join Now button.',
+    tags: [
+      { label: 'UI', accent: true },
+      { label: 'Modal' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/voice-chat-pill.png?v=2026050501',
+    PreviewComponent: VoiceChatPill,
+    code: componentCodes['voice-chat-pill'],
+    prompts: voiceChatPillPrompts,
   },
 ]
 
