@@ -19,9 +19,9 @@ const dirConfig = {
   down: {
     icon:  ArrowDown,
     label: 'DN',
-    color: tokens.color.accent.bright,
-    bg:    tokens.color.accent.glowSoft,
-    border:tokens.color.accent.dim,
+    color: tokens.color.accent[100],
+    bg:    tokens.color.accent[500],
+    border:tokens.color.accent[400],
   },
   up: {
     icon:  ArrowUp,
@@ -33,9 +33,9 @@ const dirConfig = {
   alert: {
     icon:  Warning,
     label: '!',
-    color: tokens.color.warning,
-    bg:    tokens.color.warningGlow,
-    border:tokens.color.warningDim,
+    color: tokens.color.orange[300],
+    bg:    tokens.color.orange[500],
+    border:tokens.color.orange[400],
   },
 };
 
@@ -126,9 +126,9 @@ function FilterRow({ filter, setFilter }) {
           onClick={() => setFilter(f.id)}
           style={{
             padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-            border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent.dim : tokens.color.border.base}`,
-            background: filter === f.id ? tokens.color.accent.glowSoft : tokens.color.surface.raised,
-            color: filter === f.id ? tokens.color.accent.bright : tokens.color.text.secondary,
+            border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent[400] : tokens.color.border.base}`,
+            background: filter === f.id ? tokens.color.accent[500] : tokens.color.surface.raised,
+            color: filter === f.id ? tokens.color.accent[100] : tokens.color.text.secondary,
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
             fontWeight: tokens.typography.weight.medium,

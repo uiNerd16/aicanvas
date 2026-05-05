@@ -65,6 +65,8 @@ const SYSTEMS = [
     blocks: [
       { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
       { slug: 'operator-console', name: 'Operator Console', domain: 'Sci-Fi' },
+      { slug: 'exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
+      { slug: 'resource-planning', name: 'Resource Planning', domain: 'Operations' },
     ],
   },
 ] as const

@@ -23,18 +23,15 @@ import { Badge } from '../../components/Badge';
 
 const VARIANTS = {
   accent: {
-    stroke: tokens.color.accent.base,
-    glow:   tokens.color.accent.bright,
+    stroke: tokens.color.text.primary,
     badge:  'accent',
   },
   warning: {
-    stroke: tokens.color.warning,
-    glow:   tokens.color.warning,
+    stroke: tokens.color.text.primary,
     badge:  'warning',
   },
   fault: {
-    stroke: tokens.color.fault,
-    glow:   tokens.color.fault,
+    stroke: tokens.color.text.primary,
     badge:  'fault',
   },
 };
@@ -62,7 +59,7 @@ function ChartTooltip({ active, payload, label, unit }) {
       </div>
       <div style={{
         fontSize: tokens.typography.size.md,
-        color: tokens.color.accent.bright,
+        color: tokens.color.text.primary,
         fontWeight: tokens.typography.weight.medium,
         letterSpacing: tokens.typography.tracking.wide,
       }}>
@@ -127,7 +124,7 @@ export function TelemetryChart({
             <AreaChart data={data} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor={v.stroke} stopOpacity={0.35} />
+                  <stop offset="0%"   stopColor={v.stroke} stopOpacity={0.12} />
                   <stop offset="100%" stopColor={v.stroke} stopOpacity={0}    />
                 </linearGradient>
               </defs>
@@ -163,7 +160,7 @@ export function TelemetryChart({
               />
               <Tooltip
                 content={<ChartTooltip unit={unit} />}
-                cursor={{ stroke: tokens.color.accent.dim, strokeWidth: 1, strokeDasharray: '2 4' }}
+                cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }}
               />
               <Area
                 type="monotone"
@@ -172,7 +169,7 @@ export function TelemetryChart({
                 strokeWidth={1.5}
                 fill={`url(#${fillId})`}
                 dot={false}
-                activeDot={{ r: 4, fill: v.glow, stroke: v.stroke, strokeWidth: 1 }}
+                activeDot={{ r: 4, fill: tokens.color.text.primary, stroke: tokens.color.border.base, strokeWidth: 1 }}
               />
             </AreaChart>
           </ResponsiveContainer>

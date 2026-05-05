@@ -42,7 +42,7 @@ function VehicleCard({ vehicle }) {
         aspectRatio: '16 / 9',
         overflow: 'hidden',
         borderBottom: `${tokens.border.thin} ${tokens.color.border.base}`,
-        background: tokens.color.surface.void,
+        background: tokens.color.surface.base,
       }}>
         <img
           src={vehicle.image}
@@ -60,7 +60,7 @@ function VehicleCard({ vehicle }) {
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: `linear-gradient(180deg, ${tokens.color.surface.void} 0%, transparent 30%, transparent 70%, ${tokens.color.surface.void} 100%)`,
+          background: `linear-gradient(180deg, ${tokens.color.surface.base} 0%, transparent 30%, transparent 70%, ${tokens.color.surface.base} 100%)`,
           opacity: 0.6,
         }} />
         <CornerMarkers />

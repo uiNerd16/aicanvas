@@ -471,7 +471,7 @@ export default function ComponentPageView({
                 initial={false}
                 animate={{ opacity: activeTab === 'code' ? 1 : 0 }}
                 transition={{ duration: 0.18 }}
-                className="absolute inset-0 overflow-y-auto overflow-x-hidden p-5"
+                className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-sand-950 p-5"
                 style={{
                   scrollbarWidth: 'thin',
                   scrollbarColor: '#4A453F transparent',

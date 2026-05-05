@@ -29,10 +29,6 @@ function useStatTileStyles() {
     const style = document.createElement('style');
     style.id = 'andromeda-stat-tile-style';
     style.textContent = `
-      @keyframes andromeda-scanline {
-        from { top: 0%; opacity: 0.6; }
-        to   { top: 100%; opacity: 0; }
-      }
       @keyframes andromeda-value-in {
         from { opacity: 0; transform: translateY(4px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -163,8 +159,8 @@ export const StatTile = forwardRef(function StatTile(
   const trendColorClass = !hasDelta
     ? 'text-[color:var(--andromeda-text-muted)]'
     : isPositive
-      ? 'text-[color:var(--andromeda-accent-bright)]'
-      : 'text-[color:var(--andromeda-fault)]';
+      ? 'text-[color:var(--andromeda-accent-300)]'
+      : 'text-[color:var(--andromeda-red-300)]';
 
   return (
     <Card
@@ -173,22 +169,7 @@ export const StatTile = forwardRef(function StatTile(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {/* Scanline sweep — runs once on mount */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent, var(--andromeda-accent-dim), transparent)',
-          animation: 'andromeda-scanline 1.2s ease-out forwards',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
-
-      <CardContent className="flex flex-col gap-[var(--andromeda-3)]">
+<CardContent className="flex flex-col gap-[var(--andromeda-3)]">
         {/* Label row */}
         <div className="flex items-baseline justify-between">
           <span className={labelClass}>{label}</span>

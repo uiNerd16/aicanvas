@@ -43,6 +43,12 @@ The Reviewer checks this list on every review. The Supervisor logs here after ev
 - **Component rule**: Components must use `items-center` (not `items-start`) on the root so content is vertically centred and doesn't crowd y=0 where the back button lives.
 - **Detected**: 2026-04-15
 
+## #008 — Pushed to GitHub without explicit "push it" instruction
+
+- **Issue**: User said "just integrate it." Supervisor delegated to Integrator which wired the component locally and passed the JSON check — then immediately committed and pushed without waiting for the user to say "push it."
+- **Rule**: "integrate" = steps 8–9 only (wire locally, run JSON check, report result). "push it" = step 10 (commit + push). These are two separate explicit commands. Never commit or push after step 9 unless the user explicitly says "push it" or equivalent.
+- **Detected**: 2026-04-23
+
 ## #006 — Prompts file out of sync with actual component
 - **Issue**: `silk-lines/prompts.ts` (now `wave-lines/prompts.ts`) described constants and behaviour that no longer matched `index.tsx`. The prompts said `SPACING=8, AMP=44, HOVER_BOOST=1.3` and a single sine wave; the real component had `SPACING=32, AMP=18, HOVER_BOOST=5.0`, a layered secondary wave, a Y-drift breath, and quadratic-curve smoothing through midpoints. An AI given those prompts would have produced a meaningfully different component than what's deployed.
 - **Rule**: Whenever a component is adjusted after `prompts.ts` is written, the prompts MUST be regenerated against the FINAL `index.tsx`. The Builder rule already says "Read the FINAL `index.tsx` carefully — the component may have changed since the spec" — but this needs to be enforced for *adjustments*, not just initial builds. Reviewer should diff the prompts against the component on every review and fail if constants or core behaviour drift.

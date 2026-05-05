@@ -13,9 +13,9 @@ const dirConfig = {
   down: {
     icon:  ArrowDown,
     label: 'DN',
-    color: tokens.color.accent.bright,
-    bg:    tokens.color.accent.glowSoft,
-    border:tokens.color.accent.dim,
+    color: tokens.color.accent[100],
+    bg:    tokens.color.accent[500],
+    border:tokens.color.accent[400],
   },
   up: {
     icon:  ArrowUp,
@@ -27,9 +27,9 @@ const dirConfig = {
   alert: {
     icon:  Warning,
     label: '!',
-    color: tokens.color.warning,
-    bg:    tokens.color.warningGlow,
-    border:tokens.color.warningDim,
+    color: tokens.color.orange[300],
+    bg:    tokens.color.orange[500],
+    border:tokens.color.orange[400],
   },
 };
 
@@ -128,12 +128,15 @@ export function CommsLog() {
         <Button variant="ghost" size="sm">All</Button>
       </CardHeader>
 
-      {/* Items render directly inside Card — they own their own padding */}
-      {commsLog.map((entry, i) => (
+      {/* Items render directly inside Card — they own their own padding.
+          Sliced to 5 entries so the card matches the VehiclesTable height
+          on the Overview row. The "All" button in the header is the
+          escape hatch when a viewer wants the full log. */}
+      {commsLog.slice(0, 5).map((entry, i, arr) => (
         <CommsItem
           key={i}
           entry={entry}
-          isLast={i === commsLog.length - 1}
+          isLast={i === arr.length - 1}
         />
       ))}
     </Card>

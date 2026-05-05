@@ -21,19 +21,16 @@ const GAP_COL    = 3;   // gap between columns
 
 const variantConfig = {
   default: {
-    activeColor:  'var(--andromeda-accent-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-accent-glow)',
-    activeBorder: 'var(--andromeda-accent-dim)',
+    activeColor:  'var(--andromeda-accent-400)',
+    activeBorder: 'var(--andromeda-accent-400)',
   },
   warning: {
-    activeColor:  'var(--andromeda-warning-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-warning-ring)',
-    activeBorder: 'var(--andromeda-warning-dim)',
+    activeColor:  'var(--andromeda-orange-400)',
+    activeBorder: 'var(--andromeda-orange-400)',
   },
   fault: {
-    activeColor:  'var(--andromeda-fault-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-fault-ring)',
-    activeBorder: 'var(--andromeda-fault-dim)',
+    activeColor:  'var(--andromeda-red-400)',
+    activeBorder: 'var(--andromeda-red-400)',
   },
 };
 
@@ -123,14 +120,13 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     width:  `${SQUARE_W}px`,
                     height: `${SQUARE_H}px`,
                     flexShrink: 0,
+                    transform: 'skewX(-12deg)',
                     background: active
                       ? cfg.activeColor
                       : 'var(--andromeda-surface-overlay)',
                     border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
-                    boxShadow: active ? cfg.activeGlow : 'none',
+                    boxShadow: 'none',
                     transition: 'background 400ms ease, box-shadow 400ms ease, border-color 400ms ease',
-                    // Stagger in groups of 3 — bars 0–2 fire together, then
-                    // bars 3–5, etc. 120ms between groups for a slow cascade.
                     transitionDelay: `${Math.floor(barIndex / 3) * 120}ms`,
                   }}
                 />

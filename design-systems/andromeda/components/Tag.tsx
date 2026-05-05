@@ -34,19 +34,21 @@ const tagVariants = cva(
           'border-[color:var(--andromeda-border-subtle)]',
         ],
         accent: [
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'text-[color:var(--andromeda-accent-bright)]',
-          'border-[color:rgba(96,165,250,0.12)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'text-[color:var(--andromeda-accent-100)]',
+          'border-[color:var(--andromeda-accent-400)]',
         ],
         warning: [
-          'bg-[color:var(--andromeda-warning-glow)]',
-          'text-[color:var(--andromeda-warning)]',
-          'border-[color:rgba(245,165,36,0.15)]',
+          // text-100 on bg-500 = 8.3:1 (WCAG AA pass)
+          'bg-[color:var(--andromeda-orange-500)]',
+          'text-[color:var(--andromeda-orange-100)]',
+          'border-[color:var(--andromeda-orange-400)]',
         ],
         fault: [
-          'bg-[color:var(--andromeda-fault-glow)]',
-          'text-[color:var(--andromeda-fault)]',
-          'border-[color:rgba(239,68,68,0.15)]',
+          // text-100 on bg-500 = 7.4:1 (WCAG AA pass)
+          'bg-[color:var(--andromeda-red-500)]',
+          'text-[color:var(--andromeda-red-100)]',
+          'border-[color:var(--andromeda-red-400)]',
         ],
       },
     },
@@ -61,11 +63,13 @@ const closeButtonClass = cn(
   'inline-flex items-center justify-center',
   'p-0 m-0 bg-transparent border-0',
   'cursor-pointer leading-none',
-  'text-[color:var(--andromeda-text-muted)]',
-  'transition-[colors,transform] duration-150 ease-out',
-  'hover:text-[color:var(--andromeda-text-primary)]',
+  // Inherit the variant's text color so contrast against the variant
+  // bg always matches the tag label (text-100 on bg-500 → ≥7:1).
+  'text-[color:currentColor]',
+  'opacity-70 transition-[opacity,transform] duration-150 ease-out',
+  'hover:opacity-100',
   'active:scale-[0.80]',
-  'focus-visible:outline-none focus-visible:text-[color:var(--andromeda-text-primary)]',
+  'focus-visible:outline-none focus-visible:opacity-100',
 );
 
 /**

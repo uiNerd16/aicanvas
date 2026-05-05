@@ -21,7 +21,7 @@ export default function OperatorConsoleBlock() {
   return (
     <div
       className="relative flex min-h-full items-center justify-center"
-      style={{ backgroundColor: tokens.color.surface.void }}
+      style={{ backgroundColor: tokens.color.surface.base }}
     >
       {/* Faint grid for visual continuity with the rest of Andromeda */}
       <div

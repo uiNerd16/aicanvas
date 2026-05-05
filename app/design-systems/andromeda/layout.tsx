@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
 import { IdeationSidebar } from '../../_components/IdeationSidebar'
 import { IdeationTopBar } from '../../_components/IdeationTopBar'
+import { tokens } from '../../../design-systems/andromeda/tokens'
 
 // JetBrains Mono is the only font in the Andromeda design system.
 // Loading it at the layout level makes --font-jetbrains-mono available
@@ -15,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 // Mirrors `app/ideation/layout.tsx` so every Andromeda route gets the
 // same sidebar + topbar chrome as the ideation playground. The content
-// column is forced to the void (#0E0E0F) background so it doesn't
+// column is forced to the Andromeda void background so it doesn't
 // bleed sand-950 when content is shorter than the viewport.
 export default function AndromedaLayout({ children }: { children: ReactNode }) {
   return (
@@ -25,7 +26,7 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       <IdeationSidebar />
       <div
         className="flex flex-1 scroll-smooth flex-col overflow-y-auto"
-        style={{ backgroundColor: '#0E0E0F' }}
+        style={{ backgroundColor: tokens.color.surface.base }}
       >
         <IdeationTopBar />
         {children}

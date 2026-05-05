@@ -2,8 +2,8 @@
 // ============================================================
 // COMPONENT: NavItem
 // shadcn/ui-aligned API: variant/state, asChild, forwardRef, cva.
-// Active state: accent text + accent.glowSoft bg + 6px square on the right
-// that glows leftward, illuminating the row.
+// Active state: accent text + a small square indicator on the right.
+// No background fill — the indicator alone marks the selected row.
 // Inactive: text.secondary, hover surface.hover.
 // Mono label is the default; pass `mono={false}` for sans labels.
 // ============================================================
@@ -28,14 +28,14 @@ const navItemVariants = cva(
     'transition-all duration-150 ease-out',
     'active:translate-x-[1px]',
     'focus-visible:outline-none',
-    'focus-visible:shadow-[inset_0_0_0_1px_var(--andromeda-accent-dim)]',
+    'focus-visible:shadow-[inset_0_0_0_1px_var(--andromeda-accent-400)]',
     'disabled:opacity-[0.4] disabled:pointer-events-none',
   ],
   {
     variants: {
       active: {
         true: [
-          'text-[color:var(--andromeda-accent-bright)]',
+          'text-[color:var(--andromeda-accent-300)]',
         ],
         false: [
           'text-[color:var(--andromeda-text-secondary)]',
@@ -100,36 +100,23 @@ export const NavItem = forwardRef(function NavItem(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {/* Right accent square + gradient glow — visible only when active */}
+      {/* Right indicator square — sits on top of the gradient, with a
+          small leftward glow that highlights the immediate vicinity. */}
       {active ? (
-        <>
-          {/* Gradient light sweep from square leftward */}
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to left, rgba(45,212,191,0.10) 0%, rgba(45,212,191,0.04) 40%, transparent 100%)',
-              pointerEvents: 'none',
-            }}
-          />
-          {/* The square itself */}
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              right: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '6px',
-              height: '6px',
-              flexShrink: 0,
-              background: 'var(--andromeda-accent-dim)',
-              border: '1px solid var(--andromeda-accent-dim)',
-              boxShadow: '-6px 0 12px var(--andromeda-accent-glow), -2px 0 20px var(--andromeda-accent-glowSoft)',
-            }}
-          />
-        </>
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '4px',
+            height: '4px',
+            flexShrink: 0,
+            background: 'var(--andromeda-accent-300)',
+            boxShadow: '-2px 0 8px var(--andromeda-accent-500)',
+          }}
+        />
       ) : null}
       {Icon ? <Icon size={20} weight="light" /> : null}
       <span>{label}</span>

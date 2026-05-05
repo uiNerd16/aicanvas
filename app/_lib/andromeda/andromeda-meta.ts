@@ -60,6 +60,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'CornerMarkers.tsx',
   },
   {
+    slug: 'date-range-picker',
+    name: 'Date Range Picker',
+    description:
+      'Trigger chip + drop-down calendar panel. Anchor-then-confirm range selection with hover preview, Monday-first grid, ESC and click-outside to close.',
+    sourceFile: 'DateRangePicker.tsx',
+  },
+  {
     slug: 'drawer',
     name: 'Drawer',
     description:
@@ -77,7 +84,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'icon-button',
     name: 'Icon Button',
     description:
-      'Square label-less companion to Button. Same variant + size vocabulary so it lines up with Button on the same baseline. Optional badge slot.',
+      'Square label-less companion to Button. Same variant + size vocabulary so it lines up with Button on the same baseline.',
     sourceFile: 'IconButton.tsx',
   },
   {
@@ -93,6 +100,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Sidebar item with icon, active state, accent left bar. Mono label by default; sans available.',
     sourceFile: 'NavItem.tsx',
+  },
+  {
+    slug: 'panel-menu',
+    name: 'Panel Menu',
+    description:
+      'Kebab-trigger overflow menu for panel headers. Items can have icons, separators, and a single level of right-flyout submenu. Closes on outside click and Escape.',
+    sourceFile: 'PanelMenu.tsx',
   },
   {
     slug: 'progress-bar',
@@ -114,6 +128,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Mutually-exclusive square radio. Standalone or inside a RadioGroup wiring up name, value, onValueChange.',
     sourceFile: 'Radio.tsx',
+  },
+  {
+    slug: 'segmented-control',
+    name: 'Segmented Control',
+    description:
+      'Row of icon-or-label buttons that share a single border. The active background slides between segments on selection. Sized sm/md/lg to match the row baseline.',
+    sourceFile: 'SegmentedControl.tsx',
   },
   {
     slug: 'slider',

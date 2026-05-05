@@ -15,8 +15,8 @@ import { Tag } from '../../../components/Tag';
 import { anomalies as ANOMALIES } from '../data';
 
 const SEVERITY = {
-  fault:   { badge: 'fault',   label: 'Fault',   color: tokens.color.fault       },
-  warning: { badge: 'warning', label: 'Warning', color: tokens.color.warning     },
+  fault:   { badge: 'fault',   label: 'Fault',   color: tokens.color.red[300]       },
+  warning: { badge: 'warning', label: 'Warning', color: tokens.color.orange[300]     },
   info:    { badge: 'subtle',  label: 'Info',    color: tokens.color.text.muted  },
 };
 
@@ -199,9 +199,9 @@ export function AnomaliesSection() {
               onClick={() => setFilter(f.id)}
               style={{
                 padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-                border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent.dim : tokens.color.border.base}`,
-                background: filter === f.id ? tokens.color.accent.glowSoft : tokens.color.surface.raised,
-                color: filter === f.id ? tokens.color.accent.bright : tokens.color.text.secondary,
+                border: `${tokens.border.thin} ${filter === f.id ? tokens.color.accent[400] : tokens.color.border.base}`,
+                background: filter === f.id ? tokens.color.accent[500] : tokens.color.surface.raised,
+                color: filter === f.id ? tokens.color.accent[100] : tokens.color.text.secondary,
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.xs,
                 fontWeight: tokens.typography.weight.medium,
@@ -216,7 +216,7 @@ export function AnomaliesSection() {
             >
               {f.label}
               <span style={{
-                color: filter === f.id ? tokens.color.accent.bright : tokens.color.text.muted,
+                color: filter === f.id ? tokens.color.accent[100] : tokens.color.text.muted,
               }}>
                 {counts[f.id]}
               </span>

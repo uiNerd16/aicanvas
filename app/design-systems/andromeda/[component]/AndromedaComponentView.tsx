@@ -13,6 +13,7 @@ import {
   Terminal,
 } from '@phosphor-icons/react'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
+import { tokens } from '../../../../design-systems/andromeda/tokens'
 
 type RelatedItem = { slug: string; name: string }
 
@@ -111,7 +112,7 @@ export function AndromedaComponentView({
           {tab === 'preview' ? (
             <div
               className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
-              style={{ backgroundColor: '#0E0E0F' }}
+              style={{ backgroundColor: tokens.color.surface.base }}
             >
               <AndromedaDemo slug={slug} />
             </div>
@@ -119,7 +120,7 @@ export function AndromedaComponentView({
             <div
               className="overflow-auto p-5"
               style={{
-                backgroundColor: '#0E0E0F',
+                backgroundColor: tokens.color.surface.base,
                 maxHeight: '70vh',
                 scrollbarWidth: 'thin',
               }}
@@ -182,7 +183,7 @@ export function AndromedaComponentView({
           </div>
           <div
             className="max-h-96 overflow-auto p-4"
-            style={{ backgroundColor: '#0E0E0F', scrollbarWidth: 'thin' }}
+            style={{ backgroundColor: tokens.color.surface.base, scrollbarWidth: 'thin' }}
           >
             {highlightedCode}
           </div>

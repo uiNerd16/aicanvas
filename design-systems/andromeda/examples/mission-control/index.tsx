@@ -16,16 +16,13 @@ import { VehiclesSection }      from './sections/VehiclesSection';
 import { CommsSection }         from './sections/CommsSection';
 import { AnomaliesSection }     from './sections/AnomaliesSection';
 import { MaintenanceSection }   from './sections/MaintenanceSection';
-import { NotificationsSection } from './sections/NotificationsSection';
-
 const SECTIONS = {
-  overview:      { title: 'Overview',      Render: OverviewSection      },
-  telemetry:     { title: 'Telemetry',     Render: TelemetrySection     },
-  vehicles:      { title: 'Vehicles',      Render: VehiclesSection      },
-  comms:         { title: 'Comms',         Render: CommsSection         },
-  anomalies:     { title: 'Anomalies',     Render: AnomaliesSection     },
-  maintenance:   { title: 'Maintenance',   Render: MaintenanceSection   },
-  notifications: { title: 'Notifications', Render: NotificationsSection },
+  overview:    { title: 'Overview',    Render: OverviewSection    },
+  telemetry:   { title: 'Telemetry',   Render: TelemetrySection   },
+  vehicles:    { title: 'Vehicles',    Render: VehiclesSection    },
+  comms:       { title: 'Comms',       Render: CommsSection       },
+  anomalies:   { title: 'Anomalies',   Render: AnomaliesSection   },
+  maintenance: { title: 'Maintenance', Render: MaintenanceSection },
 };
 
 export default function MissionControl() {

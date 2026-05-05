@@ -22,9 +22,24 @@ import {
   Warning,
   Info,
   ArrowUpRight,
+  ArrowClockwise,
+  Sliders,
+  Export,
+  EyeSlash,
+  Trash,
+  Pencil,
+  Copy,
+  Star,
+  ChartLine,
+  ChartBar,
+  Clock,
 } from '@phosphor-icons/react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { Button, buttonVariants } from '../../../../design-systems/andromeda/components/Button'
+import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
+import { PanelMenu } from '../../../../design-systems/andromeda/components/PanelMenu'
+import { SegmentedControl } from '../../../../design-systems/andromeda/components/SegmentedControl'
+import { DateRangePicker } from '../../../../design-systems/andromeda/components/DateRangePicker'
 import { andromedaVars } from '../../../../design-systems/andromeda/components/lib/utils'
 import { Badge } from '../../../../design-systems/andromeda/components/Badge'
 import { Avatar } from '../../../../design-systems/andromeda/components/Avatar'
@@ -63,6 +78,7 @@ import {
   EmptyStateAction,
 } from '../../../../design-systems/andromeda/components/EmptyState'
 import { RadarChart } from '../../../../design-systems/andromeda/components/RadarChart'
+import { Planet } from '../../../../design-systems/andromeda/components/Planet'
 import {
   Drawer,
   DrawerHeader,
@@ -177,7 +193,7 @@ function Row({ label, children }: { label?: string; children: ReactNode }) {
           display: 'flex',
           flexWrap: 'wrap',
           gap: tokens.spacing[3],
-          alignItems: 'center',
+          alignItems: 'flex-start',
         }}
       >
         {children}
@@ -194,13 +210,20 @@ export default function AndromedaShowcase() {
   const [sliderValue, setSliderValue] = useState(64)
   const [thrustValue, setThrustValue] = useState(38)
   const [radioValue, setRadioValue] = useState('default')
+  const [chartTypeSm, setChartTypeSm] = useState('line')
+  const [chartTypeLg, setChartTypeLg] = useState('line')
+  const [periodValue, setPeriodValue] = useState('1w')
+  const [dateRange, setDateRange] = useState({
+    start: new Date(2026, 5, 17),
+    end:   new Date(2026, 5, 21),
+  })
 
   return (
     <div
       className={jetbrainsMono.variable}
       style={{
         minHeight: '100vh',
-        backgroundColor: tokens.color.surface.void,
+        backgroundColor: tokens.color.surface.base,
         padding: `${tokens.spacing[10]} ${tokens.spacing[8]}`,
       }}
     >
@@ -259,30 +282,79 @@ export default function AndromedaShowcase() {
         <Section
           title="Color Palette"
           kicker="Foundation · Colors"
-          description="One white-alpha scale for all text, surfaces, and borders. One electric-blue accent. Two semantic states — warning amber and fault red — each with dim and glow variants for borders and tinted fills."
+          description="Three brand hue palettes lead — accent (turquoise), orange (warning), red (fault) — each a 5-stop scale (100 lightest → 500 darkest) with a matching alpha. The foundational greys follow: surface, border, text. Every alpha sits in a single row at the seam between the two halves."
         >
-          <Row label="Text">
+          <Row label="Accent · Turquoise">
             {[
-              { name: 'text.primary',   color: tokens.color.text.primary,   note: 'Headings · values' },
-              { name: 'text.secondary', color: tokens.color.text.secondary, note: 'Body · descriptions' },
-              { name: 'text.muted',     color: tokens.color.text.muted,     note: 'Kickers · metadata' },
-              { name: 'text.faint',     color: tokens.color.text.faint,     note: 'Labels · hints' },
+              { name: 'accent.100', color: tokens.color.accent[100], note: 'Highlighted text · pastel' },
+              { name: 'accent.200', color: tokens.color.accent[200], note: 'Light emphasis' },
+              { name: 'accent.300', color: tokens.color.accent[300], note: 'Active · selected · base' },
+              { name: 'accent.400', color: tokens.color.accent[400], note: 'Focus borders · dim' },
+              { name: 'accent.500', color: tokens.color.accent[500], note: 'Glow halos · tinted fills' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, border: `1px solid ${tokens.color.border.base}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: tokens.spacing[2] }}>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.md, color, letterSpacing: '0.1em' }}>Aa 01</span>
-                </div>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+              </div>
+            ))}
+          </Row>
+
+          <Row label="Orange · Warning">
+            {[
+              { name: 'orange.100', color: tokens.color.orange[100], note: 'Pastel · highlight' },
+              { name: 'orange.200', color: tokens.color.orange[200], note: 'Light · emphasis' },
+              { name: 'orange.300', color: tokens.color.orange[300], note: 'Solid · icon · base' },
+              { name: 'orange.400', color: tokens.color.orange[400], note: 'Border · ring' },
+              { name: 'orange.500', color: tokens.color.orange[500], note: 'Subtle fill' },
+            ].map(({ name, color, note }) => (
+              <div key={name} style={{ width: 148 }}>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+              </div>
+            ))}
+          </Row>
+
+          <Row label="Red · Fault">
+            {[
+              { name: 'red.100', color: tokens.color.red[100], note: 'Pastel · highlight' },
+              { name: 'red.200', color: tokens.color.red[200], note: 'Light · emphasis' },
+              { name: 'red.300', color: tokens.color.red[300], note: 'Solid · icon · base' },
+              { name: 'red.400', color: tokens.color.red[400], note: 'Border · ring' },
+              { name: 'red.500', color: tokens.color.red[500], note: 'Subtle fill' },
+            ].map(({ name, color, note }) => (
+              <div key={name} style={{ width: 148 }}>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+              </div>
+            ))}
+          </Row>
+
+          <Row label="Alpha · Layered Tints">
+            {[
+              { name: 'accent.alpha',  color: tokens.color.accent.alpha,  note: 'Turquoise selection · highlight' },
+              { name: 'orange.alpha', color: tokens.color.orange.alpha,   note: 'Warning overlay · caution tint' },
+              { name: 'red.alpha',     color: tokens.color.red.alpha,     note: 'Fault overlay · error tint' },
+              { name: 'surface.alpha', color: tokens.color.surface.alpha, note: 'Modal scrim · backdrop' },
+              { name: 'border.alpha',  color: tokens.color.border.alpha,  note: 'Glassy edge · sheen' },
+            ].map(({ name, color, note }) => (
+              <div key={name} style={{ width: 148 }}>
+                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
 
           <Row label="Surfaces">
             {[
-              { name: 'surface.void',    color: tokens.color.surface.void,    note: 'Page background' },
-              { name: 'surface.base',    color: tokens.color.surface.base,    note: 'Root · transparent' },
+              { name: 'surface.base',    color: tokens.color.surface.base,    note: 'Page void · root' },
               { name: 'surface.raised',  color: tokens.color.surface.raised,  note: 'Cards · panels' },
               { name: 'surface.overlay', color: tokens.color.surface.overlay, note: 'Dropdowns · tips' },
               { name: 'surface.hover',   color: tokens.color.surface.hover,   note: 'Hover state' },
@@ -291,8 +363,8 @@ export default function AndromedaShowcase() {
               <div key={name} style={{ width: 148 }}>
                 <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -307,43 +379,26 @@ export default function AndromedaShowcase() {
               <div key={name} style={{ width: 148 }}>
                 <div style={{ height: 48, border: `1px solid ${color}`, marginBottom: tokens.spacing[2] }} />
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
 
-          <Row label="Accent · Electric Blue">
+          <Row label="Text">
             {[
-              { name: 'accent.base',     color: tokens.color.accent.base,     note: 'Active · selected' },
-              { name: 'accent.bright',   color: tokens.color.accent.bright,   note: 'Highlighted text' },
-              { name: 'accent.dim',      color: tokens.color.accent.dim,      note: 'Focus borders' },
-              { name: 'accent.glow',     color: tokens.color.accent.glow,     note: 'Glow halos' },
-              { name: 'accent.glowSoft', color: tokens.color.accent.glowSoft, note: 'Tinted fills' },
+              { name: 'text.primary',   color: tokens.color.text.primary,   note: 'Headings · values' },
+              { name: 'text.secondary', color: tokens.color.text.secondary, note: 'Body · descriptions' },
+              { name: 'text.muted',     color: tokens.color.text.muted,     note: 'Kickers · metadata' },
+              { name: 'text.faint',     color: tokens.color.text.faint,     note: 'Labels · hints' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
+                <div style={{ height: 48, border: `1px solid ${tokens.color.border.base}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: tokens.spacing[2] }}>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.md, color, letterSpacing: '0.1em' }}>Aa 01</span>
+                </div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
-              </div>
-            ))}
-          </Row>
-
-          <Row label="Semantic · Warning + Fault">
-            {[
-              { name: 'warning',     color: tokens.color.warning,     note: 'Warning solid' },
-              { name: 'warningDim',  color: tokens.color.warningDim,  note: 'Warning border' },
-              { name: 'warningGlow', color: tokens.color.warningGlow, note: 'Warning fill' },
-              { name: 'fault',       color: tokens.color.fault,       note: 'Fault solid' },
-              { name: 'faultDim',    color: tokens.color.faultDim,    note: 'Fault border' },
-              { name: 'faultGlow',   color: tokens.color.faultGlow,   note: 'Fault fill' },
-            ].map(({ name, color, note }) => (
-              <div key={name} style={{ width: 148 }}>
-                <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{name}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1] }}>{note}</div>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.dim, marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, marginTop: tokens.spacing[1], minHeight: 28 }}>{note}</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[400], marginTop: tokens.spacing[1], wordBreak: 'break-all' }}>{color}</div>
               </div>
             ))}
           </Row>
@@ -358,19 +413,23 @@ export default function AndromedaShowcase() {
                 { role: 'Body · descriptions', token: 'text.secondary' },
                 { role: 'Kickers · metadata',  token: 'text.muted' },
                 { role: 'Decorative labels',   token: 'text.faint' },
-                { role: 'Page background',     token: 'surface.void' },
+                { role: 'Page background',     token: 'surface.base' },
                 { role: 'Card backgrounds',    token: 'surface.raised' },
                 { role: 'Hover → pressed',     token: 'surface.hover → surface.active' },
                 { role: 'Dividers',            token: 'border.subtle' },
                 { role: 'Default borders',     token: 'border.base' },
                 { role: 'Focus borders',       token: 'border.bright' },
-                { role: 'Active · selected',   token: 'accent.base' },
-                { role: 'Accent glow',         token: 'accent.glow' },
-                { role: 'Fault indicator',     token: 'fault + faultGlow' },
+                { role: 'Active · selected',   token: 'accent.300' },
+                { role: 'Accent glow',         token: 'accent.500' },
+                { role: 'Warning indicator',   token: 'orange.300 + orange.500' },
+                { role: 'Fault indicator',     token: 'red.300 + red.500' },
+                { role: 'Modal scrim',         token: 'surface.alpha' },
+                { role: 'Glassy edge',         token: 'border.alpha' },
+                { role: 'Selection sheen',     token: 'color.alpha' },
               ].map(({ role, token }) => (
                 <div key={role} style={{ padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`, background: tokens.color.surface.raised, border: `1px solid ${tokens.color.border.subtle}` }}>
                   <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>{role}</div>
-                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent.bright }}>{token}</div>
+                  <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.accent[100] }}>{token}</div>
                 </div>
               ))}
             </div>
@@ -443,6 +502,59 @@ export default function AndromedaShowcase() {
           </Row>
         </Section>
 
+        {/* ── Spacing ────────────────────────────────────────────────────── */}
+        <Section
+          title="Spacing"
+          kicker="Foundation · Spacing"
+          description="A 4px-based scale. Token names track the px value: spacing.1 → 4px, spacing.4 → 16px. The scale skips 7, 9, and 11 — only the values the system actually uses are emitted, so the keys you have are the keys you should be reaching for."
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {[
+              { token: '1',  px: '4px',  usage: 'Micro gaps · dot offsets · sub-line padding' },
+              { token: '2',  px: '8px',  usage: 'Icon ↔ text · inline rhythm' },
+              { token: '3',  px: '12px', usage: 'Card padding · list rows · default form gap' },
+              { token: '4',  px: '16px', usage: 'Row gap · panel content rhythm' },
+              { token: '5',  px: '20px', usage: 'Toolbar gap · header rhythm' },
+              { token: '6',  px: '24px', usage: 'Section padding · panel gutter' },
+              { token: '8',  px: '32px', usage: 'Page gutter · hero margin' },
+              { token: '10', px: '40px', usage: 'Page top padding · large breaks' },
+              { token: '12', px: '48px', usage: 'Hero bottom · max scale break' },
+            ].map(({ token, px, usage }) => (
+              <div
+                key={token}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: tokens.spacing[4],
+                  padding: `${tokens.spacing[2]} 0`,
+                  borderBottom: `1px solid ${tokens.color.border.subtle}`,
+                }}
+              >
+                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 64, flexShrink: 0 }}>
+                  {`spacing.${token}`}
+                </span>
+                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, width: 36, flexShrink: 0 }}>
+                  {px}
+                </span>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                  <div
+                    aria-hidden
+                    style={{
+                      width: px,
+                      height: 8,
+                      background: tokens.color.text.primary,
+                      flexShrink: 0,
+                    }}
+                  />
+                </div>
+                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>
+                  {usage}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* ── Button ─────────────────────────────────────────────────────── */}
         <Section
           title="Button"
@@ -479,6 +591,103 @@ export default function AndromedaShowcase() {
               Destructive
             </Button>
           </Row>
+        </Section>
+
+        {/* ── IconButton ─────────────────────────────────────────────────── */}
+        <Section
+          title="IconButton"
+          slug="icon-button"
+          description="Square companion to Button. Same variant + size vocabulary so a Button and an IconButton sit on the same baseline in toolbars and headers."
+        >
+          <Row label="Variants">
+            <IconButton aria-label="Default"     variant="default"     icon={Bell} />
+            <IconButton aria-label="Outline"     variant="outline"     icon={Gear} />
+            <IconButton aria-label="Ghost"       variant="ghost"       icon={Bell} />
+            <IconButton aria-label="Destructive" variant="destructive" icon={Bell} />
+          </Row>
+          <Row label="Sizes">
+            <IconButton aria-label="Small"  size="sm" icon={Gear} />
+            <IconButton aria-label="Medium" size="md" icon={Gear} />
+            <IconButton aria-label="Large"  size="lg" icon={Gear} />
+          </Row>
+          <Row label="Disabled">
+            <IconButton aria-label="Disabled default"     variant="default"     icon={Bell} disabled />
+            <IconButton aria-label="Disabled outline"     variant="outline"     icon={Gear} disabled />
+            <IconButton aria-label="Disabled destructive" variant="destructive" icon={Bell} disabled />
+          </Row>
+        </Section>
+
+        {/* ── PanelMenu ──────────────────────────────────────────────────── */}
+        <Section
+          title="PanelMenu"
+          slug="panel-menu"
+          description="Kebab-trigger overflow menu for panel headers. The trigger (IconButton, ghost, sm) flips to a held-pressed look while the menu is open. Items support icons, separators, destructive styling, persistent selection, and a single level of right-flyout submenu. Closes on outside click or Escape."
+        >
+          {(() => {
+            // Each cell is laid out vertically (label on top, kebab below);
+            // the three cells sit side-by-side in a flex row. Width is wide
+            // enough that an opened submenu (160px panel) doesn't overlap the
+            // next cell's trigger.
+            const labelStyle = {
+              marginBottom: tokens.spacing[3],
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              color: tokens.color.text.faint,
+              textTransform: 'uppercase' as const,
+              letterSpacing: tokens.typography.tracking.widest,
+            };
+            const cellStyle = { width: 200, flexShrink: 0 };
+            return (
+              <div style={{
+                display: 'flex',
+                gap: tokens.spacing[6],
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                // Reserve vertical space for the open menus. The dropdown is
+                // absolutely positioned so it does NOT push the section's
+                // height — without an explicit minHeight the menu would paint
+                // over the next section ("Badge").
+                minHeight: 220,
+              }}>
+                <div style={cellStyle}>
+                  <div style={labelStyle}>Default · panel actions</div>
+                  <PanelMenu
+                    align="left"
+                    defaultOpen
+                    items={[
+                      { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
+                      { label: 'Configure', icon: Sliders,        onSelect: () => {} },
+                      { label: 'Export',    icon: Export,         onSelect: () => {} },
+                      { type: 'separator' },
+                      { label: 'Hide',      icon: EyeSlash,       onSelect: () => {} },
+                    ]}
+                  />
+                </div>
+                <div style={cellStyle}>
+                  <div style={labelStyle}>With submenu</div>
+                  <PanelMenu
+                    align="left"
+                    defaultOpen
+                    items={[
+                      { label: 'Edit',   icon: Pencil,  onSelect: () => {} },
+                      { label: 'Copy',   icon: Copy,    onSelect: () => {} },
+                      {
+                        label: 'Move to',
+                        icon: ArrowUpRight,
+                        submenu: [
+                          { label: 'Starred', icon: Star,     onSelect: () => {} },
+                          { label: 'Archive', icon: Database, onSelect: () => {} },
+                          { label: 'Snoozed', icon: Clock,    onSelect: () => {} },
+                        ],
+                      },
+                      { type: 'separator' },
+                      { label: 'Delete', icon: Trash, destructive: true, onSelect: () => {} },
+                    ]}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </Section>
 
         {/* ── Badge ──────────────────────────────────────────────────────── */}
@@ -554,7 +763,7 @@ export default function AndromedaShowcase() {
                 </CardDescription>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline">
+                <Button size="md" variant="outline">
                   Configure
                 </Button>
               </CardFooter>
@@ -585,7 +794,7 @@ export default function AndromedaShowcase() {
                 </CardDescription>
               </CardContent>
               <CardFooter>
-                <Button size="sm">Open</Button>
+                <Button size="md">Open</Button>
               </CardFooter>
             </Card>
           </div>
@@ -602,7 +811,7 @@ export default function AndromedaShowcase() {
               { label: 'Default', props: {} },
               { label: 'Larger', props: { size: 18 } },
               { label: 'Inset 6px', props: { offset: 6 } },
-              { label: 'Accent', props: { color: tokens.color.accent.base } },
+              { label: 'Accent', props: { color: tokens.color.accent[300] } },
             ].map(({ label, props }) => (
               <div
                 key={label}
@@ -810,6 +1019,73 @@ export default function AndromedaShowcase() {
           </Row>
         </Section>
 
+        {/* ── SegmentedControl ───────────────────────────────────────────── */}
+        <Section
+          title="SegmentedControl"
+          slug="segmented-control"
+          description="Row of icon-or-label buttons that share a single border. The active background slides between segments via a CSS transform, so the indicator transition is on the compositor. Sized sm/md/lg to align with the Button/IconButton baseline."
+        >
+          <Row label="Icons · sm">
+            <SegmentedControl
+              size="sm"
+              value={chartTypeSm}
+              onChange={setChartTypeSm}
+              options={[
+                { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+                { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+              ]}
+            />
+          </Row>
+          <Row label="Icons · lg">
+            <SegmentedControl
+              size="lg"
+              value={chartTypeLg}
+              onChange={setChartTypeLg}
+              options={[
+                { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+                { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+              ]}
+            />
+          </Row>
+          <Row label="Labels">
+            <SegmentedControl
+              size="md"
+              value={periodValue}
+              onChange={setPeriodValue}
+              options={[
+                { value: '1d',  label: '1D' },
+                { value: '1w',  label: '1W' },
+                { value: '1m',  label: '1M' },
+                { value: 'all', label: 'ALL' },
+              ]}
+            />
+          </Row>
+        </Section>
+
+        {/* ── DateRangePicker ────────────────────────────────────────────── */}
+        <Section
+          title="DateRangePicker"
+          slug="date-range-picker"
+          description="Trigger chip + drop-down calendar panel. Anchor-then-confirm range selection with hover preview, Monday-first 6×7 grid, ESC and click-outside to close. Selected endpoints fill in accent; the in-between band is a 1px accent outline so the eye stays on the picked dates."
+        >
+          <div style={{
+            display: 'flex',
+            gap: tokens.spacing[6],
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            // The calendar panel is absolutely positioned (~330px tall) and
+            // would otherwise overflow into the next section.
+            minHeight: 380,
+          }}>
+            <DateRangePicker
+              value={dateRange}
+              presetLabel="Custom"
+              onChange={setDateRange}
+              defaultOpen
+            />
+          </div>
+        </Section>
+
         {/* ── Spinner ────────────────────────────────────────────────────── */}
         <Section
           title="Spinner"
@@ -978,8 +1254,70 @@ export default function AndromedaShowcase() {
                 { axis: 'SECURITY', score: 65 },
                 { axis: 'API',      score: 90 },
               ]}
-              series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent.base }]}
+              series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent[300] }]}
             />
+          </div>
+        </Section>
+
+        {/* ── Planet · Next Destination ──────────────────────────────────── */}
+        <Section
+          title="Planet"
+          slug="planet"
+          kicker="Component · Visualization"
+          description="3D particle sphere — every point lit on a Lambert ramp from accent.500 (shadow) to accent.200 (lit), with 1% accent.100 sparkles on the day side. Self-contained Three.js, transparent canvas. Drop into a Card for status / next-destination widgets."
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: tokens.spacing[5] }}>
+            {/* Standalone planet — full canvas */}
+            <Card>
+              <CardHeader>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>/// Body</span>
+                  <CardTitle>Solo</CardTitle>
+                </div>
+              </CardHeader>
+              <div style={{ height: 280, position: 'relative' }}>
+                <Planet />
+              </div>
+            </Card>
+
+            {/* Composed "Next Destination" widget */}
+            <Card>
+              <CardHeader>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>/// Heading</span>
+                  <CardTitle>Next Destination</CardTitle>
+                </div>
+                <Badge variant="accent">LOCKED</Badge>
+              </CardHeader>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[4], padding: tokens.spacing[4], alignItems: 'center' }}>
+                <div style={{ height: 220, position: 'relative' }}>
+                  <Planet particleCount={5500} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[3] }}>
+                  <div>
+                    <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>Target</div>
+                    <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xl, color: tokens.color.text.primary, fontWeight: tokens.typography.weight.bold, letterSpacing: tokens.typography.tracking.wider, marginTop: tokens.spacing[1] }}>KEPLER-186F</div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+                    {[
+                      { label: 'Distance', value: '492.3 ly' },
+                      { label: 'ETA',      value: '2027.04.18' },
+                      { label: 'Bearing',  value: '042.7°'    },
+                      { label: 'Class',    value: 'M-Dwarf'   },
+                    ].map(({ label, value }) => (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${tokens.color.border.subtle}`, paddingBottom: tokens.spacing[2] }}>
+                        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>{label}</span>
+                        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.sm, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wide }}>{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <CardFooter>
+                <Button variant="default" size="sm">ENGAGE TRAJECTORY</Button>
+                <Button variant="ghost"   size="sm">DETAILS</Button>
+              </CardFooter>
+            </Card>
           </div>
         </Section>
 

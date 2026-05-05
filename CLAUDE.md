@@ -28,7 +28,7 @@ Known recurring mistakes are logged in `supervisor/mistakes.md`.
 ## What this project is
 AI Canvas (aicanvas.me) is an open component marketplace where every component ships with:
 - Its full source code
-- Expert-crafted prompts for 4 AI platforms: Claude, GPT, Gemini, V0
+- Expert-crafted prompts for 3 AI coding platforms: Claude Code, Lovable, V0
 
 ## Tech stack
 - **Framework**: Next.js 16 App Router (`app/` directory)
@@ -102,7 +102,7 @@ Experimental, creatively-free components that appear on the homepage grid. Each 
 components-workspace/
   my-component/
     index.tsx    ← the React component (export default function)
-    prompts.ts   ← prompts for the 4 platforms (any subset allowed)
+    prompts.ts   ← prompts for the 3 platforms (any subset allowed)
     spec.md      ← brief approved by user before building
 ```
 
@@ -128,15 +128,14 @@ Files in `design-systems/` currently carry a `// @ts-nocheck` header (the folder
 The AI Canvas website itself — navbar, homepage, component grid, component preview pages. Governed by the sand/olive/Manrope system documented in this file and in `supervisor/skills/site-design-tokens.md`. Existing components built before the new structure live in `app/components/` and are registered in `app/lib/component-registry.tsx`.
 
 ## Prompt file contract
-Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
+Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude Code' | 'Lovable' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
 
 ```ts
 import type { Platform } from '../../app/components/ComponentCard'
 
 export const prompts: Partial<Record<Platform, string>> = {
-  Claude: `...`,
-  GPT: `...`,
-  Gemini: `...`,
+  'Claude Code': `...`,
+  Lovable: `...`,
   V0: `...`,
 }
 ```

@@ -18,9 +18,12 @@ const M_MENU    = ['1m', '3m', '5m', '15m', '30m'];
 const H_MENU    = ['1H', '2H', '4H', '6H', '12H'];
 
 // ── Layout constants ──────────────────────────────────────────────
-const PRICE_PAD    = 0.04;   // extra headroom above/below price range
-const Y_AXIS_W     = 72;     // px for price-label gutter (right)
-const X_AXIS_H     = 24;     // px for date-label gutter (bottom)
+const PRICE_PAD     = 0.04;   // extra headroom above/below price range
+const Y_AXIS_W      = 72;     // px for price-label gutter (right)
+const X_AXIS_H      = 24;     // px for date-label gutter (bottom)
+const VOL_HEADER_H  = 28;     // px reserved at the top of the volume area for the VOL legend
+const VOL_AREA_H    = 104;    // px total height of the volume area (legend + bars + xaxis)
+const PANEL_INSET   = 8;      // px clearance from corner markers for inline content
 
 // ── Derived ranges ────────────────────────────────────────────────
 const N        = candles.length;
@@ -339,7 +342,14 @@ function VolumeSvg() {
     <svg
       viewBox={`0 0 ${N} ${volMax}`}
       preserveAspectRatio="none"
-      style={{ position: 'absolute', top: 0, left: 0, width: `calc(100% - ${Y_AXIS_W}px)`, height: `calc(100% - ${X_AXIS_H}px)`, display: 'block' }}
+      style={{
+        position: 'absolute',
+        top: VOL_HEADER_H,
+        left: 0,
+        width: `calc(100% - ${Y_AXIS_W}px)`,
+        height: `calc(100% - ${VOL_HEADER_H}px - ${X_AXIS_H}px)`,
+        display: 'block',
+      }}
     >
       {candles.map((c, i) => {
         const up    = c.c >= c.o;
@@ -422,33 +432,41 @@ function YAxisLabels() {
 }
 
 function XAxisLabels() {
-  const tickIdxs = [0, Math.floor(N / 2), N - 1];
+  // Edge labels are anchored to the gutter (left:0 / right:0, no translate)
+  // so they never clip against the parent overflow:hidden. The middle label
+  // keeps the centered translateX trick because it has space on both sides.
+  const firstIdx = 0;
+  const midIdx   = Math.floor(N / 2);
+  const lastIdx  = N - 1;
   return (
     <div
       style={{
         position: 'absolute',
-        left: 0,
-        right: `${Y_AXIS_W}px`,
+        left: PANEL_INSET,
+        right: `${Y_AXIS_W + PANEL_INSET}px`,
         bottom: 0,
         height: `${X_AXIS_H}px`,
         pointerEvents: 'none',
       }}
     >
-      {tickIdxs.map((i) => (
-        <span
-          key={`xl-${i}`}
-          style={{
-            position: 'absolute',
-            left: `${((i + 0.5) / N) * 100}%`,
-            top: `${tokens.spacing[1]}`,
-            transform: 'translateX(-50%)',
-            whiteSpace: 'nowrap',
-            ...LABEL_STYLE,
-          }}
-        >
-          {candles[i].t}
-        </span>
-      ))}
+      <span style={{ position: 'absolute', left: 0, top: tokens.spacing[1], whiteSpace: 'nowrap', ...LABEL_STYLE }}>
+        {candles[firstIdx].t}
+      </span>
+      <span
+        style={{
+          position: 'absolute',
+          left: `${((midIdx + 0.5) / N) * 100}%`,
+          top: tokens.spacing[1],
+          transform: 'translateX(-50%)',
+          whiteSpace: 'nowrap',
+          ...LABEL_STYLE,
+        }}
+      >
+        {candles[midIdx].t}
+      </span>
+      <span style={{ position: 'absolute', right: 0, top: tokens.spacing[1], whiteSpace: 'nowrap', ...LABEL_STYLE }}>
+        {candles[lastIdx].t}
+      </span>
     </div>
   );
 }
@@ -461,7 +479,9 @@ function VolumeLegend() {
       style={{
         position: 'absolute',
         top: tokens.spacing[2],
-        left: tokens.spacing[4],
+        left: PANEL_INSET,
+        right: `${Y_AXIS_W + PANEL_INSET}px`,
+        height: `${VOL_HEADER_H - 8}px`,
         display: 'flex',
         gap: tokens.spacing[3],
         alignItems: 'center',
@@ -527,7 +547,7 @@ export function ChartPanel() {
         <div
           style={{
             position: 'relative',
-            flex: '0 0 80px',
+            flex: `0 0 ${VOL_AREA_H}px`,
             overflow: 'hidden',
           }}
         >
@@ -535,12 +555,12 @@ export function ChartPanel() {
           <VolumeSvg />
           <XAxisLabels />
 
-          {/* Vol axis labels */}
+          {/* Vol axis labels — sit inside the right Y-axis gutter, clear of bars */}
           <span
             style={{
               position: 'absolute',
-              top: tokens.spacing[2],
-              right: tokens.spacing[2],
+              top: VOL_HEADER_H,
+              right: PANEL_INSET,
               ...LABEL_STYLE,
             }}
           >
@@ -549,9 +569,8 @@ export function ChartPanel() {
           <span
             style={{
               position: 'absolute',
-              bottom: `${X_AXIS_H}px`,
-              right: tokens.spacing[2],
-              transform: 'translateY(50%)',
+              bottom: X_AXIS_H,
+              right: PANEL_INSET,
               ...LABEL_STYLE,
             }}
           >
