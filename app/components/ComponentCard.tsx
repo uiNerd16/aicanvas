@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
 import { track, type CardSource } from '../lib/analytics'
+import { optimizeImageKitUrl } from '../lib/imagekit'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
@@ -43,7 +44,7 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
           </span>
         )}
         {image ? (
-          <img src={image} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
+          <img src={optimizeImageKitUrl(image, 'card')} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
