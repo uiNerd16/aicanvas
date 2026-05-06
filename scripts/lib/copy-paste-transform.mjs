@@ -38,12 +38,12 @@ export function transformRootHeightClass(content) {
   if (!exportMatch) return content
 
   const exportPos = exportMatch.index
-  const afterExport = content.slice(exportPos)
 
-  const returnMatch = afterExport.match(/return\s*\(/)
-  if (!returnMatch) return content
+  // Find the JSX return — `return (` followed (after whitespace/comments) by `<`.
+  // This filters out useEffect cleanup `return () => {}` and similar.
+  const returnEndPos = findJSXReturnContentStart(content, exportPos)
+  if (returnEndPos === -1) return content
 
-  const returnEndPos = exportPos + returnMatch.index + returnMatch[0].length
   const afterReturn = content.slice(returnEndPos)
 
   const classNameRegex = /className\s*=\s*(["'])([^"']*?)\1/
@@ -69,4 +69,47 @@ export function transformRootHeightClass(content) {
     transformedClassName +
     content.slice(matchAbsoluteEnd)
   )
+}
+
+/**
+ * Find the position right after `return (` of the JSX return statement,
+ * starting search from `startPos`. The "JSX return" is distinguished from
+ * other `return (` patterns (e.g. useEffect cleanups returning a function:
+ * `return () => {...}`) by requiring that the next non-whitespace,
+ * non-comment character after `(` is `<` (start of a JSX element or fragment).
+ *
+ * Returns the byte position immediately after the matching `(`, or -1 if no
+ * JSX return is found.
+ */
+export function findJSXReturnContentStart(content, startPos) {
+  const re = /return\s*\(/g
+  re.lastIndex = startPos
+  let match
+  while ((match = re.exec(content)) !== null) {
+    const afterParen = match.index + match[0].length
+    let i = afterParen
+    while (i < content.length) {
+      const ch = content[i]
+      if (/\s/.test(ch)) { i++; continue }
+      // Skip /* block comment */
+      if (ch === '/' && content[i + 1] === '*') {
+        const end = content.indexOf('*/', i + 2)
+        if (end === -1) return -1
+        i = end + 2
+        continue
+      }
+      // Skip // line comment
+      if (ch === '/' && content[i + 1] === '/') {
+        const end = content.indexOf('\n', i + 2)
+        if (end === -1) return -1
+        i = end + 1
+        continue
+      }
+      // First real char: must be `<` for a JSX return
+      if (ch === '<') return afterParen
+      // Anything else (e.g. `)` for `() =>`, `{` for `({...})`) — not JSX, try next
+      break
+    }
+  }
+  return -1
 }
