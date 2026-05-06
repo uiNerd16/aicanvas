@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "screenshot": "node scripts/screenshot.mjs",
-    "validate:registry": "npx ts-node scripts/validate-registry-json.ts"
+    "validate:registry": "npx ts-node scripts/validate-registry-json.ts",
+    "gsc:audit": "npx ts-node scripts/gsc-audit.ts",
+    "gsc:submit": "npx ts-node scripts/gsc-submit.ts"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.78.0",
@@ -45,6 +47,9 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "fast-xml-parser": "^5.7.3",
+    "google-auth-library": "^10.6.2",
+    "googleapis": "^171.4.0",
     "playwright": "^1.59.1",
     "tailwindcss": "^4",
     "typescript": "^5"
