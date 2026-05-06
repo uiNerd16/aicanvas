@@ -6,17 +6,42 @@ import path from 'path'
  * Must stay in sync — this validator compares JSON content against source
  * with the SAME transform applied. See the .mjs file for full rationale.
  */
+function findJSXReturnContentStart(content: string, startPos: number): number {
+  const re = /return\s*\(/g
+  re.lastIndex = startPos
+  let match
+  while ((match = re.exec(content)) !== null) {
+    const afterParen = match.index + match[0].length
+    let i = afterParen
+    while (i < content.length) {
+      const ch = content[i]
+      if (/\s/.test(ch)) { i++; continue }
+      if (ch === '/' && content[i + 1] === '*') {
+        const end = content.indexOf('*/', i + 2)
+        if (end === -1) return -1
+        i = end + 2
+        continue
+      }
+      if (ch === '/' && content[i + 1] === '/') {
+        const end = content.indexOf('\n', i + 2)
+        if (end === -1) return -1
+        i = end + 1
+        continue
+      }
+      if (ch === '<') return afterParen
+      break
+    }
+  }
+  return -1
+}
+
 function transformRootHeightClass(content: string): string {
   const exportMatch = content.match(/export\s+default\s+function/)
   if (!exportMatch || exportMatch.index === undefined) return content
 
   const exportPos = exportMatch.index
-  const afterExport = content.slice(exportPos)
-
-  const returnMatch = afterExport.match(/return\s*\(/)
-  if (!returnMatch || returnMatch.index === undefined) return content
-
-  const returnEndPos = exportPos + returnMatch.index + returnMatch[0].length
+  const returnEndPos = findJSXReturnContentStart(content, exportPos)
+  if (returnEndPos === -1) return content
   const afterReturn = content.slice(returnEndPos)
 
   const classNameRegex = /className\s*=\s*(["'])([^"']*?)\1/
