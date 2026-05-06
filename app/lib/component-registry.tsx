@@ -1176,7 +1176,7 @@ Requirements:
       { label: 'Animation' },
     ],
     dualTheme: true,
-    image: 'https://ik.imagekit.io/aitoolkit/upload-progress.png?v=2',
+    image: 'https://ik.imagekit.io/aitoolkit/upload-progress.png?v=3',
     PreviewComponent: UploadProgress,
     code: componentCodes['upload-progress'],
     prompts: uploadProgressPrompts,
