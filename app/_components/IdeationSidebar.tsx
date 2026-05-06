@@ -64,7 +64,7 @@ const SYSTEMS = [
     components: ANDROMEDA_COMPONENT_META.map((c) => ({ slug: c.slug, name: c.name })),
     blocks: [
       { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
-      { slug: 'operator-console', name: 'Operator Console', domain: 'Sci-Fi' },
+      { slug: 'service-order', name: 'Service Order', domain: 'Telecom' },
       { slug: 'exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
       { slug: 'resource-planning', name: 'Resource Planning', domain: 'Operations' },
     ],

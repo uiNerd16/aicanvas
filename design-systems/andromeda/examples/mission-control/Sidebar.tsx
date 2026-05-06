@@ -10,6 +10,23 @@ import { NavItem } from '../../components/NavItem';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems } from './data';
 
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 export function Sidebar({ activeNav, onNavChange }) {
   return (
     <aside style={{
@@ -26,12 +43,13 @@ export function Sidebar({ activeNav, onNavChange }) {
 
       {/* Logo block */}
       <div style={{
+        position: 'relative',
         padding: `${tokens.spacing[6]} ${tokens.spacing[3]} ${tokens.spacing[3]}`,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[3],
       }}>
+        <InsetDivider />
         <AndromedaIcon size={28} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
@@ -87,12 +105,13 @@ export function Sidebar({ activeNav, onNavChange }) {
 
       {/* User card */}
       <div style={{
+        position: 'relative',
         padding: tokens.spacing[3],
-        borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[3],
       }}>
+        <InsetDivider side="top" />
         <Avatar name="Reza Quinn" src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" size="md" status="online" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{

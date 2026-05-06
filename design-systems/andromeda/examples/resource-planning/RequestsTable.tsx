@@ -16,6 +16,31 @@ import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { requestRows, filterTabs } from './data';
 
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const rowSeparatorStyle = {
+  backgroundImage: ROW_INSET_LINE,
+  backgroundSize: '100% 1px',
+  backgroundPosition: 'bottom',
+  backgroundRepeat: 'no-repeat',
+};
+
 // ── Filter tab pill ───────────────────────────────────────────────
 function FilterTab({ label, count, active, onClick }) {
   return (
@@ -69,7 +94,6 @@ function ColHeader({ children, sorted, align = 'left' }) {
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
         lineHeight: 1,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         whiteSpace: 'nowrap',
       }}
     >
@@ -130,14 +154,15 @@ export function RequestsTable() {
       {/* Filter row */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[1],
           padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
           minWidth: 0,
         }}
       >
+        <InsetDivider />
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[1], flex: 1, minWidth: 0, overflowX: 'auto' }}>
           {filterTabs.map((t) => (
             <FilterTab
@@ -176,13 +201,12 @@ export function RequestsTable() {
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
           <thead>
-            <tr>
+            <tr style={rowSeparatorStyle}>
               <th
                 style={{
                   width: tokens.spacing[8],
                   verticalAlign: 'top',
                   padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`,
-                  borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
                   lineHeight: 1,
                 }}
               >
@@ -205,7 +229,7 @@ export function RequestsTable() {
                 <tr
                   key={key}
                   style={{
-                    borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+                    ...rowSeparatorStyle,
                     transition: 'background 100ms ease',
                   }}
                   className="rp-row"

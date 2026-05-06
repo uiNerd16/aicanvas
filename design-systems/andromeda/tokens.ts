@@ -30,8 +30,8 @@ export const tokens = {
     },
     // Borders — solid greys + one alpha border for glassy edges.
     border: {
-      subtle: '#181819',
-      base:   '#212122',
+      subtle: '#212122',
+      base:   '#3E3E3F',
       bright: '#5B5B5C',
       strong: '#939393',
       alpha:  'rgba(255, 255, 255, 0.18)',
@@ -68,7 +68,11 @@ export const tokens = {
     // Gradients fade to solid colors (no transparent stops).
     gradient: {
       accentFade:  'linear-gradient(180deg, #0A2422 0%, #0E0E0F 100%)',
-      accentSweep: 'linear-gradient(135deg, #0A2422 0%, #091918 50%, #0E0E0F 100%)',
+      // Soft accent spotlight — a barely-visible accent tint blooms from
+      // the top-left corner and fades smoothly back to surface.raised.
+      // Used by Card variant="glow" to draw the eye without painting a
+      // colored card.
+      accentSweep: 'radial-gradient(ellipse 80% 70% at 0% 0%, #1B2C29 0%, #172321 25%, #141415 65%)',
       surfaceSoft: 'linear-gradient(180deg, #181819 0%, #111111 100%)',
     },
   },

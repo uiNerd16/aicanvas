@@ -13,6 +13,23 @@ import { IconButton } from '../../components/IconButton';
 import { Dropdown } from './Dropdown';
 import { candles, last, maSeries } from './data';
 
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 const TIME_MENU = ['1s', '5s', '15s', '30s'];
 const M_MENU    = ['1m', '3m', '5m', '15m', '30m'];
 const H_MENU    = ['1H', '2H', '4H', '6H', '12H'];
@@ -145,11 +162,12 @@ function ChartHeader() {
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'stretch',
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
       }}
     >
+      <InsetDivider />
       <div
         style={{
           display: 'flex',
@@ -221,6 +239,7 @@ function LegendStrip() {
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
@@ -231,9 +250,9 @@ function LegendStrip() {
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
         letterSpacing: tokens.typography.tracking.wide,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
       }}
     >
+      <InsetDivider />
       <span style={{ color: tokens.color.text.muted }}>2026/05/01</span>
 
       <LegendDivider />

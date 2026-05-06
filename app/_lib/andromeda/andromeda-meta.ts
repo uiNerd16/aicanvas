@@ -102,6 +102,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'NavItem.tsx',
   },
   {
+    slug: 'panel-header',
+    name: 'Panel Header',
+    description:
+      'Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border for separation.',
+    sourceFile: 'PanelHeader.tsx',
+  },
+  {
     slug: 'panel-menu',
     name: 'Panel Menu',
     description:
@@ -177,6 +184,20 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Sharp rectangular track + sliding rectangular thumb. Same vocabulary as Checkbox, but feels like a hardware switch.',
     sourceFile: 'Toggle.tsx',
+  },
+  {
+    slug: 'table',
+    name: 'Table',
+    description:
+      'Compound data-table primitive: Table / TableHead / TableBody / TableRow / TableHeader / TableCell. Sortable column headers, row hover lift, selected-row accent edge.',
+    sourceFile: 'Table.tsx',
+  },
+  {
+    slug: 'tooltip',
+    name: 'Tooltip',
+    description:
+      'Hover label for icon-only controls. Wraps any child, floats above or below, sharp corners, mono uppercase text.',
+    sourceFile: 'Tooltip.tsx',
   },
 ]
 

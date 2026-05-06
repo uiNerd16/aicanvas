@@ -12,6 +12,23 @@ import { IconButton } from '../../components/IconButton';
 import { Dropdown } from './Dropdown';
 import { asks, bids, tape } from './data';
 
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 const num = (n, d = 3) =>
   n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
@@ -106,13 +123,14 @@ export function OrderBook() {
       {/* Toolbar */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[2],
           padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         }}
       >
+        <InsetDivider />
         <IconButton aria-label="Both sides" variant="default" size="sm">
           <ModeIcon topColor={tokens.color.red[300]} botColor={tokens.color.accent[300]} />
         </IconButton>
