@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs'
 import { join } from 'path'
 import { execSync } from 'child_process'
+import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 
 const wsDir = 'components-workspace'
 const outFile = 'app/lib/component-codes.generated.ts'
@@ -37,8 +38,9 @@ for (const dir of dirs) {
     continue
   }
 
-  // Make copy-paste ready: h-full → min-h-screen so it fills the viewport standalone
-  const copyPasteReady = content.replace(/\bh-full\b/g, 'min-h-screen')
+  // Make copy-paste ready: h-full → min-h-screen on the ROOT element only
+  // (see scripts/lib/copy-paste-transform.mjs for why root-only)
+  const copyPasteReady = transformRootHeightClass(content)
 
   // Escape for template literal embedding
   const escaped = copyPasteReady
