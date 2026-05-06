@@ -131,6 +131,8 @@ import NewProjectModal from '../../components-workspace/new-project-modal'
 import { prompts as newProjectModalPrompts } from '../../components-workspace/new-project-modal/prompts'
 import VoiceChatPill from '../../components-workspace/voice-chat-pill'
 import { prompts as voiceChatPillPrompts } from '../../components-workspace/voice-chat-pill/prompts'
+import UploadProgress from '../../components-workspace/upload-progress'
+import { prompts as uploadProgressPrompts } from '../../components-workspace/upload-progress/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1163,6 +1165,21 @@ Requirements:
     PreviewComponent: VoiceChatPill,
     code: componentCodes['voice-chat-pill'],
     prompts: voiceChatPillPrompts,
+  },
+  {
+    slug: 'upload-progress',
+    name: 'Upload Progress',
+    description: 'A collapsible file upload widget with a shimmer progress bar — indigo while uploading, amber on pause. Expand to see per-file rows with live progress, time remaining, and pause, resume, refresh, and stop controls.',
+    tags: [
+      { label: 'Widgets', accent: true },
+      { label: 'Interactive' },
+      { label: 'Animation' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/upload-progress.png?v=2',
+    PreviewComponent: UploadProgress,
+    code: componentCodes['upload-progress'],
+    prompts: uploadProgressPrompts,
   },
 ]
 
