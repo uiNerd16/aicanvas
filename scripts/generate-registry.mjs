@@ -7,6 +7,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
 import { join } from 'path'
+import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 
 const wsDir = 'components-workspace'
@@ -238,3 +239,12 @@ const mcpMeta = {
 
 writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')
 console.log(`Generated MCP metadata: ${mcpComponents.length} components, ${Object.keys(categoryCounts).length} categories`)
+
+// ── Lint the shipped JSON for transform integrity ─────────────────────────────
+// Catches the regex-too-greedy class of bug (e.g. inner h-full incorrectly
+// turned into min-h-screen, breaking installs). Non-zero exit fails the build.
+try {
+  execSync('node scripts/lint-registry-json.mjs', { stdio: 'inherit' })
+} catch {
+  process.exit(1)
+}
