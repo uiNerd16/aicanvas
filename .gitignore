@@ -58,3 +58,7 @@ app/lib/component-codes.generated.ts
 
 # PUFI inspector (local-only dev tool — type "pufi" to toggle)
 /public/pufi.js
+
+# GSC tooling outputs (audit reports, submission logs)
+/scripts/gsc-output/*
+!/scripts/gsc-output/.gitkeep
