@@ -7,6 +7,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
 import { join } from 'path'
+import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 
 const wsDir = 'components-workspace'
 const outDir = 'public/r'
@@ -126,8 +127,9 @@ for (const dir of dirs) {
   const description = meta.description || ''
   const deps = getDeps(content)
 
-  // Make copy-paste ready: h-full → min-h-screen so it fills the viewport standalone
-  const copyPasteReady = content.replace(/\bh-full\b/g, 'min-h-screen')
+  // Make copy-paste ready: h-full → min-h-screen on the ROOT element only
+  // (see scripts/lib/copy-paste-transform.mjs for why root-only)
+  const copyPasteReady = transformRootHeightClass(content)
 
   // Build the registry item JSON
   const item = {
