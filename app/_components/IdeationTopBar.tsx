@@ -24,7 +24,7 @@ const SEGMENT_NAMES: Record<string, string> = {
   andromeda: 'Andromeda',
   examples: 'See It in Action',
   dashboard: 'Dashboard',
-  'operator-console': 'Operator Console',
+  'service-order': 'Service Order',
 }
 
 // Block routes are full-screen — chrome is suppressed to let the

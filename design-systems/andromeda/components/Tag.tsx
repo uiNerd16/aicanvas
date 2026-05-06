@@ -31,7 +31,7 @@ const tagVariants = cva(
         default: [
           'bg-[color:var(--andromeda-surface-raised)]',
           'text-[color:var(--andromeda-text-secondary)]',
-          'border-[color:var(--andromeda-border-subtle)]',
+          'border-[color:var(--andromeda-border-base)]',
         ],
         accent: [
           'bg-[color:var(--andromeda-accent-500)]',

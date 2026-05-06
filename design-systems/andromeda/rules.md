@@ -151,6 +151,43 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 - The accentSweep gradient is a barely-visible teal whisper — if it reads as a colored card it's too strong
 - CardHeader, CardContent, CardFooter use consistent padding from `tokens.spacing` — never override
 
+## PanelHeader vs CardHeader
+
+Two header components, deliberately different:
+
+| | PanelHeader | CardHeader |
+|---|---|---|
+| Title style | sentence-case mono, `size.xl`, `weight.semibold`, `tracking.tight` | uppercase mono, `size.sm`, `weight.medium`, `tracking.wider` |
+| Padding | `spacing[4] spacing[5]` | `spacing[3]` all sides |
+| Use | top of a top-level dashboard panel | top of a nested Card composition |
+
+Don't mix them. A panel that sits as a top-level dashboard cell takes a PanelHeader; a Card embedded inside a layout takes a CardHeader. The two visual weights signal the hierarchy: a panel header is a louder "this is a section of the page", a card header is a quieter "this is a labeled subdivision".
+
+## Section dividers — always inset by spacing[3]
+
+Every horizontal divider that separates two regions inside a panel — between a PanelHeader and the body, between a tab strip and a filter row, between a body and a footer — is inset by **`spacing[3]` (12px)** from each side. The divider never touches the panel edges; it stops short so the corner-marker frame reads as the panel's container, and the inset reads as a lighter, more deliberate split.
+
+The pattern (sibling absolutely-positioned span on a `position: relative` parent):
+
+```jsx
+<div style={{ position: 'relative', /* …content padding… */ }}>
+  {content}
+  <span aria-hidden style={{
+    position: 'absolute',
+    left: tokens.spacing[3],
+    right: tokens.spacing[3],
+    bottom: 0,            // or top: 0 for an upper divider
+    height: '1px',
+    background: tokens.color.border.subtle,
+    pointerEvents: 'none',
+  }} />
+</div>
+```
+
+`PanelHeader`, `CardHeader`, `CardFooter`, `RadarChart`, and the `Table` primitive already render this for you. Inline strips inside example blocks must wear the same inset — extract a tiny `InsetDivider` helper at the top of the file rather than reaching for `borderBottom: 1px solid border.subtle`.
+
+**Tables are no exception.** Column header underlines and row separators are also inset by 12px. Because TR borders don't render under `border-collapse: collapse`, the Table primitive draws the line via a `linear-gradient` background-image with transparent stops at each end — the visible result is identical to other inset dividers, just delivered through a different mechanism.
+
 ---
 
 ## Layout
@@ -367,6 +404,22 @@ If both the input and the proxy are positioned (e.g. `absolute` + `relative`), C
 - Don't import `meridian/` tokens or components into `andromeda/`, or vice versa
 - Don't add a `// New` badge to any component (system retired 2026-04-19)
 - Don't comment WHAT the code does — names handle that. Comments only explain non-obvious WHY.
+
+---
+
+## Promoting an inline pattern to a component
+
+The promotion bar is **two real consumers**, not one. A sub-component that lives inline in a single example is interesting; a sub-component that's been re-implemented twice in independent examples is a real pattern. Promote the second time, not the first.
+
+PanelHeader is the single intentional exception so far: two near-identical inline copies inside one block (`CapacityPanel` and `RequestsPanel`). The collapse to one component reduced obvious duplication and the API immediately had two consumers to road-test against. If the "two copies in one block" shortcut becomes a habit, push back — usually the right answer is to leave the duplication and wait.
+
+What to do when you spot a candidate but the bar isn't met yet:
+
+1. Leave it inline. Resist the urge.
+2. Note it (mentally, in a PR comment, or in a follow-up plan file).
+3. The next example you build, watch for the pattern. If you reach for the same shape, *now* promote — and let the second consumer shape the API, not the first.
+
+Speculative promotion is the most common way design-system components grow brittle: APIs that fit one site, then need to be widened or forked the second time they're used.
 
 ---
 

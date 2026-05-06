@@ -40,8 +40,10 @@ import { CornerMarkers } from '../../../design-systems/andromeda/components/Corn
 import { DateRangePicker } from '../../../design-systems/andromeda/components/DateRangePicker'
 import { Drawer, DrawerBody, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../../../design-systems/andromeda/components/Drawer'
 import { EmptyState, EmptyStateAction, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from '../../../design-systems/andromeda/components/EmptyState'
+import { IconButton } from '../../../design-systems/andromeda/components/IconButton'
 import { Input } from '../../../design-systems/andromeda/components/Input'
 import { NavItem } from '../../../design-systems/andromeda/components/NavItem'
+import { PanelHeader } from '../../../design-systems/andromeda/components/PanelHeader'
 import { PanelMenu } from '../../../design-systems/andromeda/components/PanelMenu'
 import { SegmentedControl } from '../../../design-systems/andromeda/components/SegmentedControl'
 import { ProgressBar } from '../../../design-systems/andromeda/components/ProgressBar'
@@ -53,6 +55,10 @@ import { StatTile } from '../../../design-systems/andromeda/components/StatTile'
 import { Tag } from '../../../design-systems/andromeda/components/Tag'
 import { Textarea } from '../../../design-systems/andromeda/components/Textarea'
 import { Toggle } from '../../../design-systems/andromeda/components/Toggle'
+import { Tooltip } from '../../../design-systems/andromeda/components/Tooltip'
+import {
+  Table, TableHead, TableBody, TableRow, TableHeader, TableCell, TableStyles,
+} from '../../../design-systems/andromeda/components/Table'
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 
@@ -364,6 +370,74 @@ function RadioDemo() {
   )
 }
 
+function TableDemo() {
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
+  const rows = [
+    { id: 'AB-00032734', part: 'X60 BJGJ29839281', source: 'US, Denver - 24071',       lvl: 66, vol: '10.9985' },
+    { id: 'AB-00032612', part: 'X62 BAGJ28599202', source: 'US, New York - 25018',     lvl: 86, vol: '7.28699' },
+    { id: 'AB-00032736', part: 'X61 BHH09027512',  source: 'US, San Francisco - 27381', lvl: 75, vol: '8.85221' },
+  ]
+  return (
+    <div style={{ width: '100%', position: 'relative', background: tokens.color.surface.raised }}>
+      <TableStyles />
+      <Table>
+        <TableHead>
+          <TableRow hoverable={false}>
+            <TableHeader>Order ID</TableHeader>
+            <TableHeader>Part ID</TableHeader>
+            <TableHeader>Source Location</TableHeader>
+            <TableHeader
+              sort={sort}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSort(s => s === 'asc' ? 'desc' : 'asc')}
+            >
+              Source Level
+            </TableHeader>
+            <TableHeader align="right">Total Volume</TableHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((r, i) => (
+            <TableRow key={r.id} selected={i === 1}>
+              <TableCell muted>{r.id}</TableCell>
+              <TableCell>{r.part}</TableCell>
+              <TableCell muted>{r.source}</TableCell>
+              <TableCell>{r.lvl}%</TableCell>
+              <TableCell align="right">{r.vol}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function TooltipDemo() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[8] }}>
+      <Row label="Position · top (default)">
+        <Tooltip label="Refresh">
+          <IconButton aria-label="Refresh" icon={ArrowClockwise} />
+        </Tooltip>
+        <Tooltip label="Settings">
+          <IconButton aria-label="Settings" icon={Gear} />
+        </Tooltip>
+        <Tooltip label="Notifications">
+          <IconButton aria-label="Notifications" icon={Bell} />
+        </Tooltip>
+      </Row>
+      <Row label="Position · bottom">
+        <Tooltip label="Refresh" position="bottom">
+          <IconButton aria-label="Refresh" icon={ArrowClockwise} />
+        </Tooltip>
+        <Tooltip label="Settings" position="bottom">
+          <IconButton aria-label="Settings" icon={Gear} />
+        </Tooltip>
+      </Row>
+    </div>
+  )
+}
+
 function ToggleDemo() {
   return (
     <Row label="States">
@@ -477,7 +551,7 @@ function EmptyStateDemo() {
 function RadarChartDemo() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[5], width: '100%' }}>
-      <RadarChart label="/// Systems" title="Ship Diagnostics" description="Nominal vs critical thresholds" />
+      <RadarChart label="/// Systems" title="Ship Diagnostics" />
       <RadarChart
         label="/// Performance"
         title="System Performance"
@@ -535,6 +609,38 @@ function SegmentedControlDemo() {
             { value: 'all', label: 'ALL' },
           ]}
         />
+      </Row>
+    </div>
+  )
+}
+
+function PanelHeaderDemo() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: '100%', maxWidth: 640 }}>
+      <Row label="Title only">
+        <div style={{ width: '100%', position: 'relative', background: tokens.color.surface.raised }}>
+          <CornerMarkers />
+          <PanelHeader title="Capacity" />
+        </div>
+      </Row>
+      <Row label="Title + actions (PanelMenu)">
+        <div style={{ width: '100%', position: 'relative', background: tokens.color.surface.raised }}>
+          <CornerMarkers />
+          <PanelHeader
+            title="Requests"
+            actions={
+              <PanelMenu
+                ariaLabel="Requests options"
+                items={[
+                  { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                  { label: 'Export',  icon: Export,         onSelect: () => {} },
+                  { type: 'separator' },
+                  { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
+                ]}
+              />
+            }
+          />
+        </div>
       </Row>
     </div>
   )
@@ -658,6 +764,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'empty-state': EmptyStateDemo,
   input: InputDemo,
   'nav-item': NavItemDemo,
+  'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,
   'segmented-control': SegmentedControlDemo,
   'progress-bar': ProgressBarDemo,
@@ -669,6 +776,8 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   tag: TagDemo,
   textarea: TextareaDemo,
   toggle: ToggleDemo,
+  table: TableDemo,
+  tooltip: TooltipDemo,
 }
 
 export function AndromedaDemo({ slug }: { slug: string }) {

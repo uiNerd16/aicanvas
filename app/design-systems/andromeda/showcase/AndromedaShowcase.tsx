@@ -37,6 +37,7 @@ import {
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { Button, buttonVariants } from '../../../../design-systems/andromeda/components/Button'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
+import { PanelHeader } from '../../../../design-systems/andromeda/components/PanelHeader'
 import { PanelMenu } from '../../../../design-systems/andromeda/components/PanelMenu'
 import { SegmentedControl } from '../../../../design-systems/andromeda/components/SegmentedControl'
 import { DateRangePicker } from '../../../../design-systems/andromeda/components/DateRangePicker'
@@ -79,6 +80,10 @@ import {
 } from '../../../../design-systems/andromeda/components/EmptyState'
 import { RadarChart } from '../../../../design-systems/andromeda/components/RadarChart'
 import { Planet } from '../../../../design-systems/andromeda/components/Planet'
+import { Tooltip } from '../../../../design-systems/andromeda/components/Tooltip'
+import {
+  Table, TableHead, TableBody, TableRow, TableHeader, TableCell, TableStyles,
+} from '../../../../design-systems/andromeda/components/Table'
 import {
   Drawer,
   DrawerHeader,
@@ -530,7 +535,7 @@ export default function AndromedaShowcase() {
                   borderBottom: `1px solid ${tokens.color.border.subtle}`,
                 }}
               >
-                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 64, flexShrink: 0 }}>
+                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 110, flexShrink: 0 }}>
                   {`spacing.${token}`}
                 </span>
                 <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, width: 36, flexShrink: 0 }}>
@@ -614,6 +619,39 @@ export default function AndromedaShowcase() {
             <IconButton aria-label="Disabled default"     variant="default"     icon={Bell} disabled />
             <IconButton aria-label="Disabled outline"     variant="outline"     icon={Gear} disabled />
             <IconButton aria-label="Disabled destructive" variant="destructive" icon={Bell} disabled />
+          </Row>
+        </Section>
+
+        {/* ── PanelHeader ────────────────────────────────────────────────── */}
+        <Section
+          title="PanelHeader"
+          slug="panel-header"
+          description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
+        >
+          <Row label="Title only">
+            <div style={{ width: 320, position: 'relative', background: tokens.color.surface.raised }}>
+              <CornerMarkers />
+              <PanelHeader title="Capacity" />
+            </div>
+          </Row>
+          <Row label="Title + actions (PanelMenu)">
+            <div style={{ width: 320, position: 'relative', background: tokens.color.surface.raised }}>
+              <CornerMarkers />
+              <PanelHeader
+                title="Requests"
+                actions={
+                  <PanelMenu
+                    ariaLabel="Requests options"
+                    items={[
+                      { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                      { label: 'Export',  icon: Export,         onSelect: () => {} },
+                      { type: 'separator' },
+                      { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
+                    ]}
+                  />
+                }
+              />
+            </div>
           </Row>
         </Section>
 
@@ -1240,7 +1278,6 @@ export default function AndromedaShowcase() {
             <RadarChart
               label="/// Systems"
               title="Ship Diagnostics"
-              description="Nominal vs critical thresholds"
             />
             <RadarChart
               label="/// Performance"
@@ -1319,6 +1356,77 @@ export default function AndromedaShowcase() {
               </CardFooter>
             </Card>
           </div>
+        </Section>
+
+        {/* ── Table ──────────────────────────────────────────────────────── */}
+        <Section
+          title="Table"
+          slug="table"
+          description="Compound primitive for dense data tables. Sortable column headers with caret indicators, row hover lift, and selected-row accent-300 left edge. TableStyles injects the hover class rules once per page."
+        >
+          <TableStyles />
+          <Table>
+            <TableHead>
+              <TableRow hoverable={false}>
+                <TableHeader>Order ID</TableHeader>
+                <TableHeader>Part ID</TableHeader>
+                <TableHeader>Source Location</TableHeader>
+                <TableHeader sort="asc">Source Level</TableHeader>
+                <TableHeader sort="sortable">Service Level</TableHeader>
+                <TableHeader align="right">Total Volume</TableHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {[
+                { id: 'AB-00032734', part: 'X60 BJGJ29839281', source: 'US, Denver - 24071',        lvl: '66%', svc: '4/10', vol: '10.9985' },
+                { id: 'AB-00032736', part: 'X61 BHH09027512',  source: 'US, San Francisco - 27381',  lvl: '75%', svc: '3/10', vol: '8.85221', selected: true },
+                { id: 'AB-00039925', part: 'X52 BB0372/2 X5A', source: 'US, Houston - 24027',        lvl: '98%', svc: '7/10', vol: '10.29701' },
+                { id: 'AB-00032002', part: 'B12 BZ9025/2 X12', source: 'EU, Sweden - 00085',         lvl: '68%', svc: '2/10', vol: '3.92871' },
+              ].map((r) => (
+                <TableRow key={r.id} selected={!!r.selected}>
+                  <TableCell muted>{r.id}</TableCell>
+                  <TableCell>{r.part}</TableCell>
+                  <TableCell muted>{r.source}</TableCell>
+                  <TableCell>{r.lvl}</TableCell>
+                  <TableCell>{r.svc}</TableCell>
+                  <TableCell align="right">{r.vol}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Section>
+
+        {/* ── Tooltip ────────────────────────────────────────────────────── */}
+        <Section
+          title="Tooltip"
+          slug="tooltip"
+          description="Hover label for icon-only controls. Wraps any child and floats a mono uppercase label above (or below) it. No portal — stays in the nearest stacking context."
+        >
+          <Row label="Position · top (default)">
+            <Tooltip label="Refresh">
+              <IconButton aria-label="Refresh" icon={ArrowClockwise} />
+            </Tooltip>
+            <Tooltip label="Settings">
+              <IconButton aria-label="Settings" icon={Gear} />
+            </Tooltip>
+            <Tooltip label="Notifications">
+              <IconButton aria-label="Notifications" icon={Bell} />
+            </Tooltip>
+            <Tooltip label="Export">
+              <IconButton aria-label="Export" variant="outline" icon={Export} />
+            </Tooltip>
+            <Tooltip label="Delete" >
+              <IconButton aria-label="Delete" variant="destructive" icon={Trash} />
+            </Tooltip>
+          </Row>
+          <Row label="Position · bottom">
+            <Tooltip label="Refresh" position="bottom">
+              <IconButton aria-label="Refresh" icon={ArrowClockwise} />
+            </Tooltip>
+            <Tooltip label="Settings" position="bottom">
+              <IconButton aria-label="Settings" icon={Gear} />
+            </Tooltip>
+          </Row>
         </Section>
 
         {/* ── Drawer ─────────────────────────────────────────────────────── */}

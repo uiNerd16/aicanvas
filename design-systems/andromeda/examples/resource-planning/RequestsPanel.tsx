@@ -10,6 +10,7 @@
 
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
+import { PanelHeader } from '../../components/PanelHeader';
 import { PanelMenu } from '../../components/PanelMenu';
 import { ArrowClockwise, Export, Check, EyeSlash } from '@phosphor-icons/react';
 import { requestsBreakdown } from './data';
@@ -119,38 +120,21 @@ export function RequestsPanel() {
     >
       <CornerMarkers />
 
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: tokens.typography.fontSans,
-            fontSize: tokens.typography.size.xl,
-            fontWeight: tokens.typography.weight.semibold,
-            color: tokens.color.text.primary,
-            letterSpacing: tokens.typography.tracking.tight,
-          }}
-        >
-          Requests
-        </span>
-        <div style={{ flex: 1 }} />
-        <PanelMenu
-          ariaLabel="Requests options"
-          items={[
-            { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
-            { label: 'Review',  icon: Check,          onSelect: () => {} },
-            { label: 'Export',  icon: Export,         onSelect: () => {} },
-            { type: 'separator' },
-            { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
-          ]}
-        />
-      </div>
+      <PanelHeader
+        title="Requests"
+        actions={
+          <PanelMenu
+            ariaLabel="Requests options"
+            items={[
+              { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+              { label: 'Review',  icon: Check,          onSelect: () => {} },
+              { label: 'Export',  icon: Export,         onSelect: () => {} },
+              { type: 'separator' },
+              { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
+            ]}
+          />
+        }
+      />
 
       {/* Three cells — flex:1 so the row fills the panel height. */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>

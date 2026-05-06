@@ -11,6 +11,7 @@
 import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
+import { PanelHeader } from '../../components/PanelHeader';
 import { PanelMenu } from '../../components/PanelMenu';
 import { ArrowClockwise, Sliders, Export, EyeSlash } from '@phosphor-icons/react';
 import { clusterUtilisation, missionSuccessRate, activeAllocations } from './data';
@@ -214,38 +215,21 @@ export function CapacityPanel() {
     >
       <CornerMarkers />
 
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: tokens.typography.fontSans,
-            fontSize: tokens.typography.size.xl,
-            fontWeight: tokens.typography.weight.semibold,
-            color: tokens.color.text.primary,
-            letterSpacing: tokens.typography.tracking.tight,
-          }}
-        >
-          Capacity
-        </span>
-        <div style={{ flex: 1 }} />
-        <PanelMenu
-          ariaLabel="Capacity options"
-          items={[
-            { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
-            { label: 'Configure', icon: Sliders,        onSelect: () => {} },
-            { label: 'Export',    icon: Export,         onSelect: () => {} },
-            { type: 'separator' },
-            { label: 'Hide',      icon: EyeSlash,       onSelect: () => {} },
-          ]}
-        />
-      </div>
+      <PanelHeader
+        title="Capacity"
+        actions={
+          <PanelMenu
+            ariaLabel="Capacity options"
+            items={[
+              { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
+              { label: 'Configure', icon: Sliders,        onSelect: () => {} },
+              { label: 'Export',    icon: Export,         onSelect: () => {} },
+              { type: 'separator' },
+              { label: 'Hide',      icon: EyeSlash,       onSelect: () => {} },
+            ]}
+          />
+        }
+      />
 
       {/* Three KPI cells — flex:1 so the row fills the panel height in
           a bento grid where both top panels share a single row height. */}

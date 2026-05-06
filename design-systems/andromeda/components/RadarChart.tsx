@@ -208,12 +208,21 @@ export const RadarChart = forwardRef(function RadarChart(
 
       {/* Header */}
       <div style={{
+        position: 'relative',
         padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-        borderBottom: `1px solid ${tokens.color.border.subtle}`,
         display: 'flex',
         flexDirection: 'column',
         gap: '2px',
       }}>
+        <span aria-hidden style={{
+          position: 'absolute',
+          left: tokens.spacing[3],
+          right: tokens.spacing[3],
+          bottom: 0,
+          height: '1px',
+          background: tokens.color.border.subtle,
+          pointerEvents: 'none',
+        }} />
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
@@ -318,11 +327,20 @@ export const RadarChart = forwardRef(function RadarChart(
 
       {/* Legend */}
       <div style={{
+        position: 'relative',
         padding: `${tokens.spacing[2]} ${tokens.spacing[4]} ${tokens.spacing[3]}`,
-        borderTop: `1px solid ${tokens.color.border.subtle}`,
         display: 'flex',
         gap: tokens.spacing[4],
       }}>
+        <span aria-hidden style={{
+          position: 'absolute',
+          left: tokens.spacing[3],
+          right: tokens.spacing[3],
+          top: 0,
+          height: '1px',
+          background: tokens.color.border.subtle,
+          pointerEvents: 'none',
+        }} />
         {series.map(s => (
           <div key={s.key} style={{
             display: 'flex',

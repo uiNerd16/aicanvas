@@ -20,6 +20,23 @@ import { Toggle } from '../../components/Toggle';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { allocationSeries } from './data';
 
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 const SERIES = [
   { key: 'allocated', label: 'Allocated', color: tokens.color.text.secondary  },
   { key: 'used',      label: 'Used',      color: tokens.color.accent[400]   },
@@ -141,13 +158,14 @@ export function AllocationChart() {
       {/* Header */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[3],
           padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         }}
       >
+        <InsetDivider />
         <span
           style={{
             fontFamily: tokens.typography.fontSans,
@@ -282,13 +300,14 @@ export function AllocationChart() {
       {/* Footer — series toggles + vs previous period */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[3],
           padding: `${tokens.spacing[3]} ${tokens.spacing[5]}`,
-          borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         }}
       >
+        <InsetDivider side="top" />
         {SERIES.map((s) => (
           <LegendChip
             key={s.key}
