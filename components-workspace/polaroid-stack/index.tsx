@@ -66,14 +66,12 @@ export default function PolaroidStack() {
   }
 
   return (
-    <>
+    <div
+      className="relative flex h-full w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
+      onClick={toggle}
+    >
       {/* Load Caveat font for polaroid labels */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');`}</style>
-
-      <div
-        className="relative flex h-full w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
-        onClick={toggle}
-      >
         {/* Fixed-size stage so cards don't overflow the preview */}
         <div className="relative" style={{ width: 460, height: 220 }}>
           {CARDS.map((card, i) => {
@@ -195,6 +193,6 @@ export default function PolaroidStack() {
               : 'click a card · click bg to stack'}
         </motion.p>
       </div>
-    </>
+    </div>
   )
 }
