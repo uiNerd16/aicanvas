@@ -129,7 +129,7 @@ export default function UploadProgress() {
     ? 'Upload complete'
     : isPaused
     ? `${overallPct}% · Paused`
-    : `${overallPct}% · ${secondsLeft} second${secondsLeft !== 1 ? 's' : ''} left`
+    : `${overallPct}% · ${secondsLeft}s left`
 
   return (
     <div ref={rootRef} className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] px-4 dark:bg-[#1A1A19]">
@@ -166,7 +166,6 @@ export default function UploadProgress() {
               initial={{ opacity: 0, y: 12, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              layout
               transition={SPRING}
               style={{
                 backgroundColor: cardBg,
@@ -195,7 +194,7 @@ export default function UploadProgress() {
                         exit={{ opacity: 0, y: -3 }}
                         transition={{ duration: 0.15 }}
                         style={{ color: mutedColor }}
-                        className="mt-0.5 font-sans text-[14px] font-medium"
+                        className="mt-0.5 whitespace-nowrap font-sans text-[14px] font-medium"
                       >
                         {isDone ? 'Upload complete' : (
                           <>
@@ -203,7 +202,7 @@ export default function UploadProgress() {
                               {overallPct}%
                             </span>
                             {' · '}
-                            {isPaused ? 'Paused' : `${secondsLeft} second${secondsLeft !== 1 ? 's' : ''} left`}
+                            {isPaused ? 'Paused' : `${secondsLeft}s left`}
                           </>
                         )}
                       </motion.p>
@@ -213,17 +212,18 @@ export default function UploadProgress() {
 
                 {/* Action buttons */}
                 <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+                  {/* Group 1: Pause/Play + Refresh — hidden when complete */}
                   <AnimatePresence initial={false}>
                     {!isDone && (
                       <motion.div
-                        key="upload-controls"
+                        key="upload-controls-left"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={SPRING}
                         className="flex items-center gap-1.5"
                       >
-                        {/* Pause / Play */}
+                        {/* 1. Pause / Play */}
                         <IconBtn onClick={togglePause} bg={btnBg} color={btnColor}>
                           <AnimatePresence mode="wait" initial={false}>
                             {isPaused ? (
@@ -252,20 +252,15 @@ export default function UploadProgress() {
                           </AnimatePresence>
                         </IconBtn>
 
-                        {/* Refresh */}
+                        {/* 2. Refresh */}
                         <IconBtn onClick={handleRefresh} bg={btnBg} color={btnColor}>
                           <ArrowCounterClockwise size={15} weight="regular" />
-                        </IconBtn>
-
-                        {/* Stop */}
-                        <IconBtn onClick={handleStop} bg={btnBg} color={btnColor}>
-                          <X size={15} weight="regular" />
                         </IconBtn>
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  {/* Expand / Collapse */}
+                  {/* 3. Expand / Collapse — always visible */}
                   <IconBtn
                     onClick={() => setExpanded(e => !e)}
                     bg={btnBg}
@@ -297,6 +292,25 @@ export default function UploadProgress() {
                       )}
                     </AnimatePresence>
                   </IconBtn>
+
+                  {/* Group 2: Stop / Close — hidden when complete */}
+                  <AnimatePresence initial={false}>
+                    {!isDone && (
+                      <motion.div
+                        key="close-control"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={SPRING}
+                        className="flex items-center"
+                      >
+                        {/* 4. Stop / Close */}
+                        <IconBtn onClick={handleStop} bg={btnBg} color={btnColor}>
+                          <X size={15} weight="regular" />
+                        </IconBtn>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
