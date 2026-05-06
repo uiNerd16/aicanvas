@@ -1,6 +1,49 @@
 import fs from 'fs'
 import path from 'path'
 
+/**
+ * TS twin of `scripts/lib/copy-paste-transform.mjs#transformRootHeightClass`.
+ * Must stay in sync — this validator compares JSON content against source
+ * with the SAME transform applied. See the .mjs file for full rationale.
+ */
+function transformRootHeightClass(content: string): string {
+  const exportMatch = content.match(/export\s+default\s+function/)
+  if (!exportMatch || exportMatch.index === undefined) return content
+
+  const exportPos = exportMatch.index
+  const afterExport = content.slice(exportPos)
+
+  const returnMatch = afterExport.match(/return\s*\(/)
+  if (!returnMatch || returnMatch.index === undefined) return content
+
+  const returnEndPos = exportPos + returnMatch.index + returnMatch[0].length
+  const afterReturn = content.slice(returnEndPos)
+
+  const classNameRegex = /className\s*=\s*(["'])([^"']*?)\1/
+  const classNameMatch = afterReturn.match(classNameRegex)
+  if (!classNameMatch || classNameMatch.index === undefined) return content
+
+  const fullMatch = classNameMatch[0]
+  const quote = classNameMatch[1]
+  const classNameValue = classNameMatch[2]
+
+  if (!/\bh-full\b/.test(classNameValue)) return content
+
+  const transformedValue = classNameValue.replace(/\bh-full\b/g, 'min-h-screen')
+  if (transformedValue === classNameValue) return content
+
+  const transformedClassName = `className=${quote}${transformedValue}${quote}`
+
+  const matchAbsoluteStart = returnEndPos + classNameMatch.index
+  const matchAbsoluteEnd = matchAbsoluteStart + fullMatch.length
+
+  return (
+    content.slice(0, matchAbsoluteStart) +
+    transformedClassName +
+    content.slice(matchAbsoluteEnd)
+  )
+}
+
 interface ShadCNFile {
   target: string
   content: string
@@ -84,7 +127,9 @@ async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
     }
   }
 
-  const sourceContent = fs.readFileSync(sourceComponentPath, 'utf-8')
+  const rawSourceContent = fs.readFileSync(sourceComponentPath, 'utf-8')
+  // Apply the same copy-paste transform that generate-registry applies (root-only h-full → min-h-screen)
+  const sourceContent = transformRootHeightClass(rawSourceContent)
   // JSON content is escaped; unescape it for comparison
   const jsonContent = json.files[0].content
   if (jsonContent !== sourceContent) {
