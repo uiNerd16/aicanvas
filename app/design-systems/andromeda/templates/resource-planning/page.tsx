@@ -1,20 +1,20 @@
 // @ts-nocheck — consumes Andromeda tokens which are not type-checked yet.
 'use client'
 
-import ServiceOrder from '../../../../../design-systems/andromeda/examples/service-order'
+import ResourcePlanning from '../../../../../design-systems/andromeda/examples/resource-planning'
 import { tokens } from '../../../../../design-systems/andromeda/tokens'
-import { BlockChrome } from '../../../../_components/BlockChrome'
+import { TemplateChrome } from '../../../../_components/TemplateChrome'
 
-export default function ServiceOrderBlock() {
+export default function ResourcePlanningTemplate() {
   return (
     <div
       className="relative min-h-full"
       style={{ backgroundColor: tokens.color.surface.base }}
     >
-      <ServiceOrder />
-      <BlockChrome
-        blockSlug="andromeda-service-order"
-        blockName="Service Order"
+      <ResourcePlanning />
+      <TemplateChrome
+        templateSlug="andromeda-resource-planning"
+        templateName="Resource Planning"
         systemName="Andromeda"
         fallbackHref="/design-systems/andromeda/showcase"
       />

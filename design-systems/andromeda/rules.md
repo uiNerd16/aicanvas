@@ -1,8 +1,38 @@
 # Andromeda — Brain
 
-The third pillar of the Andromeda design system, alongside `tokens.ts` (values) and `components/` (code). Read this file before touching any Andromeda component, example, or block. If a rule here conflicts with code, fix the code — this file is the source of truth for design intent.
+The third pillar of the Andromeda design system, alongside `tokens.ts` (values) and `components/` (code). Read this file before touching any Andromeda component, example, or template. If a rule here conflicts with code, fix the code — this file is the source of truth for design intent.
 
 Updates land here the moment a new rule is discovered. Never let the same correction happen twice.
+
+---
+
+## Identity
+
+Andromeda is a sci-fi / blueprint design system for engineering dashboards, mission-critical UIs, and tools that look at live data. Near-monochrome, hairline borders, transparent surfaces. Color is reserved for measurement and primary action — never decoration. JetBrains Mono throughout, uppercase tracking for UI labels, sentence case for buttons.
+
+Built for designers, developers, and teams who want a system, not a stylesheet — so people (and AI agents) extending it produce output that fits, on the first try.
+
+Three pillars in this folder:
+
+- **`tokens.ts`** — values (colors, spacing, radius, typography, motion)
+- **`components/`** — structure (how each piece is composed in code)
+- **`rules.md`** (this file) + per-component **`<Component>.rules.md`** — judgment (when to use what, why, recipes, anti-patterns)
+
+Tokens give the values. Components give the patterns. The brain tells you which combinations are right.
+
+---
+
+## How to read this
+
+Rules are tagged by severity. When constraints conflict, higher severity wins.
+
+- `must` — non-negotiable. Code violating a `must` rule is wrong and must be fixed.
+- `should` — strong preference with rare exceptions. Deviation needs explicit reason.
+- `may` — sensible default; alternatives acceptable when context warrants.
+
+Untagged rules default to `should`. When two `must` rules conflict, ask the user — don't pick.
+
+This file is the **system-wide brain** — rules that apply across components. Component-specific rules live alongside the source as `<Component>.rules.md` files (e.g. `components/Button.rules.md`). When extending a component, read both.
 
 ---
 
@@ -17,7 +47,7 @@ Andromeda is a near-monochrome system. Color is reserved for meaning, never deco
 - Status of importance where the meaning IS the color: `Live`, `Online`, `Fault`, `Warning`
 - Threshold crossings on charts (red for negative move, accent for positive)
 
-### When color is NEVER used
+### When color is NEVER used (`must`)
 
 - Page titles, section titles, card titles
 - Button text — text is always `text.primary`, the meaning lives in the background
@@ -47,6 +77,70 @@ When unsure, prefer `accent-300` — it's the system's signal color.
 
 ---
 
+## Composition recipes
+
+These are the canonical compositions Andromeda was built to produce. When the user asks to "build a dashboard section" or "show a row of stats", match the request to a recipe rather than inventing one. Each recipe references components and tokens by name; the source-of-truth implementations live in the four templates (`examples/<template>/`).
+
+### Recipe 1 — Stat Card Row
+
+Use for: KPI grids, mission summary, telemetry overview.
+
+- Wrap in `<Card>` with `<PanelHeader>` (uppercase title, optional right-side controls)
+- Inside: row of 3-5 `<StatTile>` components, equal flex share
+- Tiles share borders edge-to-edge with `marginLeft: -1` so the seam is a single 1px line
+- Each tile: code label (top-right, `text.faint`), big numeric value (count-up animation), delta arrow + percentage
+- Gap between Card content and StatTile row: `tokens.spacing[3]` inset
+
+Reference: `examples/mission-control/sections/OverviewSection.tsx`
+
+### Recipe 2 — Chart Panel
+
+Use for: telemetry plots, threshold charts, time-series displays.
+
+- `<Card>` with `<PanelHeader>` (title + optional `<SegmentedControl>` for chart type / period right-side)
+- Body: SVG plot area + Y-axis label gutter (right, 72px wide) + X-axis row (24px tall)
+- Single series ink: `text.primary`. Multi-series: see Charts section for series-color hierarchy.
+- Cursor: `border.bright` dashed. Tooltip values: `text.primary`. Grid lines: `border.subtle` dashed `2 4`.
+- No glow, no decorative gradient on the plot.
+
+Reference: `examples/mission-control/AltitudeChart.tsx` (single), `examples/exchange-terminal/` (multi-series)
+
+### Recipe 3 — Detail Panel (nested)
+
+Use for: any nested content region with a label and body inside an outer panel.
+
+- `<Card>` with `<CardHeader>` + `<CardContent>` + optional `<CardFooter>`
+- Distinguish from a `PanelHeader` panel: CardHeader is the QUIETER hierarchy (a labeled subdivision); PanelHeader is LOUDER (a section of the page). Don't mix.
+- Corner markers as the frame; no perimeter stroke.
+- Section dividers between header/body/footer use the 12px inset rule.
+
+Reference: `examples/mission-control/SystemStatus.tsx`
+
+### Recipe 4 — Bento Dashboard Layout
+
+Use for: multi-panel screens where seams must align across columns.
+
+- CSS Grid (NOT nested flex): `gridTemplateColumns`, `gridTemplateRows`, `gap: tokens.spacing[3]`
+- `gridTemplateRows: 'minmax(220px, auto) 1fr'` — sensible minimum, flexible growth
+- Each panel: `display: flex; flex-direction: column; justify-content: space-between` so headline pins top, viz pins bottom
+- See "Bento grid alignment" rule in Layout section for full pattern + anti-pattern
+
+Reference: `examples/mission-control/index.tsx`
+
+### Recipe 5 — Form Row
+
+Use for: input + action layouts (search bars, range filters, command bars).
+
+- Single horizontal row, all elements share size token (`md` default → 32px)
+- Elements: `<Input>` + optionally `<DateRangePicker>` + primary `<Button variant="default">` + secondary `<Button variant="outline">`
+- Lock button height to `tokens.spacing[8]` if it grows from icon content (icons render taller than text)
+- One primary action per row. Secondary buttons stay outline.
+- Gap between elements: `tokens.spacing[3]`
+
+Reference: `examples/exchange-terminal/` filter row
+
+---
+
 ## Buttons
 
 | Variant | Background | Border | Text |
@@ -59,13 +153,13 @@ When unsure, prefer `accent-300` — it's the system's signal color.
 
 - Default size in examples: `md`. Use `sm` only for dense legend rows or overflow chips.
 - Hover lifts the border one stop and adds an 8px short-radius glow tinted in the bg color.
-- No glow on `outline`, `ghost`, or `link` variants.
+- `must` — No glow on `outline`, `ghost`, or `link` variants.
 
 ---
 
 ## Badges
 
-- Text is always `text.primary` on every variant. Background carries the meaning.
+- `must` — Text is always `text.primary` on every variant. Background carries the meaning.
 - The blinking 4×4 dot at the start of the badge takes the variant color, not the text.
 
 | Variant | Background | Dot color |
@@ -101,7 +195,7 @@ When a chart shows 2+ comparable series, color CAN carry series identity. Apply 
 
 The active dot for each series matches its line color so the user can identify which series they're hovering. Tooltip values stay `text.primary` regardless — the row label carries the series identity in the tooltip.
 
-If a chart needs more than 4 series, the chart is doing too much — split into stacked charts or use small multiples. Don't reach for a 5-color palette.
+`should` — If a chart needs more than 4 series, the chart is doing too much — split into stacked charts or use small multiples. Don't reach for a 5-color palette.
 
 ### Both
 
@@ -109,7 +203,7 @@ If a chart needs more than 4 series, the chart is doing too much — split into 
 - Tooltip value: `text.primary`
 - Grid lines: `border.subtle`, dashed `2 4`, horizontal only by default
 - Axis text: `text.muted`
-- No glow on any chart element
+- `must` — No glow on any chart element
 
 Chart ink is neutral by default because the chart itself is the data. Color enters only when it carries semantic meaning that the eye must distinguish at a glance.
 
@@ -118,7 +212,7 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 ## Progress bars
 
 - 30 segments, each a 6×16 rectangle, all skewed `skewX(-12deg)` into parallelograms
-- No glow on filled or empty segments
+- `must` — No glow on filled or empty segments
 - Filled: variant color (`accent-400` / `orange-400` / `red-400`) bg + matching border
 - Empty: `surface.overlay` bg, `border.subtle` border
 - Fill animation: stagger in groups of 3, 120ms cascade, 400ms transition
@@ -128,7 +222,7 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 
 ## Stat tiles
 
-- No scanline, no sweep, no shimmer on mount — count-up animation only
+- `must` — No scanline, no sweep, no shimmer on mount — count-up animation only
 - Delta arrow: `accent-300` on positive, `red-300` on negative, `text.muted` on neutral
 - Code label (e.g. `TLM-01`) sits in the top-right corner in `text.faint`
 - Tiles share borders edge-to-edge with `marginLeft: -1` so the seam is a single 1px line
@@ -140,7 +234,7 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 - Active: text `accent-300`, 4×4 right-edge indicator dot in `accent-300` with `accent-500` glow
 - Inactive: `text.secondary`, hover → `text.primary` + `surface.hover` bg
 - Mono labels by default; pass `mono={false}` for sans labels in non-system contexts
-- No background fill on the active state — the indicator dot is the signal
+- `must` — No background fill on the active state — the indicator dot is the signal
 
 ---
 
@@ -161,11 +255,11 @@ Two header components, deliberately different:
 | Padding | `spacing[4] spacing[5]` | `spacing[3]` all sides |
 | Use | top of a top-level dashboard panel | top of a nested Card composition |
 
-Don't mix them. A panel that sits as a top-level dashboard cell takes a PanelHeader; a Card embedded inside a layout takes a CardHeader. The two visual weights signal the hierarchy: a panel header is a louder "this is a section of the page", a card header is a quieter "this is a labeled subdivision".
+`must` — Don't mix them. A panel that sits as a top-level dashboard cell takes a PanelHeader; a Card embedded inside a layout takes a CardHeader. The two visual weights signal the hierarchy: a panel header is a louder "this is a section of the page", a card header is a quieter "this is a labeled subdivision".
 
 ## Section dividers — always inset by spacing[3]
 
-Every horizontal divider that separates two regions inside a panel — between a PanelHeader and the body, between a tab strip and a filter row, between a body and a footer — is inset by **`spacing[3]` (12px)** from each side. The divider never touches the panel edges; it stops short so the corner-marker frame reads as the panel's container, and the inset reads as a lighter, more deliberate split.
+`must` — Every horizontal divider that separates two regions inside a panel — between a PanelHeader and the body, between a tab strip and a filter row, between a body and a footer — is inset by **`spacing[3]` (12px)** from each side. The divider never touches the panel edges; it stops short so the corner-marker frame reads as the panel's container, and the inset reads as a lighter, more deliberate split.
 
 The pattern (sibling absolutely-positioned span on a `position: relative` parent):
 
@@ -194,7 +288,7 @@ The pattern (sibling absolutely-positioned span on a `position: relative` parent
 
 ### Size consistency in a row
 
-When two or more sized components sit on the same horizontal row (button + avatar, button + chip, button + icon-button, input + button, etc.), they MUST share the same size token: all `sm`, all `md`, or all `lg`. Mixing sizes in a row breaks the eye's baseline and makes the row look misaligned even if individual components are correct.
+`must` — When two or more sized components sit on the same horizontal row (button + avatar, button + chip, button + icon-button, input + button, etc.), they MUST share the same size token: all `sm`, all `md`, or all `lg`. Mixing sizes in a row breaks the eye's baseline and makes the row look misaligned even if individual components are correct.
 
 The size tokens map to these heights:
 - `sm` → 24px (avatar sm, icon-button sm baseline)
@@ -248,7 +342,7 @@ Why grid wins:
 
 Inside each panel, give the content row `flex: 1` and the cell `display: flex; flex-direction: column; justify-content: space-between` so the headline value pins to the top and the visualization pins to the bottom. When the grid stretches the panel to its row height, the content distributes evenly instead of leaving a gap underneath.
 
-Anti-pattern: parallel flex columns. `<flex-col><A/><B/></flex-col><flex-col><C/><D/></flex-col>` does NOT guarantee A and C share a height — they're sized independently per column. Use grid.
+`must` — Anti-pattern: parallel flex columns. `<flex-col><A/><B/></flex-col><flex-col><C/><D/></flex-col>` does NOT guarantee A and C share a height — they're sized independently per column. Use grid.
 
 ### Content insets in panels
 
@@ -262,7 +356,7 @@ Define `PANEL_INSET = 8` (or use `tokens.spacing[2]`) at the top of any composit
 - X-axis labels: NEVER use index 0 or N-1 with `translateX(-50%)`. The first/last label will clip on the parent `overflow: hidden`. Two acceptable patterns:
   - Anchor first label with `left: 0`, last with `right: 0`, no translate
   - Inset the indices to `[2, N/2, N-3]` so even centered labels have breathing room
-- Use `vectorEffect="non-scaling-stroke"` on every SVG line drawn under `preserveAspectRatio="none"` — without it strokes distort with the viewBox.
+- `must` — Use `vectorEffect="non-scaling-stroke"` on every SVG line drawn under `preserveAspectRatio="none"` — without it strokes distort with the viewBox.
 
 ### Stacked panel sections
 
@@ -391,7 +485,120 @@ When an interactive form control is built with an invisible native `<input>` ove
 
 If both the input and the proxy are positioned (e.g. `absolute` + `relative`), CSS paints them in tree order: the proxy, declared second, paints on top. Pin the input above with an explicit `z-10` (or any value > the proxy's). Hover state will look like it works because hover styles live on the proxy — that's the tell that the wiring is in fact broken.
 
+---
+
+## Motion
+
+Andromeda is 90% still. The few elements that move are signaling something — a measurement updating, a state changing, a user action acknowledged. Motion that doesn't carry meaning is decoration; decoration drains the system's authority.
+
+### Motion philosophy
+
+- `must` — Movement signals data movement or interaction acknowledgement. Never decorative.
+- `must` — Decorative animations forbidden: shimmer, sweep, scanline, pulsing glow, idle bounce. The list isn't exhaustive — when unsure, ask "what does this animation tell the user?" If the answer is "it looks cool", remove it.
+- `should` — When two animations would happen simultaneously on the same screen, prefer staggering them by a small offset. Simultaneous motion competes for attention.
+
+### Tempo
+
+Reach for token-defined durations and easings rather than ad-hoc values. The system's tempo is part of its identity.
+
+- Click acknowledgement (active flash, focus ring, button press): ~80ms, ease-out
+- Hover state transition: 140ms, ease-out (matches popover caret rotation)
+- Cascade entrances (progress bar segment fill, count-up): 120ms stagger, 400ms total motion duration
+- State changes (data update, badge variant flip): instant or ~80ms — should NOT use a long transition; the user wants to see the new value, not the animation
+- Stateful trigger (button → menu open, drawer slide): ~200ms — the menu's opening is the visual answer to the click
+
+### Approved motion patterns
+
+- **StatTile count-up** — number tweens to its value over ~800ms with ease-out. No shimmer, no scanline, no sweep on mount.
+- **ProgressBar segment fill** — staggered cascade, 120ms apart, 400ms each, total ~600-800ms for a full bar.
+- **IconButton press** — `active:scale(0.97)` for the click moment.
+- **Caret rotation on Popover open** — 140ms ease, 0° → 180°.
+- **Drawer / Sheet slide** — 200ms ease-out.
+
+### Forbidden motion patterns
+
+- `must` — No glow on ProgressBar segments (animated or static)
+- `must` — No shimmer on Card / StatTile / PanelHeader
+- `must` — No idle bounce, breathing, or pulse on any element that isn't communicating live state
+- `should` — No transition on text color when the surrounding context didn't change (e.g. don't tween hover text color over 300ms — use ~80ms or no transition)
+
+### Reduced motion
+
+`should` — Honor `prefers-reduced-motion: reduce`. For approved motion patterns: collapse cascades to instant, keep state-feedback flashes (they're feedback, not decoration), drop entrance animations.
+
+---
+
+## Sensible defaults
+
+When unsure, these are the safe choices. Each can be overridden with reason; without reason, default.
+
+| Question | Default | When to deviate |
+|---|---|---|
+| Component size in a row | `md` (32px height) | `sm` for dense legend rows / overflow chips; `lg` for primary actions in hero rows |
+| Button variant | `outline` | `default` for primary action (one per region); `destructive` for irreversible; `ghost`/`link` for de-emphasised secondary |
+| Body text color | `text.secondary` | `text.primary` for headlines + key values; `text.muted` for tight UI labels; `text.faint` for peripheral / decorative |
+| Accent stop | `accent-300` | `accent-200` for borders/lines; `accent-400` for solid fills; `accent-500` for badge bg + focus ring |
+| Card variant | base (`surface.raised`) | glow variant only for cards that highlight a live measurement |
+| Chart series ink | `text.primary` (single) | See "Multi-series" rule for color hierarchy |
+| Padding around panel content | `tokens.spacing[2]` (8px) clearance from corner markers | Larger only when the panel feels cramped |
+| Gap between siblings in a row | `tokens.spacing[3]` (12px) | `spacing[2]` for tight legends; `spacing[4]` for relaxed forms |
+| Section divider inset | `tokens.spacing[3]` from each side — never edge-to-edge | Never deviate |
+| Animation duration | `~140ms` ease-out | `~80ms` for click feedback; `~200ms` for stateful trigger reveals |
+
+---
+
+## Decision trees
+
+Pick the right component when two could plausibly fit. These are the most common branches.
+
+### "I want to show a number"
+
+- Standalone metric, ≥ 2 lines (label + value): **`<StatTile>`**
+- Inline status or label with text: **`<Badge>`**
+- Number with delta vs baseline: **`<StatTile>`** (with arrow)
+- Number inside a Table row: plain text, right-aligned, mono
+- Number that IS a measurement (live value): the value gets accent text color; everything else stays `text.primary`
+
+### "I want a labeled section"
+
+- Top-level dashboard panel: **`<Card>` + `<PanelHeader>`** (uppercase, `size.xl`, `tracking.tight`, `spacing[4] spacing[5]` padding)
+- Nested sub-region inside a panel: **`<Card>` + `<CardHeader>`** (uppercase, `size.sm`, `tracking.wider`, `spacing[3]` all sides)
+- Single-line label with right-side action: PanelHeader (with action slot)
+- Two visual weights signal hierarchy. Don't mix.
+
+### "I want a button"
+
+- Primary action, one per region: `variant="default"` (accent fill, glow on hover)
+- Secondary actions: `variant="outline"` (transparent + border)
+- Tertiary / dismissive: `variant="ghost"` (no border, no fill, hover lightens)
+- Irreversible (delete, abort, dispatch): `variant="destructive"` (red fill)
+- Inline link-style action: `variant="link"` (underlined, no chrome)
+- When unsure: `outline`. Outline is the safe wallpaper of the system.
+
+### "I want a list of items"
+
+- Navigation: **`<NavItem>`** with mono labels, indicator dot for active
+- Selectable options: **`<PanelMenu>`** or **`<Radio>` group** depending on cardinality
+- Tabular data: **`<Table>`** (with checkbox column if multi-select)
+- Status grid: row of **`<StatTile>`** or row of **`<Badge>`** depending on payload
+
+---
+
+## Voice & copy
+
+Token-driven typography is half the system's identity; copy convention is the other half.
+
+- `must` — UI labels (panel titles, badge text, code labels): mono, uppercase, `tracking.wider`. Examples: `MISSION CONTROL`, `TLM-01`, `BEARING`.
+- `should` — CTAs and actionable buttons: sentence case (e.g. *"Install"*, *"Launch sequence"*) — slightly more human than uppercase commands, used in places where the system is asking the user to act.
+- `must` — Body copy (descriptions, paragraphs, multi-line text): normal case, sentence case, `text.secondary`, normal letter-spacing.
+- `should` — No exclamation marks. The system is calm.
+- `should` — Code labels (TLM-01, EXG-04, etc.) live in `text.faint`. They are reference, not measurement.
+
+---
+
 ## Anti-patterns — never
+
+`must`-severity. Each is a real mistake that's been made and corrected.
 
 - Don't put accent color on text that is not a measurement
 - Don't add glow to ProgressBar segments or Stat tiles
@@ -404,6 +611,9 @@ If both the input and the proxy are positioned (e.g. `absolute` + `relative`), C
 - Don't import `meridian/` tokens or components into `andromeda/`, or vice versa
 - Don't add a `// New` badge to any component (system retired 2026-04-19)
 - Don't comment WHAT the code does — names handle that. Comments only explain non-obvious WHY.
+- Don't mix `<PanelHeader>` and `<CardHeader>` in the same hierarchy level
+- Don't use parallel flex columns where seam-alignment matters — use CSS Grid
+- Don't add a transition on text color over 300ms — use ~80ms or no transition
 
 ---
 
@@ -419,7 +629,7 @@ What to do when you spot a candidate but the bar isn't met yet:
 2. Note it (mentally, in a PR comment, or in a follow-up plan file).
 3. The next example you build, watch for the pattern. If you reach for the same shape, *now* promote — and let the second consumer shape the API, not the first.
 
-Speculative promotion is the most common way design-system components grow brittle: APIs that fit one site, then need to be widened or forked the second time they're used.
+`should` — Speculative promotion is the most common way design-system components grow brittle: APIs that fit one site, then need to be widened or forked the second time they're used.
 
 ---
 
@@ -433,6 +643,10 @@ If a behavior contradicts a rule in this file but the user asks for it explicitl
 
 ## How this file is maintained
 
-Every session that touches Andromeda should leave this file at least as accurate as it found it. When a correction lands ("don't use accent on titles", "no glow on progress bars", "first X-axis label clips at offset 0"), the rule goes in immediately — not after the session, not in a future cleanup pass. Now.
+`must` — Every session that touches Andromeda should leave this file at least as accurate as it found it. When a correction lands ("don't use accent on titles", "no glow on progress bars", "first X-axis label clips at offset 0"), the rule goes in immediately — not after the session, not in a future cleanup pass. Now.
 
 The file is read at the start of every Andromeda session. Length is fine; redundancy is not. If a rule is implied by another rule, collapse them.
+
+For corrections that apply to a single component, write to that component's `<Component>.rules.md` file (e.g. `components/Button.rules.md`). For corrections that span components or change system-wide intent, write here.
+
+The companion skill `andromeda-design-system` (`.claude/skills/andromeda-design-system/SKILL.md`) points at this file. As long as this file stays current, the skill stays current — the skill doesn't duplicate content, it just routes attention here.

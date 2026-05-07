@@ -27,17 +27,17 @@ const SEGMENT_NAMES: Record<string, string> = {
   'service-order': 'Service Order',
 }
 
-// Block routes are full-screen — chrome is suppressed to let the
+// Template routes are full-screen — chrome is suppressed to let the
 // composition fill the viewport.
-const BLOCK_LEAF_RE = /^\/design-systems\/[^/]+\/blocks\/[^/]+/
+const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 // Back-button target on per-component pages — the canonical Andromeda
 // component browser lives at /design-systems/andromeda/showcase.
 const ANDROMEDA_OVERVIEW = '/design-systems/andromeda/showcase'
 // Per-component pages live at /design-systems/andromeda/<slug>; the
-// `showcase`, `blocks`, and `examples` segments must be excluded so
+// `showcase`, `templates`, and `examples` segments must be excluded so
 // they fall through to the overview branch / breadcrumb fallback.
 const ANDROMEDA_COMPONENT_RE =
-  /^\/design-systems\/andromeda\/(?!examples|showcase|blocks)([^/]+)\/?$/
+  /^\/design-systems\/andromeda\/(?!examples|showcase|templates)([^/]+)\/?$/
 // All paths that should render the "Design Systems / Andromeda" header
 // — the new clean overview + showcase, plus the legacy ideation wrapper.
 const ANDROMEDA_OVERVIEW_PATHS = new Set([
@@ -62,7 +62,7 @@ export function IdeationTopBar() {
 
   // Distraction-free example pages provide their own chrome (a floating
   // exit button), so the topbar disappears there.
-  if (BLOCK_LEAF_RE.test(pathname)) return null
+  if (TEMPLATE_LEAF_RE.test(pathname)) return null
 
   // ── Andromeda component leaf — Back / name / socials ────────────────
   const componentMatch = pathname.match(ANDROMEDA_COMPONENT_RE)

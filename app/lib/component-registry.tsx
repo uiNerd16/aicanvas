@@ -164,12 +164,12 @@ export type ComponentMeta = Pick<
 
 // ─── Design systems (site-side lookups) ───────────────────────────────────────
 // Path/file data needed by the registry generator lives in
-// `scripts/lib/design-systems.config.mjs`. The website only needs name + block
-// lookups, declared inline below to avoid a cross-tooling import.
+// `scripts/lib/design-systems.config.mjs`. The website only needs name +
+// template lookups, declared inline below to avoid a cross-tooling import.
 
 export type DesignSystemSlug = 'andromeda'
 
-export interface DesignSystemBlockMeta {
+export interface DesignSystemTemplateMeta {
   slug: string
   name: string
   domain?: string
@@ -178,14 +178,14 @@ export interface DesignSystemBlockMeta {
 export interface DesignSystemMeta {
   slug: DesignSystemSlug
   name: string
-  blocks: DesignSystemBlockMeta[]
+  templates: DesignSystemTemplateMeta[]
 }
 
 export const DESIGN_SYSTEM_META: Record<DesignSystemSlug, DesignSystemMeta> = {
   andromeda: {
     slug: 'andromeda',
     name: 'Andromeda',
-    blocks: [
+    templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom' },
       { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
@@ -198,12 +198,12 @@ export function getDesignSystemMeta(slug: DesignSystemSlug): DesignSystemMeta | 
   return DESIGN_SYSTEM_META[slug]
 }
 
-export function getDesignSystemBlockMeta(
+export function getDesignSystemTemplateMeta(
   slug: string,
-): { system: DesignSystemMeta; block: DesignSystemBlockMeta } | undefined {
+): { system: DesignSystemMeta; template: DesignSystemTemplateMeta } | undefined {
   for (const system of Object.values(DESIGN_SYSTEM_META)) {
-    const block = system.blocks.find((b) => b.slug === slug)
-    if (block) return { system, block }
+    const template = system.templates.find((t) => t.slug === slug)
+    if (template) return { system, template }
   }
   return undefined
 }

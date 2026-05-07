@@ -87,7 +87,7 @@ function toTitle(folder) {
 }
 
 // ── Design-system dependency walker ───────────────────────────────────────────
-// Used by `block` and `system` registry items to bundle every relative-imported
+// Used by `template` and `system` registry items to bundle every relative-imported
 // file inside the system's `rootDir`. External imports (npm packages) become
 // the item's `dependencies[]`.
 
@@ -145,7 +145,7 @@ function resolveImport(fromFile, spec) {
  * already ships (declared via `registryDependencies`). The walker treats them
  * as boundaries — it sees the import edge but does not ship the file or
  * recurse into it. Use this to keep tokens out of the system bundle, or
- * components out of block bundles.
+ * components out of template bundles.
  *
  * @param {string[]} entries        Absolute paths to entry files
  * @param {string}   rootDirAbs     Absolute path to the system's root directory
@@ -218,12 +218,12 @@ const expectedNames = new Set(
 )
 expectedNames.add('registry') // keep the root index
 expectedNames.add('aicanvas-mcp') // MCP metadata file
-// Reserve filenames for design systems (tokens + system + blocks) so they
+// Reserve filenames for design systems (tokens + system + templates) so they
 // survive the stale-file cleanup pass.
 for (const ds of DESIGN_SYSTEMS) {
   expectedNames.add(`${ds.slug}-tokens`)
   expectedNames.add(ds.slug)
-  for (const block of ds.blocks) expectedNames.add(block.slug)
+  for (const template of ds.templates) expectedNames.add(template.slug)
 }
 for (const existing of readdirSync(outDir).filter(f => f.endsWith('.json'))) {
   const stem = existing.replace(/\.json$/, '')
@@ -299,13 +299,17 @@ for (const dir of dirs) {
   count++
 }
 
-// ── Design systems & blocks ───────────────────────────────────────────────────
+// ── Design systems & templates ───────────────────────────────────────────────
 // Three-layer registry items connected by `registryDependencies` so files are
 // installed exactly once regardless of which entry the user picks:
 //
-//   <slug>-tokens   (registry:lib)    — tokens.ts + utils + system icons
-//   <slug>          (registry:style)  — every component file; deps on tokens
-//   <slug>-<block>  (registry:block)  — only the example folder; deps on system
+//   <slug>-tokens     (registry:lib)    — tokens.ts + utils + system icons
+//   <slug>            (registry:style)  — every component file; deps on tokens
+//   <slug>-<template> (registry:block)  — only the example folder; deps on system
+//
+// Note: shadcn's CLI requires the `type` field to be one of its known enum
+// values — `registry:block` is shadcn vocabulary, kept verbatim in the JSON.
+// Everything user-facing (URLs, copy, MCP tool names) uses "template".
 //
 // Internal relative imports stay intact because every layer writes into the
 // same `components/aicanvas/<slug>/` tree, preserving the source layout.
@@ -319,6 +323,25 @@ function makeFile(fileAbs, rootDirAbs, slug) {
     type: 'registry:lib',
     target: targetPathFor(fileAbs, rootDirAbs, slug),
   }
+}
+
+// Brain-file attachers — sidecar .md files that ride alongside the code.
+// `rules.md` ships with tokens (system-wide brain — every install gets it via
+// the dep chain). `<Component>.rules.md` ships with its sibling `<Component>.tsx`
+// in the system bundle. Skipped silently if the .md file doesn't exist yet.
+function readSibling(fileAbs) {
+  try { if (statSync(fileAbs).isFile()) return fileAbs } catch {}
+  return null
+}
+
+function brainSiblingFor(componentTsxAbs) {
+  // components/Button.tsx → components/Button.rules.md
+  const rulesPath = componentTsxAbs.replace(/\.tsx$/, '.rules.md')
+  return readSibling(rulesPath)
+}
+
+function systemRulesFile(rootDirAbs) {
+  return readSibling(join(rootDirAbs, 'rules.md'))
 }
 
 function indexEntry(item, files) {
@@ -342,12 +365,17 @@ for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensWalk = walkDependencies(tokenEntriesAbs, rootDirAbs)
   const tokensFiles = tokensWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+  // Attach the system-wide brain (`rules.md`). Lives with tokens so every
+  // install path that reaches tokens also reaches the brain — components,
+  // system, templates all inherit via `registryDependencies`.
+  const systemBrainAbs = systemRulesFile(rootDirAbs)
+  if (systemBrainAbs) tokensFiles.push(makeFile(systemBrainAbs, rootDirAbs, ds.slug))
   const tokensItem = {
     $schema: SCHEMA,
     name: tokensSlug,
     type: 'registry:lib',
     title: `${ds.name} tokens`,
-    description: `Foundation files for the ${ds.name} design system — tokens, shared utilities, and the system mark. Required by every ${ds.name} component and block.`,
+    description: `Foundation files for the ${ds.name} design system — tokens, shared utilities, and the system mark. Required by every ${ds.name} component and template.`,
     author: 'aicanvas <https://aicanvas.me>',
     dependencies: tokensWalk.npmDeps,
     files: tokensFiles,
@@ -362,6 +390,14 @@ for (const ds of DESIGN_SYSTEMS) {
   // Excludes anything shipped by the tokens item; depends on it via registry deps.
   const systemWalk = walkDependencies(systemEntriesAbs, rootDirAbs, tokensFileSet)
   const systemFiles = systemWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+  // Attach per-component brain files. For every shipped `.tsx`, look for a
+  // sibling `<Component>.rules.md` and ship it in the same bundle. The user's
+  // AI editor reads both when editing the component.
+  for (const componentAbs of systemWalk.files) {
+    if (!componentAbs.endsWith('.tsx')) continue
+    const brainAbs = brainSiblingFor(componentAbs)
+    if (brainAbs) systemFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
+  }
   const systemItem = {
     $schema: SCHEMA,
     name: ds.slug,
@@ -380,26 +416,27 @@ for (const ds of DESIGN_SYSTEMS) {
   const systemFileSet = new Set(systemWalk.files)
   const dsBoundary = new Set([...tokensFileSet, ...systemFileSet])
 
-  // ── 3. Blocks (compositions) ─────────────────────────────────────────────────
-  // Each block ships only its example folder. Components and tokens come from
-  // the system + tokens registry items via `registryDependencies`.
-  for (const block of ds.blocks) {
-    const blockEntryAbs = resolve(rootDirAbs, block.entryPath)
-    const blockWalk = walkDependencies([blockEntryAbs], rootDirAbs, dsBoundary)
-    const blockFiles = blockWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-    const blockItem = {
+  // ── 3. Templates (compositions) ──────────────────────────────────────────────
+  // Each template ships only its example folder. Components and tokens come
+  // from the system + tokens registry items via `registryDependencies`.
+  // (Type stays `registry:block` because that's shadcn's CLI vocabulary.)
+  for (const template of ds.templates) {
+    const templateEntryAbs = resolve(rootDirAbs, template.entryPath)
+    const templateWalk = walkDependencies([templateEntryAbs], rootDirAbs, dsBoundary)
+    const templateFiles = templateWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+    const templateItem = {
       $schema: SCHEMA,
-      name: block.slug,
+      name: template.slug,
       type: 'registry:block',
-      title: `${block.name} (${ds.name})`,
-      description: `${block.name} composition from ${ds.name}${block.domain ? ` — ${block.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent block installs reuse it.`,
+      title: `${template.name} (${ds.name})`,
+      description: `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent template installs reuse it.`,
       author: 'aicanvas <https://aicanvas.me>',
       registryDependencies: [ds.slug],
-      dependencies: blockWalk.npmDeps,
-      files: blockFiles,
+      dependencies: templateWalk.npmDeps,
+      files: templateFiles,
     }
-    writeFileSync(join(outDir, `${block.slug}.json`), JSON.stringify(blockItem, null, 2) + '\n')
-    registryItems.push(indexEntry(blockItem, blockFiles))
+    writeFileSync(join(outDir, `${template.slug}.json`), JSON.stringify(templateItem, null, 2) + '\n')
+    registryItems.push(indexEntry(templateItem, templateFiles))
     dsCount++
   }
 }
@@ -414,7 +451,7 @@ const registry = {
 
 writeFileSync(join(outDir, 'registry.json'), JSON.stringify(registry, null, 2) + '\n')
 
-console.log(`Generated ${count} components + ${dsCount} system/block items in ${outDir}/`)
+console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/`)
 
 // ── AI Canvas MCP metadata ────────────────────────────────────────────────
 // A separate JSON the MCP server fetches at runtime. Carries fields the
@@ -456,11 +493,11 @@ for (const dir of dirs) {
   })
 }
 
-// Build design-system / block metadata from the same source-of-truth config.
+// Build design-system / template metadata from the same source-of-truth config.
 // Each entry mirrors the per-slug JSON's shape at a high level — enough for an
 // AI agent to decide what to install and to surface the dep chain.
 const mcpSystems = []
-const mcpBlocks = []
+const mcpTemplates = []
 for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensJsonPath = join(outDir, `${tokensSlug}.json`)
@@ -478,29 +515,29 @@ for (const ds of DESIGN_SYSTEMS) {
     dependencies: [...new Set([...(tokensItem?.dependencies ?? []), ...(sysItem?.dependencies ?? [])])].sort(),
     registryDependencies: sysItem?.registryDependencies ?? [],
     tokensSlug,
-    blockSlugs: ds.blocks.map((b) => b.slug),
+    templateSlugs: ds.templates.map((t) => t.slug),
     homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}`,
     sourceUrl: `https://aicanvas.me/r/${ds.slug}.json`,
     tokensSourceUrl: `https://aicanvas.me/r/${tokensSlug}.json`,
     installCommand: `npx shadcn@latest add @aicanvas/${ds.slug}`,
     tokensInstallCommand: `npx shadcn@latest add @aicanvas/${tokensSlug}`,
   })
-  for (const block of ds.blocks) {
-    const blockJsonPath = join(outDir, `${block.slug}.json`)
-    let blockItem
-    try { blockItem = JSON.parse(readFileSync(blockJsonPath, 'utf-8')) } catch { blockItem = null }
-    mcpBlocks.push({
-      slug: block.slug,
-      name: block.name,
+  for (const template of ds.templates) {
+    const templateJsonPath = join(outDir, `${template.slug}.json`)
+    let templateItem
+    try { templateItem = JSON.parse(readFileSync(templateJsonPath, 'utf-8')) } catch { templateItem = null }
+    mcpTemplates.push({
+      slug: template.slug,
+      name: template.name,
       system: ds.slug,
-      domain: block.domain,
-      description: blockItem?.description ?? `${block.name} block from ${ds.name}.`,
-      fileCount: blockItem?.files?.length ?? 0,
-      dependencies: blockItem?.dependencies ?? [],
-      registryDependencies: blockItem?.registryDependencies ?? [],
-      homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}/blocks/${block.slug.replace(`${ds.slug}-`, '')}`,
-      sourceUrl: `https://aicanvas.me/r/${block.slug}.json`,
-      installCommand: `npx shadcn@latest add @aicanvas/${block.slug}`,
+      domain: template.domain,
+      description: templateItem?.description ?? `${template.name} template from ${ds.name}.`,
+      fileCount: templateItem?.files?.length ?? 0,
+      dependencies: templateItem?.dependencies ?? [],
+      registryDependencies: templateItem?.registryDependencies ?? [],
+      homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}/templates/${template.slug.replace(`${ds.slug}-`, '')}`,
+      sourceUrl: `https://aicanvas.me/r/${template.slug}.json`,
+      installCommand: `npx shadcn@latest add @aicanvas/${template.slug}`,
     })
   }
 }
@@ -516,7 +553,7 @@ const mcpMeta = {
     .sort((a, b) => b.count - a.count),
   components: mcpComponents,
   systems: mcpSystems,
-  blocks: mcpBlocks,
+  templates: mcpTemplates,
 }
 
 writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')
