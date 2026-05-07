@@ -185,6 +185,7 @@ export default async function Page({
         code={entry.code}
         prompts={entry.prompts}
         dualTheme={entry.dualTheme ?? false}
+        designSystem={entry.designSystem}
         related={related}
         highlightedCode={<HighlightedCode code={entry.code} />}
       >

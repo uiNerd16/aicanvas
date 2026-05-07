@@ -10,6 +10,7 @@ type EventMap = {
   'CLI Copy': { component: string }
   'Install Tab Switch': { component: string; tab: 'cli' | 'manual' }
   'Fullscreen Open': { component: string }
+  'System Install Tier Click': { component: string; system: string }
 }
 
 export function track<K extends keyof EventMap>(name: K, props: EventMap[K]): void {

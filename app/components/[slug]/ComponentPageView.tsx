@@ -26,7 +26,8 @@ import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
 import { HeaderSocials } from '../HeaderSocials'
 import { Step } from '../Step'
-import type { ComponentMeta } from '../../lib/component-registry'
+import type { ComponentMeta, DesignSystemSlug } from '../../lib/component-registry'
+import { getDesignSystemMeta } from '../../lib/component-registry'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 
@@ -61,6 +62,7 @@ interface ComponentPageViewProps {
   code: string
   prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
+  designSystem?: DesignSystemSlug
   related: ComponentMeta[]
   highlightedCode: ReactNode
   children: ReactNode
@@ -77,10 +79,17 @@ export default function ComponentPageView({
   code,
   prompts,
   dualTheme,
+  designSystem,
   related,
   highlightedCode,
   children,
 }: ComponentPageViewProps) {
+  const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
+  const [installTier, setInstallTier] = useState<'component' | 'system'>('component')
+  // Reset to component tier on mount per slug — switching pages shouldn't carry tier
+  // selection across components.
+  useEffect(() => { setInstallTier('component') }, [slug])
+  const installSlug = installTier === 'system' && systemMeta ? systemMeta.slug : slug
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
@@ -207,7 +216,7 @@ export default function ComponentPageView({
     setPreviewKey((k) => k + 1)
   }
 
-  const cliCommand = `npx shadcn@latest add @aicanvas/${slug}`
+  const cliCommand = `npx shadcn@latest add @aicanvas/${installSlug}`
 
   async function copyCode() {
     try {
@@ -323,6 +332,15 @@ export default function ComponentPageView({
                 )
               )}
             </div>
+            {systemMeta && (
+              <Link
+                href={`/design-systems/${systemMeta.slug}`}
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-sand-500 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
+              >
+                Part of {systemMeta.name} design system
+                <ArrowRight weight="regular" size={12} />
+              </Link>
+            )}
           </div>
 
           {/* Main card */}
@@ -618,12 +636,12 @@ export default function ComponentPageView({
                               <button
                                 onClick={() => {
                                   const cmd = pkgManager === 'npm'
-                                    ? `npx shadcn@latest add @aicanvas/${slug}`
+                                    ? `npx shadcn@latest add @aicanvas/${installSlug}`
                                     : pkgManager === 'pnpm'
-                                    ? `pnpm dlx shadcn@latest add @aicanvas/${slug}`
+                                    ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
                                     : pkgManager === 'yarn'
-                                    ? `npx shadcn@latest add @aicanvas/${slug}`
-                                    : `bunx shadcn@latest add @aicanvas/${slug}`
+                                    ? `npx shadcn@latest add @aicanvas/${installSlug}`
+                                    : `bunx shadcn@latest add @aicanvas/${installSlug}`
                                   navigator.clipboard.writeText(cmd)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
@@ -636,14 +654,43 @@ export default function ComponentPageView({
                               </button>
                             </div>
 
+                            {/* Tier toggle — only for components belonging to a design system */}
+                            {systemMeta && (
+                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                                <button
+                                  onClick={() => setInstallTier('component')}
+                                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    installTier === 'component'
+                                      ? 'bg-sand-800 text-sand-100'
+                                      : 'text-sand-500 hover:text-sand-300'
+                                  }`}
+                                >
+                                  Just this component
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setInstallTier('system')
+                                    track('System Install Tier Click', { component: slug, system: systemMeta.slug })
+                                  }}
+                                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                                    installTier === 'system'
+                                      ? 'bg-sand-800 text-sand-100'
+                                      : 'text-sand-500 hover:text-sand-300'
+                                  }`}
+                                >
+                                  Whole {systemMeta.name}
+                                </button>
+                              </div>
+                            )}
+
                             {/* Command */}
                             <div className="px-4 py-3.5">
                               <code className="font-mono text-sm text-sand-300">
                                 {pkgManager === 'pnpm'
-                                  ? `pnpm dlx shadcn@latest add @aicanvas/${slug}`
+                                  ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
                                   : pkgManager === 'bun'
-                                  ? `bunx shadcn@latest add @aicanvas/${slug}`
-                                  : `npx shadcn@latest add @aicanvas/${slug}`}
+                                  ? `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                  : `npx shadcn@latest add @aicanvas/${installSlug}`}
                               </code>
                             </div>
                           </div>
