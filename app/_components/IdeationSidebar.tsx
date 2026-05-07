@@ -62,7 +62,7 @@ const SYSTEMS = [
     slug: 'andromeda',
     name: 'Andromeda',
     components: ANDROMEDA_COMPONENT_META.map((c) => ({ slug: c.slug, name: c.name })),
-    blocks: [
+    templates: [
       { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
       { slug: 'service-order', name: 'Service Order', domain: 'Telecom' },
       { slug: 'exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
@@ -71,9 +71,9 @@ const SYSTEMS = [
   },
 ] as const
 
-// Block routes are full-screen — chrome is suppressed to let the
+// Template routes are full-screen — chrome is suppressed to let the
 // composition fill the viewport, same way examples used to behave.
-const BLOCK_LEAF_RE = /^\/design-systems\/[^/]+\/blocks\/[^/]+/
+const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 
 function countByLabel(label: string) {
   return COMPONENTS.filter((c) =>
@@ -125,7 +125,7 @@ export function IdeationSidebar() {
   const pathname = usePathname() ?? ''
 
   // Examples open distraction-free — no sidebar, no topbar.
-  if (BLOCK_LEAF_RE.test(pathname)) return null
+  if (TEMPLATE_LEAF_RE.test(pathname)) return null
 
   // ── Mutual-exclusion of the two poles (Components / Design Systems) ──
   // Per-component pages live at `/design-systems/<slug>/<component>` (clean
@@ -176,12 +176,12 @@ export function IdeationSidebar() {
         (c) => pathname === `/design-systems/${activeSystem.slug}/${c.slug}`,
       )
     : null
-  const onBlocks =
+  const onTemplates =
     activeSystem &&
-    pathname.startsWith(`/design-systems/${activeSystem.slug}/blocks`)
-  const activeBlock = onBlocks
-    ? activeSystem.blocks.find(
-        (b) => pathname === `/design-systems/${activeSystem.slug}/blocks/${b.slug}`,
+    pathname.startsWith(`/design-systems/${activeSystem.slug}/templates`)
+  const activeTemplate = onTemplates
+    ? activeSystem.templates.find(
+        (t) => pathname === `/design-systems/${activeSystem.slug}/templates/${t.slug}`,
       )
     : null
 
@@ -421,18 +421,18 @@ export function IdeationSidebar() {
                     </Link>
                     {systemSelected && (
                       <ul className="mt-0.5 space-y-0.5">
-                        {/* ── Blocks (label + flat list) ──────────── */}
+                        {/* ── Templates (label + flat list) ──────────── */}
                         <li className="mt-1">
                           <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
-                            Blocks
+                            Templates
                           </div>
                           <ul className="space-y-0.5">
-                            {system.blocks.map((b) => {
-                              const isActive = activeBlock?.slug === b.slug
+                            {system.templates.map((t) => {
+                              const isActive = activeTemplate?.slug === t.slug
                               return (
-                                <li key={b.slug}>
+                                <li key={t.slug}>
                                   <Link
-                                    href={`/design-systems/${system.slug}/blocks/${b.slug}`}
+                                    href={`/design-systems/${system.slug}/templates/${t.slug}`}
                                     target="_blank"
                                     className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                       isActive
@@ -440,9 +440,9 @@ export function IdeationSidebar() {
                                         : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                     }`}
                                   >
-                                    <span className="flex-1 truncate">{b.name}</span>
+                                    <span className="flex-1 truncate">{t.name}</span>
                                     <span className="ml-auto text-xxs uppercase tracking-wider text-sand-500 dark:text-sand-500">
-                                      {b.domain}
+                                      {t.domain}
                                     </span>
                                   </Link>
                                 </li>

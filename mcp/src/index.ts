@@ -50,13 +50,13 @@ interface SystemMeta {
   componentCount: number
   fileCount: number
   dependencies: string[]
-  blockSlugs: string[]
+  templateSlugs: string[]
   homepageUrl: string
   sourceUrl: string
   installCommand: string
 }
 
-interface BlockMeta {
+interface TemplateMeta {
   slug: string
   name: string
   system: string
@@ -78,7 +78,7 @@ interface MetaPayload {
   components: ComponentMeta[]
   // Older deploys may not include these fields — treat as optional.
   systems?: SystemMeta[]
-  blocks?: BlockMeta[]
+  templates?: TemplateMeta[]
 }
 
 interface ShadcnRegistryItem {
@@ -485,10 +485,10 @@ server.registerTool(
         `${systems.length} design system${systems.length === 1 ? '' : 's'} on AI Canvas:`,
         '',
         ...systems.map((s) =>
-          `  ${s.name.padEnd(16)}  ${String(s.componentCount).padStart(2)} components, ${s.blockSlugs.length} blocks`,
+          `  ${s.name.padEnd(16)}  ${String(s.componentCount).padStart(2)} components, ${s.templateSlugs.length} templates`,
         ),
         '',
-        'Use `get_system` to fetch the full source of a system, or `get_block` for a single composition.',
+        'Use `get_system` to fetch the full source of a system, or `get_template` for a single composition.',
       ]
       return {
         content: [asTextContent(lines.join('\n'))],
@@ -553,20 +553,20 @@ server.registerTool(
   },
 )
 
-// ── Tool: get_block ──────────────────────────────────────────────────────────
+// ── Tool: get_template ───────────────────────────────────────────────────────
 
 server.registerTool(
-  'get_block',
+  'get_template',
   {
-    title: 'Get a complete AI Canvas design-system block (every file)',
+    title: 'Get a complete AI Canvas design-system template (every file)',
     description:
-      'Return all files for a single block — the example composition plus every component it uses plus shared tokens. Use for "I want exactly this dashboard" / "give me the entire mission-control screen". One CLI command installs all files.',
+      'Return all files for a single template — the example composition plus every component it uses plus shared tokens. Use for "I want exactly this dashboard" / "give me the entire mission-control screen". One CLI command installs all files.',
     inputSchema: {
       slug: z
         .string()
         .min(1)
         .describe(
-          'Block slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_systems` then inspect blockSlugs to discover.',
+          'Template slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_systems` then inspect templateSlugs to discover.',
         ),
     },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
@@ -574,22 +574,22 @@ server.registerTool(
   async ({ slug }) => {
     try {
       const meta = await fetchMeta()
-      const block = (meta.blocks ?? []).find((b) => b.slug === slug)
-      if (!block) {
+      const template = (meta.templates ?? []).find((t) => t.slug === slug)
+      if (!template) {
         return errorResult(
-          `No block found with slug "${slug}". Use \`list_systems\` to see available blocks.`,
+          `No template found with slug "${slug}". Use \`list_systems\` to see available templates.`,
         )
       }
       const item = await fetchComponentSource(slug)
       const summary = [
-        `# ${block.name} (${block.system}${block.domain ? ` · ${block.domain}` : ''})`,
+        `# ${template.name} (${template.system}${template.domain ? ` · ${template.domain}` : ''})`,
         '',
-        block.description,
+        template.description,
         '',
         `Files: ${item.files.length}`,
-        `Dependencies: ${block.dependencies.join(', ') || '(none)'}`,
-        `Install: ${block.installCommand}`,
-        `Preview: ${block.homepageUrl}`,
+        `Dependencies: ${template.dependencies.join(', ') || '(none)'}`,
+        `Install: ${template.installCommand}`,
+        `Preview: ${template.homepageUrl}`,
         '',
         `--- file index ---`,
         ...item.files.map((f) => `  ${f.path}`),
@@ -598,7 +598,7 @@ server.registerTool(
       return {
         content: [asTextContent(summary)],
         structuredContent: {
-          ...block,
+          ...template,
           files: item.files,
         },
       }

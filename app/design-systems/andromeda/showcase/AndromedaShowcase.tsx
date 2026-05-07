@@ -209,7 +209,15 @@ function Row({ label, children }: { label?: string; children: ReactNode }) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export default function AndromedaShowcase() {
+interface AndromedaShowcaseProps {
+  componentCount?: number
+  templateCount?: number
+}
+
+export default function AndromedaShowcase({
+  componentCount = 0,
+  templateCount = 0,
+}: AndromedaShowcaseProps = {}) {
   // Local interactive state used by the live demos below.
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sliderValue, setSliderValue] = useState(64)
@@ -269,6 +277,18 @@ export default function AndromedaShowcase() {
           >
             Component Showcase
           </h1>
+          <p
+            style={{
+              margin: `${tokens.spacing[4]} 0 0 0`,
+              maxWidth: '56ch',
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.sm,
+              lineHeight: tokens.typography.lineHeight.normal,
+              color: tokens.color.text.secondary,
+            }}
+          >
+            Designed for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
+          </p>
           <div
             style={{
               marginTop: tokens.spacing[3],
@@ -279,7 +299,7 @@ export default function AndromedaShowcase() {
               letterSpacing: tokens.typography.tracking.wide,
             }}
           >
-            20 components · all variants · live interaction
+            {componentCount} components · {templateCount} templates · one-command install
           </div>
         </header>
 

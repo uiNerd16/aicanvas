@@ -1,16 +1,20 @@
 /**
  * Design-system declarations — source of truth for both:
- *  - the registry generator (which emits multi-file `andromeda.json` and per-block JSONs)
- *  - the website (per-component "Part of Andromeda" affordance, BlockChrome metadata)
+ *  - the registry generator (which emits multi-file `andromeda.json` and per-template JSONs)
+ *  - the website (per-component "Part of Andromeda" affordance, TemplateChrome metadata)
  *
  * Keeping this in `.mjs` means the build script and Next.js can both import it
  * without parsing TS or duplicating the data. New systems land here.
+ *
+ * Note: registry items of type `registry:block` keep that name in the JSON because
+ * shadcn's CLI only recognises a fixed set of `type` values. Everything user-facing
+ * uses "template"; only the JSON schema field uses the shadcn vocabulary.
  */
 
 /**
- * @typedef {Object} DesignSystemBlock
+ * @typedef {Object} DesignSystemTemplate
  * @property {string} slug         Registry slug, e.g. 'andromeda-mission-control'
- * @property {string} name         Human label for the block widget
+ * @property {string} name         Human label for the template widget
  * @property {string} [domain]     Short domain tag (e.g. 'Sci-Fi', 'Finance')
  * @property {string} entryPath    Entry file relative to the system's `rootDir`.
  *                                 The generator walks transitive imports starting
@@ -29,7 +33,7 @@
  * @property {string[]} systemEntries Component files. Shipped as the `<slug>` system
  *                                    item, which depends on `<slug>-tokens` so the
  *                                    foundation isn't duplicated. Walked transitively.
- * @property {DesignSystemBlock[]} blocks
+ * @property {DesignSystemTemplate[]} templates
  */
 
 /** @type {DesignSystem[]} */
@@ -73,7 +77,7 @@ export const DESIGN_SYSTEMS = [
       'components/Toggle.tsx',
       'components/Tooltip.tsx',
     ],
-    blocks: [
+    templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom',    entryPath: 'examples/service-order/index.tsx' },
       { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance',    entryPath: 'examples/exchange-terminal/index.tsx' },
@@ -86,10 +90,10 @@ export function getDesignSystem(slug) {
   return DESIGN_SYSTEMS.find((s) => s.slug === slug)
 }
 
-export function getDesignSystemBlock(slug) {
+export function getDesignSystemTemplate(slug) {
   for (const system of DESIGN_SYSTEMS) {
-    const block = system.blocks.find((b) => b.slug === slug)
-    if (block) return { system, block }
+    const template = system.templates.find((t) => t.slug === slug)
+    if (template) return { system, template }
   }
   return undefined
 }
