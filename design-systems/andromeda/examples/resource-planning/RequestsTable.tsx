@@ -10,10 +10,12 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { MagnifyingGlass, CaretUp } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
+import { rowContainer, rowItem } from '../../components/lib/motion';
 import { requestRows, filterTabs } from './data';
 
 function InsetDivider({ side = 'bottom' }) {
@@ -221,13 +223,19 @@ export function RequestsTable() {
               <ColHeader align="right">Amount</ColHeader>
             </tr>
           </thead>
-          <tbody>
+          <motion.tbody
+            variants={rowContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             {filtered.map((r, idx) => {
               const key = `${r.team}-${idx}`;
               const isSelected = selected.has(key);
               return (
-                <tr
+                <motion.tr
                   key={key}
+                  variants={rowItem}
                   style={{
                     ...rowSeparatorStyle,
                     transition: 'background 100ms ease',
@@ -307,10 +315,10 @@ export function RequestsTable() {
                   >
                     {r.amount}
                   </td>
-                </tr>
+                </motion.tr>
               );
             })}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
     </div>

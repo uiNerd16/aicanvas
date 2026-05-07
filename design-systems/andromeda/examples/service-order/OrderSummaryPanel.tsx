@@ -33,18 +33,39 @@ import { IconButton } from '../../components/IconButton';
 import { RiskGauge } from './RiskGauge';
 import { order, slaRisk, orderMetadata } from './data';
 
+// ── Inset divider — system rule: every horizontal divider inside a
+// panel inset 12px from each side, never edge-to-edge. See
+// `rules.md` → Section dividers.
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
 // ── Header strip (Order ID · timer · actions) ──────────────────────
 function HeaderStrip() {
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
       }}
     >
+      <InsetDivider />
       <span
         style={{
           fontFamily: tokens.typography.fontMono,
@@ -113,12 +134,13 @@ function SlaCard() {
       {/* Panel-style header: title on left, pin + close on right */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         }}
       >
+        <InsetDivider />
         <span
           style={{
             fontFamily: tokens.typography.fontMono,

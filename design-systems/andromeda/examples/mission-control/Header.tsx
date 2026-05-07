@@ -5,6 +5,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 
@@ -56,20 +57,23 @@ function MissionClock() {
   );
 }
 
-export function Header({ sectionTitle = 'Overview' }) {
+export function Header({ sectionTitle = 'Overview', motionProps }) {
   return (
-    <header style={{
-      position: 'relative',
-      height: tokens.layout.headerHeight,
-      flexShrink: 0,
-      background: tokens.color.surface.raised,
-      display: 'flex',
-      alignItems: 'center',
-      padding: `0 ${tokens.spacing[6]}`,
-      gap: tokens.spacing[5],
-      backdropFilter: 'blur(2px)',
-      WebkitBackdropFilter: 'blur(2px)',
-    }}>
+    <motion.header
+      {...(motionProps ?? {})}
+      style={{
+        position: 'relative',
+        height: tokens.layout.headerHeight,
+        flexShrink: 0,
+        background: tokens.color.surface.raised,
+        display: 'flex',
+        alignItems: 'center',
+        padding: `0 ${tokens.spacing[6]}`,
+        gap: tokens.spacing[5],
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+      }}
+    >
       <CornerMarkers />
 
       {/* Title block — section-aware */}
@@ -125,6 +129,6 @@ export function Header({ sectionTitle = 'Overview' }) {
           Nominal
         </span>
       </div>
-    </header>
+    </motion.header>
   );
 }

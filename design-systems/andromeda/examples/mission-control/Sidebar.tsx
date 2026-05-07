@@ -3,6 +3,7 @@
 // MISSION CONTROL: Sidebar
 // ============================================================
 
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
@@ -27,18 +28,21 @@ function InsetDivider({ side = 'bottom' }) {
   );
 }
 
-export function Sidebar({ activeNav, onNavChange }) {
+export function Sidebar({ activeNav, onNavChange, motionProps }) {
   return (
-    <aside style={{
-      position: 'relative',
-      width: tokens.layout.sidebarWidth,
-      flexShrink: 0,
-      background: tokens.color.surface.raised,
-      display: 'flex',
-      flexDirection: 'column',
-      backdropFilter: 'blur(2px)',
-      WebkitBackdropFilter: 'blur(2px)',
-    }}>
+    <motion.aside
+      {...(motionProps ?? {})}
+      style={{
+        position: 'relative',
+        width: tokens.layout.sidebarWidth,
+        flexShrink: 0,
+        background: tokens.color.surface.raised,
+        display: 'flex',
+        flexDirection: 'column',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+      }}
+    >
       <CornerMarkers />
 
       {/* Logo block */}
@@ -138,6 +142,6 @@ export function Sidebar({ activeNav, onNavChange }) {
           </div>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }

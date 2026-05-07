@@ -15,12 +15,14 @@ import {
   Warning,
   XCircle,
 } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { Badge } from '../../components/Badge';
 import { IconButton } from '../../components/IconButton';
 import { Tooltip } from '../../components/Tooltip';
+import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { OrderMetadataPanel } from './OrderMetadataPanel';
 import { SlaPanel } from './SlaPanel';
@@ -209,6 +211,15 @@ function PageHeaderStrip() {
 
 // ── Composition ───────────────────────────────────────────────────
 export default function ServiceOrder() {
+  // Five cascade slots, top-to-bottom: TopBar, PageHeaderStrip, then
+  // OrderMetadataPanel + SlaPanel side-by-side (left-to-right stagger),
+  // then ItemsPanel.
+  const topBarMotion         = useCascadeProps(0);
+  const pageHeaderMotion     = useCascadeProps(1);
+  const orderMetaMotion      = useCascadeProps(2);
+  const slaMotion            = useCascadeProps(3);
+  const itemsMotion          = useCascadeProps(4);
+
   return (
     <div
       style={{
@@ -225,8 +236,12 @@ export default function ServiceOrder() {
       }}
     >
       <HoverStyles />
-      <TopBar />
-      <PageHeaderStrip />
+      <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
+        <TopBar />
+      </motion.div>
+      <motion.div {...pageHeaderMotion} style={{ flexShrink: 0 }}>
+        <PageHeaderStrip />
+      </motion.div>
 
       <main
         style={{
@@ -246,11 +261,17 @@ export default function ServiceOrder() {
             gap: tokens.spacing[3],
           }}
         >
-          <OrderMetadataPanel />
-          <SlaPanel />
+          <motion.div {...orderMetaMotion}>
+            <OrderMetadataPanel />
+          </motion.div>
+          <motion.div {...slaMotion}>
+            <SlaPanel />
+          </motion.div>
         </div>
 
-        <ItemsPanel />
+        <motion.div {...itemsMotion}>
+          <ItemsPanel />
+        </motion.div>
       </main>
     </div>
   );
