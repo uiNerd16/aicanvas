@@ -117,5 +117,19 @@ export function andromedaVars() {
     '--andromeda-radius-none': t.radius.none,
     '--andromeda-radius-sm':   t.radius.sm,
     '--andromeda-radius-md':   t.radius.md,
+    // Motion — every duration, easing, and stagger from tokens.motion.
+    // Components and templates reference these as `var(--andromeda-duration-*)`
+    // and `var(--andromeda-easing-*)` instead of hardcoding ms / cubic-bezier.
+    '--andromeda-duration-fast':       t.motion.duration.fast,
+    '--andromeda-duration-normal':     t.motion.duration.normal,
+    '--andromeda-duration-slow':       t.motion.duration.slow,
+    '--andromeda-duration-cascade':    t.motion.duration.cascade,
+    '--andromeda-duration-countup':    t.motion.duration.countup,
+    '--andromeda-easing-standard':     t.motion.easing.standard,
+    '--andromeda-easing-out':          t.motion.easing.out,
+    '--andromeda-easing-in':           t.motion.easing.in,
+    '--andromeda-easing-sharp':        t.motion.easing.sharp,
+    '--andromeda-stagger-cascade':     t.motion.stagger.cascade,
+    '--andromeda-stagger-progressbar': t.motion.stagger.progressBar,
   };
 }

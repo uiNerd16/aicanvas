@@ -11,11 +11,13 @@
 
 import { useState } from 'react';
 import { Sliders, Download } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { Button } from '../../components/Button';
 import { DateRangePicker } from '../../components/DateRangePicker';
+import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { CapacityPanel } from './CapacityPanel';
 import { AllocationChart } from './AllocationChart';
@@ -223,6 +225,17 @@ function StatusBar() {
 
 // ─── Composition ────────────────────────────────────────────────────────
 export default function ResourcePlanning() {
+  // Six cascade slots, top-to-bottom: TopBar, StatusBar, then the 2×2
+  // bento grid in reading order — top-left, top-right, bottom-left,
+  // bottom-right. Cascade indices line up with grid positions so the
+  // user reads the page composing itself the way the eye scans.
+  const topBarMotion       = useCascadeProps(0);
+  const statusBarMotion    = useCascadeProps(1);
+  const capacityMotion     = useCascadeProps(2);
+  const requestsPanelMotion = useCascadeProps(3);
+  const allocationMotion   = useCascadeProps(4);
+  const requestsTableMotion = useCascadeProps(5);
+
   return (
     <div
       style={{
@@ -240,8 +253,12 @@ export default function ResourcePlanning() {
       }}
     >
       <HoverStyles />
-      <TopBar />
-      <StatusBar />
+      <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
+        <TopBar />
+      </motion.div>
+      <motion.div {...statusBarMotion} style={{ flexShrink: 0 }}>
+        <StatusBar />
+      </motion.div>
 
       {/* Main 2×2 bento grid. Grid (not flex) is used so the top row shares
           a single height across both columns and the bottom row fills the
@@ -257,10 +274,18 @@ export default function ResourcePlanning() {
           minHeight: 0,
         }}
       >
-        <CapacityPanel />
-        <RequestsPanel />
-        <AllocationChart />
-        <RequestsTable />
+        <motion.div {...capacityMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <CapacityPanel />
+        </motion.div>
+        <motion.div {...requestsPanelMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <RequestsPanel />
+        </motion.div>
+        <motion.div {...allocationMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <AllocationChart />
+        </motion.div>
+        <motion.div {...requestsTableMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <RequestsTable />
+        </motion.div>
       </main>
     </div>
   );

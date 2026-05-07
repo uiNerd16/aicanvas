@@ -9,7 +9,8 @@
 
 'use client';
 
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 
 const BARS       = 30;  // number of columns
@@ -61,23 +62,40 @@ const valueClass = cn(
 /** @type {React.ForwardRefExoticComponent<ProgressBarProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const ProgressBar = forwardRef(function ProgressBar(
   { className, label, value, variant = 'default', style, ...props },
-  ref,
+  outerRef,
 ) {
   const clamped     = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
   const activeCount = Math.round((clamped / 100) * BARS);
   const cfg         = variantConfig[variant] ?? variantConfig.default;
 
-  // Render-with-zero-then-set so the first paint shows an empty track,
-  // and per-bar transition-delay below makes them light up left→right.
+  // Scroll-aware fill: render with zero-active first, then on first
+  // viewport intersection switch to `activeCount` so the per-bar
+  // transition-delay below lights them up left→right at the moment
+  // the user actually sees the bar. ProgressBars below the fold no
+  // longer animate invisibly.
+  //
+  // `once: true` — animate only the first time. Re-entering the
+  // viewport (scroll up, scroll down again) doesn't re-trigger.
+  // `amount: 0.3` — wait until 30% of the bar is visible. Higher
+  // than the cascade's 0.15 because the bar's reveal is its own
+  // motion event; we want the user clearly looking at it.
+  const internalRef = useRef(null);
+  const setRefs = (node) => {
+    internalRef.current = node;
+    if (typeof outerRef === 'function') outerRef(node);
+    else if (outerRef) outerRef.current = node;
+  };
+  const inView = useInView(internalRef, { once: true, amount: 0.3 });
   const [displayed, setDisplayed] = useState(0);
   useEffect(() => {
+    if (!inView) return;
     const id = requestAnimationFrame(() => setDisplayed(activeCount));
     return () => cancelAnimationFrame(id);
-  }, [activeCount]);
+  }, [inView, activeCount]);
 
   return (
     <div
-      ref={ref}
+      ref={setRefs}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}

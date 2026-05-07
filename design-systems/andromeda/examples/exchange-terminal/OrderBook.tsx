@@ -157,16 +157,17 @@ export function OrderBook() {
       {/* Column headers */}
       <div
         style={{
+          position: 'relative',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
           padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
           ...COL_HEADER,
         }}
       >
         <span>Price (USDT)</span>
         <span style={{ textAlign: 'right' }}>Amount (SOL)</span>
         <span style={{ textAlign: 'right' }}>Total</span>
+        <InsetDivider />
       </div>
 
       {/* Asks — pinned to bottom of their half */}
@@ -187,15 +188,16 @@ export function OrderBook() {
       {/* Centerline last-price */}
       <div
         style={{
+          position: 'relative',
           padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-          borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
           background: tokens.color.surface.overlay,
           display: 'flex',
           alignItems: 'baseline',
           gap: tokens.spacing[3],
         }}
       >
+        <InsetDivider side="top" />
+        <InsetDivider side="bottom" />
         <span
           style={{
             fontFamily: tokens.typography.fontMono,

@@ -2,33 +2,42 @@
 // ============================================================
 // MISSION CONTROL
 // Composition shell. Background is intentionally transparent —
-// drop in any image at the page route level. The active sidebar
-// item drives which section renders in <main>.
+// drop in any image at the page route level.
+//
+// Only the Overview section is wired up. The other sidebar items
+// (Telemetry, Vehicles, Comms, Anomalies, Maintenance) remain
+// visible in the cyber-nav for scenic value but are inert —
+// clicking them does nothing.
+//
+// Entrance cascade: Sidebar → Header → six rows of OverviewSection
+// stagger in top-to-bottom on mount. After each element settles,
+// its own internal motion (clock tick, count-up, scan reveal,
+// telemetry flicker) takes over without further coordination.
 // ============================================================
+
+'use client';
 
 import { useState } from 'react';
 import { tokens } from '../../tokens';
+import { useCascadeProps } from '../../components/lib/motion';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { OverviewSection }      from './sections/OverviewSection';
-import { TelemetrySection }     from './sections/TelemetrySection';
-import { VehiclesSection }      from './sections/VehiclesSection';
-import { CommsSection }         from './sections/CommsSection';
-import { AnomaliesSection }     from './sections/AnomaliesSection';
-import { MaintenanceSection }   from './sections/MaintenanceSection';
-const SECTIONS = {
-  overview:    { title: 'Overview',    Render: OverviewSection    },
-  telemetry:   { title: 'Telemetry',   Render: TelemetrySection   },
-  vehicles:    { title: 'Vehicles',    Render: VehiclesSection    },
-  comms:       { title: 'Comms',       Render: CommsSection       },
-  anomalies:   { title: 'Anomalies',   Render: AnomaliesSection   },
-  maintenance: { title: 'Maintenance', Render: MaintenanceSection },
-};
+import { OverviewSection } from './sections/OverviewSection';
 
 export default function MissionControl() {
-  const [activeNav, setActiveNav] = useState('overview');
-  const section = SECTIONS[activeNav] ?? SECTIONS.overview;
-  const Render = section.Render;
+  const [activeNav] = useState('overview');
+
+  // Inert handler: non-overview ids are ignored, active stays on overview.
+  const handleNavChange = (id) => {
+    if (id === 'overview') return;
+  };
+
+  // Outer cascade slots — Sidebar 0, Header 1. OverviewSection's inner
+  // rows continue the cascade from index 2 so the whole dashboard reads
+  // as one continuous top-to-bottom sequence rather than two cascades
+  // happening at the same time.
+  const sidebarMotion = useCascadeProps(0);
+  const headerMotion  = useCascadeProps(1);
 
   return (
     <div style={{
@@ -43,7 +52,11 @@ export default function MissionControl() {
       padding: tokens.spacing[4],
       boxSizing: 'border-box',
     }}>
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
+      <Sidebar
+        activeNav={activeNav}
+        onNavChange={handleNavChange}
+        motionProps={sidebarMotion}
+      />
 
       <div style={{
         flex: 1,
@@ -53,7 +66,7 @@ export default function MissionControl() {
         minWidth: 0,
         gap: tokens.spacing[4],
       }}>
-        <Header sectionTitle={section.title} />
+        <Header sectionTitle="Overview" motionProps={headerMotion} />
 
         <main style={{
           flex: 1,
@@ -64,7 +77,7 @@ export default function MissionControl() {
           paddingRight: tokens.spacing[2],
           boxSizing: 'border-box',
         }}>
-          <Render />
+          <OverviewSection startIndex={2} />
         </main>
       </div>
     </div>

@@ -6,8 +6,10 @@
 'use client';
 
 import { Star, MagnifyingGlass } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
+import { rowContainer, rowItem } from '../../components/lib/motion';
 import { Dropdown } from './Dropdown';
 import { pairs, trades } from './data';
 
@@ -32,6 +34,23 @@ const COL_HEADER = {
   letterSpacing: tokens.typography.tracking.normal,
   whiteSpace: 'nowrap',
 };
+
+function InsetDivider({ side = 'bottom' }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
 
 function TabButton({ label, active, hasMenu, leadingStar }) {
   return (
@@ -85,7 +104,8 @@ function PairRow({ row }) {
   const pos = row.chg >= 0;
   const changeColor = pos ? tokens.color.accent[200] : tokens.color.red[200];
   return (
-    <div
+    <motion.div
+      variants={rowItem}
       className="ex-row"
       style={{
         display: 'grid',
@@ -122,7 +142,7 @@ function PairRow({ row }) {
       <span style={{ color: changeColor, textAlign: 'right' }}>
         {pos ? '+' : ''}{row.chg.toFixed(2)}%
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -154,10 +174,10 @@ function ColumnHeaders({ template, labels }) {
   return (
     <div
       style={{
+        position: 'relative',
         display: 'grid',
         gridTemplateColumns: template,
         padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         ...COL_HEADER,
       }}
     >
@@ -169,6 +189,7 @@ function ColumnHeaders({ template, labels }) {
           ) : null}
         </span>
       ))}
+      <InsetDivider />
     </div>
   );
 }
@@ -191,10 +212,10 @@ export function PairList() {
       {/* Tab strip */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           padding: `${tokens.spacing[3]} ${tokens.spacing[2]} 0`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
           overflowX: 'auto',
         }}
       >
@@ -205,18 +226,20 @@ export function PairList() {
         <Dropdown variant="tab" label="ALTS"  items={ALTS_MENU}  iconSize={9} />
         <Dropdown variant="tab" label="FIAT"  items={FIAT_MENU}  iconSize={9} />
         <Dropdown variant="tab" label="Zones" items={ZONES_MENU} iconSize={9} align="right" />
+        <InsetDivider />
       </div>
 
       {/* Search + mode toggle */}
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           gap: tokens.spacing[3],
           padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-          borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         }}
       >
+        <InsetDivider />
         <div
           style={{
             display: 'flex',
@@ -270,11 +293,17 @@ export function PairList() {
 
       {/* Pair table */}
       <ColumnHeaders template="1.4fr 1fr 0.7fr" labels={['Pair', 'Price', 'Change']} />
-      <div style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
+      <motion.div
+        variants={rowContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}
+      >
         {pairs.map((row) => (
           <PairRow key={row.sym} row={row} />
         ))}
-      </div>
+      </motion.div>
 
       {/* Market Trades */}
       <div style={{ borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}` }}>

@@ -3,6 +3,8 @@
 // EXCHANGE TERMINAL
 // ============================================================
 
+'use client';
+
 import {
   Download,
   Gear,
@@ -10,10 +12,12 @@ import {
   PlayCircle,
   DotsThree,
 } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { IconButton } from '../../components/IconButton';
+import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { OrderBook } from './OrderBook';
 import { ChartPanel } from './ChartPanel';
@@ -443,6 +447,16 @@ function OrderTabs() {
 
 // ─── Composition ───────────────────────────────────────────────────────────
 export default function ExchangeTerminal() {
+  // Six cascade slots, top-to-bottom: TopBar, PairHeader, then the three
+  // main columns (OrderBook → ChartPanel → PairList — staggers
+  // left-to-right within the same row), then OrderTabs at the bottom.
+  const topBarMotion       = useCascadeProps(0);
+  const pairHeaderMotion   = useCascadeProps(1);
+  const orderBookMotion    = useCascadeProps(2);
+  const chartPanelMotion   = useCascadeProps(3);
+  const pairListMotion     = useCascadeProps(4);
+  const orderTabsMotion    = useCascadeProps(5);
+
   return (
     <div
       style={{
@@ -460,8 +474,12 @@ export default function ExchangeTerminal() {
       }}
     >
       <HoverStyles />
-      <TopBar />
-      <PairHeader />
+      <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
+        <TopBar />
+      </motion.div>
+      <motion.div {...pairHeaderMotion} style={{ flexShrink: 0 }}>
+        <PairHeader />
+      </motion.div>
 
       {/* Main 3-column layout — flex gives each wrapper a definite height
           so inner panels can use flex:1 reliably (grid auto-rows don't). */}
@@ -473,18 +491,20 @@ export default function ExchangeTerminal() {
           minHeight: 0,
         }}
       >
-        <div style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <motion.div {...orderBookMotion} style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <OrderBook />
-        </div>
-        <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        </motion.div>
+        <motion.div {...chartPanelMotion} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <ChartPanel />
-        </div>
-        <div style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        </motion.div>
+        <motion.div {...pairListMotion} style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <PairList />
-        </div>
+        </motion.div>
       </main>
 
-      <OrderTabs />
+      <motion.div {...orderTabsMotion} style={{ flexShrink: 0 }}>
+        <OrderTabs />
+      </motion.div>
     </div>
   );
 }

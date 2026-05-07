@@ -14,6 +14,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Funnel,
   CaretUp,
@@ -35,6 +36,7 @@ import { ProgressBar } from '../../components/ProgressBar';
 import { Tag } from '../../components/Tag';
 import { PanelMenu } from '../../components/PanelMenu';
 import { Tooltip } from '../../components/Tooltip';
+import { rowContainer, rowItem } from '../../components/lib/motion';
 import { itemTabs, filterChips, productRows, initiallySelected } from './data';
 
 function InsetDivider({ side = 'bottom' }) {
@@ -371,12 +373,18 @@ export function ItemsPanel() {
               <th style={{ width: tokens.spacing[10] }} />
             </tr>
           </thead>
-          <tbody>
+          <motion.tbody
+            variants={rowContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             {productRows.map((r) => {
               const isSelected = selected.has(r.id);
               return (
-                <tr
+                <motion.tr
                   key={r.id}
+                  variants={rowItem}
                   className={`so-row${isSelected ? ' is-selected' : ''}`}
                   onClick={() => toggleRow(r.id)}
                   style={{
@@ -428,10 +436,10 @@ export function ItemsPanel() {
                       ]}
                     />
                   </td>
-                </tr>
+                </motion.tr>
               );
             })}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
     </div>

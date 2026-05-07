@@ -146,4 +146,63 @@ export const tokens = {
     sidebarWidth: '224px',
     headerHeight: '60px',
   },
+  // Motion — durations, easings, and stagger presets that encode the
+  // Andromeda tempo. Movement signals data movement or interaction
+  // acknowledgement; never decoration. See `rules.md` → Motion for the
+  // philosophy and approved/forbidden patterns.
+  motion: {
+    duration: {
+      // Click acknowledgement (active flash, focus ring, button press).
+      // Brief enough that the user reads it as feedback, not animation.
+      fast:    '80ms',
+      // Default state transitions: hover, popover caret rotation, anything
+      // where the user changed their mind and wants to see the new state.
+      normal:  '140ms',
+      // Stateful trigger reveals (drawer slide, menu open). The motion
+      // IS the visual answer to the click — slow enough to track, fast
+      // enough not to feel laggy.
+      slow:    '200ms',
+      // Cascade entrances (ProgressBar segment fill, dashboard section
+      // slide-in). Each element's own motion duration; stagger between
+      // siblings is `motion.stagger.cascade`. 500ms is the calm read —
+      // each element clearly arrives, the cascade doesn't feel hurried.
+      cascade: '500ms',
+      // Row reveals inside a table or log when its container scrolls
+      // into view. Tighter than the section cascade because rows are
+      // smaller visual elements; a 500ms reveal per row drags.
+      row:     '350ms',
+      // StatTile count-up. Long enough that the eye reads the value as
+      // animating in, short enough that the final number is what the
+      // user remembers.
+      countup: '800ms',
+    },
+    easing: {
+      // Material standard — accelerate then decelerate. Default for
+      // anything that doesn't have a more specific reason.
+      standard: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      // Ease-out — fast start, soft landing. Use for entrances (cascade,
+      // hover-in) where the motion settles into a final state.
+      out:      'cubic-bezier(0, 0, 0.2, 1)',
+      // Ease-in — slow start, fast end. Use for exits (drawer close,
+      // hover-out) where the motion is leaving the field.
+      in:       'cubic-bezier(0.4, 0, 1, 1)',
+      // Ease-in-out — symmetrical. Use for state-flip transitions where
+      // start and end deserve the same weight.
+      sharp:    'cubic-bezier(0.4, 0, 0.6, 1)',
+    },
+    stagger: {
+      // Cascade between siblings on entrance (top-to-bottom dashboard
+      // load, list reveal). 60ms reads as a deliberate sequence, not
+      // a cascade so fast it feels like a single event.
+      cascade:     '60ms',
+      // Row stagger inside a table or log. Tighter than section cascade
+      // — long tables would otherwise feel like they take forever to
+      // reveal. 40ms is fast enough to keep the user moving, slow
+      // enough that the eye registers the cascade.
+      row:         '40ms',
+      // ProgressBar segment fill cascade. Tighter than entrance because
+      // segments are visually adjacent — looser would read as choppy.
+      progressBar: '120ms',
+    },
+  },
 };

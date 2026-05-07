@@ -497,15 +497,29 @@ Andromeda is 90% still. The few elements that move are signaling something — a
 - `must` — Decorative animations forbidden: shimmer, sweep, scanline, pulsing glow, idle bounce. The list isn't exhaustive — when unsure, ask "what does this animation tell the user?" If the answer is "it looks cool", remove it.
 - `should` — When two animations would happen simultaneously on the same screen, prefer staggering them by a small offset. Simultaneous motion competes for attention.
 
-### Tempo
+### Tempo (token-driven)
 
-Reach for token-defined durations and easings rather than ad-hoc values. The system's tempo is part of its identity.
+`must` — Reach for `tokens.motion` rather than hardcoding ms / cubic-bezier. The system's tempo is part of its identity, and ad-hoc values silently drift.
 
-- Click acknowledgement (active flash, focus ring, button press): ~80ms, ease-out
-- Hover state transition: 140ms, ease-out (matches popover caret rotation)
-- Cascade entrances (progress bar segment fill, count-up): 120ms stagger, 400ms total motion duration
-- State changes (data update, badge variant flip): instant or ~80ms — should NOT use a long transition; the user wants to see the new value, not the animation
-- Stateful trigger (button → menu open, drawer slide): ~200ms — the menu's opening is the visual answer to the click
+The five durations and four easings are:
+
+| Token | Value | Use |
+|---|---|---|
+| `tokens.motion.duration.fast` | 80ms | Click acknowledgement, focus ring, button press |
+| `tokens.motion.duration.normal` | 140ms | Hover state, popover caret rotation, default |
+| `tokens.motion.duration.slow` | 200ms | Stateful trigger reveals — drawer slide, menu open |
+| `tokens.motion.duration.cascade` | 400ms | Each element's cascade entrance + ProgressBar segment fill |
+| `tokens.motion.duration.countup` | 800ms | StatTile count-up |
+| `tokens.motion.easing.standard` | accelerate-decelerate | Default for unspecified motion |
+| `tokens.motion.easing.out` | ease-out | Entrances, hover-in, settle-into-final-state |
+| `tokens.motion.easing.in` | ease-in | Exits, hover-out, leaving-the-field |
+| `tokens.motion.easing.sharp` | ease-in-out | Symmetric state flips |
+| `tokens.motion.stagger.cascade` | 60ms | Sibling-to-sibling delay in entrance cascades |
+| `tokens.motion.stagger.progressBar` | 120ms | ProgressBar segment fill (tighter, segments are visually adjacent) |
+
+Components reference these tokens directly (`tokens.motion.duration.fast`); templates and inline styles reach the same values via the CSS vars exposed by `andromedaVars()` (`var(--andromeda-duration-fast)`, `var(--andromeda-easing-out)`, etc.).
+
+State changes (data update, badge variant flip) should be instant or `fast` (80ms) — never `normal` or longer. The user wants to see the new value, not the animation.
 
 ### Approved motion patterns
 
@@ -525,6 +539,127 @@ Reach for token-defined durations and easings rather than ad-hoc values. The sys
 ### Reduced motion
 
 `should` — Honor `prefers-reduced-motion: reduce`. For approved motion patterns: collapse cascades to instant, keep state-feedback flashes (they're feedback, not decoration), drop entrance animations.
+
+### Implementation — framer-motion is the runtime
+
+`must` — Andromeda's motion runtime is framer-motion (already a project dependency, no install). Pure CSS transitions are still acceptable for trivial cases (a single transition on hover bg color), but anything involving cascade choreography, gesture-driven interaction, mount/unmount transitions, or spring physics goes through framer-motion.
+
+The bridge between tokens and framer-motion lives in `components/lib/motion.ts`. Three primitives, all token-grounded:
+
+- **`useCascadeProps(index)`** — returns `{ initial, animate, transition }` for an element entering via the staggered top-to-bottom cascade. Spread onto a `motion.X` element. Honours `prefers-reduced-motion` automatically. Crosses parent boundaries via the explicit `index` arg, so use this when the cascade spans Sidebar → Header → content rows in different DOM subtrees.
+- **`cascadeContainer` + `cascadeItem` variants** — alternative for when the staggered children share one parent (a single panel revealing its rows). Use `staggerChildren`-style orchestration. Don't mix with `useCascadeProps` in the same cascade.
+- **`useReducedMotion`** — re-exported from framer-motion. Use in any motion that should opt out for users who set the OS preference.
+
+When an element participates in motion (cascade, hover physics, exit animation), its root MUST be a `motion.X` element. Pattern: `<motion.aside>` / `<motion.header>` / `<motion.div>`. The component accepts a `motionProps` prop that the parent can spread onto the motion root:
+
+```jsx
+// In the component:
+<motion.aside {...(motionProps ?? {})} style={...}>...</motion.aside>
+
+// In the parent:
+const sidebarMotion = useCascadeProps(0);
+<Sidebar motionProps={sidebarMotion} />
+```
+
+This keeps motion concerns out of the component's internal layout — the component still owns its `style`, the parent owns the motion choreography, and there's no wrapper div that breaks flex chains.
+
+For interaction feedback (hover lifts, press states), use framer-motion's `whileHover` / `whileTap` declaratively. They respect `prefers-reduced-motion` automatically and compose with the existing `cva` variants without fighting them.
+
+For mount/unmount transitions (Drawer slide-out, Popover dismiss), wrap the conditional render in `<AnimatePresence>` with `exit` props on the motion element. This is what replaces the manual `setTimeout` patterns scattered through some components today.
+
+### Cascade vs internal motion — a deliberate split
+
+Andromeda's motion has two layers, deliberately distinct:
+
+- **Outer cascade** — the page composing itself on first load. Sidebar slides in, then header, then sections cascade top-to-bottom. Triggered on mount via `useCascadeProps(index)`. After ~860ms everything is at rest in its final position. The cascade is decorative: it doesn't carry data meaning, it signals "the system is initialising".
+- **Internal primitive motion** — count-ups, segment fills, scan reveals, live drift. Each animated primitive (`StatTile`, `ProgressBar`, etc.) gates its own animation behind `useInView` so it plays at the moment the user sees it, not at mount. These motions DO carry data meaning — the count-up is the value arriving, the fill cascade is the percentage materialising.
+
+`must` — The cascade is mount-triggered, not scroll-triggered. Sliding sections into empty viewport space as the user scrolls down feels broken — the page reads "incomplete and slowly arriving" rather than "alive". By the time the user starts scrolling, every section should already be at rest in its final place; only the *internal* animations of those sections fire on view-entry.
+
+`must` — Internal primitive motion is scroll-triggered, not mount-triggered. A status panel below the fold animating on mount means the user never sees it; by the time they scroll there, the bars are already filled. Each animated primitive gates itself on `useInView`.
+
+### Row-by-row stagger inside tables and logs
+
+`should` — Any list of stacked rows separated by dividers (table body, log feed, comments thread, notification list) gets a row-stagger reveal when its container scrolls into view. Each row fades in (opacity only — no transform), 40ms apart, 350ms per row. Tighter than the section cascade because rows are smaller visual elements.
+
+`must` — Row-reveal animation is opacity-only, never `transform: translateY`. Transforms on `<motion.tr>` interact poorly with table layout — sub-pixel reflow, brief horizontal scrollbar flashes when the table sits inside an `overflow-x: auto` container. The fade alone carries the reveal; the stagger timing does the rest.
+
+Use the `rowContainer` + `rowItem` variants pair from `components/lib/motion.ts`:
+
+```jsx
+import { motion } from 'framer-motion';
+import { rowContainer, rowItem } from '../../components/lib/motion';
+
+<motion.tbody
+  variants={rowContainer}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true, amount: 0.2 }}
+>
+  {items.map(item => (
+    <motion.tr key={item.id} variants={rowItem}>
+      {/* row cells */}
+    </motion.tr>
+  ))}
+</motion.tbody>
+```
+
+The variants live in tokens (`tokens.motion.duration.row` = 350ms, `tokens.motion.stagger.row` = 40ms) so all tables and logs share the same tempo. Don't redefine row timing inline — keep the system consistent.
+
+When the row is a non-table list (CommsLog, NotificationList, etc.), use `motion.div` for both container and item with the same variants. The pattern is the same, only the element changes.
+
+### Scroll-aware mount-time animations
+
+`must` — Any component with a one-shot mount-time animation (count-up, segment-fill cascade, fade-in) MUST gate that animation behind viewport intersection. Otherwise components below the fold burn their reveal off-screen and the user never sees the motion.
+
+The pattern, using framer-motion's `useInView` hook:
+
+```jsx
+import { useInView } from 'framer-motion';
+import { useRef } from 'react';
+
+const internalRef = useRef(null);
+const inView = useInView(internalRef, { once: true, amount: 0.3 });
+
+useEffect(() => {
+  if (!inView) return;        // wait for the user to actually see it
+  // kick off the animation — RAF, setTimeout, setState, etc.
+}, [inView]);
+
+return <div ref={internalRef}>...</div>;
+```
+
+`once: true` — animate the first time the element enters view, then never again. Re-entering the viewport (scroll up, scroll down) doesn't re-trigger.
+
+`amount: 0.3` — wait until 30% of the element is visible. Higher than the cascade's `0.15` because the internal animation is the "main event" of that component; we want the user clearly looking at it. The cascade can be more eager because it's just the section establishing itself.
+
+When forwarding refs, use a setRefs helper that fans out to both the internal ref and the consumer's outerRef:
+
+```jsx
+const setRefs = (node) => {
+  internalRef.current = node;
+  if (typeof outerRef === 'function') outerRef(node);
+  else if (outerRef) outerRef.current = node;
+};
+```
+
+Components currently scroll-aware: `ProgressBar` (segment fill), `StatTile` (count-up + live drift), `RadarChart` (scan reveal). New animated primitives must follow the same pattern — adding a fresh component with mount-only animation is a regression.
+
+The result for templates: any component using these primitives gets correct scroll choreography automatically. A new template that drops in a row of `<StatTile>` cards followed by a `<ProgressBar>` row inherits scroll-triggered count-ups and scroll-triggered fills with no extra wiring.
+
+`must` — Never hardcode ms / cubic-bezier in framer-motion `transition` props. Read from `tokens.motion`:
+
+```jsx
+import { tokens } from '../../tokens';
+
+transition={{
+  duration: parseInt(tokens.motion.duration.cascade) / 1000,  // framer-motion uses seconds
+  ease: [0, 0, 0.2, 1],                                       // tokens.motion.easing.out
+  delay: index * (parseInt(tokens.motion.stagger.cascade) / 1000),
+}}
+```
+
+Or just use `useCascadeProps(index)` and let the helper do the parsing.
 
 ---
 

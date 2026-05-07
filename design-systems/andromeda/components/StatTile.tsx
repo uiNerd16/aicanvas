@@ -19,6 +19,7 @@
 'use client';
 
 import { forwardRef, useEffect, useRef, useState } from 'react'; // useRef kept for useCountUp's RAF tracking
+import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 import { Card, CardContent } from './Card';
 
@@ -44,9 +45,23 @@ function easeOutExpo(t) {
 }
 
 // ── useCountUp ───────────────────────────────────────────────────────────────
-// Animates from 0 → target over `duration` ms. Returns the display string,
-// preserving the original decimal precision of `rawValue`.
-function useCountUp(rawValue, duration = 1800) {
+// Animates from 0 → target over `duration` ms when the tile first enters
+// the viewport (scroll-aware). Returns the display string, preserving the
+// original decimal precision of `rawValue`.
+//
+// `live=true` switches behaviour: count-up still runs once on first
+// view-entry (the reveal moment), but subsequent prop updates snap to
+// the new value without re-running the animation. This is the Andromeda
+// rule — state changes (data updates) are instant or ~80ms; never longer.
+// Telemetry rows that update every couple of seconds would otherwise
+// spasm a 1.8s count-up FROM ZERO on every refresh.
+//
+// Scroll-awareness: pre-mount the count-up doesn't fire. The provided
+// `inView` flag (true once the parent tile is visible in the viewport)
+// gates the animation so tiles below the fold don't burn their reveal
+// off-screen. Templates with multi-screen height get the count-up at
+// the moment the user actually sees the value.
+function useCountUp(rawValue, duration = 1800, live = false, inView = true) {
   const num = parseFloat(rawValue);
   const isNumeric = !isNaN(num);
   const decimals = isNumeric
@@ -56,11 +71,25 @@ function useCountUp(rawValue, duration = 1800) {
   const [display, setDisplay] = useState(isNumeric ? '0' : rawValue);
   const rafRef = useRef(null);
   const startRef = useRef(null);
+  const hasMountedRef = useRef(false);
 
   useEffect(() => {
     if (!isNumeric) { setDisplay(rawValue); return; }
 
-    // Small delay so the card mount animation is visible first.
+    // After first reveal, in `live` mode, snap to the new value without
+    // animating. Live data updates are signal, not a chance to re-reveal.
+    if (live && hasMountedRef.current) {
+      setDisplay(decimals > 0 ? num.toFixed(decimals) : String(Math.round(num)));
+      return;
+    }
+
+    // Wait for the tile to enter the viewport before kicking off the
+    // count-up. Tiles above the fold see this as `true` immediately;
+    // tiles below the fold wait until scrolled to.
+    if (!inView) return;
+
+    // First reveal: run the count-up. Small delay so the card's outer
+    // entrance (cascade slide-in) is visible first, then the value tweens.
     const timeout = setTimeout(() => {
       startRef.current = null;
 
@@ -71,6 +100,7 @@ function useCountUp(rawValue, duration = 1800) {
         const current = num * easeOutExpo(t);
         setDisplay(decimals > 0 ? current.toFixed(decimals) : String(Math.round(current)));
         if (t < 1) rafRef.current = requestAnimationFrame(tick);
+        else hasMountedRef.current = true;
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -81,7 +111,7 @@ function useCountUp(rawValue, duration = 1800) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawValue]);
+  }, [rawValue, inView]);
 
   return display;
 }
@@ -142,18 +172,33 @@ const deltaBaseClass = cn(
  * @property {number} [delta] Positive → accent, negative → fault.
  * @property {string} [deltaLabel]
  * @property {string} [code] Optional small mono identifier in the top-right.
+ * @property {boolean} [live] When true, the count-up animation runs only on
+ *   first mount; subsequent value changes snap (no re-animation). Use for
+ *   telemetry rows whose values update on a recurring interval. Without this,
+ *   each refresh runs a fresh 1.8s count-up from zero, which is unreadable.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
 /** @type {React.ForwardRefExoticComponent<StatTileProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const StatTile = forwardRef(function StatTile(
-  { className, label, value, unit, delta, deltaLabel, code, style, ...props },
-  ref,
+  { className, label, value, unit, delta, deltaLabel, code, live = false, style, ...props },
+  outerRef,
 ) {
   useStatTileStyles();
 
-  const displayValue = useCountUp(value);
+  // Scroll-aware count-up. The tile only animates its value once it enters
+  // the viewport — telemetry rows below the fold wait for the scroll, then
+  // play the count-up where the user can see it.
+  const internalRef = useRef(null);
+  const setRefs = (node) => {
+    internalRef.current = node;
+    if (typeof outerRef === 'function') outerRef(node);
+    else if (outerRef) outerRef.current = node;
+  };
+  const inView = useInView(internalRef, { once: true, amount: 0.3 });
+
+  const displayValue = useCountUp(value, 1800, live, inView);
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   const isPositive = hasDelta && delta >= 0;
   const trendColorClass = !hasDelta
@@ -164,7 +209,7 @@ export const StatTile = forwardRef(function StatTile(
 
   return (
     <Card
-      ref={ref}
+      ref={setRefs}
       className={cn('flex-1 min-w-0 overflow-hidden', className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}

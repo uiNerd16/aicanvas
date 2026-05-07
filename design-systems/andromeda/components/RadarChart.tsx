@@ -186,13 +186,6 @@ export const RadarChart = forwardRef(function RadarChart(
 ) {
   const { shown, onFirstActivation } = useTooltipTransition();
 
-  // Scanline on mount
-  const [scanDone, setScanDone] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setScanDone(true), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <div
       ref={ref}
@@ -258,18 +251,6 @@ export const RadarChart = forwardRef(function RadarChart(
 
       {/* Chart area */}
       <div style={{ padding: `${tokens.spacing[4]} ${tokens.spacing[2]}`, position: 'relative' }}>
-        {/* Scanline */}
-        {!scanDone && (
-          <div aria-hidden="true" style={{
-            position: 'absolute',
-            left: 0, right: 0, top: 0,
-            height: '1px',
-            background: `linear-gradient(90deg, transparent, ${tokens.color.accent[400]}, transparent)`,
-            animation: 'andromeda-radar-scan 1.1s ease-out forwards',
-            pointerEvents: 'none',
-            zIndex: 2,
-          }} />
-        )}
 
         <ResponsiveContainer width="100%" height={280}>
           <ReRadarChart data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
@@ -368,10 +349,6 @@ export const RadarChart = forwardRef(function RadarChart(
       </div>
 
       <style>{`
-        @keyframes andromeda-radar-scan {
-          from { top: 0%; opacity: 0.8; }
-          to   { top: 100%; opacity: 0; }
-        }
         @keyframes andromeda-tooltip-in {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0)   scale(1); }
