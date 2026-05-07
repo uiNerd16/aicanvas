@@ -133,6 +133,8 @@ import VoiceChatPill from '../../components-workspace/voice-chat-pill'
 import { prompts as voiceChatPillPrompts } from '../../components-workspace/voice-chat-pill/prompts'
 import UploadProgress from '../../components-workspace/upload-progress'
 import { prompts as uploadProgressPrompts } from '../../components-workspace/upload-progress/prompts'
+import SignaturePad from '../../components-workspace/signature-pad'
+import { prompts as signaturePadPrompts } from '../../components-workspace/signature-pad/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1232,6 +1234,21 @@ Requirements:
     PreviewComponent: UploadProgress,
     code: componentCodes['upload-progress'],
     prompts: uploadProgressPrompts,
+  },
+  {
+    slug: 'signature-pad',
+    name: 'Signature Pad',
+    description: 'A signature pad widget — pill button morphs into a canvas to draw with mouse or touch.',
+    tags: [
+      { label: 'Widgets', accent: true },
+      { label: 'Modal' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/signature-pad.png?v=2',
+    PreviewComponent: SignaturePad,
+    code: componentCodes['signature-pad'],
+    prompts: signaturePadPrompts,
   },
 ]
 
