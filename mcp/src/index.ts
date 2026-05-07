@@ -43,6 +43,32 @@ interface ComponentMeta {
   installCommand: string
 }
 
+interface SystemMeta {
+  slug: string
+  name: string
+  description: string
+  componentCount: number
+  fileCount: number
+  dependencies: string[]
+  blockSlugs: string[]
+  homepageUrl: string
+  sourceUrl: string
+  installCommand: string
+}
+
+interface BlockMeta {
+  slug: string
+  name: string
+  system: string
+  domain?: string
+  description: string
+  fileCount: number
+  dependencies: string[]
+  homepageUrl: string
+  sourceUrl: string
+  installCommand: string
+}
+
 interface MetaPayload {
   name: string
   homepage: string
@@ -50,6 +76,9 @@ interface MetaPayload {
   componentCount: number
   categories: Array<{ label: string; count: number }>
   components: ComponentMeta[]
+  // Older deploys may not include these fields — treat as optional.
+  systems?: SystemMeta[]
+  blocks?: BlockMeta[]
 }
 
 interface ShadcnRegistryItem {
@@ -424,6 +453,154 @@ server.registerTool(
           ),
         ],
         structuredContent: out,
+      }
+    } catch (err) {
+      return errorResult(err instanceof Error ? err.message : String(err))
+    }
+  },
+)
+
+// ── Tool: list_systems ───────────────────────────────────────────────────────
+
+server.registerTool(
+  'list_systems',
+  {
+    title: 'List AI Canvas design systems',
+    description:
+      'Return every design system available on AI Canvas. A design system is a coordinated set of components plus shared tokens and utilities — installable in one CLI command. Use when the user asks about "themes", "design systems", or wants more than a single component.',
+    inputSchema: {},
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+  },
+  async () => {
+    try {
+      const meta = await fetchMeta()
+      const systems = meta.systems ?? []
+      if (systems.length === 0) {
+        return {
+          content: [asTextContent('No design systems available in this registry build.')],
+          structuredContent: { systems: [] },
+        }
+      }
+      const lines = [
+        `${systems.length} design system${systems.length === 1 ? '' : 's'} on AI Canvas:`,
+        '',
+        ...systems.map((s) =>
+          `  ${s.name.padEnd(16)}  ${String(s.componentCount).padStart(2)} components, ${s.blockSlugs.length} blocks`,
+        ),
+        '',
+        'Use `get_system` to fetch the full source of a system, or `get_block` for a single composition.',
+      ]
+      return {
+        content: [asTextContent(lines.join('\n'))],
+        structuredContent: { systems },
+      }
+    } catch (err) {
+      return errorResult(err instanceof Error ? err.message : String(err))
+    }
+  },
+)
+
+// ── Tool: get_system ─────────────────────────────────────────────────────────
+
+server.registerTool(
+  'get_system',
+  {
+    title: 'Get a complete AI Canvas design system (every file)',
+    description:
+      'Return all files for a design system in a single response — every component, plus shared tokens and utilities — ready to write into the user\'s project. Use when the user wants to adopt a whole system rather than pick individual components.',
+    inputSchema: {
+      slug: z
+        .string()
+        .min(1)
+        .describe('Design system slug, e.g. "andromeda". Use `list_systems` to discover.'),
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ slug }) => {
+    try {
+      const meta = await fetchMeta()
+      const system = (meta.systems ?? []).find((s) => s.slug === slug)
+      if (!system) {
+        return errorResult(
+          `No design system found with slug "${slug}". Use \`list_systems\` to see what's available.`,
+        )
+      }
+      const item = await fetchComponentSource(slug)
+      const summary = [
+        `# ${system.name} design system`,
+        '',
+        system.description,
+        '',
+        `Files: ${item.files.length}`,
+        `Dependencies: ${system.dependencies.join(', ') || '(none)'}`,
+        `Install: ${system.installCommand}`,
+        `Homepage: ${system.homepageUrl}`,
+        '',
+        `--- file index ---`,
+        ...item.files.map((f) => `  ${f.path}`),
+      ].join('\n')
+
+      return {
+        content: [asTextContent(summary)],
+        structuredContent: {
+          ...system,
+          files: item.files,
+        },
+      }
+    } catch (err) {
+      return errorResult(err instanceof Error ? err.message : String(err))
+    }
+  },
+)
+
+// ── Tool: get_block ──────────────────────────────────────────────────────────
+
+server.registerTool(
+  'get_block',
+  {
+    title: 'Get a complete AI Canvas design-system block (every file)',
+    description:
+      'Return all files for a single block — the example composition plus every component it uses plus shared tokens. Use for "I want exactly this dashboard" / "give me the entire mission-control screen". One CLI command installs all files.',
+    inputSchema: {
+      slug: z
+        .string()
+        .min(1)
+        .describe(
+          'Block slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_systems` then inspect blockSlugs to discover.',
+        ),
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ slug }) => {
+    try {
+      const meta = await fetchMeta()
+      const block = (meta.blocks ?? []).find((b) => b.slug === slug)
+      if (!block) {
+        return errorResult(
+          `No block found with slug "${slug}". Use \`list_systems\` to see available blocks.`,
+        )
+      }
+      const item = await fetchComponentSource(slug)
+      const summary = [
+        `# ${block.name} (${block.system}${block.domain ? ` · ${block.domain}` : ''})`,
+        '',
+        block.description,
+        '',
+        `Files: ${item.files.length}`,
+        `Dependencies: ${block.dependencies.join(', ') || '(none)'}`,
+        `Install: ${block.installCommand}`,
+        `Preview: ${block.homepageUrl}`,
+        '',
+        `--- file index ---`,
+        ...item.files.map((f) => `  ${f.path}`),
+      ].join('\n')
+
+      return {
+        content: [asTextContent(summary)],
+        structuredContent: {
+          ...block,
+          files: item.files,
+        },
       }
     } catch (err) {
       return errorResult(err instanceof Error ? err.message : String(err))

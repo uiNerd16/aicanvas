@@ -124,6 +124,12 @@ for (const file of files) {
     continue
   }
 
+  // Only lint single-file `registry:ui` items. Design-system blocks / systems
+  // ship multiple files that bypass the `h-full → min-h-screen` transform —
+  // they author with explicit `100vh` / `h-screen` values and don't need this
+  // check.
+  if (json.type !== 'registry:ui') continue
+
   const content = json.files?.[0]?.content
   if (typeof content !== 'string') continue
 
