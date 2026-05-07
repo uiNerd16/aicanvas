@@ -192,7 +192,6 @@ export default function PolaroidStack() {
               ? 'click card again to deselect'
               : 'click a card · click bg to stack'}
         </motion.p>
-      </div>
     </div>
   )
 }
