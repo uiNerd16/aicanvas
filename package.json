@@ -20,6 +20,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@types/matter-js": "^0.20.2",
     "@types/three": "^0.183.1",
     "@vercel/analytics": "^2.0.1",
