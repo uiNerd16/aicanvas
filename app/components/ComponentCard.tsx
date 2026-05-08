@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
 import { track, type CardSource } from '../lib/analytics'
 import { optimizeImageKitUrl } from '../lib/imagekit'
+import { SaveButton } from './SaveButton'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
@@ -38,6 +39,9 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
     >
       {/* Image — extends slightly behind the content panel */}
       <div className="relative aspect-video overflow-hidden bg-sand-900">
+        <div className="absolute left-3 top-3 z-10">
+          <SaveButton slug={slug} />
+        </div>
         {badge && (
           <span className="absolute right-3 top-3 z-10 rounded-full border border-olive-500 px-2.5 py-0.5 text-[11px] font-semibold text-olive-400">
             {badge}
