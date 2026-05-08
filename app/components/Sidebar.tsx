@@ -7,6 +7,10 @@ import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Inf
 import { CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
+import { SignedIn } from './auth/SignedIn'
+import { SignedOut } from './auth/SignedOut'
+import { UserMenu } from './auth/UserMenu'
+import { SignInCta } from './auth/SignInCta'
 
 // ── Tier structure ────────────────────────────────────────────────────────
 // Hardcoded so the ordering is predictable. Every label here must correspond
@@ -280,6 +284,16 @@ export function Sidebar() {
           </a>
         </div>
       </nav>
+
+      {/* ── Auth row ── */}
+      <div className="shrink-0 border-t border-sand-300 px-3 py-3 dark:border-sand-800">
+        <SignedIn>
+          <UserMenu />
+        </SignedIn>
+        <SignedOut>
+          <SignInCta />
+        </SignedOut>
+      </div>
 
       {/* ── Bottom card ── */}
       {pathname !== '/support' && <div className="shrink-0 p-3">
