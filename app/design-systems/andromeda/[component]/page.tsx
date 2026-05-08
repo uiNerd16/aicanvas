@@ -19,13 +19,6 @@ export default async function AndromedaComponentPage({
   const entry = getAndromedaComponent(component)
   if (!entry) notFound()
 
-  const idx = ANDROMEDA_COMPONENTS.findIndex((c) => c.slug === entry.slug)
-  const prev = idx > 0 ? ANDROMEDA_COMPONENTS[idx - 1] : undefined
-  const next =
-    idx < ANDROMEDA_COMPONENTS.length - 1
-      ? ANDROMEDA_COMPONENTS[idx + 1]
-      : undefined
-
   const related = ANDROMEDA_COMPONENTS.filter((c) => c.slug !== entry.slug).map(
     (c) => ({ slug: c.slug, name: c.name }),
   )
@@ -38,8 +31,6 @@ export default async function AndromedaComponentPage({
       rawCode={entry.code}
       highlightedCode={<HighlightedCode code={entry.code} />}
       related={related}
-      prevComponent={prev ? { slug: prev.slug, name: prev.name } : undefined}
-      nextComponent={next ? { slug: next.slug, name: next.name } : undefined}
     />
   )
 }

@@ -4,7 +4,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { Card, CardHeader } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -46,6 +46,7 @@ function VehicleRow({ vehicle, isLast }) {
   return (
     <motion.tr
       variants={rowItem}
+      exit="exit"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -171,13 +172,15 @@ export function VehiclesTable() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {vehicles.map((vehicle, i) => (
-            <VehicleRow
-              key={vehicle.callsign}
-              vehicle={vehicle}
-              isLast={i === vehicles.length - 1}
-            />
-          ))}
+          <AnimatePresence initial={false}>
+            {vehicles.map((vehicle, i) => (
+              <VehicleRow
+                key={vehicle.callsign}
+                vehicle={vehicle}
+                isLast={i === vehicles.length - 1}
+              />
+            ))}
+          </AnimatePresence>
         </motion.tbody>
       </table>
     </Card>

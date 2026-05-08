@@ -12,8 +12,19 @@
 
 import { forwardRef } from 'react';
 import { Slot } from '@radix-ui/react-slot';
+import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
+
+// Sliding-indicator transition — token-driven. The active dot uses framer's
+// `layoutId` to animate between sibling NavItems when wrapped in a
+// <LayoutGroup>. See `rules.md` → Active indicator pattern.
+const ms = (v) => parseInt(v, 10) / 1000;
+const INDICATOR_TX = {
+  duration: ms(tokens.motion.duration.slow),
+  ease: [0.4, 0, 0.2, 1], // tokens.motion.easing.standard
+};
 
 const navItemVariants = cva(
   [
@@ -70,6 +81,10 @@ const navItemVariants = cva(
  * @property {boolean} [active=false]
  * @property {boolean} [mono=true]
  * @property {boolean} [asChild=false]
+ * @property {string} [layoutGroupId='andromeda-navitem-indicator']
+ *   Override only when two distinct nav lists share a viewport and you don't
+ *   want the active dot to animate between them. To get the slide between
+ *   sibling NavItems, wrap the list in framer's <LayoutGroup>.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
@@ -83,6 +98,7 @@ export const NavItem = forwardRef(function NavItem(
     active = false,
     mono = true,
     asChild = false,
+    layoutGroupId = 'andromeda-navitem-indicator',
     style,
     type = 'button',
     ...props
@@ -100,16 +116,18 @@ export const NavItem = forwardRef(function NavItem(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {/* Right indicator square — sits on top of the gradient, with a
-          small leftward glow that highlights the immediate vicinity. */}
+      {/* Right indicator square — when wrapped in <LayoutGroup>, this slides
+          between sibling NavItems on active change via `layoutId`. */}
       {active ? (
-        <span
+        <motion.span
+          layoutId={layoutGroupId}
           aria-hidden="true"
+          transition={INDICATOR_TX}
           style={{
             position: 'absolute',
             right: '12px',
             top: '50%',
-            transform: 'translateY(-50%)',
+            translateY: '-50%',
             width: '4px',
             height: '4px',
             flexShrink: 0,

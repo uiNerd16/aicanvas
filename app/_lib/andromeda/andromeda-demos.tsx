@@ -64,7 +64,14 @@ import {
 
 function Row({ label, children }: { label?: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: tokens.spacing[5] }}>
+    <div
+      style={{
+        marginBottom: tokens.spacing[5],
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       {label ? (
         <div
           style={{
@@ -85,6 +92,7 @@ function Row({ label, children }: { label?: string; children: React.ReactNode })
           flexWrap: 'wrap',
           gap: tokens.spacing[3],
           alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         {children}
@@ -94,6 +102,28 @@ function Row({ label, children }: { label?: string; children: React.ReactNode })
 }
 
 // ─── Per-slug demos ──────────────────────────────────────────────────────────
+
+function IconButtonDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="Variants">
+        <IconButton variant="default" aria-label="Notifications" icon={Bell} />
+        <IconButton variant="outline" aria-label="Settings" icon={Gear} />
+        <IconButton variant="ghost" aria-label="Refresh" icon={ArrowClockwise} />
+        <IconButton variant="destructive" aria-label="Delete" icon={Trash} />
+      </Row>
+      <Row label="Sizes">
+        <IconButton size="sm" aria-label="Settings" icon={Gear} />
+        <IconButton size="md" aria-label="Settings" icon={Gear} />
+        <IconButton size="lg" aria-label="Settings" icon={Gear} />
+      </Row>
+      <Row label="Disabled">
+        <IconButton aria-label="Settings" icon={Gear} disabled />
+        <IconButton variant="default" aria-label="Notifications" icon={Bell} disabled />
+      </Row>
+    </div>
+  )
+}
 
 function ButtonDemo() {
   return (
@@ -762,6 +792,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
   'empty-state': EmptyStateDemo,
+  'icon-button': IconButtonDemo,
   input: InputDemo,
   'nav-item': NavItemDemo,
   'panel-header': PanelHeaderDemo,

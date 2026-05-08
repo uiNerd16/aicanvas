@@ -7,8 +7,11 @@
 // the system "watching live data" — numbers nudge as if the ship
 // is sending fresh readings. This is "movement signals data
 // movement" — exactly the case where motion is on-brand for
-// Andromeda. StatTile in `live` mode snaps to the new value on
-// each tick rather than re-running the count-up.
+// Andromeda. StatTile in `liveRoll` mode renders each digit in a
+// fixed-width slot; on each tick only the digits whose character
+// changed roll vertically (HUD-style odometer). Digits that didn't
+// change stay still, so the user's eye tracks exactly which place
+// values moved.
 //
 // Honours `prefers-reduced-motion`: drift is suspended, values
 // stay at their initial state.
@@ -68,7 +71,7 @@ export function TelemetryRow() {
           unit={stat.unit}
           delta={stat.delta}
           deltaLabel={stat.deltaLabel}
-          live
+          liveRoll
           style={{ marginLeft: i > 0 ? -1 : 0 }}
         />
       ))}

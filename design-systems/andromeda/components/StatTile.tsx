@@ -19,9 +19,83 @@
 'use client';
 
 import { forwardRef, useEffect, useRef, useState } from 'react'; // useRef kept for useCountUp's RAF tracking
-import { useInView } from 'framer-motion';
+import { useInView, AnimatePresence, motion } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
 import { Card, CardContent } from './Card';
+
+const ms = (v) => parseInt(v, 10) / 1000;
+// Inline cubic-beziers — framer wants arrays, tokens.motion.easing values are
+// CSS strings. Keep these in sync with tokens.motion.easing.sharp.
+const SHARP_EASE = [0.4, 0, 0.6, 1];
+
+// ── DigitRoller ──────────────────────────────────────────────────────────────
+// Renders a number/string as a row of fixed-width slots; when the value
+// changes, only the slots whose character changed roll. Built on framer's
+// AnimatePresence per slot — the key is the character, so a stable digit
+// stays put while a changed digit gets exit+enter.
+//
+// Width per slot is `1ch`, paired with `font-variant-numeric: tabular-nums`
+// so digits and punctuation align in a column. Sans-serif punctuation can
+// be slightly narrower than 1ch but tabular-nums makes digits match exactly.
+function DigitSlot({ char, reduced }) {
+  if (reduced) {
+    return <span style={{ display: 'inline-block' }}>{char}</span>;
+  }
+  return (
+    <span
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+        width: '1ch',
+        height: '1em',
+        overflow: 'hidden',
+        verticalAlign: 'baseline',
+      }}
+    >
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.span
+          key={char}
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '-100%', opacity: 0 }}
+          transition={{ duration: ms(tokens.motion.duration.normal), ease: SHARP_EASE }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {char}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+function DigitRoller({ value, className, reduced }) {
+  const chars = String(value).split('');
+  return (
+    <span
+      className={className}
+      style={{
+        fontVariantNumeric: 'tabular-nums',
+        display: 'inline-flex',
+        alignItems: 'baseline',
+      }}
+    >
+      {chars.map((c, i) => (
+        // Index-based key — a "slot" stays at position i across renders.
+        // The DigitSlot's inner AnimatePresence uses the character itself
+        // as its key so position-stable but character-changed slots roll.
+        <DigitSlot key={i} char={c} reduced={reduced} />
+      ))}
+    </span>
+  );
+}
 
 // ── Styles injected once ─────────────────────────────────────────────────────
 function useStatTileStyles() {
@@ -176,13 +250,19 @@ const deltaBaseClass = cn(
  *   first mount; subsequent value changes snap (no re-animation). Use for
  *   telemetry rows whose values update on a recurring interval. Without this,
  *   each refresh runs a fresh 1.8s count-up from zero, which is unreadable.
+ * @property {boolean} [liveRoll] When true, the value is rendered as a row of
+ *   fixed-width digit slots; on update, only the slots whose character changed
+ *   "roll" (previous translates up + fades, new enters from below). Use for
+ *   high-frequency telemetry where the eye should track which digits moved
+ *   (price ticks, latency counters, throughput rates). Overrides `live`.
+ *   Initial render fades in without rolling.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
 /** @type {React.ForwardRefExoticComponent<StatTileProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const StatTile = forwardRef(function StatTile(
-  { className, label, value, unit, delta, deltaLabel, code, live = false, style, ...props },
+  { className, label, value, unit, delta, deltaLabel, code, live = false, liveRoll = false, style, ...props },
   outerRef,
 ) {
   useStatTileStyles();
@@ -197,8 +277,14 @@ export const StatTile = forwardRef(function StatTile(
     else if (outerRef) outerRef.current = node;
   };
   const inView = useInView(internalRef, { once: true, amount: 0.3 });
+  const reducedMotion = useReducedMotion();
 
-  const displayValue = useCountUp(value, 1800, live, inView);
+  // In liveRoll mode the value renders as a row of digit slots that
+  // animate per-position on change — count-up is suppressed entirely so
+  // the user reads the *value*, not a tween. The first paint still fades
+  // in via the `andromeda-value-in` keyframe on the value wrapper below.
+  const countUpDisplay = useCountUp(value, 1800, live, inView);
+  const displayValue = liveRoll ? String(value) : countUpDisplay;
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   const isPositive = hasDelta && delta >= 0;
   const trendColorClass = !hasDelta
@@ -226,7 +312,9 @@ export const StatTile = forwardRef(function StatTile(
           className="flex items-baseline gap-[var(--andromeda-2)]"
           style={{ animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: '80ms' }}
         >
-          <span className={valueClass}>{displayValue}</span>
+          {liveRoll
+            ? <DigitRoller value={displayValue} className={valueClass} reduced={reducedMotion} />
+            : <span className={valueClass}>{displayValue}</span>}
           {unit ? <span className={unitClass}>{unit}</span> : null}
         </div>
 

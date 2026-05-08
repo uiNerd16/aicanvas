@@ -385,6 +385,16 @@ The recipe:
 
 Result: every row reads as a single horizontal grid line aligned with the header.
 
+### Selection edge bar on rows
+
+`should` — When a row carries selection state (a leading checkbox), the visual signal is a 2px `accent.300` bar on the row's left edge — not a background fill, not a border, not a colour shift on the row text. The bar wipes in from the left via `scaleX` 0→1 (`transformOrigin: left`) wrapped in `<AnimatePresence>` so deselection wipes back out. `duration.normal` + `easing.out`.
+
+`must` — The bar lives as a child of the first `<td>` (which gets `position: relative`), not the `<tr>`. TR layout is unreliable as a positioning context across browsers, especially under `border-collapse: collapse`. The first cell already exists for the checkbox; it gives the bar a clean anchor.
+
+`should` — Inset the bar from the row's vertical edges by `spacing[1]` so it doesn't touch the dividers above/below. The bar reads as belonging to the row, not the row separator.
+
+The bar is the system's selection language. Don't combine it with a background fill — the bar alone is enough.
+
 ### Absolute-positioned overlays
 
 When a legend, label, or chip sits over a chart area, give the chart explicit `top` clearance equal to (legend height + `spacing[2]`). The legend and the bars must never share pixels.
@@ -524,10 +534,15 @@ State changes (data update, badge variant flip) should be instant or `fast` (80m
 ### Approved motion patterns
 
 - **StatTile count-up** — number tweens to its value over ~800ms with ease-out. No shimmer, no scanline, no sweep on mount.
+- **StatTile live drift** (`live` prop) — count-up runs once on first view-entry; subsequent value updates snap. Use for telemetry rows that re-broadcast every couple of seconds.
+- **StatTile digit roll** (`liveRoll` prop) — value renders as fixed-width digit slots; on update only the slots whose character changed roll vertically (HUD odometer). Use when the user should track which place values moved (price ticks, throughput counters). First paint fades in; no roll on mount.
 - **ProgressBar segment fill** — staggered cascade, 120ms apart, 400ms each, total ~600-800ms for a full bar.
-- **IconButton press** — `active:scale(0.97)` for the click moment.
+- **Button / IconButton interaction** — hover lifts the element 1px and brightens it 5% (`duration.normal` / `easing.out`); press scales 0.98 (Button) or 0.95 (IconButton) at `duration.fast` / `easing.in`. Focus ring fades in over `duration.fast` rather than snapping. All driven by framer-motion's `whileHover` / `whileTap` on the motion root, gated behind `useReducedMotion` and `disabled`.
+- **Active indicator slide** — selection surfaces (SegmentedControl, NavItem dot, filter pills) render their active fill/dot as a `motion.span` with a shared `layoutId`. Framer animates the indicator between sibling positions. `duration.slow` + `easing.standard`.
 - **Caret rotation on Popover open** — 140ms ease, 0° → 180°.
-- **Drawer / Sheet slide** — 200ms ease-out.
+- **Drawer / Sheet slide** — `duration.slow` + `easing.out` on entrance, `easing.in` on exit. Driven by `<AnimatePresence>` over framer-motion, not setTimeout.
+- **Tooltip enter/exit** — opacity + 4px y-offset over `duration.normal` (enter, ease-out) / `duration.fast` (exit, ease-in) via `<AnimatePresence>`.
+- **Selection edge bar** — when a table row is selected, a 2px accent.300 bar wipes in from the row's left edge via `scaleX` 0→1 + opacity 0→1 (`duration.normal`, ease-out). Exit reverses. Confined to the first TD's relative positioning context.
 
 ### Forbidden motion patterns
 
@@ -565,7 +580,42 @@ This keeps motion concerns out of the component's internal layout — the compon
 
 For interaction feedback (hover lifts, press states), use framer-motion's `whileHover` / `whileTap` declaratively. They respect `prefers-reduced-motion` automatically and compose with the existing `cva` variants without fighting them.
 
-For mount/unmount transitions (Drawer slide-out, Popover dismiss), wrap the conditional render in `<AnimatePresence>` with `exit` props on the motion element. This is what replaces the manual `setTimeout` patterns scattered through some components today.
+For mount/unmount transitions (Drawer slide-out, Popover dismiss, Tooltip), wrap the conditional render in `<AnimatePresence>` with `exit` props on the motion element. The component owns enter/exit timing via the `transition` prop on each motion element; durations come from `tokens.motion.duration.*`, easings from `tokens.motion.easing.*`. There are no `setTimeout`-driven unmounts in the system anymore — Drawer was the last holdout and is now AnimatePresence-driven.
+
+### Active indicator pattern — layoutId across siblings
+
+`should` — Selection surfaces with a single visible "active marker" (SegmentedControl fill, NavItem dot, filter pill background, tab underline) implement the marker as a `motion.span` with a shared `layoutId`, rendered only on the active item. Framer matches the new instance to the previous one and tweens the layout change between siblings — no measurement, no ResizeObserver, no manual offsetLeft math. `duration.slow` + `easing.standard` is the default tempo.
+
+```jsx
+{options.map((opt) => {
+  const active = opt.value === value;
+  return (
+    <button key={opt.value} style={{ position: 'relative' }} onClick={...}>
+      {active ? (
+        <motion.span
+          layoutId="my-list-indicator"
+          transition={{ duration: ms(tokens.motion.duration.slow), ease: [0.4, 0, 0.2, 1] }}
+          style={{ position: 'absolute', inset: 0, background: tokens.color.surface.active, zIndex: 0 }}
+        />
+      ) : null}
+      <span style={{ position: 'relative', zIndex: 1 }}>{opt.label}</span>
+    </button>
+  );
+})}
+```
+
+`must` — Scope the `layoutId` per-instance so two lists on the same page don't share their indicator. There are two ways to do it:
+
+- **Self-contained component (one instance owns its segments)** — generate the id with `useId()` inside the component and pass it to every internal `motion.span`. SegmentedControl uses this pattern. The `layoutGroupId` prop overrides only for the rare case where the consumer explicitly wants two instances to animate as one.
+- **Composed list (consumer renders sibling instances)** — wrap the list in framer's `<LayoutGroup id="...">`. NavItem uses this pattern; the per-list scoping is the consumer's job. Without the wrapper the dot flies between every active NavItem on the page.
+
+The choice is structural: if the component renders all the items, scope it itself. If the consumer composes the items, give the consumer LayoutGroup as the seam.
+
+`must` — The active item is the only one that renders the indicator. Don't render an always-mounted indicator that toggles opacity — framer's layout matching depends on element identity (mount of the new active equals layout transition from the old).
+
+`should` — Build the marker as a sibling of the content (absolute, `inset: 0`), not as a wrapping ancestor. The content gets `position: relative; z-index: 1` so it stays readable above the marker's `z-index: 0`. This keeps focus, hover, and click handlers on the real button without framer interfering.
+
+The pattern applies to: SegmentedControl, NavItem (active dot, scoped per list via LayoutGroup), filter pills (RequestsTable), and any tab strip a future component introduces. PanelMenu and DateRangePicker selection states should follow the same pattern when they get a refactor pass.
 
 ### Cascade vs internal motion — a deliberate split
 
@@ -607,6 +657,60 @@ import { rowContainer, rowItem } from '../../components/lib/motion';
 The variants live in tokens (`tokens.motion.duration.row` = 350ms, `tokens.motion.stagger.row` = 40ms) so all tables and logs share the same tempo. Don't redefine row timing inline — keep the system consistent.
 
 When the row is a non-table list (CommsLog, NotificationList, etc.), use `motion.div` for both container and item with the same variants. The pattern is the same, only the element changes.
+
+### Row enter/exit on data change
+
+`should` — Lists whose contents change at runtime (filtered tables, live logs, notification feeds) wrap their rows in `<AnimatePresence initial={false}>` and add `exit="exit"` to each `motion.tr` / `motion.div`. The `rowItem` variant exposes an `exit` state (opacity → 0, `duration.normal`, `easing.in`) so a leaving row fades out, then collapses out of the layout.
+
+`must` — Use a stable, content-derived key on each row (e.g. `r.team`, `vehicle.callsign`), not the index. AnimatePresence needs identity to know which row entered, which left, and which stayed. Index keys make every filter change look like a full re-render.
+
+`must` — Don't add `layout` to `motion.tr` under `border-collapse: collapse`. The transform-based layout animation interacts poorly with table layout (the same caveat as `rowItem`'s opacity-only enter). Rows that stay snap to their new position; rows that leave fade where they were before collapsing. The motion is the fade, not the reflow.
+
+```jsx
+<motion.tbody variants={rowContainer} initial="hidden" whileInView="visible">
+  <AnimatePresence initial={false}>
+    {filtered.map((r) => (
+      <motion.tr key={r.team} variants={rowItem} exit="exit">
+        {/* cells */}
+      </motion.tr>
+    ))}
+  </AnimatePresence>
+</motion.tbody>
+```
+
+Wiring AnimatePresence is cheap; if the list's data is currently static, the wrapper is a no-op and reveals automatic motion the day data starts changing.
+
+### Interaction motion on primitives — Button & IconButton
+
+`must` — Interactive primitives (`Button`, `IconButton`) drive hover and press through framer-motion's `whileHover` / `whileTap`, not raw CSS `:hover` transforms. The hooks compose with `cva` colour variants without fighting them and respect `useReducedMotion` automatically when gated.
+
+The contract:
+
+| State | Effect | Duration | Easing |
+|---|---|---|---|
+| Hover | `y: -1`, `filter: brightness(1.05)` | `duration.normal` (140ms) | `easing.out` |
+| Press | `scale: 0.98` (Button), `0.95` (IconButton) | `duration.fast` (80ms) | `easing.in` |
+| Focus ring | shadow fades in via CSS `transition-[box-shadow]` | `duration.normal` | `easing.out` |
+| Disabled | no motion | — | — |
+| Reduced motion | no motion | — | — |
+
+`should` — `colour`, `border-color`, `box-shadow`, and `background-color` transitions stay on the cva base via `transition-[…] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]`. This is what fades the focus ring; `whileFocus` doesn't help because framer's focus state uses `:focus`, not `:focus-visible`.
+
+`should` — When a `Button` uses `asChild` (Radix Slot), it falls back to CSS-only transitions. Slot can't accept gesture props from framer; the lift + press are skipped and the visible feedback is colour/shadow only. Acceptable trade-off.
+
+### StatTile motion modes — pick one per role
+
+The three behaviours are not interchangeable. Pick by what the value is doing:
+
+| Mode | Prop | Use when |
+|---|---|---|
+| **Count-up** | (default) | Value is a one-time reveal — a static dashboard reading the user lands on. Tweens 0 → value over `duration.countup` on first view-entry. |
+| **Live drift** | `live` | Value updates frequently (every 1–5s) and the user is reading the *current value*, not tracking individual changes. Count-up runs once on first reveal; subsequent updates snap (no animation). Use for ambient telemetry where motion would be noise. |
+| **Digit roll** | `liveRoll` | Value updates frequently AND the user should track which digits changed. Each character renders in a fixed-width slot; only changed slots roll. Use for high-frequency counters where the *change* matters as much as the value (price ticks, throughput, latency). Initial paint fades in without rolling. |
+
+`must` — Don't combine. `liveRoll` overrides `live`; the digit-roll renderer suppresses count-up entirely.
+
+`must` — `liveRoll` requires monospace digit alignment. The component sets `font-variant-numeric: tabular-nums` and a per-slot width of `1ch` so the row doesn't reflow as digits change. Don't override the value font weight to one without tabular figures.
 
 ### Scroll-aware mount-time animations
 

@@ -10,7 +10,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { MagnifyingGlass, CaretUp } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
@@ -44,35 +44,64 @@ const rowSeparatorStyle = {
 };
 
 // ── Filter tab pill ───────────────────────────────────────────────
+// The active fill (surface.active + border.bright) lives in a sibling
+// motion.span with a shared `layoutId`. Framer animates it between
+// tabs as `active` flips — the wrapping <LayoutGroup> in the parent
+// scopes the layoutId so two filter strips don't fight each other.
+const ms = (v) => parseInt(v, 10) / 1000;
+const FILTER_TX = {
+  duration: ms(tokens.motion.duration.slow),
+  ease: [0.4, 0, 0.2, 1],
+};
+
 function FilterTab({ label, count, active, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
       style={{
+        position: 'relative',
         display: 'inline-flex',
         alignItems: 'center',
         gap: tokens.spacing[2],
         padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-        background: active ? tokens.color.surface.active : 'transparent',
-        border: `${tokens.border.thin} ${active ? tokens.color.border.bright : 'transparent'}`,
+        background: 'transparent',
+        border: `${tokens.border.thin} transparent`,
         cursor: 'pointer',
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
         color: active ? tokens.color.text.primary : tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
+        transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
       }}
     >
-      {label}
-      <span
-        style={{
-          fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.faint,
-          letterSpacing: tokens.typography.tracking.wide,
-        }}
-      >
-        {count}
+      {active ? (
+        <motion.span
+          layoutId="rp-filter-indicator"
+          aria-hidden="true"
+          transition={FILTER_TX}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: tokens.color.surface.active,
+            border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        />
+      ) : null}
+      <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[2] }}>
+        {label}
+        <span
+          style={{
+            fontSize: tokens.typography.size.xs,
+            color: tokens.color.text.faint,
+            letterSpacing: tokens.typography.tracking.wide,
+          }}
+        >
+          {count}
+        </span>
       </span>
     </button>
   );
@@ -119,7 +148,10 @@ export function RequestsTable() {
     return true;
   });
 
-  const filteredKeys = filtered.map((r, i) => `${r.team}-${i}`);
+  // Use the team name as the row identity — it's unique across requestRows
+  // and stable across filter changes, which is what AnimatePresence needs
+  // to track which row entered, which left, and which stayed put.
+  const filteredKeys = filtered.map((r) => r.team);
   const allSelected = filteredKeys.length > 0 && filteredKeys.every((k) => selected.has(k));
 
   function toggleRow(key) {
@@ -166,15 +198,17 @@ export function RequestsTable() {
       >
         <InsetDivider />
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[1], flex: 1, minWidth: 0, overflowX: 'auto' }}>
-          {filterTabs.map((t) => (
-            <FilterTab
-              key={t.id}
-              label={t.label}
-              count={t.count}
-              active={activeFilter === t.id}
-              onClick={() => setActiveFilter(t.id)}
-            />
-          ))}
+          <LayoutGroup id="rp-filter-tabs">
+            {filterTabs.map((t) => (
+              <FilterTab
+                key={t.id}
+                label={t.label}
+                count={t.count}
+                active={activeFilter === t.id}
+                onClick={() => setActiveFilter(t.id)}
+              />
+            ))}
+          </LayoutGroup>
         </div>
         <button
           type="button"
@@ -229,20 +263,51 @@ export function RequestsTable() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
-            {filtered.map((r, idx) => {
-              const key = `${r.team}-${idx}`;
+            <AnimatePresence initial={false}>
+            {filtered.map((r) => {
+              const key = r.team;
               const isSelected = selected.has(key);
               return (
                 <motion.tr
                   key={key}
                   variants={rowItem}
+                  exit="exit"
                   style={{
                     ...rowSeparatorStyle,
                     transition: 'background 100ms ease',
                   }}
                   className="rp-row"
                 >
-                  <td style={{ padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
+                  <td style={{ position: 'relative', padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
+                    {/* Selection edge bar — slides in from left when the row
+                        is selected. Anchored to the first TD which provides
+                        the relative positioning context. transformOrigin:left
+                        + scaleX is what gives the wipe; opacity carries the
+                        moment the bar is fully out. */}
+                    <AnimatePresence>
+                      {isSelected ? (
+                        <motion.span
+                          aria-hidden
+                          initial={{ scaleX: 0, opacity: 0 }}
+                          animate={{ scaleX: 1, opacity: 1 }}
+                          exit={{ scaleX: 0, opacity: 0 }}
+                          transition={{
+                            duration: parseInt(tokens.motion.duration.normal, 10) / 1000,
+                            ease: [0, 0, 0.2, 1],
+                          }}
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: tokens.spacing[1],
+                            bottom: tokens.spacing[1],
+                            width: '2px',
+                            background: tokens.color.accent[300],
+                            transformOrigin: 'left',
+                            pointerEvents: 'none',
+                          }}
+                        />
+                      ) : null}
+                    </AnimatePresence>
                     <Checkbox
                       aria-label={`Select ${r.team}`}
                       checked={isSelected}
@@ -318,6 +383,7 @@ export function RequestsTable() {
                 </motion.tr>
               );
             })}
+            </AnimatePresence>
           </motion.tbody>
         </table>
       </div>

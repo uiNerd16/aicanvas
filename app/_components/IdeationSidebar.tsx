@@ -65,7 +65,7 @@ const SYSTEMS = [
     templates: [
       { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
       { slug: 'service-order', name: 'Service Order', domain: 'Telecom' },
-      { slug: 'exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
+      // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
       { slug: 'resource-planning', name: 'Resource Planning', domain: 'Operations' },
     ],
   },

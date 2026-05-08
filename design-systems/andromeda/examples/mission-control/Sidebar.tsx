@@ -3,7 +3,7 @@
 // MISSION CONTROL: Sidebar
 // ============================================================
 
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
@@ -90,21 +90,24 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
         /// Console
       </div>
 
-      {/* Nav */}
+      {/* Nav — LayoutGroup scopes NavItem's `layoutId` so the active dot
+          slides between siblings on selection change. */}
       <nav style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
       }}>
-        {navItems.map(item => (
-          <NavItem
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={activeNav === item.id}
-            onClick={() => onNavChange(item.id)}
-          />
-        ))}
+        <LayoutGroup id="mission-control-sidebar">
+          {navItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeNav === item.id}
+              onClick={() => onNavChange(item.id)}
+            />
+          ))}
+        </LayoutGroup>
       </nav>
 
       {/* User card */}
