@@ -218,11 +218,24 @@ const expectedNames = new Set(
 )
 expectedNames.add('registry') // keep the root index
 expectedNames.add('aicanvas-mcp') // MCP metadata file
-// Reserve filenames for design systems (tokens + system + templates) so they
-// survive the stale-file cleanup pass.
+// Reserve filenames for design systems (tokens + per-component + system +
+// templates) so they survive the stale-file cleanup pass.
+function componentSlug(systemSlug, fileBaseName) {
+  // Convert PascalCase file name to kebab-case, prefix with system slug.
+  // Button.tsx → andromeda-button; PanelHeader.tsx → andromeda-panel-header.
+  const kebab = fileBaseName
+    .replace(/\.tsx$/, '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+  return `${systemSlug}-${kebab}`
+}
 for (const ds of DESIGN_SYSTEMS) {
   expectedNames.add(`${ds.slug}-tokens`)
   expectedNames.add(ds.slug)
+  for (const entry of ds.systemEntries) {
+    const baseName = entry.split('/').pop()
+    expectedNames.add(componentSlug(ds.slug, baseName))
+  }
   for (const template of ds.templates) expectedNames.add(template.slug)
 }
 for (const existing of readdirSync(outDir).filter(f => f.endsWith('.json'))) {
@@ -415,6 +428,80 @@ for (const ds of DESIGN_SYSTEMS) {
 
   const systemFileSet = new Set(systemWalk.files)
   const dsBoundary = new Set([...tokensFileSet, ...systemFileSet])
+
+  // ── 2b. Individual components ───────────────────────────────────────────────
+  // One installable item per component file. Each ships its own `.tsx` + sibling
+  // `.rules.md`, depends on `andromeda-tokens` for the foundation, and declares
+  // any other system components it imports as `registryDependencies` so the dep
+  // graph stays correct (PanelHeader → IconButton → tokens, etc.).
+  //
+  // Collision handling: if a component's slug already exists as a published
+  // standalone in `components-workspace/` (e.g. the inlined `andromeda-button`
+  // wrapper), skip the system emit — the standalone retains the slug. Users on
+  // that component's page get the standalone install command; the system version
+  // is still reachable via the full `andromeda` bundle install.
+  const componentWorkspaceSlugs = new Set(
+    readdirSync(wsDir).filter((d) => {
+      try { return statSync(join(wsDir, d)).isDirectory() } catch { return false }
+    }),
+  )
+  for (const entry of ds.systemEntries) {
+    const fileAbs = resolve(rootDirAbs, entry)
+    if (!systemFileSet.has(fileAbs)) continue   // not part of system walk (skipped)
+    const baseName = entry.split('/').pop()
+    const slug = componentSlug(ds.slug, baseName)
+
+    // Slug collision with components-workspace — skip individual emit.
+    if (componentWorkspaceSlugs.has(slug)) continue
+
+    // Walk this component's transitive deps within the system, excluding tokens
+    // files (those come via registry deps) AND excluding sibling component files
+    // (those become registry deps too, not bundled inline).
+    const otherComponentFiles = [...systemFileSet].filter((f) => f !== fileAbs)
+    const componentBoundary = new Set([...tokensFileSet, ...otherComponentFiles])
+    const compWalk = walkDependencies([fileAbs], rootDirAbs, componentBoundary)
+
+    // Read the component's own imports to figure out which sibling components
+    // it actually pulls in — those become registry deps. The walker doesn't
+    // report this directly, so re-read and parse imports to identify them.
+    const sourceContent = readFileSync(fileAbs, 'utf-8')
+    const componentRegistryDeps = new Set([`${ds.slug}-tokens`])
+    for (const spec of extractImportSpecifiers(sourceContent)) {
+      if (!spec.startsWith('.') && !spec.startsWith('/')) continue
+      const resolved = resolveImport(fileAbs, spec)
+      if (!resolved || !systemFileSet.has(resolved) || resolved === fileAbs) continue
+      // Sibling component — find its slug
+      const relPath = relative(rootDirAbs, resolved)
+      const siblingBase = relPath.split(sep).pop()
+      const siblingSlug = componentSlug(ds.slug, siblingBase)
+      // Only declare a dep if that sibling is itself published individually
+      // (i.e. doesn't collide with a workspace standalone).
+      if (!componentWorkspaceSlugs.has(siblingSlug)) {
+        componentRegistryDeps.add(siblingSlug)
+      }
+    }
+
+    const compFiles = compWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+    // Attach this component's brain rules sibling if present
+    const brainAbs = brainSiblingFor(fileAbs)
+    if (brainAbs) compFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
+
+    const compName = baseName.replace(/\.tsx$/, '')
+    const compItem = {
+      $schema: SCHEMA,
+      name: slug,
+      type: 'registry:ui',
+      title: `${compName} (${ds.name})`,
+      description: `${ds.name} ${compName} component. Install just this piece — tokens and any sibling components are pulled in automatically.`,
+      author: 'aicanvas <https://aicanvas.me>',
+      registryDependencies: [...componentRegistryDeps].sort(),
+      dependencies: compWalk.npmDeps,
+      files: compFiles,
+    }
+    writeFileSync(join(outDir, `${slug}.json`), JSON.stringify(compItem, null, 2) + '\n')
+    registryItems.push(indexEntry(compItem, compFiles))
+    dsCount++
+  }
 
   // ── 3. Templates (compositions) ──────────────────────────────────────────────
   // Each template ships only its example folder. Components and tokens come

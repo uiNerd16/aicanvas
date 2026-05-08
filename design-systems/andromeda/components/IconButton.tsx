@@ -11,8 +11,19 @@
 'use client';
 
 import { forwardRef } from 'react';
+import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
+
+const ms = (v) => parseInt(v, 10) / 1000;
+const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] };
+const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] };
+const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
+// IconButton is denser than Button so its press is a touch deeper, matching
+// the original 0.94 active scale that signalled the squeeze on a small target.
+const PRESS_DOWN = { scale: 0.95, transition: PRESS_TX };
 
 const iconButtonVariants = cva(
   [
@@ -21,9 +32,11 @@ const iconButtonVariants = cva(
     'border border-solid',
     'rounded-[var(--andromeda-radius-none)]',
     'p-0',
-    // motion
-    'cursor-pointer transition-all duration-150 ease-out',
-    'active:scale-[0.94]',
+    // motion — colours/border/shadow tween via CSS at duration.normal so the
+    // focus ring fades in. Lift + press are framer-motion gesture props on
+    // the motion.button root.
+    'cursor-pointer',
+    'transition-[background-color,border-color,box-shadow,color] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
     // focus + disabled — match Button.tsx exactly
     'focus-visible:outline-none',
@@ -110,20 +123,25 @@ export const IconButton = forwardRef(function IconButton(
     children,
     style,
     type = 'button',
+    disabled,
     ...props
   },
   ref,
 ) {
+  const reducedMotion = useReducedMotion();
   return (
-    <button
+    <motion.button
       ref={ref}
       type={type}
       className={cn(iconButtonVariants({ variant, size }), className)}
       style={{ ...andromedaVars(), ...style }}
+      disabled={disabled}
+      whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
+      whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
       {...props}
     >
       {Icon ? <Icon size={ICON_SIZE[size]} weight="regular" /> : children}
-    </button>
+    </motion.button>
   );
 });
 

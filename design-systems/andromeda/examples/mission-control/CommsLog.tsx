@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ArrowDown, ArrowUp, Warning } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { Card, CardHeader } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -53,6 +53,7 @@ function CommsItem({ entry, isLast }) {
   return (
     <motion.div
       variants={rowItem}
+      exit="exit"
       style={{
         display: 'flex',
         gap: tokens.spacing[3],
@@ -155,13 +156,15 @@ export function CommsLog() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
-        {commsLog.slice(0, 5).map((entry, i, arr) => (
-          <CommsItem
-            key={i}
-            entry={entry}
-            isLast={i === arr.length - 1}
-          />
-        ))}
+        <AnimatePresence initial={false}>
+          {commsLog.slice(0, 5).map((entry, i, arr) => (
+            <CommsItem
+              key={`${entry.from}-${entry.time}`}
+              entry={entry}
+              isLast={i === arr.length - 1}
+            />
+          ))}
+        </AnimatePresence>
       </motion.div>
     </Card>
   );

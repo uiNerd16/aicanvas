@@ -3,13 +3,15 @@
 // COMPONENT: SegmentedControl
 // shadcn/ui-aligned API: controlled `value` / `onChange`, options
 // array, sized variants. A row of icon-or-label buttons with a
-// sliding `surface.active` background that translates between
-// segments when the active value changes.
+// `surface.active` fill that slides between segments via framer's
+// `layoutId` — no manual measurement, no ResizeObserver, no raw
+// timing strings. Token-driven duration + easing throughout.
 // ============================================================
 
 'use client';
 
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useId } from 'react';
+import { motion } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 import { tokens } from '../tokens';
 
@@ -23,6 +25,15 @@ const ICON_PX = {
   sm: 14,
   md: 16,
   lg: 18,
+};
+
+const ms = (v) => parseInt(v, 10) / 1000;
+// Inline cubic-bezier — framer wants arrays, tokens.motion.easing values are
+// CSS strings. Keep in sync with tokens.motion.easing.standard.
+const STANDARD_EASE = [0.4, 0, 0.2, 1];
+const INDICATOR_TX = {
+  duration: ms(tokens.motion.duration.slow),
+  ease: STANDARD_EASE,
 };
 
 /**
@@ -39,38 +50,27 @@ const ICON_PX = {
  * @property {(next: string) => void} onChange
  * @property {SegmentOption[]} options
  * @property {'sm'|'md'|'lg'} [size='md']
+ * @property {string} [layoutGroupId]
+ *   Override the auto-generated per-instance id only when you explicitly want
+ *   two SegmentedControls to share their indicator (animating across both as
+ *   one unit). The default `useId()` value scopes the indicator to a single
+ *   control, which is what you want 99% of the time — without it, switching
+ *   selections in one control makes the indicator fly between controls.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
 /** @type {React.ForwardRefExoticComponent<SegmentedControlProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const SegmentedControl = forwardRef(function SegmentedControl(
-  { className, value, onChange, options, size = 'md', style, ...props },
+  { className, value, onChange, options, size = 'md', layoutGroupId, style, ...props },
   ref,
 ) {
-  const itemRefs = useRef([]);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
-
-  // Measure the active segment's box and position the indicator over it.
-  // Re-measure on value change AND on container resize so the indicator
-  // tracks accurately when the parent reflows.
-  useEffect(() => {
-    const idx = options.findIndex((o) => o.value === value);
-    const el = itemRefs.current[idx];
-    if (!el) return;
-    const measure = () => {
-      setIndicator({
-        left: el.offsetLeft,
-        width: el.offsetWidth,
-        ready: true,
-      });
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [value, options]);
-
+  // Auto-scope the indicator's layoutId to this instance so multiple
+  // SegmentedControls on the same page don't share the marker. Override
+  // via `layoutGroupId` only when you explicitly want cross-instance
+  // animation (rare).
+  const generatedId = useId();
+  const indicatorId = layoutGroupId ?? `andromeda-segmented-${generatedId}`;
   const cellSize = SIZE_PX[size] ?? SIZE_PX.md;
   const iconSize = ICON_PX[size] ?? ICON_PX.md;
 
@@ -90,25 +90,6 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       }}
       {...props}
     >
-      {/* Sliding indicator — absolutely positioned, transitions between segments */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          height: '100%',
-          width: `${indicator.width}px`,
-          transform: `translateX(${indicator.left}px)`,
-          background: tokens.color.surface.active,
-          transition: indicator.ready
-            ? 'transform 220ms cubic-bezier(0.32, 0.72, 0, 1), width 220ms cubic-bezier(0.32, 0.72, 0, 1)'
-            : 'none',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
       {options.map((opt, i) => {
         const Icon = opt.icon;
         const active = opt.value === value;
@@ -116,7 +97,6 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
         return (
           <button
             key={opt.value}
-            ref={(el) => { itemRefs.current[i] = el; }}
             type="button"
             role="tab"
             aria-selected={active}
@@ -126,7 +106,6 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
             className="andromeda-segmented-item"
             style={{
               position: 'relative',
-              zIndex: 1,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -144,12 +123,31 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               color: active ? tokens.color.text.primary : tokens.color.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
-              transition: 'color 140ms ease',
+              transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
             }}
           >
-            {Icon ? <Icon size={iconSize} weight="regular" /> : null}
-            {opt.label && Icon ? <span>{opt.label}</span> : null}
-            {showLabel ? opt.label : null}
+            {/* Sliding indicator — only the active button renders it.
+                Framer's `layoutId` matches the new instance to the previous
+                one and animates the layout change between siblings. */}
+            {active ? (
+              <motion.span
+                layoutId={indicatorId}
+                aria-hidden="true"
+                transition={INDICATOR_TX}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: tokens.color.surface.active,
+                  zIndex: 0,
+                  pointerEvents: 'none',
+                }}
+              />
+            ) : null}
+            <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[2] }}>
+              {Icon ? <Icon size={iconSize} weight="regular" /> : null}
+              {opt.label && Icon ? <span>{opt.label}</span> : null}
+              {showLabel ? opt.label : null}
+            </span>
           </button>
         );
       })}

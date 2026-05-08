@@ -168,6 +168,17 @@ export const rowItem = {
       ease: EASE_OUT,
     },
   },
+  // Exit variant — used when a row is being removed from a list inside
+  // <AnimatePresence>. Mirror the entrance: opacity-only, no transform
+  // (same table-layout caveat as rowItem). Slightly faster + ease-in so
+  // the row "leaves the field" rather than lingering.
+  exit: {
+    opacity: 0,
+    transition: {
+      duration: toSeconds(tokens.motion.duration.normal),
+      ease: [0.4, 0, 1, 1], // tokens.motion.easing.in
+    },
+  },
 };
 
 /**

@@ -34,7 +34,19 @@ Severity tags follow the same convention: `must` / `should` / `may`.
 
 ## Hover, focus, pressed
 
-The hover lifts the border one stop and adds an 8px short-radius glow tinted in the bg color. This is by design — the glow tells the user "this is the live button under your cursor".
+The hover lifts the element 1px and brightens its fill 5% in addition to lifting the border one stop and adding an 8px short-radius glow tinted in the bg color. The lift+brightness is the same vocabulary across Button and IconButton; the colour change is per-variant. Together they tell the user "this is the live button under your cursor".
+
+The motion contract (system-wide rule, repeated here for convenience):
+
+| State | Effect | Duration | Easing |
+|---|---|---|---|
+| Hover | `y: -1`, `filter: brightness(1.05)` | `duration.normal` (140ms) | `easing.out` |
+| Press | `scale: 0.98` | `duration.fast` (80ms) | `easing.in` |
+| Focus ring | shadow fades in via CSS transition | `duration.normal` | `easing.out` |
+| Disabled | no motion | — | — |
+| Reduced motion | no motion | — | — |
+
+The lift and press are framer-motion's `whileHover` / `whileTap` on the `motion.button` root; the colour/border/shadow tweens stay on the cva base via `transition-[…]` with token-driven duration + easing. `whileFocus` isn't used — framer's focus state doesn't honour `:focus-visible`, so the ring fades via CSS.
 
 `must` — No glow on `outline`, `ghost`, or `link` variants. The glow is tied to colored fills (`default`, `destructive`); applying it to neutral variants makes them read as primary, breaking hierarchy.
 
@@ -68,7 +80,8 @@ The icon size is intentionally one step taller than the text x-height so it read
 - `must` — Don't use `default` variant for de-emphasised actions. If the hierarchy says "secondary", the variant is `outline`, not "default with subtle styling".
 - `must` — Don't apply hover glow to `outline`, `ghost`, or `link`. Glow signals "this fills with color" — using it on a neutral variant breaks the system's contract.
 - `should` — Don't mix sizes in the same row.
-- `should` — Don't add custom transitions to the Button — the cva variants already include `transition-all duration-150 ease-out` and `active:scale-[0.97]`. Override only when there's a documented reason that's been added to this file.
+- `should` — Don't add custom transitions to the Button — the cva base owns colour/border/shadow transitions at `duration.normal` / `easing.out`, and the `motion.button` root owns `whileHover` lift + `whileTap` press at the durations above. Override only when there's a documented reason that's been added to this file.
+- `must` — Don't pass framer-motion gesture props (`whileHover`, `whileTap`, `drag`, etc.) through to a Button rendered with `asChild`. Slot can't accept them; they'd silently no-op. Use a plain Button instead, or accept that asChild buttons fall back to colour-only feedback.
 
 ## Adjacent components
 

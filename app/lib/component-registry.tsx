@@ -190,7 +190,7 @@ export const DESIGN_SYSTEM_META: Record<DesignSystemSlug, DesignSystemMeta> = {
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom' },
-      { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance' },
+      // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
       { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations' },
     ],
   },

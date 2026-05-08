@@ -80,7 +80,11 @@ export const DESIGN_SYSTEMS = [
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom',    entryPath: 'examples/service-order/index.tsx' },
-      { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance',    entryPath: 'examples/exchange-terminal/index.tsx' },
+      // exchange-terminal — hidden from registry, sidebar, and showcase. Source
+      // preserved in `examples/exchange-terminal/` for future revival; restore
+      // by uncommenting the entry below + the matching entries in
+      // app/lib/component-registry.tsx and app/_components/IdeationSidebar.tsx.
+      // { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance', entryPath: 'examples/exchange-terminal/index.tsx' },
       { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations', entryPath: 'examples/resource-planning/index.tsx' },
     ],
   },
