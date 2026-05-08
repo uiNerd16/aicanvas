@@ -28,7 +28,7 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       </Suspense>
       <div
         className="flex flex-1 scroll-smooth flex-col overflow-y-auto"
-        style={{ backgroundColor: tokens.color.surface.base }}
+        style={{ backgroundColor: tokens.color.surface.base, scrollbarGutter: 'stable' }}
       >
         <IdeationTopBar />
         {children}
