@@ -92,6 +92,7 @@ import {
   DrawerBody,
   DrawerFooter,
 } from '../../../../design-systems/andromeda/components/Drawer'
+import { TemplateChrome } from '../../../_components/TemplateChrome'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
 // matches the design system's only font exactly.
@@ -232,6 +233,18 @@ export default function AndromedaShowcase({
   })
 
   return (
+    <>
+    <TemplateChrome
+      templateSlug="andromeda-all"
+      templateName="Full system"
+      systemName="Andromeda"
+      fallbackHref="/design-systems/andromeda/showcase"
+      hideBack
+      description={[
+        'Installs every Andromeda component, token, and template.',
+        'One command — sign in required.',
+      ]}
+    />
     <div
       className={jetbrainsMono.variable}
       style={{
@@ -1485,5 +1498,6 @@ export default function AndromedaShowcase({
         </Section>
       </div>
     </div>
+    </>
   )
 }
