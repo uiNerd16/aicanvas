@@ -21,6 +21,10 @@ import {
 import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
+import { SignedIn } from './auth/SignedIn'
+import { SignedOut } from './auth/SignedOut'
+import { UserMenu } from './auth/UserMenu'
+import { SignInCta } from './auth/SignInCta'
 
 // ── Tier structure (mirrors Sidebar) ──────────────────────────────────────
 const COMPONENTS_LABELS = [
@@ -364,6 +368,16 @@ export function MobileNav() {
                   <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
                   Get MCP
                 </Link>
+              </div>
+
+              {/* Auth row */}
+              <div className="shrink-0 border-t border-sand-300 px-3 py-3 dark:border-sand-800">
+                <SignedIn>
+                  <UserMenu />
+                </SignedIn>
+                <SignedOut>
+                  <SignInCta />
+                </SignedOut>
               </div>
 
               {/* Bottom card */}
