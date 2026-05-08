@@ -8,8 +8,10 @@ import './globals.css'
 import { ThemeProvider } from './components/ThemeProvider'
 import { Sidebar } from './components/Sidebar'
 import { MobileNav } from './components/MobileNav'
+import { SessionProvider } from './components/auth/SessionProvider'
 import { COMPONENTS } from './lib/component-registry'
 import { GITHUB_URL, SITE_URL } from './lib/config'
+import { createClient } from './lib/supabase/server'
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -108,11 +110,14 @@ const websiteSchema = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <html
       lang="en"
@@ -134,20 +139,28 @@ export default function RootLayout({
       </head>
       <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
         <ThemeProvider>
-          {/* Desktop sidebar — hidden on mobile */}
-          <Suspense fallback={null}>
-            <div className="hidden md:flex">
-              <Sidebar />
+          <SessionProvider initialUser={user}>
+            {/* Desktop sidebar — hidden on mobile */}
+            <Suspense fallback={null}>
+              <div className="hidden md:flex">
+                <Sidebar />
+              </div>
+            </Suspense>
+            {/* Mobile nav — visible only below md */}
+            <Suspense fallback={null}>
+              <MobileNav />
+            </Suspense>
+            {/* Content area scrolls independently of the sidebar.
+                scrollbar-gutter:stable reserves space for the vertical
+                scrollbar regardless of whether content overflows, so the
+                visible width never shifts between auth states. */}
+            <div
+              className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
+              style={{ scrollbarGutter: 'stable' }}
+            >
+              {children}
             </div>
-          </Suspense>
-          {/* Mobile nav — visible only below md */}
-          <Suspense fallback={null}>
-            <MobileNav />
-          </Suspense>
-          {/* Content area scrolls independently of the sidebar */}
-          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950">
-            {children}
-          </div>
+          </SessionProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
