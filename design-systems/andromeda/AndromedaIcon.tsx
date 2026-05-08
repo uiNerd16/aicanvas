@@ -7,7 +7,7 @@
 // never deforms regardless of where it's dropped in.
 // ============================================================
 
-export function AndromedaIcon({ size = 24, mono = false, style, ...props }) {
+export function AndromedaIcon({ size = 24, mono = false, style = undefined, ...props }) {
   const width = size;
   const height = (size * 24) / 28;
 
