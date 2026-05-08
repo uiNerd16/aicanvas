@@ -30,6 +30,8 @@ import type { ComponentMeta, DesignSystemSlug } from '../../lib/component-regist
 import { getDesignSystemMeta } from '../../lib/component-registry'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
+import { trackInstall } from '../../lib/track-install'
+import { SaveButton } from '../SaveButton'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -229,6 +231,7 @@ export default function ComponentPageView({
   async function copyCli() {
     try {
       track('CLI Copy', { component: slug })
+      trackInstall(installSlug, designSystem ?? null, pkgManager)
       await navigator.clipboard.writeText(cliCommand)
       setCliCopied(true)
       setTimeout(() => setCliCopied(false), 4000)
@@ -504,6 +507,9 @@ export default function ComponentPageView({
             {/* Action bar */}
             <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
+              {/* Save (logged-in only — no-op render otherwise) */}
+              <SaveButton slug={slug} system={designSystem ?? null} />
+
               {/* Copy CLI — copies npx shadcn install command */}
               <button
                 onClick={copyCli}
@@ -643,6 +649,7 @@ export default function ComponentPageView({
                                     ? `npx shadcn@latest add @aicanvas/${installSlug}`
                                     : `bunx shadcn@latest add @aicanvas/${installSlug}`
                                   navigator.clipboard.writeText(cmd)
+                                  trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
                                 }}
