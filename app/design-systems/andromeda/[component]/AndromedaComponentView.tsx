@@ -17,6 +17,9 @@ import {
 import { Step } from '../../../components/Step'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { SignedIn } from '../../../components/auth/SignedIn'
+import { SignedOut } from '../../../components/auth/SignedOut'
+import { trackInstall } from '../../../lib/track-install'
 
 type RelatedItem = { slug: string; name: string }
 
@@ -90,6 +93,7 @@ export function AndromedaComponentView({
 
   async function copyCli() {
     try {
+      trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
       await navigator.clipboard.writeText(cliCommand)
       setCliCopied(true)
       setTimeout(() => setCliCopied(false), 2000)
@@ -184,22 +188,60 @@ export function AndromedaComponentView({
             component breaks the system contract. Users compose AT the
             system level, not per-component. */}
         <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={copyCli}
-            className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
-          >
-            {cliCopied ? (
-              <Check weight="regular" size={15} />
-            ) : (
+          <SignedIn>
+            <button
+              type="button"
+              onClick={copyCli}
+              className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
+            >
+              {cliCopied ? (
+                <Check weight="regular" size={15} />
+              ) : (
+                <Terminal weight="regular" size={15} />
+              )}
+              {cliCopied ? 'Copied!' : 'Copy CLI'}
+            </button>
+          </SignedIn>
+          <SignedOut>
+            <Link
+              href={`/account/sign-in?next=${encodeURIComponent(`/design-systems/andromeda/${slug}`)}`}
+              className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
+            >
               <Terminal weight="regular" size={15} />
-            )}
-            {cliCopied ? 'Copied!' : 'Copy CLI'}
-          </button>
+              Sign in to copy
+            </Link>
+          </SignedOut>
         </div>
       </div>
 
       {/* ── Installation ─────────────────────────────────────────────── */}
+      <SignedOut>
+        <section className="mt-12">
+          <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+            Add to your project
+          </h2>
+          <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+            One command adds this component to your project.
+          </p>
+          {/* Same outer chrome as the SignedIn install card so the page
+              below it doesn't shift when toggling auth state. */}
+          <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-xl border border-sand-300 bg-sand-100 p-12 text-center dark:border-sand-800 dark:bg-sand-900">
+            <h3 className="text-base font-bold text-sand-900 dark:text-sand-50">
+              Free for members
+            </h3>
+            <p className="max-w-sm text-sm text-sand-500 dark:text-sand-400">
+              Sign in to copy the CLI command and paste it into your project. Takes 10 seconds.
+            </p>
+            <Link
+              href={`/account/sign-in?next=${encodeURIComponent(`/design-systems/andromeda/${slug}`)}`}
+              className="mt-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+            >
+              Sign in to install
+            </Link>
+          </div>
+        </section>
+      </SignedOut>
+      <SignedIn>
       <section className="mt-12">
         <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
           Add to your project
@@ -278,6 +320,7 @@ export function AndromedaComponentView({
                             ? `bunx shadcn@latest add @aicanvas/andromeda-${slug}`
                             : `npx shadcn@latest add @aicanvas/andromeda-${slug}`
                           navigator.clipboard.writeText(cmd)
+                          trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
                         }}
@@ -368,6 +411,7 @@ export function AndromedaComponentView({
           </div>
         </div>
       </section>
+      </SignedIn>
 
       {/* ── More Andromeda components ──────────────────────────────────── */}
       {related.length > 0 && (
