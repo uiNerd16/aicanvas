@@ -7,6 +7,7 @@ const TABS = [
   { href: '/account', label: 'Profile' },
   { href: '/account/saved', label: 'Saved' },
   { href: '/account/history', label: 'History' },
+  { href: '/account/settings', label: 'Settings' },
 ]
 
 export function AccountTabs() {

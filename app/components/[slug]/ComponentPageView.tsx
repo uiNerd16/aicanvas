@@ -31,6 +31,7 @@ import { getDesignSystemMeta } from '../../lib/component-registry'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
+import { useSession } from '../auth/SessionProvider'
 import { SaveButton } from '../SaveButton'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
@@ -93,6 +94,7 @@ export default function ComponentPageView({
   useEffect(() => { setInstallTier('component') }, [slug])
   const installSlug = installTier === 'system' && systemMeta ? systemMeta.slug : slug
   const router = useRouter()
+  const { preferences } = useSession()
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
@@ -100,6 +102,12 @@ export default function ComponentPageView({
   const [depsCopied, setDepsCopied] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
+
+  // Adopt the user's preferred package manager once preferences load.
+  // We only set the initial default — manual clicks aren't overridden.
+  useEffect(() => {
+    if (preferences.package_manager) setPkgManager(preferences.package_manager)
+  }, [preferences.package_manager])
   const [darkCopied, setDarkCopied] = useState(false)
   const [fontCopied, setFontCopied] = useState(false)
   const [fontFramework, setFontFramework] = useState<'html' | 'nextjs'>('html')
@@ -163,7 +171,14 @@ export default function ComponentPageView({
   const [promptDropdownOpen, setPromptDropdownOpen] = useState(false)
   const promptDropdownRef = useRef<HTMLDivElement>(null)
   const mainCardRef = useRef<HTMLDivElement>(null)
-  const availablePlatforms = PLATFORMS.filter((p) => prompts[p])
+  // Sort the user's preferred platform first so the Remix dropdown opens
+  // with their pick at the top. Falls back to the registry order.
+  const availablePlatforms = (() => {
+    const list = PLATFORMS.filter((p) => prompts[p])
+    const pref = preferences.ai_platform
+    if (!pref || !list.includes(pref)) return list
+    return [pref, ...list.filter((p) => p !== pref)]
+  })()
 
   // Related pagination — sliding window of RELATED_PAGE_SIZE cards advancing
   // ONE card at a time. The exiting card stays in place but drops behind the

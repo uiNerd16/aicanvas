@@ -18,6 +18,7 @@ import { Step } from '../../../components/Step'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
+import { useSession } from '../../../components/auth/SessionProvider'
 
 type RelatedItem = { slug: string; name: string }
 
@@ -38,6 +39,7 @@ export function AndromedaComponentView({
   rawCode,
   related,
 }: Props) {
+  const { preferences } = useSession()
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [codeCopied, setCodeCopied] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)
@@ -46,6 +48,12 @@ export function AndromedaComponentView({
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
   const [darkCopied, setDarkCopied] = useState(false)
   const mainCardRef = useRef<HTMLDivElement>(null)
+
+  // Adopt the user's preferred package manager once preferences load.
+  // We don't override an in-progress click — only the initial default.
+  useEffect(() => {
+    if (preferences.package_manager) setPkgManager(preferences.package_manager)
+  }, [preferences.package_manager])
 
   const RELATED_PAGE_SIZE = 3
   const [relatedStart, setRelatedStart] = useState(0)
