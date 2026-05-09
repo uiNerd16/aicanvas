@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
+import { GoogleSignInButton } from '../GoogleSignInButton'
 
 export default function SignInPage() {
   return (
@@ -76,7 +77,16 @@ function SignInForm() {
             Check your inbox at <strong>{email}</strong> — we sent you a sign-in link.
           </div>
         ) : (
-          <form onSubmit={handlePasswordSignIn} className="mt-6 space-y-4">
+          <>
+          <div className="mt-6 space-y-3">
+            <GoogleSignInButton next={next} label="Sign in with Google" />
+            <div className="flex items-center gap-3" aria-hidden="true">
+              <span className="h-px flex-1 bg-sand-300 dark:bg-sand-800" />
+              <span className="text-xs uppercase tracking-wider text-sand-500 dark:text-sand-500">or</span>
+              <span className="h-px flex-1 bg-sand-300 dark:bg-sand-800" />
+            </div>
+          </div>
+          <form onSubmit={handlePasswordSignIn} className="mt-4 space-y-4">
             <div>
               <label htmlFor="email" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
                 Email
@@ -127,6 +137,7 @@ function SignInForm() {
               Email me a magic link instead
             </button>
           </form>
+          </>
         )}
       </div>
     </div>
