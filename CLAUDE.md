@@ -148,4 +148,14 @@ export const prompts: Partial<Record<Platform, string>> = {
 - `generateStaticParams()` required for all `[slug]` routes
 - Server components pass `<PreviewComponent />` JSX as `children` to client components (never store JSX in module-level data)
 - `'use client'` required on all interactive components
+
+## Browser verification
+After any visible UI change, screenshot the affected page on the running dev server before reporting the work complete. Use the Claude in Chrome browser tools — don't claim "looks good" from the diff alone.
+
+- **Applies to**: changes to `app/`, `components-workspace/`, `design-systems/`, or any rendered output.
+- **Skip when**: only changing types, tests, comments, prompts, or other non-rendered code.
+- **Dev server**: try `localhost:3000` first; if it 404s or refuses, try `:3001`; only then ask. If no dev server is running at all, ask before guessing — don't `npm run dev` unilaterally.
+- **If the screenshot reveals a problem**: fix it before reporting; don't ship a "done" claim that the screenshot contradicts.
+- **What to check in the screenshot**: layout matches intent, no console errors triggered by the change, theme tokens (sand/olive in site chrome; system tokens in `design-systems/`) resolved correctly.
+
 "Do not invoke superpowers skills automatically. Only use them when I explicitly ask."

@@ -67,6 +67,14 @@ Tech notes: <any special requirements>
 
 Specs for DS work should be saved at `design-systems/<system>/specs/<slug>.md` (parallel to how standalone specs live at `components-workspace/<slug>/spec.md`). The Supervisor routes briefs based on the `design-system:` field.
 
+## Browser verification — design systems
+Before reporting any DS change complete, screenshot the affected page on the running dev server. For Andromeda the canonical routes are `/design-systems/andromeda` and `/design-systems/andromeda/showcase`; for Meridian, `/design-systems/meridian`. If your change touches an example, also screenshot that example page directly.
+
+- **Token resolution check**: the screenshot must show that every color, spacing, radius, and typography value resolved through the system's CSS custom properties (`--andromeda-*` / `--meridian-*`). Visually that means: no rogue Tailwind colors slipping in, no off-system shadows or radii, JetBrains Mono everywhere in Andromeda. If the screenshot looks "almost right but slightly off," suspect a hardcoded value bypassing tokens — find it before reporting done.
+- **Compositional integrity**: zoom mentally to the level that matters. A change to `Button.tsx` should be screenshot-verified inside an example that actually uses it (mission-control for Andromeda, the editorial dashboard for Meridian) — not just in isolation.
+- **Console**: read it. `// @ts-nocheck` masks compile-time errors but not runtime ones (key warnings, hydration mismatches, missing CSS vars rendering as empty strings).
+- **No drift, no exceptions**: if the screenshot reveals visual drift from the system's existing language, the fix is to align to tokens — not to ship the drift and "address it later." That's how the system rots.
+
 ## Skills
 
 - [`skills/designing-a-system.md`](skills/designing-a-system.md) — philosophy and workflow for creating or extending a DS (stub, TODO: flesh out)
