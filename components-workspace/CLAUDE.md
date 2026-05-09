@@ -102,5 +102,14 @@ When the Supervisor delegates a prompts-only task (after the user has approved t
 2. Write `prompts.ts` based on what the component ACTUALLY does, not what the spec says
 3. Verify the platforms specified in the brief are filled in and each prompt is self-contained (components may legitimately omit some platforms — check the brief)
 
+## Browser verification — standalones
+Before reporting a BUILD complete, screenshot the component in the running dev server. The route is `/components/<slug>` (the live registry-rendered page), not `/preview/<slug>`.
+
+- **Both themes**: take TWO screenshots — once with the page in dark mode, once after toggling to light. The component must look intentional in both. Standalones that "kind of work" in light mode are not done.
+- **Mobile width**: also verify at a narrow viewport (~375px) — the mobile responsiveness rules above are not optional, and the screenshot is where you catch overflow, illegible text, or dead hover-only interactions.
+- **Console**: read the console after the page loads. Framer Motion warnings, hydration mismatches, and missing `'use client'` errors all surface here.
+- **Container chrome**: confirm the root has the standalone container (`bg-sand-100 dark:bg-sand-950`) and that no inner element is using `min-h-screen` (only the root may).
+- **If the screenshot reveals a problem**: fix it before handing back. Don't ship a "ready for review" status the screenshot contradicts.
+
 ## Template
 Copy from `components-workspace/_template/` to get started.
