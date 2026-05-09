@@ -1,18 +1,30 @@
 import Link from 'next/link'
 import { createClient } from '../../../lib/supabase/server'
 import type { SavedComponent } from '../../../lib/supabase/types'
+import { SavedList, type SavedRow } from './SavedList'
 
 export default async function SavedPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: saved } = await supabase
+  // Try the full select; fall back to the pre-migration shape so existing
+  // saves still surface during the brief window after deploying the code
+  // and before applying migration 0002 (which adds the `collection` column).
+  let rows: Pick<SavedComponent, 'slug' | 'system' | 'collection' | 'saved_at'>[] = []
+  const full = await supabase
     .from('saved_components')
-    .select('slug, system, saved_at')
+    .select('slug, system, collection, saved_at')
     .order('saved_at', { ascending: false })
-
-  const rows = (saved as Pick<SavedComponent, 'slug' | 'system' | 'saved_at'>[] | null) ?? []
+  if (full.error) {
+    const legacy = await supabase
+      .from('saved_components')
+      .select('slug, system, saved_at')
+      .order('saved_at', { ascending: false })
+    rows = (legacy.data ?? []).map((r: { slug: string; system: string | null; saved_at: string }) => ({ ...r, collection: null }))
+  } else {
+    rows = (full.data ?? []) as Pick<SavedComponent, 'slug' | 'system' | 'collection' | 'saved_at'>[]
+  }
 
   if (rows.length === 0) {
     return (
@@ -30,35 +42,5 @@ export default async function SavedPage() {
     )
   }
 
-  return (
-    <div className="overflow-hidden rounded-xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
-      <ul className="divide-y divide-sand-300 dark:divide-sand-800">
-        {rows.map((row) => {
-          const href = row.system === 'andromeda'
-            ? `/design-systems/andromeda/${row.slug.replace(/^andromeda-/, '')}`
-            : `/components/${row.slug}`
-          return (
-            <li key={row.slug}>
-              <Link
-                href={href}
-                className="flex items-center justify-between px-5 py-4 text-sand-900 transition-colors hover:bg-sand-200 dark:text-sand-50 dark:hover:bg-sand-800"
-              >
-                <div>
-                  <div className="font-medium">{row.slug}</div>
-                  {row.system && (
-                    <div className="mt-0.5 text-xs text-sand-500 dark:text-sand-400">
-                      {row.system} system
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-sand-500 dark:text-sand-400">
-                  {new Date(row.saved_at).toLocaleDateString()}
-                </div>
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
+  return <SavedList initial={rows as SavedRow[]} />
 }
