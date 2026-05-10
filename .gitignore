@@ -62,3 +62,6 @@ app/lib/component-codes.generated.ts
 # GSC tooling outputs (audit reports, submission logs)
 /scripts/gsc-output/*
 !/scripts/gsc-output/.gitkeep
+
+# studio prototype (local-only — see "Studio prototype" memory)
+/app/tune/
