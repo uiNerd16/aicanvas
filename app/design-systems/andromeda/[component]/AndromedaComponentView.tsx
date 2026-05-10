@@ -276,6 +276,8 @@ export function AndromedaComponentView({
                             ? `pnpm dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                             : pkgManager === 'bun'
                             ? `bunx shadcn@latest add @aicanvas/andromeda-${slug}`
+                            : pkgManager === 'yarn'
+                            ? `yarn dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                             : `npx shadcn@latest add @aicanvas/andromeda-${slug}`
                           navigator.clipboard.writeText(cmd)
                           setCliCopied(true)
@@ -294,6 +296,8 @@ export function AndromedaComponentView({
                           ? `pnpm dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                           : pkgManager === 'bun'
                           ? `bunx shadcn@latest add @aicanvas/andromeda-${slug}`
+                          : pkgManager === 'yarn'
+                          ? `yarn dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                           : `npx shadcn@latest add @aicanvas/andromeda-${slug}`}
                       </code>
                     </div>
