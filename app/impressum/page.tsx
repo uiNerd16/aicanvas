@@ -21,7 +21,7 @@ import { SiteFooter } from '../components/SiteFooter'
 //   • Verbraucherstreitbeilegung notice (§ 36 VSBG) only required for
 //     companies ≥10 employees — solo operator is exempt.
 //
-// Operator: Alexandru Tatu, Strahuberstr. 13, 81479 Munich, Germany.
+// Operator: Alexandru Daniel Tatu, Strahuberstr. 13, 81479 Munich, Germany.
 // This is the public ladungsfähige Anschrift on the live site.
 
 export default function ImpressumPage() {
@@ -67,7 +67,7 @@ export default function ImpressumPage() {
         <section className="mt-12">
           <h2 className="text-lg font-bold text-sand-50">Creator</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Tatu <span className="mx-2 text-sand-600">•</span> Strahuberstr. 13
+            Alexandru Daniel Tatu <span className="mx-2 text-sand-600">•</span> Strahuberstr. 13
             <span className="mx-2 text-sand-600">•</span> 81479 Munich
             <span className="mx-2 text-sand-600">•</span> Germany
           </p>
