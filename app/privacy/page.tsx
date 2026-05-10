@@ -126,9 +126,9 @@ export default function PrivacyPage() {
             Requests to the public component registry endpoints (paths under{' '}
             <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">/r/</code>
             ) are made by the shadcn CLI and the AI Canvas MCP without any user
-            session. These hits are logged anonymously to PostHog (see Section 5)
-            so we can see which components are being installed. No account
-            cookies are read on these paths.
+            session. These hits are aggregated anonymously so we can see which
+            components are being installed. No personal data is processed on
+            these paths and no account cookies are read.
           </p>
         </section>
 
@@ -221,13 +221,6 @@ export default function PrivacyPage() {
               Google authenticates you and returns your email and profile
               identifier to us. Google's own privacy policy applies to their
               processing.
-            </li>
-            <li>
-              <strong className="text-sand-200">PostHog Inc.</strong> (USA / EU,
-              region depends on configuration) — receives anonymous registry-hit
-              events from CLI and MCP traffic. Does not receive any account
-              cookies, IP addresses with PII, or signed-in user data from this
-              site.
             </li>
             <li>
               <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>{' '}
