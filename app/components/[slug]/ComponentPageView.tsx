@@ -640,7 +640,7 @@ export default function ComponentPageView({
                                     : pkgManager === 'pnpm'
                                     ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
                                     : pkgManager === 'yarn'
-                                    ? `npx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
                                     : `bunx shadcn@latest add @aicanvas/${installSlug}`
                                   navigator.clipboard.writeText(cmd)
                                   setDepsCopied(true)
@@ -690,6 +690,8 @@ export default function ComponentPageView({
                                   ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
                                   : pkgManager === 'bun'
                                   ? `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                  : pkgManager === 'yarn'
+                                  ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
                                   : `npx shadcn@latest add @aicanvas/${installSlug}`}
                               </code>
                             </div>
