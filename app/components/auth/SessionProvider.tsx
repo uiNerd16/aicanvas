@@ -8,9 +8,18 @@ import type { AiPlatform, PackageManager } from '../../lib/supabase/types'
 type Preferences = {
   package_manager: PackageManager | null
   ai_platform: AiPlatform | null
+  newsletter_opt_in: boolean
 }
 
-const EMPTY_PREFS: Preferences = { package_manager: null, ai_platform: null }
+// newsletter_opt_in defaults to true to match the DB default in migration
+// 0004 — accounts created via the sign-up form implicitly opt in via the
+// inline § 7 (3) UWG notice on that form. The toggle in /account/settings
+// flips it.
+const EMPTY_PREFS: Preferences = {
+  package_manager: null,
+  ai_platform: null,
+  newsletter_opt_in: true,
+}
 
 type SessionContextValue = {
   user: User | null
@@ -54,7 +63,11 @@ export function SessionProvider({
       }
       if (prefsRes.ok) {
         const { preferences: prefs } = await prefsRes.json()
-        if (prefs) setPreferences({ package_manager: prefs.package_manager ?? null, ai_platform: prefs.ai_platform ?? null })
+        if (prefs) setPreferences({
+          package_manager: prefs.package_manager ?? null,
+          ai_platform: prefs.ai_platform ?? null,
+          newsletter_opt_in: prefs.newsletter_opt_in ?? true,
+        })
       }
     } catch {
       // Network failure — leave the prior state in place.

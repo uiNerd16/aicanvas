@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { CaretDown, SignIn, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
+import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
 
 /**
@@ -14,6 +15,7 @@ import { createClient } from '../../lib/supabase/client'
 export function TopAuthPill() {
   const { user } = useSession()
   const router = useRouter()
+  const { open: openAuthModal } = useAuthModal()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -27,13 +29,14 @@ export function TopAuthPill() {
 
   if (!user) {
     return (
-      <Link
-        href="/account/sign-in"
+      <button
+        type="button"
+        onClick={() => openAuthModal()}
         className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
       >
         <SignIn size={13} weight="regular" />
         Sign in
-      </Link>
+      </button>
     )
   }
 

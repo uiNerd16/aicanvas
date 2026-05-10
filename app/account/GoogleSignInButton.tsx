@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '../lib/supabase/client'
+import { formatAuthError } from '../lib/auth-errors'
 
 // Google's brand guidelines require the multicolor "G" mark, not a recolored
 // monochrome version. Inline SVG keeps the brand correct without an extra
@@ -32,7 +33,7 @@ export function GoogleSignInButton({ next, label = 'Continue with Google' }: { n
       },
     })
     if (oauthError) {
-      setError(oauthError.message)
+      setError(formatAuthError(oauthError))
       setSubmitting(false)
     }
     // On success, supabase navigates the browser to Google — no further work here.
