@@ -112,6 +112,18 @@ function SignUpForm() {
               {submitting ? 'Creating…' : 'Create account'}
             </button>
           </form>
+          {/* Art. 13 GDPR notice + Art. 8 age-16 confirmation. Clicking either
+              the email submit or Google buttons above counts as informed
+              consent — keeping this as a single text block (not a checkbox)
+              for cleanliness, since AI Canvas is a developer tool and the
+              under-16 risk is low. */}
+          <p className="mt-5 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
+            By creating an account you agree to our{' '}
+            <Link href="/privacy" className="text-olive-500 hover:underline dark:text-olive-400">
+              Privacy Policy
+            </Link>{' '}
+            and confirm you are at least 16 years old.
+          </p>
           </>
         )}
       </div>

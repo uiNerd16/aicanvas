@@ -1,5 +1,6 @@
 import { createClient } from '../../../lib/supabase/server'
 import { SettingsForm } from './SettingsForm'
+import { DeleteAccountSection } from './DeleteAccountSection'
 import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
 
 export default async function SettingsPage() {
@@ -30,6 +31,8 @@ export default async function SettingsPage() {
           <SettingsForm initial={initial} />
         </div>
       </div>
+
+      <DeleteAccountSection />
     </div>
   )
 }
