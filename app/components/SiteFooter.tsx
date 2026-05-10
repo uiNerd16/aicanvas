@@ -3,10 +3,10 @@ import { ArrowUpRight } from '@phosphor-icons/react/dist/ssr'
 
 // ─── SiteFooter ───────────────────────────────────────────────────────────────
 // Shared page footer used at the bottom of /, /mcp, /about, /impressum,
-// /privacy, and any other long-form page. The icon links home, the centre
-// holds the tagline + legal links (Impressum / Privacy must be "easily and
-// directly available" per § 5 DDG), and the right side is a permanent pointer
-// to the @aicanvas/mcp npm package.
+// /privacy, /terms, and any other long-form page. The icon links home, the
+// left side holds the tagline next to it, and the right side groups the
+// legal links (Impressum / Privacy must be "easily and directly available"
+// per § 5 DDG) plus a permanent pointer to the @aicanvas/mcp npm package.
 
 export function SiteFooter() {
   return (
@@ -31,6 +31,12 @@ export function SiteFooter() {
             className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
           >
             Privacy Policy
+          </Link>
+          <Link
+            href="/terms"
+            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
+          >
+            Terms
           </Link>
           <Link
             href="/impressum"

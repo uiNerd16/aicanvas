@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Check, Copy, SignIn, Terminal } from '@phosphor-icons/react'
 import { useSession } from '../components/auth/SessionProvider'
+import { useAuthModal } from '../components/auth/AuthModalProvider'
 
 interface TemplateChromeProps {
   templateSlug: string              // registry slug, e.g. 'andromeda-mission-control' or 'andromeda-all'
@@ -29,12 +29,12 @@ export function TemplateChrome({
   description,
 }: TemplateChromeProps) {
   const { user } = useSession()
+  const { open: openAuthModal } = useAuthModal()
   const pathname = usePathname() ?? '/'
   const [installOpen, setInstallOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const cliCommand = `npx shadcn@latest add @aicanvas/${templateSlug}`
-  const signInHref = `/account/sign-in?next=${encodeURIComponent(pathname)}`
 
   const bullets = description ?? [
     `Installs this template plus the full ${systemName} system.`,
@@ -171,13 +171,14 @@ export function TemplateChrome({
             )}
           </div>
         ) : (
-          <Link
-            href={signInHref}
+          <button
+            type="button"
+            onClick={() => openAuthModal({ next: pathname })}
             className="flex h-9 items-center gap-2 rounded-lg bg-olive-500 px-3.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 active:scale-95"
           >
             <SignIn weight="regular" size={15} />
             Sign in to install
-          </Link>
+          </button>
         )}
       </div>
     </div>

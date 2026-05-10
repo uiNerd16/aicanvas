@@ -3,14 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, PenNib, X } from '@phosphor-icons/react'
-import { CONTACT_EMAIL } from '../lib/config'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, X, XLogo } from '@phosphor-icons/react'
+import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
-import { SignedIn } from './auth/SignedIn'
-import { SignedOut } from './auth/SignedOut'
-import { UserMenu } from './auth/UserMenu'
-import { SignInCta } from './auth/SignInCta'
 
 // ── Tier structure ────────────────────────────────────────────────────────
 // Hardcoded so the ordering is predictable. Every label here must correspond
@@ -285,14 +281,31 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* ── Auth row ── */}
-      <div className="shrink-0 border-t border-sand-300 px-3 py-3 dark:border-sand-800">
-        <SignedIn>
-          <UserMenu />
-        </SignedIn>
-        <SignedOut>
-          <SignInCta />
-        </SignedOut>
+      {/* ── Social icons ── */}
+      {/* GitHub + X moved here from the page header so the top-right can
+          carry the auth pill + Get MCP CTA. Sits above the "Love what you
+          see" card so it's still in the bottom region of the sidebar. */}
+      <div className="shrink-0 border-t border-sand-300 px-3 py-2 dark:border-sand-800">
+        <div className="flex items-center gap-1">
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub repository"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          >
+            <GithubLogo weight="regular" size={18} />
+          </a>
+          <a
+            href={X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="X profile"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          >
+            <XLogo weight="regular" size={18} />
+          </a>
+        </div>
       </div>
 
       {/* ── Bottom card ── */}

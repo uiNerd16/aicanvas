@@ -64,12 +64,8 @@ export default function PrivacyPage() {
         <section className="mt-12">
           <h2 className="text-lg font-bold text-sand-50">1. Controller</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            The controller responsible for the processing of personal data on this
-            site is the operator named in the{' '}
-            <Link href="/impressum" className="text-olive-400 hover:underline">
-              Impressum
-            </Link>
-            . For privacy questions, contact{' '}
+            The controller responsible for the processing of personal data on
+            this site is the Creator, reachable at{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
@@ -87,7 +83,7 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed text-sand-400">
             When you create an account we store your email address and a salted,
             bcrypt-hashed version of your password. If you sign in with Google we
-            store the Google account identifier and email returned by Google's
+            store the Google account identifier and email returned by Google&apos;s
             OAuth flow instead of a password. We never see or store your Google
             password. Account data lives in our authentication database operated
             by Supabase (see Section 5).
@@ -130,6 +126,37 @@ export default function PrivacyPage() {
             components are being installed. No personal data is processed on
             these paths and no account cookies are read.
           </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Marketing communications preference
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            We store a boolean opt-in flag on your account (default: enabled
+            on sign-up, per the notice on the sign-up form) plus the timestamp
+            of your last change. We send marketing emails only to accounts
+            with the flag enabled. Toggling it off in{' '}
+            <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">
+              /account/settings
+            </code>{' '}
+            takes effect immediately. Transactional emails (sign-up
+            confirmation, magic links, password reset) are not affected by
+            this flag &mdash; they are necessary to provide the account
+            service.
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Children
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            AI Canvas is a developer tool aimed at adults. We do not knowingly
+            collect personal data from children under 16. If you believe a
+            child under 16 has created an account or otherwise provided
+            personal data to AI Canvas, email{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-400 hover:underline">
+              {CONTACT_EMAIL}
+            </a>{' '}
+            and we will delete the account and the data.
+          </p>
         </section>
 
         {/* ── 3. Legal basis ─────────────────────────────────────────────── */}
@@ -152,6 +179,15 @@ export default function PrivacyPage() {
               <strong className="text-sand-200">Anonymous registry hits:</strong>{' '}
               the data is not personal under GDPR (no identifier links to a
               person). Logged for product analytics under Art. 6 (1)(f).
+            </li>
+            <li>
+              <strong className="text-sand-200">Marketing communications:</strong>{' '}
+              § 7 (3) UWG (existing-customer exception under German competition
+              law, as interpreted by the ECJ in Case C-654/23). Marketing is
+              limited to AI Canvas&apos;s own products and services. You can
+              object at any time at no cost via account settings or the
+              unsubscribe link in any email; an objection ends this processing
+              immediately.
             </li>
           </ul>
         </section>
@@ -188,38 +224,20 @@ export default function PrivacyPage() {
           <ul className="mt-4 space-y-3 leading-relaxed text-sand-400">
             <li>
               <strong className="text-sand-200">Vercel Inc.</strong> (USA) —
-              hosting, request logs, cookieless Web Analytics. Edge serving from
-              Frankfurt where possible.{' '}
-              <a
-                href="https://vercel.com/legal/dpa"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-olive-400 hover:underline"
-              >
-                DPA
-              </a>
-              .
+              hosting, request logs, cookieless Web Analytics. Edge serving
+              from Frankfurt where possible.
             </li>
             <li>
               <strong className="text-sand-200">Supabase Inc.</strong> (USA) —
               authentication, account database, transactional emails (sign-up
-              confirmation, magic links, password reset). EU-region project where
-              available.{' '}
-              <a
-                href="https://supabase.com/legal/dpa"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-olive-400 hover:underline"
-              >
-                DPA
-              </a>
-              .
+              confirmation, magic links, password reset). EU-region project
+              where available.
             </li>
             <li>
               <strong className="text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
               Google LLC (USA) — only if you choose &ldquo;Sign in with Google.&rdquo;
               Google authenticates you and returns your email and profile
-              identifier to us. Google's own privacy policy applies to their
+              identifier to us. Google&apos;s own privacy policy applies to their
               processing.
             </li>
             <li>
@@ -242,7 +260,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong className="text-sand-200">Server logs</strong> are kept for
-              the period set by Vercel's default log retention (typically a few
+              the period set by Vercel&apos;s default log retention (typically a few
               weeks).
             </li>
             <li>
@@ -271,7 +289,10 @@ export default function PrivacyPage() {
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
-            . We respond within 30 days.
+            . We respond within 30 days. Before acting on a rights request we
+            may ask for reasonable proof that you are the person the data
+            belongs to &mdash; this is to protect you from someone else
+            requesting your data under false pretences.
           </p>
         </section>
 
@@ -310,19 +331,8 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
             You have the right to lodge a complaint with a data protection
-            supervisory authority. The competent authority for the operator named
-            in the Impressum is the Bayerisches Landesamt für Datenschutzaufsicht
-            (BayLDA), Promenade 18, 91522 Ansbach, Germany.{' '}
-            <a
-              href="https://www.lda.bayern.de"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-olive-400 hover:underline"
-            >
-              www.lda.bayern.de
-            </a>
-            . You may also contact the supervisory authority of your habitual
-            residence or place of work.
+            supervisory authority. For the Creator, that&apos;s the Bayerisches
+            Landesamt für Datenschutzaufsicht (BayLDA).
           </p>
         </section>
 

@@ -22,5 +22,6 @@ export type UserPreferences = {
   user_id: string
   package_manager: PackageManager | null
   ai_platform: AiPlatform | null
+  newsletter_opt_in: boolean
   updated_at: string
 }

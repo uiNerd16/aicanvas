@@ -9,6 +9,8 @@ import { ThemeProvider } from './components/ThemeProvider'
 import { Sidebar } from './components/Sidebar'
 import { MobileNav } from './components/MobileNav'
 import { SessionProvider } from './components/auth/SessionProvider'
+import { AuthModalProvider } from './components/auth/AuthModalProvider'
+import { AuthModal } from './components/auth/AuthModal'
 import { COMPONENTS } from './lib/component-registry'
 import { GITHUB_URL, SITE_URL } from './lib/config'
 import { createClient } from './lib/supabase/server'
@@ -140,26 +142,30 @@ export default async function RootLayout({
       <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
         <ThemeProvider>
           <SessionProvider initialUser={user}>
-            {/* Desktop sidebar — hidden on mobile */}
-            <Suspense fallback={null}>
-              <div className="hidden md:flex">
-                <Sidebar />
+            <AuthModalProvider>
+              {/* Desktop sidebar — hidden on mobile */}
+              <Suspense fallback={null}>
+                <div className="hidden md:flex">
+                  <Sidebar />
+                </div>
+              </Suspense>
+              {/* Mobile nav — visible only below md */}
+              <Suspense fallback={null}>
+                <MobileNav />
+              </Suspense>
+              {/* Content area scrolls independently of the sidebar.
+                  scrollbar-gutter:stable reserves space for the vertical
+                  scrollbar regardless of whether content overflows, so the
+                  visible width never shifts between auth states. */}
+              <div
+                className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
+                style={{ scrollbarGutter: 'stable' }}
+              >
+                {children}
               </div>
-            </Suspense>
-            {/* Mobile nav — visible only below md */}
-            <Suspense fallback={null}>
-              <MobileNav />
-            </Suspense>
-            {/* Content area scrolls independently of the sidebar.
-                scrollbar-gutter:stable reserves space for the vertical
-                scrollbar regardless of whether content overflows, so the
-                visible width never shifts between auth states. */}
-            <div
-              className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
-              style={{ scrollbarGutter: 'stable' }}
-            >
-              {children}
-            </div>
+              {/* Global auth dialog — toggles between sign-in and sign-up modes */}
+              <AuthModal />
+            </AuthModalProvider>
           </SessionProvider>
         </ThemeProvider>
         <Analytics />
