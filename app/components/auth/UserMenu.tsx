@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CaretDown, Heart, ClockClockwise, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { createClient } from '../../lib/supabase/client'
+import { EmailAvatar } from './EmailAvatar'
 
 export function UserMenu() {
   const { user } = useSession()
@@ -24,7 +25,6 @@ export function UserMenu() {
   if (!user) return null
 
   const email = user.email ?? 'Account'
-  const initial = email.charAt(0).toUpperCase()
 
   async function signOut() {
     const supabase = createClient()
@@ -41,9 +41,7 @@ export function UserMenu() {
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
       >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-olive-500 text-xs font-bold text-sand-950">
-          {initial}
-        </span>
+        <EmailAvatar email={email} className="h-6 w-6" />
         <span className="flex-1 truncate text-left">{email}</span>
         <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${open ? '-rotate-180' : ''}`} />
       </button>
@@ -55,7 +53,7 @@ export function UserMenu() {
             className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <User size={14} weight="regular" />
-            Account
+            Profile
           </Link>
           <Link
             href="/account/saved"
@@ -71,7 +69,15 @@ export function UserMenu() {
             className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <ClockClockwise size={14} weight="regular" />
-            History
+            Activity
+          </Link>
+          <Link
+            href="/account/settings"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <Gear size={14} weight="regular" />
+            Settings
           </Link>
           <button
             type="button"

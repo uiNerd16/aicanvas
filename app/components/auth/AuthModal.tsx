@@ -8,26 +8,18 @@ import { SignInFormFields } from './SignInFormFields'
 import { SignUpFormFields } from './SignUpFormFields'
 
 // ─── AuthModal ────────────────────────────────────────────────────────────────
-// Global auth dialog. Opens via useAuthModal().open() and closes on X click,
-// ESC key, backdrop click, or any pathname change. Renders SignInFormFields
-// or SignUpFormFields depending on `mode`. The internal "Create an account"
-// / "Already have one? Sign in" links flip the mode in place rather than
-// navigating, keeping the modal open for a single seamless flow.
+// Global auth dialog. Opens via useAuthModal().open() and closes on X click
+// or any pathname change — backdrop clicks and ESC are intentionally NOT
+// handled, so users only exit deliberately via the close button. Renders
+// SignInFormFields or SignUpFormFields depending on `mode`. The internal
+// "Create an account" / "Already have one? Sign in" links flip the mode in
+// place rather than navigating, keeping the modal open for a single
+// seamless flow.
 
 export function AuthModal() {
   const router = useRouter()
   const pathname = usePathname()
   const { isOpen, mode, next, close, setMode } = useAuthModal()
-
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') close()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [isOpen, close])
 
   // Close on route change. The "Forgot password?" link inside the sign-in
   // form navigates to /account/forgot-password — we want the modal to
@@ -66,10 +58,11 @@ export function AuthModal() {
       aria-label={mode === 'sign-in' ? 'Sign in' : 'Create your account'}
       className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
     >
-      {/* Backdrop */}
+      {/* Backdrop — visual only; clicks do NOT dismiss the modal. The X
+          button is the sole exit so users don't fall out of the auth flow
+          accidentally. */}
       <div
         aria-hidden="true"
-        onClick={close}
         className="absolute inset-0 bg-sand-950/80 backdrop-blur-sm"
       />
 

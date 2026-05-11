@@ -70,55 +70,57 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoFocus
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-950 dark:text-sand-50 dark:placeholder:text-sand-600"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
-              >
-                Password
-              </label>
-              <PasswordInput
-                id="password"
-                required
-                autoComplete="new-password"
-                minLength={8}
-                placeholder="At least 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
-                {error}
+          <form onSubmit={handleSubmit} className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoFocus
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-800 dark:bg-sand-950 dark:text-sand-50 dark:placeholder:text-sand-500"
+                />
               </div>
-            )}
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
+                >
+                  Password
+                </label>
+                <PasswordInput
+                  id="password"
+                  required
+                  autoComplete="new-password"
+                  minLength={8}
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {error && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+                  {error}
+                </div>
+              )}
+            </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-6 w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? 'Creating…' : 'Create account'}
             </button>
@@ -152,18 +154,18 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               separate marketing notice is required. The Art. 8 age-16
               confirmation was also dropped — developer-tool audience with
               negligible under-16 risk. */}
-          <p className="mt-5 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
+          <p className="mt-6 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
             By creating an account you agree to our{' '}
             <Link
               href="/terms"
-              className="underline hover:text-sand-700 dark:hover:text-sand-300"
+              className="underline hover:text-sand-700 dark:hover:text-sand-100"
             >
               Terms &amp; Conditions
             </Link>{' '}
             and{' '}
             <Link
               href="/privacy"
-              className="underline hover:text-sand-700 dark:hover:text-sand-300"
+              className="underline hover:text-sand-700 dark:hover:text-sand-100"
             >
               Privacy Policy
             </Link>
