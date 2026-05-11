@@ -85,49 +85,74 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
         onChange={setFilter}
       />
 
-      {/* Individual row cards with a small gap between them — each card is
-          its own surface so the list reads as a collection of items rather
-          than a single table. */}
-      <ul className="space-y-2">
-        {visible.map((row) => (
-          <li
-            key={row.slug}
-            className="flex items-center gap-4 rounded-xl border border-sand-300 bg-sand-100 px-3 py-3 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
-          >
-            <Link
-              href={hrefFor(row)}
-              className="group flex min-w-0 flex-1 items-center gap-4"
-              aria-label={`Open ${row.name}`}
+      {/* Empty state — rendered client-side too so unsaving the last row
+          immediately reveals the "you haven't saved anything yet" panel
+          instead of leaving the user staring at an empty container. The
+          identical server-side empty state in /saved/page.tsx covers the
+          first paint when there are no saves at all. */}
+      {rows.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <ul className="space-y-2">
+          {visible.map((row) => (
+            <li
+              key={row.slug}
+              className="flex items-center gap-4 rounded-xl border border-sand-300 bg-sand-100 px-3 py-3 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
             >
-              <SavedThumbnail src={row.image} alt="" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-sand-900 transition-colors group-hover:text-olive-500 dark:text-sand-50 dark:group-hover:text-olive-400">
-                  {row.name}
-                </div>
-                {row.system && (
-                  <div className="mt-0.5 truncate text-xs text-sand-500 dark:text-sand-400">
-                    {row.system} system
+              <Link
+                href={hrefFor(row)}
+                className="group flex min-w-0 flex-1 items-center gap-4"
+                aria-label={`Open ${row.name}`}
+              >
+                <SavedThumbnail src={row.image} alt="" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium text-sand-900 transition-colors group-hover:text-olive-500 dark:text-sand-50 dark:group-hover:text-olive-400">
+                    {row.name}
                   </div>
-                )}
-              </div>
-            </Link>
-            <CollectionPicker
-              value={row.collection}
-              allNames={collections.names}
-              onChange={(value) => setCollection(row.slug, value)}
-            />
-            <button
-              type="button"
-              onClick={() => unsave(row.slug)}
-              aria-label={`Remove ${row.name} from saved`}
-              title="Remove from saved"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-            >
-              <PushPinSlash size={16} weight="regular" />
-            </button>
-          </li>
-        ))}
-      </ul>
+                  {row.system && (
+                    <div className="mt-0.5 truncate text-xs text-sand-500 dark:text-sand-400">
+                      {row.system} system
+                    </div>
+                  )}
+                </div>
+              </Link>
+              <CollectionPicker
+                value={row.collection}
+                allNames={collections.names}
+                onChange={(value) => setCollection(row.slug, value)}
+              />
+              <button
+                type="button"
+                onClick={() => unsave(row.slug)}
+                aria-label={`Remove ${row.name} from saved`}
+                title="Remove from saved"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+              >
+                <PushPinSlash size={16} weight="regular" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// Client-side "you haven't saved anything yet" state — matches the server-side
+// empty state in /saved/page.tsx so the user sees the same panel whether they
+// arrive with zero saves or unsave their last item in this session.
+function EmptyState() {
+  return (
+    <div className="rounded-xl border border-sand-300 bg-sand-100 p-12 text-center dark:border-sand-800 dark:bg-sand-900">
+      <p className="text-sm text-sand-600 dark:text-sand-400">
+        You haven&apos;t saved anything yet.
+      </p>
+      <Link
+        href="/components"
+        className="mt-4 inline-block rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+      >
+        Browse components
+      </Link>
     </div>
   )
 }
