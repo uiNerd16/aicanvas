@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
 import { PasswordInput } from '../PasswordInput'
+import { AuthPagePopup } from '../AuthPagePopup'
 
 // ─── ResetPasswordForm ───────────────────────────────────────────────────────
 // Sets a new password on a recovery-issued session. The recovery callback
@@ -104,48 +105,45 @@ export function ResetPasswordForm() {
 
   if (phase === 'checking') {
     return (
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">
-        <div className="rounded-xl border border-sand-300 bg-sand-100 p-8 text-sm text-sand-500 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400">
+      <AuthPagePopup>
+        <p className="text-sm text-sand-500 dark:text-sand-400">
           Checking your session…
-        </div>
-      </div>
+        </p>
+      </AuthPagePopup>
     )
   }
 
   if (phase === 'denied') {
     return (
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">
-        <div className="rounded-xl border border-sand-300 bg-sand-100 p-8 dark:border-sand-800 dark:bg-sand-900">
-          <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
-            Use a fresh recovery link
-          </h1>
-          <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
-            For your security, the password reset page only works right after
-            you click a recovery link in your email. Request a new one to
-            continue.
-          </p>
-          <Link
-            href="/account/forgot-password"
-            className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
-          >
-            Send me a recovery link
-          </Link>
-        </div>
-      </div>
+      <AuthPagePopup>
+        <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
+          Use a fresh recovery link
+        </h1>
+        <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
+          For your security, the password reset page only works right after
+          you click a recovery link in your email. Request a new one to
+          continue.
+        </p>
+        <Link
+          href="/account/forgot-password"
+          className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+        >
+          Send me a recovery link
+        </Link>
+      </AuthPagePopup>
     )
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">
-      <div className="rounded-xl border border-sand-300 bg-sand-100 p-8 dark:border-sand-800 dark:bg-sand-900">
-        <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
-          Set a new password
-        </h1>
-        <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
-          Choose something at least 8 characters long.
-        </p>
+    <AuthPagePopup>
+      <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
+        Set a new password
+      </h1>
+      <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
+        Choose something at least 8 characters long.
+      </p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label
               htmlFor="password"
@@ -189,15 +187,14 @@ export function ResetPasswordForm() {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {submitting ? 'Updating…' : 'Update password'}
-          </button>
-        </form>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? 'Updating…' : 'Update password'}
+        </button>
+      </form>
+    </AuthPagePopup>
   )
 }
