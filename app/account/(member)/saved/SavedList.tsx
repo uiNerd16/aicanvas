@@ -2,13 +2,19 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { CaretDown, Check, Plus, X } from '@phosphor-icons/react'
+import { CaretDown, Check, Plus, PushPinSlash, X } from '@phosphor-icons/react'
 
 export type SavedRow = {
   slug: string
   system: string | null
   collection: string | null
   saved_at: string
+  // Enriched server-side from the component registry so the client doesn't
+  // need to ship the full COMPONENTS array. `name` falls back to the slug,
+  // `image` is null when the component isn't in the registry (e.g. some
+  // design-system templates) — the card renders a neutral fallback then.
+  name: string
+  image: string | null
 }
 
 const UNCAT = '__uncategorized__'
@@ -53,6 +59,23 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
     }
   }
 
+  async function unsave(slug: string) {
+    // Optimistic remove — drop the row immediately, restore from `initial`
+    // if the request fails so the user sees their state preserved.
+    const previous = rows
+    setRows((prev) => prev.filter((r) => r.slug !== slug))
+    try {
+      const res = await fetch('/api/saved', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      })
+      if (!res.ok) throw new Error('delete failed')
+    } catch {
+      setRows(previous)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <FilterChips
@@ -62,27 +85,64 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
         onChange={setFilter}
       />
 
-      <div className="overflow-hidden rounded-xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
-        <ul className="divide-y divide-sand-300 dark:divide-sand-800">
-          {visible.map((row) => (
-            <li key={row.slug} className="flex items-center justify-between gap-3 px-5 py-4">
-              <Link href={hrefFor(row)} className="flex-1 text-sand-900 hover:text-olive-500 dark:text-sand-50 dark:hover:text-olive-400">
-                <div className="font-medium">{row.slug}</div>
+      {/* Individual row cards with a small gap between them — each card is
+          its own surface so the list reads as a collection of items rather
+          than a single table. */}
+      <ul className="space-y-2">
+        {visible.map((row) => (
+          <li
+            key={row.slug}
+            className="flex items-center gap-4 rounded-xl border border-sand-300 bg-sand-100 px-3 py-3 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+          >
+            <Link
+              href={hrefFor(row)}
+              className="flex min-w-0 flex-1 items-center gap-4"
+              aria-label={`Open ${row.name}`}
+            >
+              <SavedThumbnail src={row.image} alt="" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium text-sand-900 transition-colors group-hover:text-olive-500 dark:text-sand-50">
+                  {row.name}
+                </div>
                 {row.system && (
-                  <div className="mt-0.5 text-xs text-sand-500 dark:text-sand-400">
+                  <div className="mt-0.5 truncate text-xs text-sand-500 dark:text-sand-400">
                     {row.system} system
                   </div>
                 )}
-              </Link>
-              <CollectionPicker
-                value={row.collection}
-                allNames={collections.names}
-                onChange={(value) => setCollection(row.slug, value)}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+              </div>
+            </Link>
+            <CollectionPicker
+              value={row.collection}
+              allNames={collections.names}
+              onChange={(value) => setCollection(row.slug, value)}
+            />
+            <button
+              type="button"
+              onClick={() => unsave(row.slug)}
+              aria-label={`Remove ${row.name} from saved`}
+              title="Remove from saved"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+            >
+              <PushPinSlash size={16} weight="regular" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Component preview thumbnail at the start of each row. Fixed 56×40 box on
+// sand-950 so previews with transparent backgrounds (the site convention) sit
+// on the same deep surface they're authored against. Falls back to a muted
+// placeholder for rows the registry has no image for.
+function SavedThumbnail({ src, alt }: { src: string | null; alt: string }) {
+  return (
+    <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded-md bg-sand-950 ring-1 ring-sand-300 dark:ring-sand-800">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      ) : null}
     </div>
   )
 }

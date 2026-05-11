@@ -3,10 +3,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { CaretDown, SignIn, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
+import { EmailAvatar } from './EmailAvatar'
 
 /**
  * Compact auth control for chrome that doesn't include the global sidebar
@@ -32,7 +33,7 @@ export function TopAuthPill() {
       <button
         type="button"
         onClick={() => openAuthModal()}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
       >
         <SignIn size={13} weight="regular" />
         Sign in
@@ -41,7 +42,6 @@ export function TopAuthPill() {
   }
 
   const email = user.email ?? 'Account'
-  const initial = email.charAt(0).toUpperCase()
 
   async function signOut() {
     const supabase = createClient()
@@ -55,12 +55,10 @@ export function TopAuthPill() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-2 py-1 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
         aria-label={`Account menu for ${email}`}
       >
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-olive-500 text-[10px] font-bold text-sand-950">
-          {initial}
-        </span>
+        <EmailAvatar email={email} className="h-4 w-4" />
         <CaretDown size={10} weight="regular" className={`transition-transform ${open ? '-rotate-180' : ''}`} />
       </button>
       {open && (
@@ -68,13 +66,39 @@ export function TopAuthPill() {
           <div className="border-b border-sand-300 px-3 py-2 text-xs text-sand-500 dark:border-sand-800 dark:text-sand-400">
             <span className="block truncate">{email}</span>
           </div>
+          {/* Mirrors the account tabs (Profile · Saved · Activity · Settings)
+              so the dropdown is a quick teleport into any account view. */}
           <Link
             href="/account"
             onClick={() => setOpen(false)}
             className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <User size={14} weight="regular" />
-            Account
+            Profile
+          </Link>
+          <Link
+            href="/account/saved"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <Heart size={14} weight="regular" />
+            Saved
+          </Link>
+          <Link
+            href="/account/history"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <ClockClockwise size={14} weight="regular" />
+            Activity
+          </Link>
+          <Link
+            href="/account/settings"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <Gear size={14} weight="regular" />
+            Settings
           </Link>
           <button
             type="button"

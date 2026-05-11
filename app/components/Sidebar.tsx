@@ -283,9 +283,9 @@ export function Sidebar() {
 
       {/* ── Social icons ── */}
       {/* GitHub + X moved here from the page header so the top-right can
-          carry the auth pill + Get MCP CTA. Sits above the "Love what you
-          see" card so it's still in the bottom region of the sidebar. */}
-      <div className="shrink-0 border-t border-sand-300 px-3 py-2 dark:border-sand-800">
+          carry the auth pill + Get MCP CTA. Sits above the "Send a Coffee"
+          card. No top border — the icons float quietly above the card. */}
+      <div className="shrink-0 px-3 pt-2 pb-1">
         <div className="flex items-center gap-1">
           <a
             href={GITHUB_URL}
@@ -309,26 +309,35 @@ export function Sidebar() {
       </div>
 
       {/* ── Bottom card ── */}
-      {pathname !== '/support' && <div className="shrink-0 p-3">
-        <div className="overflow-hidden rounded-xl border border-olive-500/20 bg-gradient-to-b from-olive-500/10 to-transparent p-4 ring-1 ring-inset ring-olive-500/10 dark:from-olive-500/8 dark:to-transparent">
+      {pathname !== '/support' && <div className="shrink-0 px-3 pb-3 pt-0">
+        {/* Progressive disclosure — collapsed by default to just the CTA;
+            hovering reveals the "Hi, I'm Alex" intro. Container chrome
+            (border, surface, padding) stays constant so the widget never
+            jumps in width — only the height grows. */}
+        <div className="group overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-4 dark:border-sand-800 dark:bg-sand-900">
 
-          {/* Icon badge */}
-          {/* Copy */}
-          <p className="text-sm font-bold leading-snug text-sand-900 dark:text-sand-100">
-            Love what you see?
-          </p>
-          <p className="mt-0.5 text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-            Every coffee keeps this project alive and growing.
-          </p>
+          {/* Collapsible intro. The grid 0fr → 1fr trick animates height
+              smoothly without having to measure content in JS. */}
+          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
+            <div className="overflow-hidden">
+              <p className="text-xs leading-relaxed text-sand-500 dark:text-sand-400">
+                Hi, I&apos;m Alex. I build this in my evenings and weekends.
+              </p>
+              {/* Gap between intro and CTA — sits inside the collapsing
+                  region so it disappears along with the text. */}
+              <div className="h-3" />
+            </div>
+          </div>
 
-          {/* CTA */}
+          {/* CTA — always visible. */}
           <a
             href="https://ko-fi.com/aicanvasme"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex w-full items-center justify-center rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-300 bg-transparent px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
           >
-            Buy me a coffee
+            <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
+            Send a Coffee
           </a>
         </div>
       </div>}

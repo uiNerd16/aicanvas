@@ -23,18 +23,8 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-xl border border-sand-300 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900">
-        <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">Defaults</h2>
-        <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
-          Used as the starting selection in install drawers and prompt panels.
-          Changes save automatically.
-        </p>
-        <div className="mt-6">
-          <SettingsForm initial={initial} />
-        </div>
-      </div>
-
+    <div className="space-y-4">
+      <SettingsForm initial={initial} />
       <DeleteAccountSection />
     </div>
   )

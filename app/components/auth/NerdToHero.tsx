@@ -1,132 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { AuthIntroAnimation } from './AuthIntroAnimation'
 
 // ─── NerdToHero ──────────────────────────────────────────────────────────────
-// Headline + illustration pair shown atop the sign-up modal. Auto-cycles
-// between two states:
-//   1. "newbie" — nerd character, headline "Welcome, friend."
-//   2. "hero"   — superhero character, headline "We just got superpowers."
-// The illustration crossfades with a subtle olive flash + scale beat between
-// states; the headline slides in alongside it inside a fixed-height container
-// so neither phrase ever shifts the form below. The two-tone illustration
-// uses the exact Figma colors in both themes: silhouette sand-950 (#1A1A19)
-// and highlight sand-200 (#D4D4CC), driven by CSS vars --ic-stroke / --ic-tint
-// so the SVGs stay easy to retint later if needed.
-//
-// Honors prefers-reduced-motion: no auto-cycle, no scale/flash; user just
-// sees the static superhero state with the longer headline.
-
-const CYCLE_MS = 4200
+// Sign-up intro pair. Thin wrapper around AuthIntroAnimation supplying the
+// two-tone nerd → superhero illustrations and the "Welcome, friend." → "YOU
+// just got superpowers." headline beat. The illustrations use the exact
+// Figma colors silhouette sand-950 (#1A1A19) and highlight sand-200 (#D4D4CC),
+// driven by CSS vars --ic-stroke / --ic-tint set on the engine's illustration
+// container so the SVGs stay easy to retint later if needed.
 
 export function NerdToHero() {
-  const reduceMotion = useReducedMotion()
-  const [phase, setPhase] = useState<'newbie' | 'hero'>('newbie')
-
-  useEffect(() => {
-    if (reduceMotion) return
-    const id = setInterval(() => {
-      setPhase((p) => (p === 'newbie' ? 'hero' : 'newbie'))
-    }, CYCLE_MS)
-    return () => clearInterval(id)
-  }, [reduceMotion])
-
-  // When reduced-motion is on, lock the visible phase to "hero" without
-  // touching state — derived value avoids setState-in-effect (and the
-  // cascading re-render react-hooks/set-state-in-effect warns about).
-  const effectivePhase = reduceMotion ? 'hero' : phase
-  const isHero = effectivePhase === 'hero'
-
   return (
-    <div className="flex flex-row items-center gap-4">
-      {/* Illustration */}
-      <div className="relative h-[104px] w-[84px] shrink-0">
-        {/* Olive aura behind the hero — fades in only on hero phase */}
-        <AnimatePresence>
-          {isHero && !reduceMotion && (
-            <motion.div
-              key="aura"
-              aria-hidden="true"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center"
-            >
-              <div
-                className="h-24 w-24 rounded-full bg-olive-500/25 blur-2xl"
-                style={{ animation: 'nthPulse 2.4s ease-in-out infinite' }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Flash burst at the moment of transformation */}
-        <AnimatePresence>
-          {!reduceMotion && (
-            <motion.div
-              key={`flash-${phase}`}
-              aria-hidden="true"
-              initial={{ opacity: 0.55, scale: 0.4 }}
-              animate={{ opacity: 0, scale: 1.4 }}
-              transition={{ duration: 0.55, ease: 'easeOut' }}
-              className="pointer-events-none absolute inset-0 flex items-center justify-center"
-            >
-              <div className="h-16 w-16 rounded-full bg-olive-400/70 blur-xl" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={phase}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.82, rotate: -6 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0, scale: 0.9, rotate: 6 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 flex items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]"
-          >
-            {isHero ? <SuperheroSvg /> : <NerdSvg />}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Headline — fixed height to prevent layout shift between phases */}
-      <div className="h-8 flex-1 min-w-0">
-        <AnimatePresence mode="wait">
-          <motion.h1
-            key={phase}
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="text-xl font-bold leading-tight text-sand-900 dark:text-sand-50"
-          >
-            {isHero ? (
-              <>
-                We just got{' '}
-                <span className="text-olive-500 dark:text-olive-400">
-                  superpowers
-                </span>
-                .
-              </>
-            ) : (
-              <>Welcome, friend.</>
-            )}
-          </motion.h1>
-        </AnimatePresence>
-      </div>
-
-      {/* Local keyframes — Tailwind v4 doesn't ship a default `pulse` that
-          fits the soft aura we want behind the hero. */}
-      <style>{`
-        @keyframes nthPulse {
-          0%, 100% { opacity: 0.65; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.08); }
-        }
-      `}</style>
-    </div>
+    <AuthIntroAnimation
+      BeforeIllustration={NerdSvg}
+      AfterIllustration={SuperheroSvg}
+      beforeHeadline={<>Welcome, friend.</>}
+      afterHeadline={
+        <>
+          YOU just got{' '}
+          <span className="text-olive-500 dark:text-olive-400">superpowers</span>
+          .
+        </>
+      }
+    />
   )
 }
 
