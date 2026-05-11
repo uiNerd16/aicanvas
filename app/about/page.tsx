@@ -3,9 +3,10 @@
 import { useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
-import { GithubLogo, XLogo } from '@phosphor-icons/react'
-import { GITHUB_URL, X_URL } from '../lib/config'
+import { GithubLogo } from '@phosphor-icons/react'
+import { GITHUB_URL } from '../lib/config'
 import { SiteFooter } from '../components/SiteFooter'
+import { HeaderSocials } from '../components/HeaderSocials'
 
 function Section({
   children,
@@ -49,21 +50,8 @@ export default function AboutPage() {
         <Link href="/components" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
           /About
         </Link>
-        <div className="flex items-center justify-end gap-1">
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-            <GithubLogo weight="regular" size={20} />
-          </a>
-          <div className="mx-1 h-4 w-px bg-sand-700" />
-          <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="X" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-            <XLogo weight="regular" size={20} />
-          </a>
-          <Link
-            href="/mcp"
-            className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
-          >
-            <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
-            Get MCP
-          </Link>
+        <div className="flex items-center justify-end">
+          <HeaderSocials />
         </div>
       </header>
 

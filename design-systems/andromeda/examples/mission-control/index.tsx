@@ -1,29 +1,50 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
-// SPACE EXAMPLE: Mission Control
+// MISSION CONTROL
 // Composition shell. Background is intentionally transparent —
 // drop in any image at the page route level.
+//
+// Only the Overview section is wired up. The other sidebar items
+// (Telemetry, Vehicles, Comms, Anomalies, Maintenance) remain
+// visible in the cyber-nav for scenic value but are inert —
+// clicking them does nothing.
+//
+// Entrance cascade: Sidebar → Header → six rows of OverviewSection
+// stagger in top-to-bottom on mount. After each element settles,
+// its own internal motion (clock tick, count-up, scan reveal,
+// telemetry flicker) takes over without further coordination.
 // ============================================================
+
+'use client';
 
 import { useState } from 'react';
 import { tokens } from '../../tokens';
+import { useCascadeProps } from '../../components/lib/motion';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { TelemetryRow } from './TelemetryRow';
-import { RadarChart } from '../../components/RadarChart';
-import { SystemStatus } from './SystemStatus';
-import { VehiclesTable } from './VehiclesTable';
-import { CommsLog } from './CommsLog';
+import { OverviewSection } from './sections/OverviewSection';
 
 export default function MissionControl() {
-  const [activeNav, setActiveNav] = useState('overview');
+  const [activeNav] = useState('overview');
+
+  // Inert handler: non-overview ids are ignored, active stays on overview.
+  const handleNavChange = (id) => {
+    if (id === 'overview') return;
+  };
+
+  // Outer cascade slots — Sidebar 0, Header 1. OverviewSection's inner
+  // rows continue the cascade from index 2 so the whole dashboard reads
+  // as one continuous top-to-bottom sequence rather than two cascades
+  // happening at the same time.
+  const sidebarMotion = useCascadeProps(0);
+  const headerMotion  = useCascadeProps(1);
 
   return (
     <div style={{
       display: 'flex',
       height: '100vh',
       width: '100vw',
-      background: 'transparent', // user provides background image at the page level
+      background: 'transparent',
       fontFamily: tokens.typography.fontSans,
       color: tokens.color.text.primary,
       overflow: 'hidden',
@@ -31,7 +52,11 @@ export default function MissionControl() {
       padding: tokens.spacing[4],
       boxSizing: 'border-box',
     }}>
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
+      <Sidebar
+        activeNav={activeNav}
+        onNavChange={handleNavChange}
+        motionProps={sidebarMotion}
+      />
 
       <div style={{
         flex: 1,
@@ -41,7 +66,7 @@ export default function MissionControl() {
         minWidth: 0,
         gap: tokens.spacing[4],
       }}>
-        <Header />
+        <Header sectionTitle="Overview" motionProps={headerMotion} />
 
         <main style={{
           flex: 1,
@@ -52,22 +77,7 @@ export default function MissionControl() {
           paddingRight: tokens.spacing[2],
           boxSizing: 'border-box',
         }}>
-          <TelemetryRow />
-
-          <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
-            <RadarChart
-              style={{ flex: '0 0 calc(60% - 10px)', minWidth: 0 }}
-              label="/// Systems"
-              title="Ship Diagnostics"
-              description="Nominal vs critical thresholds"
-            />
-            <SystemStatus />
-          </div>
-
-          <div style={{ display: 'flex', gap: tokens.spacing[5] }}>
-            <VehiclesTable />
-            <CommsLog />
-          </div>
+          <OverviewSection startIndex={2} />
         </main>
       </div>
     </div>

@@ -13,7 +13,7 @@ AI Canvas ships `generateMetadata` in `app/components/[slug]/page.tsx` — it au
 ## How `generateMetadata` builds the meta description
 
 ```
-[entry.description] Free copy-paste React code with AI prompts for Claude, GPT, V0, and Gemini.
+[entry.description] Free copy-paste React code with AI prompts for Claude Code, Lovable, and V0.
 ```
 
 The suffix is always appended. Your description must **read naturally when followed by that sentence**.
@@ -85,7 +85,7 @@ The Glass category deserves special attention: **every Glass component descripti
 
 ## Prompts are already doing SEO work — do not touch them
 
-Every `prompts.ts` file mentions Claude, GPT, V0, and Gemini by name. These appear on the component page as visible text, which adds keyword density naturally. Do not modify prompts for SEO purposes — they are optimised for developer utility, not search engines.
+Every `prompts.ts` file mentions Claude Code, Lovable, and V0 by name. These appear on the component page as visible text, which adds keyword density naturally. Do not modify prompts for SEO purposes — they are optimised for developer utility, not search engines.
 
 ---
 

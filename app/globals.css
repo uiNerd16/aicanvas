@@ -8,6 +8,14 @@
   --foreground: #1C1916;
 }
 
+/* Reserve scrollbar gutter on every scrollable element so toggling between
+   short and tall content (e.g. signed-in vs signed-out states) doesn't
+   reflow the layout horizontally when the scrollbar appears or disappears. */
+html,
+body {
+  scrollbar-gutter: stable;
+}
+
 .dark {
   --background: #1A1712;
   --foreground: #F0EBE3;
@@ -18,6 +26,13 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-manrope), sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
+
+  /* ── Type scale extension ──
+     Tailwind v4 ships text-xs (12px) and up. text-xxs adds a 10px step
+     used for sub-section labels in nested navigation, micro chips, and
+     other places where text-xs is too loud. */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.875rem;
 
   /* ── Sand scale — warm neutral (Phosphor-inspired) ── */
   --color-sand-50:  #FAFAF0;

@@ -83,6 +83,7 @@ const ALL_SLUGS = [
   'ripple-type',
   'radial-cards',
   'new-project-modal',
+  'signature-pad',
 ]
 
 const arg   = process.argv[2]
@@ -326,6 +327,40 @@ const INTERACTIONS = {
     await preview.locator('button').first().click()
     await page.waitForTimeout(700) // let the morph spring settle
   },
+
+  // Signature Pad — click pill to open modal, then draw a signature on canvas
+  // so the screenshot shows the whole feature in its filled state. The modal
+  // is taller than new-project-modal, so center the preview in the viewport
+  // first — otherwise the fixed-position modal escapes the preview's bounds.
+  'signature-pad': async (preview, page) => {
+    await preview.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+    await page.waitForTimeout(250)
+    await preview.locator('button').first().click()
+    await page.waitForTimeout(700)
+
+    const canvas = preview.locator('canvas').first()
+    const box = await canvas.boundingBox()
+    if (!box) return
+
+    const startX = box.x + box.width * 0.28
+    const baseY = box.y + box.height * 0.6
+
+    await page.mouse.move(startX, baseY)
+    await page.mouse.down()
+    const steps = 36
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps
+      const x = startX + box.width * 0.46 * t
+      const y =
+        baseY +
+        Math.sin(t * Math.PI * 3.2) * 14 -
+        t * 6 +
+        Math.sin(t * Math.PI * 9) * 2
+      await page.mouse.move(x, y, { steps: 4 })
+    }
+    await page.mouse.up()
+    await page.waitForTimeout(350)
+  },
 }
 
 async function hoverCenter(preview, page) {
@@ -388,8 +423,8 @@ async function main() {
       process.stdout.write(`  ${slug}... `)
 
       await page.goto(`${BASE_URL}/components/${slug}`, {
-        waitUntil: 'networkidle',
-        timeout: 30_000,
+        waitUntil: 'load',
+        timeout: 60_000,
       })
       await page.waitForTimeout(SETTLE_MS)
 

@@ -19,8 +19,83 @@
 'use client';
 
 import { forwardRef, useEffect, useRef, useState } from 'react'; // useRef kept for useCountUp's RAF tracking
+import { useInView, AnimatePresence, motion } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
 import { Card, CardContent } from './Card';
+
+const ms = (v) => parseInt(v, 10) / 1000;
+// Inline cubic-beziers — framer wants arrays, tokens.motion.easing values are
+// CSS strings. Keep these in sync with tokens.motion.easing.sharp.
+const SHARP_EASE = [0.4, 0, 0.6, 1];
+
+// ── DigitRoller ──────────────────────────────────────────────────────────────
+// Renders a number/string as a row of fixed-width slots; when the value
+// changes, only the slots whose character changed roll. Built on framer's
+// AnimatePresence per slot — the key is the character, so a stable digit
+// stays put while a changed digit gets exit+enter.
+//
+// Width per slot is `1ch`, paired with `font-variant-numeric: tabular-nums`
+// so digits and punctuation align in a column. Sans-serif punctuation can
+// be slightly narrower than 1ch but tabular-nums makes digits match exactly.
+function DigitSlot({ char, reduced }) {
+  if (reduced) {
+    return <span style={{ display: 'inline-block' }}>{char}</span>;
+  }
+  return (
+    <span
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+        width: '1ch',
+        height: '1em',
+        overflow: 'hidden',
+        verticalAlign: 'baseline',
+      }}
+    >
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.span
+          key={char}
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '-100%', opacity: 0 }}
+          transition={{ duration: ms(tokens.motion.duration.normal), ease: SHARP_EASE }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {char}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+function DigitRoller({ value, className, reduced }) {
+  const chars = String(value).split('');
+  return (
+    <span
+      className={className}
+      style={{
+        fontVariantNumeric: 'tabular-nums',
+        display: 'inline-flex',
+        alignItems: 'baseline',
+      }}
+    >
+      {chars.map((c, i) => (
+        // Index-based key — a "slot" stays at position i across renders.
+        // The DigitSlot's inner AnimatePresence uses the character itself
+        // as its key so position-stable but character-changed slots roll.
+        <DigitSlot key={i} char={c} reduced={reduced} />
+      ))}
+    </span>
+  );
+}
 
 // ── Styles injected once ─────────────────────────────────────────────────────
 function useStatTileStyles() {
@@ -29,10 +104,6 @@ function useStatTileStyles() {
     const style = document.createElement('style');
     style.id = 'andromeda-stat-tile-style';
     style.textContent = `
-      @keyframes andromeda-scanline {
-        from { top: 0%; opacity: 0.6; }
-        to   { top: 100%; opacity: 0; }
-      }
       @keyframes andromeda-value-in {
         from { opacity: 0; transform: translateY(4px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -48,9 +119,23 @@ function easeOutExpo(t) {
 }
 
 // ── useCountUp ───────────────────────────────────────────────────────────────
-// Animates from 0 → target over `duration` ms. Returns the display string,
-// preserving the original decimal precision of `rawValue`.
-function useCountUp(rawValue, duration = 1800) {
+// Animates from 0 → target over `duration` ms when the tile first enters
+// the viewport (scroll-aware). Returns the display string, preserving the
+// original decimal precision of `rawValue`.
+//
+// `live=true` switches behaviour: count-up still runs once on first
+// view-entry (the reveal moment), but subsequent prop updates snap to
+// the new value without re-running the animation. This is the Andromeda
+// rule — state changes (data updates) are instant or ~80ms; never longer.
+// Telemetry rows that update every couple of seconds would otherwise
+// spasm a 1.8s count-up FROM ZERO on every refresh.
+//
+// Scroll-awareness: pre-mount the count-up doesn't fire. The provided
+// `inView` flag (true once the parent tile is visible in the viewport)
+// gates the animation so tiles below the fold don't burn their reveal
+// off-screen. Templates with multi-screen height get the count-up at
+// the moment the user actually sees the value.
+function useCountUp(rawValue, duration = 1800, live = false, inView = true) {
   const num = parseFloat(rawValue);
   const isNumeric = !isNaN(num);
   const decimals = isNumeric
@@ -60,11 +145,25 @@ function useCountUp(rawValue, duration = 1800) {
   const [display, setDisplay] = useState(isNumeric ? '0' : rawValue);
   const rafRef = useRef(null);
   const startRef = useRef(null);
+  const hasMountedRef = useRef(false);
 
   useEffect(() => {
     if (!isNumeric) { setDisplay(rawValue); return; }
 
-    // Small delay so the card mount animation is visible first.
+    // After first reveal, in `live` mode, snap to the new value without
+    // animating. Live data updates are signal, not a chance to re-reveal.
+    if (live && hasMountedRef.current) {
+      setDisplay(decimals > 0 ? num.toFixed(decimals) : String(Math.round(num)));
+      return;
+    }
+
+    // Wait for the tile to enter the viewport before kicking off the
+    // count-up. Tiles above the fold see this as `true` immediately;
+    // tiles below the fold wait until scrolled to.
+    if (!inView) return;
+
+    // First reveal: run the count-up. Small delay so the card's outer
+    // entrance (cascade slide-in) is visible first, then the value tweens.
     const timeout = setTimeout(() => {
       startRef.current = null;
 
@@ -75,6 +174,7 @@ function useCountUp(rawValue, duration = 1800) {
         const current = num * easeOutExpo(t);
         setDisplay(decimals > 0 ? current.toFixed(decimals) : String(Math.round(current)));
         if (t < 1) rafRef.current = requestAnimationFrame(tick);
+        else hasMountedRef.current = true;
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -85,7 +185,7 @@ function useCountUp(rawValue, duration = 1800) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawValue]);
+  }, [rawValue, inView]);
 
   return display;
 }
@@ -146,49 +246,61 @@ const deltaBaseClass = cn(
  * @property {number} [delta] Positive → accent, negative → fault.
  * @property {string} [deltaLabel]
  * @property {string} [code] Optional small mono identifier in the top-right.
+ * @property {boolean} [live] When true, the count-up animation runs only on
+ *   first mount; subsequent value changes snap (no re-animation). Use for
+ *   telemetry rows whose values update on a recurring interval. Without this,
+ *   each refresh runs a fresh 1.8s count-up from zero, which is unreadable.
+ * @property {boolean} [liveRoll] When true, the value is rendered as a row of
+ *   fixed-width digit slots; on update, only the slots whose character changed
+ *   "roll" (previous translates up + fades, new enters from below). Use for
+ *   high-frequency telemetry where the eye should track which digits moved
+ *   (price ticks, latency counters, throughput rates). Overrides `live`.
+ *   Initial render fades in without rolling.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
 /** @type {React.ForwardRefExoticComponent<StatTileProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const StatTile = forwardRef(function StatTile(
-  { className, label, value, unit, delta, deltaLabel, code, style, ...props },
-  ref,
+  { className, label, value, unit, delta, deltaLabel, code, live = false, liveRoll = false, style, ...props },
+  outerRef,
 ) {
   useStatTileStyles();
 
-  const displayValue = useCountUp(value);
+  // Scroll-aware count-up. The tile only animates its value once it enters
+  // the viewport — telemetry rows below the fold wait for the scroll, then
+  // play the count-up where the user can see it.
+  const internalRef = useRef(null);
+  const setRefs = (node) => {
+    internalRef.current = node;
+    if (typeof outerRef === 'function') outerRef(node);
+    else if (outerRef) outerRef.current = node;
+  };
+  const inView = useInView(internalRef, { once: true, amount: 0.3 });
+  const reducedMotion = useReducedMotion();
+
+  // In liveRoll mode the value renders as a row of digit slots that
+  // animate per-position on change — count-up is suppressed entirely so
+  // the user reads the *value*, not a tween. The first paint still fades
+  // in via the `andromeda-value-in` keyframe on the value wrapper below.
+  const countUpDisplay = useCountUp(value, 1800, live, inView);
+  const displayValue = liveRoll ? String(value) : countUpDisplay;
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   const isPositive = hasDelta && delta >= 0;
   const trendColorClass = !hasDelta
     ? 'text-[color:var(--andromeda-text-muted)]'
     : isPositive
-      ? 'text-[color:var(--andromeda-accent-bright)]'
-      : 'text-[color:var(--andromeda-fault)]';
+      ? 'text-[color:var(--andromeda-accent-300)]'
+      : 'text-[color:var(--andromeda-red-300)]';
 
   return (
     <Card
-      ref={ref}
+      ref={setRefs}
       className={cn('flex-1 min-w-0 overflow-hidden', className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {/* Scanline sweep — runs once on mount */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent, var(--andromeda-accent-dim), transparent)',
-          animation: 'andromeda-scanline 1.2s ease-out forwards',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
-
-      <CardContent className="flex flex-col gap-[var(--andromeda-3)]">
+<CardContent className="flex flex-col gap-[var(--andromeda-3)]">
         {/* Label row */}
         <div className="flex items-baseline justify-between">
           <span className={labelClass}>{label}</span>
@@ -200,7 +312,9 @@ export const StatTile = forwardRef(function StatTile(
           className="flex items-baseline gap-[var(--andromeda-2)]"
           style={{ animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: '80ms' }}
         >
-          <span className={valueClass}>{displayValue}</span>
+          {liveRoll
+            ? <DigitRoller value={displayValue} className={valueClass} reduced={reducedMotion} />
+            : <span className={valueClass}>{displayValue}</span>}
           {unit ? <span className={unitClass}>{unit}</span> : null}
         </div>
 

@@ -199,7 +199,7 @@ export const Slider = forwardRef(function Slider(
               )}
             >
               {Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}
-              {unit ? ` ${unit}` : ''}
+              {unit ?? ''}
             </span>
           ) : null}
         </div>
@@ -223,7 +223,7 @@ export const Slider = forwardRef(function Slider(
           'cursor-pointer',
           disabled && 'opacity-[0.4] cursor-not-allowed pointer-events-none',
           'focus-visible:outline-none',
-          'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-bright),0_0_10px_var(--andromeda-accent-glow)]',
+          'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
         )}
       >
         {/* Track line */}
@@ -239,8 +239,8 @@ export const Slider = forwardRef(function Slider(
         <div
           className={cn(
             'absolute left-0 top-1/2 -translate-y-1/2 h-[3px]',
-            '[background:linear-gradient(90deg,var(--andromeda-accent-dim)_0%,var(--andromeda-accent-base)_100%)]',
-            'shadow-[0_0_8px_var(--andromeda-accent-glow)]',
+            '[background:linear-gradient(90deg,var(--andromeda-accent-400)_0%,var(--andromeda-accent-300)_100%)]',
+            'shadow-[0_0_8px_var(--andromeda-accent-500)]',
           )}
           style={{ width: `${percent}%` }}
         />
@@ -250,9 +250,9 @@ export const Slider = forwardRef(function Slider(
           className={cn(
             'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
             'w-[8px] h-[16px]',
-            'bg-[color:var(--andromeda-accent-base)]',
-            'border border-solid border-[color:var(--andromeda-accent-bright)]',
-            'shadow-[var(--slider-thumb-shadow,0_0_8px_var(--andromeda-accent-glow))]',
+            'bg-[color:var(--andromeda-accent-300)]',
+            'border border-solid border-[color:var(--andromeda-accent-100)]',
+            'shadow-[var(--slider-thumb-shadow,0_0_8px_var(--andromeda-accent-500))]',
             'transition-[box-shadow,transform] duration-150 ease-out',
             'hover:scale-[1.25]',
           )}

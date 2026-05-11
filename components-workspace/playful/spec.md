@@ -11,8 +11,8 @@ Interactive two-row typography where letters jump, drop, and rotate playfully ba
 Two stacked rows of large fluid text: "STAY" on row 1, "WEIRD" on row 2, in Science Gothic bold. Chunky 2px sticker-style drop shadow. Colors use inverted design-system palette between modes (raw hex, no tokens).
 
 ## Colors (inverted between modes)
-- **Dark mode:** Olive `#A8B94D` text on sand-950 `#1A1A19` background
-- **Light mode:** Sand-950 `#1A1A19` text on olive `#A8B94D` background
+- **Dark mode:** Olive-600 `#869631` text on sand-950 `#1A1A19` background
+- **Light mode:** Sand-950 `#1A1A19` text on olive-600 `#869631` background
 
 ## Behaviour
 Cursor-proximity based animation (600px influence radius):
@@ -32,6 +32,6 @@ Touch-friendly — onTouchStart captures the first touch position to trigger the
 - Combined transform: `translateY(var(--translate-y)) rotate(var(--rotate)) scale(var(--scale))`
 - Text shadow: `2px 2px 0 rgba(0, 0, 0, 0.85)` dark, `2px 2px 0 rgba(0, 0, 0, 0.25)` light
 - Theme detection via `closest('[data-card-theme]')` attribute (works in isolated card preview + site-wide theme)
-- Fluid responsive sizing: clamp(2rem, 20vw, 12rem) — ~60-70% of viewport width
+- Fluid responsive sizing: clamp(1.6rem, 16vw, 9.6rem) — ~60-70% of viewport width
 - Two-row layout: outer flex-col with gap-2 sm:gap-4, each row flex-nowrap with gap-1 sm:gap-2
 - Smoothstep falloff for natural proximity curve

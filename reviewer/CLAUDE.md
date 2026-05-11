@@ -54,7 +54,7 @@ Run every check in order. One FAIL stops the component from proceeding.
 
 ### 7. prompts.ts
 - [ ] Exports `prompts` typed as `Partial<Record<Platform, string>>`
-- [ ] `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'` (imported from `../../app/components/ComponentCard`)
+- [ ] `Platform = 'Claude Code' | 'Lovable' | 'V0'` (imported from `../../app/components/ComponentCard`)
 - [ ] Platforms specified by the brief are present; absent lanes are intentional (not accidentally empty)
 - [ ] No platform has an empty string or a placeholder like `TODO`
 - [ ] Each prompt is self-contained (can recreate the component without seeing the code)

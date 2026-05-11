@@ -40,32 +40,40 @@ export function andromedaVars() {
     '--andromeda-text-secondary': t.color.text.secondary,
     '--andromeda-text-muted':     t.color.text.muted,
     '--andromeda-text-faint':     t.color.text.faint,
-    // Surfaces
+    // Surfaces — solid + one alpha (scrim/backdrop)
     '--andromeda-surface-base':    t.color.surface.base,
     '--andromeda-surface-raised':  t.color.surface.raised,
     '--andromeda-surface-overlay': t.color.surface.overlay,
     '--andromeda-surface-hover':   t.color.surface.hover,
     '--andromeda-surface-active':  t.color.surface.active,
-    // Borders
+    '--andromeda-surface-alpha':   t.color.surface.alpha,
+    // Borders — solid + one alpha (glassy edge)
     '--andromeda-border-subtle': t.color.border.subtle,
     '--andromeda-border-base':   t.color.border.base,
     '--andromeda-border-bright': t.color.border.bright,
     '--andromeda-border-strong': t.color.border.strong,
-    // Accent
-    '--andromeda-accent-base':      t.color.accent.base,
-    '--andromeda-accent-bright':    t.color.accent.bright,
-    '--andromeda-accent-dim':       t.color.accent.dim,
-    '--andromeda-accent-glow':      t.color.accent.glow,
-    '--andromeda-accent-glow-soft': t.color.accent.glowSoft,
-    // Semantic
-    '--andromeda-warning':      t.color.warning,
-    '--andromeda-warning-dim':  t.color.warningDim,
-    '--andromeda-warning-glow': t.color.warningGlow,
-    '--andromeda-warning-ring': t.color.warningRing,
-    '--andromeda-fault':        t.color.fault,
-    '--andromeda-fault-dim':    t.color.faultDim,
-    '--andromeda-fault-glow':   t.color.faultGlow,
-    '--andromeda-fault-ring':   t.color.faultRing,
+    '--andromeda-border-alpha':  t.color.border.alpha,
+    // Accent (turquoise) — 5 stops + 1 alpha
+    '--andromeda-accent-100':   t.color.accent[100],
+    '--andromeda-accent-200':   t.color.accent[200],
+    '--andromeda-accent-300':   t.color.accent[300],
+    '--andromeda-accent-400':   t.color.accent[400],
+    '--andromeda-accent-500':   t.color.accent[500],
+    '--andromeda-accent-alpha': t.color.accent.alpha,
+    // Red — 5 stops + 1 alpha
+    '--andromeda-red-100':   t.color.red[100],
+    '--andromeda-red-200':   t.color.red[200],
+    '--andromeda-red-300':   t.color.red[300],
+    '--andromeda-red-400':   t.color.red[400],
+    '--andromeda-red-500':   t.color.red[500],
+    '--andromeda-red-alpha': t.color.red.alpha,
+    // Orange — 5 stops + 1 alpha
+    '--andromeda-orange-100':   t.color.orange[100],
+    '--andromeda-orange-200':   t.color.orange[200],
+    '--andromeda-orange-300':   t.color.orange[300],
+    '--andromeda-orange-400':   t.color.orange[400],
+    '--andromeda-orange-500':   t.color.orange[500],
+    '--andromeda-orange-alpha': t.color.orange.alpha,
     // Gradients
     '--andromeda-gradient-accent-fade':  t.color.gradient.accentFade,
     '--andromeda-gradient-accent-sweep': t.color.gradient.accentSweep,
@@ -109,5 +117,19 @@ export function andromedaVars() {
     '--andromeda-radius-none': t.radius.none,
     '--andromeda-radius-sm':   t.radius.sm,
     '--andromeda-radius-md':   t.radius.md,
+    // Motion — every duration, easing, and stagger from tokens.motion.
+    // Components and templates reference these as `var(--andromeda-duration-*)`
+    // and `var(--andromeda-easing-*)` instead of hardcoding ms / cubic-bezier.
+    '--andromeda-duration-fast':       t.motion.duration.fast,
+    '--andromeda-duration-normal':     t.motion.duration.normal,
+    '--andromeda-duration-slow':       t.motion.duration.slow,
+    '--andromeda-duration-cascade':    t.motion.duration.cascade,
+    '--andromeda-duration-countup':    t.motion.duration.countup,
+    '--andromeda-easing-standard':     t.motion.easing.standard,
+    '--andromeda-easing-out':          t.motion.easing.out,
+    '--andromeda-easing-in':           t.motion.easing.in,
+    '--andromeda-easing-sharp':        t.motion.easing.sharp,
+    '--andromeda-stagger-cascade':     t.motion.stagger.cascade,
+    '--andromeda-stagger-progressbar': t.motion.stagger.progressBar,
   };
 }

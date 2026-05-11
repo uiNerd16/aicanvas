@@ -28,7 +28,7 @@ Known recurring mistakes are logged in `supervisor/mistakes.md`.
 ## What this project is
 AI Canvas (aicanvas.me) is an open component marketplace where every component ships with:
 - Its full source code
-- Expert-crafted prompts for 4 AI platforms: Claude, GPT, Gemini, V0
+- Expert-crafted prompts for 3 AI coding platforms: Claude Code, Lovable, V0
 
 ## Tech stack
 - **Framework**: Next.js 16 App Router (`app/` directory)
@@ -102,7 +102,7 @@ Experimental, creatively-free components that appear on the homepage grid. Each 
 components-workspace/
   my-component/
     index.tsx    ← the React component (export default function)
-    prompts.ts   ← prompts for the 4 platforms (any subset allowed)
+    prompts.ts   ← prompts for the 3 platforms (any subset allowed)
     spec.md      ← brief approved by user before building
 ```
 
@@ -128,15 +128,14 @@ Files in `design-systems/` currently carry a `// @ts-nocheck` header (the folder
 The AI Canvas website itself — navbar, homepage, component grid, component preview pages. Governed by the sand/olive/Manrope system documented in this file and in `supervisor/skills/site-design-tokens.md`. Existing components built before the new structure live in `app/components/` and are registered in `app/lib/component-registry.tsx`.
 
 ## Prompt file contract
-Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude' | 'GPT' | 'Gemini' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
+Every `prompts.ts` must export a `prompts` object typed as `Partial<Record<Platform, string>>` where `Platform = 'Claude Code' | 'Lovable' | 'V0'`. Lanes can be legitimately absent — the drawer UI filters to only the platforms a component actually provides.
 
 ```ts
 import type { Platform } from '../../app/components/ComponentCard'
 
 export const prompts: Partial<Record<Platform, string>> = {
-  Claude: `...`,
-  GPT: `...`,
-  Gemini: `...`,
+  'Claude Code': `...`,
+  Lovable: `...`,
   V0: `...`,
 }
 ```
@@ -149,4 +148,14 @@ export const prompts: Partial<Record<Platform, string>> = {
 - `generateStaticParams()` required for all `[slug]` routes
 - Server components pass `<PreviewComponent />` JSX as `children` to client components (never store JSX in module-level data)
 - `'use client'` required on all interactive components
+
+## Browser verification
+After any visible UI change, screenshot the affected page on the running dev server before reporting the work complete. Use the Claude in Chrome browser tools — don't claim "looks good" from the diff alone.
+
+- **Applies to**: changes to `app/`, `components-workspace/`, `design-systems/`, or any rendered output.
+- **Skip when**: only changing types, tests, comments, prompts, or other non-rendered code.
+- **Dev server**: try `localhost:3000` first; if it 404s or refuses, try `:3001`; only then ask. If no dev server is running at all, ask before guessing — don't `npm run dev` unilaterally.
+- **If the screenshot reveals a problem**: fix it before reporting; don't ship a "done" claim that the screenshot contradicts.
+- **What to check in the screenshot**: layout matches intent, no console errors triggered by the change, theme tokens (sand/olive in site chrome; system tokens in `design-systems/`) resolved correctly.
+
 "Do not invoke superpowers skills automatically. Only use them when I explicitly ask."
