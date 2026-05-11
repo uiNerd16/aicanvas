@@ -34,7 +34,7 @@ const boxVariants = cva(
     'cursor-pointer',
     'active:scale-[0.88]',
     'focus-visible:outline-none',
-    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-dim),0_0_8px_var(--andromeda-accent-glow)]',
+    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
   {
     variants: {
@@ -45,9 +45,9 @@ const boxVariants = cva(
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         checked: [
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'border-[color:var(--andromeda-accent-base)]',
-          'hover:border-[color:var(--andromeda-accent-bright)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'border-[color:var(--andromeda-accent-300)]',
+          'hover:border-[color:var(--andromeda-accent-100)]',
         ],
       },
       disabled: {
@@ -124,7 +124,11 @@ export const Checkbox = forwardRef(function Checkbox(
           checked={checked}
           disabled={disabled}
           onChange={handleChange}
-          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          // z-10 keeps the invisible input on top of the visual span so
+          // clicks reach the input. Both layers are positioned, so without
+          // an explicit z-index the visual span paints last and swallows
+          // every click — the box hovers but never toggles.
+          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
           {...props}
         />
         <span
@@ -135,7 +139,7 @@ export const Checkbox = forwardRef(function Checkbox(
               disabled,
             }),
             // Sync focus ring with the hidden native input.
-            'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-dim),0_0_8px_var(--andromeda-accent-glow)]',
+            'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
             className,
           )}
         >
@@ -144,7 +148,7 @@ export const Checkbox = forwardRef(function Checkbox(
               size={12}
               weight="light"
               style={{
-                color: 'var(--andromeda-accent-bright)',
+                color: 'var(--andromeda-accent-100)',
                 animation: 'andromeda-pop-in 120ms ease-out',
               }}
             />

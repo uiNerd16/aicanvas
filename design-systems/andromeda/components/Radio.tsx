@@ -36,7 +36,7 @@ const boxVariants = cva(
     'transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out',
     'cursor-pointer',
     'active:scale-[0.88]',
-    'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-dim),0_0_8px_var(--andromeda-accent-glow)]',
+    'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
   {
     variants: {
@@ -47,9 +47,9 @@ const boxVariants = cva(
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         checked: [
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'border-[color:var(--andromeda-accent-base)]',
-          'hover:border-[color:var(--andromeda-accent-bright)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'border-[color:var(--andromeda-accent-300)]',
+          'hover:border-[color:var(--andromeda-accent-100)]',
         ],
       },
       disabled: {
@@ -216,8 +216,8 @@ export const Radio = forwardRef(function Radio(
             <span
               className="block w-[6px] h-[6px]"
               style={{
-                background: 'var(--andromeda-accent-base)',
-                boxShadow: '0 0 6px var(--andromeda-accent-glow)',
+                background: 'var(--andromeda-accent-300)',
+                boxShadow: '0 0 6px var(--andromeda-accent-500)',
                 animation: 'andromeda-pop-in 120ms ease-out',
               }}
             />

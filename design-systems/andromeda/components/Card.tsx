@@ -3,8 +3,8 @@
 // COMPONENT: Card
 // shadcn/ui-aligned compound component:
 //   <Card><CardHeader/><CardContent/><CardFooter/></Card>
-// Variant: default | glow (adds accent.glowSoft tint + bright markers)
-// Sharp corners, transparent surface.raised, thin border.subtle.
+// Variant: default | glow (adds accent.shade2 tint + bright markers)
+// Sharp corners, surface.raised background, thin border.subtle.
 // ============================================================
 
 'use client';
@@ -33,7 +33,9 @@ const cardVariants = cva(
     },
     compoundVariants: [
       { variant: 'default', bordered: true, class: 'border-[color:var(--andromeda-border-base)]' },
-      { variant: 'glow',    bordered: true, class: 'border-[color:var(--andromeda-accent-dim)]' },
+      // Glow uses accent-500 (matches the gradient peak) so the perimeter
+      // blends with the fill instead of fighting it. accent-400 was too bright.
+      { variant: 'glow',    bordered: true, class: 'border-[color:var(--andromeda-accent-500)]' },
     ],
     defaultVariants: {
       variant: 'default',
@@ -89,9 +91,14 @@ export const CardHeader = forwardRef(function CardHeader(
       ref={ref}
       data-slot="card-header"
       className={cn(
+        'relative',
         'flex items-center justify-between gap-[var(--andromeda-3)]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-b border-solid border-[color:var(--andromeda-border-subtle)]',
+        // Inset divider via ::after — left/right match the section padding
+        // so the line stops short of the card's vertical edges.
+        'after:content-[""] after:absolute after:bottom-0',
+        'after:left-[var(--andromeda-3)] after:right-[var(--andromeda-3)]',
+        'after:h-px after:bg-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}
@@ -128,9 +135,14 @@ export const CardFooter = forwardRef(function CardFooter(
       ref={ref}
       data-slot="card-footer"
       className={cn(
+        'relative',
         'flex items-center gap-[var(--andromeda-3)]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-t border-solid border-[color:var(--andromeda-border-subtle)]',
+        // Inset divider via ::before — left/right match the section padding
+        // so the line stops short of the card's vertical edges.
+        'before:content-[""] before:absolute before:top-0',
+        'before:left-[var(--andromeda-3)] before:right-[var(--andromeda-3)]',
+        'before:h-px before:bg-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}

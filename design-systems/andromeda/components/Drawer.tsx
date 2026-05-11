@@ -7,9 +7,11 @@
 // transformed/clipped ancestor. ESC closes; outside-click on
 // the backdrop closes; body scroll is locked while open.
 //
-// Animation: pure CSS transitions on transform + opacity, gated
-// by an internal `mounted` state so the open/close transitions
-// run cleanly without Framer Motion.
+// Animation: framer-motion's <AnimatePresence> handles the open/
+// close lifecycle. Backdrop fades opacity; panel slides in from
+// `side`. Both use `tokens.motion.duration.slow` and the brand's
+// ease-out (entrance) / ease-in (exit). No setTimeout-driven
+// unmount, no raw timing strings.
 //
 //   <Drawer open={open} onOpenChange={setOpen} side="right">
 //     <DrawerHeader>
@@ -25,14 +27,21 @@
 
 import { forwardRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
+import { tokens } from '../tokens';
+
+const ms = (v) => parseInt(v, 10) / 1000;
+const PANEL_DURATION = ms(tokens.motion.duration.slow);
+const EASE_OUT = [0, 0, 0.2, 1];   // tokens.motion.easing.out
+const EASE_IN  = [0.4, 0, 1, 1];   // tokens.motion.easing.in
 
 const SIDE_MAP = {
-  right:  { axis: 'X', sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
-  left:   { axis: 'X', sign: -1, position: 'left-0 top-0 bottom-0 h-full'  },
-  top:    { axis: 'Y', sign: -1, position: 'top-0 left-0 right-0 w-full'   },
-  bottom: { axis: 'Y', sign:  1, position: 'bottom-0 left-0 right-0 w-full' },
+  right:  { axis: 'x', sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
+  left:   { axis: 'x', sign: -1, position: 'left-0 top-0 bottom-0 h-full'  },
+  top:    { axis: 'y', sign: -1, position: 'top-0 left-0 right-0 w-full'   },
+  bottom: { axis: 'y', sign:  1, position: 'bottom-0 left-0 right-0 w-full' },
 };
 
 /**
@@ -60,97 +69,94 @@ export const Drawer = forwardRef(function Drawer(
   },
   ref,
 ) {
-  // mounted: in DOM at all (controls portal lifecycle)
-  // visible: open transition state (controls transform/opacity)
-  // We delay unmount until the close transition finishes.
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
+  // SSR / portal target gate. Tracks whether we have a document to portal into.
+  const [canPortal, setCanPortal] = useState(false);
+  useEffect(() => { setCanPortal(typeof document !== 'undefined'); }, []);
 
+  // ── Body scroll lock — engaged whenever the drawer is open. ──────────────
   useEffect(() => {
-    if (open) {
-      setMounted(true);
-      // Next frame, flip visible so the CSS transition runs.
-      const id = requestAnimationFrame(() => setVisible(true));
-      return () => cancelAnimationFrame(id);
-    }
-    // Closing: hide first, then unmount after the transition.
-    setVisible(false);
-    const t = setTimeout(() => setMounted(false), 240);
-    return () => clearTimeout(t);
-  }, [open]);
-
-  // ── Body scroll lock ─────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mounted) return undefined;
+    if (!open) return undefined;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prevOverflow; };
-  }, [mounted]);
+  }, [open]);
 
   // ── ESC to close ─────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mounted) return undefined;
+    if (!open) return undefined;
     const onKey = (e) => {
       if (e.key === 'Escape') onOpenChange?.(false);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [mounted, onOpenChange]);
+  }, [open, onOpenChange]);
 
-  if (!mounted || typeof document === 'undefined') return null;
+  if (!canPortal) return null;
 
   const cfg = SIDE_MAP[side] ?? SIDE_MAP.right;
-  const closedTransform = `translate${cfg.axis}(${cfg.sign * 100}%)`;
+  const closedOffset = cfg.sign * 100;
   const sizeStyle =
-    cfg.axis === 'X'
+    cfg.axis === 'x'
       ? { width: typeof size === 'number' ? `${size}px` : size }
       : { height: typeof size === 'number' ? `${size}px` : size };
+  const panelInitial = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
+  const panelAnimate = { [cfg.axis]: 0, opacity: 1 };
+  const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
 
   return createPortal(
-    <div
-      data-slot="drawer-root"
-      style={{ ...andromedaVars() }}
-      className="fixed inset-0 z-[1000]"
-    >
-      {/* Backdrop */}
-      <div
-        aria-hidden="true"
-        onClick={() => onOpenChange?.(false)}
-        className={cn(
-          'absolute inset-0 bg-black/60',
-          '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
-          'transition-opacity duration-200 ease-out',
-          visible ? 'opacity-100' : 'opacity-0',
-        )}
-      />
-      {/* Panel */}
-      <div
-        ref={ref}
-        role="dialog"
-        aria-modal="true"
-        data-slot="drawer-panel"
-        className={cn(
-          'absolute',
-          cfg.position,
-          'flex flex-col',
-          'bg-[color:var(--andromeda-surface-raised)]',
-          '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
-          'rounded-[var(--andromeda-radius-none)]',
-          'shadow-[0_0_60px_rgba(0,0,0,0.5)]',
-          'transition-transform duration-240 ease-out',
-          className,
-        )}
-        style={{
-          ...sizeStyle,
-          transform: visible ? 'translate(0,0)' : closedTransform,
-          ...style,
-        }}
-        {...props}
-      >
-        <CornerMarkers />
-        {children}
-      </div>
-    </div>,
+    <AnimatePresence>
+      {open ? (
+        <div
+          key="drawer-root"
+          data-slot="drawer-root"
+          style={{ ...andromedaVars() }}
+          className="fixed inset-0 z-[1000]"
+        >
+          {/* Backdrop */}
+          <motion.div
+            aria-hidden="true"
+            onClick={() => onOpenChange?.(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
+            className={cn(
+              'absolute inset-0 bg-black/60',
+              '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+            )}
+          />
+          {/* Panel */}
+          <motion.div
+            ref={ref}
+            role="dialog"
+            aria-modal="true"
+            data-slot="drawer-panel"
+            initial={panelInitial}
+            animate={panelAnimate}
+            exit={panelExit}
+            transition={{ duration: PANEL_DURATION, ease: open ? EASE_OUT : EASE_IN }}
+            className={cn(
+              'absolute',
+              cfg.position,
+              'flex flex-col',
+              'bg-[color:var(--andromeda-surface-raised)]',
+              '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
+              'rounded-[var(--andromeda-radius-none)]',
+              'shadow-[0_0_60px_var(--andromeda-surface-base)]',
+              className,
+            )}
+            style={{
+              ...sizeStyle,
+              ...style,
+            }}
+            {...props}
+          >
+            <CornerMarkers />
+            {children}
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>,
     document.body,
   );
 });

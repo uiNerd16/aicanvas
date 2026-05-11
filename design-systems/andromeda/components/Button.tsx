@@ -13,8 +13,21 @@
 
 import { forwardRef } from 'react';
 import { Slot } from '@radix-ui/react-slot';
+import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
+
+// Token-driven framer transitions. tokens.motion.duration values are
+// strings like "140ms"; framer expects seconds, so parseInt → /1000.
+const ms = (v) => parseInt(v, 10) / 1000;
+const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] };
+const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] };
+// whileHover / whileTap targets — transitions inlined inside the variant
+// so hover uses duration.normal and press uses duration.fast independently.
+const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
+const PRESS_DOWN = { scale: 0.98, transition: PRESS_TX };
 
 const buttonVariants = cva(
   [
@@ -28,28 +41,31 @@ const buttonVariants = cva(
     'font-[number:var(--andromeda-weight-medium)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
     '[line-height:var(--andromeda-leading-tight)]',
-    // motion
-    'cursor-pointer transition-all duration-150 ease-out',
-    'active:scale-[0.97]',
+    // motion — colours/border/shadow tween via CSS at duration.normal so the
+    // focus ring fades in (was previously a hard snap). Transform/lift/press
+    // are driven by framer-motion's whileHover/whileTap on the motion.button
+    // root, see below — they get duration.normal (hover) and duration.fast
+    // (press) per `tokens.motion`.
+    'cursor-pointer',
+    'transition-[background-color,border-color,box-shadow,color] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
     // focus & disabled
     'focus-visible:outline-none',
-    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-dim),0_0_12px_var(--andromeda-accent-glow)]',
+    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
     'disabled:cursor-not-allowed disabled:opacity-[0.35] disabled:pointer-events-none',
   ],
   {
     variants: {
       variant: {
         default: [
-          'text-[color:var(--andromeda-accent-base)]',
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'border-[color:var(--andromeda-accent-dim)]',
-          'hover:text-[color:var(--andromeda-accent-bright)]',
-          'hover:bg-[color:var(--andromeda-accent-glow)]',
-          'hover:border-[color:var(--andromeda-accent-bright)]',
-          'hover:shadow-[0_0_16px_var(--andromeda-accent-glow)]',
-          'active:bg-[color:var(--andromeda-accent-glow)]',
-          'active:border-[color:var(--andromeda-accent-bright)]',
+          'text-[color:var(--andromeda-text-primary)]',
+          'bg-[color:var(--andromeda-accent-400)]',
+          'border-[color:var(--andromeda-accent-200)]',
+          'hover:bg-[color:var(--andromeda-accent-400)]',
+          'hover:border-[color:var(--andromeda-accent-200)]',
+          'hover:shadow-[0_0_8px_var(--andromeda-accent-400)]',
+          'active:bg-[color:var(--andromeda-accent-400)]',
+          'active:border-[color:var(--andromeda-accent-200)]',
         ],
         outline: [
           'text-[color:var(--andromeda-text-primary)]',
@@ -68,22 +84,21 @@ const buttonVariants = cva(
           'active:bg-[color:var(--andromeda-surface-hover)]',
         ],
         destructive: [
-          'text-[color:var(--andromeda-fault)]',
-          'bg-[color:var(--andromeda-fault-glow)]',
-          'border-[color:var(--andromeda-fault-dim)]',
-          'hover:bg-[color:var(--andromeda-fault-dim)]',
-          'hover:text-[color:var(--andromeda-text-primary)]',
-          'hover:border-[color:var(--andromeda-fault)]',
-          'hover:shadow-[0_0_16px_var(--andromeda-fault-ring)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-fault-dim),0_0_12px_var(--andromeda-fault-ring)]',
-          'active:bg-[color:var(--andromeda-fault-dim)]',
+          'text-[color:var(--andromeda-text-primary)]',
+          'bg-[color:var(--andromeda-red-400)]',
+          'border-[color:var(--andromeda-red-400)]',
+          'hover:bg-[color:var(--andromeda-red-400)]',
+          'hover:border-[color:var(--andromeda-red-300)]',
+          'hover:shadow-[0_0_8px_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-400),0_0_8px_var(--andromeda-red-400)]',
+          'active:bg-[color:var(--andromeda-red-400)]',
         ],
         link: [
-          'text-[color:var(--andromeda-accent-base)]',
+          'text-[color:var(--andromeda-text-primary)]',
           'bg-transparent',
           'border-transparent',
           'underline-offset-4 hover:underline',
-          'hover:text-[color:var(--andromeda-accent-bright)]',
+          'hover:text-[color:var(--andromeda-text-primary)]',
           // link variant has no shadow ring on focus
           'focus-visible:shadow-none',
           'focus-visible:underline',
@@ -126,25 +141,48 @@ export const Button = forwardRef(function Button(
     children,
     style,
     type = 'button',
+    disabled,
     ...props
   },
   ref,
 ) {
-  const Comp = asChild ? Slot : 'button';
   // Icons render ~1.3× the label size so they read clearly next to the text.
   const iconSize = size === 'sm' ? 16 : size === 'md' ? 18 : 20;
-
-  return (
-    <Comp
-      ref={ref}
-      type={asChild ? undefined : type}
-      className={cn(buttonVariants({ variant, size }), className)}
-      style={{ ...andromedaVars(), ...style }}
-      {...props}
-    >
+  const reducedMotion = useReducedMotion();
+  const baseClass = cn(buttonVariants({ variant, size }), className);
+  const baseStyle = { ...andromedaVars(), ...style };
+  const content = (
+    <>
       {Icon ? <Icon size={iconSize} weight="light" /> : null}
       {children}
-    </Comp>
+    </>
+  );
+
+  // asChild path — Slot composes onto whatever child was passed (typically
+  // an <a>). Slot can't accept framer-motion gesture props, so the asChild
+  // path falls back to CSS-only transitions defined in cva. The hover lift
+  // + press scale are skipped for this path; this is a known trade-off.
+  if (asChild) {
+    return (
+      <Slot ref={ref} className={baseClass} style={baseStyle} {...props}>
+        {content}
+      </Slot>
+    );
+  }
+
+  return (
+    <motion.button
+      ref={ref}
+      type={type}
+      className={baseClass}
+      style={baseStyle}
+      disabled={disabled}
+      whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
+      whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
+      {...props}
+    >
+      {content}
+    </motion.button>
   );
 });
 

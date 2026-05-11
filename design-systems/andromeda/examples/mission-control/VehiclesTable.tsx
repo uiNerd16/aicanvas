@@ -4,10 +4,12 @@
 // ============================================================
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { Card, CardHeader } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
+import { rowContainer, rowItem } from '../../components/lib/motion';
 import { vehicles, vehicleStatusLabel } from './data';
 
 // Local map: data status → new Badge variants
@@ -19,17 +21,38 @@ const vehicleBadgeVariant = {
   fault:   'fault',
 };
 
+// Inset divider lines — 12px transparent stops at each end so the divider
+// reads as a deliberate inset, never edge-to-edge. TR borders don't render
+// under `border-collapse: collapse`, so the line is delivered as a
+// background-image gradient instead. See `rules.md` → Section dividers.
+const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const HEADER_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.base} ${tokens.spacing[3]}, ${tokens.color.border.base} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const rowSeparatorStyle = {
+  backgroundImage: ROW_INSET_LINE,
+  backgroundSize: '100% 1px',
+  backgroundPosition: 'bottom',
+  backgroundRepeat: 'no-repeat',
+};
+const headerSeparatorStyle = {
+  backgroundImage: HEADER_INSET_LINE,
+  backgroundSize: '100% 1px',
+  backgroundPosition: 'bottom',
+  backgroundRepeat: 'no-repeat',
+};
+
 function VehicleRow({ vehicle, isLast }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <tr
+    <motion.tr
+      variants={rowItem}
+      exit="exit"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: hovered ? tokens.color.surface.hover : 'transparent',
         transition: 'background 0.15s ease',
-        borderBottom: isLast ? 'none' : `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        ...(isLast ? null : rowSeparatorStyle),
       }}
     >
       {/* Callsign */}
@@ -86,7 +109,7 @@ function VehicleRow({ vehicle, isLast }) {
           {vehicle.lastContact}
         </span>
       </td>
-    </tr>
+    </motion.tr>
   );
 }
 
@@ -94,7 +117,7 @@ export function VehiclesTable() {
   return (
     <Card style={{ flex: '0 0 calc(65% - 10px)', minWidth: 0 }}>
       <CardHeader>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
@@ -120,7 +143,7 @@ export function VehiclesTable() {
 
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
-          <tr style={{ borderBottom: `${tokens.border.thin} ${tokens.color.border.base}` }}>
+          <tr style={headerSeparatorStyle}>
             {[
               { label: 'Callsign',     align: 'left'  },
               { label: 'Type',         align: 'left'  },
@@ -143,15 +166,22 @@ export function VehiclesTable() {
             ))}
           </tr>
         </thead>
-        <tbody>
-          {vehicles.map((vehicle, i) => (
-            <VehicleRow
-              key={vehicle.callsign}
-              vehicle={vehicle}
-              isLast={i === vehicles.length - 1}
-            />
-          ))}
-        </tbody>
+        <motion.tbody
+          variants={rowContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          <AnimatePresence initial={false}>
+            {vehicles.map((vehicle, i) => (
+              <VehicleRow
+                key={vehicle.callsign}
+                vehicle={vehicle}
+                isLast={i === vehicles.length - 1}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.tbody>
       </table>
     </Card>
   );

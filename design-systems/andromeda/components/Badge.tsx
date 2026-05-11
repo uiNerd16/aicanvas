@@ -57,20 +57,20 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: [
-          'bg-[color:var(--andromeda-surface-raised)]',
+          'bg-[color:var(--andromeda-surface-active)]',
           'text-[color:var(--andromeda-text-secondary)]',
         ],
         accent: [
-          'bg-[color:var(--andromeda-accent-glow-soft)]',
-          'text-[color:var(--andromeda-accent-bright)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'text-[color:var(--andromeda-text-primary)]',
         ],
         warning: [
-          'bg-[color:var(--andromeda-warning-glow)]',
-          'text-[color:var(--andromeda-warning)]',
+          'bg-[color:var(--andromeda-orange-500)]',
+          'text-[color:var(--andromeda-text-primary)]',
         ],
         fault: [
-          'bg-[color:var(--andromeda-fault-glow)]',
-          'text-[color:var(--andromeda-fault)]',
+          'bg-[color:var(--andromeda-red-500)]',
+          'text-[color:var(--andromeda-text-primary)]',
         ],
         subtle: [
           'bg-[color:var(--andromeda-surface-overlay)]',
@@ -92,9 +92,9 @@ const badgeVariants = cva(
 // Dot color per variant — matches the text color of each variant.
 const dotColor = {
   default: 'var(--andromeda-text-muted)',
-  accent:  'var(--andromeda-accent-base)',
-  warning: 'var(--andromeda-warning)',
-  fault:   'var(--andromeda-fault)',
+  accent:  'var(--andromeda-accent-300)',
+  warning: 'var(--andromeda-orange-300)',
+  fault:   'var(--andromeda-red-300)',
   subtle:  'var(--andromeda-text-faint)',
   outline: 'var(--andromeda-text-primary)',
 };

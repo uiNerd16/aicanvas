@@ -5,6 +5,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 
@@ -46,7 +47,7 @@ function MissionClock() {
       <span style={{
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.md,
-        color: tokens.color.accent.bright,
+        color: tokens.color.accent[300],
         fontWeight: tokens.typography.weight.medium,
         letterSpacing: tokens.typography.tracking.wide,
       }}>
@@ -56,24 +57,27 @@ function MissionClock() {
   );
 }
 
-export function Header() {
+export function Header({ sectionTitle = 'Overview', motionProps }) {
   return (
-    <header style={{
-      position: 'relative',
-      height: tokens.layout.headerHeight,
-      flexShrink: 0,
-      background: tokens.color.surface.raised,
-      display: 'flex',
-      alignItems: 'center',
-      padding: `0 ${tokens.spacing[6]}`,
-      gap: tokens.spacing[5],
-      backdropFilter: 'blur(2px)',
-      WebkitBackdropFilter: 'blur(2px)',
-    }}>
+    <motion.header
+      {...(motionProps ?? {})}
+      style={{
+        position: 'relative',
+        height: tokens.layout.headerHeight,
+        flexShrink: 0,
+        background: tokens.color.surface.raised,
+        display: 'flex',
+        alignItems: 'center',
+        padding: `0 ${tokens.spacing[6]}`,
+        gap: tokens.spacing[5],
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+      }}
+    >
       <CornerMarkers />
 
-      {/* Title block */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+      {/* Title block — section-aware */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], flexShrink: 0 }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
@@ -91,7 +95,7 @@ export function Header() {
           color: tokens.color.text.primary,
           letterSpacing: '-0.01em',
         }}>
-          Overview
+          {sectionTitle}
         </h1>
       </div>
 
@@ -111,20 +115,20 @@ export function Header() {
           width: '6px',
           height: '6px',
           flexShrink: 0,
-          background: tokens.color.accent.dim,
-          border: `1px solid ${tokens.color.accent.dim}`,
-          boxShadow: `0 0 6px ${tokens.color.accent.glow}`,
+          background: tokens.color.accent[400],
+          border: `1px solid ${tokens.color.accent[400]}`,
+          boxShadow: `0 0 6px ${tokens.color.accent[500]}`,
         }} />
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.accent.bright,
+          color: tokens.color.accent[100],
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
         }}>
           Nominal
         </span>
       </div>
-    </header>
+    </motion.header>
   );
 }

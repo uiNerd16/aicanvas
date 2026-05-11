@@ -16,7 +16,7 @@ export const prompts: Partial<Record<Platform, string>> = {
   - Row 1: "STAY"
   - Row 2: "WEIRD"
 - Use Science Gothic font from next/font/google with subsets: ['latin']
-- Font size: clamp(2rem, 20vw, 12rem) — fluid, ~60-70% of viewport width
+- Font size: clamp(1.6rem, 16vw, 9.6rem) — fluid, ~60-70% of viewport width
 - Font weight: 700 (bold)
 - Line height: 1
 - Each letter is an inline-block element with select-none
@@ -24,9 +24,9 @@ export const prompts: Partial<Record<Platform, string>> = {
 ### Theme Support (Dark & Light) — INVERTED
 - Dark mode (default):
   - Background: #1A1A19 (sand-950, near-black)
-  - Text color: #A8B94D (olive-500)
+  - Text color: #869631 (olive-600)
 - Light mode:
-  - Background: #A8B94D (olive-500)
+  - Background: #869631 (olive-600)
   - Text color: #1A1A19 (sand-950)
 - Detect theme via \`closest('[data-card-theme]')\` attribute first (for isolated card previews), falling back to \`document.documentElement.classList.contains('dark')\` for standalone usage
 - Use a MutationObserver walking up the ancestor chain to react to theme changes
@@ -133,11 +133,11 @@ Create this as a fully functional, copy-paste-ready component that showcases a p
 - Text displayed in two stacked rows: "STAY" on row 1, "WEIRD" on row 2
 
 ### Theme Support (Dark & Light) — INVERTED palette
-- Dark mode: background #1A1A19, text #A8B94D (olive green)
-- Light mode: background #A8B94D (olive green), text #1A1A19
+- Dark mode: background #1A1A19, text #869631 (olive green)
+- Light mode: background #869631 (olive green), text #1A1A19
 
 ### Typography
-- Font size: fluid clamp(2rem, 20vw, 12rem) — scales ~60-70% of viewport width
+- Font size: fluid clamp(1.6rem, 16vw, 9.6rem) — scales ~60-70% of viewport width
 - Font weight: 700 bold
 - Line height: 1
 - Chunky sticker-style text shadow: 2px 2px 0 rgba(0, 0, 0, 0.85) on dark, 2px 2px 0 rgba(0, 0, 0, 0.25) on light
@@ -207,11 +207,11 @@ Build a fully functional, production-ready component that showcases smooth playf
 - Two rows: "STAY" on top, "WEIRD" below
 
 ### Theme (Dark & Light) — INVERTED colors
-- Dark: background #1A1A19, text #A8B94D (olive green)
-- Light: background #A8B94D, text #1A1A19
+- Dark: background #1A1A19, text #869631 (olive green)
+- Light: background #869631, text #1A1A19
 
 ### Typography
-- Font size: clamp(2rem, 20vw, 12rem) — fluid, ~60-70% of viewport
+- Font size: clamp(1.6rem, 16vw, 9.6rem) — fluid, ~60-70% of viewport
 - Font weight: 700 bold
 - Line height: 1
 - Text shadow 2px 2px 0 — dark mode alpha 0.85, light mode 0.25

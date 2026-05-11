@@ -9,7 +9,8 @@
 
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 
 const BARS       = 30;  // number of columns
@@ -21,19 +22,16 @@ const GAP_COL    = 3;   // gap between columns
 
 const variantConfig = {
   default: {
-    activeColor:  'var(--andromeda-accent-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-accent-glow)',
-    activeBorder: 'var(--andromeda-accent-dim)',
+    activeColor:  'var(--andromeda-accent-400)',
+    activeBorder: 'var(--andromeda-accent-400)',
   },
   warning: {
-    activeColor:  'var(--andromeda-warning-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-warning-ring)',
-    activeBorder: 'var(--andromeda-warning-dim)',
+    activeColor:  'var(--andromeda-orange-400)',
+    activeBorder: 'var(--andromeda-orange-400)',
   },
   fault: {
-    activeColor:  'var(--andromeda-fault-dim)',
-    activeGlow:   '0 0 5px var(--andromeda-fault-ring)',
-    activeBorder: 'var(--andromeda-fault-dim)',
+    activeColor:  'var(--andromeda-red-400)',
+    activeBorder: 'var(--andromeda-red-400)',
   },
 };
 
@@ -64,15 +62,40 @@ const valueClass = cn(
 /** @type {React.ForwardRefExoticComponent<ProgressBarProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const ProgressBar = forwardRef(function ProgressBar(
   { className, label, value, variant = 'default', style, ...props },
-  ref,
+  outerRef,
 ) {
   const clamped     = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
   const activeCount = Math.round((clamped / 100) * BARS);
   const cfg         = variantConfig[variant] ?? variantConfig.default;
 
+  // Scroll-aware fill: render with zero-active first, then on first
+  // viewport intersection switch to `activeCount` so the per-bar
+  // transition-delay below lights them up left→right at the moment
+  // the user actually sees the bar. ProgressBars below the fold no
+  // longer animate invisibly.
+  //
+  // `once: true` — animate only the first time. Re-entering the
+  // viewport (scroll up, scroll down again) doesn't re-trigger.
+  // `amount: 0.3` — wait until 30% of the bar is visible. Higher
+  // than the cascade's 0.15 because the bar's reveal is its own
+  // motion event; we want the user clearly looking at it.
+  const internalRef = useRef(null);
+  const setRefs = (node) => {
+    internalRef.current = node;
+    if (typeof outerRef === 'function') outerRef(node);
+    else if (outerRef) outerRef.current = node;
+  };
+  const inView = useInView(internalRef, { once: true, amount: 0.3 });
+  const [displayed, setDisplayed] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    const id = requestAnimationFrame(() => setDisplayed(activeCount));
+    return () => cancelAnimationFrame(id);
+  }, [inView, activeCount]);
+
   return (
     <div
-      ref={ref}
+      ref={setRefs}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}
@@ -97,7 +120,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
         }}
       >
         {Array.from({ length: BARS }, (_, barIndex) => {
-          const active = barIndex < activeCount;
+          const active = barIndex < displayed;
 
           return (
             <div
@@ -115,12 +138,14 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     width:  `${SQUARE_W}px`,
                     height: `${SQUARE_H}px`,
                     flexShrink: 0,
+                    transform: 'skewX(-12deg)',
                     background: active
                       ? cfg.activeColor
                       : 'var(--andromeda-surface-overlay)',
                     border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
-                    boxShadow: active ? cfg.activeGlow : 'none',
-                    transition: 'background 250ms ease, box-shadow 250ms ease, border-color 250ms ease',
+                    boxShadow: 'none',
+                    transition: 'background 400ms ease, box-shadow 400ms ease, border-color 400ms ease',
+                    transitionDelay: `${Math.floor(barIndex / 3) * 120}ms`,
                   }}
                 />
               ))}

@@ -197,7 +197,7 @@ What's wrong: it talks about the mechanism, not the component. The reader doesn'
 
 ## Writing the prompts
 
-Promoted components follow the **same 4-lane prompt contract** as standalones (`Claude`, `GPT`, `Gemini`, `V0`), but with a critical twist:
+Promoted components follow the **same 3-lane prompt contract** as standalones (`Claude Code`, `Lovable`, `V0`), but with a critical twist:
 
 **The prompt must teach the reader how to rebuild the component from scratch in their own project — NOT how to import it from the design system.**
 
@@ -214,9 +214,9 @@ A reader who finds Andromeda Button on aicanvas.me and opens its drawer has neve
 
 Do NOT write prompts that say "import from the Andromeda design system" or reference any file under `design-systems/`. The promoted component must be reproducible by someone who only has the prompt and the four libraries above.
 
-**Lane-specific notes** (same as regular standalones, covered in `../skills/prompts-guide.md`): Claude = mid-density spec, GPT = highest density with exact constants, Gemini = defensive and explicit, V0 = natural language prose.
+**Lane-specific notes** (same as regular standalones, covered in `../skills/prompts-guide.md`): Claude Code = mid-density spec with env-check preamble, Lovable = same content as Claude Code without the preamble, V0 = same content as Claude Code (Claude-style prompts outperform V0-specific ones even in V0).
 
-For the first promotion (`andromeda-button`), only the Claude lane was filled in as proof of mechanism. Future polished promotions should cover all four lanes — **but if the component is complex and the lanes would take a long session, start with Claude and flesh out the others later.** Partial prompts are fine; the drawer UI filters to lanes that have content.
+For the first promotion (`andromeda-button`), only the Claude Code lane was filled in as proof of mechanism. Future polished promotions should cover all three lanes — **but if the component is complex and the lanes would take a long session, start with Claude Code and flesh out the others later.** Partial prompts are fine; the drawer UI filters to lanes that have content.
 
 ## Full integration steps
 

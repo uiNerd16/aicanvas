@@ -147,6 +147,10 @@ export interface ComponentEntry {
   image?: string
   badge?: string
   dualTheme?: boolean
+  // When set, this component is part of a design system. Drives the
+  // "Part of <system>" affordance on the per-component page and the
+  // tier toggle in the install drawer.
+  designSystem?: DesignSystemSlug
   PreviewComponent: ComponentType
   code: string
   prompts: Partial<Record<Platform, string>>
@@ -159,6 +163,52 @@ export type ComponentMeta = Pick<
   ComponentEntry,
   'slug' | 'name' | 'description' | 'tags' | 'image' | 'badge'
 >
+
+// ─── Design systems (site-side lookups) ───────────────────────────────────────
+// Path/file data needed by the registry generator lives in
+// `scripts/lib/design-systems.config.mjs`. The website only needs name +
+// template lookups, declared inline below to avoid a cross-tooling import.
+
+export type DesignSystemSlug = 'andromeda'
+
+export interface DesignSystemTemplateMeta {
+  slug: string
+  name: string
+  domain?: string
+}
+
+export interface DesignSystemMeta {
+  slug: DesignSystemSlug
+  name: string
+  templates: DesignSystemTemplateMeta[]
+}
+
+export const DESIGN_SYSTEM_META: Record<DesignSystemSlug, DesignSystemMeta> = {
+  andromeda: {
+    slug: 'andromeda',
+    name: 'Andromeda',
+    templates: [
+      { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi' },
+      { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom' },
+      // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
+      { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations' },
+    ],
+  },
+}
+
+export function getDesignSystemMeta(slug: DesignSystemSlug): DesignSystemMeta | undefined {
+  return DESIGN_SYSTEM_META[slug]
+}
+
+export function getDesignSystemTemplateMeta(
+  slug: string,
+): { system: DesignSystemMeta; template: DesignSystemTemplateMeta } | undefined {
+  for (const system of Object.values(DESIGN_SYSTEM_META)) {
+    const template = system.templates.find((t) => t.slug === slug)
+    if (template) return { system, template }
+  }
+  return undefined
+}
 
 
 // Code strings are now auto-generated from source files — see component-codes.generated.ts
@@ -856,6 +906,7 @@ Requirements:
       { label: 'Buttons & Toggles', accent: true },
       { label: 'Andromeda' },
     ],
+    designSystem: 'andromeda',
     PreviewComponent: AndromedaButton,
     code: componentCodes['andromeda-button'],
     prompts: andromedaButtonPrompts,

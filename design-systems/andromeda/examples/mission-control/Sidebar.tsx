@@ -3,53 +3,59 @@
 // MISSION CONTROL: Sidebar
 // ============================================================
 
+import { motion, LayoutGroup } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { NavItem } from '../../components/NavItem';
+import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems } from './data';
 
-export function Sidebar({ activeNav, onNavChange }) {
+function InsetDivider({ side = 'bottom' }) {
   return (
-    <aside style={{
-      position: 'relative',
-      width: tokens.layout.sidebarWidth,
-      flexShrink: 0,
-      background: tokens.color.surface.raised,
-      display: 'flex',
-      flexDirection: 'column',
-      backdropFilter: 'blur(2px)',
-      WebkitBackdropFilter: 'blur(2px)',
-    }}>
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+export function Sidebar({ activeNav, onNavChange, motionProps }) {
+  return (
+    <motion.aside
+      {...(motionProps ?? {})}
+      style={{
+        position: 'relative',
+        width: tokens.layout.sidebarWidth,
+        flexShrink: 0,
+        background: tokens.color.surface.raised,
+        display: 'flex',
+        flexDirection: 'column',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+      }}
+    >
       <CornerMarkers />
 
       {/* Logo block */}
       <div style={{
+        position: 'relative',
         padding: `${tokens.spacing[6]} ${tokens.spacing[3]} ${tokens.spacing[3]}`,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[3],
       }}>
-        <div style={{
-          position: 'relative',
-          width: '34px',
-          height: '34px',
-          background: tokens.color.accent.glowSoft,
-          border: `${tokens.border.thin} ${tokens.color.accent.dim}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.sm,
-          fontWeight: tokens.typography.weight.bold,
-          color: tokens.color.accent.bright,
-          letterSpacing: tokens.typography.tracking.tight,
-        }}>
-          <CornerMarkers size={4} offset={2} />
-          MC
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <InsetDivider />
+        <AndromedaIcon size={28} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
@@ -58,7 +64,7 @@ export function Sidebar({ activeNav, onNavChange }) {
             letterSpacing: tokens.typography.tracking.widest,
             fontWeight: tokens.typography.weight.semibold,
           }}>
-            Mission
+            Andromeda
           </span>
           <span style={{
             fontFamily: tokens.typography.fontMono,
@@ -67,7 +73,7 @@ export function Sidebar({ activeNav, onNavChange }) {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            Control
+            Design System
           </span>
         </div>
       </div>
@@ -84,31 +90,35 @@ export function Sidebar({ activeNav, onNavChange }) {
         /// Console
       </div>
 
-      {/* Nav */}
+      {/* Nav — LayoutGroup scopes NavItem's `layoutId` so the active dot
+          slides between siblings on selection change. */}
       <nav style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
       }}>
-        {navItems.map(item => (
-          <NavItem
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={activeNav === item.id}
-            onClick={() => onNavChange(item.id)}
-          />
-        ))}
+        <LayoutGroup id="mission-control-sidebar">
+          {navItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeNav === item.id}
+              onClick={() => onNavChange(item.id)}
+            />
+          ))}
+        </LayoutGroup>
       </nav>
 
       {/* User card */}
       <div style={{
+        position: 'relative',
         padding: tokens.spacing[3],
-        borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing[3],
       }}>
+        <InsetDivider side="top" />
         <Avatar name="Reza Quinn" src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" size="md" status="online" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -135,6 +145,6 @@ export function Sidebar({ activeNav, onNavChange }) {
           </div>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
