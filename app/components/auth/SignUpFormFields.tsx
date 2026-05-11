@@ -147,14 +147,13 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
           </p>
 
           {/* Art. 13 GDPR notice — Terms + Privacy links cover the pre-
-              contract informational duties. No marketing-email opt-in is
-              shown here because the column defaults to FALSE in migration
-              0004 — users must explicitly subscribe from /account/settings
-              before any marketing mail is sent. AI Canvas currently only
-              sends transactional mail (sign-up confirm, password reset,
-              account changes), legal basis Art. 6 (1)(b) GDPR. The Art. 8
-              age-16 confirmation was dropped — developer-tool audience
-              with negligible under-16 risk. */}
+              contract informational duties. Marketing-email language was
+              intentionally removed: AI Canvas only sends transactional mail
+              (sign-up confirm, password reset, account changes), so the
+              legal basis is Art. 6 (1)(b) GDPR / § 7 UWG carve-out and no
+              separate marketing notice is required. The Art. 8 age-16
+              confirmation was also dropped — developer-tool audience with
+              negligible under-16 risk. */}
           <p className="mt-6 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
             By creating an account you agree to our{' '}
             <Link

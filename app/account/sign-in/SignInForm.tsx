@@ -1,25 +1,22 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { SignInFormFields } from '../../components/auth/SignInFormFields'
 import { safeNext } from '../../lib/safe-next'
 
-// Friendly text for the `?error=…` codes the auth callback may pass through
-// after an OAuth / email-confirmation failure. Unknown codes still show a
-// generic message so users at least see *something* went wrong.
-const CALLBACK_ERROR_MESSAGES: Record<string, string> = {
-  callback_failed: 'We couldn’t complete that sign-in. Please try again.',
-  missing_code: 'That sign-in link is incomplete or expired. Please request a new one.',
+// Client wrapper for /account/sign-in. The page-level server component reads
+// `?next=` and `?error=` from the URL and passes them in as props — so we
+// avoid the `useSearchParams` Suspense dance and the error message renders
+// on the first paint (instead of post-hydration).
+
+type Props = {
+  next: string
+  initialError: string | null
 }
 
-export function SignInForm() {
+export function SignInForm({ next: rawNext, initialError }: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = safeNext(searchParams.get('next'))
-  const errorCode = searchParams.get('error')
-  const initialError = errorCode
-    ? CALLBACK_ERROR_MESSAGES[errorCode] ?? 'Sign-in failed. Please try again.'
-    : null
+  const next = safeNext(rawNext)
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">
