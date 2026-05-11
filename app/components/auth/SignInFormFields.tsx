@@ -27,13 +27,17 @@ type Props = {
   // button that flips the modal mode in place. When omitted (standalone page
   // context), it renders as a Link that navigates to /account/sign-up.
   onSwitchToSignUp?: () => void
+  // Pre-seeded error to display (e.g. the callback page failed and bounced
+  // here with `?error=…`). Cleared on the first submit attempt so the user
+  // sees feedback for their new action instead of stale callback text.
+  initialError?: string | null
 }
 
-export function SignInFormFields({ next, onSuccess, onSwitchToSignUp }: Props) {
+export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialError = null }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(initialError)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
