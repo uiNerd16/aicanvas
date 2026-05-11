@@ -2,10 +2,11 @@
 
 import { useSearchParams } from 'next/navigation'
 import { SignUpFormFields } from '../../components/auth/SignUpFormFields'
+import { safeNext } from '../../lib/safe-next'
 
 export function SignUpForm() {
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/account'
+  const next = safeNext(searchParams.get('next'))
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">

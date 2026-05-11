@@ -17,9 +17,9 @@ export default async function SettingsPage() {
   const initial = {
     package_manager: (data?.package_manager ?? null) as PackageManager | null,
     ai_platform: (data?.ai_platform ?? null) as AiPlatform | null,
-    // Default true matches the DB column default and the implicit opt-in
-    // recorded at sign-up via the § 7 (3) UWG notice on the sign-up form.
-    newsletter_opt_in: data?.newsletter_opt_in ?? true,
+    // Default FALSE — GDPR Art. 7 requires explicit opt-in for marketing
+    // emails. Users can flip the flag on from /account/settings.
+    newsletter_opt_in: data?.newsletter_opt_in ?? false,
   }
 
   return (
