@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check } from '@phosphor-icons/react'
 import { useSession } from '../../../components/auth/SessionProvider'
 import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
@@ -70,12 +70,26 @@ export function SettingsForm({ initial }: { initial: Initial }) {
 }
 
 // useSavedFlash — fires a 1.5s "Saved" tick after an async write resolves.
-// Local to each field so multiple fields can flash independently.
+// Local to each field so multiple fields can flash independently. Tracks the
+// timeout in a ref so rapid re-clicks cancel the pending tick (no setState-
+// after-unmount warnings, no stale "Saved" appearing after the user moved on).
 function useSavedFlash() {
   const [saved, setSaved] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
   function flash() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     setSaved(true)
-    setTimeout(() => setSaved(false), 1500)
+    timeoutRef.current = setTimeout(() => {
+      setSaved(false)
+      timeoutRef.current = null
+    }, 1500)
   }
   return { saved, flash }
 }

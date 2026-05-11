@@ -96,12 +96,12 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
           >
             <Link
               href={hrefFor(row)}
-              className="flex min-w-0 flex-1 items-center gap-4"
+              className="group flex min-w-0 flex-1 items-center gap-4"
               aria-label={`Open ${row.name}`}
             >
               <SavedThumbnail src={row.image} alt="" />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-sand-900 transition-colors group-hover:text-olive-500 dark:text-sand-50">
+                <div className="truncate font-medium text-sand-900 transition-colors group-hover:text-olive-500 dark:text-sand-50 dark:group-hover:text-olive-400">
                   {row.name}
                 </div>
                 {row.system && (
