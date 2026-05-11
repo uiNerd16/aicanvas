@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
+import { AuthPagePopup } from '../AuthPagePopup'
 
 // ─── ForgotPasswordForm ──────────────────────────────────────────────────────
 // Step 1 of recovery: user enters email, we send a Supabase recovery link.
@@ -34,11 +35,10 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-md flex-col justify-center px-6 py-12">
-      <div className="rounded-xl border border-sand-300 bg-sand-100 p-8 dark:border-sand-800 dark:bg-sand-900">
-        <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
-          Reset your password
-        </h1>
+    <AuthPagePopup closeHref="/account/sign-in">
+      <h1 className="text-2xl font-bold text-sand-900 dark:text-sand-50">
+        Reset your password
+      </h1>
         <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
           Enter the email on your account and we&apos;ll send you a link to set a new
           password.
@@ -88,16 +88,15 @@ export function ForgotPasswordForm() {
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-400">
-          Remembered it?{' '}
-          <Link
-            href="/account/sign-in"
-            className="font-semibold text-olive-500 hover:underline dark:text-olive-400"
-          >
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 text-center text-sm text-sand-600 dark:text-sand-400">
+        Remembered it?{' '}
+        <Link
+          href="/account/sign-in"
+          className="font-semibold text-olive-500 hover:underline dark:text-olive-400"
+        >
+          Sign in
+        </Link>
+      </p>
+    </AuthPagePopup>
   )
 }
