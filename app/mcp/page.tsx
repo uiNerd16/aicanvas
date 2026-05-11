@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { GithubLogo, Sparkle, XLogo } from '@phosphor-icons/react/dist/ssr'
+import { Sparkle } from '@phosphor-icons/react/dist/ssr'
 import { InstallCards } from './InstallCards'
 import { SiteFooter } from '../components/SiteFooter'
-import { GITHUB_URL, SITE_URL, X_URL } from '../lib/config'
+import { HeaderSocials } from '../components/HeaderSocials'
+import { SITE_URL } from '../lib/config'
 
 export const metadata: Metadata = {
   title: 'Connect to AI — Install AI Canvas in your editor',
@@ -30,33 +31,8 @@ export default function McpPage() {
         >
           /MCP
         </Link>
-        <div className="flex items-center justify-end gap-1">
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-          >
-            <GithubLogo weight="regular" size={20} />
-          </a>
-          <div className="mx-1 h-4 w-px bg-sand-300 dark:bg-sand-700" />
-          <a
-            href={X_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="X"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-          >
-            <XLogo weight="regular" size={20} />
-          </a>
-          <Link
-            href="/mcp"
-            className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
-          >
-            <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
-            Get MCP
-          </Link>
+        <div className="flex items-center justify-end">
+          <HeaderSocials />
         </div>
       </header>
 

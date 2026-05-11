@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { GithubLogo, XLogo } from '@phosphor-icons/react'
-import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
+import { CONTACT_EMAIL } from '../lib/config'
 import { SiteFooter } from '../components/SiteFooter'
+import { HeaderSocials } from '../components/HeaderSocials'
 
 // ─── /privacy ─────────────────────────────────────────────────────────────────
 // Datenschutzerklärung — Art. 13 GDPR notice. Trimmed to the strict minimum:
@@ -35,14 +35,8 @@ export default function PrivacyPage() {
         <Link href="/privacy" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
           /Privacy
         </Link>
-        <div className="flex items-center justify-end gap-1">
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-            <GithubLogo weight="regular" size={20} />
-          </a>
-          <div className="mx-1 h-4 w-px bg-sand-700" />
-          <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="X" className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100">
-            <XLogo weight="regular" size={20} />
-          </a>
+        <div className="flex items-center justify-end">
+          <HeaderSocials />
         </div>
       </header>
 
