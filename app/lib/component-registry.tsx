@@ -904,7 +904,6 @@ Requirements:
     image: 'https://ik.imagekit.io/aitoolkit/andromeda-button.png?updatedAt=1775998697243',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Design System', accent: true },
       { label: 'Andromeda' },
     ],
     designSystem: 'andromeda',
@@ -1180,7 +1179,7 @@ Requirements:
     name: 'Radial Cards',
     description: 'Seven health-metric cards bloom into a slowly rotating flower — tap any petal to pull it forward and read your stats up close.',
     tags: [
-      { label: 'Cards', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Animation' },
       { label: 'Interactive' },
     ],
