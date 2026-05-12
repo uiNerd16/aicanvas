@@ -76,6 +76,8 @@ export const DESIGN_SYSTEMS = [
       'components/Textarea.tsx',
       'components/Toggle.tsx',
       'components/Tooltip.tsx',
+      'components/UserCard.tsx',
+      'components/UserMenu.tsx',
     ],
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },

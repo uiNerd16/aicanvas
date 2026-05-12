@@ -24,7 +24,6 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarBlank, CaretDown, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { CornerMarkers } from './CornerMarkers';
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -257,7 +256,6 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             gap: tokens.spacing[3],
           }}
         >
-          <CornerMarkers />
 
           <div
             style={{

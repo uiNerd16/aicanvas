@@ -33,6 +33,9 @@ import {
   ChartLine,
   ChartBar,
   Clock,
+  Keyboard,
+  SignOut,
+  UserCircle,
 } from '@phosphor-icons/react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { Button, buttonVariants } from '../../../../design-systems/andromeda/components/Button'
@@ -64,6 +67,8 @@ import { Toggle } from '../../../../design-systems/andromeda/components/Toggle'
 import { Spinner } from '../../../../design-systems/andromeda/components/Spinner'
 import { Slider } from '../../../../design-systems/andromeda/components/Slider'
 import { Textarea } from '../../../../design-systems/andromeda/components/Textarea'
+import { UserCard } from '../../../../design-systems/andromeda/components/UserCard'
+import { UserMenu } from '../../../../design-systems/andromeda/components/UserMenu'
 import {
   Alert,
   AlertIcon,
@@ -1495,6 +1500,130 @@ export default function AndromedaShowcase({
               </Button>
             </DrawerFooter>
           </Drawer>
+        </Section>
+
+        {/* ── UserMenu ───────────────────────────────────────────────────── */}
+        <Section
+          title="UserMenu"
+          slug="user-menu"
+          description="Avatar-trigger popover with Profile, Preferences, Sign Out and friends. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; pairs with UserCard for sidebars that have room to spell out name and role."
+        >
+          {(() => {
+            const items = [
+              { id: 'profile',     label: 'Profile',             icon: UserCircle },
+              { id: 'preferences', label: 'Preferences',         icon: Gear },
+              { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
+              { id: 'sep1',        type: 'separator' as const },
+              { id: 'signout',     label: 'Sign Out',            icon: SignOut },
+            ];
+            return (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: tokens.spacing[8],
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                  // Reserve room for the open-down panel (~200px tall) so
+                  // it doesn't paint over the next section. Same trick the
+                  // PanelMenu showcase uses.
+                  minHeight: 260,
+                }}
+              >
+                <Row label="Open up">
+                  <UserMenu
+                    name="OPS-01"
+                    src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    status="online"
+                    items={items}
+                    placement="top"
+                    align="end"
+                  />
+                </Row>
+                {/* Shifted 40px right so the open panel (which extends
+                    leftward from the right-aligned trigger) doesn't crowd
+                    the Open Up trigger in the column to its left. */}
+                <div style={{ marginLeft: 40 }}>
+                  <Row label="Open down">
+                    <UserMenu
+                      name="OPS-01"
+                      src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                      status="online"
+                      items={items}
+                      placement="bottom"
+                      align="end"
+                      defaultOpen
+                    />
+                  </Row>
+                </div>
+              </div>
+            );
+          })()}
+        </Section>
+
+        {/* ── UserCard ───────────────────────────────────────────────────── */}
+        <Section
+          title="UserCard"
+          slug="user-card"
+          description="Wider user trigger that shows avatar, name, and role alongside the chevron — the canonical bottom-of-sidebar identity card. Same Profile / Preferences / Sign Out popover as UserMenu; opens upward by default and stretches to the card width."
+        >
+          {(() => {
+            const items = [
+              { id: 'profile',     label: 'Profile',             icon: UserCircle },
+              { id: 'preferences', label: 'Preferences',         icon: Gear },
+              { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
+              { id: 'sep1',        type: 'separator' as const },
+              { id: 'signout',     label: 'Sign Out',            icon: SignOut },
+            ];
+            return (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: tokens.spacing[8],
+                  // Open-up is the default placement and the variant we render
+                  // pre-opened; placing the trigger at the bottom lets the
+                  // panel grow upward into reserved space instead of bleeding
+                  // into the previous section. minHeight sized snug against
+                  // the actual panel + gap + trigger height so the open
+                  // dropdown sits right under the section description.
+                  alignItems: 'flex-end',
+                  flexWrap: 'wrap',
+                  minHeight: 220,
+                }}
+              >
+                <div style={{ width: 224 }}>
+                  <Row label="Open up">
+                    <div style={{ width: '100%', background: tokens.color.surface.raised }}>
+                      <UserCard
+                        name="Reza Quinn"
+                        role="Flight Director"
+                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        status="online"
+                        items={items}
+                        placement="top"
+                        align="stretch"
+                        defaultOpen
+                      />
+                    </div>
+                  </Row>
+                </div>
+                <div style={{ width: 224 }}>
+                  <Row label="Open down">
+                    <div style={{ width: '100%', background: tokens.color.surface.raised }}>
+                      <UserCard
+                        name="Reza Quinn"
+                        role="Flight Director"
+                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        status="online"
+                        items={items}
+                        placement="bottom"
+                        align="stretch"
+                      />
+                    </div>
+                  </Row>
+                </div>
+              </div>
+            );
+          })()}
         </Section>
       </div>
     </div>

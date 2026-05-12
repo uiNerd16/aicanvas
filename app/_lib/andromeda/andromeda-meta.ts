@@ -199,6 +199,20 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
       'Hover label for icon-only controls. Wraps any child, floats above or below, sharp corners, mono uppercase text.',
     sourceFile: 'Tooltip.tsx',
   },
+  {
+    slug: 'user-card',
+    name: 'User Card',
+    description:
+      'Wider user trigger that shows avatar, name, and role alongside the chevron — the canonical bottom-of-sidebar identity card. Same Profile / Preferences / Sign Out popover as User Menu; opens upward by default and stretches to the card width.',
+    sourceFile: 'UserCard.tsx',
+  },
+  {
+    slug: 'user-menu',
+    name: 'User Menu',
+    description:
+      'Avatar-trigger popover with Profile, Preferences, Sign Out and friends. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; closes on outside-click and Escape.',
+    sourceFile: 'UserMenu.tsx',
+  },
 ]
 
 export const ANDROMEDA_META = {
