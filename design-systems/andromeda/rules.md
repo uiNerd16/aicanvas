@@ -471,7 +471,7 @@ Floating panels triggered from a chip or button:
 
 - The trigger sits in a `position: relative` wrapper; the panel is `position: absolute` below at `top: calc(100% + spacing[2])`. No portals — the popover stays inside the trigger's stacking context so dismiss-on-outside-click works with a single ref.
 - Backgrounds are solid: `surface.raised` for the panel, never alpha. The drop shadow (`0 8px 32px surface.base`) is the only depth cue.
-- The panel always carries `<CornerMarkers />`. Popovers are not a separate visual language — they're part of the system, so they wear the system's frame.
+- **Frame: `must` — a popover panel uses EITHER a 1px `border.base` border OR `<CornerMarkers />`, never both.** Stacking the two frames looks busy and contradicts the "one frame per surface" principle. Default for menu-style popovers (`UserMenu`, dropdowns, comboboxes, date-pickers): the solid 1px border. Reserve CornerMarkers for popovers whose content is itself framed material (e.g. a mini-panel that contains a Card), where the corners read as the panel's own bracketing rather than a second border on top of the first.
 - The trigger gets `data-state="open"` while the panel is mounted, with a one-step-darker background (`surface.hover`) so the row reads as "pressed and held" — matches the "Stateful triggers" rule above.
 - ESC and document `mousedown` outside the wrapper close the panel. Listeners are attached only while open and removed on close — never as session-wide globals.
 - The CaretDown indicator rotates 180° on open. 140ms ease. The rotation is the only animation needed to communicate the state change; no fade-in for the panel itself unless the system later adds one consistently across all popovers.

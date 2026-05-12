@@ -19,12 +19,15 @@ import {
   EyeSlash,
   Gear,
   Info,
+  Keyboard,
   MagnifyingGlass,
   Pencil,
   Pulse,
+  SignOut,
   Sliders,
   Star,
   Trash,
+  UserCircle,
   Users,
   Warning,
 } from '@phosphor-icons/react'
@@ -56,6 +59,8 @@ import { Tag } from '../../../design-systems/andromeda/components/Tag'
 import { Textarea } from '../../../design-systems/andromeda/components/Textarea'
 import { Toggle } from '../../../design-systems/andromeda/components/Toggle'
 import { Tooltip } from '../../../design-systems/andromeda/components/Tooltip'
+import { UserCard } from '../../../design-systems/andromeda/components/UserCard'
+import { UserMenu } from '../../../design-systems/andromeda/components/UserMenu'
 import {
   Table, TableHead, TableBody, TableRow, TableHeader, TableCell, TableStyles,
 } from '../../../design-systems/andromeda/components/Table'
@@ -779,6 +784,84 @@ function DrawerDemo() {
   )
 }
 
+const USER_MENU_ITEMS = [
+  { id: 'profile',     label: 'Profile',             icon: UserCircle },
+  { id: 'preferences', label: 'Preferences',         icon: Gear },
+  { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
+  { id: 'sep1',        type: 'separator' as const },
+  { id: 'signout',     label: 'Sign Out',            icon: SignOut },
+]
+
+const USER_AVATAR_SRC =
+  'https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+
+const USER_CARD_SRC =
+  'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+
+function UserMenuDemo() {
+  return (
+    <div style={{ display: 'flex', gap: tokens.spacing[8], alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
+      <Row label="Open down">
+        <UserMenu
+          name="OPS-01"
+          src={USER_AVATAR_SRC}
+          status="online"
+          items={USER_MENU_ITEMS}
+          placement="bottom"
+          align="end"
+        />
+      </Row>
+      <Row label="Open up">
+        <UserMenu
+          name="OPS-01"
+          src={USER_AVATAR_SRC}
+          status="online"
+          items={USER_MENU_ITEMS}
+          placement="top"
+          align="end"
+        />
+      </Row>
+    </div>
+  )
+}
+
+function UserCardDemo() {
+  return (
+    <div style={{ display: 'flex', gap: tokens.spacing[8], alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
+      <div style={{ width: 224 }}>
+        <Row label="Open up">
+          <div style={{ width: '100%', background: tokens.color.surface.raised }}>
+            <UserCard
+              name="Reza Quinn"
+              role="Flight Director"
+              src={USER_CARD_SRC}
+              status="online"
+              items={USER_MENU_ITEMS}
+              placement="top"
+              align="stretch"
+            />
+          </div>
+        </Row>
+      </div>
+      <div style={{ width: 224 }}>
+        <Row label="Open down">
+          <div style={{ width: '100%', background: tokens.color.surface.raised }}>
+            <UserCard
+              name="Reza Quinn"
+              role="Flight Director"
+              src={USER_CARD_SRC}
+              status="online"
+              items={USER_MENU_ITEMS}
+              placement="bottom"
+              align="stretch"
+            />
+          </div>
+        </Row>
+      </div>
+    </div>
+  )
+}
+
 // ─── Public switcher ─────────────────────────────────────────────────────────
 
 const DEMOS: Record<string, () => React.ReactElement> = {
@@ -809,6 +892,8 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   toggle: ToggleDemo,
   table: TableDemo,
   tooltip: TooltipDemo,
+  'user-card': UserCardDemo,
+  'user-menu': UserMenuDemo,
 }
 
 export function AndromedaDemo({ slug }: { slug: string }) {
