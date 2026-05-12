@@ -65,3 +65,4 @@ app/lib/component-codes.generated.ts
 
 # studio prototype (local-only — see "Studio prototype" memory)
 /app/tune/
+scripts/sync-output/
