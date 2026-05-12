@@ -1,42 +1,43 @@
 /**
- * Edge proxy — logs every request to /r/* (the registry) to PostHog.
+ * Edge proxy — two responsibilities:
  *
- * Why: shadcn CLI installs and the AI Canvas MCP both fetch
- * /r/<slug>.json. Logging here gives us per-component install counts
- * without touching either client.
+ * 1. /r/* registry hits → log to PostHog (anonymous, fire-and-forget)
+ * 2. Everything else → refresh the Supabase auth-session cookie
  *
- * Safety:
- *   - POSTHOG_KEY missing → silently no-op, request passes through unchanged
- *   - PostHog down or slow → fire-and-forget via event.waitUntil(), never blocks the response
- *   - Any thrown error → caught, logged to stderr, request still served
- *
- * Distinguishing CLI from MCP traffic comes from the User-Agent header:
- *   - "aicanvas-mcp/x.y.z" → MCP
- *   - anything else (typically "shadcn/...", "node-fetch/...") → CLI or browser
+ * /r/* is fetched by the shadcn CLI and the AI Canvas MCP, both anonymous.
+ * Running Supabase there would just waste cycles. Everything else may carry
+ * a logged-in user's cookie — the Supabase session needs a refresh hop here
+ * because Server Components can't write cookies themselves.
  */
 
 import { NextResponse } from 'next/server'
 import type { NextFetchEvent, NextRequest } from 'next/server'
+import { updateSession } from './app/lib/supabase/proxy'
 
 const POSTHOG_KEY = process.env.POSTHOG_KEY
 const POSTHOG_HOST = process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com'
 
-export function proxy(request: NextRequest, event: NextFetchEvent) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const { pathname } = request.nextUrl
+
   // Case-sensitive redirect: /MCP → /mcp. Next's redirects() matcher is
   // case-insensitive, so it would loop on lowercase /mcp.
-  if (request.nextUrl.pathname === '/MCP') {
+  if (pathname === '/MCP') {
     return NextResponse.redirect(new URL('/mcp', request.url), 308)
   }
 
-  try {
-    if (POSTHOG_KEY) {
-      event.waitUntil(logRegistryHit(request))
+  if (pathname.startsWith('/r/')) {
+    try {
+      if (POSTHOG_KEY) {
+        event.waitUntil(logRegistryHit(request))
+      }
+    } catch (err) {
+      console.error('[proxy] logging failed:', err)
     }
-  } catch (err) {
-    // Never let logging break the request
-    console.error('[proxy] logging failed:', err)
+    return NextResponse.next()
   }
-  return NextResponse.next()
+
+  return await updateSession(request)
 }
 
 async function logRegistryHit(request: NextRequest): Promise<void> {
@@ -91,5 +92,7 @@ function hashUa(ua: string): string {
 }
 
 export const config = {
-  matcher: ['/r/:path*', '/MCP'],
+  // Skip Next internals + common static assets. Everything else is either
+  // /r/* (PostHog branch) or runs through Supabase session refresh.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'],
 }

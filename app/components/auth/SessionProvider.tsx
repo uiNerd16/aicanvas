@@ -1,0 +1,146 @@
+'use client'
+
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import type { User } from '@supabase/supabase-js'
+import { createClient } from '../../lib/supabase/client'
+import type { AiPlatform, PackageManager } from '../../lib/supabase/types'
+
+type Preferences = {
+  package_manager: PackageManager | null
+  ai_platform: AiPlatform | null
+  newsletter_opt_in: boolean
+}
+
+// newsletter_opt_in defaults to true to match the DB default in migration
+// 0004 — accounts created via the sign-up form implicitly opt in via the
+// inline § 7 (3) UWG notice on that form. The toggle in /account/settings
+// flips it.
+const EMPTY_PREFS: Preferences = {
+  package_manager: null,
+  ai_platform: null,
+  newsletter_opt_in: true,
+}
+
+type SessionContextValue = {
+  user: User | null
+  savedSlugs: Set<string>
+  preferences: Preferences
+  loading: boolean
+  refreshSaved: () => Promise<void>
+  toggleSaved: (slug: string, system: string | null) => Promise<void>
+  updatePreferences: (next: Partial<Preferences>) => Promise<void>
+}
+
+const SessionContext = createContext<SessionContextValue | null>(null)
+
+export function SessionProvider({
+  children,
+  initialUser,
+}: {
+  children: ReactNode
+  initialUser: User | null
+}) {
+  const [user, setUser] = useState<User | null>(initialUser)
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set())
+  const [preferences, setPreferences] = useState<Preferences>(EMPTY_PREFS)
+  const [loading, setLoading] = useState(false)
+
+  const refreshSaved = useCallback(async () => {
+    if (!user) {
+      setSavedSlugs(new Set())
+      setPreferences(EMPTY_PREFS)
+      return
+    }
+    setLoading(true)
+    try {
+      const [savedRes, prefsRes] = await Promise.all([
+        fetch('/api/saved', { method: 'GET' }),
+        fetch('/api/preferences', { method: 'GET' }),
+      ])
+      if (savedRes.ok) {
+        const { slugs } = await savedRes.json()
+        setSavedSlugs(new Set(slugs))
+      }
+      if (prefsRes.ok) {
+        const { preferences: prefs } = await prefsRes.json()
+        if (prefs) setPreferences({
+          package_manager: prefs.package_manager ?? null,
+          ai_platform: prefs.ai_platform ?? null,
+          newsletter_opt_in: prefs.newsletter_opt_in ?? true,
+        })
+      }
+    } catch {
+      // Network failure — leave the prior state in place.
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  const updatePreferences = useCallback(async (next: Partial<Preferences>) => {
+    if (!user) return
+    const merged = { ...preferences, ...next }
+    setPreferences(merged) // optimistic
+    try {
+      await fetch('/api/preferences', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(merged),
+      })
+    } catch {
+      // Rollback on network failure.
+      setPreferences(preferences)
+    }
+  }, [user, preferences])
+
+  const toggleSaved = useCallback(async (slug: string, system: string | null) => {
+    if (!user) return
+    const isSaved = savedSlugs.has(slug)
+    setSavedSlugs((prev) => {
+      const next = new Set(prev)
+      if (isSaved) next.delete(slug)
+      else next.add(slug)
+      return next
+    })
+    try {
+      await fetch('/api/saved', {
+        method: isSaved ? 'DELETE' : 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ slug, system }),
+      })
+    } catch {
+      // Roll back the optimistic update on network failure.
+      setSavedSlugs((prev) => {
+        const next = new Set(prev)
+        if (isSaved) next.add(slug)
+        else next.delete(slug)
+        return next
+      })
+    }
+  }, [user, savedSlugs])
+
+  useEffect(() => {
+    void refreshSaved()
+  }, [refreshSaved])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  return (
+    <SessionContext.Provider
+      value={{ user, savedSlugs, preferences, loading, refreshSaved, toggleSaved, updatePreferences }}
+    >
+      {children}
+    </SessionContext.Provider>
+  )
+}
+
+export function useSession() {
+  const ctx = useContext(SessionContext)
+  if (!ctx) throw new Error('useSession must be used within <SessionProvider>')
+  return ctx
+}

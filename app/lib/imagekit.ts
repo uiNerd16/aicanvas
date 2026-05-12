@@ -1,9 +1,11 @@
 // ImageKit URL helper — appends transformation params for serve-time
 // resize + WebP conversion. Non-ImageKit URLs pass through untouched.
 
-type Preset = 'card' | 'detail'
+type Preset = 'thumb' | 'card' | 'detail'
 
 const PRESETS: Record<Preset, string> = {
+  // Small row thumbnails (account/saved, account/activity): ~64px display × 2
+  thumb: 'w-160,q-80,f-auto',
   // Homepage card thumbnails: ~400px display × 2 for retina
   card: 'w-800,q-85,f-auto',
   // Component detail / larger views: 2× a wider hero crop

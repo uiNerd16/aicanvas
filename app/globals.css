@@ -8,6 +8,14 @@
   --foreground: #1C1916;
 }
 
+/* Reserve scrollbar gutter on every scrollable element so toggling between
+   short and tall content (e.g. signed-in vs signed-out states) doesn't
+   reflow the layout horizontally when the scrollbar appears or disappears. */
+html,
+body {
+  scrollbar-gutter: stable;
+}
+
 .dark {
   --background: #1A1712;
   --foreground: #F0EBE3;
