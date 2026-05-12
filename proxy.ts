@@ -20,6 +20,12 @@ const POSTHOG_HOST = process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com'
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl
 
+  // Case-sensitive redirect: /MCP → /mcp. Next's redirects() matcher is
+  // case-insensitive, so it would loop on lowercase /mcp.
+  if (pathname === '/MCP') {
+    return NextResponse.redirect(new URL('/mcp', request.url), 308)
+  }
+
   if (pathname.startsWith('/r/')) {
     try {
       if (POSTHOG_KEY) {
