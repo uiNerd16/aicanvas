@@ -245,6 +245,14 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 - The accentSweep gradient is a barely-visible teal whisper — if it reads as a colored card it's too strong
 - CardHeader, CardContent, CardFooter use consistent padding from `tokens.spacing` — never override
 
+### Frames don't nest
+
+`must` — A corner-marked surface (`Card`, `StatTile`, anything that renders `<CornerMarkers />`) NEVER sits inside another corner-marked surface. Brackets nested inside brackets read as clutter and the inner frame competes with the outer one for the eye's attention. The rule applies even when the inner surface is "different" (e.g. a strip of StatTiles inside a hero Card) — if both wear corners, they fight.
+
+When a panel logically owns both a body region AND a row of corner-marked tiles (StatTiles, mini-Cards), break the tile row out as a sibling at the next level up — the dashboard composition (`index.tsx` / `Section.tsx`) is the right place to lay out the panel next to the tile row, not nested inside it.
+
+Canonical shape: `examples/mission-control/sections/OverviewSection.tsx` — `<TelemetryRow />` (a bare flex of StatTiles) sits as a sibling of the surrounding Cards, never as a child of one. The cascade still flows top-to-bottom because the tile row gets its own cascade slot.
+
 ## PanelHeader vs CardHeader
 
 Two header components, deliberately different:
