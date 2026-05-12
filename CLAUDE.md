@@ -154,7 +154,7 @@ After any visible UI change, screenshot the affected page on the running dev ser
 
 - **Applies to**: changes to `app/`, `components-workspace/`, `design-systems/`, or any rendered output.
 - **Skip when**: only changing types, tests, comments, prompts, or other non-rendered code.
-- **Dev server**: try `localhost:3000` first; if it 404s or refuses, try `:3001`; only then ask. If no dev server is running at all, ask before guessing — don't `npm run dev` unilaterally.
+- **Dev server**: try `localhost:3000` first; if it 404s or refuses, try `:3001`. If neither responds, start one with `npm run dev` in the background — no need to ask.
 - **If the screenshot reveals a problem**: fix it before reporting; don't ship a "done" claim that the screenshot contradicts.
 - **What to check in the screenshot**: layout matches intent, no console errors triggered by the change, theme tokens (sand/olive in site chrome; system tokens in `design-systems/`) resolved correctly.
 

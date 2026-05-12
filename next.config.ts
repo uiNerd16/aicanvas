@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { execSync } from "node:child_process";
+import path from "node:path";
 
 function currentGitBranch(): string {
   try {
@@ -14,6 +15,9 @@ function currentGitBranch(): string {
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   env: {
     NEXT_PUBLIC_GIT_BRANCH: currentGitBranch(),
   },
