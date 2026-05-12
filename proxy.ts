@@ -22,6 +22,12 @@ const POSTHOG_KEY = process.env.POSTHOG_KEY
 const POSTHOG_HOST = process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com'
 
 export function proxy(request: NextRequest, event: NextFetchEvent) {
+  // Case-sensitive redirect: /MCP → /mcp. Next's redirects() matcher is
+  // case-insensitive, so it would loop on lowercase /mcp.
+  if (request.nextUrl.pathname === '/MCP') {
+    return NextResponse.redirect(new URL('/mcp', request.url), 308)
+  }
+
   try {
     if (POSTHOG_KEY) {
       event.waitUntil(logRegistryHit(request))
@@ -85,5 +91,5 @@ function hashUa(ua: string): string {
 }
 
 export const config = {
-  matcher: '/r/:path*',
+  matcher: ['/r/:path*', '/MCP'],
 }
