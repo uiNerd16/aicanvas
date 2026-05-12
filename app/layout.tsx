@@ -11,6 +11,7 @@ import { MobileNav } from './components/MobileNav'
 import { SessionProvider } from './components/auth/SessionProvider'
 import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
+import { DevBranchBadge } from './components/DevBranchBadge'
 import { COMPONENTS } from './lib/component-registry'
 import { GITHUB_URL, SITE_URL } from './lib/config'
 import { createClient } from './lib/supabase/server'
@@ -170,6 +171,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
+        <DevBranchBadge />
       </body>
     </html>
   )
