@@ -135,6 +135,8 @@ import UploadProgress from '../../components-workspace/upload-progress'
 import { prompts as uploadProgressPrompts } from '../../components-workspace/upload-progress/prompts'
 import SignaturePad from '../../components-workspace/signature-pad'
 import { prompts as signaturePadPrompts } from '../../components-workspace/signature-pad/prompts'
+import CuriousAi from '../../components-workspace/curious-ai'
+import { prompts as curiousAiPrompts } from '../../components-workspace/curious-ai/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -494,6 +496,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
       '9,000 particles arranged on a sphere with warm gold and cool silver tones, slowly spinning in Three.js.',
     tags: [
       { label: 'Backgrounds', accent: true },
+      { label: '3D & Shaders', accent: true },
       { label: 'Three.js' },
     ],
     PreviewComponent: ParticleSphere,
@@ -1120,6 +1123,7 @@ Requirements:
     description: 'Rotating 3D ring text animation — the front arc reads upright, the back arc upside-down.',
     tags: [
       { label: 'Typography', accent: true },
+      { label: '3D & Shaders', accent: true },
       { label: 'Animation' },
       { label: 'Interactive' },
     ],
@@ -1248,6 +1252,21 @@ Requirements:
     PreviewComponent: SignaturePad,
     code: componentCodes['signature-pad'],
     prompts: signaturePadPrompts,
+  },
+  {
+    slug: 'curious-ai',
+    name: 'Curious AI',
+    description: 'A morphing 3D AI orb in Three.js with cyan and magenta rim lights, iridescent pink speckles on a wrinkled surface, and glowing pink robot-eye pills that follow your cursor and blink between idle looks.',
+    tags: [
+      { label: '3D & Shaders', accent: true },
+      { label: 'Three.js' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/curious-ai.png',
+    PreviewComponent: CuriousAi,
+    code: componentCodes['curious-ai'],
+    prompts: curiousAiPrompts,
   },
 ]
 
