@@ -36,7 +36,9 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
       onClick={() => track('Component Card Click', { component: slug, position, source })}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
     >
-      {/* Image — extends slightly behind the content panel */}
+      {/* Image — extends slightly behind the content panel. Save action
+          intentionally lives on the component detail page only; keeping it
+          off the card keeps the preview surface uncluttered. */}
       <div className="relative aspect-video overflow-hidden bg-sand-900">
         {badge && (
           <span className="absolute right-3 top-3 z-10 rounded-full border border-olive-500 px-2.5 py-0.5 text-[11px] font-semibold text-olive-400">

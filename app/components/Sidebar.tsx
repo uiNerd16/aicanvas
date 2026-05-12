@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Info, MagnifyingGlass, PenNib, X } from '@phosphor-icons/react'
-import { CONTACT_EMAIL } from '../lib/config'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, X, XLogo } from '@phosphor-icons/react'
+import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 
@@ -20,9 +20,8 @@ const COMPONENTS_LABELS = [
   'Inputs & Controls',
   'Notifications',
   'Typography',
+  'Glass',
 ] as const
-
-const DESIGN_SYSTEM_LABELS = ['Glass'] as const
 
 type Section = {
   title: string
@@ -34,7 +33,7 @@ type Section = {
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
   { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
-  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: DESIGN_SYSTEM_LABELS, disabled: true },
+  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 function countByLabel(label: string) {
@@ -281,27 +280,63 @@ export function Sidebar() {
         </div>
       </nav>
 
+      {/* ── Social icons ── */}
+      {/* GitHub + X moved here from the page header so the top-right can
+          carry the auth pill + Get MCP CTA. Sits above the "Send a Coffee"
+          card. No top border — the icons float quietly above the card. */}
+      <div className="shrink-0 px-3 pt-2 pb-1">
+        <div className="flex items-center gap-1">
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub repository"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          >
+            <GithubLogo weight="regular" size={18} />
+          </a>
+          <a
+            href={X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="X profile"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          >
+            <XLogo weight="regular" size={18} />
+          </a>
+        </div>
+      </div>
+
       {/* ── Bottom card ── */}
-      {pathname !== '/support' && <div className="shrink-0 p-3">
-        <div className="overflow-hidden rounded-xl border border-olive-500/20 bg-gradient-to-b from-olive-500/10 to-transparent p-4 ring-1 ring-inset ring-olive-500/10 dark:from-olive-500/8 dark:to-transparent">
+      {pathname !== '/support' && <div className="shrink-0 px-3 pb-3 pt-0">
+        {/* Progressive disclosure — collapsed by default to just the CTA;
+            hovering reveals the "Hi, I'm Alex" intro. Container chrome
+            (border, surface, padding) stays constant so the widget never
+            jumps in width — only the height grows. */}
+        <div className="group overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-4 dark:border-sand-800 dark:bg-sand-900">
 
-          {/* Icon badge */}
-          {/* Copy */}
-          <p className="text-sm font-bold leading-snug text-sand-900 dark:text-sand-100">
-            Love what you see?
-          </p>
-          <p className="mt-0.5 text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-            Every coffee keeps this project alive and growing.
-          </p>
+          {/* Collapsible intro. The grid 0fr → 1fr trick animates height
+              smoothly without having to measure content in JS. */}
+          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
+            <div className="overflow-hidden">
+              <p className="text-xs leading-relaxed text-sand-500 dark:text-sand-400">
+                Hi, I&apos;m Alex. I build this in my evenings and weekends.
+              </p>
+              {/* Gap between intro and CTA — sits inside the collapsing
+                  region so it disappears along with the text. */}
+              <div className="h-3" />
+            </div>
+          </div>
 
-          {/* CTA */}
+          {/* CTA — always visible. */}
           <a
             href="https://ko-fi.com/aicanvasme"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex w-full items-center justify-center rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-300 bg-transparent px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
           >
-            Buy me a coffee
+            <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
+            Send a Coffee
           </a>
         </div>
       </div>}

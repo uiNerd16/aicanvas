@@ -237,6 +237,7 @@ for (const ds of DESIGN_SYSTEMS) {
     expectedNames.add(componentSlug(ds.slug, baseName))
   }
   for (const template of ds.templates) expectedNames.add(template.slug)
+  if (ds.templates.length > 0) expectedNames.add(`${ds.slug}-all`)
 }
 for (const existing of readdirSync(outDir).filter(f => f.endsWith('.json'))) {
   const stem = existing.replace(/\.json$/, '')
@@ -524,6 +525,27 @@ for (const ds of DESIGN_SYSTEMS) {
     }
     writeFileSync(join(outDir, `${template.slug}.json`), JSON.stringify(templateItem, null, 2) + '\n')
     registryItems.push(indexEntry(templateItem, templateFiles))
+    dsCount++
+  }
+
+  // ── 4. Full-system bundle (everything) ──────────────────────────────────────
+  // Single registry item that pulls components + tokens (via the system slug)
+  // plus every template via `registryDependencies`. One CLI command grabs the
+  // entire system. Soft-gated in the website UI; the JSON itself stays public
+  // alongside every other `/r/*.json` per Phase 1.
+  if (ds.templates.length > 0) {
+    const allItem = {
+      $schema: SCHEMA,
+      name: `${ds.slug}-all`,
+      type: 'registry:style',
+      title: `${ds.name} — full system`,
+      description: `Every ${ds.name} component, token, and template in one install.`,
+      author: 'aicanvas <https://aicanvas.me>',
+      registryDependencies: [ds.slug, ...ds.templates.map((t) => t.slug)],
+      files: [],
+    }
+    writeFileSync(join(outDir, `${ds.slug}-all.json`), JSON.stringify(allItem, null, 2) + '\n')
+    registryItems.push(indexEntry(allItem, []))
     dsCount++
   }
 }

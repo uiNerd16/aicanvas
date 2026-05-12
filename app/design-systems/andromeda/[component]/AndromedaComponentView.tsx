@@ -17,6 +17,8 @@ import {
 import { Step } from '../../../components/Step'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { trackInstall } from '../../../lib/track-install'
+import { useSession } from '../../../components/auth/SessionProvider'
 
 type RelatedItem = { slug: string; name: string }
 
@@ -37,6 +39,7 @@ export function AndromedaComponentView({
   rawCode,
   related,
 }: Props) {
+  const { preferences } = useSession()
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [codeCopied, setCodeCopied] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)
@@ -45,6 +48,12 @@ export function AndromedaComponentView({
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
   const [darkCopied, setDarkCopied] = useState(false)
   const mainCardRef = useRef<HTMLDivElement>(null)
+
+  // Adopt the user's preferred package manager once preferences load.
+  // We don't override an in-progress click — only the initial default.
+  useEffect(() => {
+    if (preferences.package_manager) setPkgManager(preferences.package_manager)
+  }, [preferences.package_manager])
 
   const RELATED_PAGE_SIZE = 3
   const [relatedStart, setRelatedStart] = useState(0)
@@ -90,6 +99,7 @@ export function AndromedaComponentView({
 
   async function copyCli() {
     try {
+      trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
       await navigator.clipboard.writeText(cliCommand)
       setCliCopied(true)
       setTimeout(() => setCliCopied(false), 2000)
@@ -98,7 +108,7 @@ export function AndromedaComponentView({
 
   return (
     <>
-    <main className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
+    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -280,6 +290,7 @@ export function AndromedaComponentView({
                             ? `yarn dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                             : `npx shadcn@latest add @aicanvas/andromeda-${slug}`
                           navigator.clipboard.writeText(cmd)
+                          trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
                         }}
