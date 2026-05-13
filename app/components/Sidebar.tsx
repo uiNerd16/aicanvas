@@ -21,6 +21,7 @@ const COMPONENTS_LABELS = [
   'Notifications',
   'Typography',
   'Glass',
+  '3D & Shaders',
 ] as const
 
 type Section = {
