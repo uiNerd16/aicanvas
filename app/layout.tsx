@@ -139,6 +139,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         {process.env.NODE_ENV === 'development' && <script src="/pufi.js" defer />}
+        {process.env.NODE_ENV === 'development' && <script src="/koko.js" defer />}
       </head>
       <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
         <ThemeProvider>
