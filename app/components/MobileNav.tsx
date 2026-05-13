@@ -135,7 +135,8 @@ export function MobileNav() {
   // that subtree ships its own duplicated mobile/desktop chrome.
   const hideMobileNav =
     pathname?.startsWith('/design-systems/') ||
-    pathname?.startsWith('/ideation')
+    pathname?.startsWith('/ideation') ||
+    pathname?.startsWith('/lab')
   if (hideMobileNav) return null
 
   return (
