@@ -1,6 +1,6 @@
 'use client'
 
-// 60K Particles — Studio tool
+// 60K Particles — LAB tool
 // Two-pane layout: live preview (left, DOM first) + control sidebar (right).
 // Source order matches visual order so hydration doesn't flash from one to the
 // other when the dynamically-imported Canvas mounts.
@@ -44,7 +44,7 @@ const SPRING_OPTIONS:    readonly Spring[]       = ['Stiff', 'Smooth', 'Bouncy']
 const LIGHT_OPTIONS:     readonly Light[]        = ['Top-Right', 'Top-Left', 'Center', 'None'] as const
 const DEPTH_OPTIONS:     readonly Depth[]        = ['Flat', 'Subtle', '3D'] as const
 
-export default function ParticleMarkStudioPage() {
+export default function ParticleMarkLabPage() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [copied, setCopied] = useState(false)
 
