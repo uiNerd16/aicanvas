@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ArrowLeft, CaretRight } from '@phosphor-icons/react'
 import { HeaderSocials } from '../components/HeaderSocials'
-import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 // Three layouts driven by the current pathname:
@@ -86,7 +85,6 @@ export function IdeationTopBar() {
           <span className="text-olive-500">{name}</span>
         </span>
         <div className="flex items-center justify-end gap-3">
-          <TopAuthPill />
           <HeaderSocials />
         </div>
       </div>
@@ -102,7 +100,6 @@ export function IdeationTopBar() {
         </span>
         <span className="text-sm font-semibold text-olive-500">/Andromeda</span>
         <div className="flex items-center justify-end gap-3">
-          <TopAuthPill />
           <HeaderSocials />
         </div>
       </div>
@@ -144,7 +141,6 @@ export function IdeationTopBar() {
         ))}
       </nav>
       <div className="ml-auto flex items-center gap-3">
-        <TopAuthPill />
         <HeaderSocials />
       </div>
     </div>
