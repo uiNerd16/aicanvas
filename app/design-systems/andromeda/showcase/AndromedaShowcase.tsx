@@ -48,6 +48,7 @@ import { andromedaVars } from '../../../../design-systems/andromeda/components/l
 import { Badge } from '../../../../design-systems/andromeda/components/Badge'
 import { Avatar } from '../../../../design-systems/andromeda/components/Avatar'
 import { Input } from '../../../../design-systems/andromeda/components/Input'
+import { SearchField } from '../../../../design-systems/andromeda/components/SearchField'
 import { NavItem } from '../../../../design-systems/andromeda/components/NavItem'
 import { ProgressBar } from '../../../../design-systems/andromeda/components/ProgressBar'
 import { StatTile } from '../../../../design-systems/andromeda/components/StatTile'
@@ -943,6 +944,28 @@ export default function AndromedaShowcase({
               defaultValue="INVALID"
               error="Field cannot be empty"
             />
+          </div>
+        </Section>
+
+        {/* ── SearchField ────────────────────────────────────────────────── */}
+        <Section
+          title="SearchField"
+          slug="search-field"
+          description="Command-bar-style search input with an optional ⌘-K shortcut chip. Five states — idle, hover, focus, text-inactive (placeholder), text-active (typed)."
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: tokens.spacing[5],
+              width: '100%',
+              maxWidth: 520,
+            }}
+          >
+            <SearchField placeholder="Search anything" />
+            <SearchField placeholder="Search tracks, channels, waveforms" shortcut="⌘ F" />
+            <SearchField placeholder="No shortcut" shortcut={null} />
+            <SearchField defaultValue="orbital launch" />
           </div>
         </Section>
 

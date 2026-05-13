@@ -6,59 +6,12 @@
 // as one family.
 // ============================================================
 
-import { MagnifyingGlass } from '@phosphor-icons/react';
+'use client';
+
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
-
-function CommandSearch() {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacing[3],
-        width: '420px',
-        maxWidth: '60%',
-        padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-        border: `${tokens.border.thin} ${tokens.color.border.base}`,
-        background: tokens.color.surface.raised,
-      }}
-    >
-      <CornerMarkers size={4} offset={2} />
-      <MagnifyingGlass
-        size={14}
-        weight="regular"
-        color={tokens.color.text.muted}
-      />
-      <span
-        style={{
-          flex: 1,
-          fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
-          letterSpacing: tokens.typography.tracking.wide,
-        }}
-      >
-        Search tracks, channels, waveforms
-      </span>
-      <span
-        style={{
-          fontFamily: tokens.typography.fontMono,
-          fontSize: '10px',
-          color: tokens.color.text.faint,
-          padding: '2px 6px',
-          border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
-          textTransform: 'uppercase',
-          letterSpacing: tokens.typography.tracking.widest,
-        }}
-      >
-        ⌘ K
-      </span>
-    </div>
-  );
-}
+import { SearchField } from '../../components/SearchField';
 
 export function Header({ sectionTitle = 'Library', motionProps }) {
   return (
@@ -108,7 +61,7 @@ export function Header({ sectionTitle = 'Library', motionProps }) {
 
       {/* Command search */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <CommandSearch />
+        <SearchField style={{ width: '420px', maxWidth: '60%' }} />
       </div>
 
       {/* Transmit status — dot + label, no box */}
