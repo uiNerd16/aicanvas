@@ -53,8 +53,12 @@ export function Sidebar() {
   // Hide the global sidebar on design-system preview routes so the design
   // system gets the full viewport. Also hidden on /ideation/* — that subtree
   // ships its own duplicated sidebar/topbar for the new design-systems flow.
+  // And on /lab/* — LAB has its own custom top bar (logo + Ko-fi icon),
+  // no left rail, no search.
   const hideSidebar =
-    pathname?.startsWith('/design-systems/') || pathname?.startsWith('/ideation')
+    pathname?.startsWith('/design-systems/') ||
+    pathname?.startsWith('/ideation') ||
+    pathname?.startsWith('/lab')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   const toggle = (title: string) =>
