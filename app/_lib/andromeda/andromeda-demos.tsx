@@ -45,6 +45,7 @@ import { Drawer, DrawerBody, DrawerDescription, DrawerFooter, DrawerHeader, Draw
 import { EmptyState, EmptyStateAction, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from '../../../design-systems/andromeda/components/EmptyState'
 import { IconButton } from '../../../design-systems/andromeda/components/IconButton'
 import { Input } from '../../../design-systems/andromeda/components/Input'
+import { SearchField } from '../../../design-systems/andromeda/components/SearchField'
 import { NavItem } from '../../../design-systems/andromeda/components/NavItem'
 import { PanelHeader } from '../../../design-systems/andromeda/components/PanelHeader'
 import { PanelMenu } from '../../../design-systems/andromeda/components/PanelMenu'
@@ -310,6 +311,25 @@ function InputDemo() {
       <Input label="Search" icon={MagnifyingGlass} placeholder="QUERY DATABASE" />
       <Input label="Email" icon={Envelope} placeholder="OPERATOR@DOMAIN.COM" />
       <Input label="Validation" defaultValue="INVALID" error="Field cannot be empty" />
+    </div>
+  )
+}
+
+function SearchFieldDemo() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacing[5],
+        width: '100%',
+        maxWidth: 520,
+      }}
+    >
+      <SearchField placeholder="Search anything" />
+      <SearchField placeholder="Search tracks, channels, waveforms" shortcut="⌘ F" />
+      <SearchField placeholder="No shortcut" shortcut={null} />
+      <SearchField defaultValue="orbital launch" />
     </div>
   )
 }
@@ -880,6 +900,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'nav-item': NavItemDemo,
   'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,
+  'search-field': SearchFieldDemo,
   'segmented-control': SegmentedControlDemo,
   'progress-bar': ProgressBarDemo,
   'radar-chart': RadarChartDemo,

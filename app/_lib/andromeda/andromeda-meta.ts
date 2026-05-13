@@ -137,6 +137,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'Radio.tsx',
   },
   {
+    slug: 'search-field',
+    name: 'Search Field',
+    description:
+      'Command-bar-style search input with optional ⌘-K shortcut chip. Five states — idle, hover, focus, text-inactive (placeholder), text-active (typed). Controlled or uncontrolled.',
+    sourceFile: 'SearchField.tsx',
+  },
+  {
     slug: 'segmented-control',
     name: 'Segmented Control',
     description:
