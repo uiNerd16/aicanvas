@@ -1,4 +1,4 @@
-// 60K Particles — Studio tool config
+// 60K Particles — LAB tool config
 // Typed Config + default + segment value maps used by Renderer.tsx, codeGen.ts,
 // and every control in controls/.
 

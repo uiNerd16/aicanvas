@@ -136,7 +136,7 @@ export function MobileNav() {
   const hideMobileNav =
     pathname?.startsWith('/design-systems/') ||
     pathname?.startsWith('/ideation') ||
-    pathname?.startsWith('/studio')
+    pathname?.startsWith('/lab')
   if (hideMobileNav) return null
 
   return (

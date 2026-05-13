@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { SiteFooter } from '../components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Studio — AI Canvas',
+  title: 'LAB — AI Canvas',
   description:
-    'Upload an asset. Tune it. Export the code. Studio turns your own marks into interactive components — no design system required.',
-  alternates: { canonical: 'https://aicanvas.me/studio' },
+    'Upload an asset. Tune it. Export the code. LAB turns your own marks into interactive components — no design system required.',
+  alternates: { canonical: 'https://aicanvas.me/lab' },
 }
 
 type Status = 'in progress' | 'planned' | 'live'
@@ -56,7 +56,7 @@ const STATUS_STYLES: Record<Status, string> = {
     'border-olive-500/30 bg-olive-500/15 text-olive-700 dark:text-olive-300',
 }
 
-export default function StudioPage() {
+export default function LabPage() {
   return (
     <main className="bg-sand-200 dark:bg-sand-950">
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
@@ -65,10 +65,10 @@ export default function StudioPage() {
             New
           </p>
           <h1 className="mb-5 text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
-            Studio
+            LAB
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-sand-600 dark:text-sand-400">
-            Upload an asset. Tune it. Export the code. Studio is a small set of
+            Upload an asset. Tune it. Export the code. LAB is a small set of
             generators that turn your own marks into interactive components —
             no design system, no boilerplate.
           </p>
@@ -111,7 +111,7 @@ export default function StudioPage() {
                     card
                   ) : (
                     <Link
-                      href={`/studio/${tool.slug}`}
+                      href={`/lab/${tool.slug}`}
                       className="block h-full focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 focus:ring-offset-sand-200 dark:focus:ring-offset-sand-950"
                     >
                       {card}
@@ -132,7 +132,7 @@ export default function StudioPage() {
               <span className="block font-semibold text-sand-700 dark:text-sand-300">
                 1. Upload
               </span>
-              SVG or PNG. Studio reads the shape and the colours.
+              SVG or PNG. LAB reads the shape and the colours.
             </li>
             <li>
               <span className="block font-semibold text-sand-700 dark:text-sand-300">
