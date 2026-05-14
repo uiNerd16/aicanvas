@@ -43,8 +43,7 @@ export default function LabLayout({
               gap={1}
               letterGap={0.8}
               bubbles={false}
-              assemblyDuration={1.2}
-              idleAnimation
+              assemblyDuration={2.0}
             />
           </span>
         </div>
