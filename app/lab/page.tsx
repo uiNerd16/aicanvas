@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SiteFooter } from '../components/SiteFooter'
+import { LabLogo } from './_components/LabLogo'
 
 export const metadata: Metadata = {
   title: 'LAB — AI Canvas',
@@ -29,14 +30,14 @@ const TOOLS: Array<{
     name: 'Mesh Gradient',
     description:
       'Extract dominant colours from any image and turn them into a soft animated mesh-gradient background.',
-    status: 'planned',
+    status: 'in progress',
   },
   {
     slug: 'noise-field',
     name: 'Noise Field',
     description:
       'Procedural animated noise patterns with your colour palette, tuned for backgrounds, hero sections and loading states.',
-    status: 'planned',
+    status: 'in progress',
   },
   {
     slug: 'glow-aura',
@@ -64,8 +65,9 @@ export default function LabPage() {
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-olive-500">
             New
           </p>
-          <h1 className="mb-5 text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
-            LAB
+          <h1 className="mb-5">
+            <LabLogo />
+            <span className="sr-only">LAB</span>
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-sand-600 dark:text-sand-400">
             Upload an asset. Tune it. Export the code. LAB is a small set of

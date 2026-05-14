@@ -5,6 +5,7 @@
 
 import Link from 'next/link'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
+import { LabLogo } from './_components/LabLogo'
 
 export default function LabLayout({
   children,
@@ -35,8 +36,16 @@ export default function LabLayout({
             aria-hidden="true"
             className="h-4 w-px bg-sand-300 dark:bg-sand-700"
           />
-          <span className="rounded-md border border-sand-300 bg-sand-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sand-900 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-50">
-            LAB
+          <span className="inline-flex items-center" aria-label="LAB">
+            <LabLogo
+              variant="compact"
+              pixel={1.5}
+              gap={1}
+              letterGap={0.8}
+              bubbles={false}
+              assemblyDuration={1.2}
+              idleAnimation
+            />
           </span>
         </div>
 
