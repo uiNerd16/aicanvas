@@ -17,8 +17,6 @@ export type SavedRow = {
   image: string | null
 }
 
-const UNCAT = '__uncategorized__'
-
 function hrefFor(row: SavedRow) {
   return row.system === 'andromeda'
     ? `/design-systems/andromeda/${row.slug.replace(/^andromeda-/, '')}`
@@ -28,20 +26,32 @@ function hrefFor(row: SavedRow) {
 export function SavedList({ initial }: { initial: SavedRow[] }) {
   const [rows, setRows] = useState<SavedRow[]>(initial)
   const [filter, setFilter] = useState<string | null>(null) // null = All
+  // Newly-named folders that have no items yet. In-memory only — they
+  // disappear on navigation/refresh until we add a Supabase user_collections
+  // table. See trade-off note in the chat thread.
+  const [ghostCollections, setGhostCollections] = useState<string[]>([])
 
   const collections = useMemo(() => {
-    const set = new Set<string>()
-    let hasUncat = false
+    const counts = new Map<string, number>()
     for (const row of rows) {
-      if (row.collection) set.add(row.collection)
-      else hasUncat = true
+      if (row.collection) counts.set(row.collection, (counts.get(row.collection) ?? 0) + 1)
     }
-    return { names: [...set].sort(), hasUncat }
-  }, [rows])
+    for (const name of ghostCollections) {
+      if (!counts.has(name)) counts.set(name, 0)
+    }
+    const names = [...counts.keys()].sort()
+    return { names, counts }
+  }, [rows, ghostCollections])
+
+  function createCollection(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    setGhostCollections((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]))
+    setFilter(trimmed)
+  }
 
   const visible = useMemo(() => {
     if (filter === null) return rows
-    if (filter === UNCAT) return rows.filter((r) => !r.collection)
     return rows.filter((r) => r.collection === filter)
   }, [rows, filter])
 
@@ -56,6 +66,31 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
     } catch {
       // Roll back on failure
       setRows(initial)
+    }
+  }
+
+  async function deleteCollection(name: string) {
+    // Clears the collection tag on every item in this folder (collection: null).
+    // Items keep their saved status; the folder itself disappears because
+    // folders are derived from the rows. Items continue to show under "All".
+    const previous = rows
+    const affectedSlugs = previous.filter((r) => r.collection === name).map((r) => r.slug)
+    setRows((prev) => prev.map((r) => (r.collection === name ? { ...r, collection: null } : r)))
+    if (filter === name) setFilter(null)
+    if (affectedSlugs.length === 0) return // ghost / empty — nothing to PATCH
+    try {
+      const results = await Promise.all(
+        affectedSlugs.map((slug) =>
+          fetch('/api/saved', {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ slug, collection: null }),
+          }),
+        ),
+      )
+      if (results.some((r) => !r.ok)) throw new Error('partial delete failure')
+    } catch {
+      setRows(previous)
     }
   }
 
@@ -77,12 +112,16 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      <FilterChips
+    <div className="space-y-6">
+      <FolderTabs
         names={collections.names}
-        hasUncat={collections.hasUncat}
+        counts={collections.counts}
+        totalCount={rows.length}
+        hasAnySaves={rows.length > 0}
         active={filter}
         onChange={setFilter}
+        onDelete={deleteCollection}
+        onCreate={createCollection}
       />
 
       {/* Empty state — rendered client-side too so unsaving the last row
@@ -92,6 +131,8 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
           first paint when there are no saves at all. */}
       {rows.length === 0 ? (
         <EmptyState />
+      ) : visible.length === 0 ? (
+        <FilteredEmptyState onReset={() => setFilter(null)} />
       ) : (
         <ul className="space-y-2">
           {visible.map((row) => (
@@ -172,56 +213,230 @@ function SavedThumbnail({ src, alt }: { src: string | null; alt: string }) {
   )
 }
 
-function FilterChips({
-  names,
-  hasUncat,
-  active,
-  onChange,
-}: {
-  names: string[]
-  hasUncat: boolean
-  active: string | null
-  onChange: (value: string | null) => void
-}) {
-  if (names.length === 0 && !hasUncat) return null
+function FilteredEmptyState({ onReset }: { onReset: () => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <Chip label="All" active={active === null} onClick={() => onChange(null)} />
-      {names.map((name) => (
-        <Chip key={name} label={name} active={active === name} onClick={() => onChange(name)} />
-      ))}
-      {hasUncat && (
-        <Chip label="Uncategorized" active={active === UNCAT} onClick={() => onChange(UNCAT)} muted />
-      )}
+    <div className="rounded-xl border border-dashed border-sand-300 bg-transparent p-10 text-center dark:border-sand-800">
+      <p className="text-sm text-sand-600 dark:text-sand-400">
+        This collection is empty.
+      </p>
+      <p className="mt-2 text-xs text-sand-500">
+        Save more components, or move an existing save in from its per-row dropdown.
+      </p>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <Link
+          href="/components"
+          className="inline-block rounded-lg bg-olive-500 px-4 py-1.5 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+        >
+          Browse components
+        </Link>
+        <button
+          type="button"
+          onClick={onReset}
+          className="inline-block rounded-lg border border-sand-300 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+        >
+          Show all
+        </button>
+      </div>
     </div>
   )
 }
 
-function Chip({
+// Folder-graphic tabs. Each folder is a 64×56 SVG (olive paper when the tab
+// is active, sand paper when idle) with the collection name + item count
+// underneath. Collections are created exclusively by assigning saves via the
+// per-row CollectionPicker dropdown — a folder only exists once it has at
+// least one item in it. Items without a collection don't get a pseudo-folder
+// — they live under "All" alongside everything else. User-created folders
+// show a hover-revealed × badge that opens a confirm banner; "All" is not
+// deletable.
+function FolderTabs({
+  names,
+  counts,
+  totalCount,
+  hasAnySaves,
+  active,
+  onChange,
+  onDelete,
+  onCreate,
+}: {
+  names: string[]
+  counts: Map<string, number>
+  totalCount: number
+  hasAnySaves: boolean
+  active: string | null
+  onChange: (value: string | null) => void
+  onDelete: (name: string) => void
+  onCreate: (name: string) => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [draft, setDraft] = useState('')
+  const confirmCount = confirmDelete ? counts.get(confirmDelete) ?? 0 : 0
+
+  function commit() {
+    const trimmed = draft.trim()
+    if (!trimmed) {
+      setCreating(false)
+      return
+    }
+    onCreate(trimmed)
+    setDraft('')
+    setCreating(false)
+  }
+
+  return (
+    <div className="space-y-3">
+      {confirmDelete && (
+        <div className="flex flex-col gap-3 rounded-xl border border-red-500/40 bg-red-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-sand-900 dark:text-sand-50">
+            Delete <strong className="font-semibold">&ldquo;{confirmDelete}&rdquo;</strong>?
+            {confirmCount > 0 && (
+              <span className="text-sand-600 dark:text-sand-400">
+                {' '}
+                {confirmCount === 1 ? '1 item' : `${confirmCount} items`} will stay saved under All.
+              </span>
+            )}
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(null)}
+              className="rounded-lg border border-sand-300 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => { onDelete(confirmDelete); setConfirmDelete(null) }}
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-500"
+            >
+              Delete folder
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-4">
+        <Folder
+          label="All"
+          count={totalCount}
+          active={active === null}
+          onClick={() => onChange(null)}
+        />
+        {names.map((name) => (
+          <Folder
+            key={name}
+            label={name}
+            count={counts.get(name) ?? 0}
+            active={active === name}
+            onClick={() => onChange(name)}
+            onDelete={() => { setConfirmDelete(name); setCreating(false) }}
+          />
+        ))}
+        {creating ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); commit() }}
+            className="flex h-[72px] w-[160px] flex-col items-stretch justify-center gap-1"
+          >
+            <input
+              type="text"
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => { if (e.key === 'Escape') { setDraft(''); setCreating(false) } }}
+              placeholder="Folder name…"
+              maxLength={40}
+              className="w-full rounded-md border border-olive-500 bg-sand-50 px-2 py-1 text-xs text-sand-900 outline-none dark:bg-sand-900 dark:text-sand-50"
+            />
+            <p className="text-center text-[10px] text-sand-500">Enter to create · Esc to cancel</p>
+          </form>
+        ) : (
+          hasAnySaves && (
+            <button
+              type="button"
+              onClick={() => { setCreating(true); setConfirmDelete(null) }}
+              aria-label="Create new folder"
+              title="Create new folder"
+              className="mt-[14px] flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-dashed border-sand-700 text-sand-700 transition-colors hover:border-olive-500 hover:text-olive-500 dark:border-sand-50 dark:text-sand-50 dark:hover:border-olive-400 dark:hover:text-olive-400"
+            >
+              <Plus size={14} weight="regular" />
+            </button>
+          )
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Picks the folder graphic for a given count + selection state. Empty folders
+// share one neutral graphic (the design has no "empty + active" variant —
+// selection on an empty folder is signalled by the label colour instead).
+function folderAsset(count: number, active: boolean): string {
+  if (count === 0) return '/account/folders/folder-empty.svg'
+  const variant = count === 1 ? 'one' : 'multi'
+  const state = active ? 'active' : 'inactive'
+  return `/account/folders/folder-${variant}-${state}.svg`
+}
+
+// Single folder tab. Native viewBox is 56×49 (≈1.14:1), rendered at 64×56.
+// When `onDelete` is supplied, a small × badge appears on hover/focus in the
+// folder graphic's top-right corner — clicking it opens the parent's confirm
+// banner (it does NOT bubble to the folder-select click).
+function Folder({
   label,
+  count,
   active,
   onClick,
-  muted = false,
+  onDelete,
 }: {
   label: string
+  count: number
   active: boolean
   onClick: () => void
-  muted?: boolean
+  onDelete?: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-lg border px-3 py-1 text-xs font-semibold transition-colors ${
-        active
-          ? 'border-olive-500 bg-olive-500/15 text-olive-600 dark:text-olive-400'
-          : muted
-            ? 'border-sand-300 bg-transparent text-sand-500 hover:text-sand-700 dark:border-sand-800 dark:text-sand-500 dark:hover:text-sand-300'
-            : 'border-sand-300 bg-sand-50 text-sand-700 hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100'
-      }`}
-    >
-      {label}
-    </button>
+    <div className="group relative flex min-w-[88px] flex-col items-center gap-2">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
+        className="flex flex-col items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-sand-200 dark:focus-visible:ring-offset-sand-950"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={folderAsset(count, active)}
+          alt=""
+          width={64}
+          height={56}
+          className={`h-14 w-16 transition-transform group-hover:-translate-y-0.5 ${active ? '' : 'opacity-90 group-hover:opacity-100'}`}
+        />
+        <div className="flex items-end justify-center gap-0.5 whitespace-nowrap">
+          <span
+            className={`text-xs font-medium leading-none ${
+              active
+                ? 'text-sand-900 dark:text-sand-50'
+                : 'text-sand-700 dark:text-sand-200'
+            }`}
+          >
+            {label}
+          </span>
+          <span className="text-[10px] leading-none text-sand-500">({count})</span>
+        </div>
+      </button>
+      {onDelete && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          aria-label={`Delete ${label} folder`}
+          title={`Delete ${label}`}
+          className="absolute right-2 top-0 flex h-5 w-5 items-center justify-center rounded-full border border-sand-300 bg-sand-50 text-sand-700 opacity-0 shadow-sm transition-all hover:border-red-400 hover:bg-red-500 hover:text-white focus-visible:opacity-100 group-hover:opacity-100 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-200 dark:hover:border-red-500 dark:hover:bg-red-600"
+        >
+          <X size={10} weight="bold" />
+        </button>
+      )}
+    </div>
   )
 }
 
