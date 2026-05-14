@@ -32,8 +32,14 @@ export const PLACEHOLDER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="2
 
 // Load an SVG source string into an HTMLImageElement.
 function loadSvgAsImage(svgSource: string): Promise<HTMLImageElement> {
+  const blob = new Blob([svgSource], { type: 'image/svg+xml' })
+  return loadBlobAsImage(blob)
+}
+
+// Load any binary image (Blob / File — PNG, JPEG, WebP, …) into an
+// HTMLImageElement. Used for raster uploads alongside the SVG path.
+function loadBlobAsImage(blob: Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const blob = new Blob([svgSource], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const img = new Image()
     img.onload = () => {
@@ -44,7 +50,6 @@ function loadSvgAsImage(svgSource: string): Promise<HTMLImageElement> {
       URL.revokeObjectURL(url)
       reject(e)
     }
-    // Allow cross-origin canvas reads (we control the blob, so this is fine).
     img.crossOrigin = 'anonymous'
     img.src = url
   })
@@ -70,11 +75,6 @@ function pickCanvasSize(img: HTMLImageElement): { cw: number; ch: number; aspect
 
 /**
  * Sample `count` particles from an SVG source string.
- *
- * @param svgSource    raw SVG markup (from a file upload or paste)
- * @param count        requested particle count
- * @param zJitter      amplitude of per-particle Z offset, in world units
- * @param worldLongEdge world-space size of the longer edge of the mark
  */
 export async function sampleSvg(
   svgSource: string,
@@ -83,14 +83,42 @@ export async function sampleSvg(
   worldLongEdge: number = DEFAULT_WORLD_LONG_EDGE,
 ): Promise<SamplerResult> {
   if (typeof document === 'undefined' || count <= 0) return EMPTY
-
   let img: HTMLImageElement
   try {
     img = await loadSvgAsImage(svgSource)
   } catch {
     return EMPTY
   }
+  return sampleFromImage(img, count, zJitter, worldLongEdge)
+}
 
+/**
+ * Sample `count` particles from a raster image (PNG / JPEG / WebP) Blob.
+ * Same sampling logic as `sampleSvg` — the only difference is how the source
+ * gets rasterized.
+ */
+export async function sampleImage(
+  blob: Blob,
+  count: number,
+  zJitter: number = 0.05,
+  worldLongEdge: number = DEFAULT_WORLD_LONG_EDGE,
+): Promise<SamplerResult> {
+  if (typeof document === 'undefined' || count <= 0) return EMPTY
+  let img: HTMLImageElement
+  try {
+    img = await loadBlobAsImage(blob)
+  } catch {
+    return EMPTY
+  }
+  return sampleFromImage(img, count, zJitter, worldLongEdge)
+}
+
+async function sampleFromImage(
+  img: HTMLImageElement,
+  count: number,
+  zJitter: number,
+  worldLongEdge: number,
+): Promise<SamplerResult> {
   const { cw, ch, aspect } = pickCanvasSize(img)
 
   const canvas = document.createElement('canvas')
