@@ -323,7 +323,13 @@ function applyMonoColor(arr: Float32Array, hex: string) {
 }
 
 // ─── Canvas wrapper (browser-only) ──────────────────────────────────────────
-function Scene({ config }: { config: Config }) {
+function Scene({
+  config,
+  onCanvasReady,
+}: {
+  config: Config
+  onCanvasReady?: (canvas: HTMLCanvasElement | null) => void
+}) {
   const resolvedSvg = config.svgSource ?? PLACEHOLDER_SVG
   const bg = config.backgroundColor
 
@@ -333,6 +339,10 @@ function Scene({ config }: { config: Config }) {
   // capture and clip that extra saturation, so recordings looked duller than
   // the live view. Forcing the canvas opaque keeps everything on one sRGB
   // path and recordings match the live colours.
+  //
+  // preserveDrawingBuffer is required so that WebCodecs / canvas.toBlob can
+  // read pixels after the browser has composited them; without it the buffer
+  // is cleared and our recorder captures black frames.
   return (
     <div className="relative h-full w-full" style={{ background: bg }}>
       <Canvas
@@ -342,8 +352,9 @@ function Scene({ config }: { config: Config }) {
         onCreated={({ camera, gl }) => {
           camera.lookAt(0, 0, 0)
           gl.setClearColor(bg, 1)
+          onCanvasReady?.(gl.domElement)
         }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
         style={{ touchAction: 'none' }}
       >
         <ParticleField config={config} resolvedSvg={resolvedSvg} />
@@ -354,6 +365,12 @@ function Scene({ config }: { config: Config }) {
 
 const SceneNoSSR = dynamic(() => Promise.resolve(Scene), { ssr: false })
 
-export default function Renderer({ config }: { config: Config }) {
-  return <SceneNoSSR config={config} />
+export default function Renderer({
+  config,
+  onCanvasReady,
+}: {
+  config: Config
+  onCanvasReady?: (canvas: HTMLCanvasElement | null) => void
+}) {
+  return <SceneNoSSR config={config} onCanvasReady={onCanvasReady} />
 }
