@@ -320,6 +320,18 @@ export function useCanvasRecorder() {
 
         const timestampUs = Math.round((performance.now() - s.startTime) * 1000)
         try {
+          // Force the WebGL pipeline to settle before we read the buffer.
+          // Without this, the compositor can occasionally hand us a stale
+          // or mid-resolve GPU texture — most visible when the canvas's
+          // clear-colour matches a nearby DOM background (e.g. #1A1A19,
+          // shared with the page wrapper), where the optimizer is more
+          // willing to short-circuit and a bright neighbouring texture
+          // bleeds in as a single-frame flash.
+          const gl =
+            (canvas.getContext('webgl2') as WebGL2RenderingContext | null) ??
+            (canvas.getContext('webgl') as WebGLRenderingContext | null)
+          gl?.finish()
+
           // If colour-boost is on, draw the WebGL canvas through a 2D
           // context that applies a saturation/contrast bump, then capture
           // that. Otherwise capture the WebGL canvas directly.

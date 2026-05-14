@@ -19,7 +19,7 @@ import {
   LIGHT_MAP,
   DEPTH_MAP,
 } from './config'
-import { sampleSvg, PLACEHOLDER_SVG, type SamplerResult } from './svgSampler'
+import { sampleSvg, sampleImage, PLACEHOLDER_SVG, type SamplerResult } from './svgSampler'
 
 const PLANE_SIZE = 5.0
 const HOVER_DISPLACEMENT_SCALE = 1.0 // hoverStrength config already in 0..2
@@ -128,17 +128,22 @@ function ParticleField({ config, resolvedSvg }: PointsProps) {
 
   const { gl } = useThree()
 
-  // Sample state — async because SVG → img is async.
+  // Sample state — async because image → canvas is async.
   const [sample, setSample] = useState<SamplerResult | null>(null)
   // Track key inputs that require a full rebuild. (Mono-colour changes are
-  // applied in-place; density / svgSource / depth changes require a resample.)
+  // applied in-place; density / source / depth changes require a resample.)
   const zJitter = DEPTH_MAP[config.depth]
-  const resampleKey = `${resolvedSvg.length}::${config.density}::${zJitter}::${config.markSize}`
+  const sourceKey = config.imageFile
+    ? `r:${config.imageUrl}`
+    : `s:${resolvedSvg.length}`
+  const resampleKey = `${sourceKey}::${config.density}::${zJitter}::${config.markSize}`
 
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const result = await sampleSvg(resolvedSvg, config.density, zJitter, config.markSize)
+      const result = config.imageFile
+        ? await sampleImage(config.imageFile, config.density, zJitter, config.markSize)
+        : await sampleSvg(resolvedSvg, config.density, zJitter, config.markSize)
       if (!alive) return
       setSample(result)
     })()
@@ -346,7 +351,6 @@ function Scene({
   return (
     <div className="relative h-full w-full" style={{ background: bg }}>
       <Canvas
-        key={`opaque:${bg}`}
         dpr={[1, 2]}
         camera={{ position: [0, 0, 4.5], fov: 38 }}
         onCreated={({ camera, gl }) => {
@@ -357,10 +361,22 @@ function Scene({
         gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
         style={{ touchAction: 'none' }}
       >
+        <ClearColorSync color={bg} />
         <ParticleField config={config} resolvedSvg={resolvedSvg} />
       </Canvas>
     </div>
   )
+}
+
+// Keep the WebGL clear-colour in sync with the React state without
+// remounting the Canvas. Lives inside <Canvas> so it can grab the renderer
+// via useThree; renders nothing.
+function ClearColorSync({ color }: { color: string }) {
+  const { gl } = useThree()
+  useEffect(() => {
+    gl.setClearColor(color, 1)
+  }, [gl, color])
+  return null
 }
 
 const SceneNoSSR = dynamic(() => Promise.resolve(Scene), { ssr: false })

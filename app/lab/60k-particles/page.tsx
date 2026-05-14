@@ -93,25 +93,63 @@ export default function ParticleMarkLabPage() {
     setConfig((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  // File handling — read SVG into string state.
+  // File handling — branch on SVG (text) vs raster (Blob/ObjectURL).
   const onSvgFile = useCallback((file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const text = typeof reader.result === 'string' ? reader.result : ''
-      if (!text.trim().startsWith('<')) return
-      setConfig((prev) => ({ ...prev, svgSource: text, svgFileName: file.name }))
+    const isSvg = file.type === 'image/svg+xml' || /\.svg$/i.test(file.name)
+    if (isSvg) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const text = typeof reader.result === 'string' ? reader.result : ''
+        if (!text.trim().startsWith('<')) return
+        setConfig((prev) => {
+          if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+          return {
+            ...prev,
+            svgSource: text,
+            svgFileName: file.name,
+            imageFile: null,
+            imageUrl: null,
+          }
+        })
+      }
+      reader.readAsText(file)
+      return
     }
-    reader.readAsText(file)
+    // Raster — PNG / JPEG / WebP. Sampler reads pixels directly from the blob.
+    const url = URL.createObjectURL(file)
+    setConfig((prev) => {
+      if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+      return {
+        ...prev,
+        svgSource: null,
+        svgFileName: file.name,
+        imageFile: file,
+        imageUrl: url,
+      }
+    })
   }, [])
 
   const onClearSvg = useCallback(() => {
-    setConfig((prev) => ({ ...prev, svgSource: null, svgFileName: null }))
+    setConfig((prev) => {
+      if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+      return {
+        ...prev,
+        svgSource: null,
+        svgFileName: null,
+        imageFile: null,
+        imageUrl: null,
+      }
+    })
   }, [])
 
   // Copy code to clipboard.
   const onCopy = useCallback(async () => {
-    const svg = config.svgSource ?? PLACEHOLDER_SVG
-    const tsx = generateTSX(config, svg)
+    const tsx = config.imageFile
+      ? generateTSX(config, { kind: 'raster', filename: config.imageFile.name })
+      : generateTSX(config, {
+          kind: 'svg',
+          svg: config.svgSource ?? PLACEHOLDER_SVG,
+        })
     try {
       await navigator.clipboard.writeText(tsx)
       setCopied(true)
@@ -211,7 +249,7 @@ export default function ParticleMarkLabPage() {
               <section>
                 <SectionLabel>Source</SectionLabel>
                 <FileDrop
-                  accept="image/svg+xml"
+                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
                   onFile={onSvgFile}
                   fileName={config.svgFileName}
                   onClear={onClearSvg}
