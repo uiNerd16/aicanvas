@@ -26,6 +26,13 @@ export function FileDrop({ accept, onFile, fileName, onClear }: FileDropProps) {
 
   // Clipboard paste — listen globally so the user can ⌘V anywhere on page.
   useEffect(() => {
+    const ACCEPTED_RX = /\.(svg|png|jpe?g|webp)$/i
+    const ACCEPTED_TYPES = new Set([
+      'image/svg+xml',
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+    ])
     function onPaste(e: ClipboardEvent) {
       const items = e.clipboardData?.items
       if (!items) return
@@ -33,7 +40,7 @@ export function FileDrop({ accept, onFile, fileName, onClear }: FileDropProps) {
         const item = items[i]
         if (item.kind === 'file') {
           const f = item.getAsFile()
-          if (f && (f.type === 'image/svg+xml' || f.name.endsWith('.svg'))) {
+          if (f && (ACCEPTED_TYPES.has(f.type) || ACCEPTED_RX.test(f.name))) {
             handleFile(f)
             return
           }

@@ -10,9 +10,12 @@ export type Light = 'Top-Right' | 'Top-Left' | 'Center' | 'None'
 export type Depth = 'Flat' | 'Subtle' | '3D'
 
 export interface Config {
-  // SOURCE
+  // SOURCE — SVG path (text content) OR raster path (file + object URL).
+  // Exactly one of `svgSource` / `imageFile` is set at a time; the other is null.
   svgSource: string | null
   svgFileName: string | null
+  imageFile: File | null      // original raster File, kept so the user can download it
+  imageUrl: string | null     // object URL for the raster file (used by the sampler)
 
   // DENSITY
   density: number
@@ -55,17 +58,19 @@ export interface Config {
 export const DEFAULT_CONFIG: Config = {
   svgSource: null,
   svgFileName: null,
+  imageFile: null,
+  imageUrl: null,
   density: 28000,
   particleSize: 5.5,
   markSize: 1.5,
   colorMode: 'Original',
   monoColor: '#A8B94D',
-  backgroundColor: '#1A1A19',
+  backgroundColor: '#121212',
   idle: 'Calm',
   hoverArea: 'Medium',
   hoverStrength: 1.4,
   spring: 'Smooth',
-  light: 'Top-Right',
+  light: 'None',
   highlightStrength: 0.25,
   depth: 'Subtle',
 }
@@ -112,7 +117,7 @@ export const DEPTH_MAP: Record<Depth, number> = {
 // (matches DEFAULT_CONFIG.backgroundColor). The trailing colour-picker trigger
 // in the UI lets the user pick anything outside this palette.
 export const BG_PRESETS: readonly string[] = [
-  '#1A1A19', // dark default (was previously the "Default" segment value)
+  '#121212', // dark default
   '#FFFFFF', // pure white
   '#9E9E98', // mid sand
   '#A8B94D', // olive accent
