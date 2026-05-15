@@ -30,14 +30,14 @@ const TOOLS: Array<{
     name: 'Mesh Gradient',
     description:
       'Extract dominant colours from any image and turn them into a soft animated mesh-gradient background.',
-    status: 'in progress',
+    status: 'planned',
   },
   {
     slug: 'noise-field',
     name: 'Noise Field',
     description:
       'Procedural animated noise patterns with your colour palette, tuned for backgrounds, hero sections and loading states.',
-    status: 'in progress',
+    status: 'planned',
   },
   {
     slug: 'glow-aura',
