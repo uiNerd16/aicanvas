@@ -245,6 +245,14 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 - The accentSweep gradient is a barely-visible teal whisper — if it reads as a colored card it's too strong
 - CardHeader, CardContent, CardFooter use consistent padding from `tokens.spacing` — never override
 
+### Frames don't nest
+
+`must` — A corner-marked surface (`Card`, `StatTile`, anything that renders `<CornerMarkers />`) NEVER sits inside another corner-marked surface. Brackets nested inside brackets read as clutter and the inner frame competes with the outer one for the eye's attention. The rule applies even when the inner surface is "different" (e.g. a strip of StatTiles inside a hero Card) — if both wear corners, they fight.
+
+When a panel logically owns both a body region AND a row of corner-marked tiles (StatTiles, mini-Cards), break the tile row out as a sibling at the next level up — the dashboard composition (`index.tsx` / `Section.tsx`) is the right place to lay out the panel next to the tile row, not nested inside it.
+
+Canonical shape: `examples/mission-control/sections/OverviewSection.tsx` — `<TelemetryRow />` (a bare flex of StatTiles) sits as a sibling of the surrounding Cards, never as a child of one. The cascade still flows top-to-bottom because the tile row gets its own cascade slot.
+
 ## PanelHeader vs CardHeader
 
 Two header components, deliberately different:
@@ -471,7 +479,7 @@ Floating panels triggered from a chip or button:
 
 - The trigger sits in a `position: relative` wrapper; the panel is `position: absolute` below at `top: calc(100% + spacing[2])`. No portals — the popover stays inside the trigger's stacking context so dismiss-on-outside-click works with a single ref.
 - Backgrounds are solid: `surface.raised` for the panel, never alpha. The drop shadow (`0 8px 32px surface.base`) is the only depth cue.
-- The panel always carries `<CornerMarkers />`. Popovers are not a separate visual language — they're part of the system, so they wear the system's frame.
+- **Frame: `must` — a popover panel uses EITHER a 1px `border.base` border OR `<CornerMarkers />`, never both.** Stacking the two frames looks busy and contradicts the "one frame per surface" principle. Default for menu-style popovers (`UserMenu`, dropdowns, comboboxes, date-pickers): the solid 1px border. Reserve CornerMarkers for popovers whose content is itself framed material (e.g. a mini-panel that contains a Card), where the corners read as the panel's own bracketing rather than a second border on top of the first.
 - The trigger gets `data-state="open"` while the panel is mounted, with a one-step-darker background (`surface.hover`) so the row reads as "pressed and held" — matches the "Stateful triggers" rule above.
 - ESC and document `mousedown` outside the wrapper close the panel. Listeners are attached only while open and removed on close — never as session-wide globals.
 - The CaretDown indicator rotates 180° on open. 140ms ease. The rotation is the only animation needed to communicate the state change; no fade-in for the panel itself unless the system later adds one consistently across all popovers.
