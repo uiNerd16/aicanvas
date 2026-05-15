@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowUpRight } from '@phosphor-icons/react/dist/ssr'
 import { SiteFooter } from '../components/SiteFooter'
 import { LabLogo } from './_components/LabLogo'
 
 export const metadata: Metadata = {
   title: 'LAB — AI Canvas',
   description:
-    'Upload an asset. Tune it. Export the code. LAB turns your own marks into interactive components — no design system required.',
+    'A workshop of small generators. Bring your own mark — leave with an interactive, exportable component.',
   alternates: { canonical: 'https://aicanvas.me/lab' },
 }
 
@@ -22,21 +23,21 @@ const TOOLS: Array<{
     slug: '60k-particles',
     name: '60K Particles',
     description:
-      'Upload a logo or icon. Get an interactive cloud of up to 60,000 particles you can hover, tune the density / colours / motion, and export as ready-to-paste code.',
+      'Drop in a logo or icon. Get an interactive cloud of up to 60,000 particles you can hover, tune the density, colours and motion of, and export as ready-to-paste code.',
     status: 'in progress',
   },
   {
     slug: 'mesh-gradient',
     name: 'Mesh Gradient',
     description:
-      'Extract dominant colours from any image and turn them into a soft animated mesh-gradient background.',
+      'Sample dominant colours from any image and turn them into a soft, animated mesh-gradient background.',
     status: 'planned',
   },
   {
     slug: 'noise-field',
     name: 'Noise Field',
     description:
-      'Procedural animated noise patterns with your colour palette, tuned for backgrounds, hero sections and loading states.',
+      'Procedural animated noise patterns in your own palette. Tuned for backgrounds, hero sections, and loading states.',
     status: 'planned',
   },
   {
@@ -58,32 +59,42 @@ const STATUS_STYLES: Record<Status, string> = {
 }
 
 export default function LabPage() {
+  const activeCount = TOOLS.filter((t) => t.status !== 'planned').length
+
   return (
     <main className="bg-sand-200 dark:bg-sand-950">
-      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
-        <header className="mb-14">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-olive-500">
-            New
-          </p>
-          <h1 className="mb-5">
-            <LabLogo />
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12 sm:px-6 sm:pt-16">
+        {/* ── Hero ── */}
+        <header className="mb-16 sm:mb-20">
+          <p className="mb-5 text-sm font-semibold text-olive-500">/lab</p>
+          <h1 className="mb-7">
+            <LabLogo
+              variant="compact"
+              pixel={10}
+              gap={3}
+              letterGap={1}
+              bubbleHeadRoom={44}
+              idleAnimation
+            />
             <span className="sr-only">LAB</span>
           </h1>
-          <p className="max-w-2xl text-lg leading-relaxed text-sand-600 dark:text-sand-400">
-            Upload an asset. Tune it. Export the code. LAB is a small set of
-            generators that turn your own marks into interactive components —
-            no design system, no boilerplate.
+          <p className="max-w-xl text-lg leading-relaxed text-sand-700 dark:text-sand-300">
+            Bring a mark. Pull a slider. Walk out with code.{' '}
+            <span className="text-sand-500 dark:text-sand-500">
+              LAB is a workshop of small generators for the experiments that
+              don&rsquo;t fit a design system.
+            </span>
           </p>
         </header>
 
+        {/* ── Tools ── */}
         <section>
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-sand-500">
+          <div className="mb-6 flex items-baseline justify-between border-b border-sand-300 pb-3 dark:border-sand-800">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-sand-700 dark:text-sand-300">
               Tools
             </h2>
-            <span className="text-xs text-sand-500 dark:text-sand-500">
-              {TOOLS.filter((t) => t.status !== 'planned').length} active ·{' '}
-              {TOOLS.length} total
+            <span className="text-xs text-sand-500">
+              {activeCount} active · {TOOLS.length} total
             </span>
           </div>
 
@@ -91,20 +102,30 @@ export default function LabPage() {
             {TOOLS.map((tool) => {
               const isPlanned = tool.status === 'planned'
               const card = (
-                <article className="flex h-full flex-col rounded-2xl border border-sand-300 bg-sand-100 p-6 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700">
+                <article className="group relative flex h-full flex-col rounded-2xl border border-sand-300 bg-sand-100 p-6 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700">
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <h3 className="text-xl font-bold text-sand-900 dark:text-sand-50">
+                    <h3 className="text-lg font-bold text-sand-900 dark:text-sand-50">
                       {tool.name}
                     </h3>
                     <span
-                      className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLES[tool.status]}`}
+                      className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[tool.status]}`}
                     >
                       {tool.status}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+                  <p className="flex-1 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
                     {tool.description}
                   </p>
+                  {!isPlanned && (
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                      Open tool
+                      <ArrowUpRight
+                        weight="regular"
+                        size={12}
+                        className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      />
+                    </span>
+                  )}
                 </article>
               )
               return (
@@ -114,7 +135,7 @@ export default function LabPage() {
                   ) : (
                     <Link
                       href={`/lab/${tool.slug}`}
-                      className="block h-full focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 focus:ring-offset-sand-200 dark:focus:ring-offset-sand-950"
+                      className="block h-full rounded-2xl focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 focus:ring-offset-sand-200 dark:focus:ring-offset-sand-950"
                     >
                       {card}
                     </Link>
@@ -125,33 +146,8 @@ export default function LabPage() {
           </ul>
         </section>
 
-        <section className="mt-16 rounded-2xl border border-dashed border-sand-300 bg-sand-100/40 p-6 dark:border-sand-800 dark:bg-sand-900/40">
-          <h2 className="mb-2 text-sm font-semibold text-sand-900 dark:text-sand-50">
-            How it works
-          </h2>
-          <ol className="grid gap-2 text-sm text-sand-600 dark:text-sand-400 sm:grid-cols-3 sm:gap-6">
-            <li>
-              <span className="block font-semibold text-sand-700 dark:text-sand-300">
-                1. Upload
-              </span>
-              SVG or PNG. LAB reads the shape and the colours.
-            </li>
-            <li>
-              <span className="block font-semibold text-sand-700 dark:text-sand-300">
-                2. Tune
-              </span>
-              Sliders for density, motion, size, hover behaviour and colour.
-            </li>
-            <li>
-              <span className="block font-semibold text-sand-700 dark:text-sand-300">
-                3. Export
-              </span>
-              Copy-paste code, self-contained HTML, static SVG, GIF/WebM loop.
-            </li>
-          </ol>
-        </section>
+        <SiteFooter />
       </div>
-      <SiteFooter />
     </main>
   )
 }
