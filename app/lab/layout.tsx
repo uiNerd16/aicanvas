@@ -14,20 +14,20 @@ export default function LabLayout({
 }) {
   return (
     <div className="relative flex h-full w-full flex-col bg-sand-200 dark:bg-sand-950">
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90 sm:px-6">
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-sand-300 bg-sand-200/90 px-4 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
         {/* Left: icon + "AI Canvas" (links home, lighter) + divider + "LAB" badge (darker) */}
         <div className="flex items-center gap-2.5">
           <Link
             href="/"
             aria-label="AI Canvas — home"
-            className="flex items-center gap-2 text-sm font-bold text-sand-500 transition-colors hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-200"
+            className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
           >
             <img
               src="/ai-canvas-icon.svg"
               alt=""
               aria-hidden="true"
-              width={22}
-              height={19}
+              width={20}
+              height={17}
               className="shrink-0"
             />
             <span>AI Canvas</span>
