@@ -4,10 +4,16 @@
 // ============================================================
 
 import { motion, LayoutGroup } from 'framer-motion';
+import {
+  UserCircle,
+  Gear,
+  Keyboard,
+  SignOut,
+} from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
-import { Avatar } from '../../components/Avatar';
 import { NavItem } from '../../components/NavItem';
+import { UserCard } from '../../components/UserCard';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems } from './data';
 
@@ -27,6 +33,14 @@ function InsetDivider({ side = 'bottom' }) {
     />
   );
 }
+
+const userMenuItems = [
+  { id: 'profile',     label: 'Profile',             icon: UserCircle },
+  { id: 'preferences', label: 'Preferences',         icon: Gear },
+  { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
+  { id: 'sep1',        type: 'separator' },
+  { id: 'signout',     label: 'Sign Out',            icon: SignOut },
+];
 
 export function Sidebar({ activeNav, onNavChange, motionProps }) {
   return (
@@ -110,40 +124,20 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
         </LayoutGroup>
       </nav>
 
-      {/* User card */}
-      <div style={{
-        position: 'relative',
-        padding: tokens.spacing[3],
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacing[3],
-      }}>
+      {/* User card — opens upward and stretches to the sidebar width so
+          the panel sits flush. The inset divider above the card lives
+          inside this wrapper so it scopes to the row. */}
+      <div style={{ position: 'relative' }}>
         <InsetDivider side="top" />
-        <Avatar name="Reza Quinn" src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" size="md" status="online" />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.xs,
-            fontWeight: tokens.typography.weight.semibold,
-            color: tokens.color.text.primary,
-            textTransform: 'uppercase',
-            letterSpacing: tokens.typography.tracking.wider,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            Reza Quinn
-          </div>
-          <div style={{
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
-            textTransform: 'uppercase',
-            letterSpacing: tokens.typography.tracking.wide,
-          }}>
-            Flight Director
-          </div>
-        </div>
+        <UserCard
+          name="Reza Quinn"
+          role="Flight Director"
+          src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          status="online"
+          items={userMenuItems}
+          placement="top"
+          align="stretch"
+        />
       </div>
     </motion.aside>
   );

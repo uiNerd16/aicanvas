@@ -10,13 +10,20 @@
 'use client';
 
 import { useState } from 'react';
-import { Sliders, Download } from '@phosphor-icons/react';
+import {
+  Download,
+  Gear,
+  Keyboard,
+  SignOut,
+  Sliders,
+  UserCircle,
+} from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
-import { Avatar } from '../../components/Avatar';
 import { Button } from '../../components/Button';
 import { DateRangePicker } from '../../components/DateRangePicker';
+import { UserMenu } from '../../components/UserMenu';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { CapacityPanel } from './CapacityPanel';
@@ -40,6 +47,15 @@ function HoverStyles() {
     `}</style>
   );
 }
+
+// ─── User menu items (shared shape with mission-control / service-order) ─
+const userMenuItems = [
+  { id: 'profile',     label: 'Profile',             icon: UserCircle },
+  { id: 'preferences', label: 'Preferences',         icon: Gear },
+  { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
+  { id: 'sep1',        type: 'separator' },
+  { id: 'signout',     label: 'Sign Out',            icon: SignOut },
+];
 
 // ─── Top bar ────────────────────────────────────────────────────────────
 function TopBar() {
@@ -142,11 +158,13 @@ function TopBar() {
         >
           Generate Report
         </Button>
-        <Avatar
+        <UserMenu
           name="OPS-01"
-          size="md"
-          status="online"
           src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          status="online"
+          items={userMenuItems}
+          placement="bottom"
+          align="end"
         />
       </div>
     </header>

@@ -76,6 +76,8 @@ export const DESIGN_SYSTEMS = [
       'components/Textarea.tsx',
       'components/Toggle.tsx',
       'components/Tooltip.tsx',
+      'components/UserCard.tsx',
+      'components/UserMenu.tsx',
     ],
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },
@@ -86,6 +88,7 @@ export const DESIGN_SYSTEMS = [
       // app/lib/component-registry.tsx and app/_components/IdeationSidebar.tsx.
       // { slug: 'andromeda-exchange-terminal', name: 'Exchange Terminal', domain: 'Finance', entryPath: 'examples/exchange-terminal/index.tsx' },
       { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations', entryPath: 'examples/resource-planning/index.tsx' },
+      { slug: 'andromeda-signal-room',       name: 'Signal Room',       domain: 'Audio',      entryPath: 'examples/signal-room/index.tsx' },
     ],
   },
 ]

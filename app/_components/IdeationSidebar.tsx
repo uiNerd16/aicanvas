@@ -67,6 +67,7 @@ const SYSTEMS = [
       { slug: 'service-order', name: 'Service Order', domain: 'Telecom' },
       // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
       { slug: 'resource-planning', name: 'Resource Planning', domain: 'Operations' },
+      { slug: 'signal-room', name: 'Signal Room', domain: 'Audio' },
     ],
   },
 ] as const
