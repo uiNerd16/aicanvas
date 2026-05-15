@@ -4,9 +4,17 @@
 // Two-pane layout: live preview (left, DOM first) + control sidebar (right).
 // Source order matches visual order so hydration doesn't flash from one to the
 // other when the dynamically-imported Canvas mounts.
+//
+// Export / Record / Save Preset / Copy code are gated behind sign-in via
+// useLabAuthGate. Signed-out users see the same buttons but clicking them
+// snapshots the current tune to localStorage and opens the auth modal in
+// sign-up mode; on return the tune hydrates and the originally-clicked
+// action auto-fires.
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Renderer from '../_lib/particleMark/Renderer'
+import { useCanvasRecorder } from '../_lib/recorder/useCanvasRecorder'
+import { exportCanvasImage, type ImageFormat } from '../_lib/recorder/exportImage'
 import {
   type Config,
   type ColorMode,
@@ -25,7 +33,19 @@ import { Segmented } from '../_lib/particleMark/controls/Segmented'
 import { Slider } from '../_lib/particleMark/controls/Slider'
 import { ColorInput } from '../_lib/particleMark/controls/ColorInput'
 import { FileDrop } from '../_lib/particleMark/controls/FileDrop'
-import { CircleHalfTilt, Sun, Prohibit } from '@phosphor-icons/react'
+import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple } from '@phosphor-icons/react'
+import { useLabAuthGate } from '../_lib/useLabAuthGate'
+import {
+  serializeParticleConfig,
+  deserializeParticleConfig,
+  type SerializedParticleConfig,
+} from '../_lib/preset/serialize'
+import { PresetSaveDialog } from '../_lib/preset/PresetSaveDialog'
+import { PresetMenu, type PresetSummary } from '../_lib/preset/PresetMenu'
+import { useSession } from '../../components/auth/SessionProvider'
+
+const MAX_RECORDING_MS = 20_000
+const TOOL = '60k-particles' as const
 
 // Phosphor icons for the Light Direction segmented control. Each icon depicts
 // a sphere shaded as if the light were coming from that direction — much more
@@ -44,39 +64,63 @@ const SPRING_OPTIONS:    readonly Spring[]       = ['Stiff', 'Smooth', 'Bouncy']
 const LIGHT_OPTIONS:     readonly Light[]        = ['Top-Right', 'Top-Left', 'Center', 'None'] as const
 const DEPTH_OPTIONS:     readonly Depth[]        = ['Flat', 'Subtle', '3D'] as const
 
+type PresetRow = PresetSummary & { config: SerializedParticleConfig }
+
 export default function ParticleMarkLabPage() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [copied, setCopied] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const recorder = useCanvasRecorder()
+  const { start: startRecording, stop: stopRecording, state: recorderState } = recorder
 
-  const update = useCallback(<K extends keyof Config>(key: K, value: Config[K]) => {
-    setConfig((prev) => ({ ...prev, [key]: value }))
+  const { user } = useSession()
+  const [presets, setPresets] = useState<PresetRow[]>([])
+  const [presetsLoading, setPresetsLoading] = useState(false)
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [renameTarget, setRenameTarget] = useState<{ id: string; currentName: string } | null>(null)
+
+  const onCanvasReady = useCallback((c: HTMLCanvasElement | null) => {
+    canvasRef.current = c
   }, [])
 
-  // File handling — read SVG into string state.
-  const onSvgFile = useCallback((file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const text = typeof reader.result === 'string' ? reader.result : ''
-      if (!text.trim().startsWith('<')) return
-      setConfig((prev) => ({ ...prev, svgSource: text, svgFileName: file.name }))
+  const onSaveImage = useCallback(async (format: ImageFormat) => {
+    if (!canvasRef.current) return
+    setImageError(null)
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+    try {
+      await exportCanvasImage(canvasRef.current, format, `60k-particles-${stamp}.${format}`)
+    } catch (e) {
+      setImageError(e instanceof Error ? e.message : `Failed to export ${format.toUpperCase()}`)
     }
-    reader.readAsText(file)
   }, [])
 
-  const onClearSvg = useCallback(() => {
-    setConfig((prev) => ({ ...prev, svgSource: null, svgFileName: null }))
-  }, [])
+  const onRecord = useCallback(() => {
+    if (recorderState === 'recording') {
+      stopRecording()
+      return
+    }
+    if (!canvasRef.current) return
+    startRecording(canvasRef.current, {
+      fps: 60,
+      filename: `60k-particles-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.mp4`,
+      colorBoost: true,
+      maxDurationMs: MAX_RECORDING_MS,
+    })
+  }, [recorderState, startRecording, stopRecording])
 
-  // Copy code to clipboard.
   const onCopy = useCallback(async () => {
-    const svg = config.svgSource ?? PLACEHOLDER_SVG
-    const tsx = generateTSX(config, svg)
+    const tsx = config.imageFile
+      ? generateTSX(config, { kind: 'raster', filename: config.imageFile.name })
+      : generateTSX(config, {
+          kind: 'svg',
+          svg: config.svgSource ?? PLACEHOLDER_SVG,
+        })
     try {
       await navigator.clipboard.writeText(tsx)
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {
-      // Clipboard API can fail outside secure contexts — fall back to a manual copy.
       const ta = document.createElement('textarea')
       ta.value = tsx
       document.body.appendChild(ta)
@@ -88,10 +132,166 @@ export default function ParticleMarkLabPage() {
     }
   }, [config])
 
+  // Auth gate. Each gated action is registered with a stable name; gate.run
+  // looks the action up at click time (and again on post-auth resume from
+  // localStorage). serializeState / applyState handle the tune handoff so
+  // the user lands back on the same canvas after sign-up.
+  const gate = useLabAuthGate({
+    tool: TOOL,
+    serializeState: () => serializeParticleConfig(config),
+    applyState: (s) => setConfig(deserializeParticleConfig(s)),
+    actions: {
+      'export-png':  () => onSaveImage('png'),
+      'export-webp': () => onSaveImage('webp'),
+      'record':      () => onRecord(),
+      'copy-code':   () => onCopy(),
+      'save-preset': () => setSaveDialogOpen(true),
+    },
+  })
+
+  // Load presets when the user becomes available; clear them when they sign out.
+  const refreshPresets = useCallback(async () => {
+    if (!user) {
+      setPresets([])
+      return
+    }
+    setPresetsLoading(true)
+    try {
+      const res = await fetch(`/api/lab-presets?tool=${TOOL}`)
+      if (res.ok) {
+        const { presets: rows } = (await res.json()) as { presets: PresetRow[] }
+        setPresets(rows ?? [])
+      }
+    } catch {
+      // Network failure — leave the prior list in place.
+    } finally {
+      setPresetsLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    void refreshPresets()
+  }, [refreshPresets])
+
+  const onSavePreset = useCallback(async (name: string) => {
+    const serialized = await serializeParticleConfig(config)
+    const res = await fetch('/api/lab-presets', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tool: TOOL, name, config: serialized }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      throw new Error(body?.error ?? 'Could not save preset')
+    }
+    setSaveDialogOpen(false)
+    await refreshPresets()
+  }, [config, refreshPresets])
+
+  const onLoadPreset = useCallback((id: string) => {
+    const preset = presets.find((p) => p.id === id)
+    if (!preset) return
+    setConfig(deserializeParticleConfig(preset.config))
+  }, [presets])
+
+  const onRenamePreset = useCallback((id: string, currentName: string) => {
+    setRenameTarget({ id, currentName })
+  }, [])
+
+  const onSubmitRename = useCallback(async (nextName: string) => {
+    if (!renameTarget) return
+    if (nextName === renameTarget.currentName) {
+      setRenameTarget(null)
+      return
+    }
+    const res = await fetch('/api/lab-presets', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: renameTarget.id, name: nextName }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      throw new Error(body?.error ?? 'Could not rename preset')
+    }
+    setRenameTarget(null)
+    await refreshPresets()
+  }, [renameTarget, refreshPresets])
+
+  const onDeletePreset = useCallback(async (id: string) => {
+    const preset = presets.find((p) => p.id === id)
+    const ok = window.confirm(
+      preset ? `Delete preset "${preset.name}"? This can't be undone.` : 'Delete this preset?',
+    )
+    if (!ok) return
+    const res = await fetch('/api/lab-presets', {
+      method: 'DELETE',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    if (res.ok) await refreshPresets()
+  }, [presets, refreshPresets])
+
+  const update = useCallback(<K extends keyof Config>(key: K, value: Config[K]) => {
+    setConfig((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  // File handling — branch on SVG (text) vs raster (Blob/ObjectURL).
+  const onSvgFile = useCallback((file: File) => {
+    const isSvg = file.type === 'image/svg+xml' || /\.svg$/i.test(file.name)
+    if (isSvg) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const text = typeof reader.result === 'string' ? reader.result : ''
+        if (!text.trim().startsWith('<')) return
+        setConfig((prev) => {
+          if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+          return {
+            ...prev,
+            svgSource: text,
+            svgFileName: file.name,
+            imageFile: null,
+            imageUrl: null,
+          }
+        })
+      }
+      reader.readAsText(file)
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setConfig((prev) => {
+      if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+      return {
+        ...prev,
+        svgSource: null,
+        svgFileName: file.name,
+        imageFile: file,
+        imageUrl: url,
+      }
+    })
+  }, [])
+
+  const onClearSvg = useCallback(() => {
+    setConfig((prev) => {
+      if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl)
+      return {
+        ...prev,
+        svgSource: null,
+        svgFileName: null,
+        imageFile: null,
+        imageUrl: null,
+      }
+    })
+  }, [])
+
   // The renderer rebuilds geometry whenever density/depth/svg changes — these
   // are the inputs that require a resample. Everything else updates uniforms
   // in place.
   const rendererConfig = useMemo(() => config, [config])
+
+  const presetSummaries: PresetSummary[] = useMemo(
+    () => presets.map(({ id, name, updated_at }) => ({ id, name, updated_at })),
+    [presets],
+  )
 
   return (
     <>
@@ -142,19 +342,11 @@ export default function ParticleMarkLabPage() {
       />
 
       <main className="flex min-h-0 flex-1 flex-col bg-sand-200 dark:bg-sand-950">
-        {/* Edge-to-edge two-pane: full-height canvas (left) + compact controls
-            rail (right). Height comes from flex-1 chain — no fragile calc(). */}
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-          {/* ── Preview ───────────────────────────────────────────────────
-              Full-height, edge-to-edge canvas. No toolbar — Copy code lives
-              at the bottom of the controls panel. */}
           <section className="flex w-full flex-col overflow-hidden md:min-w-0 md:flex-1">
-            <CanvasArea config={rendererConfig} onFile={onSvgFile} />
+            <CanvasArea config={rendererConfig} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
           </section>
 
-          {/* ── Controls ──────────────────────────────────────────────────
-              Right rail. On desktop it owns its own scroll so the canvas
-              stays pinned. Compact spacing, no dividers. */}
           <aside className="w-full shrink-0 border-t border-sand-300 px-5 py-6 dark:border-sand-800 md:w-[340px] md:overflow-y-auto md:border-l md:border-t-0 md:px-5 md:py-6">
             <header className="mb-5">
               <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
@@ -166,11 +358,34 @@ export default function ParticleMarkLabPage() {
             </header>
 
             <div className="space-y-5">
+              {/* PRESETS — sits at the top so users find their saved looks fast */}
+              <section>
+                <SectionLabel>Presets</SectionLabel>
+                <div className="space-y-2">
+                  <PresetMenu
+                    presets={presetSummaries}
+                    loading={presetsLoading}
+                    signedIn={!!user}
+                    onLoad={onLoadPreset}
+                    onRename={onRenamePreset}
+                    onDelete={onDeletePreset}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => gate.run('save-preset')}
+                    className="flex w-full items-center justify-center gap-2 rounded-md border border-sand-300 bg-transparent px-3 py-2 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
+                  >
+                    <BookmarkSimple size={14} weight="regular" />
+                    Save preset
+                  </button>
+                </div>
+              </section>
+
               {/* SOURCE */}
               <section>
                 <SectionLabel>Source</SectionLabel>
                 <FileDrop
-                  accept="image/svg+xml"
+                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
                   onFile={onSvgFile}
                   fileName={config.svgFileName}
                   onClear={onClearSvg}
@@ -207,7 +422,6 @@ export default function ParticleMarkLabPage() {
                 format={(v) => v.toFixed(2)}
               />
 
-{/* COLORS */}
               <section>
                 <SectionLabel>Colors</SectionLabel>
                 <Segmented
@@ -230,7 +444,6 @@ export default function ParticleMarkLabPage() {
                 )}
               </section>
 
-{/* BACKGROUND */}
               <section>
                 <SectionLabel>Background</SectionLabel>
                 <div className="flex flex-wrap items-center gap-2">
@@ -265,7 +478,6 @@ export default function ParticleMarkLabPage() {
                 </div>
               </section>
 
-{/* IDLE MOTION */}
               <section>
                 <SectionLabel>Idle Motion</SectionLabel>
                 <Segmented
@@ -275,7 +487,6 @@ export default function ParticleMarkLabPage() {
                 />
               </section>
 
-{/* HOVER AREA */}
               <section>
                 <SectionLabel>Hover Area</SectionLabel>
                 <Segmented
@@ -295,7 +506,6 @@ export default function ParticleMarkLabPage() {
                 format={(v) => v.toFixed(2)}
               />
 
-{/* RETURN SPRING */}
               <section>
                 <SectionLabel>Return Spring</SectionLabel>
                 <Segmented
@@ -305,7 +515,6 @@ export default function ParticleMarkLabPage() {
                 />
               </section>
 
-{/* LIGHT DIRECTION */}
               <section>
                 <SectionLabel>Light Direction</SectionLabel>
                 <Segmented
@@ -327,7 +536,6 @@ export default function ParticleMarkLabPage() {
                 format={(v) => v.toFixed(3)}
               />
 
-{/* DEPTH */}
               <section>
                 <SectionLabel>Depth</SectionLabel>
                 <Segmented
@@ -337,13 +545,64 @@ export default function ParticleMarkLabPage() {
                 />
               </section>
 
-              {/* EXPORT — flush with bottom, no divider above */}
-              <section className="pt-2">
+              <section className="space-y-2 pt-2">
                 <SectionLabel>Export</SectionLabel>
+
                 <button
                   type="button"
-                  onClick={onCopy}
-                  className="w-full rounded-md bg-olive-500 px-3 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-600"
+                  onClick={() => gate.run('record')}
+                  disabled={!recorder.supported || recorder.state === 'encoding'}
+                  className={`flex w-full items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    recorder.state === 'recording'
+                      ? 'bg-red-500 text-white hover:bg-red-600'
+                      : 'bg-olive-500 text-sand-950 hover:bg-olive-600'
+                  }`}
+                >
+                  {recorder.state === 'recording' && (
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+                  )}
+                  {recorder.state === 'idle' && `Record MP4 (max ${Math.round(MAX_RECORDING_MS / 1000)}s)`}
+                  {recorder.state === 'recording' &&
+                    `Stop  ${formatElapsed(recorder.elapsedMs)} / ${formatElapsed(MAX_RECORDING_MS)}`}
+                  {recorder.state === 'encoding' && 'Saving your video…'}
+                </button>
+
+                {!recorder.supported && (
+                  <p className="text-[11px] leading-snug text-sand-500 dark:text-sand-500">
+                    Recording needs Chrome / Edge / Safari 16.4+ / Firefox 130+.
+                  </p>
+                )}
+                {recorder.error && (
+                  <p className="text-[11px] leading-snug text-red-500">{recorder.error}</p>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => gate.run('export-png')}
+                    disabled={recorder.state !== 'idle'}
+                    className="rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
+                  >
+                    Save PNG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => gate.run('export-webp')}
+                    disabled={recorder.state !== 'idle'}
+                    className="rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
+                  >
+                    Save WebP
+                  </button>
+                </div>
+
+                {imageError && (
+                  <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => gate.run('copy-code')}
+                  className="w-full rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
                 >
                   {copied ? 'Copied ✓' : 'Copy code (TSX)'}
                 </button>
@@ -352,8 +611,33 @@ export default function ParticleMarkLabPage() {
           </aside>
         </div>
       </main>
+
+      <PresetSaveDialog
+        isOpen={saveDialogOpen}
+        defaultName={`Untitled · ${new Date().toLocaleString()}`}
+        onSave={onSavePreset}
+        onCancel={() => setSaveDialogOpen(false)}
+      />
+
+      <PresetSaveDialog
+        isOpen={renameTarget !== null}
+        defaultName={renameTarget?.currentName ?? ''}
+        onSave={onSubmitRename}
+        onCancel={() => setRenameTarget(null)}
+        title="Rename preset"
+        description="Give this preset a new name."
+        submitLabel="Rename"
+        submittingLabel="Renaming…"
+      />
     </>
   )
+}
+
+function formatElapsed(ms: number) {
+  const totalSec = Math.floor(ms / 1000)
+  const m = Math.floor(totalSec / 60)
+  const s = totalSec % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 // Wraps the renderer with a drop zone that covers the canvas area so files
@@ -361,9 +645,11 @@ export default function ParticleMarkLabPage() {
 function CanvasArea({
   config,
   onFile,
+  onCanvasReady,
 }: {
   config: Config
   onFile: (file: File) => void
+  onCanvasReady?: (canvas: HTMLCanvasElement | null) => void
 }) {
   const [dragOver, setDragOver] = useState(false)
 
@@ -382,7 +668,7 @@ function CanvasArea({
       }}
       className="relative h-[60vh] min-h-[420px] w-full md:h-auto md:min-h-0 md:flex-1"
     >
-      <Renderer config={config} />
+      <Renderer config={config} onCanvasReady={onCanvasReady} />
       {dragOver && (
         <div className="pointer-events-none absolute inset-2 flex items-center justify-center rounded-lg border-2 border-dashed border-olive-500 bg-olive-500/10 text-sm font-semibold text-olive-500 dark:text-olive-400">
           Drop SVG to load
@@ -391,4 +677,3 @@ function CanvasArea({
     </div>
   )
 }
-

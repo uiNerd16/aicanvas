@@ -10,7 +10,17 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { HexColorPicker, HexColorInput } from 'react-colorful'
-import { Plus } from '@phosphor-icons/react'
+import { Eyedropper, Plus } from '@phosphor-icons/react'
+
+// Chromium-based browsers expose a screen-eyedropper. Feature-detected at
+// runtime so unsupported browsers (Firefox, Safari) hide the button.
+type EyeDropperResult = { sRGBHex: string }
+type EyeDropperConstructor = new () => { open: () => Promise<EyeDropperResult> }
+declare global {
+  interface Window {
+    EyeDropper?: EyeDropperConstructor
+  }
+}
 
 export function ColorInput({
   value,
@@ -28,8 +38,30 @@ export function ColorInput({
   active?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  // Auto-detect which side of the trigger to anchor the popover on, so it
+  // never overflows the controls panel into the masked canvas.
+  const [anchor, setAnchor] = useState<'left' | 'right'>('left')
+  const [eyedropperAvailable, setEyedropperAvailable] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+
+  // Feature-detect the native screen eyedropper (Chromium only).
+  useEffect(() => {
+    setEyedropperAvailable(typeof window !== 'undefined' && 'EyeDropper' in window)
+  }, [])
+
+  async function pickFromScreen() {
+    if (!window.EyeDropper) return
+    try {
+      const result = await new window.EyeDropper().open()
+      if (result?.sRGBHex) {
+        onChange(result.sRGBHex)
+        setOpen(false)
+      }
+    } catch {
+      // User cancelled — no-op.
+    }
+  }
 
   // Close on outside click + Escape
   useEffect(() => {
@@ -49,6 +81,17 @@ export function ColorInput({
       document.removeEventListener('mousedown', onPointer)
       document.removeEventListener('keydown', onKey)
     }
+  }, [open])
+
+  // When the popover opens, pick the side with more room. Width 220 + 8px buffer.
+  useEffect(() => {
+    if (!open || !triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+    const popoverWidth = 220
+    const margin = 8
+    const fitsExtendingRight =
+      rect.left + popoverWidth + margin <= window.innerWidth
+    setAnchor(fitsExtendingRight ? 'left' : 'right')
   }, [open])
 
   // Swatch trigger: circular, plus-icon overlay, opens the picker.
@@ -115,7 +158,7 @@ export function ColorInput({
           ref={popoverRef}
           role="dialog"
           className={`particle-color-popover absolute z-50 mt-2 w-[220px] rounded-lg border border-sand-300 bg-sand-100 p-3 shadow-lg dark:border-sand-700 dark:bg-sand-900 ${
-            variant === 'swatch' ? 'right-0' : 'left-0'
+            anchor === 'right' ? 'right-0' : 'left-0'
           }`}
         >
           <HexColorPicker color={value} onChange={onChange} />
@@ -127,6 +170,17 @@ export function ColorInput({
               prefixed={false}
               className="w-full flex-1 rounded-md border border-sand-300 bg-sand-50 px-2 py-1.5 font-mono text-xs uppercase text-sand-800 outline-none transition-colors focus:border-olive-500 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-100"
             />
+            {eyedropperAvailable && (
+              <button
+                type="button"
+                onClick={pickFromScreen}
+                aria-label="Pick a colour from the screen"
+                title="Pick from screen"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-sand-300 bg-sand-50 text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-50"
+              >
+                <Eyedropper size={14} weight="regular" />
+              </button>
+            )}
           </div>
         </div>
       )}
