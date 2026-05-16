@@ -7,6 +7,7 @@ import { CaretDown, ClockClockwise, Gear, Heart, SignIn, SignOut, User } from '@
 import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
+import { Button } from '../Button'
 import { EmailAvatar } from './EmailAvatar'
 
 /**
@@ -30,14 +31,10 @@ export function TopAuthPill() {
 
   if (!user) {
     return (
-      <button
-        type="button"
-        onClick={() => openAuthModal()}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
-      >
+      <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
         <SignIn size={13} weight="regular" />
         Sign in
-      </button>
+      </Button>
     )
   }
 
@@ -52,15 +49,15 @@ export function TopAuthPill() {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="xs"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
         aria-label={`Account menu for ${email}`}
       >
         <EmailAvatar email={email} className="h-4 w-4" />
         <CaretDown size={10} weight="regular" className={`transition-transform ${open ? '-rotate-180' : ''}`} />
-      </button>
+      </Button>
       {open && (
         <div className="absolute right-0 top-full mt-1 w-48 overflow-hidden rounded-lg border border-sand-300 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
           <div className="border-b border-sand-300 px-3 py-2 text-xs text-sand-500 dark:border-sand-800 dark:text-sand-400">

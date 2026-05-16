@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X } from '@phosphor-icons/react'
+import { Button } from '../../../components/Button'
 
 // Lightweight name-input dialog. Styled to match the AuthModal (centered,
 // backdrop blur, X close) so the lab feels visually coherent with the rest
@@ -89,14 +90,15 @@ export function PresetSaveDialog({
         onClick={onCancel}
       />
       <div className="relative z-10 w-full max-w-md rounded-xl border border-sand-300 bg-sand-100 p-8 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
-        <button
-          type="button"
+        <Button
+          variant="icon"
+          size="md"
           onClick={onCancel}
           aria-label="Close"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          className="absolute right-3 top-3"
         >
           <X weight="regular" size={18} />
-        </button>
+        </Button>
 
         <h2 className="text-xl font-bold text-sand-900 dark:text-sand-50">{title}</h2>
         <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">{description}</p>
@@ -126,20 +128,12 @@ export function PresetSaveDialog({
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-md border border-sand-300 bg-transparent px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-800"
-            >
+            <Button variant="outline" size="md" onClick={onCancel}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" variant="primary" size="md" disabled={saving}>
               {saving ? submittingLabel : submitLabel}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

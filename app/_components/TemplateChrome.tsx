@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Check, Copy, SignIn, Terminal } from '@phosphor-icons/react'
 import { useSession } from '../components/auth/SessionProvider'
 import { useAuthModal } from '../components/auth/AuthModalProvider'
+import { Button } from '../components/Button'
 
 interface TemplateChromeProps {
   templateSlug: string              // registry slug, e.g. 'andromeda-mission-control' or 'andromeda-all'
@@ -113,14 +114,10 @@ export function TemplateChrome({
             to sign-in with `next=` set to the current path. */}
         {user ? (
           <div className="relative" ref={popoverRef}>
-            <button
-              type="button"
-              onClick={() => setInstallOpen((o) => !o)}
-              className="flex h-9 items-center gap-2 rounded-lg bg-olive-500 px-3.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 active:scale-95"
-            >
+            <Button variant="primary" size="md" onClick={() => setInstallOpen((o) => !o)}>
               <Terminal weight="regular" size={15} />
               Install
-            </button>
+            </Button>
 
             {installOpen && (
               <div className="fixed bottom-[88px] left-1/2 z-50 w-[min(480px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-xl border border-sand-800 bg-sand-900 shadow-2xl">
@@ -171,14 +168,10 @@ export function TemplateChrome({
             )}
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => openAuthModal({ next: pathname })}
-            className="flex h-9 items-center gap-2 rounded-lg bg-olive-500 px-3.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 active:scale-95"
-          >
+          <Button variant="primary" size="md" onClick={() => openAuthModal({ next: pathname })}>
             <SignIn weight="regular" size={15} />
             Sign in to install
-          </button>
+          </Button>
         )}
       </div>
     </div>

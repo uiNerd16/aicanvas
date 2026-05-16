@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { X } from '@phosphor-icons/react'
+import { Button } from '../Button'
 import { useAuthModal } from './AuthModalProvider'
 import { SignInFormFields } from './SignInFormFields'
 import { SignUpFormFields } from './SignUpFormFields'
@@ -115,14 +116,15 @@ export function AuthModal() {
         ref={dialogRef}
         className="relative z-10 w-full max-w-md rounded-xl border border-sand-300 bg-sand-100 p-8 shadow-2xl dark:border-sand-800 dark:bg-sand-900"
       >
-        <button
-          type="button"
+        <Button
+          variant="icon"
+          size="md"
           onClick={close}
           aria-label="Close"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          className="absolute right-3 top-3"
         >
           <X weight="regular" size={18} />
-        </button>
+        </Button>
 
         {mode === 'sign-in' ? (
           <SignInFormFields

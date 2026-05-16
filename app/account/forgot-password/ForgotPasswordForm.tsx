@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
+import { Button } from '../../components/Button'
 import { AuthPagePopup } from '../AuthPagePopup'
 
 // ─── ForgotPasswordForm ──────────────────────────────────────────────────────
@@ -78,13 +79,15 @@ export function ForgotPasswordForm() {
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="md"
+              fullWidth
               disabled={submitting}
-              className="w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? 'Sending…' : 'Send reset link'}
-            </button>
+            </Button>
           </form>
         )}
 

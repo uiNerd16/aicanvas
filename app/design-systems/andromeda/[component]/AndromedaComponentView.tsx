@@ -15,6 +15,7 @@ import {
   Terminal,
 } from '@phosphor-icons/react'
 import { Step } from '../../../components/Step'
+import { Button } from '../../../components/Button'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
@@ -152,13 +153,9 @@ export function AndromedaComponentView({
 
           {tab === 'preview' && (
             <div className="group/fullscreen relative">
-              <button
-                type="button"
-                onClick={() => setFullscreen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 bg-sand-200 text-sand-700 transition-colors hover:border-sand-400 hover:bg-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:bg-sand-700 dark:hover:text-sand-100"
-              >
+              <Button variant="outline" size="md" iconOnly onClick={() => setFullscreen(true)}>
                 <CornersOut weight="regular" size={16} />
-              </button>
+              </Button>
               <div className="pointer-events-none absolute right-0 top-full z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
                 Full screen
               </div>
@@ -194,18 +191,14 @@ export function AndromedaComponentView({
             component breaks the system contract. Users compose AT the
             system level, not per-component. */}
         <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={copyCli}
-            className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
-          >
+          <Button variant="primary" size="sm" onClick={copyCli}>
             {cliCopied ? (
               <Check weight="regular" size={15} />
             ) : (
               <Terminal weight="regular" size={15} />
             )}
             {cliCopied ? 'Copied!' : 'Copy CLI'}
-          </button>
+          </Button>
         </div>
       </div>
 

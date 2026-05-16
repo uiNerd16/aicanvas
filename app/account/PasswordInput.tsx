@@ -2,6 +2,7 @@
 
 import { forwardRef, useState } from 'react'
 import { Eye, EyeSlash } from '@phosphor-icons/react'
+import { Button } from '../components/Button'
 
 // ─── PasswordInput ────────────────────────────────────────────────────────────
 // Shared password input with a built-in show/hide toggle. Used on sign-in,
@@ -27,15 +28,16 @@ export const PasswordInput = forwardRef<HTMLInputElement, Props>(function Passwo
         className={`w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 pr-10 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-800 dark:bg-sand-950 dark:text-sand-50 dark:placeholder:text-sand-500 ${className}`}
         {...rest}
       />
-      <button
-        type="button"
+      <Button
+        variant="icon"
+        size="xs"
         onClick={() => setVisible((v) => !v)}
         aria-label={visible ? 'Hide password' : 'Show password'}
         tabIndex={-1}
-        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-200"
+        className="absolute right-2 top-1/2 -translate-y-1/2"
       >
         {visible ? <EyeSlash weight="regular" size={16} /> : <Eye weight="regular" size={16} />}
-      </button>
+      </Button>
     </div>
   )
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { buttonClasses } from './Button'
 import { TopAuthPill } from './auth/TopAuthPill'
 
 // ─── HeaderSocials ────────────────────────────────────────────────────────────
@@ -17,7 +18,7 @@ export function HeaderSocials() {
       <TopAuthPill />
       <Link
         href="/mcp"
-        className="inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+        className={buttonClasses({ variant: 'primary', size: 'xs' })}
       >
         <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
         Get MCP

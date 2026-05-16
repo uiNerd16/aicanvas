@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { CaretDown, Check, Plus, PushPinSlash, X } from '@phosphor-icons/react'
+import { Button, buttonClasses } from '../../../components/Button'
 
 export type SavedRow = {
   slug: string
@@ -162,15 +163,16 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
                 allNames={collections.names}
                 onChange={(value) => setCollection(row.slug, value)}
               />
-              <button
-                type="button"
+              <Button
+                variant="icon"
+                size="sm"
                 onClick={() => unsave(row.slug)}
                 aria-label={`Remove ${row.name} from saved`}
                 title="Remove from saved"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                className="shrink-0"
               >
                 <PushPinSlash size={16} weight="regular" />
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -190,7 +192,7 @@ function EmptyState() {
       </p>
       <Link
         href="/components"
-        className="mt-4 inline-block rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+        className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'md' })}`}
       >
         Browse components
       </Link>
@@ -225,17 +227,13 @@ function FilteredEmptyState({ onReset }: { onReset: () => void }) {
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
         <Link
           href="/components"
-          className="inline-block rounded-lg bg-olive-500 px-4 py-1.5 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+          className={buttonClasses({ variant: 'primary', size: 'xs' })}
         >
           Browse components
         </Link>
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-block rounded-lg border border-sand-300 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
-        >
+        <Button variant="outline" size="xs" onClick={onReset}>
           Show all
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -298,20 +296,17 @@ function FolderTabs({
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(null)}
-              className="rounded-lg border border-sand-300 px-3 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
-            >
+            <Button variant="outline" size="xs" onClick={() => setConfirmDelete(null)}>
               Cancel
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="destructive"
+              tone="solid"
+              size="xs"
               onClick={() => { onDelete(confirmDelete); setConfirmDelete(null) }}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-500"
             >
               Delete folder
-            </button>
+            </Button>
           </div>
         </div>
       )}

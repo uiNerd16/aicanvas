@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { GithubLogo } from '@phosphor-icons/react'
 import { GITHUB_URL } from '../lib/config'
+import { buttonClasses } from '../components/Button'
 import { SiteFooter } from '../components/SiteFooter'
 import { HeaderSocials } from '../components/HeaderSocials'
 
@@ -135,7 +136,7 @@ export default function AboutPage() {
               href={GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'md' })}`}
             >
               <GithubLogo weight="regular" size={20} />
               View on GitHub

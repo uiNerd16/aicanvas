@@ -21,6 +21,7 @@ import {
 import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
+import { Button, buttonClasses } from './Button'
 import { SignedIn } from './auth/SignedIn'
 import { SignedOut } from './auth/SignedOut'
 import { UserMenu } from './auth/UserMenu'
@@ -148,13 +149,9 @@ export function MobileNav() {
           AI Canvas
         </Link>
 
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-        >
+        <Button variant="icon" size="md" onClick={() => setOpen(true)} aria-label="Open menu">
           <List weight="regular" size={20} />
-        </button>
+        </Button>
       </div>
 
       {/* ── Slide-in drawer ── */}
@@ -191,13 +188,9 @@ export function MobileNav() {
                   <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
                   AI Canvas
                 </Link>
-                <button
-                  onClick={() => setOpen(false)}
-                  aria-label="Close menu"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
-                >
+                <Button variant="icon" size="sm" onClick={() => setOpen(false)} aria-label="Close menu">
                   <X weight="regular" size={18} />
-                </button>
+                </Button>
               </div>
 
               {/* Search */}
@@ -345,7 +338,7 @@ export function MobileNav() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="GitHub repository"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className={buttonClasses({ variant: 'icon', size: 'md' })}
                 >
                   <GithubLogo weight="regular" size={20} />
                 </a>
@@ -354,14 +347,14 @@ export function MobileNav() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="X profile"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className={buttonClasses({ variant: 'icon', size: 'md' })}
                 >
                   <XLogo weight="regular" size={20} />
                 </a>
                 <Link
                   href="/mcp"
                   onClick={() => setOpen(false)}
-                  className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+                  className={`ml-1 ${buttonClasses({ variant: 'primary', size: 'xs' })}`}
                 >
                   <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
                   Get MCP
@@ -389,7 +382,7 @@ export function MobileNav() {
                     href="https://ko-fi.com/aicanvasme"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-sand-300 bg-transparent px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+                    className={`mt-3 ${buttonClasses({ variant: 'outline', size: 'xs', fullWidth: true })}`}
                   >
                     <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
                     Send a Coffee

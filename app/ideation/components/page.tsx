@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { buttonClasses } from '../../components/Button'
 
 // Placeholder for /ideation/components. The Components pole exists in the
 // sidebar so the hierarchy is visible, but for this ideation pass we only
@@ -19,13 +20,13 @@ export default function IdeationComponentsPlaceholder() {
       <div className="mt-10 flex flex-wrap gap-3">
         <Link
           href="/ideation/design-systems/andromeda"
-          className="rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+          className={buttonClasses({ variant: 'primary', size: 'md' })}
         >
           Open Andromeda
         </Link>
         <Link
           href="/components"
-          className="rounded-lg border border-sand-300 bg-sand-100 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+          className={buttonClasses({ variant: 'outline', size: 'md' })}
         >
           Production /components
         </Link>

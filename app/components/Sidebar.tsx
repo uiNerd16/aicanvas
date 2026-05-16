@@ -7,6 +7,7 @@ import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Git
 import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
+import { buttonClasses } from './Button'
 
 // ── Tier structure ────────────────────────────────────────────────────────
 // Hardcoded so the ordering is predictable. Every label here must correspond
@@ -293,7 +294,7 @@ export function Sidebar() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub repository"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+            className={buttonClasses({ variant: 'icon', size: 'md' })}
           >
             <GithubLogo weight="regular" size={18} />
           </a>
@@ -302,7 +303,7 @@ export function Sidebar() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="X profile"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-300/60 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+            className={buttonClasses({ variant: 'icon', size: 'md' })}
           >
             <XLogo weight="regular" size={18} />
           </a>
@@ -335,7 +336,7 @@ export function Sidebar() {
             href="https://ko-fi.com/aicanvasme"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-300 bg-transparent px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+            className={buttonClasses({ variant: 'outline', size: 'xs', fullWidth: true })}
           >
             <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
             Send a Coffee

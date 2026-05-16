@@ -17,6 +17,7 @@ import {
   CaretRight,
   Terminal,
 } from '@phosphor-icons/react'
+import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SiteFooter } from '../components/SiteFooter'
 import type { ComponentMeta } from '../lib/component-registry'
@@ -710,7 +711,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           >
             <Link
               href="/components"
-              className="flex items-center gap-1.5 rounded-xl bg-olive-500 px-5 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              className={buttonClasses({ variant: 'primary', size: 'lg' })}
             >
               Browse Components
               <ArrowRight weight="regular" size={14} />
@@ -1001,7 +1002,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             </p>
             <Link
               href="/components"
-              className="relative mt-6 inline-flex items-center gap-1.5 rounded-xl bg-olive-500 px-5 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              className={`relative mt-6 ${buttonClasses({ variant: 'primary', size: 'lg' })}`}
             >
               Browse Components
               <ArrowRight weight="regular" size={14} />
