@@ -16,7 +16,10 @@ export async function GET() {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[preferences GET]', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   return NextResponse.json({
     preferences: {
       package_manager: data?.package_manager ?? null,
@@ -50,27 +53,30 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'invalid newsletter_opt_in' }, { status: 400 })
   }
 
+  // Only include fields the client explicitly sent. Without this, a partial
+  // update (e.g. just toggling newsletter_opt_in) would clobber other fields
+  // to null when the client's in-memory preferences haven't loaded yet.
   const upsert: {
     user_id: string
-    package_manager: PackageManager | null
-    ai_platform: AiPlatform | null
+    package_manager?: PackageManager | null
+    ai_platform?: AiPlatform | null
     newsletter_opt_in?: boolean
     updated_at: string
   } = {
     user_id: user.id,
-    package_manager: pkg ?? null,
-    ai_platform: platform ?? null,
     updated_at: new Date().toISOString(),
   }
-  // Only include newsletter_opt_in when the client explicitly sent it, so
-  // a partial update from the legacy preferences form doesn't accidentally
-  // reset the flag to undefined/false.
+  if (pkg !== undefined) upsert.package_manager = pkg
+  if (platform !== undefined) upsert.ai_platform = platform
   if (newsletter !== undefined) upsert.newsletter_opt_in = newsletter
 
   const { error } = await supabase
     .from('user_preferences')
     .upsert(upsert)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[preferences PUT]', error, 'payload:', upsert)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
