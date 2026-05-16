@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { X } from '@phosphor-icons/react'
+import { Button } from '../components/Button'
 
 // ─── AuthPagePopup ───────────────────────────────────────────────────────────
 // Shared modal-style wrapper for the standalone auth pages — sign-in, sign-up,
@@ -33,14 +34,15 @@ export function AuthPagePopup({ children, closeHref = '/' }: Props) {
         className="absolute inset-0 bg-sand-950/80 backdrop-blur-sm"
       />
       <div className="relative z-10 w-full max-w-md rounded-xl border border-sand-300 bg-sand-100 p-8 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
-        <button
-          type="button"
+        <Button
+          variant="icon"
+          size="md"
           onClick={() => router.push(closeHref)}
           aria-label="Close"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+          className="absolute right-3 top-3"
         >
           <X weight="regular" size={18} />
-        </button>
+        </Button>
         {children}
       </div>
     </div>

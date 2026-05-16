@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Warning } from '@phosphor-icons/react'
 import { createClient } from '../../../lib/supabase/client'
+import { Button } from '../../../components/Button'
 
 // ─── DeleteAccountSection ─────────────────────────────────────────────────────
 // GDPR Art. 17 right-to-erasure surface inside /account/settings.
@@ -63,38 +64,41 @@ export function DeleteAccountSection() {
           </p>
 
           {!confirming ? (
-            <button
-              type="button"
+            <Button
+              variant="destructive"
+              tone="outline"
+              size="sm"
               onClick={() => setConfirming(true)}
-              className="mt-5 rounded-lg border border-red-500/40 bg-transparent px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-500/10 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/15"
+              className="mt-5"
             >
               Delete my account
-            </button>
+            </Button>
           ) : (
             <div className="mt-5 space-y-3">
               <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
                 Are you sure? This cannot be undone.
               </p>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="destructive"
+                  tone="solid"
+                  size="sm"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {deleting ? 'Deleting…' : 'Delete forever'}
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     setConfirming(false)
                     setError(null)
                   }}
                   disabled={deleting}
-                  className="rounded-lg border border-sand-300 bg-sand-50 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:bg-sand-950 dark:text-sand-300 dark:hover:bg-sand-800"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
               {error && (
                 <p className="text-sm text-red-700 dark:text-red-400">

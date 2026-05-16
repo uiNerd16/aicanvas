@@ -6,6 +6,7 @@ import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
 import { GoogleSignInButton } from '../../account/GoogleSignInButton'
 import { PasswordInput } from '../../account/PasswordInput'
+import { Button } from '../Button'
 import { TerminatorReveal } from './TerminatorReveal'
 
 // ─── SignInFormFields ─────────────────────────────────────────────────────────
@@ -120,13 +121,16 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          size="md"
+          fullWidth
           disabled={submitting}
-          className="mt-6 w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-6"
         >
           {submitting ? 'Signing in…' : 'Sign in'}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-4 text-center text-sm text-sand-600 dark:text-sand-400">

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, ImageSquare } from '@phosphor-icons/react'
 import { track, type CardSource } from '../lib/analytics'
 import { optimizeImageKitUrl } from '../lib/imagekit'
+import { buttonClasses } from './Button'
 
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
@@ -69,9 +70,12 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
           </p>
         </div>
 
-        {/* CTA */}
+        {/* CTA — visually mirrors the outline secondary button (md). The
+            entire card is the click target, so the CTA isn't a real button;
+            we use group-hover so hovering anywhere on the card lights it
+            up with the same shift as a real outline button's :hover. */}
         <div className="mt-auto pt-1">
-          <span className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-sand-300 py-2.5 text-sm font-semibold text-sand-700 transition-colors group-hover:border-olive-500 group-hover:bg-olive-500 group-hover:text-sand-950 dark:border-sand-700 dark:text-sand-300 dark:group-hover:border-olive-500 dark:group-hover:bg-olive-500 dark:group-hover:text-sand-950">
+          <span className={`${buttonClasses({ variant: 'outline', size: 'md', fullWidth: true })} text-xs group-hover:border-sand-400 group-hover:text-sand-900 dark:group-hover:border-sand-600 dark:group-hover:text-sand-100`}>
             View Component
             <ArrowRight weight="regular" size={14} className="transition-transform group-hover:translate-x-0.5" />
           </span>
