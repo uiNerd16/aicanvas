@@ -3,7 +3,7 @@ import { createClient } from '../../../lib/supabase/server'
 import type { SavedComponent } from '../../../lib/supabase/types'
 import { COMPONENTS } from '../../../lib/component-registry'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
-import { buttonClasses } from '../../../components/Button'
+import { buttonClasses } from '../../../components/buttonClasses'
 import { SavedList, type SavedRow } from './SavedList'
 
 export default async function SavedPage() {

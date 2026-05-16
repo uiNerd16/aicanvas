@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CaretDown, ClockClockwise, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Flask, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { createClient } from '../../lib/supabase/client'
 import { EmailAvatar } from './EmailAvatar'
@@ -62,6 +62,14 @@ export function UserMenu() {
           >
             <Heart size={14} weight="regular" />
             Saved
+          </Link>
+          <Link
+            href="/account/lab"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <Flask size={14} weight="regular" />
+            Made in Lab
           </Link>
           <Link
             href="/account/history"

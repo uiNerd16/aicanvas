@@ -3,7 +3,7 @@ import { Flask } from '@phosphor-icons/react/dist/ssr'
 import { createClient } from '../../../lib/supabase/server'
 import type { SerializedParticleConfig } from '../../../lab/_lib/preset/serialize'
 import { LabPresetCard } from '../../../lab/_lib/preset/LabPresetCard'
-import { buttonClasses } from '../../../components/Button'
+import { buttonClasses } from '../../../components/buttonClasses'
 
 // Made in Lab — lists the signed-in user's saved presets grouped by tool.
 // Each card links back to the matching /lab/<tool>?preset=<id> page where
@@ -87,9 +87,9 @@ function EmptyState() {
   return (
     <div className="rounded-xl border border-dashed border-sand-300 bg-sand-100/40 p-10 text-center dark:border-sand-800 dark:bg-sand-900/40">
       <Flask size={40} weight="regular" className="mx-auto text-sand-400" />
-      <h2 className="mt-4 text-lg font-bold text-sand-900 dark:text-sand-50">No presets yet</h2>
+      <h2 className="mt-4 text-lg font-bold text-sand-900 dark:text-sand-50">Nothing saved yet</h2>
       <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
-        Tune a lab tool you like, then click Save preset to keep it here.
+        Experiment in a lab tool, save what you like. This page becomes your collection.
       </p>
       <div className="mt-5">
         <Link

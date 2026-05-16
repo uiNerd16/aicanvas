@@ -78,17 +78,19 @@ export function SessionProvider({
 
   const updatePreferences = useCallback(async (next: Partial<Preferences>) => {
     if (!user) return
-    const merged = { ...preferences, ...next }
-    setPreferences(merged) // optimistic
+    const prev = preferences
+    setPreferences({ ...prev, ...next }) // optimistic
     try {
+      // Send only the changed fields so we never clobber values that haven't
+      // loaded into local state yet (e.g. a fast click before GET resolves).
+      // The server route mirrors this and only writes fields it received.
       await fetch('/api/preferences', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(merged),
+        body: JSON.stringify(next),
       })
     } catch {
-      // Rollback on network failure.
-      setPreferences(preferences)
+      setPreferences(prev)
     }
   }, [user, preferences])
 

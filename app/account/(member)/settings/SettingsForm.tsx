@@ -59,7 +59,7 @@ export function SettingsForm({ initial }: { initial: Initial }) {
 
       <BooleanField
         label="Marketing emails"
-        description="Occasional updates about AI Canvas — new components, design-system releases, MCP changes. Transactional emails (sign-up confirmation, magic links, password reset) are unaffected."
+        description="Occasional updates about AI Canvas: new components, design-system releases, MCP changes. Transactional emails (sign-up confirmation, magic links, password reset) are unaffected."
         value={newsletter}
         onSelect={selectNewsletter}
         onLabel="Subscribed"
