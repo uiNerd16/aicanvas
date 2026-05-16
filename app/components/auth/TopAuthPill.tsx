@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { CaretDown, ClockClockwise, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Flask, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
@@ -63,16 +63,9 @@ export function TopAuthPill() {
           <div className="border-b border-sand-300 px-3 py-2 text-xs text-sand-500 dark:border-sand-800 dark:text-sand-400">
             <span className="block truncate">{email}</span>
           </div>
-          {/* Mirrors the account tabs (Profile · Saved · Activity · Settings)
-              so the dropdown is a quick teleport into any account view. */}
-          <Link
-            href="/account"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-          >
-            <User size={14} weight="regular" />
-            Profile
-          </Link>
+          {/* Mirrors the account tabs (Saved · Made in Lab · Activity ·
+              Settings · Profile) so the dropdown is a quick teleport into
+              any account view. */}
           <Link
             href="/account/saved"
             onClick={() => setOpen(false)}
@@ -80,6 +73,14 @@ export function TopAuthPill() {
           >
             <Heart size={14} weight="regular" />
             Saved
+          </Link>
+          <Link
+            href="/account/lab"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <Flask size={14} weight="regular" />
+            Made in Lab
           </Link>
           <Link
             href="/account/history"
@@ -96,6 +97,14 @@ export function TopAuthPill() {
           >
             <Gear size={14} weight="regular" />
             Settings
+          </Link>
+          <Link
+            href="/account"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <User size={14} weight="regular" />
+            Profile
           </Link>
           <button
             type="button"

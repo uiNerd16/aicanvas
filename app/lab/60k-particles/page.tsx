@@ -33,7 +33,7 @@ import { Segmented } from '../_lib/particleMark/controls/Segmented'
 import { Slider } from '../_lib/particleMark/controls/Slider'
 import { ColorInput } from '../_lib/particleMark/controls/ColorInput'
 import { FileDrop } from '../_lib/particleMark/controls/FileDrop'
-import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple } from '@phosphor-icons/react'
+import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple, DotsThreeVertical, Check } from '@phosphor-icons/react'
 import { useLabAuthGate } from '../_lib/useLabAuthGate'
 import {
   serializeParticleConfig,
@@ -70,10 +70,32 @@ type PresetRow = PresetSummary & { config: SerializedParticleConfig }
 export default function ParticleMarkLabPage() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
   const [copied, setCopied] = useState(false)
+  const [imageSaved, setImageSaved] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
+  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const recorder = useCanvasRecorder()
   const { start: startRecording, stop: stopRecording, state: recorderState } = recorder
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && exportMenuOpen) setExportMenuOpen(false)
+    }
+    function onClickOutside(e: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false)
+      }
+    }
+    if (exportMenuOpen) {
+      document.addEventListener('keydown', onKey)
+      document.addEventListener('mousedown', onClickOutside)
+      return () => {
+        document.removeEventListener('keydown', onKey)
+        document.removeEventListener('mousedown', onClickOutside)
+      }
+    }
+  }, [exportMenuOpen])
 
   const { user } = useSession()
   const [presets, setPresets] = useState<PresetRow[]>([])
@@ -91,6 +113,8 @@ export default function ParticleMarkLabPage() {
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
     try {
       await exportCanvasImage(canvasRef.current, format, `60k-particles-${stamp}.${format}`)
+      setImageSaved(true)
+      setTimeout(() => setImageSaved(false), 1500)
     } catch (e) {
       setImageError(e instanceof Error ? e.message : `Failed to export ${format.toUpperCase()}`)
     }
@@ -359,25 +383,6 @@ export default function ParticleMarkLabPage() {
             </header>
 
             <div className="space-y-5">
-              {/* PRESETS — sits at the top so users find their saved looks fast */}
-              <section>
-                <SectionLabel>Presets</SectionLabel>
-                <div className="space-y-2">
-                  <PresetMenu
-                    presets={presetSummaries}
-                    loading={presetsLoading}
-                    signedIn={!!user}
-                    onLoad={onLoadPreset}
-                    onRename={onRenamePreset}
-                    onDelete={onDeletePreset}
-                  />
-                  <Button variant="outline" size="md" fullWidth onClick={() => gate.run('save-preset')}>
-                    <BookmarkSimple size={14} weight="regular" />
-                    Save preset
-                  </Button>
-                </div>
-              </section>
-
               {/* SOURCE */}
               <section>
                 <SectionLabel>Source</SectionLabel>
@@ -542,6 +547,26 @@ export default function ParticleMarkLabPage() {
                 />
               </section>
 
+              {/* PRESETS — placed near the export actions so saving / loading a
+                  tune lives next to the other "take this with me" controls. */}
+              <section>
+                <SectionLabel>Presets</SectionLabel>
+                <div className="space-y-2">
+                  <PresetMenu
+                    presets={presetSummaries}
+                    loading={presetsLoading}
+                    signedIn={!!user}
+                    onLoad={onLoadPreset}
+                    onRename={onRenamePreset}
+                    onDelete={onDeletePreset}
+                  />
+                  <Button variant="outline" size="md" fullWidth onClick={() => gate.run('save-preset')}>
+                    <BookmarkSimple size={14} weight="regular" />
+                    Save preset
+                  </Button>
+                </div>
+              </section>
+
               <section className="space-y-2 pt-2">
                 <SectionLabel>Export</SectionLabel>
 
@@ -574,31 +599,59 @@ export default function ParticleMarkLabPage() {
                 )}
 
                 <div className="grid grid-cols-2 gap-2">
+                  <div className="relative" ref={exportMenuRef}>
+                    <Button
+                      variant="outline"
+                      size="md"
+                      fullWidth
+                      onClick={() => setExportMenuOpen((o) => !o)}
+                      disabled={recorder.state !== 'idle'}
+                      className="!rounded-md !px-3 !py-2.5"
+                    >
+                      {imageSaved && <Check weight="regular" size={15} />}
+                      {imageSaved ? 'Saved!' : 'Save image'}
+                      {!imageSaved && <DotsThreeVertical weight="bold" size={15} className="ml-auto" />}
+                    </Button>
+                    {exportMenuOpen && (
+                      <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-md border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExportMenuOpen(false)
+                            gate.run('export-png')
+                          }}
+                          className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                        >
+                          Save as PNG
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExportMenuOpen(false)
+                            gate.run('export-webp')
+                          }}
+                          className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                        >
+                          Save as WebP
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     variant="outline"
                     size="md"
-                    onClick={() => gate.run('export-png')}
-                    disabled={recorder.state !== 'idle'}
+                    fullWidth
+                    onClick={() => gate.run('copy-code')}
+                    className="!rounded-md !px-3 !py-2.5"
                   >
-                    Save PNG
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="md"
-                    onClick={() => gate.run('export-webp')}
-                    disabled={recorder.state !== 'idle'}
-                  >
-                    Save WebP
+                    {copied ? 'Copied ✓' : 'Copy code'}
                   </Button>
                 </div>
 
                 {imageError && (
                   <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
                 )}
-
-                <Button variant="outline" size="md" fullWidth onClick={() => gate.run('copy-code')}>
-                  {copied ? 'Copied ✓' : 'Copy code (TSX)'}
-                </Button>
               </section>
             </div>
           </aside>
