@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { buttonClasses } from '../../components/Button'
+import { buttonClasses } from '../../components/buttonClasses'
 
 // Placeholder for /ideation/components. The Components pole exists in the
 // sidebar so the hierarchy is visible, but for this ideation pass we only
