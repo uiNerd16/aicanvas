@@ -11,40 +11,36 @@ import type { ComponentType } from 'react'
 type IconComponent = ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'fill' }>
 
 const TABS: { href: string; label: string; Icon: IconComponent }[] = [
-  { href: '/account', label: 'Profile', Icon: User },
   { href: '/account/saved', label: 'Saved', Icon: Heart },
   { href: '/account/lab', label: 'Made in Lab', Icon: Flask },
   { href: '/account/history', label: 'Activity', Icon: ClockClockwise },
   { href: '/account/settings', label: 'Settings', Icon: Gear },
+  { href: '/account', label: 'Profile', Icon: User },
 ]
 
 export function AccountTabs() {
   const pathname = usePathname()
   return (
-    // Full-bleed on mobile so the swipe area runs edge-to-edge; the page
-    // padding (px-4) is cancelled with -mx-4, then re-added inside so the
-    // first/last tabs still align with the rest of the column.
-    // Scrollbar hidden visually because horizontal track on this control
-    // would steal a row of height — touch swipe + active-tab affordance
-    // is the navigation cue.
-    <nav
-      className="-mx-4 overflow-x-auto border-b border-sand-300 px-4 [scrollbar-width:none] dark:border-sand-800 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
-    >
-      <div className="flex gap-1">
+    // Five tabs split the full row evenly (flex-1). No horizontal scroll —
+    // labels collapse to icon-only below `sm:` so all five always fit on
+    // mobile; on desktop the label rides alongside.
+    <nav className="border-b border-sand-300 dark:border-sand-800">
+      <div className="flex">
         {TABS.map(({ href, label, Icon }) => {
           const active = pathname === href
           return (
             <Link
               key={href}
               href={href}
-              className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 text-sm font-semibold transition-colors ${
+              aria-label={label}
+              className={`relative flex flex-1 items-center justify-center gap-2 whitespace-nowrap px-2 py-2.5 text-sm font-semibold transition-colors sm:px-4 ${
                 active
                   ? 'text-sand-900 dark:text-sand-50'
                   : 'text-sand-500 hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-50'
               }`}
             >
               <Icon size={16} weight="regular" />
-              {label}
+              <span className="sr-only sm:not-sr-only">{label}</span>
               {active && (
                 <span className="absolute inset-x-0 -bottom-px h-0.5 bg-olive-500" />
               )}

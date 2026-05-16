@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowUpRight } from '@phosphor-icons/react/dist/ssr'
+import { ArrowRight, ImageSquare } from '@phosphor-icons/react/dist/ssr'
 import { SiteFooter } from '../components/SiteFooter'
+import { buttonClasses } from '../components/buttonClasses'
 import { LabLogo } from './_components/LabLogo'
 
 export const metadata: Metadata = {
@@ -64,10 +65,9 @@ export default function LabPage() {
   return (
     <main className="bg-sand-200 dark:bg-sand-950">
       <div className="mx-auto max-w-5xl px-4 pt-10 pb-12 sm:px-6 sm:pt-16">
-        {/* ── Hero ── */}
-        <header className="mb-16 sm:mb-20">
-          <p className="mb-5 text-sm font-semibold text-olive-500">/lab</p>
-          <h1 className="mb-7">
+        {/* ── Hero — logo on the left, description on the right ── */}
+        <header className="mb-16 grid items-center gap-8 sm:mb-20 sm:grid-cols-2 sm:gap-12">
+          <h1>
             <LabLogo
               variant="compact"
               pixel={10}
@@ -78,7 +78,7 @@ export default function LabPage() {
             />
             <span className="sr-only">LAB</span>
           </h1>
-          <p className="max-w-xl text-lg leading-relaxed text-sand-700 dark:text-sand-300">
+          <p className="text-lg leading-relaxed text-sand-700 dark:text-sand-300">
             Bring a mark. Pull a slider. Walk out with code.{' '}
             <span className="text-sand-500 dark:text-sand-500">
               LAB is a workshop of small generators for the experiments that
@@ -102,34 +102,63 @@ export default function LabPage() {
             {TOOLS.map((tool) => {
               const isPlanned = tool.status === 'planned'
               const card = (
-                <article className="group relative flex h-full flex-col rounded-2xl border border-sand-300 bg-sand-100 p-6 transition-colors hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <h3 className="text-lg font-bold text-sand-900 dark:text-sand-50">
-                      {tool.name}
-                    </h3>
-                    <span
-                      className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[tool.status]}`}
+                <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50">
+                  {/* Placeholder image */}
+                  <div className="relative aspect-video overflow-hidden bg-sand-900">
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        backgroundImage:
+                          'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+                        backgroundSize: '22px 22px',
+                      }}
                     >
-                      {tool.status}
-                    </span>
+                      <ImageSquare weight="regular" size={28} className="text-sand-700" />
+                    </div>
                   </div>
-                  <p className="flex-1 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-                    {tool.description}
-                  </p>
-                  {!isPlanned && (
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-olive-600 dark:text-olive-400">
-                      Open tool
-                      <ArrowUpRight
-                        weight="regular"
-                        size={12}
-                        className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      />
-                    </span>
-                  )}
+
+                  {/* Card body — floats over image with rounded top corners */}
+                  <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)]">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="font-bold text-sand-900 dark:text-sand-50">
+                          {tool.name}
+                        </h3>
+                        <span
+                          className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[tool.status]}`}
+                        >
+                          {tool.status}
+                        </span>
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-sm font-normal text-sand-600 dark:text-sand-400">
+                        {tool.description}
+                      </p>
+                    </div>
+
+                    {/* CTA — mirrors ComponentCard's outline button */}
+                    <div className="mt-auto pt-1">
+                      <span
+                        className={`${buttonClasses({ variant: 'outline', size: 'md', fullWidth: true })} text-xs ${
+                          isPlanned
+                            ? 'opacity-60'
+                            : 'group-hover:border-sand-400 group-hover:text-sand-900 dark:group-hover:border-sand-600 dark:group-hover:text-sand-100'
+                        }`}
+                      >
+                        {isPlanned ? 'Coming soon' : 'Open tool'}
+                        {!isPlanned && (
+                          <ArrowRight
+                            weight="regular"
+                            size={14}
+                            className="transition-transform group-hover:translate-x-0.5"
+                          />
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </article>
               )
               return (
-                <li key={tool.slug} className={isPlanned ? 'opacity-60' : ''}>
+                <li key={tool.slug}>
                   {isPlanned ? (
                     card
                   ) : (

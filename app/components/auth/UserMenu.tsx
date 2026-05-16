@@ -48,14 +48,6 @@ export function UserMenu() {
       {open && (
         <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-sand-300 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
           <Link
-            href="/account"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-          >
-            <User size={14} weight="regular" />
-            Profile
-          </Link>
-          <Link
             href="/account/saved"
             onClick={() => setOpen(false)}
             className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
@@ -86,6 +78,14 @@ export function UserMenu() {
           >
             <Gear size={14} weight="regular" />
             Settings
+          </Link>
+          <Link
+            href="/account"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+          >
+            <User size={14} weight="regular" />
+            Profile
           </Link>
           <button
             type="button"
