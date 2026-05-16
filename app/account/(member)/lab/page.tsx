@@ -94,7 +94,7 @@ function EmptyState() {
       <div className="mt-5">
         <Link
           href="/lab"
-          className={buttonClasses({ variant: 'primary', size: 'md' })}
+          className={buttonClasses({ variant: 'primary', size: 'sm' })}
         >
           Open LAB
         </Link>

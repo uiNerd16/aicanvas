@@ -67,7 +67,7 @@ export function DeleteAccountSection() {
             <Button
               variant="destructive"
               tone="outline"
-              size="md"
+              size="sm"
               onClick={() => setConfirming(true)}
               className="mt-5"
             >
@@ -82,7 +82,7 @@ export function DeleteAccountSection() {
                 <Button
                   variant="destructive"
                   tone="solid"
-                  size="md"
+                  size="sm"
                   onClick={handleDelete}
                   disabled={deleting}
                 >
@@ -90,7 +90,7 @@ export function DeleteAccountSection() {
                 </Button>
                 <Button
                   variant="outline"
-                  size="md"
+                  size="sm"
                   onClick={() => {
                     setConfirming(false)
                     setError(null)
