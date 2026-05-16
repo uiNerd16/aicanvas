@@ -5,9 +5,10 @@ import { useSession } from './auth/SessionProvider'
 import { Button, buttonClasses } from './Button'
 
 // ─── SaveButton ───────────────────────────────────────────────────────────────
-// Heart toggle for saving a component. Renders as a 36×36 icon-only Button
-// from the unified system; the saved-state styling (olive heart) is layered
-// on top via className.
+// Heart toggle for saving a component. Renders as a 32×32 icon-only Button
+// from the unified system (size="sm") so it aligns with the sm label buttons
+// it sits next to in the component action bar. Saved-state styling (olive
+// heart) is layered on top via className.
 
 type SaveButtonProps = {
   slug: string
@@ -31,7 +32,7 @@ export function SaveButton({ slug, system = null, className = '', size = 15 }: S
   return (
     <Button
       variant="outline"
-      size="md"
+      size="sm"
       iconOnly
       onClick={handleClick}
       aria-label={saved ? 'Unsave component' : 'Save component'}

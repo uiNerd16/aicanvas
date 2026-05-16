@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Check } from '@phosphor-icons/react'
 import { useSession } from '../../../components/auth/SessionProvider'
+import { Toggle } from '../../../components/Toggle'
 import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
 
 const PACKAGE_MANAGERS: PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun']
@@ -14,10 +15,9 @@ type Initial = {
   newsletter_opt_in: boolean
 }
 
-// Three preferences with autosave-on-click. The "Saved" affordance is owned
-// by each field (rendered inline at the end of its row) so the user sees
-// confirmation right next to the control they just touched — no global
-// indicator floating above the cards.
+// Three preferences with autosave-on-click. The visible state of the control
+// (active pill, on/off switch) is its own confirmation; no separate "Saved"
+// tick is rendered.
 export function SettingsForm({ initial }: { initial: Initial }) {
   const { updatePreferences } = useSession()
   const [pkg, setPkg] = useState<PackageManager | null>(initial.package_manager)
@@ -58,52 +58,12 @@ export function SettingsForm({ initial }: { initial: Initial }) {
       />
 
       <BooleanField
-        label="Marketing emails"
-        description="Occasional updates about AI Canvas: new components, design-system releases, MCP changes. Transactional emails (sign-up confirmation, magic links, password reset) are unaffected."
+        label="Product updates"
+        description="Occasional emails about AI Canvas: new components, design-system releases, MCP changes. Transactional emails (sign-up confirmation, magic links, password reset) are unaffected."
         value={newsletter}
         onSelect={selectNewsletter}
-        onLabel="Subscribed"
-        offLabel="Unsubscribed"
       />
     </div>
-  )
-}
-
-// useSavedFlash — fires a 1.5s "Saved" tick after an async write resolves.
-// Local to each field so multiple fields can flash independently. Tracks the
-// timeout in a ref so rapid re-clicks cancel the pending tick (no setState-
-// after-unmount warnings, no stale "Saved" appearing after the user moved on).
-function useSavedFlash() {
-  const [saved, setSaved] = useState(false)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [])
-
-  function flash() {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setSaved(true)
-    timeoutRef.current = setTimeout(() => {
-      setSaved(false)
-      timeoutRef.current = null
-    }, 1500)
-  }
-  return { saved, flash }
-}
-
-function SavedTick({ visible }: { visible: boolean }) {
-  return (
-    <span
-      aria-live="polite"
-      className={`ml-auto text-xs font-semibold transition-opacity ${
-        visible ? 'text-olive-500 opacity-100' : 'opacity-0'
-      }`}
-    >
-      Saved
-    </span>
   )
 }
 
@@ -135,8 +95,7 @@ function Pill({
 
 // Each field is its own card surface so the three preferences don't read as
 // one undifferentiated block — title + description sit on a sand-100 card
-// (sand-900 dark) with consistent padding. The Saved tick appears at the
-// end of the pill row when the most recent change persisted.
+// (sand-900 dark) with consistent padding.
 function Field<T extends string>({
   label,
   description,
@@ -150,12 +109,9 @@ function Field<T extends string>({
   options: readonly T[]
   onSelect: (value: T | null) => Promise<void>
 }) {
-  const { saved, flash } = useSavedFlash()
-
   async function handle(opt: T) {
     const active = value === opt
     await onSelect(active ? null : opt)
-    flash()
   }
 
   return (
@@ -168,48 +124,30 @@ function Field<T extends string>({
             {opt}
           </Pill>
         ))}
-        <SavedTick visible={saved} />
       </div>
     </div>
   )
 }
 
-// Boolean variant of Field — two pills, strict on/off (no null state). Used
-// for /account/settings's marketing-emails toggle so the user can't end up
-// in a "neither subscribed nor unsubscribed" limbo state.
+// Boolean variant of Field — a single switch on the third row, strict on/off
+// (no null state). The toggle's own colour communicates state.
 function BooleanField({
   label,
   description,
   value,
   onSelect,
-  onLabel,
-  offLabel,
 }: {
   label: string
   description: string
   value: boolean
   onSelect: (value: boolean) => Promise<void>
-  onLabel: string
-  offLabel: string
 }) {
-  const { saved, flash } = useSavedFlash()
-
-  async function handle(opt: boolean) {
-    await onSelect(opt)
-    flash()
-  }
-
   return (
     <div className="rounded-xl border border-sand-300 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900">
       <div className="text-lg font-bold text-sand-900 dark:text-sand-50">{label}</div>
       <div className="mt-1 text-sm text-sand-600 dark:text-sand-400">{description}</div>
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {[true, false].map((opt) => (
-          <Pill key={String(opt)} active={value === opt} onClick={() => handle(opt)}>
-            {opt ? onLabel : offLabel}
-          </Pill>
-        ))}
-        <SavedTick visible={saved} />
+        <Toggle checked={value} onCheckedChange={onSelect} aria-label={label} />
       </div>
     </div>
   )
