@@ -32,6 +32,7 @@ import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
 import { useSession } from '../auth/SessionProvider'
+import { Button } from '../Button'
 import { SaveButton } from '../SaveButton'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
@@ -398,13 +399,13 @@ export default function ComponentPageView({
 
                 {/* Theme toggle — hidden on code tab */}
                 <div className="group/toggle relative" style={{ cursor: !dualTheme ? 'not-allowed' : undefined, display: activeTab === 'code' ? 'none' : undefined }}>
-                  <button
+                  <Button
+                    variant="outline"
+                    size="md"
+                    iconOnly
+                    disabled={!dualTheme}
                     onClick={() => dualTheme && setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-                    className={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border transition-all duration-150 ${
-                      dualTheme
-                        ? 'border-sand-300 text-sand-500 hover:border-sand-400 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-600 dark:hover:text-sand-100'
-                        : 'pointer-events-none border-sand-300 text-sand-400 opacity-40 dark:border-sand-700 dark:text-sand-600'
-                    }`}
+                    className="overflow-hidden"
                   >
                     <AnimatePresence mode="wait" initial={false}>
                       {cardTheme === 'dark' ? (
@@ -429,7 +430,7 @@ export default function ComponentPageView({
                         </motion.span>
                       )}
                     </AnimatePresence>
-                  </button>
+                  </Button>
                   <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/toggle:block">
                     {dualTheme
                       ? cardTheme === 'dark' ? 'Switch to light' : 'Switch to dark'
@@ -440,31 +441,35 @@ export default function ComponentPageView({
                 {/* Refresh — preview only */}
                 {activeTab === 'preview' && (
                   <div className="group/refresh relative">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="md"
+                      iconOnly
                       onClick={refreshPreview}
                       aria-label="Restart animation"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 text-sand-500 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-600 dark:hover:text-sand-100"
                     >
                       <ArrowClockwise weight="regular" size={16} />
-                    </button>
+                    </Button>
                     <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/refresh:block">
                       Refresh
                     </div>
                   </div>
                 )}
 
-                {/* Fullscreen — preview only, accented */}
+                {/* Fullscreen — preview only */}
                 {activeTab === 'preview' && (
                   <div className="group/fullscreen relative">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="md"
+                      iconOnly
                       onClick={() => {
                         track('Fullscreen Open', { component: slug })
                         setFullscreen(true)
                       }}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-sand-300 bg-sand-200 text-sand-700 transition-colors hover:border-sand-400 hover:bg-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:bg-sand-700 dark:hover:text-sand-100"
                     >
                       <CornersOut weight="regular" size={16} />
-                    </button>
+                    </Button>
                     <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
                       Full screen
                     </div>
@@ -523,35 +528,33 @@ export default function ComponentPageView({
             <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Save (logged-in only — no-op render otherwise) */}
-              <SaveButton slug={slug} system={designSystem ?? null} variant="action" />
+              <SaveButton slug={slug} system={designSystem ?? null} />
 
               {/* Copy CLI — copies npx shadcn install command */}
-              <button
-                onClick={copyCli}
-                className="flex items-center gap-2 rounded-lg border border-sand-300 bg-sand-50 px-3.5 py-2 text-sm font-semibold text-sand-700 transition-all hover:border-sand-400 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-50"
-              >
+              <Button variant="outline" size="sm" onClick={copyCli}>
                 {cliCopied
                   ? <Check weight="regular" size={15} />
                   : <Terminal weight="regular" size={15} />}
                 {cliCopied ? 'Copied!' : 'Copy CLI'}
-              </button>
+              </Button>
 
               {/* Copy Prompt — dropdown with 3 platforms.
                   Hidden entirely when no prompts are available so the button
                   can never open an empty dropdown. */}
               {availablePlatforms.length > 0 && (
                 <div className="relative" ref={promptDropdownRef}>
-                  <button
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={() => setPromptDropdownOpen((o) => {
                       if (!o) track('Remix Open', { component: slug })
                       return !o
                     })}
-                    className="flex items-center gap-2 rounded-lg bg-olive-500 px-3.5 py-2 text-sm font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-95"
                   >
                     {promptCopied ? <Check weight="regular" size={15} /> : <Sparkle weight="regular" size={15} />}
                     {promptCopied ? 'Copied!' : 'Remix with AI'}
                     {!promptCopied && <DotsThreeVertical weight="bold" size={15} />}
-                  </button>
+                  </Button>
                   {promptDropdownOpen && (
                     <div className="absolute bottom-full right-0 z-40 mb-2 w-52 overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
                       {availablePlatforms.map((platform) => (
@@ -992,22 +995,26 @@ export default function ComponentPageView({
                 </h2>
                 {canPaginate && (
                   <div className="flex shrink-0 items-center gap-1.5">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      iconOnly
                       onClick={() => pageRelated(-1)}
                       disabled={!canGoPrev}
                       aria-label="Previous related components"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                     >
                       <ArrowLeft weight="regular" size={15} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      iconOnly
                       onClick={() => pageRelated(1)}
                       disabled={!canGoNext}
                       aria-label="Next related components"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                     >
                       <ArrowRight weight="regular" size={15} />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

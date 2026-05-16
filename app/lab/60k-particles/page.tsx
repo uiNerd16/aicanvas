@@ -43,6 +43,7 @@ import {
 import { PresetSaveDialog } from '../_lib/preset/PresetSaveDialog'
 import { PresetMenu, type PresetSummary } from '../_lib/preset/PresetMenu'
 import { useSession } from '../../components/auth/SessionProvider'
+import { Button } from '../../components/Button'
 
 const MAX_RECORDING_MS = 20_000
 const TOOL = '60k-particles' as const
@@ -370,14 +371,10 @@ export default function ParticleMarkLabPage() {
                     onRename={onRenamePreset}
                     onDelete={onDeletePreset}
                   />
-                  <button
-                    type="button"
-                    onClick={() => gate.run('save-preset')}
-                    className="flex w-full items-center justify-center gap-2 rounded-md border border-sand-300 bg-transparent px-3 py-2 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
-                  >
+                  <Button variant="outline" size="md" fullWidth onClick={() => gate.run('save-preset')}>
                     <BookmarkSimple size={14} weight="regular" />
                     Save preset
-                  </button>
+                  </Button>
                 </div>
               </section>
 
@@ -577,35 +574,31 @@ export default function ParticleMarkLabPage() {
                 )}
 
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    size="md"
                     onClick={() => gate.run('export-png')}
                     disabled={recorder.state !== 'idle'}
-                    className="rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
                   >
                     Save PNG
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="md"
                     onClick={() => gate.run('export-webp')}
                     disabled={recorder.state !== 'idle'}
-                    className="rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
                   >
                     Save WebP
-                  </button>
+                  </Button>
                 </div>
 
                 {imageError && (
                   <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => gate.run('copy-code')}
-                  className="w-full rounded-md border border-sand-300 bg-transparent px-3 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-200 dark:hover:bg-sand-900"
-                >
+                <Button variant="outline" size="md" fullWidth onClick={() => gate.run('copy-code')}>
                   {copied ? 'Copied ✓' : 'Copy code (TSX)'}
-                </button>
+                </Button>
               </section>
             </div>
           </aside>

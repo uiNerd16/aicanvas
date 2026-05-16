@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '../lib/supabase/client'
 import { formatAuthError } from '../lib/auth-errors'
+import { Button } from '../components/Button'
 
 // Google's brand guidelines require the multicolor "G" mark, not a recolored
 // monochrome version. Inline SVG keeps the brand correct without an extra
@@ -41,15 +42,16 @@ export function GoogleSignInButton({ next, label = 'Continue with Google' }: { n
 
   return (
     <div>
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="md"
+        fullWidth
         onClick={handleClick}
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-sand-300 bg-sand-50 px-4 py-2.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sand-700 dark:bg-sand-950 dark:text-sand-200 dark:hover:bg-sand-800"
       >
         <GoogleGlyph />
         {submitting ? 'Redirecting…' : label}
-      </button>
+      </Button>
       {error && (
         <p className="mt-2 text-xs text-red-700 dark:text-red-300">{error}</p>
       )}
