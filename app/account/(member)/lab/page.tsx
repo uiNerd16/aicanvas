@@ -3,6 +3,7 @@ import { Flask } from '@phosphor-icons/react/dist/ssr'
 import { createClient } from '../../../lib/supabase/server'
 import type { SerializedParticleConfig } from '../../../lab/_lib/preset/serialize'
 import { LabPresetCard } from '../../../lab/_lib/preset/LabPresetCard'
+import { buttonClasses } from '../../../components/Button'
 
 // Made in Lab — lists the signed-in user's saved presets grouped by tool.
 // Each card links back to the matching /lab/<tool>?preset=<id> page where
@@ -93,7 +94,7 @@ function EmptyState() {
       <div className="mt-5">
         <Link
           href="/lab"
-          className="inline-flex items-center gap-2 rounded-md bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-600"
+          className={buttonClasses({ variant: 'primary', size: 'md' })}
         >
           Open LAB
         </Link>

@@ -3,6 +3,7 @@ import { createClient } from '../../../lib/supabase/server'
 import type { SavedComponent } from '../../../lib/supabase/types'
 import { COMPONENTS } from '../../../lib/component-registry'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
+import { buttonClasses } from '../../../components/Button'
 import { SavedList, type SavedRow } from './SavedList'
 
 export default async function SavedPage() {
@@ -36,7 +37,7 @@ export default async function SavedPage() {
         </p>
         <Link
           href="/components"
-          className="mt-4 inline-block rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+          className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'md' })}`}
         >
           Browse components
         </Link>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
 import { PasswordInput } from '../PasswordInput'
+import { Button, buttonClasses } from '../../components/Button'
 import { AuthPagePopup } from '../AuthPagePopup'
 
 // ─── ResetPasswordForm ───────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ export function ResetPasswordForm({ hasRecoveryMarker }: Props) {
         </p>
         <Link
           href="/account/forgot-password"
-          className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+          className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'md', fullWidth: true })}`}
         >
           Send me a recovery link
         </Link>
@@ -133,13 +134,15 @@ export function ResetPasswordForm({ hasRecoveryMarker }: Props) {
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          size="md"
+          fullWidth
           disabled={submitting}
-          className="w-full rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? 'Updating…' : 'Update password'}
-        </button>
+        </Button>
       </form>
     </AuthPagePopup>
   )

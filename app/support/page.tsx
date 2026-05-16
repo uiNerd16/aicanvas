@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { GithubLogo, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
+import { buttonClasses } from '../components/Button'
 
 // ─── Hey translations ──────────────────────────────────────────────────────────
 
@@ -134,7 +135,7 @@ export default function SupportPage() {
           </a>
           <Link
             href="/mcp"
-            className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-olive-500 px-3 py-2 text-xs font-semibold text-sand-950 transition-all hover:bg-olive-400 active:scale-[0.97]"
+            className={`ml-1 ${buttonClasses({ variant: 'primary', size: 'xs' })}`}
           >
             <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
             Get MCP
@@ -168,7 +169,7 @@ export default function SupportPage() {
               href="https://ko-fi.com/aicanvasme"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-olive-500 px-5 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              className={buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}
             >
               <KofiLogo className="shrink-0" />
               Ko-fi
