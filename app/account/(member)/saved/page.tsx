@@ -37,7 +37,7 @@ export default async function SavedPage() {
         </p>
         <Link
           href="/components"
-          className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'md' })}`}
+          className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'sm' })}`}
         >
           Browse components
         </Link>

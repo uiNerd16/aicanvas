@@ -192,7 +192,7 @@ function EmptyState() {
       </p>
       <Link
         href="/components"
-        className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'md' })}`}
+        className={`mt-4 ${buttonClasses({ variant: 'primary', size: 'sm' })}`}
       >
         Browse components
       </Link>
@@ -227,11 +227,11 @@ function FilteredEmptyState({ onReset }: { onReset: () => void }) {
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
         <Link
           href="/components"
-          className={buttonClasses({ variant: 'primary', size: 'xs' })}
+          className={buttonClasses({ variant: 'primary', size: 'sm' })}
         >
           Browse components
         </Link>
-        <Button variant="outline" size="xs" onClick={onReset}>
+        <Button variant="outline" size="sm" onClick={onReset}>
           Show all
         </Button>
       </div>
@@ -296,13 +296,13 @@ function FolderTabs({
             )}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Button variant="outline" size="xs" onClick={() => setConfirmDelete(null)}>
+            <Button variant="outline" size="sm" onClick={() => setConfirmDelete(null)}>
               Cancel
             </Button>
             <Button
               variant="destructive"
               tone="solid"
-              size="xs"
+              size="sm"
               onClick={() => { onDelete(confirmDelete); setConfirmDelete(null) }}
             >
               Delete folder
