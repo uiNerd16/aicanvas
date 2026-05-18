@@ -1,26 +1,72 @@
 'use client'
 
-// Snapshot the WebGL canvas to a downloadable image. Both formats are
-// lossless: PNG by definition, WebP at quality 1.0 (the spec's lossless
-// mode). Files are produced from the canvas's current pixel buffer, so
-// the snapshot matches exactly what you see on screen — no encoder
-// artefacts, no colour-space squash.
+// Snapshot the WebGL canvas to a downloadable PNG at a fixed canonical size
+// (matches the video recorder's resolution lock). Source pixels are drawn
+// into an offscreen 2D canvas of the requested size, letterboxed to preserve
+// aspect — so 1x and 2x always produce predictable 16:9 dimensions
+// regardless of the live preview pane's size or the user's display DPR.
+//
+// PNG is always lossless, so no quality knob is exposed.
 
-export type ImageFormat = 'png' | 'webp'
+export type ImageScale = '1x' | '2x'
+
+const SCALE_DIMENSIONS: Record<ImageScale, { width: number; height: number }> = {
+  '1x': { width: 1920, height: 1080 },
+  '2x': { width: 3840, height: 2160 },
+}
+
+export function getImageDimensions(scale: ImageScale) {
+  return SCALE_DIMENSIONS[scale]
+}
+
+function computeFit(srcW: number, srcH: number, dstW: number, dstH: number) {
+  if (srcW <= 0 || srcH <= 0) return { x: 0, y: 0, w: dstW, h: dstH }
+  const srcAspect = srcW / srcH
+  const dstAspect = dstW / dstH
+  if (srcAspect > dstAspect) {
+    const w = dstW
+    const h = Math.round(dstW / srcAspect)
+    return { x: 0, y: Math.round((dstH - h) / 2), w, h }
+  }
+  const h = dstH
+  const w = Math.round(dstH * srcAspect)
+  return { x: Math.round((dstW - w) / 2), y: 0, w, h }
+}
 
 export async function exportCanvasImage(
   canvas: HTMLCanvasElement,
-  format: ImageFormat,
+  scale: ImageScale,
   filename: string,
 ): Promise<void> {
-  const mime = format === 'png' ? 'image/png' : 'image/webp'
-  // Spec: quality > 0.99 selects lossless WebP. Ignored for PNG.
-  const quality = format === 'webp' ? 1.0 : undefined
+  const { width, height } = SCALE_DIMENSIONS[scale]
+
+  // Settle the WebGL pipeline before reading. Same fix the recorder uses —
+  // prevents the compositor from handing us a stale GPU texture (which can
+  // bleed in a neighbouring DOM element's content as a single-frame ghost).
+  const gl =
+    (canvas.getContext('webgl2') as WebGL2RenderingContext | null) ??
+    (canvas.getContext('webgl') as WebGLRenderingContext | null)
+  gl?.finish()
+
+  const target = document.createElement('canvas')
+  target.width = width
+  target.height = height
+  const ctx = target.getContext('2d', {
+    alpha: false,
+    colorSpace: 'srgb',
+    desynchronized: true,
+  })
+  if (!ctx) throw new Error('Failed to create offscreen 2D context for image export')
+
+  const fit = computeFit(canvas.width, canvas.height, width, height)
+  // alpha:false means clearRect paints opaque black — that's the letterbox.
+  ctx.clearRect(0, 0, width, height)
+  ctx.drawImage(canvas, fit.x, fit.y, fit.w, fit.h)
 
   const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, mime, quality)
+    target.toBlob(resolve, 'image/png')
   })
-  if (!blob) throw new Error(`Failed to export ${format.toUpperCase()} from canvas`)
+  if (!blob) throw new Error('Failed to export PNG from canvas')
 
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

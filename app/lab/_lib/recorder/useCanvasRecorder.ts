@@ -233,55 +233,63 @@ export function useCanvasRecorder() {
    * Hand off the recording at the user's chosen fps. The captured fps is
    * downloaded as-is (instant); any other fps runs through MediaBunny's
    * Conversion API, which re-encodes at the new frame rate.
+   *
+   * Fire-and-forget: this returns immediately for the fast path and
+   * runs the transcode in the background for the slow path. Pending state
+   * is NOT cleared here — callers (the popup) close themselves on a short
+   * timer after invoking this, so the user gets a quick acknowledgement
+   * and the file appears in their downloads when the transcode finishes.
+   * Any error from a background transcode surfaces via `error` state.
    */
   const downloadRecording = useCallback(
-    async (targetFps: number) => {
+    (targetFps: number) => {
       const rec = pending
       if (!rec) return
       const mime = 'video/mp4'
       const filenameFor = (fps: number) => `${rec.baseFilename}-${fps}fps.mp4`
 
-      // Fast path: user picked the fps we already encoded at.
+      // Fast path: user picked the fps we already encoded at. Instant.
       if (targetFps === rec.sourceFps) {
         triggerDownload(new Blob([rec.buffer], { type: mime }), filenameFor(targetFps))
-        setPending(null)
         return
       }
 
-      // Re-encode path. Build a fresh Input from the in-memory buffer, run a
-      // Conversion that targets the new frame rate, then download the result.
+      // Slow path: re-encode at the new fps in the background. Buffer is
+      // captured into the closure, so dismissing `pending` while this runs
+      // doesn't break anything.
       setTranscoding(true)
       setError(null)
-      try {
-        const input = new Input({
-          source: new BufferSource(rec.buffer),
-          formats: ALL_FORMATS,
-        })
-        const output = new Output({
-          format: new Mp4OutputFormat({ fastStart: 'in-memory' }),
-          target: new BufferTarget(),
-        })
-        const conversion = await Conversion.init({
-          input,
-          output,
-          video: {
-            codec: 'avc',
-            frameRate: targetFps,
-            // Match the bitrate formula used during capture so quality is
-            // comparable. 30fps at the same bpp will be ~half the bitrate.
-            bitrate: computeBitrate(OUTPUT_WIDTH, OUTPUT_HEIGHT, targetFps),
-          },
-        })
-        await conversion.execute()
-        const buf = output.target.buffer
-        if (!buf) throw new Error('Re-encode produced no output')
-        triggerDownload(new Blob([buf], { type: mime }), filenameFor(targetFps))
-        setPending(null)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e))
-      } finally {
-        setTranscoding(false)
-      }
+      ;(async () => {
+        try {
+          const input = new Input({
+            source: new BufferSource(rec.buffer),
+            formats: ALL_FORMATS,
+          })
+          const output = new Output({
+            format: new Mp4OutputFormat({ fastStart: 'in-memory' }),
+            target: new BufferTarget(),
+          })
+          const conversion = await Conversion.init({
+            input,
+            output,
+            video: {
+              codec: 'avc',
+              frameRate: targetFps,
+              // Match the bitrate formula used during capture so quality
+              // is comparable. 30fps at the same bpp is ~half the bitrate.
+              bitrate: computeBitrate(OUTPUT_WIDTH, OUTPUT_HEIGHT, targetFps),
+            },
+          })
+          await conversion.execute()
+          const buf = output.target.buffer
+          if (!buf) throw new Error('Re-encode produced no output')
+          triggerDownload(new Blob([buf], { type: mime }), filenameFor(targetFps))
+        } catch (e) {
+          setError(e instanceof Error ? e.message : String(e))
+        } finally {
+          setTranscoding(false)
+        }
+      })()
     },
     [pending],
   )
