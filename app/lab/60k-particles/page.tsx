@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Renderer from '../_lib/particleMark/Renderer'
 import { useCanvasRecorder } from '../_lib/recorder/useCanvasRecorder'
+import { RecordingDownloadDialog } from '../_lib/recorder/RecordingDownloadDialog'
 import { exportCanvasImage, type ImageFormat } from '../_lib/recorder/exportImage'
 import {
   type Config,
@@ -378,7 +379,10 @@ export default function ParticleMarkLabPage() {
                 60K Particles
               </h1>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sand-500 dark:text-sand-500">
-                Turn any SVG into interactive particles
+                Animate by mouse
+              </p>
+              <p className="mt-2 text-[13px] leading-snug text-sand-600 dark:text-sand-400">
+                Drop an SVG or PNG. Move your mouse to animate the scene. Hit Record MP4, no keyframes needed.
               </p>
             </header>
 
@@ -674,6 +678,16 @@ export default function ParticleMarkLabPage() {
         description="Give this preset a new name."
         submitLabel="Rename"
         submittingLabel="Renaming…"
+      />
+
+      <RecordingDownloadDialog
+        isOpen={recorder.pending !== null}
+        sourceSizeBytes={recorder.pending?.sizeBytes ?? 0}
+        durationSec={recorder.pending?.durationSec ?? 0}
+        transcoding={recorder.transcoding}
+        error={recorder.error}
+        onDownload={(fps) => void recorder.downloadRecording(fps)}
+        onCancel={recorder.dismissRecording}
       />
     </>
   )
