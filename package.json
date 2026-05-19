@@ -13,7 +13,8 @@
     "screenshot": "node scripts/screenshot.mjs",
     "validate:registry": "npx ts-node scripts/validate-registry-json.ts",
     "gsc:audit": "npx ts-node scripts/gsc-audit.ts",
-    "gsc:submit": "npx ts-node scripts/gsc-submit.ts"
+    "gsc:submit": "npx ts-node scripts/gsc-submit.ts",
+    "gsc:keywords": "npx ts-node scripts/gsc-keywords.ts"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.78.0",
