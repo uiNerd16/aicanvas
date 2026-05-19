@@ -74,11 +74,13 @@ export function deserializeParticleConfig(
   let imageFile: File | null = null
   let imageUrl: string | null = null
 
-  if (serialized.imageDataUrl && serialized.svgFileName) {
-    const blob = dataUrlToBlob(serialized.imageDataUrl, serialized.imageMimeType ?? 'image/png')
-    imageFile = new File([blob], serialized.svgFileName, {
-      type: serialized.imageMimeType ?? 'image/png',
-    })
+  if (serialized.imageDataUrl) {
+    const mime = serialized.imageMimeType ?? 'image/png'
+    const blob = dataUrlToBlob(serialized.imageDataUrl, mime)
+    // svgFileName is only set for SVG uploads; rasters fall back to a generic
+    // name so the File is still constructable and the preview can mount.
+    const filename = serialized.svgFileName ?? 'preset-image'
+    imageFile = new File([blob], filename, { type: mime })
     imageUrl = URL.createObjectURL(blob)
   }
 

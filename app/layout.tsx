@@ -125,10 +125,19 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} h-full antialiased`}
+      // `dark` is in the server-rendered className so SSR HTML already
+      // matches what ThemeProvider sets client-side. Without it, the inline
+      // <head> script adds `dark` pre-paint, but React's hydration pass
+      // reconciles the html className back to JSX → strips `dark` for one
+      // frame → ThemeProvider's effect re-adds it. That round-trip is the
+      // visible dark → light → dark flash on refresh.
+      className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} dark h-full antialiased`}
     >
-      {/* Apply saved theme before first paint to prevent flash */}
       <head>
+        {/* Defense-in-depth: extension scripts or future theme toggles might
+            mutate the class before hydration. Re-asserting `dark` in the
+            head script keeps the live DOM correct even if something else
+            stripped it. */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark')` }} />
         <script
           type="application/ld+json"

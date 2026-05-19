@@ -79,7 +79,10 @@ const SVG_BASE64 = '${svgB64}'
   const imgLoad = isRaster
     ? `  let img: HTMLImageElement
   try { img = await loadImage(src) } catch { return { positions, colors } }`
-    : `  const svgText = atob(SVG_BASE64)
+    : `  // Inverse of the base64 encode in the LAB exporter — round-trips UTF-8
+  // so SVGs with non-ASCII characters (e.g. embedded foreign-language text)
+  // restore byte-for-byte.
+  const svgText = decodeURIComponent(escape(atob(SVG_BASE64)))
   let img: HTMLImageElement
   try { img = await loadSvg(svgText) } catch { return { positions, colors } }`
 
@@ -348,13 +351,22 @@ ${fieldSignature} {
 }
 
 ${sceneSignature} {
+  // Canvas is opaque (alpha: false) + the chosen bg as clear-colour. A
+  // transparent WebGL canvas takes the OS's wide-gamut composite path on
+  // macOS, which screen recorders clip back to sRGB — recordings end up
+  // duller than the live view. Forcing opaque keeps one sRGB path.
+  // preserveDrawingBuffer lets WebCodecs / canvas.toBlob read pixels after
+  // compositing — without it captures come out black.
   return (
     <Canvas
       dpr={[1, 2]}
       camera={{ position: [0, 0, 4.5], fov: 38 }}
-      onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
-      gl={{ antialias: true, alpha: true }}
-      style={{ touchAction: 'none', background: 'transparent' }}
+      onCreated={({ camera, gl }) => {
+        camera.lookAt(0, 0, 0)
+        gl.setClearColor(BG_COLOR, 1)
+      }}
+      gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
+      style={{ touchAction: 'none' }}
     >
       ${fieldRender}
     </Canvas>
