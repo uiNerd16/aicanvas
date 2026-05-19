@@ -137,6 +137,8 @@ import SignaturePad from '../../components-workspace/signature-pad'
 import { prompts as signaturePadPrompts } from '../../components-workspace/signature-pad/prompts'
 import CuriousAi from '../../components-workspace/curious-ai'
 import { prompts as curiousAiPrompts } from '../../components-workspace/curious-ai/prompts'
+import CubeCarousel from '../../components-workspace/cube-carousel'
+import { prompts as cubeCarouselPrompts } from '../../components-workspace/cube-carousel/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1267,6 +1269,21 @@ Requirements:
     PreviewComponent: CuriousAi,
     code: componentCodes['curious-ai'],
     prompts: curiousAiPrompts,
+  },
+  {
+    slug: 'cube-carousel',
+    name: 'Cube Carousel',
+    description: 'An interactive 3D photo cube with six placeholder images on its faces. Drag with your cursor to spin it freely on both axes; release and it coasts naturally to a stop. No buttons, no snap, no controls, just the cube and your hand.',
+    tags: [
+      { label: '3D & Shaders', accent: true },
+      { label: 'Interactive' },
+      { label: 'Framer Motion' },
+    ],
+    dualTheme: true,
+    image: 'https://ik.imagekit.io/aitoolkit/cube-carousel.png',
+    PreviewComponent: CubeCarousel,
+    code: componentCodes['cube-carousel'],
+    prompts: cubeCarouselPrompts,
   },
 ]
 
