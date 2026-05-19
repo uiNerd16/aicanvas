@@ -81,21 +81,19 @@ export default function ParticleMarkLabPage() {
   const recorder = useCanvasRecorder()
   const { start: startRecording, stop: stopRecording, state: recorderState } = recorder
 
-  // Preload the default source image (the AI Canvas mark parrot) once on
-  // first mount. Skipped if a source is already set — that happens when a
-  // preset / auth-gate handoff hydrated the page before this effect ran.
-  // The `<File>` constructor only exists client-side, so the default can't
-  // sit in the module-level DEFAULT_CONFIG.
-  const defaultImageLoadedRef = useRef(false)
+  // Preload the default source image (the AI Canvas mark parrot) on first
+  // mount. Skipped once a source is set (preset / auth-gate handoff, user
+  // upload, or the default itself once it lands). The effect's own dep
+  // condition handles the "don't refetch" guard — no extra ref is needed,
+  // and adding one breaks React 19 StrictMode (the ref persists across
+  // dev's mount/unmount/remount cycle while the cleanup cancels the first
+  // mount's fetch, so the second mount short-circuits with nothing
+  // applied). The `<File>` constructor only exists client-side, so the
+  // default can't sit in the module-level DEFAULT_CONFIG.
   useEffect(() => {
-    if (defaultImageLoadedRef.current) return
-    if (config.imageFile || config.svgSource) {
-      defaultImageLoadedRef.current = true
-      return
-    }
-    defaultImageLoadedRef.current = true
+    if (config.imageFile || config.svgSource) return
     let cancelled = false
-    fetch('/lab/ai-canvas-mark.png')
+    fetch('/lab/ai-canvas-mark.webp')
       .then((r) => {
         if (!r.ok) throw new Error(`default image fetch failed (${r.status})`)
         return r.blob()
@@ -103,7 +101,7 @@ export default function ParticleMarkLabPage() {
       .then((blob) => {
         if (cancelled) return
         const file = new File([blob], 'ai-canvas.webp', {
-          type: blob.type || 'image/png',
+          type: blob.type || 'image/webp',
         })
         const url = URL.createObjectURL(blob)
         setConfig((prev) => {
