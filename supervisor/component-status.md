@@ -57,3 +57,4 @@
 | flip-grid | deleted | Removed by user request |
 | liquid-button | deleted | Removed by user request |
 | scatter-field | deleted | Removed by user request |
+| pivot-cube | built | 3D image cube, 6 picsum faces with caption tags, drag on X+Y, snap to nearest 90° per axis, 4 directional chevrons (44×44 touch), hover lift + shadow deepen, raw hex tokens for chrome, dualTheme — inspired-by rewrite of @fancy/box-carousel (not copied) |
