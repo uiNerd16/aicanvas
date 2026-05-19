@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { COMPONENTS } from './lib/component-registry'
+import { CATEGORIES } from './lib/categories'
 import { SITE_URL } from './lib/config'
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -8,6 +9,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.8,
+  }))
+
+  const categoryPages: MetadataRoute.Sitemap = CATEGORIES.map((c) => ({
+    url: `${SITE_URL}/components/category/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.85,
   }))
 
   return [
@@ -29,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    ...categoryPages,
     ...componentPages,
   ]
 }

@@ -7,23 +7,13 @@ import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, Git
 import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
+import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { buttonClasses } from './Button'
 
 // ── Tier structure ────────────────────────────────────────────────────────
-// Hardcoded so the ordering is predictable. Every label here must correspond
-// to an `accent: true` tag on at least one component in the registry.
-const COMPONENTS_LABELS = [
-  'Backgrounds',
-  'Buttons & Toggles',
-  'Navigation',
-  'Widgets',
-  'Cards & Modals',
-  'Inputs & Controls',
-  'Notifications',
-  'Typography',
-  'Glass',
-  '3D & Shaders',
-] as const
+// Ordering comes from the shared categories config so the sidebar, the
+// /components/category/[slug] route, and the sitemap stay in lockstep.
+const COMPONENTS_LABELS = CATEGORIES.map((c) => c.label)
 
 type Section = {
   title: string
@@ -49,7 +39,17 @@ export function Sidebar() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const isHome = pathname === '/components'
-  const activeCategory = isHome ? (searchParams.get('category') ?? 'All Components') : null
+  // Active category resolves from the path first (canonical
+  // /components/category/<slug>), then falls back to the legacy ?category=
+  // query param so old bookmarks still highlight correctly.
+  const categoryFromPath = pathname?.startsWith('/components/category/')
+    ? pathname.replace('/components/category/', '')
+    : null
+  const activeCategory = categoryFromPath
+    ? CATEGORIES.find((c) => c.slug === categoryFromPath)?.label ?? null
+    : isHome
+      ? (searchParams.get('category') ?? 'All Components')
+      : null
 
   // Hide the global sidebar on design-system preview routes so the design
   // system gets the full viewport. Also hidden on /ideation/* — that subtree
@@ -224,7 +224,10 @@ export function Sidebar() {
                 <ul className="space-y-0.5">
                   {section.labels.map((label) => {
                     const isActive = label === activeCategory
-                    const href = `/components?category=${encodeURIComponent(label)}`
+                    const cat = getCategoryByLabel(label)
+                    const href = cat
+                      ? `/components/category/${cat.slug}`
+                      : `/components?category=${encodeURIComponent(label)}`
                     const count = countByLabel(label)
                     return (
                       <li key={label}>
