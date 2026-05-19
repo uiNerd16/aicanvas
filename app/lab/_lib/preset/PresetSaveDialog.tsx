@@ -128,7 +128,7 @@ export function PresetSaveDialog({
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" size="md" onClick={onCancel}>
+            <Button type="button" variant="outline" size="md" onClick={onCancel}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" size="md" disabled={saving}>
