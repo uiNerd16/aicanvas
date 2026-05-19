@@ -43,6 +43,9 @@ export async function exportCanvasImage(
   // Settle the WebGL pipeline before reading. Same fix the recorder uses —
   // prevents the compositor from handing us a stale GPU texture (which can
   // bleed in a neighbouring DOM element's content as a single-frame ghost).
+  // Browsers return the original context type only; once a canvas was
+  // created as webgl, asking for webgl2 returns null (and vice versa).
+  // Probe both — whichever was originally created hands us back the live ctx.
   const gl =
     (canvas.getContext('webgl2') as WebGL2RenderingContext | null) ??
     (canvas.getContext('webgl') as WebGLRenderingContext | null)

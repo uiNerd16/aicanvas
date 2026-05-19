@@ -183,7 +183,7 @@ function DownloadCard({
   sizeHint,
   icon,
   badge,
-  disabled,
+  disabled = false,
   onClick,
 }: {
   label: string
@@ -191,7 +191,7 @@ function DownloadCard({
   sizeHint: string
   icon: React.ReactNode
   badge?: string
-  disabled: boolean
+  disabled?: boolean
   onClick: () => void
 }) {
   return (

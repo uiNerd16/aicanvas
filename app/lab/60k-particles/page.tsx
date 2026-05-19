@@ -36,7 +36,7 @@ import { Segmented } from '../_lib/particleMark/controls/Segmented'
 import { Slider } from '../_lib/particleMark/controls/Slider'
 import { ColorInput } from '../_lib/particleMark/controls/ColorInput'
 import { FileDrop } from '../_lib/particleMark/controls/FileDrop'
-import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple, DotsThreeVertical, Check } from '@phosphor-icons/react'
+import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple, CaretDown, Check } from '@phosphor-icons/react'
 import { useLabAuthGate } from '../_lib/useLabAuthGate'
 import {
   serializeParticleConfig,
@@ -105,6 +105,9 @@ export default function ParticleMarkLabPage() {
   const [presetsLoading, setPresetsLoading] = useState(false)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [renameTarget, setRenameTarget] = useState<{ id: string; currentName: string } | null>(null)
+  // Captured when the Save dialog opens so the suggested name doesn't drift
+  // on every parent re-render while the dialog is on screen.
+  const [saveDefaultName, setSaveDefaultName] = useState('')
 
   const onCanvasReady = useCallback((c: HTMLCanvasElement | null) => {
     canvasRef.current = c
@@ -113,9 +116,12 @@ export default function ParticleMarkLabPage() {
   const onSaveImage = useCallback(async (scale: ImageScale) => {
     if (!canvasRef.current) return
     setImageError(null)
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+    // Filename convention: `aicanvas-<name>-<format/spec>.<ext>`. Brand prefix
+    // is unspaced so it reads as one token; the name keeps its readable spaces.
+    const resolution = scale === '2x' ? '3840x2160' : '1920x1080'
+    const spec = `PNGx${scale === '2x' ? '2' : '1'}-${resolution}`
     try {
-      await exportCanvasImage(canvasRef.current, scale, `60k-particles-${stamp}-${scale}.png`)
+      await exportCanvasImage(canvasRef.current, scale, `aicanvas-it's possible-${spec}.png`)
       setImageSaved(true)
       setTimeout(() => setImageSaved(false), 1500)
     } catch (e) {
@@ -129,9 +135,11 @@ export default function ParticleMarkLabPage() {
       return
     }
     if (!canvasRef.current) return
+    // Recorder appends `-<fps>fps` to the base name automatically, so the final
+    // download lands as `aicanvas-it's possible-60fps.mp4`.
     startRecording(canvasRef.current, {
       fps: 60,
-      filename: `60k-particles-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.mp4`,
+      filename: 'aicanvas-it's possible.mp4',
       colorBoost: true,
       maxDurationMs: MAX_RECORDING_MS,
     })
@@ -173,7 +181,10 @@ export default function ParticleMarkLabPage() {
       'export-png-2x': () => onSaveImage('2x'),
       'record':        () => onRecord(),
       'copy-code':     () => onCopy(),
-      'save-preset':   () => setSaveDialogOpen(true),
+      'save-preset':   () => {
+        setSaveDefaultName(`Untitled · ${new Date().toLocaleString()}`)
+        setSaveDialogOpen(true)
+      },
     },
   })
 
@@ -315,11 +326,6 @@ export default function ParticleMarkLabPage() {
     })
   }, [])
 
-  // The renderer rebuilds geometry whenever density/depth/svg changes — these
-  // are the inputs that require a resample. Everything else updates uniforms
-  // in place.
-  const rendererConfig = useMemo(() => config, [config])
-
   const presetSummaries: PresetSummary[] = useMemo(
     () => presets.map(({ id, name, updated_at }) => ({ id, name, updated_at })),
     [presets],
@@ -376,7 +382,7 @@ export default function ParticleMarkLabPage() {
       <main className="flex min-h-0 flex-1 flex-col bg-sand-200 dark:bg-sand-950">
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
           <section className="relative flex w-full flex-col overflow-hidden md:min-w-0 md:flex-1">
-            <CanvasArea config={rendererConfig} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
+            <CanvasArea config={config} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
             {/* Bottom-of-canvas Record strip — centred over the live preview
                 rather than the full viewport, so it stays put when the
                 sidebar's width changes. */}
@@ -399,11 +405,8 @@ export default function ParticleMarkLabPage() {
               <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
                 60K Particles
               </h1>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sand-500 dark:text-sand-500">
-                Animate by mouse
-              </p>
               <p className="mt-2 text-[13px] leading-snug text-sand-600 dark:text-sand-400">
-                Drop an SVG or PNG. Move your mouse to animate the scene. Hit Record MP4, no keyframes needed.
+                Drop an SVG or PNG. Move your mouse to animate the scene. Export PNG • Export MP4 • Copy Code
               </p>
             </header>
 
@@ -596,14 +599,21 @@ export default function ParticleMarkLabPage() {
                 <SectionLabel>Export</SectionLabel>
                 <div className="relative" ref={exportMenuRef}>
                   <Button
-                    variant="outline"
+                    variant="primary"
                     size="xs"
                     fullWidth
                     onClick={() => setExportMenuOpen((o) => !o)}
+                    className="relative"
                   >
                     {imageSaved && <Check weight="regular" size={12} />}
                     {imageSaved ? 'Saved!' : 'Save image'}
-                    {!imageSaved && <DotsThreeVertical weight="bold" size={12} className="ml-auto" />}
+                    {!imageSaved && (
+                      <CaretDown
+                        weight="regular"
+                        size={12}
+                        className={`absolute right-3 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`}
+                      />
+                    )}
                   </Button>
                   {exportMenuOpen && (
                     <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
@@ -667,7 +677,7 @@ export default function ParticleMarkLabPage() {
 
       <PresetSaveDialog
         isOpen={saveDialogOpen}
-        defaultName={`Untitled · ${new Date().toLocaleString()}`}
+        defaultName={saveDefaultName}
         onSave={onSavePreset}
         onCancel={() => setSaveDialogOpen(false)}
       />

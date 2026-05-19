@@ -428,8 +428,11 @@ export function useCanvasRecorder() {
         // the page wrapper), where the optimizer is more willing to short-
         // circuit and a bright neighbouring texture bleeds in as a single-
         // frame flash.
+        // Browsers return the original context type only; once a canvas was
+        // created as webgl, asking for webgl2 returns null (and vice versa).
+        // Try both and use whichever the canvas was created with.
         const gl =
-          (s.webglCanvas.getContext('webgl2') as WebGL2RenderingContext | null) ??
+          (s.webglCanvas.getContext('webgl2') as WebGL2RenderingContext | null) ||
           (s.webglCanvas.getContext('webgl') as WebGLRenderingContext | null)
         gl?.finish()
 
@@ -467,9 +470,8 @@ export function useCanvasRecorder() {
             if (cur === s) cur.readyForMoreFrames = true
           },
           (e: unknown) => {
-            // Loud about silent rejections — they otherwise show up as
+            // Loud about silent rejections so they don't show up as
             // recordings stopping mid-capture for no visible reason.
-            // eslint-disable-next-line no-console
             console.error('[recorder] mediabunny add() rejected:', e, {
               frameIndex: s.frameIndex,
               timestampSec: t,
@@ -483,7 +485,6 @@ export function useCanvasRecorder() {
             }
           },
         )
-        s.frameIndex += 1
         s.rafId = requestAnimationFrame(captureFrame)
       }
 
@@ -517,7 +518,7 @@ export function useCanvasRecorder() {
       setState('recording')
       startingRef.current = false
     },
-    [cleanup, stop],
+    [stop],
   )
 
   return {
