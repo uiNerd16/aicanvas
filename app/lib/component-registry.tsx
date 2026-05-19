@@ -137,8 +137,8 @@ import SignaturePad from '../../components-workspace/signature-pad'
 import { prompts as signaturePadPrompts } from '../../components-workspace/signature-pad/prompts'
 import CuriousAi from '../../components-workspace/curious-ai'
 import { prompts as curiousAiPrompts } from '../../components-workspace/curious-ai/prompts'
-import PivotCube from '../../components-workspace/pivot-cube'
-import { prompts as pivotCubePrompts } from '../../components-workspace/pivot-cube/prompts'
+import CubeCarousel from '../../components-workspace/cube-carousel'
+import { prompts as cubeCarouselPrompts } from '../../components-workspace/cube-carousel/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1271,19 +1271,19 @@ Requirements:
     prompts: curiousAiPrompts,
   },
   {
-    slug: 'pivot-cube',
-    name: 'Pivot Cube',
-    description: 'A 3D image cube that rotates on both X and Y axes via drag, snapping to whichever of its six faces lands nearest the front.',
+    slug: 'cube-carousel',
+    name: 'Cube Carousel',
+    description: 'An interactive 3D photo cube with six placeholder images on its faces. Drag with your cursor to spin it freely on both axes; release and it coasts naturally to a stop. No buttons, no snap, no controls, just the cube and your hand.',
     tags: [
       { label: '3D & Shaders', accent: true },
       { label: 'Interactive' },
       { label: 'Framer Motion' },
     ],
     dualTheme: true,
-    image: '',
-    PreviewComponent: PivotCube,
-    code: componentCodes['pivot-cube'],
-    prompts: pivotCubePrompts,
+    image: 'https://ik.imagekit.io/aitoolkit/cube-carousel.png',
+    PreviewComponent: CubeCarousel,
+    code: componentCodes['cube-carousel'],
+    prompts: cubeCarouselPrompts,
   },
 ]
 
