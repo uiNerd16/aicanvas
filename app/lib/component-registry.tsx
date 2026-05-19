@@ -137,6 +137,8 @@ import SignaturePad from '../../components-workspace/signature-pad'
 import { prompts as signaturePadPrompts } from '../../components-workspace/signature-pad/prompts'
 import CuriousAi from '../../components-workspace/curious-ai'
 import { prompts as curiousAiPrompts } from '../../components-workspace/curious-ai/prompts'
+import PivotCube from '../../components-workspace/pivot-cube'
+import { prompts as pivotCubePrompts } from '../../components-workspace/pivot-cube/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1267,6 +1269,21 @@ Requirements:
     PreviewComponent: CuriousAi,
     code: componentCodes['curious-ai'],
     prompts: curiousAiPrompts,
+  },
+  {
+    slug: 'pivot-cube',
+    name: 'Pivot Cube',
+    description: 'A 3D image cube that rotates on both X and Y axes via drag, snapping to whichever of its six faces lands nearest the front.',
+    tags: [
+      { label: '3D & Shaders', accent: true },
+      { label: 'Interactive' },
+      { label: 'Framer Motion' },
+    ],
+    dualTheme: true,
+    image: '',
+    PreviewComponent: PivotCube,
+    code: componentCodes['pivot-cube'],
+    prompts: pivotCubePrompts,
   },
 ]
 
