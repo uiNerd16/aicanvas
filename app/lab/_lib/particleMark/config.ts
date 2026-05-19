@@ -56,18 +56,22 @@ export interface Config {
 }
 
 export const DEFAULT_CONFIG: Config = {
+  // Source is preloaded client-side from /lab/ai-canvas-mark.png on first
+  // mount of the 60K Particles page (see ParticleMarkLabPage). Module-level
+  // defaults can't hold a File, so the slots start null and the page fills
+  // them in after fetching the default image.
   svgSource: null,
   svgFileName: null,
   imageFile: null,
   imageUrl: null,
-  density: 28000,
-  particleSize: 5.5,
-  markSize: 1.5,
+  density: 31000,
+  particleSize: 4.5,
+  markSize: 1.85,
   colorMode: 'Original',
   monoColor: '#A8B94D',
   backgroundColor: '#121212',
-  idle: 'Calm',
-  hoverArea: 'Medium',
+  idle: 'Still',
+  hoverArea: 'Large',
   hoverStrength: 1.4,
   spring: 'Smooth',
   light: 'None',

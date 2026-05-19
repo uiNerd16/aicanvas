@@ -81,6 +81,56 @@ export default function ParticleMarkLabPage() {
   const recorder = useCanvasRecorder()
   const { start: startRecording, stop: stopRecording, state: recorderState } = recorder
 
+  // Preload the default source image (the AI Canvas mark parrot) once on
+  // first mount. Skipped if a source is already set — that happens when a
+  // preset / auth-gate handoff hydrated the page before this effect ran.
+  // The `<File>` constructor only exists client-side, so the default can't
+  // sit in the module-level DEFAULT_CONFIG.
+  const defaultImageLoadedRef = useRef(false)
+  useEffect(() => {
+    if (defaultImageLoadedRef.current) return
+    if (config.imageFile || config.svgSource) {
+      defaultImageLoadedRef.current = true
+      return
+    }
+    defaultImageLoadedRef.current = true
+    let cancelled = false
+    fetch('/lab/ai-canvas-mark.png')
+      .then((r) => {
+        if (!r.ok) throw new Error(`default image fetch failed (${r.status})`)
+        return r.blob()
+      })
+      .then((blob) => {
+        if (cancelled) return
+        const file = new File([blob], 'ai-canvas.webp', {
+          type: blob.type || 'image/png',
+        })
+        const url = URL.createObjectURL(blob)
+        setConfig((prev) => {
+          // Re-check inside the updater: if a preset / auth handoff landed
+          // between the fetch start and this resolve, leave it alone and
+          // free the object URL we just allocated.
+          if (prev.imageFile || prev.svgSource) {
+            URL.revokeObjectURL(url)
+            return prev
+          }
+          return {
+            ...prev,
+            imageFile: file,
+            imageUrl: url,
+            svgSource: null,
+            svgFileName: null,
+          }
+        })
+      })
+      .catch(() => {
+        // Silent — the renderer falls back to the inline PLACEHOLDER_SVG.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [config.imageFile, config.svgSource])
+
   // Close the Save image dropdown on outside click or Escape.
   useEffect(() => {
     if (!exportMenuOpen) return
