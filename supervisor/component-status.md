@@ -57,4 +57,4 @@
 | flip-grid | deleted | Removed by user request |
 | liquid-button | deleted | Removed by user request |
 | scatter-field | deleted | Removed by user request |
-| cube-carousel | awaiting-commit | 3D photo cube (W:H:D = 16:9:9), 6 Unsplash faces with inset vignette, drag-only via Framer onPan, release coasts with soft spring (no snap, no buttons), raw hex chrome, dualTheme — inspired-by rewrite of @fancy/box-carousel (renamed from pivot-cube). JSON check PASS, ImageKit screenshot live, CLI install verified locally |
+| cube-carousel | published | 3D photo cube (W:H:D = 16:9:9), 6 Unsplash faces with inset vignette, drag-only via Framer onPan, release coasts with soft spring (no snap, no buttons), raw hex chrome, dualTheme — inspired-by rewrite of @fancy/box-carousel (renamed from pivot-cube). JSON check PASS, ImageKit screenshot live, PR #17 merged, aicanvas.me/r/cube-carousel.json returns 200 |
