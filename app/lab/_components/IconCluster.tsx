@@ -28,9 +28,14 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 
 // ── Tunables ───────────────────────────────────────────────────────────────
 const ICON_COUNT = 150
-const PACK_RADIUS_FRAC = 0.48
-const MIN_ICON_FRAC = 0.028
-const MAX_ICON_FRAC = 0.080
+// Cluster fills a diamond (rhombus) inside the square container — corners
+// pointing up / down / left / right. Half-width and half-height are roughly
+// equal so the diamond reads as a classic ⬨ rotated square; bump them apart
+// to stretch the diamond horizontally or vertically.
+const DIAMOND_HALF_WIDTH_FRAC = 0.47
+const DIAMOND_HALF_HEIGHT_FRAC = 0.47
+const MIN_ICON_FRAC = 0.024
+const MAX_ICON_FRAC = 0.072
 const ICON_ASPECT = 24 / 28
 
 // Magnetic field (fractions of container).
@@ -44,11 +49,14 @@ const MAGNET_STRENGTH_FRAC = 0.18
 const CURL_FACTOR = 0.30
 
 // Floating drift loop (fractions of container) and rotation sway (degrees).
-const DRIFT_MAG_MIN_FRAC = 0.006
-const DRIFT_MAG_MAX_FRAC = 0.016
-const DRIFT_ROT_AMPLITUDE = 1.6
-const DRIFT_DURATION_MIN = 5
-const DRIFT_DURATION_MAX = 9
+// Default-state movement: icons drift ~1.2–3% of container size on x/y and
+// sway ±3.5° around their base rotation. Periods are de-synced per icon so
+// the cluster always reads as alive when the cursor is idle.
+const DRIFT_MAG_MIN_FRAC = 0.012
+const DRIFT_MAG_MAX_FRAC = 0.030
+const DRIFT_ROT_AMPLITUDE = 3.5
+const DRIFT_DURATION_MIN = 4
+const DRIFT_DURATION_MAX = 8
 
 type Palette = {
   id: string
@@ -141,22 +149,45 @@ type Item = {
   zIndex: number
 }
 
+// Halton sequence — a low-discrepancy quasi-random generator. Index 1..N
+// produces evenly-spread points in [0,1] without the clumping you get from
+// pure Math.random or the visible grid you get from row/col layout.
+function halton(index: number, base: number): number {
+  let result = 0
+  let f = 1
+  let i = index
+  while (i > 0) {
+    f /= base
+    result += f * (i % base)
+    i = Math.floor(i / base)
+  }
+  return result
+}
+
 function buildCluster(): Item[] {
-  const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
   const palettes = shuffle(buildPalettePool(), 0xabcdef12).slice(0, ICON_COUNT)
   const items: Item[] = []
   for (let i = 0; i < ICON_COUNT; i++) {
     const rand = mulberry32(0x9e3779b1 + i * 2654435761)
-    const t = i / (ICON_COUNT - 1)
-    const baseR = PACK_RADIUS_FRAC * Math.sqrt(t)
-    const angle = i * GOLDEN_ANGLE + rand() * 0.4
-    const jitter = (rand() - 0.5) * 0.018
-    const xFrac = (baseR + jitter) * Math.cos(angle) + (rand() - 0.5) * 0.012
-    const yFrac = (baseR + jitter) * Math.sin(angle) + (rand() - 0.5) * 0.012
+
+    // Diamond distribution: take 2D Halton points in the unit square, then
+    // rotate by 45° (a linear transform: x' = u-v, y' = u+v) so the square
+    // maps to a diamond with corners at (±1, 0) and (0, ±1). Multiply by
+    // the half-width / half-height to scale into the container. The +1
+    // offset on halton(...) skips the degenerate (0,0) first point. Small
+    // random jitter on top so the layout doesn't feel mathematically perfect.
+    const u = halton(i + 1, 2) - 0.5 // [-0.5, 0.5]
+    const v = halton(i + 1, 3) - 0.5
+    const xFrac =
+      (u - v) * DIAMOND_HALF_WIDTH_FRAC + (rand() - 0.5) * 0.018
+    const yFrac =
+      (u + v) * DIAMOND_HALF_HEIGHT_FRAC + (rand() - 0.5) * 0.018
+
+    // Size is fully random per icon (no longer correlated with radial
+    // distance, since there's no centre to point at in a rectangle).
     const sizeFrac =
-      MAX_ICON_FRAC -
-      (MAX_ICON_FRAC - MIN_ICON_FRAC) * t +
-      (rand() - 0.5) * 0.008
+      MIN_ICON_FRAC +
+      Math.pow(rand(), 1.4) * (MAX_ICON_FRAC - MIN_ICON_FRAC)
 
     const fromAngle = rand() * Math.PI * 2
     const fromDist = 1.6 + rand() * 0.4
@@ -182,10 +213,10 @@ function buildCluster(): Item[] {
         DRIFT_DURATION_MIN +
         rand() * (DRIFT_DURATION_MAX - DRIFT_DURATION_MIN),
       driftDelay: -rand() * DRIFT_DURATION_MAX,
-      // Generous per-icon stagger so the cluster takes its time gathering.
-      // 150 × 0.022s ≈ 3.3s before the last icon launches.
-      entryDelay: i * 0.022,
-      zIndex: 250 - i,
+      // Tighter stagger now: 150 × 0.012s ≈ 1.8s before the last icon launches.
+      entryDelay: i * 0.012,
+      // Stack bigger icons on top so they read as the foreground layer.
+      zIndex: Math.round(sizeFrac * 10000),
     })
   }
   return items
@@ -371,10 +402,10 @@ function ClusterIcon({
           }
           animate={{ x: 0, y: 0, opacity: 1, scale: 1 }}
           transition={{
-            // Softer entry spring (lower stiffness + higher damping) so each
-            // icon glides into rest over ~1.4s instead of snapping.
+            // Brisk entry spring: ~0.8s settle per icon. Combined with the
+            // i*0.012s stagger, the last icon lands at roughly 2.6s total.
             type: 'spring',
-            stiffness: 42,
+            stiffness: 100,
             damping: 18,
             mass: 1,
             delay: reduceMotion ? 0 : item.entryDelay,
@@ -472,10 +503,10 @@ export function IconCluster({ className = '' }: { className?: string }) {
 
     // Wait for the entry stagger + spring settle to mostly finish before
     // showing the demo so it doesn't overlap with the gather animation.
-    const entryDoneMs = ICON_COUNT * 22 + 1400 // matches entryDelay i*0.022s + ~1.4s spring
-    const startDelay = entryDoneMs + 500       // small pause for the eye to settle
-    const sweepDuration = 1700                  // total sweep time, ms
-    const pauseAfter = 400                      // hold off-screen briefly post-sweep
+    const entryDoneMs = ICON_COUNT * 12 + 900 // matches entryDelay i*0.012s + ~0.8s spring
+    const startDelay = entryDoneMs + 400      // small pause for the eye to settle
+    const sweepDuration = 1500                 // total sweep time, ms
+    const pauseAfter = 400                     // hold off-screen briefly post-sweep
 
     let cancelled = false
     let rafId = 0
