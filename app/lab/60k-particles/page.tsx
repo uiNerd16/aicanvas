@@ -139,7 +139,7 @@ export default function ParticleMarkLabPage() {
     // download lands as `aicanvas-it's possible-60fps.mp4`.
     startRecording(canvasRef.current, {
       fps: 60,
-      filename: 'aicanvas-it's possible.mp4',
+      filename: "aicanvas-it's possible.mp4",
       colorBoost: true,
       maxDurationMs: MAX_RECORDING_MS,
     })

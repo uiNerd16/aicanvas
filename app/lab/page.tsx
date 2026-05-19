@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, ImageSquare } from '@phosphor-icons/react/dist/ssr'
 import { SiteFooter } from '../components/SiteFooter'
-import { buttonClasses } from '../components/buttonClasses'
-import { LabLogo } from './_components/LabLogo'
+import { IconCluster } from './_components/IconCluster'
 
 export const metadata: Metadata = {
   title: 'LAB — AI Canvas',
   description:
-    'A workshop of small generators. Bring your own mark — leave with an interactive, exportable component.',
+    'A workshop of small generators. Bring your own mark, leave with an interactive, exportable component.',
   alternates: { canonical: 'https://aicanvas.me/lab' },
 }
 
@@ -65,20 +64,21 @@ export default function LabPage() {
   return (
     <main className="bg-sand-200 dark:bg-sand-950">
       <div className="mx-auto max-w-5xl px-4 pt-10 pb-12 sm:px-6 sm:pt-16">
-        {/* ── Hero — logo on the left, description on the right ── */}
-        <header className="mb-16 grid items-center gap-8 sm:mb-20 sm:grid-cols-2 sm:gap-12">
-          <h1>
-            <LabLogo
-              variant="compact"
-              pixel={10}
-              gap={3}
-              letterGap={1}
-              bubbleHeadRoom={44}
-              idleAnimation
-            />
+        {/* ── Hero — icon cluster on the left, description on the right ──
+            `isolate` creates a fresh stacking context for the header so the
+            cluster's z-30 layer can sit above the description without leaking
+            stacking changes to anything outside the hero. */}
+        <header className="relative isolate mb-16 grid items-center gap-8 sm:mb-20 sm:grid-cols-2 sm:gap-12">
+          <h1 className="relative z-30 mx-auto aspect-square w-full max-w-[240px] sm:max-w-[420px]">
             <span className="sr-only">LAB</span>
+            {/* The cluster is absolutely positioned inside the h1 so its
+                pointer-handler covers the square but flying icons can spill
+                outside the h1's bounds (overflow defaults to visible). */}
+            <div className="absolute inset-0">
+              <IconCluster />
+            </div>
           </h1>
-          <p className="text-lg leading-relaxed text-sand-700 dark:text-sand-300">
+          <p className="relative z-10 text-lg leading-relaxed text-sand-700 dark:text-sand-300">
             Bring a mark. Pull a slider. Walk out with code.{' '}
             <span className="text-sand-500 dark:text-sand-500">
               LAB is a workshop of small generators for the experiments that
@@ -87,9 +87,9 @@ export default function LabPage() {
           </p>
         </header>
 
-        {/* ── Tools ── */}
+        {/* ── Tools — 2×2 grid of horizontal row cards ── */}
         <section>
-          <div className="mb-6 flex items-baseline justify-between border-b border-sand-300 pb-3 dark:border-sand-800">
+          <div className="mb-6 flex items-baseline justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-sand-700 dark:text-sand-300">
               Tools
             </h2>
@@ -102,53 +102,47 @@ export default function LabPage() {
             {TOOLS.map((tool) => {
               const isPlanned = tool.status === 'planned'
               const card = (
-                <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50">
-                  {/* Placeholder image */}
-                  <div className="relative aspect-video overflow-hidden bg-sand-900">
+                <article className="group flex h-full items-stretch overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 transition-all duration-200 hover:border-sand-400 hover:shadow-md dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 dark:hover:shadow-black/30">
+                  {/* Left thumbnail strip */}
+                  <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-sand-950 sm:w-28">
                     <div
                       className="absolute inset-0 flex items-center justify-center"
                       style={{
                         backgroundImage:
                           'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-                        backgroundSize: '22px 22px',
+                        backgroundSize: '18px 18px',
                       }}
                     >
-                      <ImageSquare weight="regular" size={28} className="text-sand-700" />
+                      <ImageSquare
+                        weight="regular"
+                        size={22}
+                        className="text-sand-700"
+                      />
                     </div>
                   </div>
 
-                  {/* Card body — floats over image with rounded top corners */}
-                  <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)]">
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-bold text-sand-900 dark:text-sand-50">
-                          {tool.name}
-                        </h3>
-                        <span
-                          className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[tool.status]}`}
-                        >
-                          {tool.status}
-                        </span>
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-sm font-normal text-sand-600 dark:text-sand-400">
-                        {tool.description}
-                      </p>
-                    </div>
-
-                    {/* CTA — mirrors ComponentCard's outline button */}
-                    <div className="mt-auto pt-1">
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col gap-1.5 px-4 py-3.5 sm:px-5 sm:py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-base font-bold text-sand-900 dark:text-sand-50 sm:text-lg">
+                        {tool.name}
+                      </h3>
                       <span
-                        className={`${buttonClasses({ variant: 'outline', size: 'md', fullWidth: true })} text-xs ${
-                          isPlanned
-                            ? 'opacity-60'
-                            : 'group-hover:border-sand-400 group-hover:text-sand-900 dark:group-hover:border-sand-600 dark:group-hover:text-sand-100'
-                        }`}
+                        className={`shrink-0 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${STATUS_STYLES[tool.status]}`}
                       >
+                        {tool.status}
+                      </span>
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-snug text-sand-600 dark:text-sand-400">
+                      {tool.description}
+                    </p>
+                    <div className="mt-auto pt-1">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-sand-500 transition-colors group-hover:text-sand-900 dark:group-hover:text-sand-100">
                         {isPlanned ? 'Coming soon' : 'Open tool'}
                         {!isPlanned && (
                           <ArrowRight
                             weight="regular"
-                            size={14}
+                            size={13}
                             className="transition-transform group-hover:translate-x-0.5"
                           />
                         )}
