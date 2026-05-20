@@ -1,10 +1,17 @@
 /**
  * gsc-submit.ts — Google Indexing API submission.
  *
- * Reads scripts/gsc-output/audit.json (produced by gsc-audit.ts) and submits
- * eligible URLs via the Indexing API. By default only "Discovered, awaiting
- * crawl" and "Unknown to Google" buckets are submitted — submission rarely
- * helps "Crawled, not indexed" (that's a content/quality signal).
+ * Two modes:
+ *
+ *   1. Batch (default): reads scripts/gsc-output/audit.json (produced by
+ *      gsc-audit.ts) and submits eligible URLs. By default only
+ *      "Discovered, awaiting crawl" and "Unknown to Google" buckets are
+ *      submitted — submission rarely helps "Crawled, not indexed" (that's
+ *      a content/quality signal).
+ *
+ *   2. Single URL: --url=<URL> bypasses audit.json and submits one URL
+ *      directly. Used by the component pipeline immediately after publishing
+ *      a new component so Google sees the URL within hours instead of days.
  *
  * Honest disclaimer: Google's Indexing API is officially intended for
  * JobPosting / BroadcastEvent schema. For marketing pages, results are
@@ -16,8 +23,11 @@
  *   --dry-run                       Print what would be submitted, exit.
  *   --limit=N                       Cap submissions (default 100; daily quota 200).
  *   --include-crawled-not-indexed   Also submit "Crawled, not indexed" URLs.
+ *   --url=<URL>                     Submit one URL directly (skip audit.json).
  *
- * Run: npm run gsc:submit -- --dry-run
+ * Run:
+ *   npm run gsc:submit -- --dry-run
+ *   npm run gsc:submit -- --url=https://aicanvas.me/components/cube-carousel
  */
 
 import fs from 'fs'
@@ -85,10 +95,12 @@ function parseFlags(argv: string[]): {
   dryRun: boolean
   limit: number
   includeCrawledNotIndexed: boolean
+  url: string | null
 } {
   let dryRun = false
   let limit = 100
   let includeCrawledNotIndexed = false
+  let url: string | null = null
   for (const arg of argv) {
     if (arg === '--dry-run') dryRun = true
     else if (arg === '--include-crawled-not-indexed') includeCrawledNotIndexed = true
@@ -96,11 +108,82 @@ function parseFlags(argv: string[]): {
       const n = parseInt(arg.slice('--limit='.length), 10)
       if (!Number.isFinite(n) || n <= 0) throw new Error(`Invalid --limit value: ${arg}`)
       limit = n
+    } else if (arg.startsWith('--url=')) {
+      const u = arg.slice('--url='.length).trim()
+      if (!u) throw new Error('--url cannot be empty')
+      try {
+        const parsed = new URL(u)
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+          throw new Error(`--url must be http(s): got ${u}`)
+        }
+      } catch {
+        throw new Error(`--url is not a valid URL: ${u}`)
+      }
+      url = u
     } else if (arg.startsWith('--')) {
       throw new Error(`Unknown flag: ${arg}`)
     }
   }
-  return { dryRun, limit, includeCrawledNotIndexed }
+  return { dryRun, limit, includeCrawledNotIndexed, url }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Single-URL submission (pipeline-friendly)
+// ─────────────────────────────────────────────────────────────────────
+async function submitSingleUrl(url: string, dryRun: boolean) {
+  console.log('GSC submit (single URL)')
+  console.log('---')
+  console.log(`URL:     ${url}`)
+  console.log(`Dry run: ${dryRun ? 'yes' : 'no'}`)
+  console.log('')
+
+  if (dryRun) {
+    console.log('(dry run — no submission made)')
+    return
+  }
+
+  const auth = new google.auth.GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/indexing'],
+  })
+  const indexing = google.indexing({ version: 'v3', auth })
+
+  const entry: SubmitLogEntry = {
+    url,
+    submittedAt: new Date().toISOString(),
+    category: 'pipeline:single-url',
+    status: 'success',
+  }
+
+  process.stdout.write(`Submitting ... `)
+  try {
+    const res = await indexing.urlNotifications.publish({
+      requestBody: { url, type: 'URL_UPDATED' },
+    })
+    entry.notifyTime = res.data.urlNotificationMetadata?.latestUpdate?.notifyTime ?? null
+    process.stdout.write(`OK\n`)
+  } catch (err: any) {
+    entry.status = 'error'
+    entry.error = err?.message || String(err)
+    process.stdout.write(`ERROR: ${entry.error}\n`)
+  }
+
+  // Append to existing log so single-URL submissions accumulate alongside batch runs.
+  let existing: SubmitLogEntry[] = []
+  if (fs.existsSync(SUBMIT_LOG)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(SUBMIT_LOG, 'utf8'))
+      if (!Array.isArray(existing)) existing = []
+    } catch {
+      existing = []
+    }
+  } else {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true })
+  }
+  fs.writeFileSync(SUBMIT_LOG, JSON.stringify([...existing, entry], null, 2))
+
+  console.log('')
+  console.log(`Log: ${path.relative(process.cwd(), SUBMIT_LOG)}`)
+  if (entry.status === 'error') process.exit(1)
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -111,6 +194,15 @@ async function main() {
 
   if (!CREDS) throw new Error('GOOGLE_APPLICATION_CREDENTIALS is not set. Add it to .env.local.')
   if (!fs.existsSync(CREDS)) throw new Error(`Service account JSON not found at: ${CREDS}`)
+
+  // Single-URL mode: skip audit.json entirely. Used by the component
+  // pipeline right after a deploy so a brand-new URL is announced to
+  // Google immediately, before the next batch audit would pick it up.
+  if (flags.url) {
+    await submitSingleUrl(flags.url, flags.dryRun)
+    return
+  }
+
   if (!fs.existsSync(AUDIT_JSON)) {
     throw new Error(
       `audit.json not found at ${AUDIT_JSON}.\nRun \`npm run gsc:audit\` first.`,
