@@ -286,7 +286,7 @@ export default function DesignSystemPage() {
             { name: 'Next.js 16', detail: 'App Router' },
             { name: 'TypeScript', detail: 'Strict mode' },
             { name: 'Tailwind CSS v4', detail: '@theme inline' },
-            { name: 'Framer Motion', detail: 'All animations' },
+            { name: 'Motion', detail: 'All animations' },
             { name: 'Phosphor Icons', detail: 'weight="regular"' },
             { name: 'Manrope', detail: 'Primary font' },
           ].map((tech) => (

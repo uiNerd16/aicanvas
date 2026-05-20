@@ -821,8 +821,8 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'One CLI command installs any component into your project. TypeScript, Framer Motion, Tailwind CSS — all included, ready to run.',
-                badges: ['TypeScript', 'Framer Motion', 'Tailwind CSS'],
+                description: 'One CLI command installs any component into your project. TypeScript, Motion, Tailwind CSS — all included, ready to run.',
+                badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
