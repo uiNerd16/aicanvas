@@ -103,6 +103,12 @@ Every new component follows this exact sequence — never skip a step. **Four us
                                On "push", Integrator runs `git push origin main`.
                                Vercel auto-deploys. Update status to `published` once
                                `aicanvas.me/r/<slug>.json` returns 200.
+13. Announce to Google       → After the 200-check passes, Supervisor runs:
+                                 `npm run gsc:submit -- --url=https://aicanvas.me/components/<slug>`
+                               Fire-and-report: log the OK/ERROR line in chat, do not
+                               retry on failure (the URL is also in sitemap.xml so
+                               Google finds it eventually — this just nudges crawl).
+                               Never block pipeline completion on this step.
 ```
 
 **Why prompts come last:** Users often adjust the component multiple times. Writing prompts early means they describe an outdated version. Always write prompts against the final, approved component.
@@ -154,6 +160,14 @@ Use this pipeline when the user wants to change, fix, or tune an EXISTING compon
                                GitHub doesn't have it yet. Vercel doesn't see it yet.
 13. Push live                → ⚠️ Wait for user to explicitly say "push" / "go live".
                                On "push", `git push origin main`. Vercel auto-deploys.
+14. Announce to Google       → Right after the push completes, Supervisor runs:
+                                 `npm run gsc:submit -- --url=https://aicanvas.me/components/<slug>`
+                               URL_UPDATED tells Google to re-crawl the modified page.
+                               Indexing API is asynchronous, so it does not matter if
+                               Vercel is still mid-deploy when this fires — Google
+                               queues the crawl and fetches the URL once available.
+                               Fire-and-report: log OK/ERROR in chat, do not retry,
+                               do not block on failure.
 ```
 
 ### The 3 gates for modification
@@ -230,7 +244,7 @@ Then follow the failure protocol below.
 | User says | You do |
 |---|---|
 | "commit" (working confirmation) | Integrator runs `git commit` LOCALLY. Do NOT push. Tell user commit is local; waiting for "push" before going live |
-| "push" / "go live" | Integrator runs `git push origin main` → Vercel deploys → verify `aicanvas.me/r/<slug>.json` returns 200 → update status to `published` |
+| "push" / "go live" | Integrator runs `git push origin main` → Vercel deploys → verify `aicanvas.me/r/<slug>.json` returns 200 → update status to `published` → run `npm run gsc:submit -- --url=https://aicanvas.me/components/<slug>` and report the OK/ERROR line |
 | "what components do we have?" | Read `supervisor/component-status.md` and summarise |
 | "review the component" | Delegate to Reviewer |
 | "what went wrong before?" | Read `supervisor/mistakes.md` |
