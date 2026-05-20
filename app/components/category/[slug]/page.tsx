@@ -87,10 +87,7 @@ export default async function CategoryPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <HomeClient
-        components={filtered}
-        categoryHeader={{ label: category.label, h1: category.h1, intro: category.intro }}
-      />
+      <HomeClient components={filtered} categoryLabel={category.label} />
     </>
   )
 }

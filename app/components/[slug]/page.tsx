@@ -188,6 +188,8 @@ export default async function Page({
         designSystem={entry.designSystem}
         related={related}
         highlightedCode={<HighlightedCode code={entry.code} />}
+        useCases={entry.useCases}
+        about={entry.about}
       >
         <PreviewComponent />
       </ComponentPageView>

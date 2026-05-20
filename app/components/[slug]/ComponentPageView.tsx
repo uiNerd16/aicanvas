@@ -24,6 +24,7 @@ import {
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
+import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
 import { HeaderSocials } from '../HeaderSocials'
 import { Step } from '../Step'
 import type { ComponentMeta, DesignSystemSlug } from '../../lib/component-registry'
@@ -33,6 +34,7 @@ import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
 import { useSession } from '../auth/SessionProvider'
 import { Button } from '../Button'
+import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
@@ -70,6 +72,11 @@ interface ComponentPageViewProps {
   related: ComponentMeta[]
   highlightedCode: ReactNode
   children: ReactNode
+  // Per-component copy slots. Render when the slot is filled; components
+  // without `about` simply omit that section. Sourced from the registry
+  // (which merges them in from app/lib/component-copy.ts).
+  about?: string                                    // ~70-110 word paragraph below the install section
+  useCases?: string[]                               // up to 3 chips shown next to the category in the header
 }
 
 const RELATED_PAGE_SIZE = 3
@@ -87,6 +94,8 @@ export default function ComponentPageView({
   related,
   highlightedCode,
   children,
+  about,
+  useCases,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
   const [installTier, setInstallTier] = useState<'component' | 'system'>('component')
@@ -337,20 +346,29 @@ export default function ComponentPageView({
             {!headingSubtitle && (
               <p className="mt-3 font-normal text-sand-600 dark:text-sand-400">{description}</p>
             )}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
-              {tags.map((tag) =>
-                tag.accent ? (
-                  <span key={tag.label} className="rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
-                    {tag.label}
-                  </span>
-                ) : (
-                  <span key={tag.label} className="rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
-                    {tag.label}
-                  </span>
-                )
-              )}
-            </div>
+            {(() => {
+              // Header chip row: category chip + up to 3 use-case chips.
+              // Use cases (e.g. "Hero section", "Portfolio") capture the
+              // intent queries users actually type. Stack tags live in the
+              // "Built with" row further down the page, next to About.
+              const categoryTags = tags.filter((t) => t.accent)
+              const useCaseChips = (useCases ?? []).slice(0, 3)
+              return (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
+                  {categoryTags.map((tag) => (
+                    <span key={tag.label} className="rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                      {tag.label}
+                    </span>
+                  ))}
+                  {useCaseChips.map((label) => (
+                    <span key={label} className="rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              )
+            })()}
             {systemMeta && (
               <Link
                 href={`/design-systems/${systemMeta.slug}`}
@@ -985,6 +1003,93 @@ export default function ComponentPageView({
               </div>
             </section>
           )})()}
+
+          {/* MCP install section — sits immediately below the shadcn CLI
+              install section so the two install paths read as siblings.
+              Same heading + description + button rhythm. */}
+          <section className="mt-12">
+              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                Install with AI Canvas MCP
+              </h2>
+              <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+                With AI Canvas MCP, your AI knows every component we ship.
+                Ask for &ldquo;a navigation component from AI Canvas&rdquo;
+                inside Claude Code, Codex, or Cursor and it can suggest you
+                a few options, then install the one you like. Less typing,
+                lower token cost, modern way to build.
+              </p>
+              <Link
+                href="/mcp"
+                className={buttonClasses({ variant: 'outline', size: 'sm' })}
+              >
+                Get MCP
+                <ArrowRight weight="regular" size={13} />
+              </Link>
+            </section>
+
+          {/* About this component — long-form body copy that gives Google a
+              substantial chunk of original, on-topic text per component.
+              Placed below the install section so the install CTA stays the
+              first action visible after the preview. The Built-with stack
+              row sits immediately below About so the technical detail lives
+              next to the long-form explanation, not in the header. */}
+          {about && (
+            <>
+              <section className="mt-16">
+                <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                  About {name}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-sand-600 dark:text-sand-400 sm:text-base">
+                  {about}
+                </p>
+              </section>
+              {/* Built with — brand-icon row, styled at the same heading
+                  weight as About so the two sections read as paired. */}
+              {(() => {
+                const stackTags = tags.filter(
+                  (t) => !t.accent && isStackLabel(t.label),
+                ) as Array<{ label: Stack }>
+                if (stackTags.length === 0) return null
+                return (
+                  <section className="mt-8">
+                    <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                      Built with
+                    </h2>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-sand-700 dark:text-sand-300">
+                      {stackTags.map((tag, i) => {
+                        const icon = STACK_ICONS[tag.label]
+                        const iconHeight = icon.pixelHeight ?? 14
+                        const iconWidth = stackIconWidthForHeight(icon, iconHeight)
+                        return (
+                          <span key={tag.label} className="flex items-center gap-x-3">
+                            {i > 0 && (
+                              <span
+                                aria-hidden="true"
+                                className="h-3 w-px bg-sand-300 dark:bg-sand-700"
+                              />
+                            )}
+                            <span className="flex items-center gap-1.5">
+                              <svg
+                                viewBox={icon.viewBox}
+                                width={iconWidth}
+                                height={iconHeight}
+                                fill="currentColor"
+                                aria-hidden="true"
+                                className="shrink-0 text-sand-500 dark:text-sand-400"
+                              >
+                                <path d={icon.path} />
+                              </svg>
+                              <span className="font-medium">{tag.label}</span>
+                            </span>
+                          </span>
+                        )
+                      })}
+                    </div>
+                  </section>
+                )
+              })()}
+            </>
+          )}
 
           {/* ── Related components ─────────────────────────────────────────── */}
           {related.length > 0 && (
