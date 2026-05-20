@@ -12,7 +12,7 @@ export function GET() {
 
   const intro = `# AI Canvas
 
-> AI Canvas is an open-source, shadcn-compatible registry of ${total} animated React components built with Tailwind CSS and Framer Motion. Each component ships with reproduction prompts for Claude Code, Lovable, and v0 — so developers can install the code directly or recreate it in any AI builder.
+> AI Canvas is an open-source, shadcn-compatible registry of ${total} animated React components built with Tailwind CSS and Motion. Each component ships with reproduction prompts for Claude Code, Lovable, and v0 — so developers can install the code directly or recreate it in any AI builder.
 
 ## Overview
 - [Homepage](${SITE_URL}): Browse all components.
