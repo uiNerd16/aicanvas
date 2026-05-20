@@ -359,7 +359,11 @@ function Scene({
           onCanvasReady?.(gl.domElement)
         }}
         gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
-        style={{ touchAction: 'none' }}
+        // Paint the canvas DOM background with the same colour as the WebGL
+        // clear colour. WebGL's default clear is white, and it only switches
+        // to our `bg` inside onCreated → there's a one-frame window on
+        // mount/refresh where the canvas would flash white otherwise.
+        style={{ touchAction: 'none', background: bg }}
       >
         <ClearColorSync color={bg} />
         <ParticleField config={config} resolvedSvg={resolvedSvg} />

@@ -18,7 +18,7 @@ type Props = {
 }
 
 export function LabPresetCard({ href, name, tool, createdAt, config }: Props) {
-  const summary = tool === '60k-particles' ? summarizeParticleConfig(config) : '—'
+  const summary = tool === '60k-particles' ? summarizeParticleConfig(config) : ''
 
   return (
     <Link
