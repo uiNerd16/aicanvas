@@ -14,7 +14,8 @@ Visual:
 
 Behaviour:
 - Drag on the cube to rotate it.
-- Horizontal drag rotates the Y axis. Vertical drag rotates the X axis. Use Framer Motion's \`onPan\` / \`onPanStart\` / \`onPanEnd\` on the cube motion.div (NOT raw pointer events. Pan listens at window level so it can't wedge on lost pointer capture).
+- Horizontal drag rotates the Y axis. Vertical drag rotates the X axis. Use Framer Motion's \`onPan\` / \`onPanStart\` / \`onPanEnd\`.
+- IMPORTANT: put the pan handlers on a separate flat 2D shield div (\`absolute inset-0 z-10\`) that overlays the cube area, NOT on the rotating cube itself. The cube has \`pointerEvents: 'none'\`. Reason: hit-testing on a 3D-rotated element fails at edge-on angles because \`backface-visibility: hidden\` rounds the wrong way, freezing the drag. A flat shield never rotates, so its hit area is constant.
 - DRAG_SENSITIVITY = 0.5. Map drag offset to rotation: \`rotateY = startRotY + offset.x * 0.5\`, \`rotateX = startRotX - offset.y * 0.5\`.
 - Stash starting rotation in a ref on \`onPanStart\` so \`onPan\` can compute relative offsets.
 - On \`onPanEnd\`, project ~180ms of release momentum and animate to that projected position with a soft spring: \`{ type: 'spring', stiffness: 40, damping: 22, velocity }\`. Velocity comes from \`info.velocity\` (Framer's tracker, deg/sec after multiplying by DRAG_SENSITIVITY).

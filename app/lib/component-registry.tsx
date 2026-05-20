@@ -1280,7 +1280,7 @@ Requirements:
       { label: 'Framer Motion' },
     ],
     dualTheme: true,
-    image: 'https://ik.imagekit.io/aitoolkit/cube-carousel.png',
+    image: 'https://ik.imagekit.io/aitoolkit/cube-carousel.png?v=2',
     PreviewComponent: CubeCarousel,
     code: componentCodes['cube-carousel'],
     prompts: cubeCarouselPrompts,

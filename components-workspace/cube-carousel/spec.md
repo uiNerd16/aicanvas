@@ -27,6 +27,7 @@ Touch drag identical to mouse drag on both axes. The cube scales fluidly via cla
 ## Tech notes
 
 - **Framer Motion only.** `useMotionValue` for `rotateX` / `rotateY`, `motion.div` for the cube, `onPan` / `onPanStart` / `onPanEnd` for drag (NOT raw pointer events. Pan uses window-level listeners so it can't wedge on lost pointer capture).
+- **Pan handlers live on a separate flat 2D shield**, not on the rotating cube. The cube has `pointerEvents: 'none'`. The shield is an `absolute inset-0 z-10` overlay that never rotates, so its hit area is a constant 2D rectangle. Without this, hit-testing on the 3D-transformed cube fails at certain edge-on angles (backface-visibility rounds the wrong way) and the cube becomes unresponsive to drag at those orientations.
 - Release coast uses `animate(value, target, { type: 'spring', stiffness: 40, damping: 22, velocity })`.
 - Six face divs absolutely positioned. Four wide (W × H) at front/back/top/bottom, two square (D × H, D=H) at left/right. Each face has an inset `box-shadow` vignette overlay.
 - Component owns its dark background via raw hex (`bg-[#E8E8DF] dark:bg-[#1A1A19]`), no sand-*/olive-* tokens per standalone rules.
