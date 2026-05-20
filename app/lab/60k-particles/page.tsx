@@ -14,7 +14,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Renderer from '../_lib/particleMark/Renderer'
 import { useCanvasRecorder } from '../_lib/recorder/useCanvasRecorder'
-import { exportCanvasImage, type ImageFormat } from '../_lib/recorder/exportImage'
+import { RecordingDownloadDialog } from '../_lib/recorder/RecordingDownloadDialog'
+import { exportCanvasImage, type ImageScale } from '../_lib/recorder/exportImage'
+import { RecordButton } from '../_lib/recorder/RecordButton'
+import { RecordInfoTooltip } from '../_lib/recorder/RecordInfoTooltip'
 import {
   type Config,
   type ColorMode,
@@ -33,7 +36,7 @@ import { Segmented } from '../_lib/particleMark/controls/Segmented'
 import { Slider } from '../_lib/particleMark/controls/Slider'
 import { ColorInput } from '../_lib/particleMark/controls/ColorInput'
 import { FileDrop } from '../_lib/particleMark/controls/FileDrop'
-import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple, DotsThreeVertical, Check } from '@phosphor-icons/react'
+import { CircleHalfTilt, Sun, Prohibit, BookmarkSimple, CaretDown, Check } from '@phosphor-icons/react'
 import { useLabAuthGate } from '../_lib/useLabAuthGate'
 import {
   serializeParticleConfig,
@@ -69,31 +72,79 @@ type PresetRow = PresetSummary & { config: SerializedParticleConfig }
 
 export default function ParticleMarkLabPage() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
-  const [copied, setCopied] = useState(false)
-  const [imageSaved, setImageSaved] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
+  const [imageSaved, setImageSaved] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
   const exportMenuRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const recorder = useCanvasRecorder()
   const { start: startRecording, stop: stopRecording, state: recorderState } = recorder
 
+  // Preload the default source image (the AI Canvas mark parrot) on first
+  // mount. Skipped once a source is set (preset / auth-gate handoff, user
+  // upload, or the default itself once it lands). The effect's own dep
+  // condition handles the "don't refetch" guard — no extra ref is needed,
+  // and adding one breaks React 19 StrictMode (the ref persists across
+  // dev's mount/unmount/remount cycle while the cleanup cancels the first
+  // mount's fetch, so the second mount short-circuits with nothing
+  // applied). The `<File>` constructor only exists client-side, so the
+  // default can't sit in the module-level DEFAULT_CONFIG.
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && exportMenuOpen) setExportMenuOpen(false)
+    if (config.imageFile || config.svgSource) return
+    let cancelled = false
+    fetch('/lab/ai-canvas-mark.webp')
+      .then((r) => {
+        if (!r.ok) throw new Error(`default image fetch failed (${r.status})`)
+        return r.blob()
+      })
+      .then((blob) => {
+        if (cancelled) return
+        const file = new File([blob], 'ai-canvas.webp', {
+          type: blob.type || 'image/webp',
+        })
+        const url = URL.createObjectURL(blob)
+        setConfig((prev) => {
+          // Re-check inside the updater: if a preset / auth handoff landed
+          // between the fetch start and this resolve, leave it alone and
+          // free the object URL we just allocated.
+          if (prev.imageFile || prev.svgSource) {
+            URL.revokeObjectURL(url)
+            return prev
+          }
+          return {
+            ...prev,
+            imageFile: file,
+            imageUrl: url,
+            svgSource: null,
+            svgFileName: null,
+          }
+        })
+      })
+      .catch(() => {
+        // Silent — the renderer falls back to the inline PLACEHOLDER_SVG.
+      })
+    return () => {
+      cancelled = true
     }
-    function onClickOutside(e: MouseEvent) {
+  }, [config.imageFile, config.svgSource])
+
+  // Close the Save image dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!exportMenuOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setExportMenuOpen(false)
+    }
+    function onClick(e: MouseEvent) {
       if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
         setExportMenuOpen(false)
       }
     }
-    if (exportMenuOpen) {
-      document.addEventListener('keydown', onKey)
-      document.addEventListener('mousedown', onClickOutside)
-      return () => {
-        document.removeEventListener('keydown', onKey)
-        document.removeEventListener('mousedown', onClickOutside)
-      }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onClick)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
     }
   }, [exportMenuOpen])
 
@@ -102,21 +153,27 @@ export default function ParticleMarkLabPage() {
   const [presetsLoading, setPresetsLoading] = useState(false)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [renameTarget, setRenameTarget] = useState<{ id: string; currentName: string } | null>(null)
+  // Captured when the Save dialog opens so the suggested name doesn't drift
+  // on every parent re-render while the dialog is on screen.
+  const [saveDefaultName, setSaveDefaultName] = useState('')
 
   const onCanvasReady = useCallback((c: HTMLCanvasElement | null) => {
     canvasRef.current = c
   }, [])
 
-  const onSaveImage = useCallback(async (format: ImageFormat) => {
+  const onSaveImage = useCallback(async (scale: ImageScale) => {
     if (!canvasRef.current) return
     setImageError(null)
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+    // Filename convention: `aicanvas-<name>-<format/spec>.<ext>`. Brand prefix
+    // is unspaced so it reads as one token; the name keeps its readable spaces.
+    const resolution = scale === '2x' ? '3840x2160' : '1920x1080'
+    const spec = `PNGx${scale === '2x' ? '2' : '1'}-${resolution}`
     try {
-      await exportCanvasImage(canvasRef.current, format, `60k-particles-${stamp}.${format}`)
+      await exportCanvasImage(canvasRef.current, scale, `aicanvas-it's possible-${spec}.png`)
       setImageSaved(true)
       setTimeout(() => setImageSaved(false), 1500)
     } catch (e) {
-      setImageError(e instanceof Error ? e.message : `Failed to export ${format.toUpperCase()}`)
+      setImageError(e instanceof Error ? e.message : 'Failed to export PNG')
     }
   }, [])
 
@@ -126,9 +183,11 @@ export default function ParticleMarkLabPage() {
       return
     }
     if (!canvasRef.current) return
+    // Recorder appends `-<fps>fps` to the base name automatically, so the final
+    // download lands as `aicanvas-it's possible-60fps.mp4`.
     startRecording(canvasRef.current, {
       fps: 60,
-      filename: `60k-particles-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.mp4`,
+      filename: "aicanvas-it's possible.mp4",
       colorBoost: true,
       maxDurationMs: MAX_RECORDING_MS,
     })
@@ -143,18 +202,18 @@ export default function ParticleMarkLabPage() {
         })
     try {
       await navigator.clipboard.writeText(tsx)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
     } catch {
+      // Clipboard API can fail without a user gesture or in cross-origin
+      // contexts; fall back to the legacy execCommand path.
       const ta = document.createElement('textarea')
       ta.value = tsx
       document.body.appendChild(ta)
       ta.select()
       try { document.execCommand('copy') } catch { /* swallow */ }
       ta.remove()
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
     }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
   }, [config])
 
   // Auth gate. Each gated action is registered with a stable name; gate.run
@@ -166,13 +225,20 @@ export default function ParticleMarkLabPage() {
     serializeState: () => serializeParticleConfig(config),
     applyState: (s) => setConfig(deserializeParticleConfig(s)),
     actions: {
-      'export-png':  () => onSaveImage('png'),
-      'export-webp': () => onSaveImage('webp'),
-      'record':      () => onRecord(),
-      'copy-code':   () => onCopy(),
-      'save-preset': () => setSaveDialogOpen(true),
+      'export-png-1x': () => onSaveImage('1x'),
+      'export-png-2x': () => onSaveImage('2x'),
+      'record':        () => onRecord(),
+      'copy-code':     () => onCopy(),
+      'save-preset':   () => {
+        setSaveDefaultName(`Untitled · ${new Date().toLocaleString()}`)
+        setSaveDialogOpen(true)
+      },
     },
   })
+
+  // Record button lives in a fixed bottom-center strip rendered below
+  // (next to the Ko-fi icon's row). Export controls live back in the
+  // sidebar (Save image dropdown + Copy code button).
 
   // Load presets when the user becomes available; clear them when they sign out.
   const refreshPresets = useCallback(async () => {
@@ -308,11 +374,6 @@ export default function ParticleMarkLabPage() {
     })
   }, [])
 
-  // The renderer rebuilds geometry whenever density/depth/svg changes — these
-  // are the inputs that require a resample. Everything else updates uniforms
-  // in place.
-  const rendererConfig = useMemo(() => config, [config])
-
   const presetSummaries: PresetSummary[] = useMemo(
     () => presets.map(({ id, name, updated_at }) => ({ id, name, updated_at })),
     [presets],
@@ -368,8 +429,23 @@ export default function ParticleMarkLabPage() {
 
       <main className="flex min-h-0 flex-1 flex-col bg-sand-200 dark:bg-sand-950">
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-          <section className="flex w-full flex-col overflow-hidden md:min-w-0 md:flex-1">
-            <CanvasArea config={rendererConfig} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
+          <section className="relative flex w-full flex-col overflow-hidden md:min-w-0 md:flex-1">
+            <CanvasArea config={config} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
+            {/* Bottom-of-canvas Record strip — centred over the live preview
+                rather than the full viewport, so it stays put when the
+                sidebar's width changes. */}
+            <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
+              <div className="pointer-events-auto flex items-center gap-2">
+                <RecordButton
+                  state={recorder.state}
+                  elapsedMs={recorder.elapsedMs}
+                  maxDurationMs={MAX_RECORDING_MS}
+                  supported={recorder.supported}
+                  onClick={() => gate.run('record')}
+                />
+                <RecordInfoTooltip />
+              </div>
+            </div>
           </section>
 
           <aside className="w-full shrink-0 border-t border-sand-300 px-5 py-6 dark:border-sand-800 md:w-[340px] md:overflow-y-auto md:border-l md:border-t-0 md:px-5 md:py-6">
@@ -377,8 +453,8 @@ export default function ParticleMarkLabPage() {
               <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
                 60K Particles
               </h1>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sand-500 dark:text-sand-500">
-                Turn any SVG into interactive particles
+              <p className="mt-2 text-[13px] leading-snug text-sand-600 dark:text-sand-400">
+                Drop an SVG or PNG. Move your mouse to animate the scene. Export PNG • Export MP4 • Copy Code
               </p>
             </header>
 
@@ -560,8 +636,8 @@ export default function ParticleMarkLabPage() {
                     onRename={onRenamePreset}
                     onDelete={onDeletePreset}
                   />
-                  <Button variant="outline" size="md" fullWidth onClick={() => gate.run('save-preset')}>
-                    <BookmarkSimple size={14} weight="regular" />
+                  <Button variant="outline" size="xs" fullWidth onClick={() => gate.run('save-preset')}>
+                    <BookmarkSimple size={12} weight="regular" />
                     Save preset
                   </Button>
                 </div>
@@ -569,90 +645,79 @@ export default function ParticleMarkLabPage() {
 
               <section className="space-y-2 pt-2">
                 <SectionLabel>Export</SectionLabel>
-
-                <button
-                  type="button"
-                  onClick={() => gate.run('record')}
-                  disabled={!recorder.supported || recorder.state === 'encoding'}
-                  className={`flex w-full items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    recorder.state === 'recording'
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'bg-olive-500 text-sand-950 hover:bg-olive-600'
-                  }`}
-                >
-                  {recorder.state === 'recording' && (
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-                  )}
-                  {recorder.state === 'idle' && `Record MP4 (max ${Math.round(MAX_RECORDING_MS / 1000)}s)`}
-                  {recorder.state === 'recording' &&
-                    `Stop  ${formatElapsed(recorder.elapsedMs)} / ${formatElapsed(MAX_RECORDING_MS)}`}
-                  {recorder.state === 'encoding' && 'Saving your video…'}
-                </button>
-
-                {!recorder.supported && (
-                  <p className="text-[11px] leading-snug text-sand-500 dark:text-sand-500">
-                    Recording needs Chrome / Edge / Safari 16.4+ / Firefox 130+.
-                  </p>
-                )}
-                {recorder.error && (
-                  <p className="text-[11px] leading-snug text-red-500">{recorder.error}</p>
-                )}
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="relative" ref={exportMenuRef}>
-                    <Button
-                      variant="outline"
-                      size="md"
-                      fullWidth
-                      onClick={() => setExportMenuOpen((o) => !o)}
-                      disabled={recorder.state !== 'idle'}
-                      className="!rounded-md !px-3 !py-2.5"
-                    >
-                      {imageSaved && <Check weight="regular" size={15} />}
-                      {imageSaved ? 'Saved!' : 'Save image'}
-                      {!imageSaved && <DotsThreeVertical weight="bold" size={15} className="ml-auto" />}
-                    </Button>
-                    {exportMenuOpen && (
-                      <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-md border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setExportMenuOpen(false)
-                            gate.run('export-png')
-                          }}
-                          className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                        >
-                          Save as PNG
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setExportMenuOpen(false)
-                            gate.run('export-webp')
-                          }}
-                          className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                        >
-                          Save as WebP
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
+                <div className="relative" ref={exportMenuRef}>
                   <Button
-                    variant="outline"
-                    size="md"
+                    variant="primary"
+                    size="xs"
                     fullWidth
-                    onClick={() => gate.run('copy-code')}
-                    className="!rounded-md !px-3 !py-2.5"
+                    onClick={() => setExportMenuOpen((o) => !o)}
+                    className="relative"
                   >
-                    {copied ? 'Copied ✓' : 'Copy code'}
+                    {imageSaved && <Check weight="regular" size={12} />}
+                    {imageSaved ? 'Saved!' : 'Save image'}
+                    {!imageSaved && (
+                      <CaretDown
+                        weight="regular"
+                        size={12}
+                        className={`absolute right-3 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`}
+                      />
+                    )}
                   </Button>
+                  {exportMenuOpen && (
+                    <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExportMenuOpen(false)
+                          gate.run('export-png-1x')
+                        }}
+                        className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                      >
+                        <span>PNG · 1x</span>
+                        <span className="font-mono text-[10px] text-sand-500">1920×1080</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExportMenuOpen(false)
+                          gate.run('export-png-2x')
+                        }}
+                        className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                      >
+                        <span>PNG · 2x</span>
+                        <span className="font-mono text-[10px] text-sand-500">3840×2160</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-
-                {imageError && (
-                  <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
-                )}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  fullWidth
+                  onClick={() => gate.run('copy-code')}
+                >
+                  {copied ? 'Copied ✓' : 'Copy code'}
+                </Button>
               </section>
+
+              {/* Recorder / image-export status. Hidden until there's
+                  something to surface — Record itself lives in the
+                  bottom-bar. */}
+              {(!recorder.supported || recorder.error || imageError) && (
+                <section className="space-y-1.5 pt-2">
+                  {!recorder.supported && (
+                    <p className="text-[11px] leading-snug text-sand-500 dark:text-sand-500">
+                      Recording needs Chrome / Edge / Safari 16.4+ / Firefox 130+.
+                    </p>
+                  )}
+                  {recorder.error && (
+                    <p className="text-[11px] leading-snug text-red-500">{recorder.error}</p>
+                  )}
+                  {imageError && (
+                    <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
+                  )}
+                </section>
+              )}
             </div>
           </aside>
         </div>
@@ -660,7 +725,7 @@ export default function ParticleMarkLabPage() {
 
       <PresetSaveDialog
         isOpen={saveDialogOpen}
-        defaultName={`Untitled · ${new Date().toLocaleString()}`}
+        defaultName={saveDefaultName}
         onSave={onSavePreset}
         onCancel={() => setSaveDialogOpen(false)}
       />
@@ -675,15 +740,18 @@ export default function ParticleMarkLabPage() {
         submitLabel="Rename"
         submittingLabel="Renaming…"
       />
+
+      <RecordingDownloadDialog
+        isOpen={recorder.pending !== null}
+        sourceSizeBytes={recorder.pending?.sizeBytes ?? 0}
+        durationSec={recorder.pending?.durationSec ?? 0}
+        error={recorder.error}
+        onDownload={(fps) => recorder.downloadRecording(fps)}
+        onCancel={recorder.dismissRecording}
+      />
+
     </>
   )
-}
-
-function formatElapsed(ms: number) {
-  const totalSec = Math.floor(ms / 1000)
-  const m = Math.floor(totalSec / 60)
-  const s = totalSec % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 // Wraps the renderer with a drop zone that covers the canvas area so files

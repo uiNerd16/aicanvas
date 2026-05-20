@@ -131,6 +131,12 @@ type LabLogoProps = {
   bubbles?: boolean
   variant?: 'tall' | 'compact'
   idleAnimation?: boolean
+  /**
+   * Skip the dot-cascade assembly animation and render every dot at its
+   * settled state from the first frame. Useful in navbar usage where the
+   * mark should read as a static logo, not as a one-time intro.
+   */
+  noAssembly?: boolean
 }
 
 export function LabLogo({
@@ -144,6 +150,7 @@ export function LabLogo({
   bubbles: bubblesEnabled = true,
   variant = 'tall',
   idleAnimation = false,
+  noAssembly = false,
 }: LabLogoProps = {}) {
   const step = pixel + gap
   const letters = variant === 'compact' ? COMPACT_LETTERS : TALL_LETTERS
@@ -268,12 +275,16 @@ export function LabLogo({
               left: d.col * step,
               top: effectiveHeadRoom + d.row * step,
             }}
-            initial={{
-              opacity: 0,
-              scale: 0.2,
-              y: -40 - Math.random() * 80,
-              x: (Math.random() - 0.5) * 12,
-            }}
+            initial={
+              noAssembly
+                ? false
+                : {
+                    opacity: 0,
+                    scale: 0.2,
+                    y: -40 - Math.random() * 80,
+                    x: (Math.random() - 0.5) * 12,
+                  }
+            }
             animate={
               active
                 ? {
@@ -291,13 +302,15 @@ export function LabLogo({
                     times: [0, 0.45, 0.55, 0.7, 1],
                     ease: 'easeOut',
                   }
-                : {
-                    delay:
-                      (i / dots.length) * (assemblyDuration - 0.55) +
-                      Math.random() * 0.18,
-                    duration: 0.55,
-                    ease: [0.2, 0.7, 0.2, 1],
-                  }
+                : noAssembly
+                  ? { duration: 0 }
+                  : {
+                      delay:
+                        (i / dots.length) * (assemblyDuration - 0.55) +
+                        Math.random() * 0.18,
+                      duration: 0.55,
+                      ease: [0.2, 0.7, 0.2, 1],
+                    }
             }
             onAnimationComplete={() => {
               if (active) clearActiveDot(d.key)
