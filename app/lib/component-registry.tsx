@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import type { Tag, Platform } from '../components/ComponentCard'
+import { COMPONENT_COPY, ACCURATE_STACKS } from './component-copy'
 import FloatingCards from '../../components-workspace/floating-cards'
 import { prompts as floatingCardsPrompts } from '../../components-workspace/floating-cards/prompts'
 import TextBlurReveal from '../../components-workspace/text-blur-reveal'
@@ -158,6 +159,10 @@ export interface ComponentEntry {
   PreviewComponent: ComponentType
   code: string
   prompts: Partial<Record<Platform, string>>
+  // Long-form copy + use-case chips for the per-component page. Lives in
+  // app/lib/component-copy.ts and is merged in at the bottom of this file.
+  useCases?: string[]
+  about?: string
 }
 
 // Serializable subset of ComponentEntry — pass this across the
@@ -300,7 +305,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A minimal iOS-style slider toggle — thumb glides between off (grey) and on (green) with a snappy spring. Fully responsive.',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -315,7 +320,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'An iOS-style pill toggle in warm earth and sand tones — the thumb carries a small icon that morphs from X to checkmark as it slides across.',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -330,7 +335,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A playful pill toggle with an expressive face on the thumb — dead (×× eyes, flat mouth) when off, happy (arc eyes, big smile) when on. Track warms from grey to yellow.',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -345,7 +350,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A dark/light mode toggle styled as a window-blind pull cord — click to yank the cord and watch the icon swap through a venetian-blind slat animation.',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -375,7 +380,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A radial context menu that fans out formatting tools around a centre button, with active toggle states and an animated label pill.',
     tags: [
       { label: 'Inputs & Controls', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'SVG' },
     ],
     dualTheme: true,
@@ -407,7 +412,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
       'Circular battery indicator with animated liquid waves that rise as the percentage counts up, looping continuously.',
     tags: [
       { label: 'Widgets', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'SVG' },
     ],
     dualTheme: true,
@@ -422,7 +427,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'An airplane taxis down a runway progress bar, nose tilting up and taking off at 100%.',
     tags: [
       { label: 'Widgets', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Animation' },
     ],
     dualTheme: true,
@@ -437,7 +442,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A desk-calendar widget showing dates 1–31 with a satisfying flip-clock page-turn animation.',
     tags: [
       { label: 'Widgets', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -452,7 +457,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     description: 'A terminal-inspired button with a text scramble glitch effect on hover.',
     tags: [
       { label: 'Buttons & Toggles', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Terminal' },
     ],
     dualTheme: true,
@@ -468,7 +473,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
       'A swipeable deck of destination cards. Drag the front card down to send it to the back — each card reveals an animated hotels counter as it comes forward.',
     tags: [
       { label: 'Cards & Modals', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -484,7 +489,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
       'Words animate into view one by one with a satisfying blur-to-sharp entrance, auto-replaying in a loop.',
     tags: [
       { label: 'Typography', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
     ],
     PreviewComponent: TextBlurReveal,
     code: componentCodes['text-blur-reveal'],
@@ -559,7 +564,7 @@ Requirements:
       'Five polaroid photo cards stacked in a casual pile — click to fan them out in a spring-animated arc, hover to lift, click a card to spotlight it.',
     tags: [
       { label: 'Cards & Modals', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
     ],
     PreviewComponent: PolaroidStack,
     code: componentCodes['polaroid-stack'],
@@ -812,7 +817,7 @@ Requirements:
     tags: [
       { label: 'Navigation', accent: true },
       { label: 'Glass', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
     ],
     PreviewComponent: GlassSidebar,
     code: componentCodes['glass-sidebar'],
@@ -1008,7 +1013,7 @@ Requirements:
     dualTheme: true,
     tags: [
       { label: 'Widgets', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'Matter.js' },
     ],
     PreviewComponent: StickerWall,
@@ -1022,7 +1027,7 @@ Requirements:
     description: 'A portrait card whose corner peels on tap, revealing a scannable Wi-Fi QR code.',
     tags: [
       { label: 'Cards & Modals', accent: true },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
       { label: 'SVG' },
     ],
     dualTheme: true,
@@ -1277,7 +1282,7 @@ Requirements:
     tags: [
       { label: '3D & Shaders', accent: true },
       { label: 'Interactive' },
-      { label: 'Framer Motion' },
+      { label: 'Motion' },
     ],
     dualTheme: true,
     image: 'https://ik.imagekit.io/aitoolkit/cube-carousel.png?v=2',
@@ -1287,8 +1292,30 @@ Requirements:
   },
 ]
 
-// Newest first — append new components at the bottom of COMPONENTS_RAW
-export const COMPONENTS: ComponentEntry[] = [...COMPONENTS_RAW].reverse()
+// Newest first — append new components at the bottom of COMPONENTS_RAW.
+// At export time we merge in two pieces of curated data from component-copy.ts:
+//   1. Accurate stack tags from ACCURATE_STACKS — rebuilds each entry's `tags`
+//      array as `[category, ...stack_tags]`, dropping noise tags like
+//      "Interactive", "Animation", "SVG", and "Modal" that crept in over time.
+//   2. Per-component `useCases` + `about` copy from COMPONENT_COPY — drives the
+//      use-case chips in the header and the "About <name>" body section.
+// Anything not in either map keeps its original tags / omits the copy slots.
+export const COMPONENTS: ComponentEntry[] = [...COMPONENTS_RAW]
+  .reverse()
+  .map((entry) => {
+    const copy = COMPONENT_COPY[entry.slug]
+    const stack = ACCURATE_STACKS[entry.slug]
+    let tags: Tag[] = entry.tags
+    if (stack) {
+      // Preserve every accent tag, not just the first — Glass components
+      // carry two (their UI category + "Glass") so the sidebar can list
+      // them under both, and dropping the second was emptying the Glass
+      // category landing page.
+      const categories = entry.tags.filter((t) => t.accent)
+      tags = [...categories, ...stack.map((label) => ({ label }))]
+    }
+    return { ...entry, tags, ...(copy ?? {}) }
+  })
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 

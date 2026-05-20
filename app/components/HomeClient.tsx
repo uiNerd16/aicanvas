@@ -77,26 +77,19 @@ function findSuggestions(query: string, vocab: string[], max = 3): string[] {
 
 // ─── HomeClient ───────────────────────────────────────────────────────────────
 
-type CategoryHeader = {
-  label: string
-  h1: string
-  intro: string
-}
-
 export function HomeClient({
   components,
-  categoryHeader,
+  categoryLabel,
 }: {
   components: ComponentEntry[]
-  categoryHeader?: CategoryHeader
+  /** Category name shown in the breadcrumb. Passed by /components/category/[slug];
+   *  the legacy /components?category=X URL falls back to the query param. */
+  categoryLabel?: string
 }) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
   const query         = searchParams.get('q') ?? ''
-  // Category for the breadcrumb: prefer the explicit prop (used by the
-  // dynamic /components/category/[slug] route), fall back to the query
-  // param so the old /components?category=X URL still renders correctly.
-  const category      = categoryHeader?.label ?? searchParams.get('category') ?? ''
+  const category      = categoryLabel ?? searchParams.get('category') ?? ''
 
   const q = query.trim().toLowerCase()
   const filtered = q
@@ -190,19 +183,6 @@ export function HomeClient({
           <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
           {category && <span className="text-olive-500">/{category}</span>}
         </p>
-        {/* Category landing-page header. Rendered only on /components/category/[slug]
-            routes (driven by the prop, not the query param) so it gives those URLs
-            real on-page content for search engines. */}
-        {categoryHeader && (
-          <header className="mx-auto mb-6 max-w-[1800px]">
-            <h1 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-3xl">
-              {categoryHeader.h1}
-            </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sand-600 dark:text-sand-400 sm:text-base">
-              {categoryHeader.intro}
-            </p>
-          </header>
-        )}
         {filtered.length > 0 ? (
           <>
             <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
