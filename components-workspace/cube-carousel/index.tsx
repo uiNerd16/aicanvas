@@ -7,17 +7,17 @@ import { motion, useMotionValue, animate, type AnimationPlaybackControls, type P
 type FaceShape = 'wide' | 'side'
 
 // Unsplash photos (in face-slot order):
-//   00 Sebastian Svenson, 01 Galina Nelyubova, 02 Milad Fakurian,
-//   03 S. Baker, 04 Muriel Liu, 05 Pawel Czerwinski
+//   00 Jeremy Bishop, 01 Jeremy Bishop, 02 giacomo ambrosini,
+//   03 Luke Paris, 04 Jonny Gios, 05 Cloris Chou
 const wide = (id: string) => `https://images.unsplash.com/photo-${id}?w=960&h=540&fit=crop&auto=format&q=80`
 const square = (id: string) => `https://images.unsplash.com/photo-${id}?w=720&h=720&fit=crop&auto=format&q=80`
 
-const P00 = '1622547748225-3fc4abd2cca0' // Sebastian Svenson  — blue/white 3D
-const P01 = '1657497850541-b0199c958846' // Galina Nelyubova   — pattern
-const P02 = '1618005198919-d3d4b5a92ead' // Milad Fakurian     — yellow balloons
-const P03 = '1656100029860-b71a8be82ca8' // S. Baker           — logo
-const P04 = '1717913521927-e42591d63ca0' // Muriel Liu         — blue glass
-const P05 = '1643916861364-02e63ce3e52f' // Pawel Czerwinski   — pink/grey waves
+const P00 = '1602303832953-05d841ee21f7' // Jeremy Bishop      — woman in white hallway
+const P01 = '1560841650-fa45ffd48b77'    // Jeremy Bishop      — woman in white strap top
+const P02 = '1568464992136-fae8c7322eee' // giacomo ambrosini  — colored walls room
+const P03 = '1565105337533-d23f47c0fd58' // Luke Paris         — multicolored glass board
+const P04 = '1661632359984-0954ccc8a149' // Jonny Gios         — colorful tunnel walls
+const P05 = '1637909837540-80e1b9198ea9' // Cloris Chou        — colorful art pieces
 
 const FACES: { src: string; shape: FaceShape; transform: string }[] = [
   // Wide 16:9 faces (front, back, top, bottom)
@@ -86,6 +86,17 @@ export default function CubeCarousel() {
           }}
         />
 
+        <motion.div
+          onPanStart={onPanStart}
+          onPan={onPan}
+          onPanEnd={onPanEnd}
+          aria-label="Drag to rotate the cube"
+          role="button"
+          tabIndex={0}
+          className="absolute inset-0 z-10 cursor-grab select-none active:cursor-grabbing"
+          style={{ touchAction: 'none' }}
+        />
+
         <div
           style={{ perspective: '1400px' }}
           className="flex h-full w-full items-center justify-center"
@@ -95,9 +106,6 @@ export default function CubeCarousel() {
             className="relative"
           >
             <motion.div
-              onPanStart={onPanStart}
-              onPan={onPan}
-              onPanEnd={onPanEnd}
               style={
                 {
                   width: 'var(--w)',
@@ -111,10 +119,10 @@ export default function CubeCarousel() {
                   '--half-w': 'calc(var(--w) / 2)',
                   '--half-h': 'calc(var(--h) / 2)',
                   '--half-d': 'calc(var(--d) / 2)',
-                  touchAction: 'none',
+                  pointerEvents: 'none',
                 } as React.CSSProperties
               }
-              className="relative cursor-grab select-none active:cursor-grabbing"
+              className="relative select-none"
             >
               {FACES.map((face, i) => {
                 const isSide = face.shape === 'side'
