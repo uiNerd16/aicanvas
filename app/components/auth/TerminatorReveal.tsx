@@ -24,7 +24,7 @@ export function TerminatorReveal() {
   )
 }
 
-function TerminatorCool() {
+export function TerminatorCool() {
   return (
     <img
       src="/auth/terminator-cool.svg"
@@ -35,7 +35,7 @@ function TerminatorCool() {
   )
 }
 
-function TerminatorSkull() {
+export function TerminatorSkull() {
   return (
     <img
       src="/auth/terminator-skull.svg"
