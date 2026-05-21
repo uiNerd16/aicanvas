@@ -18,6 +18,7 @@ import {
   MagnifyingGlass,
   PenNib,
   PiggyBank,
+  Plug,
 } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
 import type { ReactNode } from 'react'
@@ -307,9 +308,21 @@ export function MobileNav() {
                   )
                 })}
 
-                {/* Pricing, About — follows same pattern as section headers */}
+                {/* Get MCP, Pricing, About — follows same pattern as section headers */}
                 <div className="mb-3 h-px bg-sand-300 dark:bg-sand-800" />
                 <div className="mb-3">
+                  <Link
+                    href="/mcp"
+                    onClick={() => setOpen(false)}
+                    className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                      pathname === '/mcp'
+                        ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                        : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                    }`}
+                  >
+                    <span><Plug weight="regular" size={16} /></span>
+                    <span className="flex-1">Get MCP</span>
+                  </Link>
                   <Link
                     href="/pricing"
                     onClick={() => setOpen(false)}

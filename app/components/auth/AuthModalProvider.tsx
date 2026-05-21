@@ -3,19 +3,25 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 
 // ─── AuthModalProvider ────────────────────────────────────────────────────────
-// Global state for the auth modal — open/closed, current mode (sign-in or
-// sign-up), and an optional `next` URL for post-success redirects. Mounted
+// Global state for the auth modal — open/closed, current mode (gate, sign-in,
+// or sign-up), and an optional `next` URL for post-success redirects. Mounted
 // once at the root layout. The actual <AuthModal /> reads this state and
-// renders the dialog with whichever form-fields component matches the mode.
+// renders the dialog with whichever screen matches the mode.
 //
 // API:
 //   const { open, close, setMode, isOpen, mode, next } = useAuthModal()
 //   open()                                  // opens in sign-in mode (default)
 //   open({ mode: 'sign-up' })               // opens in sign-up mode
+//   open({ mode: 'gate' })                  // soft-gate confidence screen (Sign in / Sign up)
 //   open({ next: '/account/saved' })        // opens, redirect after success
 //   setMode('sign-up')                      // toggle mode while open
+//
+// The 'gate' mode is used when a value-extracting action (Lab Save / Record /
+// Save Preset, etc.) wants to soft-pitch the value of signing in before
+// asking for credentials. The gate screen renders confidence copy + two
+// buttons that call setMode('sign-in' | 'sign-up').
 
-export type AuthModalMode = 'sign-in' | 'sign-up'
+export type AuthModalMode = 'gate' | 'sign-in' | 'sign-up'
 
 type AuthModalContextValue = {
   isOpen: boolean
