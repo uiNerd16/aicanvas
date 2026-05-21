@@ -47,6 +47,7 @@ import { PresetSaveDialog } from '../_lib/preset/PresetSaveDialog'
 import { PresetMenu, type PresetSummary } from '../_lib/preset/PresetMenu'
 import { useSession } from '../../components/auth/SessionProvider'
 import { Button } from '../../components/Button'
+import { MobileControlSheet } from '../_components/MobileControlSheet'
 
 const MAX_RECORDING_MS = 20_000
 const TOOL = '60k-particles' as const
@@ -379,6 +380,284 @@ export default function ParticleMarkLabPage() {
     [presets],
   )
 
+  // Shared control panel — rendered into the desktop right sidebar AND the
+  // mobile bottom sheet. Lives here (not as a sub-component) so it captures
+  // page state directly without a long props handshake.
+  const panelContent = (
+    <>
+      <header className="mb-5">
+        <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
+          60K Particles
+        </h1>
+        <p className="mt-2 text-[13px] leading-snug text-sand-600 dark:text-sand-400">
+          Drop an SVG or PNG. Move your mouse to animate the scene. Export PNG • Export MP4 • Copy Code
+        </p>
+      </header>
+
+      <div className="space-y-5">
+        {/* SOURCE */}
+        <section>
+          <SectionLabel>Source</SectionLabel>
+          <FileDrop
+            accept="image/svg+xml,image/png,image/jpeg,image/webp"
+            onFile={onSvgFile}
+            fileName={config.svgFileName}
+            onClear={onClearSvg}
+          />
+        </section>
+
+        <Slider
+          label="Density"
+          value={config.density}
+          min={2000}
+          max={60000}
+          step={1000}
+          onChange={(v) => update('density', v)}
+          format={(v) => v.toLocaleString()}
+        />
+
+        <Slider
+          label="Particle Size"
+          value={config.particleSize}
+          min={2}
+          max={12}
+          step={0.5}
+          onChange={(v) => update('particleSize', v)}
+          format={(v) => v.toFixed(1)}
+        />
+
+        <Slider
+          label="Mark Size"
+          value={config.markSize}
+          min={1}
+          max={4}
+          step={0.05}
+          onChange={(v) => update('markSize', v)}
+          format={(v) => v.toFixed(2)}
+        />
+
+        <section>
+          <SectionLabel>Colors</SectionLabel>
+          <Segmented
+            options={COLOR_MODE_OPTIONS}
+            value={config.colorMode}
+            onChange={(v) => update('colorMode', v)}
+          />
+          {config.colorMode === 'Mono' && (
+            <div className="mt-3 flex items-center gap-2">
+              <ColorInput
+                variant="swatch"
+                appearance="solid"
+                value={config.monoColor}
+                onChange={(v) => update('monoColor', v)}
+              />
+              <span className="font-mono text-xs text-sand-700 dark:text-sand-300">
+                {config.monoColor.toUpperCase()}
+              </span>
+            </div>
+          )}
+        </section>
+
+        <section>
+          <SectionLabel>Background</SectionLabel>
+          <div className="flex flex-wrap items-center gap-2">
+            {BG_PRESETS.map((hex) => {
+              const active = config.backgroundColor.toLowerCase() === hex.toLowerCase()
+              return (
+                <button
+                  key={hex}
+                  type="button"
+                  onClick={() => update('backgroundColor', hex)}
+                  title={hex}
+                  aria-label={`Use ${hex} as background`}
+                  className={`h-7 w-7 rounded-full border transition-all ${
+                    active
+                      ? 'border-olive-500 ring-2 ring-olive-500/40'
+                      : 'border-sand-400 hover:scale-110 dark:border-sand-700'
+                  }`}
+                  style={{ background: hex }}
+                />
+              )
+            })}
+            <ColorInput
+              variant="swatch"
+              active={
+                !BG_PRESETS.some(
+                  (p) => p.toLowerCase() === config.backgroundColor.toLowerCase(),
+                )
+              }
+              value={config.backgroundColor}
+              onChange={(v) => update('backgroundColor', v)}
+            />
+          </div>
+        </section>
+
+        <section>
+          <SectionLabel>Idle Motion</SectionLabel>
+          <Segmented
+            options={IDLE_OPTIONS}
+            value={config.idle}
+            onChange={(v) => update('idle', v)}
+          />
+        </section>
+
+        <section>
+          <SectionLabel>Hover Area</SectionLabel>
+          <Segmented
+            options={HOVER_OPTIONS}
+            value={config.hoverArea}
+            onChange={(v) => update('hoverArea', v)}
+          />
+        </section>
+
+        <Slider
+          label="Hover Strength"
+          value={config.hoverStrength}
+          min={0}
+          max={2}
+          step={0.05}
+          onChange={(v) => update('hoverStrength', v)}
+          format={(v) => v.toFixed(2)}
+        />
+
+        <section>
+          <SectionLabel>Return Spring</SectionLabel>
+          <Segmented
+            options={SPRING_OPTIONS}
+            value={config.spring}
+            onChange={(v) => update('spring', v)}
+          />
+        </section>
+
+        <section>
+          <SectionLabel>Light Direction</SectionLabel>
+          <Segmented
+            options={LIGHT_OPTIONS}
+            value={config.light}
+            onChange={(v) => update('light', v)}
+            renderOption={(opt) => LIGHT_ICONS[opt]}
+          />
+        </section>
+
+        <Slider
+          label="Highlight Strength"
+          value={config.highlightStrength}
+          min={0}
+          max={0.5}
+          step={0.025}
+          disabled={config.light === 'None'}
+          onChange={(v) => update('highlightStrength', v)}
+          format={(v) => v.toFixed(3)}
+        />
+
+        <section>
+          <SectionLabel>Depth</SectionLabel>
+          <Segmented
+            options={DEPTH_OPTIONS}
+            value={config.depth}
+            onChange={(v) => update('depth', v)}
+          />
+        </section>
+
+        {/* PRESETS — placed near the export actions so saving / loading a
+            tune lives next to the other "take this with me" controls. */}
+        <section>
+          <SectionLabel>Presets</SectionLabel>
+          <div className="space-y-2">
+            <PresetMenu
+              presets={presetSummaries}
+              loading={presetsLoading}
+              signedIn={!!user}
+              onLoad={onLoadPreset}
+              onRename={onRenamePreset}
+              onDelete={onDeletePreset}
+            />
+            <Button variant="outline" size="xs" fullWidth onClick={() => gate.run('save-preset')}>
+              <BookmarkSimple size={12} weight="regular" />
+              Save preset
+            </Button>
+          </div>
+        </section>
+
+        <section className="space-y-2 pt-2">
+          <SectionLabel>Export</SectionLabel>
+          <div className="relative" ref={exportMenuRef}>
+            <Button
+              variant="primary"
+              size="xs"
+              fullWidth
+              onClick={() => setExportMenuOpen((o) => !o)}
+              className="relative"
+            >
+              {imageSaved && <Check weight="regular" size={12} />}
+              {imageSaved ? 'Saved!' : 'Save image'}
+              {!imageSaved && (
+                <CaretDown
+                  weight="regular"
+                  size={12}
+                  className={`absolute right-3 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`}
+                />
+              )}
+            </Button>
+            {exportMenuOpen && (
+              <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExportMenuOpen(false)
+                    gate.run('export-png-1x')
+                  }}
+                  className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                >
+                  <span>PNG · 1x</span>
+                  <span className="font-mono text-[10px] text-sand-500">1920×1080</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExportMenuOpen(false)
+                    gate.run('export-png-2x')
+                  }}
+                  className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+                >
+                  <span>PNG · 2x</span>
+                  <span className="font-mono text-[10px] text-sand-500">3840×2160</span>
+                </button>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="xs"
+            fullWidth
+            onClick={() => gate.run('copy-code')}
+          >
+            {copied ? 'Copied ✓' : 'Copy code'}
+          </Button>
+        </section>
+
+        {/* Recorder / image-export status. Hidden until there's
+            something to surface — Record itself lives in the
+            bottom-bar. */}
+        {(!recorder.supported || recorder.error || imageError) && (
+          <section className="space-y-1.5 pt-2">
+            {!recorder.supported && (
+              <p className="text-[11px] leading-snug text-sand-500 dark:text-sand-500">
+                Recording needs Chrome / Edge / Safari 16.4+ / Firefox 130+.
+              </p>
+            )}
+            {recorder.error && (
+              <p className="text-[11px] leading-snug text-red-500">{recorder.error}</p>
+            )}
+            {imageError && (
+              <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
+            )}
+          </section>
+        )}
+      </div>
+    </>
+  )
+
   return (
     <>
       <style
@@ -429,12 +708,13 @@ export default function ParticleMarkLabPage() {
 
       <main className="flex min-h-0 flex-1 flex-col bg-sand-200 dark:bg-sand-950">
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-          <section className="relative flex w-full flex-col overflow-hidden md:min-w-0 md:flex-1">
+          <section className="relative flex w-full min-w-0 flex-1 flex-col overflow-hidden">
             <CanvasArea config={config} onFile={onSvgFile} onCanvasReady={onCanvasReady} />
             {/* Bottom-of-canvas Record strip — centred over the live preview
                 rather than the full viewport, so it stays put when the
-                sidebar's width changes. */}
-            <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2">
+                sidebar's width changes. On mobile, lifted higher so it
+                clears the bottom-sheet's peek state. */}
+            <div className="pointer-events-none absolute bottom-[88px] left-1/2 z-20 -translate-x-1/2 md:bottom-4">
               <div className="pointer-events-auto flex items-center gap-2">
                 <RecordButton
                   state={recorder.state}
@@ -448,278 +728,16 @@ export default function ParticleMarkLabPage() {
             </div>
           </section>
 
-          <aside className="w-full shrink-0 border-t border-sand-300 px-5 py-6 dark:border-sand-800 md:w-[340px] md:overflow-y-auto md:border-l md:border-t-0 md:px-5 md:py-6">
-            <header className="mb-5">
-              <h1 className="mb-1 text-2xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
-                60K Particles
-              </h1>
-              <p className="mt-2 text-[13px] leading-snug text-sand-600 dark:text-sand-400">
-                Drop an SVG or PNG. Move your mouse to animate the scene. Export PNG • Export MP4 • Copy Code
-              </p>
-            </header>
-
-            <div className="space-y-5">
-              {/* SOURCE */}
-              <section>
-                <SectionLabel>Source</SectionLabel>
-                <FileDrop
-                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                  onFile={onSvgFile}
-                  fileName={config.svgFileName}
-                  onClear={onClearSvg}
-                />
-              </section>
-
-              <Slider
-                label="Density"
-                value={config.density}
-                min={2000}
-                max={60000}
-                step={1000}
-                onChange={(v) => update('density', v)}
-                format={(v) => v.toLocaleString()}
-              />
-
-              <Slider
-                label="Particle Size"
-                value={config.particleSize}
-                min={2}
-                max={12}
-                step={0.5}
-                onChange={(v) => update('particleSize', v)}
-                format={(v) => v.toFixed(1)}
-              />
-
-              <Slider
-                label="Mark Size"
-                value={config.markSize}
-                min={1}
-                max={4}
-                step={0.05}
-                onChange={(v) => update('markSize', v)}
-                format={(v) => v.toFixed(2)}
-              />
-
-              <section>
-                <SectionLabel>Colors</SectionLabel>
-                <Segmented
-                  options={COLOR_MODE_OPTIONS}
-                  value={config.colorMode}
-                  onChange={(v) => update('colorMode', v)}
-                />
-                {config.colorMode === 'Mono' && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <ColorInput
-                      variant="swatch"
-                      appearance="solid"
-                      value={config.monoColor}
-                      onChange={(v) => update('monoColor', v)}
-                    />
-                    <span className="font-mono text-xs text-sand-700 dark:text-sand-300">
-                      {config.monoColor.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </section>
-
-              <section>
-                <SectionLabel>Background</SectionLabel>
-                <div className="flex flex-wrap items-center gap-2">
-                  {BG_PRESETS.map((hex) => {
-                    const active = config.backgroundColor.toLowerCase() === hex.toLowerCase()
-                    return (
-                      <button
-                        key={hex}
-                        type="button"
-                        onClick={() => update('backgroundColor', hex)}
-                        title={hex}
-                        aria-label={`Use ${hex} as background`}
-                        className={`h-7 w-7 rounded-full border transition-all ${
-                          active
-                            ? 'border-olive-500 ring-2 ring-olive-500/40'
-                            : 'border-sand-400 hover:scale-110 dark:border-sand-700'
-                        }`}
-                        style={{ background: hex }}
-                      />
-                    )
-                  })}
-                  <ColorInput
-                    variant="swatch"
-                    active={
-                      !BG_PRESETS.some(
-                        (p) => p.toLowerCase() === config.backgroundColor.toLowerCase(),
-                      )
-                    }
-                    value={config.backgroundColor}
-                    onChange={(v) => update('backgroundColor', v)}
-                  />
-                </div>
-              </section>
-
-              <section>
-                <SectionLabel>Idle Motion</SectionLabel>
-                <Segmented
-                  options={IDLE_OPTIONS}
-                  value={config.idle}
-                  onChange={(v) => update('idle', v)}
-                />
-              </section>
-
-              <section>
-                <SectionLabel>Hover Area</SectionLabel>
-                <Segmented
-                  options={HOVER_OPTIONS}
-                  value={config.hoverArea}
-                  onChange={(v) => update('hoverArea', v)}
-                />
-              </section>
-
-              <Slider
-                label="Hover Strength"
-                value={config.hoverStrength}
-                min={0}
-                max={2}
-                step={0.05}
-                onChange={(v) => update('hoverStrength', v)}
-                format={(v) => v.toFixed(2)}
-              />
-
-              <section>
-                <SectionLabel>Return Spring</SectionLabel>
-                <Segmented
-                  options={SPRING_OPTIONS}
-                  value={config.spring}
-                  onChange={(v) => update('spring', v)}
-                />
-              </section>
-
-              <section>
-                <SectionLabel>Light Direction</SectionLabel>
-                <Segmented
-                  options={LIGHT_OPTIONS}
-                  value={config.light}
-                  onChange={(v) => update('light', v)}
-                  renderOption={(opt) => LIGHT_ICONS[opt]}
-                />
-              </section>
-
-              <Slider
-                label="Highlight Strength"
-                value={config.highlightStrength}
-                min={0}
-                max={0.5}
-                step={0.025}
-                disabled={config.light === 'None'}
-                onChange={(v) => update('highlightStrength', v)}
-                format={(v) => v.toFixed(3)}
-              />
-
-              <section>
-                <SectionLabel>Depth</SectionLabel>
-                <Segmented
-                  options={DEPTH_OPTIONS}
-                  value={config.depth}
-                  onChange={(v) => update('depth', v)}
-                />
-              </section>
-
-              {/* PRESETS — placed near the export actions so saving / loading a
-                  tune lives next to the other "take this with me" controls. */}
-              <section>
-                <SectionLabel>Presets</SectionLabel>
-                <div className="space-y-2">
-                  <PresetMenu
-                    presets={presetSummaries}
-                    loading={presetsLoading}
-                    signedIn={!!user}
-                    onLoad={onLoadPreset}
-                    onRename={onRenamePreset}
-                    onDelete={onDeletePreset}
-                  />
-                  <Button variant="outline" size="xs" fullWidth onClick={() => gate.run('save-preset')}>
-                    <BookmarkSimple size={12} weight="regular" />
-                    Save preset
-                  </Button>
-                </div>
-              </section>
-
-              <section className="space-y-2 pt-2">
-                <SectionLabel>Export</SectionLabel>
-                <div className="relative" ref={exportMenuRef}>
-                  <Button
-                    variant="primary"
-                    size="xs"
-                    fullWidth
-                    onClick={() => setExportMenuOpen((o) => !o)}
-                    className="relative"
-                  >
-                    {imageSaved && <Check weight="regular" size={12} />}
-                    {imageSaved ? 'Saved!' : 'Save image'}
-                    {!imageSaved && (
-                      <CaretDown
-                        weight="regular"
-                        size={12}
-                        className={`absolute right-3 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`}
-                      />
-                    )}
-                  </Button>
-                  {exportMenuOpen && (
-                    <div className="absolute bottom-full left-0 z-40 mb-2 w-full overflow-hidden rounded-lg border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExportMenuOpen(false)
-                          gate.run('export-png-1x')
-                        }}
-                        className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                      >
-                        <span>PNG · 1x</span>
-                        <span className="font-mono text-[10px] text-sand-500">1920×1080</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExportMenuOpen(false)
-                          gate.run('export-png-2x')
-                        }}
-                        className="flex w-full items-center justify-between gap-2.5 px-3 py-2 text-xs text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                      >
-                        <span>PNG · 2x</span>
-                        <span className="font-mono text-[10px] text-sand-500">3840×2160</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  fullWidth
-                  onClick={() => gate.run('copy-code')}
-                >
-                  {copied ? 'Copied ✓' : 'Copy code'}
-                </Button>
-              </section>
-
-              {/* Recorder / image-export status. Hidden until there's
-                  something to surface — Record itself lives in the
-                  bottom-bar. */}
-              {(!recorder.supported || recorder.error || imageError) && (
-                <section className="space-y-1.5 pt-2">
-                  {!recorder.supported && (
-                    <p className="text-[11px] leading-snug text-sand-500 dark:text-sand-500">
-                      Recording needs Chrome / Edge / Safari 16.4+ / Firefox 130+.
-                    </p>
-                  )}
-                  {recorder.error && (
-                    <p className="text-[11px] leading-snug text-red-500">{recorder.error}</p>
-                  )}
-                  {imageError && (
-                    <p className="text-[11px] leading-snug text-red-500">{imageError}</p>
-                  )}
-                </section>
-              )}
-            </div>
+          <aside className="hidden w-full shrink-0 border-t border-sand-300 px-5 py-6 dark:border-sand-800 md:block md:w-[340px] md:overflow-y-auto md:border-l md:border-t-0 md:px-5 md:py-6">
+            {panelContent}
           </aside>
+
+          {/* Mobile-only bottom sheet — drag handle, 3 snap points. Hidden on
+              md+ where the right sidebar takes over. */}
+          <div className="md:hidden">
+            <MobileControlSheet>{panelContent}</MobileControlSheet>
+          </div>
+
         </div>
       </main>
 
@@ -780,7 +798,7 @@ function CanvasArea({
         const f = e.dataTransfer.files?.[0]
         if (f) onFile(f)
       }}
-      className="relative h-[60vh] min-h-[420px] w-full md:h-auto md:min-h-0 md:flex-1"
+      className="relative w-full flex-1 min-h-0"
     >
       <Renderer config={config} onCanvasReady={onCanvasReady} />
       {dragOver && (
