@@ -12,16 +12,15 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 //   • NerdToHero      — sign-up flow (nerd → superhero, "YOU just got superpowers.")
 //   • TerminatorReveal — sign-in flow (cool → skull, "I'll be back." → "Told you.")
 //
-// Asymmetric dwell — the "after" state holds the punchline, so it deserves
-// more screen time than the setup. Setup ~2s, payoff ~5s.
+// Symmetric dwell — 3s on each phase keeps the rhythm even.
 // The "after" headline lands ~150ms after the illustration so the rhythm
 // reads as ta-da → punchline instead of both moving in unison.
 //
 // Honors prefers-reduced-motion: no auto-cycle, no scale/flash; user sees
 // the static "after" state with the longer headline.
 
-const BEFORE_MS = 2000
-const AFTER_MS = 5000
+const BEFORE_MS = 3000
+const AFTER_MS = 3000
 
 export type AuthIntroAnimationProps = {
   BeforeIllustration: React.ComponentType
