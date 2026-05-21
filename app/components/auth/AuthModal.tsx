@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { X } from '@phosphor-icons/react'
 import { Button } from '../Button'
 import { useAuthModal } from './AuthModalProvider'
+import { AuthGateScreen } from './AuthGateScreen'
 import { SignInFormFields } from './SignInFormFields'
 import { SignUpFormFields } from './SignUpFormFields'
 
@@ -100,7 +101,13 @@ export function AuthModal() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={mode === 'sign-in' ? 'Sign in' : 'Create your account'}
+      aria-label={
+        mode === 'gate'
+          ? 'Unlock the canvas'
+          : mode === 'sign-in'
+            ? 'Sign in'
+            : 'Create your account'
+      }
       className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
     >
       {/* Backdrop — visual only; clicks do NOT dismiss the modal. The X
@@ -126,7 +133,12 @@ export function AuthModal() {
           <X weight="regular" size={18} />
         </Button>
 
-        {mode === 'sign-in' ? (
+        {mode === 'gate' ? (
+          <AuthGateScreen
+            onChooseSignIn={() => setMode('sign-in')}
+            onChooseSignUp={() => setMode('sign-up')}
+          />
+        ) : mode === 'sign-in' ? (
           <SignInFormFields
             next={next ?? '/'}
             onSuccess={handleSignInSuccess}

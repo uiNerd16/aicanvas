@@ -105,7 +105,7 @@ export function useLabAuthGate<S>({
         // up; they just won't auto-resume their tune.
       }
 
-      open({ mode: 'sign-up', next: pathname })
+      open({ mode: 'gate', next: pathname })
     },
     [user, open, pathname, serializeState, storageKey],
   )
