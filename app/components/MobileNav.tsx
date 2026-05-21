@@ -15,8 +15,8 @@ import {
   CaretDown,
   Cube,
   DiamondsFour,
+  Flask,
   MagnifyingGlass,
-  PenNib,
   PiggyBank,
   Plug,
 } from '@phosphor-icons/react'
@@ -144,6 +144,7 @@ export function MobileNav() {
       {/* ── Mobile top bar ── */}
       <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-300 bg-sand-200 px-4 dark:border-sand-800 dark:bg-sand-950 md:hidden">
         <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
           AI Canvas
         </Link>
@@ -184,6 +185,7 @@ export function MobileNav() {
                   className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
                   onClick={() => setOpen(false)}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
                   AI Canvas
                 </Link>
@@ -378,12 +380,12 @@ export function MobileNav() {
                   <XLogo weight="regular" size={20} />
                 </a>
                 <Link
-                  href="/mcp"
+                  href="/lab"
                   onClick={() => setOpen(false)}
                   className={`ml-1 ${buttonClasses({ variant: 'primary', size: 'xs' })}`}
                 >
-                  <img src="/ai-canvas-icon-mono.svg" alt="" width={16} height={14} className="shrink-0" />
-                  Get MCP
+                  <Flask weight="regular" size={16} className="shrink-0" />
+                  Lab
                 </Link>
               </div>
 
@@ -410,6 +412,7 @@ export function MobileNav() {
                     rel="noopener noreferrer"
                     className={`mt-3 ${buttonClasses({ variant: 'outline', size: 'xs', fullWidth: true })}`}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
                     Send a Coffee
                   </a>
