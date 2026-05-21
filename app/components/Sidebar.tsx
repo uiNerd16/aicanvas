@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, PiggyBank, X, XLogo } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
 import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
@@ -263,8 +263,19 @@ export function Sidebar() {
         {/* ── Divider ── */}
         <div className="my-2 border-t border-sand-300 dark:border-sand-800" />
 
-        {/* ── Pricing, About & Contact ── */}
+        {/* ── Get MCP, Pricing, About & Contact ── */}
         <div className="space-y-0.5">
+          <Link
+            href="/mcp"
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+              pathname === '/mcp'
+                ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+            }`}
+          >
+            <Plug weight="regular" size={16} />
+            <span>Get MCP</span>
+          </Link>
           <Link
             href="/pricing"
             className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
