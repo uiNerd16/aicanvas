@@ -22,7 +22,7 @@ export function AuthGateScreen({ onChooseSignIn, onChooseSignUp }: AuthGateScree
         Sign in and unlock the canvas.
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-        Save what you love, tune in the Lab, export to your machine.
+        Save what you love, tune in the Lab, export to your machine. AI Canvas is open source and completely free.
       </p>
 
       <div className="mt-7 flex flex-col gap-3">
