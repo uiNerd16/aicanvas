@@ -86,6 +86,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'taga-toggle': ['Motion', 'Tailwind CSS'],
   'task-cards': ['Motion', 'Tailwind CSS'],
   'text-blur-reveal': ['Motion', 'Tailwind CSS'],
+  'tilted-coverflow': ['Motion', 'Tailwind CSS'],
   'traveldeck': ['Motion', 'Tailwind CSS'],
   'upload-progress': ['Motion', 'Tailwind CSS'],
   'voice-chat-pill': ['Motion', 'Tailwind CSS'],
@@ -451,6 +452,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Image gallery', 'Portfolio', 'Hero section'],
     about:
       'Cube Carousel is a true 3D photo cube built on CSS transforms with preserve-3d, not a Three.js scene or a perspective trick. Six placeholder images sit on the faces of a cube with a 16:9:9 width-height-depth ratio. The drag interaction uses Motion onPan to apply rotation deltas on both axes simultaneously; releasing the cube lets it coast to a soft spring stop with no snap-back. No buttons, no controls, no UI chrome, just a cube and your cursor. It is well suited to portfolio galleries, product showcases, or hero sections where a tactile, physical-feeling interaction is worth more than another fade-in.',
+  },
+  'tilted-coverflow': {
+    useCases: ['Image gallery', 'Portfolio', 'Hero section'],
+    about:
+      'Tilted Coverflow is a 3D photo carousel built on CSS perspective and rotateY transforms, not Three.js. Seven cards fan out in a horizontal arc with a size gradient from center to edge; every card breathes on its own slow loop, and the focused caption fades in word by word when it lands in the middle. Drag, click any side card, or use the arrow keys to focus, and the row wraps circularly so three cards always sit on each side of center. Motion handles the springs and breathing; Tailwind covers layout. Suits portfolios, image galleries, or hero bands that want a tactile, image-forward interaction.',
   },
 
   // ─── UI (uncategorized) ──────────────────────────────────────────────────

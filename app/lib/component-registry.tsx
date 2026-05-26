@@ -140,6 +140,8 @@ import CuriousAi from '../../components-workspace/curious-ai'
 import { prompts as curiousAiPrompts } from '../../components-workspace/curious-ai/prompts'
 import CubeCarousel from '../../components-workspace/cube-carousel'
 import { prompts as cubeCarouselPrompts } from '../../components-workspace/cube-carousel/prompts'
+import TiltedCoverflow from '../../components-workspace/tilted-coverflow'
+import { prompts as tiltedCoverflowPrompts } from '../../components-workspace/tilted-coverflow/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1289,6 +1291,22 @@ Requirements:
     PreviewComponent: CubeCarousel,
     code: componentCodes['cube-carousel'],
     prompts: cubeCarouselPrompts,
+  },
+  {
+    slug: 'tilted-coverflow',
+    image: 'https://ik.imagekit.io/aitoolkit/tilted-coverflow.png',
+    name: 'Tilted Coverflow',
+    description:
+      '3D coverflow card carousel of seven tilted photos. Drag or arrows to focus any card.',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Motion' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: TiltedCoverflow,
+    code: componentCodes['tilted-coverflow'],
+    prompts: tiltedCoverflowPrompts,
   },
 ]
 
