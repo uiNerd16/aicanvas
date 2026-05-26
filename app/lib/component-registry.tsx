@@ -142,6 +142,8 @@ import CubeCarousel from '../../components-workspace/cube-carousel'
 import { prompts as cubeCarouselPrompts } from '../../components-workspace/cube-carousel/prompts'
 import TiltedCoverflow from '../../components-workspace/tilted-coverflow'
 import { prompts as tiltedCoverflowPrompts } from '../../components-workspace/tilted-coverflow/prompts'
+import ScatterPile from '../../components-workspace/scatter-pile'
+import { prompts as scatterPilePrompts } from '../../components-workspace/scatter-pile/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1307,6 +1309,22 @@ Requirements:
     PreviewComponent: TiltedCoverflow,
     code: componentCodes['tilted-coverflow'],
     prompts: tiltedCoverflowPrompts,
+  },
+  {
+    slug: 'scatter-pile',
+    image: '',
+    name: 'Scatter Pile',
+    description:
+      'Five-card moodboard pile with mixed aspect ratios. Click, drag, or arrow keys to focus any card; the rest reshuffle around it.',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Motion' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: ScatterPile,
+    code: componentCodes['scatter-pile'],
+    prompts: scatterPilePrompts,
   },
 ]
 
