@@ -84,6 +84,7 @@ const ALL_SLUGS = [
   'radial-cards',
   'new-project-modal',
   'signature-pad',
+  'tilted-coverflow',
 ]
 
 const arg   = process.argv[2]
