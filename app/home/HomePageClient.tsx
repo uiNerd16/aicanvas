@@ -231,6 +231,10 @@ function ShowcaseCard({ items }: { items: ComponentMeta[] }) {
               <img
                 src={current.image}
                 alt={`${current.name} — ${current.description.split('.')[0]}`}
+                // Above-the-fold hero showcase — the likely LCP element.
+                // High fetch priority pulls it off the critical path bottleneck.
+                fetchPriority="high"
+                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
@@ -407,6 +411,8 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
           <img
             src={entry.image}
             alt={`${entry.name} — ${entry.description.split('.')[0]}`}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
@@ -593,6 +599,8 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                       <img
                         src={current.image}
                         alt={`${current.name} — ${current.description.split('.')[0]}`}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     ) : (

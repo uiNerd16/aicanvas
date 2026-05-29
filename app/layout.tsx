@@ -19,7 +19,9 @@ import { createClient } from './lib/supabase/server'
 const manrope = Manrope({
   variable: '--font-manrope',
   subsets: ['latin'],
-  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  // Weights 200/300 were declared but never used in the app — dropping them
+  // removes two font files from the critical path. Used range is 400–800.
+  weight: ['400', '500', '600', '700', '800'],
 })
 
 const geistMono = Geist_Mono({
