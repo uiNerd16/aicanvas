@@ -47,7 +47,7 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
           </span>
         )}
         {image ? (
-          <img src={optimizeImageKitUrl(image, 'card')} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
+          <img src={optimizeImageKitUrl(image, 'card')} alt={name} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-125" />
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
