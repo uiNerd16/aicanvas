@@ -46,7 +46,7 @@ export default function McpPage() {
         <header className="mb-10 sm:mb-14">
           <h1 className="max-w-xl text-3xl font-extrabold leading-[1.2] tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
             Every AI Canvas component, inside{' '}
-            <span className="text-olive-500">Claude Code.</span>
+            <span className="text-olive-500">Claude Code &amp; Codex.</span>
           </h1>
           <p className="mt-5 max-w-xl text-xl text-sand-800 dark:text-sand-100">
             One command to install the MCP. Then forget it exists.
