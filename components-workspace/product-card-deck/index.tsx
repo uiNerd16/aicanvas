@@ -17,41 +17,36 @@ import {
 // Swap these for any images — the deck loops endlessly through them.
 
 interface CardData {
-  eyebrow: string
   title: string
   image: string
+  label?: string
 }
 
 const CARDS: CardData[] = [
   {
-    eyebrow: 'Birds',
-    title: 'Sun conure at dusk',
-    image:
-      'https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&w=600&h=800&q=80',
+    title: 'Dreamer backpack',
+    label: 'Shop',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/backpack.jpg?tr=w-600',
   },
   {
-    eyebrow: 'Big cats',
-    title: 'White tiger in the ferns',
-    image:
-      'https://images.unsplash.com/photo-1602491453631-e2a5ad90a131?auto=format&fit=crop&w=600&h=800&q=80',
+    title: 'Creator graffiti tee',
+    label: 'Shop',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/tee.jpg?tr=w-600',
   },
   {
-    eyebrow: 'Birds',
-    title: 'Toco toucan in the canopy',
-    image:
-      'https://images.unsplash.com/photo-1658289929355-e87b9c4e9c47?auto=format&fit=crop&w=600&h=800&q=80',
+    title: 'Dreamer high-tops',
+    label: 'Shop',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/sneaker.jpg?tr=w-600',
   },
   {
-    eyebrow: 'Reptiles',
-    title: 'Veiled chameleon',
-    image:
-      'https://images.unsplash.com/photo-1704265586326-6b8d7569e62c?auto=format&fit=crop&w=600&h=800&q=80',
+    title: 'Denim jacket',
+    label: 'Shop',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/jacket.jpg?tr=w-600',
   },
   {
-    eyebrow: 'Bears',
-    title: 'Giant panda in the bamboo',
-    image:
-      'https://images.unsplash.com/photo-1617910879258-2aff8026515d?auto=format&fit=crop&w=600&h=800&q=80',
+    // Mural card — image only, no caption.
+    title: '',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/mural.jpg?tr=w-600',
   },
 ]
 
@@ -71,56 +66,78 @@ const SPRING = { type: 'spring' as const, stiffness: 300, damping: 30 }
 function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
   return (
     <div
-      className="relative h-full w-full overflow-hidden"
+      className="relative flex h-full w-full flex-col overflow-hidden"
       style={{
         borderRadius: 22,
-        backgroundColor: '#111111',
+        backgroundColor: '#D3DDEE',
         boxShadow: isTop
           ? '0 30px 60px rgba(0,0,0,0.30), 0 10px 20px rgba(0,0,0,0.20)'
           : '0 14px 30px rgba(0,0,0,0.18)',
       }}
     >
-      <img
-        src={card.image}
-        alt={card.title}
-        draggable={false}
-        loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5"
-        style={{
-          padding: '48px 20px 20px',
-          background:
-            'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 100%)',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'var(--font-sans, sans-serif)',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.7)',
-          }}
-        >
-          {card.eyebrow}
-        </span>
-        <h3
-          style={{
-            fontFamily: 'var(--font-sans, sans-serif)',
-            fontSize: 20,
-            fontWeight: 700,
-            lineHeight: 1.15,
-            letterSpacing: '-0.01em',
-            color: '#FFFFFF',
-            margin: 0,
-          }}
-        >
-          {card.title}
-        </h3>
+      {/* Container 1 — the picture. Fills the whole card on the textless mural. */}
+      <div className="relative w-full" style={{ flex: 1, minHeight: 0 }}>
+        <img
+          src={card.image}
+          alt={card.title || 'Urban Canvas'}
+          draggable={false}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       </div>
+
+      {/* Container 2 — name + button, on a clean strip below the picture. */}
+      {card.title && (
+        <div
+          className="flex items-center justify-between"
+          style={{ flexShrink: 0, gap: 12, padding: '12px 12px 12px 16px' }}
+        >
+          <h3
+            style={{
+              flex: 1,
+              minWidth: 0,
+              fontFamily: 'var(--font-sans, sans-serif)',
+              fontSize: 16,
+              fontWeight: 700,
+              lineHeight: 1.15,
+              letterSpacing: '-0.01em',
+              color: '#111111',
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {card.title}
+          </h3>
+          {card.label && (
+            <motion.button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
+              whileHover={{ scale: 1.06, backgroundColor: '#2C2825' }}
+              whileTap={{ scale: 0.93, backgroundColor: '#000000' }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              style={{
+                flexShrink: 0,
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: '#141312',
+                color: '#F5F1E8',
+                // Fully rounded (pill) corners.
+                borderRadius: 9999,
+                padding: '8px 16px',
+                fontFamily: 'var(--font-sans, sans-serif)',
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: '0.01em',
+              }}
+            >
+              {card.label}
+            </motion.button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -210,7 +227,8 @@ function FlickCard({
         inset: 0,
         zIndex: 100 - slot,
         cursor: isTop ? 'grab' : 'auto',
-        touchAction: 'none',
+        // Only the draggable top card blocks touch-scroll; peeking cards don't.
+        touchAction: isTop ? 'none' : 'auto',
       }}
       drag={isTop}
       onDragEnd={isTop ? handleDragEnd : undefined}
@@ -221,14 +239,14 @@ function FlickCard({
   )
 }
 
-// ─── CardFlick ──────────────────────────────────────────────────────────────
+// ─── ProductCardDeck ──────────────────────────────────────────────────────────
 
 interface DeckCard {
   key: number
   content: number
 }
 
-export default function CardFlick() {
+export default function ProductCardDeck() {
   const [deck, setDeck] = useState<DeckCard[]>(() =>
     Array.from({ length: VISIBLE }, (_, i) => ({ key: i, content: i })),
   )
@@ -253,8 +271,10 @@ export default function CardFlick() {
         <div
           className="relative"
           style={{
+            // Card = a (roughly square) picture container on top + a clean
+            // caption strip below it.
             width: 'clamp(220px, 72vw, 300px)',
-            height: 'clamp(293px, 96vw, 400px)',
+            height: 'calc(clamp(220px, 72vw, 300px) + 56px)',
           }}
         >
           <AnimatePresence>
