@@ -20,10 +20,39 @@ const CLAUDE_CLI: Record<Scope, string> = {
 // Codex has no --scope flag yet — its CLI registers the server globally.
 const CODEX_CLI = `codex mcp add ${SERVER_NAME} -- npx -y ${PACKAGE}`
 
-const TEST_PROMPT = `Use AI Canvas to find me an animated card stack and tell me how to install it.`
+// Cursor stores MCP servers as JSON, or installs via a one-click deep link.
+// The deep-link config is base64 of the INNER server object only:
+//   {"command":"npx","args":["-y","@aicanvas/mcp"]}
+const CURSOR_CONFIG_B64 =
+  'eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhaWNhbnZhcy9tY3AiXX0='
+const CURSOR_DEEPLINK = `cursor://anysphere.cursor-deeplink/mcp/install?name=${SERVER_NAME}&config=${CURSOR_CONFIG_B64}`
+const CURSOR_JSON = `{
+  "mcpServers": {
+    "${SERVER_NAME}": {
+      "command": "npx",
+      "args": ["-y", "${PACKAGE}"]
+    }
+  }
+}`
 
-type Tool = 'claude' | 'codex'
+const TEST_PROMPT = `What's the best navbar component in AI Canvas? Install it for me.`
+
+// Geist Mono shapes `--` as a ligature/contextual alternate, which visually
+// swallows the space before it (e.g. `aicanvas--scope`). Disable ligatures so
+// the install commands render with correct spacing.
+const NO_LIGATURES = {
+  fontVariantLigatures: 'none',
+  fontFeatureSettings: '"liga" 0, "calt" 0',
+} as const
+
+type Tool = 'claude' | 'codex' | 'cursor'
 type Scope = 'user' | 'project' | 'local'
+
+const TOOL_META: Record<Tool, { label: string; ask: string }> = {
+  claude: { label: 'Claude Code', ask: 'Claude' },
+  codex: { label: 'Codex', ask: 'Codex' },
+  cursor: { label: 'Cursor', ask: 'Cursor' },
+}
 
 // ── Brand marks ──────────────────────────────────────────────────────────────
 
@@ -43,9 +72,18 @@ function CodexMark() {
   )
 }
 
-const TOOLS: { id: Tool; label: string; mark: React.ReactNode }[] = [
-  { id: 'claude', label: 'Claude Code', mark: <ClaudeMark /> },
-  { id: 'codex', label: 'Codex', mark: <CodexMark /> },
+function CursorMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden>
+      <path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23" />
+    </svg>
+  )
+}
+
+const TOOLS: { id: Tool; mark: React.ReactNode }[] = [
+  { id: 'claude', mark: <ClaudeMark /> },
+  { id: 'codex', mark: <CodexMark /> },
+  { id: 'cursor', mark: <CursorMark /> },
 ]
 
 const SCOPES: { id: Scope; label: string; desc: React.ReactNode }[] = [
@@ -123,30 +161,41 @@ function CodeBlock({
   command,
   copied,
   onCopy,
+  label,
+  multiline,
 }: {
   command: string
   copied: boolean
   onCopy: () => void
+  label: string
+  multiline?: boolean
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-sand-950 px-4 py-3.5">
-      <code
-        className="flex-1 overflow-x-auto font-mono text-sm text-sand-300"
-        // Geist Mono shapes `--` as a ligature/contextual alternate, which
-        // visually swallows the space before it (e.g. `aicanvas--scope`).
-        // Disable ligatures so the install commands render with correct spacing.
-        style={{
-          fontVariantLigatures: 'none',
-          fontFeatureSettings: '"liga" 0, "calt" 0',
-        }}
-      >
-        {command}
-      </code>
+    <div
+      className={`flex gap-3 rounded-lg bg-sand-950 px-4 py-3.5 ${
+        multiline ? 'items-start' : 'items-center justify-between'
+      }`}
+    >
+      {multiline ? (
+        <pre
+          className="flex-1 overflow-x-auto font-mono text-sm leading-relaxed text-sand-300"
+          style={NO_LIGATURES}
+        >
+          {command}
+        </pre>
+      ) : (
+        <code
+          className="flex-1 overflow-x-auto font-mono text-sm text-sand-300"
+          style={NO_LIGATURES}
+        >
+          {command}
+        </code>
+      )}
       <button
         type="button"
         onClick={onCopy}
         className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-        aria-label="Copy command"
+        aria-label={`Copy ${label}`}
       >
         {copied ? (
           <Check weight="regular" size={14} className="text-olive-500" />
@@ -169,7 +218,7 @@ export function InstallCards() {
 
   function copy(text: string, toast: string, setLocal: (v: boolean) => void) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
-      show('Copy not supported — copy manually')
+      show('Copy not supported, copy it manually')
       return
     }
     navigator.clipboard
@@ -179,29 +228,33 @@ export function InstallCards() {
         show(toast)
         setTimeout(() => setLocal(false), 2000)
       })
-      .catch(() => show('Copy failed — try again'))
+      .catch(() => show('Copy failed, try again'))
   }
 
   const isCodex = tool === 'codex'
-  const toolLabel = isCodex ? 'Codex' : 'Claude Code'
-  const askLabel = isCodex ? 'Codex' : 'Claude'
+  const isCursor = tool === 'cursor'
+  const { label: toolLabel, ask: askLabel } = TOOL_META[tool]
   const installCommand = isCodex ? CODEX_CLI : CLAUDE_CLI[scope]
-  const activeScope = SCOPES.find((s) => s.id === scope)!
 
   return (
     <section className="mt-2">
       {/* Tabbed install widget — matches the per-component "Add to your project" */}
       <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
-        {/* Tool toggle — Claude Code / Codex */}
+        {/* Tool toggle — Claude Code / Codex / Cursor */}
         <div className="flex gap-1.5 border-b border-sand-300 bg-sand-100 p-1.5 dark:border-sand-800 dark:bg-sand-900">
           {TOOLS.map((t) => {
             const active = tool === t.id
             return (
               <button
                 key={t.id}
-                onClick={() => setTool(t.id)}
+                type="button"
+                onClick={() => {
+                  setTool(t.id)
+                  setInstallCopied(false)
+                  setTestCopied(false)
+                }}
                 aria-pressed={active}
-                className={`relative flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2.5 text-[13px] font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-sm ${
                   active
                     ? 'text-sand-900 dark:text-sand-50'
                     : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
@@ -214,24 +267,26 @@ export function InstallCards() {
                     transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-1.5 whitespace-nowrap sm:gap-2">
                   {t.mark}
-                  {t.label}
+                  {TOOL_META[t.id].label}
                 </span>
               </button>
             )
           })}
         </div>
 
-        {/* Scope tabs — Claude Code only (Codex has no --scope) */}
-        {!isCodex && (
+        {/* Scope tabs — Claude Code only (Codex/Cursor have no --scope) */}
+        {tool === 'claude' && (
           <div className="flex overflow-x-auto border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
             {SCOPES.map((s) => {
               const active = scope === s.id
               return (
                 <button
                   key={s.id}
+                  type="button"
                   onClick={() => setScope(s.id)}
+                  aria-pressed={active}
                   className={`relative whitespace-nowrap px-4 py-2.5 text-sm font-semibold transition-colors ${
                     active
                       ? 'text-sand-900 dark:text-sand-50'
@@ -255,29 +310,73 @@ export function InstallCards() {
         {/* Steps */}
         <div className="space-y-6 bg-sand-100 px-5 py-6 dark:bg-sand-900">
           <Step number={1}>
-            <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-              {isCodex ? (
-                <>
-                  Run this in any terminal. Codex registers the MCP globally, so
-                  it works in every project. Its CLI has no per-project scope
-                  yet.
-                </>
-              ) : (
-                activeScope.desc
-              )}
-            </p>
-            <CodeBlock
-              command={installCommand}
-              copied={installCopied}
-              onCopy={() =>
-                copy(installCommand, 'Install command copied', setInstallCopied)
-              }
-            />
+            {isCursor ? (
+              <>
+                <p className="mb-3 text-sm text-sand-600 dark:text-sand-400">
+                  One click installs it. The button opens Cursor with the config
+                  filled in, so you just enable it.
+                </p>
+                <a
+                  href={CURSOR_DEEPLINK}
+                  className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+                >
+                  <CursorMark />
+                  Add to Cursor
+                </a>
+                <p className="mb-2.5 mt-5 text-sm text-sand-600 dark:text-sand-400">
+                  Or paste this into{' '}
+                  <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                    ~/.cursor/mcp.json
+                  </code>{' '}
+                  (global) or{' '}
+                  <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                    .cursor/mcp.json
+                  </code>{' '}
+                  (one project):
+                </p>
+                <CodeBlock
+                  command={CURSOR_JSON}
+                  copied={installCopied}
+                  onCopy={() =>
+                    copy(CURSOR_JSON, 'Config copied', setInstallCopied)
+                  }
+                  label="Cursor config"
+                  multiline
+                />
+              </>
+            ) : (
+              <>
+                <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                  {isCodex ? (
+                    <>
+                      Run this in any terminal. Codex registers the MCP globally,
+                      so it works in every project. Its CLI has no per-project
+                      scope yet.
+                    </>
+                  ) : (
+                    SCOPES.find((s) => s.id === scope)!.desc
+                  )}
+                </p>
+                <CodeBlock
+                  command={installCommand}
+                  copied={installCopied}
+                  onCopy={() =>
+                    copy(
+                      installCommand,
+                      'Install command copied',
+                      setInstallCopied,
+                    )
+                  }
+                  label="install command"
+                />
+              </>
+            )}
           </Step>
 
           <Step number={2}>
             <p className="text-sm text-sand-600 dark:text-sand-400">
-              Restart {toolLabel}. The{' '}
+              {isCursor ? 'Reload the Cursor window.' : `Restart ${toolLabel}.`}{' '}
+              The{' '}
               <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
                 aicanvas
               </code>{' '}
@@ -298,6 +397,7 @@ export function InstallCards() {
               command={TEST_PROMPT}
               copied={testCopied}
               onCopy={() => copy(TEST_PROMPT, 'Test prompt copied', setTestCopied)}
+              label="test prompt"
             />
           </Step>
         </div>
