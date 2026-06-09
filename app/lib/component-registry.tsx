@@ -144,8 +144,8 @@ import TiltedCoverflow from '../../components-workspace/tilted-coverflow'
 import { prompts as tiltedCoverflowPrompts } from '../../components-workspace/tilted-coverflow/prompts'
 import ScatterPile from '../../components-workspace/scatter-pile'
 import { prompts as scatterPilePrompts } from '../../components-workspace/scatter-pile/prompts'
-import CardFlick from '../../components-workspace/card-flick'
-import { prompts as cardFlickPrompts } from '../../components-workspace/card-flick/prompts'
+import ProductCardDeck from '../../components-workspace/product-card-deck'
+import { prompts as productCardDeckPrompts } from '../../components-workspace/product-card-deck/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1329,20 +1329,20 @@ Requirements:
     prompts: scatterPilePrompts,
   },
   {
-    slug: 'card-flick',
-    image: '',
-    name: 'Card Flick',
+    slug: 'product-card-deck',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck.png?v=1',
+    name: 'Product Card Deck',
     description:
-      'A stack of photo cards you flick away one by one. The top card spins and sails off with momentum, revealing the next card beneath. The deck loops endlessly.',
+      'A draggable card deck you flick through one card at a time. The top card leans toward your drag, then spins away with momentum to reveal the next, and the deck loops endlessly. Every card pairs a picture with a title and a pill action button with hover and press states.',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
-    PreviewComponent: CardFlick,
-    code: componentCodes['card-flick'],
-    prompts: cardFlickPrompts,
+    PreviewComponent: ProductCardDeck,
+    code: componentCodes['product-card-deck'],
+    prompts: productCardDeckPrompts,
   },
 ]
 

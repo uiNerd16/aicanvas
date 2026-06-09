@@ -71,6 +71,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'pill-toggle': ['Motion', 'Tailwind CSS'],
   'playful': ['Motion', 'Tailwind CSS'],
   'polaroid-stack': ['Motion', 'Tailwind CSS'],
+  'product-card-deck': ['Motion', 'Tailwind CSS'],
   'radial-cards': ['Motion', 'Tailwind CSS'],
   'radial-toolbar': ['Motion', 'Tailwind CSS'],
   'responsive-letters': ['Motion', 'Tailwind CSS'],
@@ -469,5 +470,10 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Collaboration tool', 'SaaS', 'Game UI'],
     about:
       'Live Session Pill is a compact presence indicator with an animated speaking pulse and overlapping participant avatars, that opens into a soft-UI modal when tapped — showing every participant with a Join Now button. Motion drives both the speaking pulse and the pill-to-modal expansion. It slots into collaboration tools, multiplayer game lobbies, design-tool comment threads, and any product where live presence deserves a compact, glanceable affordance with a fast path to joining the conversation.',
+  },
+  'product-card-deck': {
+    useCases: ['Product showcase', 'E-commerce', 'Lookbook'],
+    about:
+      'Product Card Deck is a draggable stack of product cards you flick through one at a time, built for browsing a small catalogue the way you swipe a deck of cards. Grab the top card and it leans toward your drag like a real card being thrown, then spins off with momentum in whatever direction you flick it, while the card behind rises into its place and a fresh one slides in at the back so the deck never runs out. Each card pairs a full-bleed product image with a clean caption strip holding the name and a pill call-to-action button with hover and press states. Framer Motion drives the drag, tilt, and fly-off physics while Tailwind covers the surrounding chrome, and it is fully touch-friendly for a mobile-first shoppable gallery. Swap in your own images and labels to turn it into a lookbook, a featured-products carousel, or a swipe-to-shop experience.',
   },
 }
