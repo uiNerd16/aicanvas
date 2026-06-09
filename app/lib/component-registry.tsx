@@ -142,8 +142,8 @@ import CubeCarousel from '../../components-workspace/cube-carousel'
 import { prompts as cubeCarouselPrompts } from '../../components-workspace/cube-carousel/prompts'
 import TiltedCoverflow from '../../components-workspace/tilted-coverflow'
 import { prompts as tiltedCoverflowPrompts } from '../../components-workspace/tilted-coverflow/prompts'
-import ScatterPile from '../../components-workspace/scatter-pile'
-import { prompts as scatterPilePrompts } from '../../components-workspace/scatter-pile/prompts'
+import InteractiveCardStack from '../../components-workspace/interactive-card-stack'
+import { prompts as interactiveCardStackPrompts } from '../../components-workspace/interactive-card-stack/prompts'
 import ProductCardDeck from '../../components-workspace/product-card-deck'
 import { prompts as productCardDeckPrompts } from '../../components-workspace/product-card-deck/prompts'
 import { componentCodes } from './component-codes.generated'
@@ -1313,20 +1313,20 @@ Requirements:
     prompts: tiltedCoverflowPrompts,
   },
   {
-    slug: 'scatter-pile',
-    image: '',
-    name: 'Scatter Pile',
+    slug: 'interactive-card-stack',
+    image: 'https://ik.imagekit.io/aitoolkit/interactive-card-stack.png?v=1',
+    name: 'Interactive Card Stack',
     description:
-      'Five-card moodboard pile with mixed aspect ratios. Click, drag, or arrow keys to focus any card; the rest reshuffle around it.',
+      'A scattered stack of photo cards. Drag, click, or arrow keys to focus any card.',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Motion' },
       { label: 'Interactive' },
     ],
     dualTheme: true,
-    PreviewComponent: ScatterPile,
-    code: componentCodes['scatter-pile'],
-    prompts: scatterPilePrompts,
+    PreviewComponent: InteractiveCardStack,
+    code: componentCodes['interactive-card-stack'],
+    prompts: interactiveCardStackPrompts,
   },
   {
     slug: 'product-card-deck',

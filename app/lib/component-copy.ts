@@ -55,6 +55,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'good-vibes': ['Motion', 'Tailwind CSS'],
   'grid-lines': ['Canvas', 'Tailwind CSS'],
   'halo-type': ['Motion', 'Tailwind CSS'],
+  'interactive-card-stack': ['Motion', 'Tailwind CSS'],
   'jar-of-emotions': ['Motion', 'Matter.js', 'Tailwind CSS'],
   'label-cards': ['Motion', 'Tailwind CSS'],
   'magnetic-dots': ['Canvas', 'Tailwind CSS'],
@@ -458,6 +459,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Image gallery', 'Portfolio', 'Hero section'],
     about:
       'Tilted Coverflow is a 3D photo carousel built on CSS perspective and rotateY transforms, not Three.js. Seven cards fan out in a horizontal arc with a size gradient from center to edge; every card breathes on its own slow loop, and the focused caption fades in word by word when it lands in the middle. Drag, click any side card, or use the arrow keys to focus, and the row wraps circularly so three cards always sit on each side of center. Motion handles the springs and breathing; Tailwind covers layout. Suits portfolios, image galleries, or hero bands that want a tactile, image-forward interaction.',
+  },
+  'interactive-card-stack': {
+    useCases: ['Image gallery', 'Moodboard', 'Portfolio'],
+    about:
+      'Interactive Card Stack is a loose pile of five photo cards scattered around a focused center, each a polaroid-style print that breathes gently on its own slow loop. Click any card to pull it to the front, drag the front card sideways to cycle, or use the arrow keys, and the rest spring into a new arrangement around it. Motion drives the scatter, the breathing, and the focus shuffle; Tailwind covers the layout, and it honours reduced-motion settings. Drop in your own photos and titles, and set an optional link per card. It suits image galleries, moodboards, and portfolio sections where the photo itself is the point.',
   },
 
   // ─── UI (uncategorized) ──────────────────────────────────────────────────

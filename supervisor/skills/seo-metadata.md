@@ -32,6 +32,21 @@ This is handled by `generateMetadata`. Never put the title in the registry entry
 
 ---
 
+## Naming the component (the name IS the SEO title)
+
+**Hard rule, every component, no exceptions.** The display name and slug must be SEO-friendly and *stupidly* intuitive: someone searching for this kind of component should recognise it from the name alone, with zero guessing. Because the page title is `[Name] — Animated React Component | AI Canvas`, the name is the biggest SEO lever after the description. Cute codenames are banned.
+
+- **Lead with what people search.** Name the mechanism, form, or category, not a metaphor. "Interactive Card Stack" beats "Scatter Pile"; a developer should be able to guess the component from the name alone.
+- **Describe the component, not the demo content.** The name must survive the user swapping in their own images and copy. "Interactive Card Stack" works for any photos; "Aviary" or "Paradise" only fit the bird demo.
+- **Be unique across the catalog.** No two components share a name or slug, and a new name must be clearly distinguishable from existing siblings (we already have Polaroid Stack, Tilted Coverflow, Card Flick, Radial Cards, Stack Tower — a new card component needs its own angle, not a near-duplicate).
+- **Don't repeat yourself.** Don't restate words the surrounding structure already supplies: the title suffix adds "Animated React Component" (so never put "Animated" in the name), and the description must not repeat the component name or the slug — spend those characters describing the visual and the interaction instead.
+- **No em-dashes in the name** (project copy rule). If you want an evocative tag, prefer a clean two-word form over "Name — Tag".
+- **The slug must match the name** (kebab-case) and is **permanent once published**. Lock the SEO name before the first push — renaming a published slug breaks every `shadcn add @aicanvas/<slug>` install.
+
+Prior art: `scatter-pile` was renamed to `interactive-card-stack` pre-publish (2026-06-09) purely for search intent.
+
+---
+
 ## Description formula
 
 Every description must answer: **what does this component look like and what does it do on interaction?**
@@ -112,6 +127,9 @@ Before adding a component to the registry, verify:
 - [ ] Glass components say "glassmorphism" or "frosted glass"
 - [ ] `image` field is present and points to a valid ImageKit URL
 - [ ] Name is the display name (title case, no acronyms)
+- [ ] Name + slug are SEO-friendly and intuitive — a searcher recognises the component from the name alone (no codenames)
+- [ ] Name + slug are unique and not a near-duplicate of an existing component
+- [ ] Name does not contain "Animated"; description does not repeat the name or slug
 
 ---
 
