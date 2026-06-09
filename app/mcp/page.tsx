@@ -7,21 +7,38 @@ import { HeaderSocials } from '../components/HeaderSocials'
 import { SITE_URL } from '../lib/config'
 
 export const metadata: Metadata = {
-  title: 'Connect to AI — Install AI Canvas in your editor',
+  title: 'MCP Server for Claude Code, Cursor and Codex',
   description:
-    'Add the AI Canvas MCP server to Claude Desktop, Claude Code, Cursor, or Codex in seconds. One click for Cursor, copy-paste for the rest. Search, inspect, and install React components from your AI editor.',
+    'Add production-ready React components to Claude Code, Cursor, and Codex from one MCP server. Source, design specs, and Framer Motion included. Install in seconds.',
   alternates: { canonical: `${SITE_URL}/mcp` },
   openGraph: {
-    title: 'Connect AI Canvas to your AI editor',
+    title: 'AI Canvas MCP connects Claude Code, Codex, and Cursor',
     description:
-      'Pick your AI editor. Click install. Start asking the AI to find and install components from AI Canvas.',
+      'One command gives your AI agent every AI Canvas component, with the design spec and motion built in. Save tokens, stop starting from scratch, adapt in seconds.',
     url: `${SITE_URL}/mcp`,
   },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: '@aicanvas/mcp',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Cross-platform',
+  description:
+    'MCP server that gives Claude Code, Codex, and Cursor access to every AI Canvas React component, with source, design specs, and Framer Motion.',
+  url: `${SITE_URL}/mcp`,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  publisher: { '@type': 'Organization', name: 'AI Canvas', url: SITE_URL },
 }
 
 export default function McpPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Sticky top bar — h-14 (56px) matches the sidebar logo block ── */}
       <header className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
@@ -44,16 +61,18 @@ export default function McpPage() {
 
         {/* ── Hero ────────────────────────────────────────────────────── */}
         <header className="mb-10 sm:mb-14">
-          <h1 className="max-w-xl text-3xl font-extrabold leading-[1.2] tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
-            Every AI Canvas component, inside{' '}
-            <span className="text-olive-500">Claude Code &amp; Codex.</span>
+          <h1 className="max-w-xl text-3xl font-extrabold leading-[1.2] tracking-tight sm:text-4xl">
+            <span className="block font-normal text-sand-600 dark:text-sand-300">
+              AI Canvas MCP connected with
+            </span>
+            <span className="block text-olive-500">
+              Claude Code, Codex, and Cursor.
+            </span>
           </h1>
-          <p className="mt-5 max-w-xl text-xl text-sand-800 dark:text-sand-100">
-            One command to install the MCP. Then forget it exists.
-          </p>
-          <p className="mt-3 max-w-xl text-base text-sand-600 dark:text-sand-400">
-            Every new component on AI Canvas appears automatically. No updates,
-            no reinstalls.
+          <p className="mt-5 max-w-xl text-lg text-sand-600 dark:text-sand-300">
+            Save tokens. Don&rsquo;t start from scratch. Your agent pulls a
+            finished component with the design spec and the motion included, and
+            you just adapt it to your project. It takes seconds.
           </p>
         </header>
 
@@ -68,16 +87,16 @@ export default function McpPage() {
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {[
             {
-              title: 'Just ask',
-              body: 'Describe what you want, like “an animated card stack,” and pick from ranked results.',
+              title: 'One command, then forget it',
+              body: 'Install the MCP with a single command. After that your agent can search, inspect, and install AI Canvas components on its own. No copy-paste from the marketplace.',
             },
             {
-              title: 'No copy-paste',
-              body: 'Your AI picks the right component and runs the install for you.',
+              title: 'No more from-scratch UI',
+              body: 'Instead of generating UI from zero, your agent pulls a real component with full source, the design spec, and Framer Motion.',
             },
             {
               title: 'Always current',
-              body: 'New components appear in your AI ~5 minutes after they ship. No package bumps, ever.',
+              body: 'The server fetches from the live registry at runtime, so new components reach your agent about five minutes after they ship. No reinstalls, ever.',
             },
           ].map((card, i) => (
             <div
