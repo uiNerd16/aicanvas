@@ -204,13 +204,15 @@ function ToastCard({
       </div>
 
       {/* Close button — matches glass-search-bar X button */}
-      {/* Outer div provides 44px touch target; inner styled circle is 20×20 visual */}
-      <div
-        className="absolute right-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center"
-        style={{ width: 44, height: 44 }}
+      {/* Real button provides 44px touch target; inner styled circle is 20×20 visual */}
+      <motion.button
+        type="button"
         onClick={() => onDismiss(toast.id)}
+        aria-label="Dismiss"
+        className="absolute right-0 top-1/2 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center bg-transparent"
+        style={{ width: 44, height: 44, outline: 'none' }}
       >
-        <motion.div
+        <motion.span
           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.14)' }}
           whileTap={{ scale: 0.88 }}
           className="flex items-center justify-center rounded-full"
@@ -220,12 +222,10 @@ function ToastCard({
             background: 'rgba(255, 255, 255, 0.08)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
           }}
-          role="button"
-          aria-label="Dismiss toast"
         >
           <X size={10} weight="regular" className="text-white/60" />
-        </motion.div>
-      </div>
+        </motion.span>
+      </motion.button>
 
       {/* Progress bar */}
       <div className="absolute bottom-0 left-0 right-0 h-[2px]">

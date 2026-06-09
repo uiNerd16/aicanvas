@@ -2,10 +2,13 @@
 
 // npm install @phosphor-icons/react framer-motion
 
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { X, Check, ShieldCheck } from '@phosphor-icons/react'
 
 export default function GlassModal() {
+  const [open, setOpen] = useState(true)
+
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
       {/* Background image */}
@@ -16,11 +19,14 @@ export default function GlassModal() {
       />
 
       {/* Modal card */}
+      <AnimatePresence>
+        {open && (
       <motion.div
         initial={{ scale: 0.9, y: 16 }}
         animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 16, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-        className="relative isolate w-[340px] overflow-hidden rounded-3xl"
+        className="relative isolate w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-3xl"
         style={{
           background: 'rgba(255, 255, 255, 0.08)',
           border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -40,6 +46,9 @@ export default function GlassModal() {
 
         {/* Close button */}
         <motion.button
+          type="button"
+          aria-label="Close"
+          onClick={() => setOpen(false)}
           whileHover={{ scale: 1.15, rotate: 90 }}
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
@@ -143,6 +152,8 @@ export default function GlassModal() {
           </div>
         </div>
       </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

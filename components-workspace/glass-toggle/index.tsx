@@ -2,7 +2,7 @@
 
 // npm install framer-motion
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { motion, useSpring, useTransform } from 'framer-motion'
 
 function Toggle({
@@ -17,6 +17,7 @@ function Toggle({
   delay: number
 }) {
   const [on, setOn] = useState(defaultOn)
+  const labelId = useId()
   const progress = useSpring(defaultOn ? 1 : 0, { stiffness: 300, damping: 22 })
 
   useEffect(() => {
@@ -48,7 +49,7 @@ function Toggle({
       className="flex items-center justify-between"
     >
       <div className="flex flex-col">
-        <span className="text-sm font-medium text-white/60">{label}</span>
+        <span id={labelId} className="text-sm font-medium text-white/60">{label}</span>
         <motion.span
           animate={{ opacity: on ? 1 : 0.5 }}
           className="text-[11px]"
@@ -59,6 +60,10 @@ function Toggle({
       </div>
 
       <motion.button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-labelledby={labelId}
         onClick={() => setOn(!on)}
         className="relative h-8 w-14 cursor-pointer rounded-full p-0"
         style={{

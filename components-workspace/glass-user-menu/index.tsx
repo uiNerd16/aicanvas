@@ -179,12 +179,12 @@ export default function GlassUserMenu() {
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, x: -8, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.95, x: -8, filter: 'blur(4px)' }}
+              initial={{ opacity: 0, scale: 0.95, x: '-50%', y: -8, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, scale: 1, x: '-50%', y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.95, x: '-50%', y: -8, filter: 'blur(4px)' }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="absolute left-full top-0 ml-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
-              style={{ ...glassPanel, ...glassPanelBlur, transformOrigin: 'top left' }}
+              className="absolute left-1/2 top-full mt-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
+              style={{ ...glassPanel, ...glassPanelBlur, transformOrigin: 'top center' }}
             >
               {/* Left edge highlight */}
               <div

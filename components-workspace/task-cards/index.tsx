@@ -310,8 +310,9 @@ export default function TaskCards() {
                     position: 'relative',
                   }}
                 >
-                  {/* Top-right arrow button */}
-                  <motion.button
+                  {/* Top-right decorative arrow */}
+                  <motion.span
+                    aria-hidden="true"
                     style={{
                       position: 'absolute',
                       top: 14,
@@ -324,7 +325,6 @@ export default function TaskCards() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: 'pointer',
                       color: catColor,
                       flexShrink: 0,
                     }}
@@ -333,7 +333,7 @@ export default function TaskCards() {
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   >
                     <ArrowUpRight weight="regular" size={13} />
-                  </motion.button>
+                  </motion.span>
                   {/* Category row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                     <Icon weight="regular" size={11} style={{ color: catColor }} />

@@ -29,11 +29,29 @@ export default function NewProjectModal() {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const titleRef = useRef<HTMLInputElement>(null)
 
+  function close() {
+    setOpen(false)
+    setTitle('')
+    setDescription('')
+    setIsPrivate(false)
+    setTitleError(false)
+    setColor(null)
+  }
+
   useEffect(() => {
     if (open) {
       const t = setTimeout(() => titleRef.current?.focus(), 320)
       return () => clearTimeout(t)
     }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
 
   function handleOpen() {
@@ -42,15 +60,6 @@ export default function NewProjectModal() {
       setOrigin({ x: r.left, y: r.top, w: r.width, h: r.height })
     }
     setOpen(true)
-  }
-
-  function close() {
-    setOpen(false)
-    setTitle('')
-    setDescription('')
-    setIsPrivate(false)
-    setTitleError(false)
-    setColor(null)
   }
 
   return (
@@ -166,6 +175,9 @@ function ModalCard({
         }}
         style={{ borderRadius: 28, willChange: 'transform, border-radius' }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="New Project"
         className="w-full max-w-[480px] rounded-[28px] bg-[#f1f1f0] px-6 pb-6 pt-6"
       >
         <motion.div
@@ -347,6 +359,7 @@ function Swatch({
 
       <motion.button
         onClick={onClick}
+        aria-label={label}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         whileHover={{ scale: 1.2 }}

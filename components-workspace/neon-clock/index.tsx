@@ -107,7 +107,16 @@ function ColonDots({ dim, size }: { dim: boolean; size: number }) {
 const pad2 = (n: number) => n.toString().padStart(2, '0')
 const DAYS  = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const
 
-function getNow() {
+type Now = {
+  h: string
+  m: string
+  s: string
+  isPM: boolean
+  dow: number
+  date: string
+}
+
+function getNow(): Now {
   const d = new Date()
   const h = d.getHours()
   return {
@@ -134,16 +143,38 @@ const TIME_W    = 4 * BIG + COLON_BIG + COLON_SML + 2 * SML + 7 * GAP
 
 // ─── NeonClock ────────────────────────────────────────────────────────────────
 export default function NeonClock() {
-  const [now,     setNow]     = useState(getNow)
+  // Start from a stable placeholder so the server and the client's first paint
+  // agree — reading the system clock during render causes a hydration mismatch.
+  const [now,     setNow]     = useState<Now | null>(null)
   const [colonOn, setColonOn] = useState(true)
 
   useEffect(() => {
+    setNow(getNow())
     const id = setInterval(() => {
       setNow(getNow())
       setColonOn(c => !c)
     }, 1000)
     return () => clearInterval(id)
   }, [])
+
+  // First render (pre-mount / SSR): render the chrome with no time yet so the
+  // server and client markup match. The real time fills in after mount.
+  if (now === null) {
+    return (
+      <div
+        className="relative flex h-full w-full select-none items-center justify-center overflow-hidden"
+        style={{ background: BG, fontFamily: '"Courier New", Courier, monospace' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.48) 1.3px, transparent 1.3px)',
+            backgroundSize: '3.8px 3.8px',
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div

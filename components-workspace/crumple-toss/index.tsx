@@ -334,6 +334,17 @@ export default function CrumpleToss() {
   const modeRef = useRef<Mode>('idle')
   const msgIndexRef = useRef<number>(0)
 
+  // Track pending setTimeout ids so we can clear them on unmount and avoid
+  // setState-after-unmount from the launch / reset / save chains.
+  const timeoutsRef = useRef<number[]>([])
+  const scheduleTimeout = useCallback((fn: () => void, delay: number): void => {
+    const id = window.setTimeout(() => {
+      timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id)
+      fn()
+    }, delay)
+    timeoutsRef.current.push(id)
+  }, [])
+
   const message = MESSAGES[msgIndex % MESSAGES.length]
 
   useEffect(() => {
@@ -416,12 +427,12 @@ export default function CrumpleToss() {
     paperY.set(16)
     paperScaleY.set(1)
     // Brief pause lets React commit new msgIndex + rebuild texture, then slide in.
-    window.setTimeout(() => {
+    scheduleTimeout(() => {
       setMode('idle')
       void fmAnimate(paperOpacity, 1, { duration: 0.45, ease: 'easeOut' })
       void fmAnimate(paperY, 0, { duration: 0.45, ease: 'easeOut' })
     }, 80)
-  }, [paperOpacity, paperY, paperScaleY])
+  }, [paperOpacity, paperY, paperScaleY, scheduleTimeout])
 
   // ── DELETE: crumple then toss ────────────────────────────────────────────
   const handleDelete = useCallback(() => {
@@ -453,10 +464,10 @@ export default function CrumpleToss() {
     void fmAnimate(paperOpacity, [1, 1, 0], { duration: 0.85, times: [0, 0.5, 1], ease: 'easeInOut' })
     void fmAnimate(paperY, [0, -20, -80], { duration: 0.85, times: [0, 0.5, 1], ease: 'easeInOut' })
     void fmAnimate(paperScaleY, [1, 0.5, 0.2], { duration: 0.85, times: [0, 0.5, 1], ease: 'easeInOut' })
-    window.setTimeout(() => {
+    scheduleTimeout(() => {
       resetPaper()
     }, 900)
-  }, [mode, resetPaper, paperOpacity, paperY, paperScaleY])
+  }, [mode, resetPaper, paperOpacity, paperY, paperScaleY, scheduleTimeout])
 
   // ── Matter.js lifecycle ─────────────────────────────────────────────────
   useEffect(() => {
@@ -478,6 +489,8 @@ engineRef.current = engine
       alive = false
       cancelAnimationFrame(rafRef.current)
       cancelAnimationFrame(paperRafRef.current)
+      for (const id of timeoutsRef.current) window.clearTimeout(id)
+      timeoutsRef.current = []
       const runner = runnerRef.current
       const engine = engineRef.current
       const world = worldRef.current
@@ -537,13 +550,13 @@ engineRef.current = engine
     tossActiveRef.current = true
 
     // Fade out the ball canvas after 700ms, then reset
-    window.setTimeout(() => {
+    scheduleTimeout(() => {
       const canvasEl = canvasRef.current
       if (canvasEl) {
         canvasEl.style.transition = 'opacity 400ms ease-out'
         canvasEl.style.opacity = '0'
       }
-      window.setTimeout(() => {
+      scheduleTimeout(() => {
         tossActiveRef.current = false
         setShowCanvas(false)
         if (canvasEl) {
@@ -613,7 +626,7 @@ engineRef.current = engine
       rafRef.current = requestAnimationFrame(draw)
     }
     rafRef.current = requestAnimationFrame(draw)
-  }, [resetPaper])
+  }, [resetPaper, scheduleTimeout])
 
   // ── Paper canvas sizing (DPR-aware, ResizeObserver) ──────────────────────
   useEffect(() => {

@@ -106,6 +106,12 @@ export default function ScrambleText() {
   const chars1 = useScramble(WORDS[1]!, isHovered)
   const rows = [chars0, chars1]
 
+  // Fluid type scale so the longest row ("/DECRYPT") fits a 320px viewport.
+  const charStyle: React.CSSProperties = {
+    color: '#BECF5D',
+    fontSize: 'clamp(1.75rem, 9vw, 3.75rem)',
+  }
+
   return (
     <div
       className="relative flex h-full w-full cursor-default items-center justify-center"
@@ -117,26 +123,36 @@ export default function ScrambleText() {
       <Crosshair style={{ bottom: '10%', left: '8%' }} />
       <div
         className="flex select-none flex-col items-center gap-4"
-        style={{ padding: '60px 80px' }}
+        style={{ padding: 'clamp(1.5rem, 8vw, 60px) clamp(1rem, 10vw, 80px)' }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onPointerDown={e => {
+          // Touch/pen have no hover: reveal on press.
+          if (e.pointerType !== 'mouse') setIsHovered(true)
+        }}
+        onPointerUp={e => {
+          if (e.pointerType !== 'mouse') setIsHovered(false)
+        }}
+        onPointerCancel={e => {
+          if (e.pointerType !== 'mouse') setIsHovered(false)
+        }}
       >
         {rows.map((chars, rowIdx) => (
-          <div key={rowIdx} className={`flex items-center gap-1 ${GeistPixelGrid.className}`}>
+          <div key={rowIdx} className={`flex flex-wrap items-center justify-center gap-1 ${GeistPixelGrid.className}`}>
             {rowIdx === 0 && (
-              <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>/</span>
+              <span className="leading-none tracking-widest" style={charStyle}>/</span>
             )}
             {chars.map((ch, i) => (
               <span
                 key={i}
-                className="text-6xl leading-none tracking-widest"
-                style={{ color: '#BECF5D' }}
+                className="leading-none tracking-widest"
+                style={charStyle}
               >
                 {ch.display}
               </span>
             ))}
             {rowIdx === rows.length - 1 && (
-              <span className="text-6xl leading-none tracking-widest" style={{ color: '#BECF5D' }}>_</span>
+              <span className="leading-none tracking-widest" style={charStyle}>_</span>
             )}
           </div>
         ))}

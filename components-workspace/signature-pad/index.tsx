@@ -170,6 +170,7 @@ function ModalCard({
   onClose: () => void
 }) {
   const palette = MODAL_PALETTE
+  const surfaceRef = useRef<HTMLDivElement>(null)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const strokesRef = useRef<Stroke[]>([])
@@ -190,6 +191,19 @@ function ModalCard({
       }),
     )
   }, [])
+
+  // Dialog semantics: dismiss on Escape and move focus into the modal on open.
+  useEffect(() => {
+    surfaceRef.current?.focus()
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
 
   const drawSegment = useCallback(
     (stroke: Stroke) => {
@@ -346,6 +360,11 @@ function ModalCard({
       onClick={onClose}
     >
       <motion.div
+        ref={surfaceRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signature-pad-title"
+        tabIndex={-1}
         initial={{
           x: initialOffsetX,
           y: initialOffsetY,
@@ -417,6 +436,7 @@ function ModalCard({
               </div>
               <div className="flex flex-col gap-0.5">
                 <span
+                  id="signature-pad-title"
                   className="font-sans text-[17px] font-bold leading-tight"
                   style={{ color: palette.titleColor }}
                 >

@@ -124,6 +124,7 @@ function NotificationCard({
           whileHover={{ scale: 1.2, backgroundColor: 'rgba(255,255,255,0.15)' }}
           whileTap={{ scale: 0.85 }}
           onClick={() => onDismiss(notification.id)}
+          aria-label={`Dismiss ${notification.title}`}
           className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full"
           style={{
             background: 'rgba(255,255,255,0.06)',

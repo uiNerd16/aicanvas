@@ -3,8 +3,10 @@
 // npm install framer-motion
 // font: Caveat
 
-import { useState } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,6 +27,12 @@ interface Pos {
 
 const CARD_W = 110
 const CARD_H = 140
+
+// Stage box size. The fan reaches x = ±160, so cards span ±(160 + CARD_W/2)
+// horizontally. STAGE_W is the natural width the stage needs before it has to
+// scale down to fit a narrow container.
+const STAGE_W = 2 * (160 + CARD_W / 2) + 32 // fan extent + small breathing room
+const STAGE_H = 220
 
 const CARDS: CardData[] = [
   { id: 0, label: 'Sunset', from: '#FF6B6B', to: '#FF8E53' },
@@ -59,6 +67,24 @@ export default function PolaroidStack() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
 
+  // Scale the fixed-size stage down so the fan never spills past a narrow
+  // container. Capped at 1 so wide screens render at the natural size.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+
+  useIsomorphicLayoutEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const update = () => {
+      const next = Math.min(1, el.clientWidth / STAGE_W)
+      setScale(Number.isFinite(next) && next > 0 ? next : 1)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const toggle = () => {
     setFanned((f) => !f)
     setHoveredId(null)
@@ -67,13 +93,20 @@ export default function PolaroidStack() {
 
   return (
     <div
-      className="relative flex h-full w-full cursor-pointer select-none items-center justify-center bg-zinc-950"
+      ref={rootRef}
+      className="relative flex h-full w-full cursor-pointer select-none items-center justify-center overflow-hidden bg-zinc-950"
       onClick={toggle}
     >
       {/* Load Caveat font for polaroid labels */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');`}</style>
-        {/* Fixed-size stage so cards don't overflow the preview */}
-        <div className="relative" style={{ width: 460, height: 220 }}>
+        {/* Fixed-size stage, scaled down to fit narrow containers so cards
+            never overflow the preview or the viewport */}
+        <motion.div
+          className="relative"
+          animate={{ scale }}
+          transition={{ type: 'spring', stiffness: 280, damping: 30 }}
+          style={{ width: STAGE_W, height: STAGE_H }}
+        >
           {CARDS.map((card, i) => {
             const pos = fanned ? FANNED[i] : STACKED[i]
             const isHovered = fanned && hoveredId === card.id && selectedId !== card.id
@@ -171,7 +204,7 @@ export default function PolaroidStack() {
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
         {/* Toggle hint */}
         <motion.p

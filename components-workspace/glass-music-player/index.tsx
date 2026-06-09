@@ -110,14 +110,15 @@ export default function GlassMusicPlayer() {
 
           {/* ── Top bar ───────────────────────────────────────────────────────── */}
           <div className="mb-6 flex w-full items-center justify-between">
-            <motion.button
+            {/* Decorative chrome — no real navigation in this demo, so not announced as actionable */}
+            <motion.div
+              aria-hidden
               whileHover={{ scale: 1.15, color: 'rgba(255,255,255,0.8)' }}
               whileTap={{ scale: 0.85 }}
-              className="cursor-pointer"
               style={{ color: 'rgba(255,255,255,0.35)' }}
             >
               <ArrowLeft size={20} weight="regular" />
-            </motion.button>
+            </motion.div>
 
             <span
               className="text-[10px] font-semibold uppercase tracking-[0.18em]"
@@ -330,14 +331,15 @@ export default function GlassMusicPlayer() {
               <SkipForward size={26} weight="fill" />
             </motion.button>
 
-            <motion.button
+            {/* Decorative chrome — no real queue panel in this demo, so not announced as actionable */}
+            <motion.div
+              aria-hidden
               whileHover={{ scale: 1.15, color: 'rgba(255,255,255,0.75)' }}
               whileTap={{ scale: 0.85 }}
-              className="cursor-pointer"
               style={{ color: 'rgba(255,255,255,0.35)' }}
             >
               <Queue size={19} weight="regular" />
-            </motion.button>
+            </motion.div>
 
           </div>
 
