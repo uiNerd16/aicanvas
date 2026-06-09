@@ -23,8 +23,22 @@ const SKIP_FOLDERS = new Set(['_template'])
 // ── Extract metadata from the component registry ──────────────────────────────
 
 function parseRegistryMetadata() {
-  const content = readFileSync('app/lib/component-registry.tsx', 'utf-8')
+  const file = readFileSync('app/lib/component-registry.tsx', 'utf-8')
   const metadata = {}
+
+  // IMPORTANT: scope parsing to the COMPONENTS_RAW array only. The entry regex
+  // below is non-greedy, so if it runs over the whole file a `slug:` in an
+  // earlier object (e.g. the `andromeda` design system in DESIGN_SYSTEMS) pairs
+  // with the *first* component's `code: componentCodes[...]`, fabricating a
+  // phantom component and clobbering the real one (wave-lines). Slice first.
+  const rawStart = file.indexOf('const COMPONENTS_RAW')
+  const rawEnd = file.indexOf('export const COMPONENTS', rawStart)
+  if (rawStart === -1 || rawEnd === -1 || rawEnd <= rawStart) {
+    throw new Error(
+      'generate-registry: could not locate the COMPONENTS_RAW array in component-registry.tsx',
+    )
+  }
+  const content = file.slice(rawStart, rawEnd)
 
   // Match each entry block in COMPONENTS_RAW
   const entryRegex = /\{\s*slug:\s*'([^']+)',[\s\S]*?code:\s*componentCodes\['([^']+)'\]/g
@@ -662,6 +676,28 @@ const mcpMeta = {
   components: mcpComponents,
   systems: mcpSystems,
   templates: mcpTemplates,
+}
+
+// ── Integrity guard ──────────────────────────────────────────────────────────
+// AI agents turn these slugs into /components/<slug> and /design-systems/<slug>
+// URLs. A slug landing in more than one bucket (e.g. the 'andromeda' design
+// system leaking into components[]) ships a dead link straight to the MCP.
+// Fail the build loudly instead.
+{
+  const bucketOf = new Map()
+  const claim = (slug, bucket) => {
+    if (bucketOf.has(slug)) {
+      throw new Error(
+        `generate-registry: slug "${slug}" is in both "${bucketOf.get(slug)}" and "${bucket}". ` +
+          `Each slug must belong to exactly one of components/systems/templates, ` +
+          `otherwise the MCP hands AI agents a URL that 404s.`,
+      )
+    }
+    bucketOf.set(slug, bucket)
+  }
+  for (const c of mcpComponents) claim(c.slug, 'components')
+  for (const s of mcpSystems) claim(s.slug, 'systems')
+  for (const t of mcpTemplates) claim(t.slug, 'templates')
 }
 
 writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')
