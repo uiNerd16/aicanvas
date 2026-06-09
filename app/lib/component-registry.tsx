@@ -144,6 +144,8 @@ import TiltedCoverflow from '../../components-workspace/tilted-coverflow'
 import { prompts as tiltedCoverflowPrompts } from '../../components-workspace/tilted-coverflow/prompts'
 import ScatterPile from '../../components-workspace/scatter-pile'
 import { prompts as scatterPilePrompts } from '../../components-workspace/scatter-pile/prompts'
+import CardFlick from '../../components-workspace/card-flick'
+import { prompts as cardFlickPrompts } from '../../components-workspace/card-flick/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1325,6 +1327,22 @@ Requirements:
     PreviewComponent: ScatterPile,
     code: componentCodes['scatter-pile'],
     prompts: scatterPilePrompts,
+  },
+  {
+    slug: 'card-flick',
+    image: '',
+    name: 'Card Flick',
+    description:
+      'A stack of photo cards you flick away one by one. The top card spins and sails off with momentum, revealing the next card beneath. The deck loops endlessly.',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Motion' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: true,
+    PreviewComponent: CardFlick,
+    code: componentCodes['card-flick'],
+    prompts: cardFlickPrompts,
   },
 ]
 
