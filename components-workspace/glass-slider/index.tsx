@@ -2,7 +2,7 @@
 
 // npm install framer-motion
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -51,6 +51,10 @@ function Slider({
   const isDragging = useMotionValue(0)
   const thumbScale = useSpring(useTransform(isDragging, [0, 1], [1, 1.3]), { stiffness: 400, damping: 20 })
 
+  // Refs to the active drag listeners so an unmount mid-drag can detach them.
+  const onMoveRef = useRef<((ev: PointerEvent) => void) | null>(null)
+  const onUpRef = useRef<(() => void) | null>(null)
+
   const thumbColor = lerpHex(colorA, colorB, value / 100)
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -72,10 +76,33 @@ function Slider({
       isDragging.set(0)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
+      onMoveRef.current = null
+      onUpRef.current = null
     }
+    onMoveRef.current = onMove
+    onUpRef.current = onUp
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
   }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    let next: number | null = null
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = value - 1
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = value + 1
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = 100
+    if (next === null) return
+    e.preventDefault()
+    setValue(Math.max(0, Math.min(100, next)))
+  }
+
+  // Detach any in-flight drag listeners if the slider unmounts mid-drag.
+  useEffect(() => {
+    return () => {
+      if (onMoveRef.current) window.removeEventListener('pointermove', onMoveRef.current)
+      if (onUpRef.current) window.removeEventListener('pointerup', onUpRef.current)
+    }
+  }, [])
 
   return (
     <motion.div
@@ -101,8 +128,15 @@ function Slider({
       {/* Track */}
       <div
         ref={trackRef}
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={value}
         onPointerDown={handlePointerDown}
-        className="relative h-[5px] w-full cursor-pointer rounded-full touch-none"
+        onKeyDown={handleKeyDown}
+        className="relative h-[5px] w-full cursor-pointer rounded-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         style={{
           background: hovered ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)',
           transition: 'background 0.2s ease',

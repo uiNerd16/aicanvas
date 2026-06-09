@@ -109,6 +109,10 @@ export default function PillToggle() {
       >
         {/* ── Track ──────────────────────────────────────────────────────────── */}
         <motion.button
+          type="button"
+          role="switch"
+          aria-checked={isOn}
+          aria-label="Toggle"
           onClick={handleToggle}
           style={{
             width: trackW,

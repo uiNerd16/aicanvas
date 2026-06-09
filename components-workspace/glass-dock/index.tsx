@@ -112,32 +112,39 @@ export default function GlassDock() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Dock container */}
-      <motion.div
-        initial={{ y: 50 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 180, damping: 20 }}
-        onMouseMove={(e) => mouseX.set(e.clientX)}
-        onMouseLeave={() => mouseX.set(-200)}
-        className="relative isolate mx-auto flex items-end gap-2 rounded-3xl px-4 pb-3 pt-3"
-        style={{
-          background: 'rgba(255, 255, 255, 0.06)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-        }}
-      >
-        {/* Blur layer — non-animating so it isn't recalculated on every mouse-move frame */}
-        <div
-          className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+      {/* Scroll track — lets the dock scroll horizontally instead of clipping on
+          narrow screens. Symmetric vertical padding keeps the dock centered while
+          giving the lifted icons and tooltips room to overflow without being cut. */}
+      <div className="flex w-full overflow-x-auto py-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Dock container — auto margins center it when there is room and keep the
+            left edge reachable while scrolling (justify-center would push overflow
+            off the unscrollable left side at 320px). */}
+        <motion.div
+          initial={{ y: 50 }}
+          animate={{ y: 0 }}
+          transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+          onMouseMove={(e) => mouseX.set(e.clientX)}
+          onMouseLeave={() => mouseX.set(-200)}
+          className="relative isolate mx-auto flex shrink-0 items-end gap-2 rounded-3xl px-4 pb-3 pt-3"
           style={{
-            backdropFilter: 'blur(24px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
           }}
-        />
-        {DOCK_ITEMS.map((item, i) => (
-          <DockItem key={item.label} {...item} mouseX={mouseX} index={i} />
-        ))}
-      </motion.div>
+        >
+          {/* Blur layer — non-animating so it isn't recalculated on every mouse-move frame */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
+            style={{
+              backdropFilter: 'blur(24px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+            }}
+          />
+          {DOCK_ITEMS.map((item, i) => (
+            <DockItem key={item.label} {...item} mouseX={mouseX} index={i} />
+          ))}
+        </motion.div>
+      </div>
     </div>
   )
 }

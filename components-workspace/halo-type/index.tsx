@@ -228,7 +228,6 @@ export default function HaloType() {
         ref={wrapRef}
         className="relative flex h-[min(100vh,100vw)] w-full items-center justify-center overflow-hidden"
         style={{
-          touchAction: 'none',
           maskImage: edgeMask,
           WebkitMaskImage: edgeMask,
         }}

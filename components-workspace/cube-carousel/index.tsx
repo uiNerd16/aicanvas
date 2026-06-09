@@ -2,7 +2,7 @@
 // npm install framer-motion
 
 import { useRef } from 'react'
-import { motion, useMotionValue, animate, type AnimationPlaybackControls, type PanInfo } from 'framer-motion'
+import { motion, useMotionValue, animate, type AnimationPlaybackControls, type MotionValue, type PanInfo } from 'framer-motion'
 
 type FaceShape = 'wide' | 'side'
 
@@ -31,6 +31,7 @@ const FACES: { src: string; shape: FaceShape; transform: string }[] = [
 ]
 
 const DRAG_SENSITIVITY = 0.5
+const KEY_STEP = 30 // degrees per arrow-key press
 const COAST = { type: 'spring' as const, stiffness: 40, damping: 22 }
 
 export default function CubeCarousel() {
@@ -68,6 +69,36 @@ export default function CubeCarousel() {
     xAnim.current = animate(rotateX, projectX, { ...COAST, velocity: vx })
   }
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let target: MotionValue<number> | null = null
+    let delta = 0
+    switch (e.key) {
+      case 'ArrowLeft':
+        target = rotateY
+        delta = -KEY_STEP
+        break
+      case 'ArrowRight':
+        target = rotateY
+        delta = KEY_STEP
+        break
+      case 'ArrowUp':
+        target = rotateX
+        delta = KEY_STEP
+        break
+      case 'ArrowDown':
+        target = rotateX
+        delta = -KEY_STEP
+        break
+      default:
+        return
+    }
+    e.preventDefault()
+    stopAnims()
+    const anim = animate(target, target.get() + delta, COAST)
+    if (target === rotateY) yAnim.current = anim
+    else xAnim.current = anim
+  }
+
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]">
       <div
@@ -90,7 +121,8 @@ export default function CubeCarousel() {
           onPanStart={onPanStart}
           onPan={onPan}
           onPanEnd={onPanEnd}
-          aria-label="Drag to rotate the cube"
+          onKeyDown={onKeyDown}
+          aria-label="Drag or use the arrow keys to rotate the cube"
           role="button"
           tabIndex={0}
           className="absolute inset-0 z-10 cursor-grab select-none active:cursor-grabbing"

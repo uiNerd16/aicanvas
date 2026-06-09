@@ -7,7 +7,11 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Science_Gothic } from 'next/font/google'
 
-const scienceGothic = Science_Gothic({ subsets: ['latin'] })
+// Request the `wdth` (width) axis explicitly so the variable font ships the
+// width variation the animation drives. The weight range loads automatically
+// for variable fonts, so `wght` must not be listed here (and is rejected if it
+// is). Other axes (slnt, CTRS) are intentionally omitted: nothing animates them.
+const scienceGothic = Science_Gothic({ subsets: ['latin'], axes: ['wdth'] })
 
 // ─── LetterSpan Component ─────────────────────────────────────────────────────
 // Reads CSS --italic variable and applies fontStyle dynamically
@@ -67,7 +71,9 @@ const LetterSpanComponent = ({ letter, textColor, fontFamily, forwardedRef }: Le
       style={{
         fontSize: 'clamp(4rem, 12vw, 7rem)',
         fontWeight: 'var(--font-weight, 100)',
-        fontStretch: 'var(--font-stretch, 100%)',
+        // Drive the loaded `wdth` axis directly. `font-stretch` maps to `wdth`
+        // only inconsistently across browsers, so target the axis by tag.
+        fontVariationSettings: `'wdth' var(--font-width, 100)`,
         fontFamily,
         fontStyle,
         lineHeight: 1,
@@ -238,9 +244,11 @@ export default function ResponsiveLetters() {
         state.skew += (targetSkew - state.skew) * easing
         state.italic += (italicValue - state.italic) * easing
 
-        // Update CSS custom properties for font variation
+        // Update CSS custom properties for font variation.
+        // `--font-width` feeds the `wdth` axis as a raw number (axis range 50..200,
+        // matching the MIN_STRETCH..MAX_STRETCH band the animation computes).
         letterEl.style.setProperty('--font-weight', Math.round(state.weight).toString())
-        letterEl.style.setProperty('--font-stretch', `${state.stretch.toFixed(1)}%`)
+        letterEl.style.setProperty('--font-width', state.stretch.toFixed(1))
         letterEl.style.setProperty('--letter-spacing', `${state.letterSpacing.toFixed(3)}em`)
         letterEl.style.setProperty('--skew', `${state.skew.toFixed(1)}`)
         letterEl.style.setProperty('--italic', state.italic.toFixed(3))

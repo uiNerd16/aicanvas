@@ -31,7 +31,7 @@ export default function GlassTabBar() {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 200, damping: 24 }}
-        className="relative isolate flex w-[380px] items-center justify-around rounded-full px-5 py-2.5"
+        className="relative isolate flex w-[min(380px,calc(100vw-2rem))] items-center justify-around rounded-full px-5 py-2.5"
         style={{
           background: 'rgba(255, 255, 255, 0.07)',
           border: '1px solid rgba(255, 255, 255, 0.11)',

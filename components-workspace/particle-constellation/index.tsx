@@ -297,8 +297,18 @@ export default function ParticleConstellation() {
       mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
     }
     function onLeave() { mouseRef.current = null }
+    function onTouch(e: TouchEvent) {
+      const t = e.touches[0]
+      if (!t) return
+      const rect = canvas!.getBoundingClientRect()
+      mouseRef.current = { x: t.clientX - rect.left, y: t.clientY - rect.top }
+    }
+    function onTouchEnd() { mouseRef.current = null }
     container.addEventListener('mousemove', onMove)
     container.addEventListener('mouseleave', onLeave)
+    container.addEventListener('touchstart', onTouch, { passive: true })
+    container.addEventListener('touchmove', onTouch, { passive: true })
+    container.addEventListener('touchend', onTouchEnd)
 
     return () => {
       alive = false
@@ -307,6 +317,9 @@ export default function ParticleConstellation() {
       mo.disconnect()
       container.removeEventListener('mousemove', onMove)
       container.removeEventListener('mouseleave', onLeave)
+      container.removeEventListener('touchstart', onTouch)
+      container.removeEventListener('touchmove', onTouch)
+      container.removeEventListener('touchend', onTouchEnd)
     }
   }, [])
 

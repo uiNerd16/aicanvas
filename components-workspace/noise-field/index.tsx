@@ -85,11 +85,24 @@ export default function NoiseField() {
       mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
     }
     const onLeave = () => { mouseRef.current = null }
+    const onTouch = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      if (!touch) return
+      const rect = canvas.getBoundingClientRect()
+      mouseRef.current = { x: touch.clientX - rect.left, y: touch.clientY - rect.top }
+    }
+    const onTouchEnd = () => { mouseRef.current = null }
     canvas.addEventListener('mousemove', onMove)
     canvas.addEventListener('mouseleave', onLeave)
+    canvas.addEventListener('touchstart', onTouch, { passive: true })
+    canvas.addEventListener('touchmove', onTouch, { passive: true })
+    canvas.addEventListener('touchend', onTouchEnd)
     return () => {
       canvas.removeEventListener('mousemove', onMove)
       canvas.removeEventListener('mouseleave', onLeave)
+      canvas.removeEventListener('touchstart', onTouch)
+      canvas.removeEventListener('touchmove', onTouch)
+      canvas.removeEventListener('touchend', onTouchEnd)
     }
   }, [])
 

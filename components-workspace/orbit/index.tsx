@@ -1,6 +1,6 @@
 'use client'
 
-// npm install framer-motion react next
+// npm install next
 // font: Anton
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'

@@ -117,13 +117,13 @@ export default function UploadProgress() {
   const isDone = status === 'complete'
   const isPaused = status === 'paused'
 
-  const cardBg = isDark ? '#f1f1f0' : '#f1f1f0'
-  const titleColor = isDark ? '#1a1a18' : '#1a1a18'
-  const mutedColor = isDark ? '#6c6c6c' : '#6c6c6c'
-  const btnBg = isDark ? '#e4e4dc' : '#ededea'
-  const btnColor = isDark ? '#5a5a58' : '#6c6c6c'
-  const dividerColor = isDark ? '#e0e0d8' : '#e4e4dc'
-  const trackColor = isDark ? '#e0e0d8' : '#e4e4dc'
+  const cardBg = isDark ? '#262623' : '#f1f1f0'
+  const titleColor = isDark ? '#f1f1ec' : '#1a1a18'
+  const mutedColor = isDark ? '#9a9a94' : '#6c6c6c'
+  const btnBg = isDark ? '#34342f' : '#ededea'
+  const btnColor = isDark ? '#b8b8b0' : '#6c6c6c'
+  const dividerColor = isDark ? '#34342f' : '#e4e4dc'
+  const trackColor = isDark ? '#34342f' : '#e4e4dc'
 
   const subtitle = isDone
     ? 'Upload complete'
