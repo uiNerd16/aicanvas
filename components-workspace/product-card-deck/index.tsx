@@ -24,6 +24,11 @@ interface CardData {
 
 const CARDS: CardData[] = [
   {
+    // Mural card — image only, no caption. The deck opens on this one.
+    title: '',
+    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/mural.jpg?tr=w-600',
+  },
+  {
     title: 'Dreamer backpack',
     label: 'Shop',
     image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/backpack.jpg?tr=w-600',
@@ -42,11 +47,6 @@ const CARDS: CardData[] = [
     title: 'Denim jacket',
     label: 'Shop',
     image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/jacket.jpg?tr=w-600',
-  },
-  {
-    // Mural card — image only, no caption.
-    title: '',
-    image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/mural.jpg?tr=w-600',
   },
 ]
 
