@@ -1,14 +1,14 @@
 'use client'
 
 // npm install framer-motion
-// font: Silkscreen (loaded via Google Fonts @import inside the component)
+// font: Manrope (loaded via Google Fonts @import inside the component)
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// Self-contained display font (loaded via @import in the root <style> below) with a
-// monospace fallback stack so the headline renders even when copy-pasted standalone.
-const HEADLINE_FONT = "'Silkscreen', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace"
+// Manrope, loaded via @import in the root <style> below so the headline renders in
+// Manrope even when copy-pasted standalone; falls back to the host sans stack.
+const HEADLINE_FONT = "'Manrope', var(--font-sans, sans-serif)"
 
 const WORDS = ['Craft', 'interfaces', 'that', 'feel', 'like', 'magic.']
 const ACCENTED = new Set([1, 5]) // "interfaces", "magic."
@@ -31,7 +31,7 @@ export default function TextBlurReveal() {
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden">
 
       {/* Self-contained headline font — loaded inside the component so it survives copy-paste */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');`}</style>
 
       {/* Dot grid — two layers toggled by theme so dots stay visible on light and dark */}
       <div
