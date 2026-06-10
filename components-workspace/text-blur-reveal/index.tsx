@@ -1,14 +1,10 @@
 'use client'
 
 // npm install framer-motion
-// font: Manrope (loaded via Google Fonts @import inside the component)
+// font-pkg: geist/font/pixel|GeistPixelCircle|--font-geist-pixel-circle
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-// Manrope, loaded via @import in the root <style> below so the headline renders in
-// Manrope even when copy-pasted standalone; falls back to the host sans stack.
-const HEADLINE_FONT = "'Manrope', var(--font-sans, sans-serif)"
 
 const WORDS = ['Craft', 'interfaces', 'that', 'feel', 'like', 'magic.']
 const ACCENTED = new Set([1, 5]) // "interfaces", "magic."
@@ -30,19 +26,9 @@ export default function TextBlurReveal() {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden">
 
-      {/* Self-contained headline font — loaded inside the component so it survives copy-paste */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');`}</style>
-
-      {/* Dot grid — two layers toggled by theme so dots stay visible on light and dark */}
+      {/* Dot grid */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-100 dark:opacity-0"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 dark:opacity-100"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
@@ -68,10 +54,10 @@ export default function TextBlurReveal() {
             }}
             className={
               ACCENTED.has(i)
-                ? 'bg-gradient-to-r from-violet-500 to-indigo-500 bg-clip-text text-4xl tracking-tight text-transparent dark:from-violet-400 dark:to-indigo-400'
-                : 'text-4xl tracking-tight text-zinc-900 dark:text-white'
+                ? 'bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-4xl tracking-tight text-transparent'
+                : 'text-4xl tracking-tight text-white'
             }
-            style={{ fontFamily: HEADLINE_FONT }}
+            style={{ fontFamily: 'var(--font-geist-pixel-circle)' }}
           >
             {word}
           </motion.span>
@@ -88,7 +74,7 @@ export default function TextBlurReveal() {
           delay: ((WORDS.length - 1) * STAGGER + 200) / 1000,
           ease: 'easeOut',
         }}
-        className="relative text-base text-zinc-500 dark:text-zinc-400"
+        className="relative text-base text-zinc-400"
       >
         Drop any phrase. Works with any text.
       </motion.p>
