@@ -171,24 +171,6 @@ function ModalCard({
   speakerId: number
 }) {
   const [joining, setJoining] = useState(false)
-  // Self-contained dark-mode detection (no dependency on the host app's theme
-  // provider, so the component works when copy-pasted into any project).
-  const [dark, setDark] = useState(
-    () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'),
-  )
-  useEffect(() => {
-    const check = () => setDark(document.documentElement.classList.contains('dark'))
-    const mo = new MutationObserver(check)
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => mo.disconnect()
-  }, [])
-  const surface = dark ? '#21211f' : '#f1f1f0'
-  const closeBg = dark ? '#2d2d2b' : '#f8f8f8'
-  const closeHover = dark ? '#3a3a38' : '#ececec'
-  const joinBg = dark ? '#f1f1f0' : '#1a1a18'
-  const joinHover = dark ? '#e0dfd8' : '#2d2d2b'
-  const joinPressed = dark ? '#cfcfc8' : '#3a3a38'
-  const joinText = dark ? '#1a1a18' : '#f2f1ec'
   const targetW = typeof window !== 'undefined' ? Math.min(440, window.innerWidth - 32) : 440
 
   const initialOffsetX = origin.x + origin.w / 2 - window.innerWidth / 2
@@ -227,9 +209,9 @@ function ModalCard({
           opacity: { duration: 0.18 },
           boxShadow: { duration: 0.35, ease: 'easeInOut' },
         }}
-        style={{ borderRadius: 28, willChange: 'transform, border-radius', backgroundColor: surface }}
+        style={{ borderRadius: 28, willChange: 'transform, border-radius' }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[440px] rounded-[28px] px-6 pb-6 pt-6"
+        className="w-full max-w-[440px] rounded-[28px] bg-[#f1f1f0] px-6 pb-6 pt-6"
       >
         <motion.div
           variants={{
@@ -249,15 +231,15 @@ function ModalCard({
             }}
             className="relative mb-5 flex items-center justify-center"
           >
-            <span className="font-sans text-[18px] font-bold text-[#1a1a18] dark:text-[#f1f1f0]">Live Session</span>
+            <span className="font-sans text-[18px] font-bold text-[#1a1a18]">Live Session</span>
             <motion.button
               onClick={onClose}
               aria-label="Close live session"
               whileTap={{ scale: 0.88 }}
-              whileHover={{ scale: 1.1, backgroundColor: closeHover }}
+              whileHover={{ scale: 1.1, backgroundColor: '#ececec' }}
               transition={{ type: 'spring', stiffness: 400, damping: 26 }}
-              className="absolute right-0 flex size-9 items-center justify-center rounded-full text-[#6c6c6c] dark:text-[#a0a09a]"
-              style={{ backgroundColor: closeBg }}
+              className="absolute right-0 flex size-9 items-center justify-center rounded-full text-[#6c6c6c]"
+              style={{ backgroundColor: '#f8f8f8' }}
             >
               <X size={16} weight="bold" />
             </motion.button>
@@ -295,16 +277,16 @@ function ModalCard({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.6 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 26 }}
-                        className="absolute -right-1 -top-0.5 flex size-[22px] items-center justify-center rounded-full bg-[#f1f1f0] ring-2 ring-[#f1f1f0] dark:bg-[#21211f] dark:ring-[#21211f]"
+                        className="absolute -right-1 -top-0.5 flex size-[22px] items-center justify-center rounded-full bg-[#f1f1f0] ring-2 ring-[#f1f1f0]"
                       >
-                        <span className="flex size-[22px] items-center justify-center rounded-full bg-[#1a1a18] text-[#f1f1f0] dark:bg-[#f1f1f0] dark:text-[#1a1a18]">
+                        <span className="flex size-[22px] items-center justify-center rounded-full bg-[#1a1a18] text-[#f1f1f0]">
                           <SpeakingBars size={10} />
                         </span>
                       </motion.span>
                     )}
                   </AnimatePresence>
                 </div>
-                <span className="font-sans text-[13px] font-medium text-[#1a1a18] dark:text-[#f1f1f0]">
+                <span className="font-sans text-[13px] font-medium text-[#1a1a18]">
                   {p.name}
                 </span>
               </div>
@@ -323,12 +305,12 @@ function ModalCard({
               setTimeout(() => { setJoining(false); onClose() }, 700)
             }}
             disabled={joining}
-            animate={{ scale: joining ? 0.96 : 1, backgroundColor: joining ? joinPressed : joinBg }}
-            whileHover={joining ? {} : { scale: 1.02, backgroundColor: joinHover }}
+            animate={{ scale: joining ? 0.96 : 1, backgroundColor: joining ? '#3a3a38' : '#1a1a18' }}
+            whileHover={joining ? {} : { scale: 1.02, backgroundColor: '#2d2d2b' }}
             whileTap={joining ? {} : { scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-            className="mt-6 w-full rounded-full py-3.5 font-sans text-[15px] font-bold"
-            style={{ backgroundColor: joinBg, color: joinText }}
+            className="mt-6 w-full rounded-full py-3.5 font-sans text-[15px] font-bold text-[#f2f1ec]"
+            style={{ backgroundColor: '#1a1a18' }}
           >
             <AnimatePresence mode="wait" initial={false}>
               {joining ? (
