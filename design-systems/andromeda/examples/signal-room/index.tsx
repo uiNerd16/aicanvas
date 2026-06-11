@@ -29,10 +29,48 @@ import { MixesRow } from './MixesRow';
 import { RecentTransmissions } from './RecentTransmissions';
 import { LevelsPanel } from './LevelsPanel';
 import { Transport } from './Transport';
+import { nowPlaying } from './data';
 import { motion } from 'framer-motion';
+
+// Normalize a source item (mix card / transmission row) to the shape the
+// bottom player consumes: title, subtitle, code, cover (image url or null →
+// glyph), duration in seconds.
+const parseDur = (d) => {
+  const [m, s] = String(d).split(':').map(Number);
+  return (m || 0) * 60 + (s || 0);
+};
+const mixToNowPlaying = (mix) => ({
+  title: mix.name, subtitle: mix.desc, code: mix.code, cover: mix.image, duration: 221,
+});
+const recToNowPlaying = (r) => ({
+  title: r.track, subtitle: r.artist, code: r.id, cover: null, duration: parseDur(r.duration),
+});
 
 export default function SignalRoom() {
   const [activeNav, setActiveNav] = useState('library');
+
+  // The one source of truth for the player. Pressing play on a routine card or
+  // a transmission row sets `current` and starts playback; the Transport bar
+  // (cover + title + transport state) reflects it.
+  const [current, setCurrent] = useState(() => ({
+    title: nowPlaying.track,
+    subtitle: nowPlaying.artist,
+    code: nowPlaying.code,
+    cover: null,
+    duration: nowPlaying.duration,
+  }));
+  const [isPlaying, setIsPlaying] = useState(true);
+  const togglePlay = () => setIsPlaying((p) => !p);
+  // Clicking the already-current item toggles play/pause; a different item
+  // switches to it and starts playing.
+  const playMix = (mix) => {
+    if (current.code === mix.code) togglePlay();
+    else { setCurrent(mixToNowPlaying(mix)); setIsPlaying(true); }
+  };
+  const playRec = (r) => {
+    if (current.code === r.id) togglePlay();
+    else { setCurrent(recToNowPlaying(r)); setIsPlaying(true); }
+  };
 
   // Cascade slots: Sidebar 0 → Header 1 → NowTransmitting 2 → TransmitStats 3
   // → MixesRow 4 → Recent/Levels row 5 → Transport 6. The stats row sits as
@@ -101,21 +139,26 @@ export default function SignalRoom() {
           </motion.div>
 
           <motion.div {...mixesMotion}>
-            <MixesRow />
+            <MixesRow onPlay={playMix} currentCode={current.code} isPlaying={isPlaying} />
           </motion.div>
 
           <motion.div
             {...splitMotion}
             style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'stretch' }}
           >
-            <RecentTransmissions />
+            <RecentTransmissions onPlay={playRec} currentCode={current.code} isPlaying={isPlaying} />
             <div style={{ flex: '0 0 360px', display: 'flex' }}>
               <LevelsPanel />
             </div>
           </motion.div>
         </main>
 
-        <Transport motionProps={transportMotion} />
+        <Transport
+          motionProps={transportMotion}
+          current={current}
+          isPlaying={isPlaying}
+          onTogglePlay={togglePlay}
+        />
       </div>
     </div>
   );

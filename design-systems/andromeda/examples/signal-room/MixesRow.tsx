@@ -9,7 +9,7 @@
 // accent is on-rule.
 // ============================================================
 
-import { Play } from '@phosphor-icons/react';
+import { Play, Pause } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
@@ -57,7 +57,8 @@ function SignalMeter({ value }) {
   );
 }
 
-function MixCard({ mix }) {
+function MixCard({ mix, onPlay, isCurrent, isPlaying }) {
+  const playingThis = isCurrent && isPlaying;
   // Markers off entirely — the image overlay carries the card's identity,
   // corner brackets would compete with it.
   return (
@@ -102,7 +103,8 @@ function MixCard({ mix }) {
         }}
       />
 
-      {/* Top row: code label + play icon button */}
+      {/* Top row: code label + play action (top-right, secondary). Pressing it
+          starts the routine in the bottom player. */}
       <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <span
           style={{
@@ -115,7 +117,13 @@ function MixCard({ mix }) {
         >
           {mix.code}
         </span>
-        <IconButton variant="ghost" size="sm" icon={Play} aria-label={`Play ${mix.name}`} />
+        <IconButton
+          variant={playingThis ? 'default' : 'outline'}
+          size="sm"
+          icon={playingThis ? Pause : Play}
+          aria-label={playingThis ? `Pause ${mix.name}` : `Play ${mix.name}`}
+          onClick={() => onPlay?.(mix)}
+        />
       </div>
 
       {/* Spacer pushes the meta to the middle */}
@@ -152,7 +160,7 @@ function MixCard({ mix }) {
   );
 }
 
-export function MixesRow() {
+export function MixesRow({ onPlay, currentCode, isPlaying }) {
   return (
     <Card>
       <PanelHeader
@@ -180,7 +188,13 @@ export function MixesRow() {
         }}
       >
         {mixes.map(mix => (
-          <MixCard key={mix.code} mix={mix} />
+          <MixCard
+            key={mix.code}
+            mix={mix}
+            onPlay={onPlay}
+            isCurrent={mix.code === currentCode}
+            isPlaying={isPlaying}
+          />
         ))}
       </div>
     </Card>
