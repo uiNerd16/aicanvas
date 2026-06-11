@@ -189,7 +189,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
 
 const FREE_FEATURES = [
   'Browse every component, preview and prompts',
-  '10 component installs a day with a free account, 2 without one',
+  '10 component installs a day with a free account',
   'Remix with AI, always free',
   'MCP server for Claude Code, Codex, and Cursor',
   'Lab access with presets and export',
@@ -197,9 +197,12 @@ const FREE_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  'Unlimited components per day',
-  'Design systems, full access',
+  'Unlimited component installs per day',
+  'Pull design systems through the CLI and MCP',
   'Templates, full access',
+  'Every new design system and template, included',
+  'One command installs a whole system, wired up',
+  'Cancel anytime',
 ]
 
 function PremiumCards() {
@@ -223,9 +226,17 @@ function PremiumCards() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
             Browse everything, install components daily, and remix with AI.
-            No card, no catch.
           </p>
-          <div className="mt-6 flex items-baseline gap-2">
+          {/* Invisible mirror of the Premium card's billing-cycle toggle so the
+              price and CTA align across both cards. Same box height, no toggle
+              on the free tier. */}
+          <div
+            aria-hidden
+            className="invisible mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
+          >
+            <span className="rounded-md px-3 py-1 text-xs font-semibold">Monthly</span>
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
             <span className="text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
               $0
             </span>

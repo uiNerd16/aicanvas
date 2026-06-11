@@ -39,7 +39,6 @@ import { SaveButton } from '../SaveButton'
 import { premiumEnabled } from '../../../lib/flags'
 import { useEntitlement } from '../billing/useEntitlement'
 import { PremiumBadge } from '../billing/PremiumBadge'
-import { DailyLimitMeter } from '../billing/DailyLimitMeter'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
@@ -565,9 +564,6 @@ export default function ComponentPageView({
 
             {/* Action bar */}
             <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
-
-              {/* Daily allowance — renders null while the premium flag is off */}
-              <DailyLimitMeter className="mr-auto" />
 
               {/* Save (logged-in only — no-op render otherwise) */}
               <SaveButton slug={slug} system={designSystem ?? null} />

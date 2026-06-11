@@ -922,7 +922,6 @@ Requirements:
       { label: 'Buttons & Toggles', accent: true },
       { label: 'Andromeda' },
     ],
-    designSystem: 'andromeda',
     PreviewComponent: AndromedaButton,
     code: componentCodes['andromeda-button'],
     prompts: andromedaButtonPrompts,

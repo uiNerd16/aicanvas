@@ -3,14 +3,12 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, Crown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, Cube, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PenNib, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
 import { CONTACT_EMAIL, GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { buttonClasses } from './Button'
-import { premiumEnabled } from '../../lib/flags'
-import { PremiumBadge } from './billing/PremiumBadge'
 
 // ── Tier structure ────────────────────────────────────────────────────────
 // Ordering comes from the shared categories config so the sidebar, the
@@ -216,13 +214,7 @@ export function Sidebar() {
                   <span className={isDisabled ? 'opacity-40' : ''}>{section.icon}</span>
                   <span className="flex-1 text-left">
                     {section.title}
-                    {/* Flag on: Design Systems carries the Premium badge instead
-                        of "· soon". Flag off: unchanged. */}
-                    {isDisabled && (
-                      section.title === 'Design Systems' && premiumEnabled()
-                        ? <PremiumBadge className="ml-1.5 align-middle" />
-                        : <span className="ml-1 text-xs font-normal text-sand-400 dark:text-sand-700">· soon</span>
-                    )}
+                    {isDisabled && <span className="ml-1 text-xs font-normal text-sand-400 dark:text-sand-700">· soon</span>}
                   </span>
                   {!isDisabled && <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />}
                 </button>
@@ -273,16 +265,6 @@ export function Sidebar() {
 
         {/* ── Get MCP, Pricing, About & Contact ── */}
         <div className="space-y-0.5">
-          {/* Upgrade — flag-gated premium entry, olive accent */}
-          {premiumEnabled() && (
-            <Link
-              href="/pricing"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-olive-600 transition-colors hover:bg-sand-300/50 hover:text-olive-500 dark:text-olive-400 dark:hover:bg-sand-800/60 dark:hover:text-olive-300"
-            >
-              <Crown weight="regular" size={16} />
-              <span>Upgrade</span>
-            </Link>
-          )}
           <Link
             href="/mcp"
             className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
