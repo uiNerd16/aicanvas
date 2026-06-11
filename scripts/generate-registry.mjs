@@ -1,6 +1,9 @@
 /**
  * Generate shadcn-compatible registry JSON files from component source files.
- * Outputs to public/r/ — each component gets its own JSON file.
+ * Outputs to registry-data/ — each component gets its own JSON file. The files
+ * are served at /r/<slug>.json by the dynamic route in app/r/[file]/route.ts
+ * (NOT statically from public/), so the route can identify the caller and
+ * enforce entitlement. Same bytes as before; only the on-disk location moved.
  *
  * Usage: node scripts/generate-registry.mjs
  */
@@ -12,7 +15,7 @@ import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 import { DESIGN_SYSTEMS } from './lib/design-systems.config.mjs'
 
 const wsDir = 'components-workspace'
-const outDir = 'public/r'
+const outDir = 'registry-data'
 const SCHEMA = 'https://ui.shadcn.com/schema/registry-item.json'
 const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
 
