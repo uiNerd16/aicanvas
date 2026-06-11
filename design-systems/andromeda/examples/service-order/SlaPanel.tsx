@@ -21,7 +21,7 @@ import { Button } from '../../components/Button';
 import { IconButton } from '../../components/IconButton';
 import { Tag } from '../../components/Tag';
 import { Tooltip } from '../../components/Tooltip';
-import { RiskGrid } from './RiskGrid';
+import { HeatGrid } from '../../components/HeatGrid';
 import { slaRisk } from './data';
 
 // Stagger timing — values match the grid's stagger so the percentage
@@ -122,7 +122,9 @@ export function SlaPanel() {
           padding: `${tokens.spacing[5]} ${tokens.spacing[5]} ${tokens.spacing[4]} ${tokens.spacing[5]}`,
         }}
       >
-        <RiskGrid />
+        {/* The panel renders its own count-up percentage (below), so the
+            gauge ships with showValue off — value flows from the same source. */}
+        <HeatGrid value={slaRisk.value} showValue={false} label="Window risk" />
 
         {/* Percentage — accent-300 because it IS the measurement */}
         <span

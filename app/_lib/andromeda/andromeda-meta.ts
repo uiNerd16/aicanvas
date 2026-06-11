@@ -81,6 +81,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'EmptyState.tsx',
   },
   {
+    slug: 'heat-grid',
+    name: 'Heat Grid',
+    description:
+      'A 2-D matrix fill gauge — the cousin of ProgressBar. Cells fill from the bottom-centre outward in a widening pyramid as the value rises, with a dim-to-bright accent ramp toward the wave front. Scroll-gated fill, optional percentage readout.',
+    sourceFile: 'HeatGrid.tsx',
+  },
+  {
     slug: 'icon-button',
     name: 'Icon Button',
     description:

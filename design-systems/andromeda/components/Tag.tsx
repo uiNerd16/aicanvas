@@ -15,7 +15,7 @@ import { cn, andromedaVars } from './lib/utils';
 
 const tagVariants = cva(
   [
-    'inline-flex items-center select-none whiteandromeda-nowrap',
+    'inline-flex items-center select-none whitespace-nowrap',
     'gap-[var(--andromeda-2)]',
     'px-[var(--andromeda-2)] py-[3px]',
     'border border-solid',
@@ -28,26 +28,27 @@ const tagVariants = cva(
   {
     variants: {
       variant: {
+        // Text is always text.primary across variants (mirrors Badge): the
+        // background + border carry the meaning, never the label color. The
+        // -500 backgrounds are dark, so near-white primary text clears WCAG AA.
         default: [
           'bg-[color:var(--andromeda-surface-raised)]',
-          'text-[color:var(--andromeda-text-secondary)]',
+          'text-[color:var(--andromeda-text-primary)]',
           'border-[color:var(--andromeda-border-base)]',
         ],
         accent: [
           'bg-[color:var(--andromeda-accent-500)]',
-          'text-[color:var(--andromeda-accent-100)]',
+          'text-[color:var(--andromeda-text-primary)]',
           'border-[color:var(--andromeda-accent-400)]',
         ],
         warning: [
-          // text-100 on bg-500 = 8.3:1 (WCAG AA pass)
           'bg-[color:var(--andromeda-orange-500)]',
-          'text-[color:var(--andromeda-orange-100)]',
+          'text-[color:var(--andromeda-text-primary)]',
           'border-[color:var(--andromeda-orange-400)]',
         ],
         fault: [
-          // text-100 on bg-500 = 7.4:1 (WCAG AA pass)
           'bg-[color:var(--andromeda-red-500)]',
-          'text-[color:var(--andromeda-red-100)]',
+          'text-[color:var(--andromeda-text-primary)]',
           'border-[color:var(--andromeda-red-400)]',
         ],
       },
@@ -97,11 +98,11 @@ export const Tag = forwardRef(function Tag(
       {onClose ? (
         <button
           type="button"
-          aria-label="Remove"
+          aria-label={typeof children === 'string' ? `Remove ${children}` : 'Remove'}
           onClick={onClose}
           className={closeButtonClass}
         >
-          <X size={12} weight="light" />
+          <X size={12} weight="regular" />
         </button>
       ) : null}
     </span>

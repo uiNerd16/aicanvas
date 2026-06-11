@@ -45,15 +45,68 @@ import { andromedaVars } from './lib/utils';
 
 const ITEM_HEIGHT = 26;
 
+// Roving arrow-key navigation for a `role="menu"` container. Queries the
+// direct menuitem buttons, finds the focused one, and moves focus up/down
+// with wrap-around. Home/End jump to first/last. Separators are ignored
+// because they are not `role="menuitem"` buttons. Shared by the top-level
+// menu and any open submenu — each gets its own onKeyDown bound to its own
+// container, and stopPropagation keeps an inner submenu's keys from also
+// being handled by the parent menu.
+function handleMenuKeyDown(e) {
+  const container = e.currentTarget;
+  const itemsList = Array.from(
+    container.querySelectorAll(':scope > div > button[role="menuitem"]'),
+  );
+  if (itemsList.length === 0) return;
+
+  const current = document.activeElement;
+  const idx = itemsList.indexOf(current);
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = idx < 0 ? 0 : (idx + 1) % itemsList.length;
+    itemsList[next].focus();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    e.stopPropagation();
+    const prev = idx < 0 ? itemsList.length - 1 : (idx - 1 + itemsList.length) % itemsList.length;
+    itemsList[prev].focus();
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    e.stopPropagation();
+    itemsList[0].focus();
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    e.stopPropagation();
+    itemsList[itemsList.length - 1].focus();
+  }
+}
+
 function MenuItem({ item, onClose }) {
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const itemRef = useRef(null);
+  const buttonRef = useRef(null);
+  const submenuRef = useRef(null);
   const closeTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  // When the submenu opens via keyboard (ArrowRight), move focus into its
+  // first item. Guarded by the keyboard-open flag so hover-opening the
+  // submenu never steals focus from the pointer.
+  const submenuOpenedByKey = useRef(false);
+  useEffect(() => {
+    if (submenuOpen && submenuOpenedByKey.current && submenuRef.current) {
+      const first = submenuRef.current.querySelector('button[role="menuitem"]');
+      if (first) first.focus();
+    }
+    if (!submenuOpen) submenuOpenedByKey.current = false;
+  }, [submenuOpen]);
 
   if (item.type === 'separator') {
     return (
       <div
-        aria-hidden="true"
         role="separator"
         style={{
           height: '1px',
@@ -88,6 +141,26 @@ function MenuItem({ item, onClose }) {
     onClose();
   }
 
+  // ArrowRight opens the submenu and focuses into it; ArrowLeft (handled on
+  // the submenu container) closes it and returns focus to this parent button.
+  function handleButtonKeyDown(e) {
+    if (hasSub && e.key === 'ArrowRight') {
+      e.preventDefault();
+      e.stopPropagation();
+      submenuOpenedByKey.current = true;
+      setSubmenuOpen(true);
+    }
+  }
+
+  function handleSubmenuKeyDown(e) {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      e.stopPropagation();
+      setSubmenuOpen(false);
+      buttonRef.current?.focus();
+    }
+  }
+
   const color = item.destructive
     ? tokens.color.red[300]
     : item.selected
@@ -102,11 +175,13 @@ function MenuItem({ item, onClose }) {
       style={{ position: 'relative' }}
     >
       <button
+        ref={buttonRef}
         type="button"
         role="menuitem"
         aria-haspopup={hasSub ? 'menu' : undefined}
         aria-expanded={hasSub ? submenuOpen : undefined}
         onClick={handleClick}
+        onKeyDown={handleButtonKeyDown}
         className="andromeda-panel-menu-item"
         data-selected={item.selected ? 'true' : 'false'}
         style={{
@@ -127,7 +202,7 @@ function MenuItem({ item, onClose }) {
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wide,
           whiteSpace: 'nowrap',
-          transition: 'background 100ms ease, color 100ms ease',
+          transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >
         {Icon ? <Icon size={14} weight="regular" /> : <span style={{ width: '14px' }} />}
@@ -138,7 +213,12 @@ function MenuItem({ item, onClose }) {
       {/* Right-flyout submenu */}
       {hasSub && submenuOpen ? (
         <div
+          ref={submenuRef}
           role="menu"
+          onKeyDown={(e) => {
+            handleSubmenuKeyDown(e);
+            handleMenuKeyDown(e);
+          }}
           style={{
             position: 'absolute',
             top: 0,
@@ -168,6 +248,27 @@ export const PanelMenu = forwardRef(function PanelMenu(
 ) {
   const [open, setOpen] = useState(defaultOpen || staticOpen);
   const wrapperRef = useRef(null);
+  const menuRef = useRef(null);
+  // The element to return focus to when the menu closes — captured at the
+  // moment the trigger toggles the menu open (interactive open only).
+  const returnFocusRef = useRef(null);
+
+  // Focus the first menuitem when the panel opens — but NEVER in staticOpen
+  // mode, where multiple pinned menus would fight over focus.
+  useEffect(() => {
+    if (!open || staticOpen) return;
+    const first = menuRef.current?.querySelector('button[role="menuitem"]');
+    if (first) first.focus();
+  }, [open, staticOpen]);
+
+  // Return focus to the trigger when the menu closes after an interactive
+  // open. Skipped in staticOpen mode (no focus stealing on showcase pages).
+  useEffect(() => {
+    if (open || staticOpen) return;
+    const target = returnFocusRef.current;
+    returnFocusRef.current = null;
+    if (target) target.focus();
+  }, [open, staticOpen]);
 
   useEffect(() => {
     // staticOpen pins the menu open (showcase/docs) — skip the dismissers so it
@@ -208,7 +309,11 @@ export const PanelMenu = forwardRef(function PanelMenu(
         variant="ghost"
         size="sm"
         icon={DotsThreeVertical}
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          // Capture the trigger as the focus-return target before opening.
+          if (!open && !staticOpen) returnFocusRef.current = e.currentTarget;
+          setOpen((o) => !o);
+        }}
         data-state={open ? 'open' : 'closed'}
         style={open ? {
           background: tokens.color.surface.active,
@@ -218,10 +323,12 @@ export const PanelMenu = forwardRef(function PanelMenu(
 
       {open ? (
         <div
+          ref={menuRef}
           role="menu"
+          onKeyDown={handleMenuKeyDown}
           style={{
             position: 'absolute',
-            top: 'calc(100% + 4px)',
+            top: `calc(100% + ${tokens.spacing[2]})`,
             [align === 'right' ? 'right' : 'left']: 0,
             minWidth: '160px',
             background: tokens.color.surface.overlay,

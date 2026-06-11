@@ -103,8 +103,6 @@ export const SearchField = forwardRef(function SearchField(
         ...style,
       }}
     >
-      <CornerMarkers size={4} offset={2} />
-
       {Icon ? (
         <Icon
           size={14}
@@ -156,7 +154,10 @@ export const SearchField = forwardRef(function SearchField(
           value={value}
           onChange={handleChange}
           onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
+          onBlur={() => {
+            setIsFocus(false);
+            setIsHover(false);
+          }}
           aria-label={ariaLabel ?? placeholder}
           disabled={disabled}
           {...rest}

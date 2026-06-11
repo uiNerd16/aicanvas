@@ -32,7 +32,7 @@ const PRESS_DOWN = { scale: 0.98, transition: PRESS_TX };
 const buttonVariants = cva(
   [
     // structural
-    'relative inline-flex items-center justify-center select-none whiteandromeda-nowrap',
+    'relative inline-flex items-center justify-center select-none whitespace-nowrap',
     'gap-[var(--andromeda-2)]',
     'border border-solid',
     'rounded-[var(--andromeda-radius-none)]',
@@ -153,7 +153,7 @@ export const Button = forwardRef(function Button(
   const baseStyle = { ...andromedaVars(), ...style };
   const content = (
     <>
-      {Icon ? <Icon size={iconSize} weight="light" /> : null}
+      {Icon ? <Icon size={iconSize} weight="regular" /> : null}
       {children}
     </>
   );

@@ -28,7 +28,7 @@ export function cn(...inputs) {
  * cascade every token down to that subtree, where cva variants
  * can reference them via `[color:var(--andromeda-…)]` arbitrary
  * classes — including in `hover:` / `focus-visible:` state
- * variants. Every value below traces back to `tokens.js` exactly.
+ * variants. Every value below traces back to `tokens.ts` exactly.
  *
  * @returns {Record<string, string>}
  */
@@ -124,12 +124,14 @@ export function andromedaVars() {
     '--andromeda-duration-normal':     t.motion.duration.normal,
     '--andromeda-duration-slow':       t.motion.duration.slow,
     '--andromeda-duration-cascade':    t.motion.duration.cascade,
+    '--andromeda-duration-row':        t.motion.duration.row,
     '--andromeda-duration-countup':    t.motion.duration.countup,
     '--andromeda-easing-standard':     t.motion.easing.standard,
     '--andromeda-easing-out':          t.motion.easing.out,
     '--andromeda-easing-in':           t.motion.easing.in,
     '--andromeda-easing-sharp':        t.motion.easing.sharp,
     '--andromeda-stagger-cascade':     t.motion.stagger.cascade,
+    '--andromeda-stagger-row':         t.motion.stagger.row,
     '--andromeda-stagger-progressbar': t.motion.stagger.progressBar,
   };
 }
