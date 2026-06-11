@@ -1,14 +1,16 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
-import { CheckCircle, Lightning, Sparkle } from '@phosphor-icons/react'
+import { CheckCircle, Crown, Lightning, Sparkle } from '@phosphor-icons/react'
 import type { ComponentType, ReactNode } from 'react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SiteFooter } from '../components/SiteFooter'
 import { NerdSvg, SuperheroSvg } from '../components/auth/NerdToHero'
+import { premiumEnabled } from '../../lib/flags'
+import { useSession } from '../components/auth/SessionProvider'
 
 // ─── Plan data ──────────────────────────────────────────────────────────────
 // Two tiers, both free. Nerd is the unauthenticated baseline; Hero is the
@@ -178,9 +180,158 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
   )
 }
 
+// ─── Premium pricing (flag-gated) ───────────────────────────────────────────
+// Rendered only when NEXT_PUBLIC_PREMIUM_ENABLED=true. Free vs Premium with a
+// monthly/yearly toggle, yearly default and highlighted. The Premium card
+// lists ONLY the three real unlocks; every free perk stays on the Free card
+// so the copy never sells free things as premium. CTAs navigate for now,
+// Plan 4 wires the Paddle overlay.
+
+const FREE_FEATURES = [
+  'Browse every component, preview and prompts',
+  '10 component installs a day with a free account, 2 without one',
+  'Remix with AI, always free',
+  'MCP server for Claude Code, Codex, and Cursor',
+  'Lab access with presets and export',
+  'Save your favorite components',
+]
+
+const PREMIUM_FEATURES = [
+  'Unlimited components per day',
+  'Design systems, full access',
+  'Templates, full access',
+]
+
+function PremiumCards() {
+  const { user } = useSession()
+  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('yearly')
+  const price = cycle === 'yearly' ? '$49.99' : '$9.99'
+  const suffix = cycle === 'yearly' ? 'year' : 'month'
+
+  return (
+    <div className="mt-12 grid gap-6 sm:mt-16 md:grid-cols-2">
+      {/* ── Free card ── */}
+      <div className="relative flex flex-col rounded-3xl border border-sand-300 bg-sand-100 p-2 dark:border-sand-800 dark:bg-sand-900">
+        <div className="px-5 pt-6 pb-6 sm:px-6 sm:pt-7">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]">
+              <NerdSvg />
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
+              Free
+            </h2>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            Browse everything, install components daily, and remix with AI.
+            No card, no catch.
+          </p>
+          <div className="mt-6 flex items-baseline gap-2">
+            <span className="text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
+              $0
+            </span>
+            <span className="text-sm font-medium text-sand-500">/ forever</span>
+          </div>
+          <Link
+            href={user ? '/components' : '/account/sign-up'}
+            className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+          >
+            {user ? 'Browse Components' : 'Sign up free'}
+          </Link>
+        </div>
+        <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+            ALWAYS INCLUDED
+          </p>
+          <ul className="mt-4 space-y-3">
+            {FREE_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
+                <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-400 dark:text-sand-300" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* ── Premium card ── */}
+      <div className="relative flex flex-col rounded-3xl border border-olive-500/50 bg-sand-100 p-2 dark:border-olive-500/40 dark:bg-sand-900">
+        <div className="px-5 pt-6 pb-6 sm:px-6 sm:pt-7">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]">
+              <SuperheroSvg />
+            </div>
+            <h2 className="flex items-center gap-2 text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
+              Premium
+              <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
+            </h2>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            Everything in Free, without limits. Whole design systems and
+            templates, installed with one command.
+          </p>
+
+          {/* Billing cycle toggle — yearly default + highlighted */}
+          <div className="mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
+            <button
+              type="button"
+              onClick={() => setCycle('monthly')}
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                cycle === 'monthly'
+                  ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setCycle('yearly')}
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                cycle === 'yearly'
+                  ? 'bg-olive-500 text-sand-950'
+                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+              }`}
+            >
+              Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 58%</span>
+            </button>
+          </div>
+
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className="text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
+              {price}
+            </span>
+            <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
+          </div>
+
+          <Link
+            href={user ? '/pricing' : '/account/sign-up?intent=premium'}
+            className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}`}
+          >
+            Go Premium
+          </Link>
+        </div>
+        <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+            EVERYTHING IN FREE, PLUS
+          </p>
+          <ul className="mt-4 space-y-3">
+            {PREMIUM_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
+                <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
+  const premium = premiumEnabled()
   return (
     <div className="flex min-h-full flex-col bg-sand-200 dark:bg-sand-950">
       {/* ── Top bar — mirrors /About: olive /Pricing centered, HeaderSocials right ── */}
@@ -210,20 +361,25 @@ export default function PricingPage() {
             Our Pricing Plan
           </span>
           <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">
-            Pick your side
+            {premium ? 'Start free, upgrade when you need more' : 'Pick your side'}
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-sand-600 dark:text-sand-400">
-            AI Canvas is free, forever. Browse as a Nerd or sign up as a Hero
-            to save your work, keep Lab presets, and export to your machine.
+            {premium
+              ? 'Free accounts install 10 components a day and remix with AI at no cost. Premium unlocks design systems, templates, and unlimited installs.'
+              : 'AI Canvas is free, forever. Browse as a Nerd or sign up as a Hero to save your work, keep Lab presets, and export to your machine.'}
           </p>
         </Section>
 
         {/* ── Plan cards ── */}
-        <div className="mt-12 grid gap-6 sm:mt-16 md:grid-cols-2">
-          {PLANS.map((plan, i) => (
-            <PlanCard key={plan.name} plan={plan} delay={0.1 + i * 0.08} />
-          ))}
-        </div>
+        {premium ? (
+          <PremiumCards />
+        ) : (
+          <div className="mt-12 grid gap-6 sm:mt-16 md:grid-cols-2">
+            {PLANS.map((plan, i) => (
+              <PlanCard key={plan.name} plan={plan} delay={0.1 + i * 0.08} />
+            ))}
+          </div>
+        )}
 
         {/* ── Footnote ── */}
         <Section className="mt-12 text-center sm:mt-16" delay={0.2}>
