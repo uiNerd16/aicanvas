@@ -147,7 +147,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
               fontWeight: tokens.typography.weight.semibold,
             }}
           >
-            Signal Room
+            Andromeda
           </span>
           <span
             style={{
@@ -158,7 +158,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
               letterSpacing: tokens.typography.tracking.widest,
             }}
           >
-            Audio Console
+            Signal Room
           </span>
         </div>
       </div>

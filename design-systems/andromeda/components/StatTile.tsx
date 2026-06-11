@@ -41,35 +41,37 @@ function DigitSlot({ char, reduced }) {
   if (reduced) {
     return <span style={{ display: 'inline-block' }}>{char}</span>;
   }
+  // The slot keeps a REAL text baseline (from an invisible sizing char) so a
+  // unit rendered next to the value aligns to the digits' baseline. The roll
+  // animation runs in an absolutely-positioned, clipped overlay — being out of
+  // flow, it doesn't hijack the slot's baseline. (An inline-block with
+  // `overflow:hidden` otherwise reports its bottom edge as the baseline, which
+  // drops the unit a few px below the numbers.)
   return (
     <span
       style={{
         position: 'relative',
         display: 'inline-block',
         width: '1ch',
-        height: '1em',
-        overflow: 'hidden',
+        textAlign: 'center',
         verticalAlign: 'baseline',
       }}
     >
-      <AnimatePresence initial={false} mode="popLayout">
-        <motion.span
-          key={char}
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '-100%', opacity: 0 }}
-          transition={{ duration: ms(tokens.motion.duration.normal), ease: SHARP_EASE }}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {char}
-        </motion.span>
-      </AnimatePresence>
+      <span aria-hidden="true" style={{ visibility: 'hidden' }}>{char}</span>
+      <span style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.span
+            key={char}
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '-100%', opacity: 0 }}
+            transition={{ duration: ms(tokens.motion.duration.normal), ease: SHARP_EASE }}
+            style={{ position: 'absolute', inset: 0, textAlign: 'center' }}
+          >
+            {char}
+          </motion.span>
+        </AnimatePresence>
+      </span>
     </span>
   );
 }

@@ -87,7 +87,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            Design System
+            Mission Control
           </span>
         </div>
       </div>
