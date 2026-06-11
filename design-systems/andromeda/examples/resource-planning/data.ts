@@ -70,6 +70,8 @@ export const requestRows = [
   { team: 'Nav Compute',     submitted: '08/15/25', owner: 'OPS-01',  amount: '18 PFLOPS', status: 'approved' },
   { team: 'Hull Diagnostics', submitted: '08/15/25', owner: 'OPS-05', amount: '3 PFLOPS',  status: 'pending'  },
   { team: 'Life Support',    submitted: '08/14/25', owner: 'OPS-06',  amount: '7 PFLOPS',  status: 'approved' },
+  { team: 'Power Grid',      submitted: '08/13/25', owner: 'OPS-08',  amount: '15 PFLOPS', status: 'approved' },
+  { team: 'Comms Relay',     submitted: '08/13/25', owner: 'OPS-10',  amount: '9 PFLOPS',  status: 'approved' },
 ];
 
 export const filterTabs = [
