@@ -25,12 +25,28 @@
 
 'use client';
 
-import { forwardRef, useEffect, useState } from 'react';
+import {
+  forwardRef,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  createContext,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
 import { tokens } from '../tokens';
+
+// Shares the dialog's accessible-name / description ids from the Drawer root
+// down to DrawerTitle / DrawerDescription so they can wire `id` ↔ `aria-*`.
+const DrawerContext = createContext({ titleId: undefined, descId: undefined });
+
+// Focusable-element selector for the focus trap + initial focus move-in.
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const ms = (v) => parseInt(v, 10) / 1000;
 const PANEL_DURATION = ms(tokens.motion.duration.slow);
@@ -73,6 +89,75 @@ export const Drawer = forwardRef(function Drawer(
   const [canPortal, setCanPortal] = useState(false);
   useEffect(() => { setCanPortal(typeof document !== 'undefined'); }, []);
 
+  // Accessible-name / description ids, shared via context to Title/Description.
+  const reactId = useId();
+  const titleId = `${reactId}-title`;
+  const descId = `${reactId}-desc`;
+
+  // Panel node + the element focused before opening (to restore focus on close).
+  const panelRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
+
+  // ── Focus return — capture the trigger on open, restore it on close. ─────
+  // Capturing in a layout-ish effect keyed on `open` grabs document.activeElement
+  // (the trigger) just as the drawer opens, and the cleanup restores it on
+  // close/unmount, guarding for a null or detached element.
+  useEffect(() => {
+    if (!open) return undefined;
+    previouslyFocusedRef.current =
+      typeof document !== 'undefined' ? document.activeElement : null;
+    return () => {
+      const el = previouslyFocusedRef.current;
+      previouslyFocusedRef.current = null;
+      if (el && typeof el.focus === 'function' && document.contains(el)) {
+        el.focus();
+      }
+    };
+  }, [open]);
+
+  // ── Focus move-in — once the panel is in the DOM, move focus into it. ────
+  // Focus the first focusable child, else the panel container itself
+  // (it carries tabIndex={-1} so it can receive programmatic focus).
+  useEffect(() => {
+    if (!open || !canPortal) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const first = panel.querySelector(FOCUSABLE_SELECTOR);
+    if (first && typeof first.focus === 'function') {
+      first.focus();
+    } else if (typeof panel.focus === 'function') {
+      panel.focus();
+    }
+  }, [open, canPortal]);
+
+  // ── Focus trap — wrap Tab / Shift+Tab so focus can't leave the panel. ────
+  const onPanelKeyDown = (e) => {
+    if (e.key !== 'Tab') return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusable = Array.from(
+      panel.querySelectorAll(FOCUSABLE_SELECTOR),
+    ).filter((el) => el.offsetParent !== null || el === panel);
+    if (focusable.length === 0) {
+      // Nothing focusable inside — keep focus pinned to the panel itself.
+      e.preventDefault();
+      panel.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey) {
+      if (active === first || !panel.contains(active)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !panel.contains(active)) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   // ── Body scroll lock — engaged whenever the drawer is open. ──────────────
   useEffect(() => {
     if (!open) return undefined;
@@ -104,59 +189,70 @@ export const Drawer = forwardRef(function Drawer(
   const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
 
   return createPortal(
-    <AnimatePresence>
-      {open ? (
-        <div
-          key="drawer-root"
-          data-slot="drawer-root"
-          style={{ ...andromedaVars() }}
-          className="fixed inset-0 z-[1000]"
-        >
-          {/* Backdrop */}
-          <motion.div
-            aria-hidden="true"
-            onClick={() => onOpenChange?.(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
-            className={cn(
-              'absolute inset-0 bg-black/60',
-              '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
-            )}
-          />
-          {/* Panel */}
-          <motion.div
-            ref={ref}
-            role="dialog"
-            aria-modal="true"
-            data-slot="drawer-panel"
-            initial={panelInitial}
-            animate={panelAnimate}
-            exit={panelExit}
-            transition={{ duration: PANEL_DURATION, ease: open ? EASE_OUT : EASE_IN }}
-            className={cn(
-              'absolute',
-              cfg.position,
-              'flex flex-col',
-              'bg-[color:var(--andromeda-surface-raised)]',
-              '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
-              'rounded-[var(--andromeda-radius-none)]',
-              'shadow-[0_0_60px_var(--andromeda-surface-base)]',
-              className,
-            )}
-            style={{
-              ...sizeStyle,
-              ...style,
-            }}
-            {...props}
+    <DrawerContext.Provider value={{ titleId, descId }}>
+      <AnimatePresence>
+        {open ? (
+          <div
+            key="drawer-root"
+            data-slot="drawer-root"
+            style={{ ...andromedaVars() }}
+            className="fixed inset-0 z-[1000]"
           >
-            <CornerMarkers />
-            {children}
-          </motion.div>
-        </div>
-      ) : null}
-    </AnimatePresence>,
+            {/* Backdrop */}
+            <motion.div
+              aria-hidden="true"
+              onClick={() => onOpenChange?.(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
+              className={cn(
+                'absolute inset-0 bg-[color:var(--andromeda-surface-alpha)]',
+                '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+              )}
+            />
+            {/* Panel */}
+            <motion.div
+              ref={(node) => {
+                panelRef.current = node;
+                if (typeof ref === 'function') ref(node);
+                else if (ref) ref.current = node;
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              aria-describedby={descId}
+              tabIndex={-1}
+              onKeyDown={onPanelKeyDown}
+              data-slot="drawer-panel"
+              initial={panelInitial}
+              animate={panelAnimate}
+              exit={{ ...panelExit, transition: { duration: PANEL_DURATION, ease: EASE_IN } }}
+              transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
+              className={cn(
+                'absolute',
+                cfg.position,
+                'flex flex-col',
+                'bg-[color:var(--andromeda-surface-raised)]',
+                '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
+                'rounded-[var(--andromeda-radius-none)]',
+                'shadow-[0_0_60px_var(--andromeda-surface-base)]',
+                'outline-none',
+                className,
+              )}
+              style={{
+                ...sizeStyle,
+                ...style,
+              }}
+              {...props}
+            >
+              <CornerMarkers />
+              {children}
+            </motion.div>
+          </div>
+        ) : null}
+      </AnimatePresence>
+    </DrawerContext.Provider>,
     document.body,
   );
 });
@@ -183,12 +279,14 @@ export const DrawerHeader = forwardRef(function DrawerHeader(
 });
 
 export const DrawerTitle = forwardRef(function DrawerTitle(
-  { className, children, ...props },
+  { className, children, id, ...props },
   ref,
 ) {
+  const { titleId } = useContext(DrawerContext);
   return (
     <div
       ref={ref}
+      id={id ?? titleId}
       data-slot="drawer-title"
       className={cn(
         '[font-family:var(--andromeda-font-mono)]',
@@ -206,18 +304,19 @@ export const DrawerTitle = forwardRef(function DrawerTitle(
 });
 
 export const DrawerDescription = forwardRef(function DrawerDescription(
-  { className, children, ...props },
+  { className, children, id, ...props },
   ref,
 ) {
+  const { descId } = useContext(DrawerContext);
   return (
     <div
       ref={ref}
+      id={id ?? descId}
       data-slot="drawer-description"
       className={cn(
-        '[font-family:var(--andromeda-font-mono)]',
+        '[font-family:var(--andromeda-font-sans)]',
         'text-[length:var(--andromeda-text-xs)]',
-        'text-[color:var(--andromeda-text-muted)]',
-        'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
+        'text-[color:var(--andromeda-text-secondary)]',
         className,
       )}
       {...props}

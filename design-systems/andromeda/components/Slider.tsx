@@ -214,6 +214,7 @@ export const Slider = forwardRef(function Slider(
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={value}
+        aria-valuetext={`${Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}${unit ?? ''}`}
         aria-label={typeof label === 'string' ? label : undefined}
         aria-disabled={disabled || undefined}
         onPointerDown={handlePointerDown}
@@ -235,12 +236,12 @@ export const Slider = forwardRef(function Slider(
             'border-[color:var(--andromeda-border-subtle)]',
           )}
         />
-        {/* Filled portion */}
+        {/* Filled portion — the accent gradient IS the measurement; no resting
+            glow (glow is reserved for the focused/active thumb, below). */}
         <div
           className={cn(
             'absolute left-0 top-1/2 -translate-y-1/2 h-[3px]',
             '[background:linear-gradient(90deg,var(--andromeda-accent-400)_0%,var(--andromeda-accent-300)_100%)]',
-            'shadow-[0_0_8px_var(--andromeda-accent-500)]',
           )}
           style={{ width: `${percent}%` }}
         />
@@ -252,8 +253,9 @@ export const Slider = forwardRef(function Slider(
             'w-[8px] h-[16px]',
             'bg-[color:var(--andromeda-accent-300)]',
             'border border-solid border-[color:var(--andromeda-accent-100)]',
-            'shadow-[var(--slider-thumb-shadow,0_0_8px_var(--andromeda-accent-500))]',
-            'transition-[box-shadow,transform] duration-150 ease-out',
+            // No resting glow; the focus-visible state sets --slider-thumb-shadow.
+            'shadow-[var(--slider-thumb-shadow,none)]',
+            'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
             'hover:scale-[1.25]',
           )}
           style={{ left: `${percent}%` }}

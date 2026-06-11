@@ -46,6 +46,8 @@ export const Tooltip = forwardRef(function Tooltip(
       style={{ position: 'relative', display: 'inline-flex', ...style }}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
+      onFocus={() => setVisible(true)}
+      onBlur={() => setVisible(false)}
       {...props}
     >
       {children}

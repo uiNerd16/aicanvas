@@ -26,14 +26,15 @@ function useSpacePopIn() {
 }
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
 
 const boxVariants = cva(
   [
     'relative inline-flex items-center justify-center shrink-0',
-    'w-[16px] h-[16px]',
+    'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
     'border border-solid',
     'rounded-[var(--andromeda-radius-none)]',
-    'transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out',
+    'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
     'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
@@ -174,7 +175,7 @@ export const Radio = forwardRef(function Radio(
     checked = group.value === value;
     disabled = disabled || group.disabled;
     name = name ?? group.name;
-    onChange = () => group.onValueChange(value);
+    onChange = () => { group.onValueChange(value); onCheckedChange?.(true); };
   } else {
     const isControlled = controlledChecked !== undefined;
     checked = isControlled ? controlledChecked : internal;
@@ -222,7 +223,7 @@ export const Radio = forwardRef(function Radio(
               style={{
                 background: 'var(--andromeda-accent-300)',
                 boxShadow: '0 0 6px var(--andromeda-accent-500)',
-                animation: 'andromeda-pop-in 120ms ease-out',
+                animation: `andromeda-pop-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
               }}
             />
           ) : null}

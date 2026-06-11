@@ -4,7 +4,7 @@
 // Title row that sits at the top of a panel — sentence-case mono
 // title on the left, optional `actions` slot on the right (typically
 // PanelMenu / IconButton). Bottom border uses the inset divider
-// pattern: `border.subtle` line that spans the full width.
+// pattern: `border.subtle` line inset by spacing[3] from each edge.
 //
 //   <PanelHeader title="Capacity" actions={<PanelMenu items={…} />} />
 //

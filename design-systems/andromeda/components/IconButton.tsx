@@ -22,7 +22,7 @@ const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2
 const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] };
 const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
 // IconButton is denser than Button so its press is a touch deeper, matching
-// the original 0.94 active scale that signalled the squeeze on a small target.
+// the original 0.95 active scale that signalled the squeeze on a small target.
 const PRESS_DOWN = { scale: 0.95, transition: PRESS_TX };
 
 const iconButtonVariants = cva(

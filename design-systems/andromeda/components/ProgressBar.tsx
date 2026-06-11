@@ -3,8 +3,8 @@
 // COMPONENT: ProgressBar
 // shadcn/ui-aligned API: variant, forwardRef, ARIA progressbar.
 // Variants: default | warning | fault
-// Visual: a row of bars, each bar = 3 stacked squares. All bars
-// are the same height. Filled bars glow in the variant colour.
+// Visual: a row of bars, each bar = a single square. All bars
+// are the same height.
 // ============================================================
 
 'use client';
@@ -65,7 +65,9 @@ export const ProgressBar = forwardRef(function ProgressBar(
   outerRef,
 ) {
   const clamped     = Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
-  const activeCount = Math.round((clamped / 100) * BARS);
+  // Any positive value lights at least one segment — a 1% reading should
+  // never render an empty bar.
+  const activeCount = clamped > 0 ? Math.max(1, Math.round((clamped / 100) * BARS)) : 0;
   const cfg         = variantConfig[variant] ?? variantConfig.default;
 
   // Scroll-aware fill: render with zero-active first, then on first
@@ -113,7 +115,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={typeof label === 'string' ? label : undefined}
+        aria-label={typeof label === 'string' ? label : 'progress'}
         style={{
           display: 'flex',
           gap: `${GAP_COL}px`,
@@ -144,8 +146,8 @@ export const ProgressBar = forwardRef(function ProgressBar(
                       : 'var(--andromeda-surface-overlay)',
                     border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
                     boxShadow: 'none',
-                    transition: 'background 400ms ease, box-shadow 400ms ease, border-color 400ms ease',
-                    transitionDelay: `${Math.floor(barIndex / 3) * 120}ms`,
+                    transition: 'background var(--andromeda-duration-cascade) var(--andromeda-easing-out), box-shadow var(--andromeda-duration-cascade) var(--andromeda-easing-out), border-color var(--andromeda-duration-cascade) var(--andromeda-easing-out)',
+                    transitionDelay: `calc(${Math.floor(barIndex / 3)} * var(--andromeda-stagger-progressbar))`,
                   }}
                 />
               ))}

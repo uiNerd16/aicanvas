@@ -31,8 +31,8 @@ const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-const CELL_PX = 32;
-const NAV_PX  = 24;
+const CELL_PX = parseInt(tokens.spacing[8], 10);
+const NAV_PX  = parseInt(tokens.spacing[6], 10);
 
 function startOfDay(d) {
   if (!d) return null;
@@ -54,6 +54,18 @@ function compareDays(a, b) {
   if (a.getFullYear() !== b.getFullYear()) return a.getFullYear() - b.getFullYear();
   if (a.getMonth()    !== b.getMonth())    return a.getMonth()    - b.getMonth();
   return a.getDate() - b.getDate();
+}
+
+function addDays(d, n) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+// Monday-first weekday index: Mon=0 … Sun=6
+function weekdayIndex(d) {
+  return (d.getDay() + 6) % 7;
 }
 
 function buildMonthGrid(viewDate) {
@@ -81,7 +93,7 @@ function formatRangeChip(range) {
 function PickerStyles() {
   return (
     <style>{`
-      .adp-trigger { transition: background 120ms ease, border-color 120ms ease; outline: none; }
+      .adp-trigger { transition: background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
       .adp-trigger:hover { border-color: ${tokens.color.border.bright} !important; }
       .adp-trigger[data-state="open"] {
         background: ${tokens.color.surface.hover};
@@ -91,13 +103,13 @@ function PickerStyles() {
         border-color: ${tokens.color.accent[400]} !important;
         box-shadow: 0 0 0 1px ${tokens.color.accent[400]}, 0 0 8px ${tokens.color.accent[500]};
       }
-      .adp-nav { transition: color 120ms ease, background 120ms ease; outline: none; }
+      .adp-nav { transition: color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
       .adp-nav:hover { color: ${tokens.color.text.primary} !important; background: ${tokens.color.surface.hover} !important; }
       .adp-nav:focus-visible {
         color: ${tokens.color.text.primary};
         box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
       }
-      .adp-day { transition: background 100ms ease, color 100ms ease, border-color 100ms ease; outline: none; }
+      .adp-day { transition: background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}; outline: none; }
       .adp-day[data-state="default"]:hover {
         background: ${tokens.color.surface.hover} !important;
         color: ${tokens.color.text.primary} !important;
@@ -127,7 +139,27 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     const seed = value?.start ?? new Date();
     return new Date(seed.getFullYear(), seed.getMonth(), 1);
   });
+  // Roving-tabindex focus target for keyboard nav across the day grid.
+  // Initialised to the range start (if it lands in the visible month),
+  // else today (if visible), else the 1st of the visible month.
+  const [focusedDay, setFocusedDay] = useState(() => {
+    const seed = value?.start ?? new Date();
+    const vd   = new Date(seed.getFullYear(), seed.getMonth(), 1);
+    if (value?.start && value.start.getMonth() === vd.getMonth() && value.start.getFullYear() === vd.getFullYear()) {
+      return startOfDay(value.start);
+    }
+    const t = startOfDay(new Date());
+    if (t.getMonth() === vd.getMonth() && t.getFullYear() === vd.getFullYear()) return t;
+    return startOfDay(vd);
+  });
   const wrapRef = useRef(null);
+  // Map of day-key → button node, used to move real DOM focus after a
+  // keyboard move flushes focusedDay state.
+  const dayRefs = useRef(new Map());
+  // Tracks whether the last focusedDay change came from a keyboard event,
+  // so we only steal focus on intentional arrow/Home/End/PageUp/Down moves
+  // (never on open — see the staticOpen docs-mode requirement).
+  const keyboardMoveRef = useRef(false);
 
   // Click-outside + ESC to dismiss. Only attaches when open to avoid
   // listening across the entire app lifetime. staticOpen pins the panel
@@ -149,12 +181,25 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     };
   }, [open, staticOpen]);
 
-  // When the panel opens, jump the visible month to the current start.
+  // When the panel opens, jump the visible month to the current start and
+  // re-seed the roving focus target (without stealing DOM focus).
   useEffect(() => {
     if (open && value?.start) {
       setViewDate(new Date(value.start.getFullYear(), value.start.getMonth(), 1));
+      keyboardMoveRef.current = false;
+      setFocusedDay(startOfDay(value.start));
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // After a keyboard move, push real DOM focus onto the matching day button.
+  // Gated on keyboardMoveRef so opening the panel never auto-focuses the grid
+  // (critical for staticOpen docs mode where multiple popovers coexist).
+  useEffect(() => {
+    if (!open || !keyboardMoveRef.current) return;
+    const node = dayRefs.current.get(focusedDay.getTime());
+    if (node) node.focus();
+    keyboardMoveRef.current = false;
+  }, [focusedDay, open]);
 
   function close() {
     setOpen(false);
@@ -177,6 +222,38 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     // dismisses only on click-outside or ESC.
     setAnchor(null);
     setHover(null);
+  }
+
+  // Roving-tabindex keyboard navigation across the day grid. Computes the
+  // next focus target, syncs viewDate if it crosses a month boundary, and
+  // flags keyboardMoveRef so the focus effect moves real DOM focus.
+  function moveFocus(next) {
+    keyboardMoveRef.current = true;
+    if (next.getMonth() !== viewDate.getMonth() || next.getFullYear() !== viewDate.getFullYear()) {
+      setViewDate(new Date(next.getFullYear(), next.getMonth(), 1));
+    }
+    setFocusedDay(next);
+  }
+
+  function handleGridKeyDown(e) {
+    const f = focusedDay;
+    switch (e.key) {
+      case 'ArrowLeft':  e.preventDefault(); moveFocus(addDays(f, -1)); break;
+      case 'ArrowRight': e.preventDefault(); moveFocus(addDays(f,  1)); break;
+      case 'ArrowUp':    e.preventDefault(); moveFocus(addDays(f, -7)); break;
+      case 'ArrowDown':  e.preventDefault(); moveFocus(addDays(f,  7)); break;
+      case 'Home':       e.preventDefault(); moveFocus(addDays(f, -weekdayIndex(f)));     break;
+      case 'End':        e.preventDefault(); moveFocus(addDays(f,  6 - weekdayIndex(f))); break;
+      case 'PageUp':     e.preventDefault(); moveFocus(startOfDay(new Date(f.getFullYear(), f.getMonth() - 1, f.getDate()))); break;
+      case 'PageDown':   e.preventDefault(); moveFocus(startOfDay(new Date(f.getFullYear(), f.getMonth() + 1, f.getDate()))); break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        handleDayClick(startOfDay(f));
+        break;
+      default:
+        break;
+    }
   }
 
   const grid  = useMemo(() => buildMonthGrid(viewDate), [viewDate]);
@@ -237,7 +314,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           style={{
             color: tokens.color.text.faint,
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 140ms ease',
+            transition: `transform ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}`,
           }}
         />
       </button>
@@ -250,7 +327,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             position: 'absolute',
             top: `calc(100% + ${tokens.spacing[2]})`,
             left: 0,
-            zIndex: 50,
+            zIndex: 1000,
             background: tokens.color.surface.raised,
             border: `${tokens.border.thin} ${tokens.color.border.base}`,
             padding: tokens.spacing[3],
@@ -400,14 +477,23 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 padding: 0,
               };
 
+              const isFocused = isSameDay(day, focusedDay);
+
               return (
                 <button
                   key={i}
                   type="button"
                   className="adp-day"
                   data-state={dataState}
+                  ref={(node) => {
+                    if (node) dayRefs.current.set(day.getTime(), node);
+                    else dayRefs.current.delete(day.getTime());
+                  }}
+                  tabIndex={isFocused ? 0 : -1}
                   onClick={() => handleDayClick(day)}
+                  onKeyDown={handleGridKeyDown}
                   onMouseEnter={() => { if (anchor) setHover(day); }}
+                  aria-label={day.toDateString()}
                   style={cellStyle}
                 >
                   {day.getDate()}

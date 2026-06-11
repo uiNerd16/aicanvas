@@ -24,7 +24,7 @@ const textareaVariants = cva(
     'px-[var(--andromeda-3)] py-[var(--andromeda-2)]',
     'leading-[1.5]',
     'outline-none',
-    'transition-[border-color,box-shadow] duration-150 ease-out',
+    'transition-[border-color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'placeholder:text-[color:var(--andromeda-text-muted)]',
     'disabled:opacity-[0.4] disabled:cursor-not-allowed disabled:resize-none',
   ],
@@ -35,12 +35,12 @@ const textareaVariants = cva(
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
           'focus:border-[color:var(--andromeda-accent-400)]',
-          'focus:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
         ],
         error: [
           'border-[color:var(--andromeda-red-300)]',
           'focus:border-[color:var(--andromeda-red-300)]',
-          'focus:shadow-[0_0_0_1px_var(--andromeda-red-300),0_0_8px_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-300),0_0_8px_var(--andromeda-red-400)]',
         ],
       },
     },
@@ -110,6 +110,7 @@ export const Textarea = forwardRef(function Textarea(
       {error ? (
         <span
           id={errorId}
+          role="alert"
           className={cn(
             '[font-family:var(--andromeda-font-mono)]',
             'text-[length:var(--andromeda-text-xs)]',
