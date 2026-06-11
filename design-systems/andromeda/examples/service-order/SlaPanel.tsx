@@ -22,6 +22,7 @@ import { IconButton } from '../../components/IconButton';
 import { Tag } from '../../components/Tag';
 import { Tooltip } from '../../components/Tooltip';
 import { HeatGrid } from '../../components/HeatGrid';
+import { useReducedMotion } from '../../components/lib/motion';
 import { slaRisk } from './data';
 
 // Stagger timing — values match the grid's stagger so the percentage
@@ -48,12 +49,16 @@ function InsetDivider({ side = 'bottom' }) {
 }
 
 export function SlaPanel() {
-  const target = slaRisk.value;
+  const INITIAL = slaRisk.value;
+  const reducedMotion = useReducedMotion();
+  const [liveValue, setLiveValue] = useState(INITIAL); // drives the gauge
   const [displayedPct, setDisplayedPct] = useState(0);
   const [showCurrent, setShowCurrent] = useState(false);
+  const [driftOn, setDriftOn] = useState(false);
 
   useEffect(() => {
-    // After the grid has finished its stagger, count up the percentage.
+    // After the grid has finished its stagger, count up the percentage to the
+    // initial value. Then hand off to the live drift.
     let rafId;
     const startTimer = setTimeout(() => {
       const start = performance.now();
@@ -61,21 +66,43 @@ export function SlaPanel() {
         const t = Math.min(1, (now - start) / PERCENT_DURATION);
         // ease-out cubic — fast start, gentle settle
         const eased = 1 - Math.pow(1 - t, 3);
-        setDisplayedPct(Math.round(target * eased));
+        setDisplayedPct(Math.round(INITIAL * eased));
         if (t < 1) rafId = requestAnimationFrame(tick);
       };
       rafId = requestAnimationFrame(tick);
     }, GRID_FINISH_MS);
 
-    // After the count-up settles, reveal CURRENT.
+    // After the count-up settles, reveal CURRENT and start the live drift.
     const currentTimer = setTimeout(() => setShowCurrent(true), CURRENT_DELAY_MS);
+    const driftTimer = setTimeout(() => setDriftOn(true), CURRENT_DELAY_MS + 400);
 
     return () => {
       clearTimeout(startTimer);
       clearTimeout(currentTimer);
+      clearTimeout(driftTimer);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [target]);
+  }, [INITIAL]);
+
+  // Live drift — a calm random walk with gentle mean-reversion, simulating a
+  // risk value updating from telemetry (same intent as StatTile's live drift).
+  // The HeatGrid crossfades to each new value; reduced-motion holds it steady.
+  useEffect(() => {
+    if (!driftOn || reducedMotion) return undefined;
+    const id = setInterval(() => {
+      setLiveValue((v) => {
+        const wander = (Math.random() - 0.5) * 12;   // ±6
+        const pull   = (50 - v) * 0.12;               // pull back toward centre
+        return Math.max(32, Math.min(66, Math.round(v + wander + pull)));
+      });
+    }, 2800);
+    return () => clearInterval(id);
+  }, [driftOn, reducedMotion]);
+
+  // Once drift is live, the readout tracks the gauge value.
+  useEffect(() => {
+    if (driftOn) setDisplayedPct(Math.round(liveValue));
+  }, [liveValue, driftOn]);
 
   return (
     <Card
@@ -122,9 +149,9 @@ export function SlaPanel() {
           padding: `${tokens.spacing[5]} ${tokens.spacing[5]} ${tokens.spacing[4]} ${tokens.spacing[5]}`,
         }}
       >
-        {/* The panel renders its own count-up percentage (below), so the
-            gauge ships with showValue off — value flows from the same source. */}
-        <HeatGrid value={slaRisk.value} showValue={false} label="Window risk" />
+        {/* The panel renders its own count-up / live percentage (below), so the
+            gauge ships with showValue off and tracks the drifting liveValue. */}
+        <HeatGrid value={liveValue} showValue={false} label="Window risk" />
 
         {/* Percentage — accent-300 because it IS the measurement */}
         <span

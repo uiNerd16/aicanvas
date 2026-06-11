@@ -342,9 +342,10 @@ export function ItemsPanel() {
       <TabStrip value={tab} onChange={setTab} />
       <FilterRow chips={chips} onRemoveChip={removeChip} />
 
-      {/* Table — scrolls horizontally on narrow widths so the layout
-          stays intact rather than collapsing columns. */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+      {/* Table — scrolls on narrow/short viewports so the layout stays intact.
+          A bottom gutter (paddingBottom) gives the last row room to scroll fully
+          clear of any fixed bottom chrome, instead of stopping half-hidden. */}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', paddingBottom: tokens.spacing[12] }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
           <thead>
             <tr style={rowSeparatorStyle}>
