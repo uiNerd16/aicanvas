@@ -69,21 +69,34 @@ function TopBar() {
     >
       <CornerMarkers />
 
-      {/* Brand */}
+      {/* Brand — Andromeda over the template name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0 }}>
         <AndromedaIcon size={22} />
-        <span
-          style={{
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.lg,
-            fontWeight: tokens.typography.weight.bold,
-            color: tokens.color.text.primary,
-            textTransform: 'uppercase',
-            letterSpacing: tokens.typography.tracking.wider,
-          }}
-        >
-          Andromeda
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
+          <span
+            style={{
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              color: tokens.color.text.primary,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.widest,
+              fontWeight: tokens.typography.weight.semibold,
+            }}
+          >
+            Andromeda
+          </span>
+          <span
+            style={{
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              color: tokens.color.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.widest,
+            }}
+          >
+            Service Order
+          </span>
+        </div>
       </div>
 
       <span aria-hidden style={{ width: '1px', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
