@@ -12,8 +12,6 @@
 //
 // Animations:
 //  - Value counts up from 0 on mount (easeOutExpo, 1.8s)
-//  - Delta arrow flickers randomly (signal-loss glitch)
-//  - Scanline sweeps down on mount (terminal boot)
 // ============================================================
 
 'use client';
@@ -300,7 +298,7 @@ export const StatTile = forwardRef(function StatTile(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-<CardContent className="flex flex-col gap-[var(--andromeda-3)]">
+      <CardContent className="flex flex-col gap-[var(--andromeda-3)]">
         {/* Label row */}
         <div className="flex items-baseline justify-between">
           <span className={labelClass}>{label}</span>
@@ -328,7 +326,10 @@ export const StatTile = forwardRef(function StatTile(
             )}
           >
             {hasDelta ? (
-              <span className={cn(deltaBaseClass, trendColorClass)}>
+              <span
+                className={cn(deltaBaseClass, trendColorClass)}
+                aria-label={`${isPositive ? 'up' : 'down'} ${Math.abs(delta)}`}
+              >
                 {isPositive ? '▲' : '▼'} {Math.abs(delta)}
               </span>
             ) : null}

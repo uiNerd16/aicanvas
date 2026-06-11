@@ -20,6 +20,7 @@
 'use client';
 
 import { forwardRef, useState, useEffect, useRef } from 'react';
+import { useInView, motion } from 'framer-motion';
 import {
   RadarChart as ReRadarChart,
   PolarGrid,
@@ -29,8 +30,17 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 import { tokens } from '../tokens';
 import { CornerMarkers } from './CornerMarkers';
+
+// Framer wants seconds + a cubic-bezier array; tokens store ms strings and
+// CSS cubic-bezier() strings. Convert at the boundary, same pattern as
+// StatTile / lib/motion.
+const ms = (v) => parseInt(v, 10) / 1000;
+// Token-driven equivalent of tokens.motion.easing.out
+// ('cubic-bezier(0, 0, 0.2, 1)') — fast start, soft landing. Keep in sync.
+const EASE_OUT = [0, 0, 0.2, 1];
 
 // ── Default demo data ────────────────────────────────────────────────────────
 const DEFAULT_DATA = [
@@ -65,7 +75,7 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
       WebkitBackdropFilter: 'blur(12px)',
       position: 'relative',
       // Slide-in from slightly above, fade in — triggered on every mount
-      animation: 'andromeda-tooltip-in 400ms cubic-bezier(0.25,1,0.5,1) both',
+      animation: `andromeda-tooltip-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out} both`,
       minWidth: 120,
     }}>
       <div style={{
@@ -128,7 +138,7 @@ function SpaceTick({ x, y, payload, cx, cy }) {
         fontSize: '9px',
         fill: tokens.color.text.muted,
         textTransform: 'uppercase',
-        letterSpacing: '0.14em',
+        letterSpacing: tokens.typography.tracking.wider,
       }}
     >
       {payload.value}
@@ -182,13 +192,40 @@ export const RadarChart = forwardRef(function RadarChart(
     style,
     ...props
   },
-  ref,
+  outerRef,
 ) {
   const { shown, onFirstActivation } = useTooltipTransition();
 
+  // Scroll-aware scan reveal. The chart wipes itself in top-to-bottom the
+  // first time it enters the viewport — a measurement revealing itself, not
+  // decoration. Gated on useInView so a RadarChart below the fold doesn't
+  // burn its reveal off-screen (same contract as StatTile / ProgressBar).
+  // `margin: '-10% 0px'` triggers slightly before it's fully on-screen.
+  const internalRef = useRef(null);
+  const setRefs = (node) => {
+    internalRef.current = node;
+    if (typeof outerRef === 'function') outerRef(node);
+    else if (outerRef) outerRef.current = node;
+  };
+  const inView = useInView(internalRef, { once: true, margin: '-10% 0px' });
+  const reducedMotion = useReducedMotion();
+
+  // Reduced motion: render the chart fully visible immediately — no wipe,
+  // no transition. Otherwise wipe from hidden (inset top→bottom) to fully
+  // revealed once in view.
+  const revealProps = reducedMotion
+    ? { initial: false, animate: { clipPath: 'inset(0 0 0% 0)', opacity: 1 } }
+    : {
+        initial: { clipPath: 'inset(0 0 100% 0)', opacity: 0 },
+        animate: inView
+          ? { clipPath: 'inset(0 0 0% 0)', opacity: 1 }
+          : { clipPath: 'inset(0 0 100% 0)', opacity: 0 },
+        transition: { duration: ms(tokens.motion.duration.cascade), ease: EASE_OUT },
+      };
+
   return (
     <div
-      ref={ref}
+      ref={setRefs}
       className={cn('relative', className)}
       style={{
         ...andromedaVars(),
@@ -250,8 +287,17 @@ export const RadarChart = forwardRef(function RadarChart(
       </div>
 
       {/* Chart area */}
-      <div style={{ padding: `${tokens.spacing[4]} ${tokens.spacing[2]}`, position: 'relative' }}>
+      <div
+        role="img"
+        aria-label="Systems radar chart"
+        style={{ padding: `${tokens.spacing[4]} ${tokens.spacing[2]}`, position: 'relative' }}
+      >
 
+        {/* Scan-reveal wrapper. width/height 100% so ResponsiveContainer
+            still measures the chart correctly — the motion.div must not
+            collapse the sizing box. The clipPath wipe + opacity is driven
+            by `revealProps` above (static when reduced motion). */}
+        <motion.div style={{ width: '100%', height: 280 }} {...revealProps}>
         <ResponsiveContainer width="100%" height={280}>
           <ReRadarChart data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
             {/* Grid rings */}
@@ -280,7 +326,7 @@ export const RadarChart = forwardRef(function RadarChart(
               wrapperStyle={{
                 outline: 'none',
                 transition: shown
-                  ? 'transform 380ms cubic-bezier(0.22,1,0.36,1)'
+                  ? `transform ${tokens.motion.duration.slow} ${tokens.motion.easing.standard}`
                   : 'none',
               }}
             />
@@ -304,6 +350,7 @@ export const RadarChart = forwardRef(function RadarChart(
             ))}
           </ReRadarChart>
         </ResponsiveContainer>
+        </motion.div>
       </div>
 
       {/* Legend */}

@@ -81,10 +81,13 @@ export const Alert = forwardRef(function Alert(
   { className, variant = 'default', children, style, ...props },
   ref,
 ) {
+  // Severity-aware live region: warning/fault interrupt (assertive),
+  // everything else announces politely.
+  const role = variant === 'warning' || variant === 'fault' ? 'alert' : 'status';
   return (
     <div
       ref={ref}
-      role="alert"
+      role={role}
       data-slot="alert"
       className={cn(alertVariants({ variant }), className)}
       style={{ ...andromedaVars(), ...style }}
@@ -166,10 +169,9 @@ export const AlertDescription = forwardRef(function AlertDescription(
       ref={ref}
       data-slot="alert-description"
       className={cn(
-        '[font-family:var(--andromeda-font-mono)]',
+        '[font-family:var(--andromeda-font-sans)]',
         'text-[length:var(--andromeda-text-xs)]',
         'text-[color:var(--alert-description-color)]',
-        'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
         'leading-[1.6]',
         className,
       )}

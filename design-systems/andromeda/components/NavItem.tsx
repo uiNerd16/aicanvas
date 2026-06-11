@@ -36,7 +36,7 @@ const navItemVariants = cva(
     'font-[number:var(--andromeda-weight-medium)]',
     'text-[length:var(--andromeda-text-sm)]',
     '[line-height:var(--andromeda-leading-snug)]',
-    'transition-all duration-150 ease-out',
+    'transition-[background-color,color,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'active:translate-x-[1px]',
     'focus-visible:outline-none',
     'focus-visible:shadow-[inset_0_0_0_1px_var(--andromeda-accent-400)]',
@@ -112,6 +112,7 @@ export const NavItem = forwardRef(function NavItem(
       ref={ref}
       type={asChild ? undefined : type}
       data-active={active ? 'true' : 'false'}
+      aria-current={active ? 'page' : undefined}
       className={cn(navItemVariants({ active, mono }), className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}
@@ -136,7 +137,7 @@ export const NavItem = forwardRef(function NavItem(
           }}
         />
       ) : null}
-      {Icon ? <Icon size={20} weight="light" /> : null}
+      {Icon ? <Icon size={20} weight="regular" /> : null}
       <span>{label}</span>
     </Comp>
   );

@@ -23,14 +23,15 @@ function useSpacePopIn() {
 }
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
 
 const boxVariants = cva(
   [
     'relative inline-flex items-center justify-center shrink-0',
-    'w-[16px] h-[16px]',
+    'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
     'border border-solid',
     'rounded-[var(--andromeda-radius-none)]',
-    'transition-[background-color,border-color,box-shadow,transform] duration-150 ease-out',
+    'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
     'focus-visible:outline-none',
@@ -149,7 +150,7 @@ export const Checkbox = forwardRef(function Checkbox(
               weight="light"
               style={{
                 color: 'var(--andromeda-accent-100)',
-                animation: 'andromeda-pop-in 120ms ease-out',
+                animation: `andromeda-pop-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
               }}
             />
           ) : null}

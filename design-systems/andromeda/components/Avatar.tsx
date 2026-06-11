@@ -9,7 +9,7 @@
 
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
@@ -24,7 +24,7 @@ const avatarVariants = cva(
     '[font-family:var(--andromeda-font-mono)]',
     'font-[number:var(--andromeda-weight-semibold)]',
     '[letter-spacing:var(--andromeda-tracking-normal)]',
-    'transition-transform duration-150 ease-out',
+    'transition-transform [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'hover:scale-[1.05]',
   ],
   {
@@ -49,20 +49,14 @@ const statusDotVariants = cva(
   ],
   {
     variants: {
-      size: {
-        sm: '',
-        md: '',
-        lg: '',
-      },
       status: {
-        online:  'bg-[color:var(--andromeda-accent-400)] shadow-[-3px_0_8px_var(--andromeda-accent-500)]',
-        caution: 'bg-[color:var(--andromeda-orange-400)] shadow-[-3px_0_8px_var(--andromeda-orange-400)]',
-        fault:   'bg-[color:var(--andromeda-red-400)] shadow-[-3px_0_8px_var(--andromeda-red-400)]',
+        online:  'bg-[color:var(--andromeda-accent-400)]',
+        caution: 'bg-[color:var(--andromeda-orange-400)]',
+        fault:   'bg-[color:var(--andromeda-red-400)]',
         offline: 'bg-[color:var(--andromeda-text-faint)]',
       },
     },
     defaultVariants: {
-      size: 'md',
       status: 'offline',
     },
   },
@@ -95,21 +89,24 @@ export const Avatar = forwardRef(function Avatar(
   ref,
 ) {
   const initials = deriveInitials(name);
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImage = src && !imgFailed;
 
   return (
     <div
       ref={ref}
       className="relative inline-flex shrink-0"
       style={{ ...andromedaVars(), ...style }}
+      aria-label={status ? `${name}, ${status}` : name}
       {...props}
     >
       <div className={cn(avatarVariants({ size }), className)}>
-        {src
-          ? <img src={src} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          : initials
+        {showImage
+          ? <img src={src} alt={name} onError={() => setImgFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          : <span role="img" aria-label={name} style={{ display: 'inline-flex' }}>{initials}</span>
         }
       </div>
-      {status ? <span className={statusDotVariants({ size, status })} aria-hidden="true" /> : null}
+      {status ? <span className={statusDotVariants({ status })} aria-hidden="true" /> : null}
     </div>
   );
 });

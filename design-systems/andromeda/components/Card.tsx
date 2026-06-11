@@ -60,6 +60,8 @@ export const Card = forwardRef(function Card(
   { className, variant = 'default', bordered = false, markers = true, markerProps, children, style, ...props },
   ref,
 ) {
+  // EITHER a perimeter border OR corner markers, never both.
+  const showMarkers = markers && !bordered;
   return (
     <div
       ref={ref}
@@ -68,7 +70,7 @@ export const Card = forwardRef(function Card(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {markers ? <CornerMarkers {...markerProps} /> : null}
+      {showMarkers ? <CornerMarkers {...markerProps} /> : null}
       {children}
     </div>
   );

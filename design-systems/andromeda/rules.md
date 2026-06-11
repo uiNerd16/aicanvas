@@ -160,7 +160,9 @@ Reference: `examples/exchange-terminal/` filter row
 ## Badges
 
 - `must` — Text is always `text.primary` on every variant. Background carries the meaning.
+- `must` — `Tag` follows the same rule: its label is `text.primary` on every variant; the fill + border carry the meaning, never the label color. (The `-500` variant backgrounds are dark, so near-white primary text clears WCAG AA.) Do not tint Tag/Badge label text with accent/warning/fault stops — accent on text is reserved for live measurements.
 - The blinking 4×4 dot at the start of the badge takes the variant color, not the text.
+- `should` — The dot's blink honors `prefers-reduced-motion` (holds steady when the user opts out); the blink is a liveness cue, not load-bearing.
 
 | Variant | Background | Dot color |
 |---|---|---|
@@ -439,6 +441,15 @@ Without this, the user clicks the button, the menu opens beside it, but the butt
 
 For dropdown / context-menu items, both `:hover` and `:active` should be defined explicitly. `:hover` is the daily affordance; `:active` is the click acknowledgement (it flashes for ~80ms during the click). The brief flash matters even if the menu closes immediately afterwards — without it, fast clicks feel unresponsive.
 
+### Keyboard & focus contract for menus, dialogs, and grids — `must`
+
+Andromeda's interactive overlays carry a full keyboard/focus contract; new ones inherit it:
+
+- **Menus** (`PanelMenu`, `UserMenu`, `UserCard`) — roving Arrow Up/Down moves focus across `role="menuitem"` buttons (Home/End jump to ends); on interactive open, focus moves to the first item; on close (incl. ESC / outside-click), focus returns to the trigger. `PanelMenu` submenus enter on ArrowRight, leave on ArrowLeft.
+- **Dialogs** (`Drawer`) — `role="dialog"` + `aria-modal` get a real focus trap (Tab/Shift+Tab wrap inside the panel), focus moves into the panel on open and returns to the trigger on close, and the panel is named via `aria-labelledby`/`aria-describedby` wired from `DrawerTitle`/`DrawerDescription` through a context with generated ids.
+- **Grids** (`DateRangePicker` calendar) — roving tabindex over day cells; Arrow keys move ±1 day / ±7 days, Home/End to week edges, PageUp/PageDown change month (updating the visible month when focus crosses a boundary), Enter/Space selects. The grid is NOT auto-focused on open.
+- `must` — **`staticOpen` overrides focus management.** When a popover is pinned open for docs (`staticOpen`), auto-focus-on-open and focus-return-on-close are SKIPPED — multiple pinned-open popovers must never fight for focus. Arrow-key navigation still works (it only moves focus on an explicit keypress, never steals it).
+
 ### Overlay-input controls must raise the input above the visual layer — `must`
 
 Form controls that hide the native `<input>` and render a custom visual (Checkbox, Radio, Toggle — the "box span" / "track span" pattern) layer two elements inside one positioned wrapper: an invisible `<input class="peer absolute inset-0 opacity-0">` and the visible box/track span. The visible span is itself positioned (`relative`, for its own absolute children like the thumb or fill). Two positioned siblings with `z-index: auto` paint in DOM order, so the visible span paints **last** — on top — and swallows every click on the control. The result is a control that hovers but never toggles; only the `<label htmlFor>` text still works, which hides the bug in any demo that has a label.
@@ -521,6 +532,11 @@ Andromeda is 90% still. The few elements that move are signaling something — a
 - `must` — Movement signals data movement or interaction acknowledgement. Never decorative.
 - `must` — Decorative animations forbidden: shimmer, sweep, scanline, pulsing glow, idle bounce. The list isn't exhaustive — when unsure, ask "what does this animation tell the user?" If the answer is "it looks cool", remove it.
 - `should` — When two animations would happen simultaneously on the same screen, prefer staggering them by a small offset. Simultaneous motion competes for attention.
+- `may` — **Showpiece exception (Planet only).** `Planet` is the system's one sanctioned decorative object: an additive-blended particle body with glow, equator shimmer, and a slow auto-rotation that exist to read as "a live celestial body," not to convey a measurement. This is a deliberate, named carve-out — it does not license decorative glow/motion anywhere else, and it is the exception that proves the rule. Conditions: it is a hero/set-piece widget (never inline chrome), and it `must` freeze its rotation/wobble under `prefers-reduced-motion`. Any second decorative object would need its own explicit entry here, not a silent copy of this one.
+
+### Slider — glow is a focus signal, not a resting state
+
+- `must` — The Slider's accent glow (`0 0 ...px accent`) appears only on the focused/active thumb (`focus-visible` sets `--slider-thumb-shadow`). The filled track and the resting thumb carry NO glow — the accent gradient already IS the measurement. A permanent glow reads as decoration and violates the "color is measurement" rule; the glow's job is to mark the control as live/keyboard-focused.
 
 ### Tempo (token-driven)
 
@@ -762,7 +778,7 @@ const setRefs = (node) => {
 };
 ```
 
-Components currently scroll-aware: `ProgressBar` (segment fill), `StatTile` (count-up + live drift), `RadarChart` (scan reveal). New animated primitives must follow the same pattern — adding a fresh component with mount-only animation is a regression.
+Components currently scroll-aware: `ProgressBar` (segment fill), `StatTile` (count-up + live drift), `RadarChart` (scan reveal), `HeatGrid` (pyramid fill cascade). New animated primitives must follow the same pattern — adding a fresh component with mount-only animation is a regression.
 
 The result for templates: any component using these primitives gets correct scroll choreography automatically. A new template that drops in a row of `<StatTile>` cards followed by a `<ProgressBar>` row inherits scroll-triggered count-ups and scroll-triggered fills with no extra wiring.
 

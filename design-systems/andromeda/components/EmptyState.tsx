@@ -111,10 +111,9 @@ export const EmptyStateDescription = forwardRef(function EmptyStateDescription(
       data-slot="empty-state-description"
       className={cn(
         'm-0 max-w-[44ch]',
-        '[font-family:var(--andromeda-font-mono)]',
+        '[font-family:var(--andromeda-font-sans)]',
         'text-[length:var(--andromeda-text-xs)]',
-        'text-[color:var(--andromeda-text-muted)]',
-        'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
+        'text-[color:var(--andromeda-text-secondary)]',
         'leading-[1.6]',
         className,
       )}

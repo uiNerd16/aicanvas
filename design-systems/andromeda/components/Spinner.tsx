@@ -20,7 +20,7 @@ import { andromedaVars } from './lib/utils';
 
 const STYLE_ID = 'andromeda-spinner-keyframes';
 // 0-37.5% bright, 37.5-100% dim. The 37.6% stop snaps the colour change so
-// the trail moves like discrete LCD pixels instead of fading. Over 1.2 ms
+// the trail moves like discrete LCD pixels instead of fading. Over 1.2 s
 // of cycle the linear interpolation is imperceptible — it just looks crisp.
 const KEYFRAMES = `
   @keyframes andromeda-spinner-snake {
@@ -79,7 +79,6 @@ export const Spinner = forwardRef(function Spinner(
   ref,
 ) {
   useEffect(() => { ensureKeyframesInjected(); }, []);
-  ensureKeyframesInjected();
 
   const sz = SIZE_MAP[size] ?? SIZE_MAP.md;
   const bright = colorByVariant[variant] ?? colorByVariant.default;
