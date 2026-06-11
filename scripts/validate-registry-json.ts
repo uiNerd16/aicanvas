@@ -87,7 +87,7 @@ type ValidationResult =
   | { success: false; reason: string }
 
 async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
-  const jsonPath = path.join(process.cwd(), 'public', 'r', `${slug}.json`)
+  const jsonPath = path.join(process.cwd(), 'registry-data', `${slug}.json`)
   const sourceComponentPath = path.join(process.cwd(), 'components-workspace', slug, 'index.tsx')
 
   // Check 1: JSON file exists and is readable
