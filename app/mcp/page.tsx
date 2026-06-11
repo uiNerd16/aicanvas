@@ -5,6 +5,7 @@ import { InstallCards } from './InstallCards'
 import { SiteFooter } from '../components/SiteFooter'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SITE_URL } from '../lib/config'
+import { premiumEnabled } from '../../lib/flags'
 
 export const metadata: Metadata = {
   title: 'MCP Server for Claude Code, Cursor and Codex',
@@ -74,6 +75,20 @@ export default function McpPage() {
             finished component with the design spec and the motion included, and
             you just adapt it to your project. It takes seconds.
           </p>
+          {/* Premium-aware limits note — flag-gated, honest about the tiers. */}
+          {premiumEnabled() && (
+            <p className="mt-3 max-w-xl text-sm text-sand-500 dark:text-sand-400">
+              Free accounts pull 10 components a day. Design systems and
+              templates need{' '}
+              <Link
+                href="/pricing"
+                className="font-semibold text-olive-600 transition-colors hover:text-olive-500 dark:text-olive-400 dark:hover:text-olive-300"
+              >
+                Premium
+              </Link>
+              .
+            </p>
+          )}
         </header>
 
       {/* ── Install cards ────────────────────────────────────────────────── */}
