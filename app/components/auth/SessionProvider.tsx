@@ -11,14 +11,13 @@ type Preferences = {
   newsletter_opt_in: boolean
 }
 
-// newsletter_opt_in defaults to true to match the DB default in migration
-// 0004 — accounts created via the sign-up form implicitly opt in via the
-// inline § 7 (3) UWG notice on that form. The toggle in /account/settings
-// flips it.
+// newsletter_opt_in defaults to false (migration 0007): the newsletter is
+// explicit opt-in, so a user is only subscribed once they turn the toggle on
+// in /account/settings.
 const EMPTY_PREFS: Preferences = {
   package_manager: null,
   ai_platform: null,
-  newsletter_opt_in: true,
+  newsletter_opt_in: false,
 }
 
 type SessionContextValue = {
@@ -66,7 +65,7 @@ export function SessionProvider({
         if (prefs) setPreferences({
           package_manager: prefs.package_manager ?? null,
           ai_platform: prefs.ai_platform ?? null,
-          newsletter_opt_in: prefs.newsletter_opt_in ?? true,
+          newsletter_opt_in: prefs.newsletter_opt_in ?? false,
         })
       }
     } catch {
