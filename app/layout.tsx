@@ -12,6 +12,7 @@ import { SessionProvider } from './components/auth/SessionProvider'
 import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { DevTierSwitcher } from './components/billing/DevTierSwitcher'
 import { COMPONENTS } from './lib/component-registry'
 import { GITHUB_URL, SITE_URL } from './lib/config'
 import { createClient } from './lib/supabase/server'
@@ -184,6 +185,7 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <DevBranchBadge />
+        <DevTierSwitcher />
       </body>
     </html>
   )
