@@ -30,6 +30,16 @@ AI Canvas (aicanvas.me) is an open component marketplace where every component s
 - Its full source code
 - Expert-crafted prompts for 3 AI coding platforms: Claude Code, Lovable, V0
 
+## Secrets & credentials — this is an OPEN-SOURCE repo
+
+This repository is public. A leaked secret is exposed the moment it is committed. Treat every key as radioactive:
+
+- **Never commit a secret.** Real values live only in `.env.local` (already gitignored). Confirm `.env.local` and any `*service_role*` / `*secret*` files are covered by `.gitignore` before touching keys. Never paste a live key into a tracked file, a doc, a commit message, or chat output.
+- **`NEXT_PUBLIC_` ships to the browser.** Only the Supabase anon/publishable key may carry that prefix. The `service_role` / `SUPABASE_SECRET_KEY` must NEVER be `NEXT_PUBLIC_` and must only be read in server code.
+- **Prefer the Supabase CLI over keys on disk.** `supabase login` stores the token in the OS keychain, not the repo — nothing to accidentally commit. Use a `service_role` key in `.env.local` only as a last resort, never beyond it.
+- **Supabase access is read-only by default.** Run writes/migrations only when the user explicitly asks, one at a time, showing the SQL first. It is the production project — no destructive or schema changes without sign-off.
+- If a secret is ever found in tracked history, treat it as compromised: rotate it in the provider, don't just delete the line.
+
 ## Tech stack
 - **Framework**: Next.js 16 App Router (`app/` directory)
 - **Language**: TypeScript (strict)
