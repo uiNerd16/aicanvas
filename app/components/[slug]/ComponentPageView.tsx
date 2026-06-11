@@ -121,7 +121,22 @@ export default function ComponentPageView({
   useEffect(() => { setInstallTier('component') }, [slug])
   const installSlug = installTier === 'system' && systemMeta ? systemMeta.slug : slug
   const router = useRouter()
-  const { preferences } = useSession()
+  const { preferences, user } = useSession()
+  // Personalized install: when signed in, the copied command carries the
+  // user's API token so the registry can attribute the pull to the account
+  // (Plan 2). Signed out = today's plain @aicanvas/<slug> command, unchanged.
+  // The token route is resilient (returns null pre-migration), so this stays
+  // a no-op until the backend lands.
+  const [userToken, setUserToken] = useState<string | null>(null)
+  useEffect(() => {
+    if (!user) { setUserToken(null); return }
+    let cancelled = false
+    fetch('/api/me/token')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user])
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
@@ -260,7 +275,13 @@ export default function ComponentPageView({
     setPreviewKey((k) => k + 1)
   }
 
-  const cliCommand = `npx shadcn@latest add @aicanvas/${installSlug}`
+  // Signed-in users get a tokenized direct-URL install; anonymous users get
+  // the plain registry-namespace command. One reference, reused everywhere the
+  // install command is built or shown.
+  const installReference = userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=${userToken}"`
+    : `@aicanvas/${installSlug}`
+  const cliCommand = `npx shadcn@latest add ${installReference}`
 
   async function copyCode() {
     try {
@@ -698,12 +719,12 @@ export default function ComponentPageView({
                               <button
                                 onClick={() => {
                                   const cmd = pkgManager === 'npm'
-                                    ? `npx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `npx shadcn@latest add ${installReference}`
                                     : pkgManager === 'pnpm'
-                                    ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `pnpm dlx shadcn@latest add ${installReference}`
                                     : pkgManager === 'yarn'
-                                    ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
-                                    : `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `yarn dlx shadcn@latest add ${installReference}`
+                                    : `bunx shadcn@latest add ${installReference}`
                                   navigator.clipboard.writeText(cmd)
                                   trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
@@ -748,14 +769,14 @@ export default function ComponentPageView({
 
                             {/* Command */}
                             <div className="px-4 py-3.5">
-                              <code className="font-mono text-sm text-sand-300">
+                              <code className="font-mono text-sm text-sand-300 break-all">
                                 {pkgManager === 'pnpm'
-                                  ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
+                                  ? `pnpm dlx shadcn@latest add ${installReference}`
                                   : pkgManager === 'bun'
-                                  ? `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                  ? `bunx shadcn@latest add ${installReference}`
                                   : pkgManager === 'yarn'
-                                  ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
-                                  : `npx shadcn@latest add @aicanvas/${installSlug}`}
+                                  ? `yarn dlx shadcn@latest add ${installReference}`
+                                  : `npx shadcn@latest add ${installReference}`}
                               </code>
                             </div>
                           </div>
