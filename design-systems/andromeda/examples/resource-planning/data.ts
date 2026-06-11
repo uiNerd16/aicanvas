@@ -33,25 +33,25 @@ export const activeAllocations = {
 };
 
 // ---- Allocation vs usage (multi-series area chart) ----
-// 31 days of mock data. Allocated is the planned capacity, used is the
-// active draw, reserved is the locked-but-idle pool.
-const _allocationDays = [
-  [9100, 8200, 1500], [9200, 8400, 1480], [9050, 8050, 1520], [9300, 8600, 1460],
-  [9450, 8800, 1500], [9100, 8500, 1430], [9250, 8350, 1480], [9400, 8700, 1500],
-  [9550, 8900, 1520], [9600, 9050, 1480], [9450, 8950, 1450], [9300, 8800, 1490],
-  [9650, 9100, 1530], [9800, 9300, 1500], [9700, 9050, 1470], [9550, 8900, 1500],
-  [9750, 9250, 1520], [9900, 9450, 1490], [10050, 9650, 1500], [10100, 9700, 1470],
-  [9950, 9500, 1450], [10000, 9550, 1480], [10150, 9750, 1500], [10300, 9900, 1530],
-  [10250, 9850, 1500], [10100, 9700, 1480], [10250, 9850, 1500], [10400, 10050, 1520],
-  [10500, 10150, 1500], [10350, 9950, 1470], [10450, 10100, 1490],
-];
+// 31 days of mock telemetry. Allocated is the planned capacity, used is the
+// active draw, reserved is the locked-but-idle pool. Generated with organic
+// day-to-day variance (NOT a smooth trend — real draw is choppy): allocated
+// wanders, used tracks at a varying fraction so the gap weaves open and shut,
+// reserved holds roughly flat. Deterministic (no Math.random) so SSR and the
+// client render identical points — a mismatch would hydrate-error.
+const _fract = (x) => x - Math.floor(x);
+const _noise = (i, s) => _fract(Math.sin((i + 1) * 12.9898 + s * 78.233) * 43758.5453); // [0,1)
+const _clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-export const allocationSeries = _allocationDays.map(([allocated, used, reserved], i) => ({
-  t:         i + 1,                          // day-of-month
-  allocated,
-  used,
-  reserved,
-}));
+export const allocationSeries = Array.from({ length: 31 }, (_, i) => {
+  const trend  = 8600 + Math.sin(i / 5) * 900;       // slow rolling baseline
+  const swell  = Math.sin(i / 2.3 + 1) * 700;        // mid-frequency waves
+  const jitter = (_noise(i, 1) - 0.5) * 1900;        // strong day-to-day noise
+  const allocated = _clamp(Math.round(trend + swell + jitter), 6200, 11400);
+  const used = Math.round(allocated * (0.76 + _noise(i, 2) * 0.2)); // 76–96%, varying
+  const reserved = Math.round(1480 + (_noise(i, 3) - 0.5) * 160);   // ~1400–1560
+  return { t: i + 1, allocated, used, reserved };
+});
 
 // ---- Requests breakdown (3-bucket stacked) ----
 export const requestsBreakdown = {

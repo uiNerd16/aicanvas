@@ -53,6 +53,7 @@ import { SegmentedControl } from '../../../design-systems/andromeda/components/S
 import { ProgressBar } from '../../../design-systems/andromeda/components/ProgressBar'
 import { HeatGrid } from '../../../design-systems/andromeda/components/HeatGrid'
 import { RadarChart } from '../../../design-systems/andromeda/components/RadarChart'
+import { TrendChart } from '../../../design-systems/andromeda/components/TrendChart'
 import { Radio, RadioGroup } from '../../../design-systems/andromeda/components/Radio'
 import { Slider } from '../../../design-systems/andromeda/components/Slider'
 import { Spinner } from '../../../design-systems/andromeda/components/Spinner'
@@ -360,6 +361,43 @@ function ProgressBarDemo() {
       <ProgressBar label="Storage Used" value={72} variant="default" />
       <ProgressBar label="Bandwidth" value={48} variant="warning" />
       <ProgressBar label="Memory Critical" value={91} variant="fault" />
+    </div>
+  )
+}
+
+// Organic demo telemetry — deterministic (no Math.random) so SSR/client agree.
+const _tdFract = (x) => x - Math.floor(x)
+const _tdNoise = (i, s) => _tdFract(Math.sin((i + 1) * 12.9898 + s * 78.233) * 43758.5453)
+const _tdClamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
+const TREND_DATA = Array.from({ length: 18 }, (_, i) => {
+  const planned = _tdClamp(
+    Math.round(120 + Math.sin(i / 4) * 14 + Math.sin(i / 1.7 + 1) * 9 + (_tdNoise(i, 1) - 0.5) * 26),
+    78,
+    150,
+  )
+  return {
+    t: i + 1,
+    planned,
+    actual: Math.round(planned * (0.78 + _tdNoise(i, 2) * 0.18)),
+    reserve: Math.round(20 + (_tdNoise(i, 3) - 0.5) * 5),
+  }
+})
+
+function TrendChartDemo() {
+  return (
+    <div style={{ position: 'relative', background: tokens.color.surface.raised, padding: tokens.spacing[5], width: '100%', maxWidth: 640 }}>
+      <CornerMarkers />
+      <TrendChart
+        data={TREND_DATA}
+        title="Throughput vs plan"
+        yLabel="Requests / sec"
+        height={220}
+        series={[
+          { key: 'planned', label: 'Planned', role: 'baseline' },
+          { key: 'actual', label: 'Actual', role: 'live' },
+          { key: 'reserve', label: 'Reserve', role: 'context' },
+        ]}
+      />
     </div>
   )
 }
@@ -923,6 +961,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   spinner: SpinnerDemo,
   'stat-tile': StatTileDemo,
   tag: TagDemo,
+  'trend-chart': TrendChartDemo,
   textarea: TextareaDemo,
   toggle: ToggleDemo,
   table: TableDemo,

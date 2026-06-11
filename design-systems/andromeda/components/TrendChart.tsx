@@ -1,0 +1,386 @@
+// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
+// ============================================================
+// COMPONENT: TrendChart
+// The canonical multi-series time-series chart. One configurable
+// component that renders as line, area (filled line), or bar, with
+// a built-in mode toggle, custom tooltip, and a toggleable legend.
+//
+// Series colour follows the rules.md multi-series hierarchy via a
+// `role`: baseline (white) · live (accent) · context (faint) ·
+// threshold (red dashed). Pass an explicit `color` only when a
+// series genuinely needs one outside that vocabulary.
+//
+// Renders the chart content (header + plot + legend) WITHOUT the
+// panel frame — wrap it in a Card or a CornerMarkers surface, the
+// same way RadarChart is composed. The draw is gated on `useInView`
+// (a left-to-right reveal when scrolled to) and honours
+// prefers-reduced-motion.
+// ============================================================
+
+'use client';
+
+import { forwardRef, useRef, useState } from 'react';
+import {
+  AreaChart, Area, BarChart, Bar, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+} from 'recharts';
+import { motion, useInView } from 'framer-motion';
+import { ChartLine, ChartBar } from '@phosphor-icons/react';
+import { tokens } from '../tokens';
+import { andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
+import { SegmentedControl } from './SegmentedControl';
+
+const sec = (v) => parseInt(v, 10) / 1000; // "500ms" → 0.5
+const EASE_OUT = [0, 0, 0.2, 1];           // = tokens.motion.easing.out
+
+// Multi-series colour hierarchy (rules.md "Charts · Multi-series").
+const ROLE_COLOR = {
+  baseline:  tokens.color.text.primary,
+  live:      tokens.color.accent[300],
+  context:   tokens.color.text.faint,
+  threshold: tokens.color.red[300],
+};
+const MODE_ICON  = { line: ChartLine, area: ChartLine, bar: ChartBar };
+const MODE_LABEL = { line: 'Line chart', area: 'Area chart', bar: 'Bar chart' };
+
+const colorOf = (s) => s.color ?? ROLE_COLOR[s.role] ?? tokens.color.text.primary;
+const isThreshold = (s) => s.role === 'threshold';
+
+// Inset divider (12px from each edge) separating header / footer from the plot.
+function InsetDivider({ side }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: 'absolute',
+        left: tokens.spacing[3],
+        right: tokens.spacing[3],
+        [side]: 0,
+        height: '1px',
+        background: tokens.color.border.subtle,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────
+function buildTooltip(series, labelFormatter, valueFormatter) {
+  return function ChartTooltip({ active, payload, label }) {
+    if (!active || !payload?.length) return null;
+    const ordered = series
+      .map((s) => ({ s, p: payload.find((p) => p.dataKey === s.key) }))
+      .filter((row) => row.p);
+    return (
+      <div
+        style={{
+          background: tokens.color.surface.overlay,
+          border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+          padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+          fontFamily: tokens.typography.fontMono,
+          minWidth: '180px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: tokens.typography.size.xs,
+            color: tokens.color.text.muted,
+            textTransform: 'uppercase',
+            letterSpacing: tokens.typography.tracking.widest,
+            marginBottom: tokens.spacing[2],
+          }}
+        >
+          {labelFormatter ? labelFormatter(label) : String(label)}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
+          {ordered.map(({ s, p }) => (
+            <div
+              key={s.key}
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: tokens.spacing[4] }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: tokens.spacing[2],
+                  fontSize: tokens.typography.size.sm,
+                  color: tokens.color.text.muted,
+                  letterSpacing: tokens.typography.tracking.wide,
+                }}
+              >
+                <span aria-hidden style={{ width: '6px', height: '6px', background: colorOf(s), flexShrink: 0 }} />
+                {s.label}
+              </span>
+              <span
+                style={{
+                  fontSize: tokens.typography.size.sm,
+                  color: tokens.color.text.primary,
+                  fontWeight: tokens.typography.weight.medium,
+                  letterSpacing: tokens.typography.tracking.wide,
+                }}
+              >
+                {valueFormatter ? valueFormatter(p.value) : p.value?.toLocaleString?.('en-US') ?? p.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+}
+
+// ── Legend chip ──────────────────────────────────────────────────
+function LegendChip({ color, label, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: tokens.spacing[2],
+        padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        opacity: active ? 1 : 0.4,
+        fontFamily: tokens.typography.fontMono,
+        fontSize: tokens.typography.size.sm,
+        color: tokens.color.text.secondary,
+        letterSpacing: tokens.typography.tracking.wide,
+      }}
+    >
+      <span aria-hidden style={{ width: '10px', height: '10px', background: color, flexShrink: 0 }} />
+      {label}
+    </button>
+  );
+}
+
+const AXIS_TICK = {
+  fontFamily: tokens.typography.fontMono,
+  fontSize: parseInt(tokens.typography.size.xs, 10),
+  fill: tokens.color.text.muted,
+  letterSpacing: '0.05em',
+};
+
+/**
+ * @typedef {object} TrendSeries
+ * @property {string} key
+ * @property {string} label
+ * @property {'baseline'|'live'|'context'|'threshold'} [role]
+ * @property {string} [color]   Explicit override; prefer `role`.
+ */
+
+/**
+ * @typedef {object} TrendChartProps
+ * @property {object[]} data
+ * @property {TrendSeries[]} series
+ * @property {string} [xKey='t']
+ * @property {Array<'line'|'area'|'bar'>} [modes=['area','bar']]  Toggle appears when >1.
+ * @property {'line'|'area'|'bar'} [defaultMode]
+ * @property {string} [title]
+ * @property {string} [yLabel]            Uppercase mono axis caption, top-left.
+ * @property {(label:any)=>string} [tooltipLabelFormatter]
+ * @property {(value:any)=>string} [valueFormatter]
+ * @property {number} [xInterval=4]
+ * @property {boolean} [showLegend=true]
+ * @property {React.ReactNode} [footerSlot]   Right side of the footer (custom controls).
+ * @property {number} [height=240]
+ * @property {string} [className]
+ * @property {React.CSSProperties} [style]
+ */
+
+/** @type {React.ForwardRefExoticComponent<TrendChartProps & React.HTMLAttributes<HTMLDivElement>>} */
+export const TrendChart = forwardRef(function TrendChart(
+  {
+    data,
+    series,
+    xKey = 't',
+    modes = ['area', 'bar'],
+    defaultMode,
+    title,
+    yLabel,
+    tooltipLabelFormatter,
+    valueFormatter,
+    xInterval = 4,
+    showLegend = true,
+    footerSlot,
+    height = 240,
+    className,
+    style,
+    ...props
+  },
+  ref,
+) {
+  const [mode, setMode] = useState(defaultMode ?? modes[0]);
+  const [visible, setVisible] = useState(() =>
+    Object.fromEntries(series.map((s) => [s.key, true])),
+  );
+
+  const innerRef = useRef(null);
+  const reducedMotion = useReducedMotion();
+  const inView = useInView(innerRef, { once: true, margin: '-10% 0px' });
+
+  const setRefs = (node) => {
+    innerRef.current = node;
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  };
+
+  // Left-to-right "draw" reveal — the line materialises across time.
+  const revealProps = reducedMotion
+    ? { initial: false, animate: { clipPath: 'inset(0 0% 0 0)', opacity: 1 } }
+    : {
+        initial: { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+        animate: inView
+          ? { clipPath: 'inset(0 0% 0 0)', opacity: 1 }
+          : { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+        transition: { duration: sec(tokens.motion.duration.cascade), ease: EASE_OUT },
+      };
+
+  // height={number} → fixed; height="fill" → grow to fill a flex parent panel.
+  const fill = height === 'fill';
+  const plotHeight = fill ? '100%' : height;
+
+  const ChartTooltip = buildTooltip(series, tooltipLabelFormatter, valueFormatter);
+  const shown = series.filter((s) => visible[s.key]);
+  const chartMargin = { top: 32, right: 8, left: 0, bottom: 12 };
+
+  const grid = <CartesianGrid strokeDasharray="2 4" stroke={tokens.color.border.subtle} vertical={false} />;
+  const xAxis = (
+    <XAxis dataKey={xKey} tick={AXIS_TICK} axisLine={{ stroke: tokens.color.border.subtle }} tickLine={false} interval={xInterval} />
+  );
+  const yAxis = <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={48} />;
+
+  let chart;
+  if (mode === 'bar') {
+    chart = (
+      <BarChart data={data} margin={chartMargin}>
+        {grid}{xAxis}{yAxis}
+        <RechartsTooltip content={<ChartTooltip />} cursor={{ fill: tokens.color.surface.hover }} />
+        {shown.map((s) => (
+          <Bar key={s.key} dataKey={s.key} fill={colorOf(s)} isAnimationActive={false} />
+        ))}
+      </BarChart>
+    );
+  } else {
+    const Filled = mode === 'area';
+    chart = (
+      <AreaChart data={data} margin={chartMargin}>
+        <defs>
+          {shown.map((s) => (
+            <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={colorOf(s)} stopOpacity={Filled ? 0.12 : 0} />
+              <stop offset="100%" stopColor={colorOf(s)} stopOpacity={0} />
+            </linearGradient>
+          ))}
+        </defs>
+        {grid}{xAxis}{yAxis}
+        <RechartsTooltip
+          content={<ChartTooltip />}
+          cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }}
+        />
+        {shown.map((s) => (
+          <Area
+            key={s.key}
+            type="monotone"
+            dataKey={s.key}
+            stroke={colorOf(s)}
+            strokeWidth={1.5}
+            strokeDasharray={isThreshold(s) ? '4 4' : undefined}
+            fill={`url(#tc-fill-${s.key})`}
+            dot={false}
+            activeDot={{ r: 4, fill: colorOf(s), stroke: tokens.color.surface.raised, strokeWidth: 1 }}
+            isAnimationActive={false}
+          />
+        ))}
+      </AreaChart>
+    );
+  }
+
+  return (
+    <div
+      ref={setRefs}
+      className={className}
+      style={{ ...andromedaVars(), display: 'flex', flexDirection: 'column', minHeight: 0, flex: fill ? 1 : undefined, ...style }}
+      {...props}
+    >
+      {/* Header — title + mode toggle */}
+      {(title || modes.length > 1) ? (
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: tokens.spacing[3], paddingBottom: tokens.spacing[4] }}>
+          <InsetDivider side="bottom" />
+          {title ? (
+            <span
+              style={{
+                fontFamily: tokens.typography.fontSans,
+                fontSize: tokens.typography.size.xl,
+                fontWeight: tokens.typography.weight.semibold,
+                color: tokens.color.text.primary,
+                letterSpacing: tokens.typography.tracking.tight,
+              }}
+            >
+              {title}
+            </span>
+          ) : null}
+          <div style={{ flex: 1 }} />
+          {modes.length > 1 ? (
+            <SegmentedControl
+              size="md"
+              value={mode}
+              onChange={setMode}
+              options={modes.map((m) => ({ value: m, icon: MODE_ICON[m], ariaLabel: MODE_LABEL[m] }))}
+            />
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Plot */}
+      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+        {yLabel ? (
+          <span
+            style={{
+              position: 'absolute',
+              top: tokens.spacing[2],
+              left: tokens.spacing[1],
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              color: tokens.color.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.widest,
+              zIndex: 1,
+            }}
+          >
+            {yLabel}
+          </span>
+        ) : null}
+        <motion.div style={{ width: '100%', height: plotHeight }} {...revealProps}>
+          <ResponsiveContainer width="100%" height="100%">
+            {chart}
+          </ResponsiveContainer>
+        </motion.div>
+      </div>
+
+      {/* Footer — legend + optional slot */}
+      {(showLegend || footerSlot) ? (
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: tokens.spacing[3], paddingTop: tokens.spacing[4] }}>
+          <InsetDivider side="top" />
+          {showLegend
+            ? series.map((s) => (
+                <LegendChip
+                  key={s.key}
+                  color={colorOf(s)}
+                  label={s.label}
+                  active={visible[s.key]}
+                  onClick={() => setVisible((v) => ({ ...v, [s.key]: !v[s.key] }))}
+                />
+              ))
+            : null}
+          <div style={{ flex: 1 }} />
+          {footerSlot}
+        </div>
+      ) : null}
+    </div>
+  );
+});

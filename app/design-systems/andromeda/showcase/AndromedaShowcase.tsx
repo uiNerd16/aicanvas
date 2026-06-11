@@ -86,6 +86,7 @@ import {
   EmptyStateAction,
 } from '../../../../design-systems/andromeda/components/EmptyState'
 import { RadarChart } from '../../../../design-systems/andromeda/components/RadarChart'
+import { TrendChart } from '../../../../design-systems/andromeda/components/TrendChart'
 import { Planet } from '../../../../design-systems/andromeda/components/Planet'
 import { Tooltip } from '../../../../design-systems/andromeda/components/Tooltip'
 import {
@@ -107,6 +108,26 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
+})
+
+// Organic demo telemetry for the Trend Chart — deterministic (no Math.random)
+// so SSR and client agree. Real day-to-day variance: allocated wanders, used
+// tracks at a varying fraction so the gap weaves, reserved holds roughly flat.
+const _tcFract = (x: number) => x - Math.floor(x)
+const _tcNoise = (i: number, s: number) => _tcFract(Math.sin((i + 1) * 12.9898 + s * 78.233) * 43758.5453)
+const _tcClamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+const TREND_DEMO_DATA = Array.from({ length: 31 }, (_, i) => {
+  const allocated = _tcClamp(
+    Math.round(8600 + Math.sin(i / 5) * 900 + Math.sin(i / 2.3 + 1) * 700 + (_tcNoise(i, 1) - 0.5) * 1900),
+    6200,
+    11400,
+  )
+  return {
+    t: i + 1,
+    allocated,
+    used: Math.round(allocated * (0.76 + _tcNoise(i, 2) * 0.2)),
+    reserved: Math.round(1480 + (_tcNoise(i, 3) - 0.5) * 160),
+  }
 })
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
@@ -234,6 +255,7 @@ export default function AndromedaShowcase({
   const [chartTypeSm, setChartTypeSm] = useState('line')
   const [chartTypeLg, setChartTypeLg] = useState('line')
   const [periodValue, setPeriodValue] = useState('1w')
+  const [heatValue, setHeatValue] = useState(60)
   const [dateRange, setDateRange] = useState({
     start: new Date(2026, 5, 17),
     end:   new Date(2026, 5, 21),
@@ -1051,6 +1073,26 @@ export default function AndromedaShowcase({
           <Row label="Value">
             <HeatGrid value={60} label="Window risk" />
           </Row>
+          <Row label="Live · jump or drag (cells appear / disappear in real time)">
+            <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[8], flexWrap: 'wrap' }}>
+              <HeatGrid value={heatValue} label="Live gauge" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[4], minWidth: 240 }}>
+                <div style={{ display: 'flex', gap: tokens.spacing[2], flexWrap: 'wrap' }}>
+                  {[0, 40, 60, 80, 100].map((v) => (
+                    <Button
+                      key={v}
+                      size="sm"
+                      variant={heatValue === v ? 'default' : 'outline'}
+                      onClick={() => setHeatValue(v)}
+                    >
+                      {v}%
+                    </Button>
+                  ))}
+                </div>
+                <Slider value={heatValue} onValueChange={setHeatValue} min={0} max={100} label="Fill" unit="%" />
+              </div>
+            </div>
+          </Row>
           <Row label="Sizes · without readout">
             <HeatGrid value={30} cellSize={16} gap={2} showValue={false} label="Low" />
             <HeatGrid value={75} cellSize={16} gap={2} showValue={false} label="High" />
@@ -1400,6 +1442,30 @@ export default function AndromedaShowcase({
                 { axis: 'API',      score: 90 },
               ]}
               series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent[300] }]}
+            />
+          </div>
+        </Section>
+
+        {/* ── Trend Chart ────────────────────────────────────────────────── */}
+        <Section
+          title="Trend Chart"
+          slug="trend-chart"
+          kicker="Component · Charts"
+          description="The canonical multi-series time-series chart. One component, line / area / bar via the mode toggle, with a custom tooltip and toggleable legend. Series colour follows the multi-series hierarchy: baseline (white), live (accent), context (faint), threshold (red dashed). Built on recharts; scroll-gated left-to-right reveal."
+        >
+          <div style={{ position: 'relative', background: tokens.color.surface.raised, padding: tokens.spacing[5] }}>
+            <CornerMarkers />
+            <TrendChart
+              title="Allocation vs usage"
+              yLabel="Compute units, PFLOPS"
+              height={260}
+              data={TREND_DEMO_DATA}
+              series={[
+                { key: 'allocated', label: 'Allocated', role: 'baseline' },
+                { key: 'used',      label: 'Used',      role: 'live' },
+                { key: 'reserved',  label: 'Reserved',  role: 'context' },
+              ]}
+              tooltipLabelFormatter={(l) => `DAY ${String(l).padStart(2, '0')}`}
             />
           </div>
         </Section>
