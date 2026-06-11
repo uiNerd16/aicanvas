@@ -2,14 +2,17 @@
 // ============================================================
 // COMPONENT: PanelMenu
 // Kebab-trigger overflow menu for panel headers. Trigger is an
-// IconButton (size sm, ghost). Menu opens beneath it, supports
-// items with optional icons and a single level of submenu (right-
-// flyout). Closes on outside click and on Escape.
+// IconButton (size sm, ghost). Menu opens beneath it — or flips
+// above when a downward menu wouldn't fit on screen (e.g. the kebab
+// on the last row of a scrolled table). Supports items with optional
+// icons and a single level of submenu (right-flyout). Closes on
+// outside click and on Escape.
 // ============================================================
 
 'use client';
 
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { IconButton } from './IconButton';
@@ -44,6 +47,21 @@ import { andromedaVars } from './lib/utils';
  */
 
 const ITEM_HEIGHT = 26;
+
+// Layout effect on the client (runs before paint so the flip lands without a
+// flash), plain effect on the server (avoids the useLayoutEffect SSR warning
+// when a staticOpen menu is server-rendered).
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+// Shared panel chrome for the dropdown (inline and portaled paths).
+const MENU_PANEL_STYLE = {
+  minWidth: '160px',
+  background: tokens.color.surface.overlay,
+  border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+  padding: tokens.spacing[1],
+  zIndex: 1000,
+  boxShadow: `0 12px 28px ${tokens.color.surface.alpha}`,
+};
 
 // Roving arrow-key navigation for a `role="menu"` container. Queries the
 // direct menuitem buttons, finds the focused one, and moves focus up/down
@@ -247,8 +265,16 @@ export const PanelMenu = forwardRef(function PanelMenu(
   ref,
 ) {
   const [open, setOpen] = useState(defaultOpen || staticOpen);
+  // Interactive menus portal to <body> and position with `fixed` coords, so they
+  // sit in the top layer — never clipped by an `overflow` container, never
+  // stacked under sibling table rows — and flip above the trigger when a
+  // downward menu would fall off the bottom of the viewport. staticOpen (docs)
+  // menus stay inline in normal flow on purpose.
+  const [coords, setCoords] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const wrapperRef = useRef(null);
   const menuRef = useRef(null);
+  useEffect(() => setMounted(true), []);
   // The element to return focus to when the menu closes — captured at the
   // moment the trigger toggles the menu open (interactive open only).
   const returnFocusRef = useRef(null);
@@ -275,9 +301,12 @@ export const PanelMenu = forwardRef(function PanelMenu(
     // survives outside clicks and scrolling.
     if (!open || staticOpen) return;
     function onClick(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false);
-      }
+      // The portaled menu lives outside the wrapper, so check it too — otherwise
+      // clicking a menu item would register as an outside click and close before
+      // the item fires.
+      const inWrapper = wrapperRef.current && wrapperRef.current.contains(e.target);
+      const inMenu = menuRef.current && menuRef.current.contains(e.target);
+      if (!inWrapper && !inMenu) setOpen(false);
     }
     function onKey(e) {
       if (e.key === 'Escape') setOpen(false);
@@ -289,6 +318,38 @@ export const PanelMenu = forwardRef(function PanelMenu(
       document.removeEventListener('keydown', onKey);
     };
   }, [open, staticOpen]);
+
+  // Position the portaled (interactive) menu in viewport coords, flipping above
+  // the trigger when a downward menu wouldn't fit. Measured in a layout effect
+  // so it lands before paint (no flash), and recomputed on scroll/resize so the
+  // menu stays pinned to its trigger. staticOpen menus are inline — skipped here.
+  useIsomorphicLayoutEffect(() => {
+    if (staticOpen) return;
+    if (!open) { setCoords(null); return; }
+    const reposition = () => {
+      const trigger = wrapperRef.current;
+      const menu = menuRef.current;
+      if (!trigger || !menu) return;
+      const margin = parseInt(tokens.spacing[2], 10) || 8;
+      const tr = trigger.getBoundingClientRect();
+      const mr = menu.getBoundingClientRect();
+      const fitsDown = tr.bottom + margin + mr.height <= window.innerHeight - margin;
+      const fitsUp = tr.top - margin - mr.height >= margin;
+      const top = !fitsDown && fitsUp ? tr.top - margin - mr.height : tr.bottom + margin;
+      let left = align === 'right' ? tr.right - mr.width : tr.left;
+      left = Math.max(margin, Math.min(left, window.innerWidth - mr.width - margin));
+      setCoords({ top, left });
+    };
+    reposition();
+    window.addEventListener('scroll', reposition, true); // capture: catch scroll in any ancestor
+    window.addEventListener('resize', reposition);
+    return () => {
+      window.removeEventListener('scroll', reposition, true);
+      window.removeEventListener('resize', reposition);
+    };
+    // `mounted` is a dep so a defaultOpen menu repositions once the portal
+    // actually mounts (the menu ref doesn't exist until then).
+  }, [open, staticOpen, align, mounted]);
 
   return (
     <div
@@ -322,26 +383,46 @@ export const PanelMenu = forwardRef(function PanelMenu(
       />
 
       {open ? (
-        <div
-          ref={menuRef}
-          role="menu"
-          onKeyDown={handleMenuKeyDown}
-          style={{
-            position: 'absolute',
-            top: `calc(100% + ${tokens.spacing[2]})`,
-            [align === 'right' ? 'right' : 'left']: 0,
-            minWidth: '160px',
-            background: tokens.color.surface.overlay,
-            border: `${tokens.border.thin} ${tokens.color.border.bright}`,
-            padding: tokens.spacing[1],
-            zIndex: 1000,
-            boxShadow: `0 12px 28px ${tokens.color.surface.alpha}`,
-          }}
-        >
-          {items.map((item, i) => (
-            <MenuItem key={i} item={item} onClose={() => setOpen(false)} />
-          ))}
-        </div>
+        staticOpen ? (
+          // Docs / showcase: inline absolute under the trigger, in normal flow.
+          <div
+            ref={menuRef}
+            role="menu"
+            onKeyDown={handleMenuKeyDown}
+            style={{
+              position: 'absolute',
+              top: `calc(100% + ${tokens.spacing[2]})`,
+              [align === 'right' ? 'right' : 'left']: 0,
+              ...MENU_PANEL_STYLE,
+            }}
+          >
+            {items.map((item, i) => (
+              <MenuItem key={i} item={item} onClose={() => setOpen(false)} />
+            ))}
+          </div>
+        ) : mounted ? (
+          // Product: portal to <body>, fixed coords → top layer, never clipped.
+          createPortal(
+            <div
+              ref={menuRef}
+              role="menu"
+              onKeyDown={handleMenuKeyDown}
+              style={{
+                ...andromedaVars(),
+                position: 'fixed',
+                top: coords ? coords.top : 0,
+                left: coords ? coords.left : 0,
+                visibility: coords ? 'visible' : 'hidden',
+                ...MENU_PANEL_STYLE,
+              }}
+            >
+              {items.map((item, i) => (
+                <MenuItem key={i} item={item} onClose={() => setOpen(false)} />
+              ))}
+            </div>,
+            document.body,
+          )
+        ) : null
       ) : null}
 
       <style>{`

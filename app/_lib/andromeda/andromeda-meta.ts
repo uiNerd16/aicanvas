@@ -214,6 +214,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     sourceFile: 'Tooltip.tsx',
   },
   {
+    slug: 'trend-chart',
+    name: 'Trend Chart',
+    description:
+      'The canonical multi-series time-series chart. One configurable component that renders as line, area, or bar with a built-in mode toggle, custom tooltip, and toggleable legend. Series colour follows the multi-series hierarchy (baseline / live / context / threshold). Scroll-gated reveal.',
+    sourceFile: 'TrendChart.tsx',
+  },
+  {
     slug: 'user-card',
     name: 'User Card',
     description:

@@ -209,6 +209,8 @@ The active dot for each series matches its line color so the user can identify w
 
 Chart ink is neutral by default because the chart itself is the data. Color enters only when it carries semantic meaning that the eye must distinguish at a glance.
 
+`should` — For time-series / categorical-x charts, the canonical component is **`TrendChart`** (one component, line / area / bar via a mode toggle). It encodes this whole hierarchy through a per-series `role` (`baseline` / `live` / `context` / `threshold`) so consumers can't accidentally reach for an off-palette colour. Build new line/area/bar charts on it rather than hand-rolling recharts; `RadarChart` remains the radial primitive. Resist passing an explicit `color` to recolour the standard roles — orange/red on a plain series reads as warning/fault, which the series is not.
+
 ---
 
 ## Progress bars
@@ -494,7 +496,10 @@ Both flavours are 100% token-driven, which is what matters. Don't use one tool t
 
 Floating panels triggered from a chip or button:
 
-- The trigger sits in a `position: relative` wrapper; the panel is `position: absolute` below at `top: calc(100% + spacing[2])`. No portals — the popover stays inside the trigger's stacking context so dismiss-on-outside-click works with a single ref.
+- The trigger sits in a `position: relative` wrapper. A docs-only / `staticOpen` panel renders inline (`position: absolute` at `top: calc(100% + spacing[2])`) so it sits in normal flow for the showcase.
+- **`must` — Interactive trigger-menus portal to the top layer.** A real product menu/dropdown (`PanelMenu` in a table, an overflow menu, a combobox) MUST render through a portal to `<body>` with `position: fixed` coordinates computed from the trigger rect. Rendering it inline (absolute, inside the trigger's row/panel) means it gets clipped by any ancestor `overflow`, AND it stacks UNDER later sibling rows (each animated row is its own stacking context, so a `z-index` on the inline menu can't beat them). A portal puts it above everything. Because the portaled menu lives outside the trigger wrapper, the outside-click dismisser must check BOTH the wrapper ref and the menu ref (else clicking an item reads as an outside click and closes before the item fires). Recompute the fixed coords on `scroll` (capture phase, to catch ancestor scroll) and `resize` so it stays pinned. Guard the portal behind a mounted flag (`createPortal` needs `document`).
+- **`must` — Flip up when a downward menu wouldn't fit on screen.** The same menus must open ABOVE the trigger when a downward placement would fall off the bottom of the viewport — the classic case is the kebab on the last row of a scrolled table. Decide in the same layout effect that computes the fixed coords: compare `triggerRect.bottom + menuHeight` against `window.innerHeight`; anchor the menu above the trigger only when down doesn't fit and up does. A menu that opens off-screen is broken, and an inline downward off-screen menu also adds phantom scroll height to an `overflow:auto` container (a "ghost row" appears) — portaling + flipping fixes both. Use the isomorphic-layout-effect pattern so server-rendered menus don't trip the SSR `useLayoutEffect` warning.
+- **`should` — Scroll containers need a bottom gutter.** A `overflow:auto` list/table whose last row can end flush against fixed bottom chrome needs `paddingBottom` so the final row scrolls fully into view instead of stopping half-hidden.
 - Backgrounds are solid: `surface.raised` for the panel, never alpha. The drop shadow (`0 8px 32px surface.base`) is the only depth cue.
 - **Frame: `must` — a popover panel uses EITHER a 1px `border.base` border OR `<CornerMarkers />`, never both.** Stacking the two frames looks busy and contradicts the "one frame per surface" principle. Default for menu-style popovers (`UserMenu`, dropdowns, comboboxes, date-pickers): the solid 1px border. Reserve CornerMarkers for popovers whose content is itself framed material (e.g. a mini-panel that contains a Card), where the corners read as the panel's own bracketing rather than a second border on top of the first.
 - The trigger gets `data-state="open"` while the panel is mounted, with a one-step-darker background (`surface.hover`) so the row reads as "pressed and held" — matches the "Stateful triggers" rule above.
@@ -778,7 +783,7 @@ const setRefs = (node) => {
 };
 ```
 
-Components currently scroll-aware: `ProgressBar` (segment fill), `StatTile` (count-up + live drift), `RadarChart` (scan reveal), `HeatGrid` (pyramid fill cascade). New animated primitives must follow the same pattern — adding a fresh component with mount-only animation is a regression.
+Components currently scroll-aware: `ProgressBar` (segment fill), `StatTile` (count-up + live drift), `RadarChart` (scan reveal), `HeatGrid` (pyramid fill cascade), `TrendChart` (left-to-right draw reveal). New animated primitives must follow the same pattern — adding a fresh component with mount-only animation is a regression.
 
 The result for templates: any component using these primitives gets correct scroll choreography automatically. A new template that drops in a row of `<StatTile>` cards followed by a `<ProgressBar>` row inherits scroll-triggered count-ups and scroll-triggered fills with no extra wiring.
 

@@ -18,6 +18,7 @@ A 2-D matrix fill gauge. Cells fill from the bottom-centre outward in a widening
 
 - `must` — The fill animation is gated on `useInView` (plays when scrolled into view, once), token-timed (`duration.cascade`), and cascades base-first / centre-out via `stagger.progressbar`. Never a mount-only animation — that's a regression against the scroll-aware-primitives rule.
 - `must` — Honour `prefers-reduced-motion`: render fully filled immediately, no transition, no stagger.
+- `should` — The cascade is a ONE-SHOT entrance. After it plays, the gauge is live: changing `value` at runtime crossfades the cells uniformly (no re-cascade), so cells appear/disappear as a real-time response. This is the supported way to show a moving measurement (e.g. a live risk gauge) — drive `value` from state, don't remount.
 
 ## Geometry
 
