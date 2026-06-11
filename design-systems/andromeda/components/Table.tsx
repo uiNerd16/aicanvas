@@ -5,7 +5,7 @@
 //   Table / TableHead / TableBody / TableRow / TableHeader / TableCell
 //
 // Features:
-//   - Consistent mono typography, verticalAlign:middle, 1px subtle dividers
+//   - Consistent mono typography, verticalAlign:top, 1px subtle dividers
 //   - TableHeader accepts sort="asc|desc|sortable" → renders the correct caret
 //   - TableRow accepts selected (accent-300 left edge + surface.active bg)
 //     and hover state via the included <TableStyles /> helper
@@ -13,7 +13,7 @@
 
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
@@ -21,14 +21,27 @@ import { andromedaVars } from './lib/utils';
 // ── Global hover stylesheet ────────────────────────────────────────
 // Inject once per page. Class-based rules beat inline styles so the
 // hover lift fires correctly even when rows carry an inline background.
-export function TableStyles() {
-  return (
-    <style>{`
+const TABLE_STYLE_ID = 'andromeda-table-styles';
+const TABLE_STYLES = `
       .andro-tr         { transition: background-color 100ms ease; cursor: default; }
       .andro-tr-hover   { cursor: pointer; }
       .andro-tr-hover:hover { background-color: ${tokens.color.surface.hover} !important; }
-    `}</style>
-  );
+    `;
+
+export function TableStyles() {
+  // Dedupe guard — multiple <Table> instances on a page would otherwise
+  // each inject this stylesheet. Mirror the keyframe-injection guard used
+  // in Spinner/StatTile: check for the id before appending so the rules
+  // land exactly once per document.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (document.getElementById(TABLE_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = TABLE_STYLE_ID;
+    style.textContent = TABLE_STYLES;
+    document.head.appendChild(style);
+  }, []);
+  return null;
 }
 
 // Linear-gradient bottom line that insets 12px from each side.
@@ -113,6 +126,12 @@ export const TableHeader = forwardRef(function TableHeader(
   ref,
 ) {
   const sorted = sort === 'asc' || sort === 'desc';
+  const sortable = sorted || sort === 'sortable';
+  const ariaSort =
+    sort === 'asc'      ? 'ascending'  :
+    sort === 'desc'     ? 'descending' :
+    sort === 'sortable' ? 'none'       :
+    undefined;
   const sortIcon =
     sort === 'asc'      ? <CaretUp     weight="bold"    size={10} /> :
     sort === 'desc'     ? <CaretDown   weight="bold"    size={10} /> :
@@ -122,9 +141,11 @@ export const TableHeader = forwardRef(function TableHeader(
   return (
     <th
       ref={ref}
+      scope="col"
+      aria-sort={sortable ? ariaSort : undefined}
       style={{
         textAlign: align,
-        verticalAlign: 'middle',
+        verticalAlign: 'top',
         padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
@@ -166,7 +187,7 @@ export const TableCell = forwardRef(function TableCell(
       ref={ref}
       style={{
         textAlign: align,
-        verticalAlign: 'middle',
+        verticalAlign: 'top',
         padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,

@@ -51,6 +51,7 @@ import { Input } from '../../../../design-systems/andromeda/components/Input'
 import { SearchField } from '../../../../design-systems/andromeda/components/SearchField'
 import { NavItem } from '../../../../design-systems/andromeda/components/NavItem'
 import { ProgressBar } from '../../../../design-systems/andromeda/components/ProgressBar'
+import { HeatGrid } from '../../../../design-systems/andromeda/components/HeatGrid'
 import { StatTile } from '../../../../design-systems/andromeda/components/StatTile'
 import { Tag } from '../../../../design-systems/andromeda/components/Tag'
 import {
@@ -1003,7 +1004,7 @@ export default function AndromedaShowcase({
         <Section
           title="NavItem"
           slug="nav-item"
-          description="Sidebar item with icon, active state, accent left bar. Mono label by default; pass mono={false} for sans."
+          description="Sidebar item with icon, active state, right-edge indicator dot. Mono label by default; pass mono={false} for sans."
         >
           <div
             style={{
@@ -1039,6 +1040,22 @@ export default function AndromedaShowcase({
             <ProgressBar label="Bandwidth" value={48} variant="warning" />
             <ProgressBar label="Memory Critical" value={91} variant="fault" />
           </div>
+        </Section>
+
+        {/* ── HeatGrid ───────────────────────────────────────────────────── */}
+        <Section
+          title="HeatGrid"
+          slug="heat-grid"
+          description="2-D matrix fill gauge — the cousin of ProgressBar. Cells fill from the bottom-centre outward in a widening pyramid as the value rises, dim-to-bright toward the wave front. Scroll-gated fill, optional percentage readout, role=meter."
+        >
+          <Row label="Value">
+            <HeatGrid value={60} label="Window risk" />
+          </Row>
+          <Row label="Sizes · without readout">
+            <HeatGrid value={30} cellSize={16} gap={2} showValue={false} label="Low" />
+            <HeatGrid value={75} cellSize={16} gap={2} showValue={false} label="High" />
+            <HeatGrid value={100} cellSize={16} gap={2} showValue={false} label="Full" />
+          </Row>
         </Section>
 
         {/* ── StatTile ───────────────────────────────────────────────────── */}

@@ -19,13 +19,21 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 
 // Blinks once every ~2s: full opacity → 0.12 for 200ms → full opacity.
+// Honours reduced-motion: when the user opts out, the dot holds at full
+// opacity and the blink loop never schedules.
 function useBlink() {
+  const reducedMotion = useReducedMotion();
   const [opacity, setOpacity] = useState(1);
   const timerRef = useRef(null);
 
   useEffect(() => {
+    if (reducedMotion) {
+      setOpacity(1);
+      return;
+    }
     function schedule() {
       timerRef.current = setTimeout(() => {
         setOpacity(0.12);
@@ -37,14 +45,14 @@ function useBlink() {
     }
     schedule();
     return () => clearTimeout(timerRef.current);
-  }, []);
+  }, [reducedMotion]);
 
   return opacity;
 }
 
 const badgeVariants = cva(
   [
-    'inline-flex items-center gap-[5px] select-none whiteandromeda-nowrap',
+    'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
     'rounded-[var(--andromeda-radius-none)]',
     'px-[var(--andromeda-2)] py-[2px]',
     '[font-family:var(--andromeda-font-mono)]',
@@ -58,7 +66,7 @@ const badgeVariants = cva(
       variant: {
         default: [
           'bg-[color:var(--andromeda-surface-active)]',
-          'text-[color:var(--andromeda-text-secondary)]',
+          'text-[color:var(--andromeda-text-primary)]',
         ],
         accent: [
           'bg-[color:var(--andromeda-accent-500)]',
@@ -74,7 +82,7 @@ const badgeVariants = cva(
         ],
         subtle: [
           'bg-[color:var(--andromeda-surface-overlay)]',
-          'text-[color:var(--andromeda-text-muted)]',
+          'text-[color:var(--andromeda-text-primary)]',
         ],
         outline: [
           'bg-transparent',
@@ -89,7 +97,8 @@ const badgeVariants = cva(
   },
 );
 
-// Dot color per variant — matches the text color of each variant.
+// Dot color per variant — the dot is the per-variant signal (text is always
+// text.primary across variants, so the colored dot, not the label, carries meaning).
 const dotColor = {
   default: 'var(--andromeda-text-muted)',
   accent:  'var(--andromeda-accent-300)',
@@ -128,7 +137,7 @@ export const Badge = forwardRef(function Badge(
           width: '4px',
           height: '4px',
           flexShrink: 0,
-          background: dotColor[variant ?? 'default'],
+          background: dotColor[variant],
           opacity: dotOpacity,
           transition: 'opacity 80ms ease-out',
         }}

@@ -38,6 +38,32 @@ import { andromedaVars } from './lib/utils';
 const toSeconds = (ms) => parseInt(ms, 10) / 1000;
 const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
 
+// Roving arrow-key navigation for the `role="menu"` panel. Queries the
+// menuitem buttons, finds the focused one, and moves focus up/down with
+// wrap-around; Home/End jump to first/last. Separators are ignored because
+// they are not `role="menuitem"` buttons. Bound to the panel's onKeyDown.
+function handleMenuKeyDown(e) {
+  const itemsList = Array.from(
+    e.currentTarget.querySelectorAll('button[role="menuitem"]'),
+  );
+  if (itemsList.length === 0) return;
+  const idx = itemsList.indexOf(document.activeElement);
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    itemsList[idx < 0 ? 0 : (idx + 1) % itemsList.length].focus();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    itemsList[idx < 0 ? itemsList.length - 1 : (idx - 1 + itemsList.length) % itemsList.length].focus();
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    itemsList[0].focus();
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    itemsList[itemsList.length - 1].focus();
+  }
+}
+
 /**
  * @typedef {object} UserMenuItem
  * @property {string}   [id]
@@ -64,6 +90,9 @@ const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
 export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
   const [open, setOpen] = useState(initialOpen || staticOpen);
   const wrapperRef = useRef(null);
+  // The element to return focus to on close — captured when the trigger
+  // toggles the menu open (interactive open only).
+  const returnFocusRef = useRef(null);
 
   useEffect(() => {
     if (!open || staticOpen) return;
@@ -79,7 +108,32 @@ export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
     };
   }, [open, staticOpen]);
 
-  const toggle = () => setOpen((o) => !o);
+  // Focus the first menuitem when the panel opens — NEVER in staticOpen mode,
+  // where multiple pinned menus would fight over focus. Queried from the
+  // wrapper (which both UserMenu and UserCard set) so the panel ref does not
+  // need threading through every trigger component.
+  useEffect(() => {
+    if (!open || staticOpen) return;
+    const first = wrapperRef.current?.querySelector('[role="menu"] button[role="menuitem"]');
+    if (first) first.focus();
+  }, [open, staticOpen]);
+
+  // Return focus to the trigger when the panel closes after an interactive
+  // open. Skipped in staticOpen mode (no focus stealing on showcase pages).
+  useEffect(() => {
+    if (open || staticOpen) return;
+    const target = returnFocusRef.current;
+    returnFocusRef.current = null;
+    if (target) target.focus();
+  }, [open, staticOpen]);
+
+  const toggle = (e) => {
+    // Capture the trigger as the focus-return target before opening.
+    if (!open && !staticOpen) {
+      returnFocusRef.current = e?.currentTarget ?? document.activeElement;
+    }
+    setOpen((o) => !o);
+  };
   const close = () => setOpen(false);
   const triggerProps = {
     'aria-haspopup': 'menu',
@@ -95,7 +149,6 @@ function UserMenuItemRow({ item, onClose }) {
   if (item.type === 'separator') {
     return (
       <div
-        aria-hidden="true"
         role="separator"
         style={{
           height: '1px',
@@ -161,6 +214,7 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
     <div
       role="menu"
       aria-label={ariaLabel}
+      onKeyDown={handleMenuKeyDown}
       style={{
         position: 'absolute',
         ...vertical,

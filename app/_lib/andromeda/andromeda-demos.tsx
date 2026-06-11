@@ -51,6 +51,7 @@ import { PanelHeader } from '../../../design-systems/andromeda/components/PanelH
 import { PanelMenu } from '../../../design-systems/andromeda/components/PanelMenu'
 import { SegmentedControl } from '../../../design-systems/andromeda/components/SegmentedControl'
 import { ProgressBar } from '../../../design-systems/andromeda/components/ProgressBar'
+import { HeatGrid } from '../../../design-systems/andromeda/components/HeatGrid'
 import { RadarChart } from '../../../design-systems/andromeda/components/RadarChart'
 import { Radio, RadioGroup } from '../../../design-systems/andromeda/components/Radio'
 import { Slider } from '../../../design-systems/andromeda/components/Slider'
@@ -359,6 +360,18 @@ function ProgressBarDemo() {
       <ProgressBar label="Storage Used" value={72} variant="default" />
       <ProgressBar label="Bandwidth" value={48} variant="warning" />
       <ProgressBar label="Memory Critical" value={91} variant="fault" />
+    </div>
+  )
+}
+
+function HeatGridDemo() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[6] }}>
+      <HeatGrid value={60} label="Window risk" />
+      <div style={{ display: 'flex', gap: tokens.spacing[8], flexWrap: 'wrap' }}>
+        <HeatGrid value={25} cellSize={16} gap={2} label="Low" />
+        <HeatGrid value={85} cellSize={16} gap={2} label="High" />
+      </div>
     </div>
   )
 }
@@ -895,6 +908,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
   'empty-state': EmptyStateDemo,
+  'heat-grid': HeatGridDemo,
   'icon-button': IconButtonDemo,
   input: InputDemo,
   'nav-item': NavItemDemo,

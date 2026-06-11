@@ -16,6 +16,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { tokens } from '../tokens';
+import { useReducedMotion } from './lib/motion';
 
 /** Soft radial sprite. Multiplied by vertex color and blended additively
  *  so each particle reads as a tiny glow on the dark void. */
@@ -24,6 +25,7 @@ function makeSprite(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   const half = size / 2;
   const grad = ctx.createRadialGradient(half, half, 0, half, half, half);
   grad.addColorStop(0.00, 'rgba(255,255,255,1.00)');
@@ -57,6 +59,7 @@ export function Planet({
   style?: React.CSSProperties;
 } = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -168,7 +171,8 @@ export function Planet({
     function tick() {
       if (!alive) return;
       raf = requestAnimationFrame(tick);
-      if (!paused) {
+      // Reduced motion: render the scene once with no rotation/wobble.
+      if (!paused && !reducedMotion) {
         t += rotationSpeed;
         mesh.rotation.y = t;
         // Gentle Z wobble — keeps the rotation from feeling mechanical.
@@ -190,7 +194,7 @@ export function Planet({
         container.removeChild(renderer.domElement);
       }
     };
-  }, [particleCount, particleSize, rotationSpeed, paused]);
+  }, [particleCount, particleSize, rotationSpeed, paused, reducedMotion]);
 
   return (
     <div
