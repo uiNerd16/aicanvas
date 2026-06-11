@@ -21,6 +21,14 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GIT_BRANCH: currentGitBranch(),
   },
+  // The /r/[file] route reads registry-data/*.json with fs at request time.
+  // Those files are NOT traced as imports, so without this they are absent
+  // from the deployed serverless function and every /r/*.json 404s in prod
+  // (works locally). This bundles them into the function. Top-level option in
+  // Next 16 (confirmed against node_modules/next config-shared.d.ts).
+  outputFileTracingIncludes: {
+    "/r/[file]": ["./registry-data/*.json"],
+  },
   async redirects() {
     return [
       { source: "/r", destination: "/components", permanent: true },
