@@ -199,7 +199,11 @@ export const Radio = forwardRef(function Radio(
           checked={checked}
           disabled={disabled}
           onChange={onChange}
-          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          // z-10 keeps the invisible input on top of the visual box so clicks
+          // reach the input. Both layers are positioned, so without an explicit
+          // z-index the box span paints last and swallows every click on the
+          // square — only the label (via htmlFor) would toggle. Mirrors Checkbox.
+          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
           {...props}
         />
         <span

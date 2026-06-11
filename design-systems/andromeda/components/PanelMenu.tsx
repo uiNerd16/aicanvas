@@ -34,6 +34,11 @@ import { andromedaVars } from './lib/utils';
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
  *   showcases / docs so the consumer can see the menu contents without first
  *   having to click the trigger. Click-outside and Escape still dismiss it.
+ * @property {boolean} [staticOpen=false] Like defaultOpen, but the menu stays
+ *   open: the click-outside and Escape dismissers are not attached. For
+ *   showcases / docs where the menu must remain visible as the reader scrolls
+ *   past, so the component reads as a menu without any interaction. The trigger
+ *   can still toggle it. Not for product UI — a real overflow menu must dismiss.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
@@ -158,14 +163,16 @@ function MenuItem({ item, onClose }) {
 
 /** @type {React.ForwardRefExoticComponent<PanelMenuProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const PanelMenu = forwardRef(function PanelMenu(
-  { items, align = 'right', ariaLabel = 'Panel options', defaultOpen = false, className, style, ...props },
+  { items, align = 'right', ariaLabel = 'Panel options', defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(defaultOpen || staticOpen);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return;
+    // staticOpen pins the menu open (showcase/docs) — skip the dismissers so it
+    // survives outside clicks and scrolling.
+    if (!open || staticOpen) return;
     function onClick(e) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
         setOpen(false);
@@ -180,7 +187,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
       document.removeEventListener('mousedown', onClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, staticOpen]);
 
   return (
     <div
