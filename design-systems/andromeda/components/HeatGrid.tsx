@@ -12,14 +12,17 @@
 // measurement, so accent is allowed (the rules.md "colour is for
 // meaning" exception, same as ProgressBar / charts).
 //
-// The fill animation is gated on `useInView` so a HeatGrid below
-// the fold plays when scrolled into view (consistent with
-// ProgressBar / StatTile), and it honours prefers-reduced-motion.
+// The entrance fill is gated on `useInView` so a HeatGrid below the
+// fold plays when scrolled into view (consistent with ProgressBar /
+// StatTile), and it honours prefers-reduced-motion. After the one-shot
+// entrance cascade, the gauge is LIVE: change `value` at runtime and the
+// cells crossfade uniformly (dots appearing / disappearing) — a real-time
+// gauge responding, not a re-load.
 // ============================================================
 
 'use client';
 
-import { forwardRef, useMemo, useRef } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
 import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
@@ -119,6 +122,24 @@ export const HeatGrid = forwardRef(function HeatGrid(
   const rowStaggerMs = msNum(tokens.motion.stagger.progressbar);
   const colStaggerMs = Math.round(rowStaggerMs * 0.18);
 
+  // The staggered cascade plays ONCE on entrance. After it finishes the gauge
+  // goes "live": subsequent `value` changes crossfade uniformly (delay 0) so a
+  // real-time update reads as the gauge responding, not re-loading. Cells that
+  // turn on/off just transition their fill, so dots appear/disappear smoothly.
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    if (entered) return undefined;
+    if (reducedMotion) { setEntered(true); return undefined; }
+    if (!revealed) return undefined;
+    const cascadeMs =
+      (rows - 1) * rowStaggerMs + center * colStaggerMs + msNum(tokens.motion.duration.cascade);
+    const t = setTimeout(() => setEntered(true), cascadeMs + 60);
+    return () => clearTimeout(t);
+  }, [revealed, entered, reducedMotion, rows, rowStaggerMs, colStaggerMs, center]);
+
+  // Stagger only during the one-shot entrance; live updates crossfade together.
+  const inEntrance = revealed && !entered && !reducedMotion;
+
   const setRefs = (node) => {
     innerRef.current = node;
     if (typeof ref === 'function') ref(node);
@@ -159,7 +180,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
             const shown = revealed ? intensity : 0;
             const { bg, border } = INTENSITY_COLOR[shown];
             const delay =
-              !reducedMotion && revealed && intensity > 0
+              inEntrance && intensity > 0
                 ? (rows - 1 - r) * rowStaggerMs + Math.abs(c - center) * colStaggerMs
                 : 0;
             return (
