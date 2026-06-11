@@ -50,6 +50,7 @@ const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
  * @property {'top'|'bottom'} [placement='top']
  * @property {'start'|'end'|'stretch'} [align='stretch']
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened (showcases / docs). Outside-click and Escape still dismiss it.
+ * @property {boolean} [staticOpen=false] Render pre-opened AND pinned — outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
  * @property {string} [ariaLabel='User menu']
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -67,6 +68,7 @@ export const UserCard = forwardRef(function UserCard(
     placement = 'top',
     align = 'stretch',
     defaultOpen = false,
+    staticOpen = false,
     ariaLabel = 'User menu',
     className,
     style,
@@ -74,7 +76,7 @@ export const UserCard = forwardRef(function UserCard(
   },
   ref,
 ) {
-  const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen);
+  const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
 

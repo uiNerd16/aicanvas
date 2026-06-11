@@ -130,7 +130,11 @@ export const Toggle = forwardRef(function Toggle(
           checked={checked}
           disabled={disabled}
           onChange={handleChange}
-          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          // z-10 keeps the invisible input on top of the visual track so clicks
+          // reach the input. Both layers are positioned, so without an explicit
+          // z-index the track span paints last and swallows every click on the
+          // switch — only the label (via htmlFor) would toggle. Mirrors Checkbox.
+          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
           {...props}
         />
         <span

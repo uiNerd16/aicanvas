@@ -55,13 +55,18 @@ const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
  *
  * `initialOpen` lets callers render the menu pre-opened (showcases /
  * docs); outside-click and Escape still dismiss it.
+ *
+ * `staticOpen` pins the panel open: the outside-click + Escape dismissers
+ * are not attached, so it survives clicks elsewhere on the page. For
+ * showcases / docs where several popovers are shown open at once and one
+ * must not close the others. The trigger can still toggle it.
  */
-export function useUserMenuPanel(initialOpen = false) {
-  const [open, setOpen] = useState(initialOpen);
+export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
+  const [open, setOpen] = useState(initialOpen || staticOpen);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || staticOpen) return;
     const onClick = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
     };
@@ -72,7 +77,7 @@ export function useUserMenuPanel(initialOpen = false) {
       document.removeEventListener('mousedown', onClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, staticOpen]);
 
   const toggle = () => setOpen((o) => !o);
   const close = () => setOpen(false);
@@ -216,6 +221,7 @@ export { UserMenuStyles };
  * @property {'top'|'bottom'} [placement='bottom']
  * @property {'start'|'end'} [align='end']
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened (showcases / docs). Outside-click and Escape still dismiss it.
+ * @property {boolean} [staticOpen=false] Render pre-opened AND pinned — outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
  * @property {string} [ariaLabel='User menu']
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -232,6 +238,7 @@ export const UserMenu = forwardRef(function UserMenu(
     placement = 'bottom',
     align = 'end',
     defaultOpen = false,
+    staticOpen = false,
     ariaLabel = 'User menu',
     className,
     style,
@@ -239,7 +246,7 @@ export const UserMenu = forwardRef(function UserMenu(
   },
   ref,
 ) {
-  const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen);
+  const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
 

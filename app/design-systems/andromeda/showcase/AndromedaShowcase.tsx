@@ -667,31 +667,61 @@ export default function AndromedaShowcase({
           slug="panel-header"
           description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
         >
-          <Row label="Title only">
-            <div style={{ width: 320, position: 'relative', background: tokens.color.surface.raised }}>
-              <CornerMarkers />
-              <PanelHeader title="Capacity" />
-            </div>
-          </Row>
-          <Row label="Title + actions (PanelMenu)">
-            <div style={{ width: 320, position: 'relative', background: tokens.color.surface.raised }}>
-              <CornerMarkers />
-              <PanelHeader
-                title="Requests"
-                actions={
-                  <PanelMenu
-                    ariaLabel="Requests options"
-                    items={[
-                      { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
-                      { label: 'Export',  icon: Export,         onSelect: () => {} },
-                      { type: 'separator' },
-                      { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
-                    ]}
-                  />
-                }
-              />
-            </div>
-          </Row>
+          {(() => {
+            // Both demos sit side-by-side on one line. Each cell carries its
+            // own uppercase mini-label (same style as Row's label) above a
+            // 320px panel. flexWrap lets them stack on narrow viewports.
+            // minHeight reserves room for the second cell's open menu — the
+            // dropdown is absolutely positioned so it would otherwise paint
+            // over the next section ("PanelMenu").
+            const labelStyle = {
+              marginBottom: tokens.spacing[3],
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              color: tokens.color.text.faint,
+              textTransform: 'uppercase' as const,
+              letterSpacing: tokens.typography.tracking.widest,
+            };
+            const panelStyle = { width: 320, position: 'relative' as const, background: tokens.color.surface.raised };
+            return (
+              <div style={{
+                display: 'flex',
+                gap: tokens.spacing[6],
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                minHeight: 260,
+              }}>
+                <div>
+                  <div style={labelStyle}>Title only</div>
+                  <div style={panelStyle}>
+                    <CornerMarkers />
+                    <PanelHeader title="Capacity" />
+                  </div>
+                </div>
+                <div>
+                  <div style={labelStyle}>Title + actions (PanelMenu)</div>
+                  <div style={panelStyle}>
+                    <CornerMarkers />
+                    <PanelHeader
+                      title="Requests"
+                      actions={
+                        <PanelMenu
+                          ariaLabel="Requests options"
+                          staticOpen
+                          items={[
+                            { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                            { label: 'Export',  icon: Export,         onSelect: () => {} },
+                            { type: 'separator' },
+                            { label: 'Hide',    icon: EyeSlash,       onSelect: () => {} },
+                          ]}
+                        />
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </Section>
 
         {/* ── PanelMenu ──────────────────────────────────────────────────── */}
@@ -730,7 +760,7 @@ export default function AndromedaShowcase({
                   <div style={labelStyle}>Default · panel actions</div>
                   <PanelMenu
                     align="left"
-                    defaultOpen
+                    staticOpen
                     items={[
                       { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
                       { label: 'Configure', icon: Sliders,        onSelect: () => {} },
@@ -744,7 +774,7 @@ export default function AndromedaShowcase({
                   <div style={labelStyle}>With submenu</div>
                   <PanelMenu
                     align="left"
-                    defaultOpen
+                    staticOpen
                     items={[
                       { label: 'Edit',   icon: Pencil,  onSelect: () => {} },
                       { label: 'Copy',   icon: Copy,    onSelect: () => {} },
@@ -1180,7 +1210,7 @@ export default function AndromedaShowcase({
               value={dateRange}
               presetLabel="Custom"
               onChange={setDateRange}
-              defaultOpen
+              staticOpen
             />
           </div>
         </Section>
@@ -1574,7 +1604,7 @@ export default function AndromedaShowcase({
                       items={items}
                       placement="bottom"
                       align="end"
-                      defaultOpen
+                      staticOpen
                     />
                   </Row>
                 </div>
@@ -1602,33 +1632,15 @@ export default function AndromedaShowcase({
                 style={{
                   display: 'flex',
                   gap: tokens.spacing[8],
-                  // Open-up is the default placement and the variant we render
-                  // pre-opened; placing the trigger at the bottom lets the
-                  // panel grow upward into reserved space instead of bleeding
-                  // into the previous section. minHeight sized snug against
-                  // the actual panel + gap + trigger height so the open
-                  // dropdown sits right under the section description.
-                  alignItems: 'flex-end',
+                  // Open-down is the variant we render pre-opened, so the
+                  // triggers sit at the TOP of the row (flex-start) and the
+                  // panel grows downward into the reserved minHeight space
+                  // below — instead of bleeding into the next section.
+                  alignItems: 'flex-start',
                   flexWrap: 'wrap',
                   minHeight: 220,
                 }}
               >
-                <div style={{ width: 224 }}>
-                  <Row label="Open up">
-                    <div style={{ width: '100%', background: tokens.color.surface.raised }}>
-                      <UserCard
-                        name="Reza Quinn"
-                        role="Flight Director"
-                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                        status="online"
-                        items={items}
-                        placement="top"
-                        align="stretch"
-                        defaultOpen
-                      />
-                    </div>
-                  </Row>
-                </div>
                 <div style={{ width: 224 }}>
                   <Row label="Open down">
                     <div style={{ width: '100%', background: tokens.color.surface.raised }}>
@@ -1639,6 +1651,22 @@ export default function AndromedaShowcase({
                         status="online"
                         items={items}
                         placement="bottom"
+                        align="stretch"
+                        staticOpen
+                      />
+                    </div>
+                  </Row>
+                </div>
+                <div style={{ width: 224 }}>
+                  <Row label="Open up">
+                    <div style={{ width: '100%', background: tokens.color.surface.raised }}>
+                      <UserCard
+                        name="Reza Quinn"
+                        role="Flight Director"
+                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        status="online"
+                        items={items}
+                        placement="top"
                         align="stretch"
                       />
                     </div>

@@ -439,6 +439,12 @@ Without this, the user clicks the button, the menu opens beside it, but the butt
 
 For dropdown / context-menu items, both `:hover` and `:active` should be defined explicitly. `:hover` is the daily affordance; `:active` is the click acknowledgement (it flashes for ~80ms during the click). The brief flash matters even if the menu closes immediately afterwards — without it, fast clicks feel unresponsive.
 
+### Overlay-input controls must raise the input above the visual layer — `must`
+
+Form controls that hide the native `<input>` and render a custom visual (Checkbox, Radio, Toggle — the "box span" / "track span" pattern) layer two elements inside one positioned wrapper: an invisible `<input class="peer absolute inset-0 opacity-0">` and the visible box/track span. The visible span is itself positioned (`relative`, for its own absolute children like the thumb or fill). Two positioned siblings with `z-index: auto` paint in DOM order, so the visible span paints **last** — on top — and swallows every click on the control. The result is a control that hovers but never toggles; only the `<label htmlFor>` text still works, which hides the bug in any demo that has a label.
+
+The input MUST carry an explicit `z-10` so it sits above the visual layer and receives the click. This bit Radio and Toggle (fixed 2026-06-11) while Checkbox already had it. Any new control built on this pattern inherits the trap — add `z-10` to the input from the start, and when verifying, click the **box/track itself**, not the label.
+
 ### Date-range pickers — anchor-then-confirm
 
 A range picker has two clicks per selection. The first sets an **anchor** that stays fixed; hovering any other day previews the in-between band; the second click commits the range. There is no "Apply" button — the second click IS the apply.
@@ -483,6 +489,7 @@ Floating panels triggered from a chip or button:
 - The trigger gets `data-state="open"` while the panel is mounted, with a one-step-darker background (`surface.hover`) so the row reads as "pressed and held" — matches the "Stateful triggers" rule above.
 - ESC and document `mousedown` outside the wrapper close the panel. Listeners are attached only while open and removed on close — never as session-wide globals.
 - The CaretDown indicator rotates 180° on open. 140ms ease. The rotation is the only animation needed to communicate the state change; no fade-in for the panel itself unless the system later adds one consistently across all popovers.
+- **Showcase/docs `defaultOpen` vs `staticOpen` — `should`.** Every popover (`PanelMenu`, `UserMenu`, `UserCard`, `DateRangePicker`) ships two pre-opened modes. `defaultOpen` renders open but keeps the outside-click + ESC dismissers, so the FIRST click anywhere on the page closes it — and when a docs page shows several popovers open at once, any interaction (including opening a different one) collapses all the others. That cross-dismiss reads as a bug. For pages that display multiple popovers open simultaneously, use **`staticOpen`** (pins open, skips the dismissers) so each demo stays independent — interacting with one never resets the others. Reserve `defaultOpen` for showing a single popover's initial state where dismiss-on-click is itself the thing being demonstrated. `staticOpen` is docs-only — never ship it in product UI, where a popover must dismiss.
 
 ### Hover on inline-styled controls
 
