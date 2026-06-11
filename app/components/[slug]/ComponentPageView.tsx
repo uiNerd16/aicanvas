@@ -36,6 +36,11 @@ import { useSession } from '../auth/SessionProvider'
 import { Button } from '../Button'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
+import { premiumEnabled } from '../../../lib/flags'
+import { useEntitlement } from '../billing/useEntitlement'
+import { PremiumBadge } from '../billing/PremiumBadge'
+import { DailyLimitMeter } from '../billing/DailyLimitMeter'
+import { Paywall, type PaywallReason } from '../billing/Paywall'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -98,6 +103,19 @@ export default function ComponentPageView({
   useCases,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
+  // Premium UI layer (Plan 0): flag-gated, driven by the entitlement stub.
+  // Flag off = today's behavior, byte for byte. Design systems and templates
+  // are premium-only; standalones draw from the daily pool. Remix is never
+  // gated. Real enforcement arrives with Plans 1-3; this is presentation.
+  const entitlement = useEntitlement()
+  const paywallReason: PaywallReason | null =
+    !premiumEnabled() || entitlement.tier === 'premium'
+      ? null
+      : designSystem
+        ? 'premium-only'
+        : entitlement.usedToday >= entitlement.limit
+          ? 'quota-exceeded'
+          : null
   const [installTier, setInstallTier] = useState<'component' | 'system'>('component')
   // Reset to component tier on mount per slug — switching pages shouldn't carry tier
   // selection across components.
@@ -356,6 +374,7 @@ export default function ComponentPageView({
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
+                  {designSystem && <PremiumBadge />}
                   {categoryTags.map((tag) => (
                     <span key={tag.label} className="rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                       {tag.label}
@@ -538,12 +557,17 @@ export default function ComponentPageView({
                 }}
                 aria-hidden={activeTab !== 'code'}
               >
-                {highlightedCode}
+                {/* Paywall replaces the source when the (stubbed) entitlement
+                    says locked. Flag off → paywallReason is always null. */}
+                {paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode}
               </motion.div>
             </div>
 
             {/* Action bar */}
             <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+
+              {/* Daily allowance — renders null while the premium flag is off */}
+              <DailyLimitMeter className="mr-auto" />
 
               {/* Save (logged-in only — no-op render otherwise) */}
               <SaveButton slug={slug} system={designSystem ?? null} />
