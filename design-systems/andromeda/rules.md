@@ -336,11 +336,11 @@ The reliable pattern is CSS Grid, not nested flex:
 ```jsx
 <main style={{
   display: 'grid',
-  gridTemplateColumns: '2fr 1fr',
+  gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
   gridTemplateRows: 'minmax(220px, auto) 1fr',
   gap: tokens.spacing[3],
 }}>
-  <TopLeft />
+  <TopLeft />   {/* each grid item: style={{ minWidth: 0, minHeight: 0 }} */}
   <TopRight />
   <BottomLeft />
   <BottomRight />
@@ -351,6 +351,10 @@ Why grid wins:
 - `gridTemplateRows` sizes both top panels to the same height, both bottom panels to the same height — the seam is computed from the row, not the cells
 - `minmax(Npx, auto)` gives a sensible minimum while letting the row grow if content exceeds it
 - Items stretch to fill their cell by default — no extra wiring needed
+
+`must` — **A full-screen dashboard shell sizes to `width: 100%`, never `100vw`.** `100vw` is the viewport width INCLUDING the vertical scrollbar gutter, so the shell runs wider than the visible area: content shifts right and the right padding gets clipped while the left looks fine (the classic "right padding is wrong on some templates, fine on others" bug). Use `width: '100%'` (the content box, which excludes the scrollbar) with `boxSizing: 'border-box'`.
+
+`must` — **Track columns with `minmax(0, fr)`, not bare `fr`, and give each grid item `minWidth: 0`.** A bare `2fr 1fr` is implicitly `minmax(auto, fr)`, so a wide `white-space: nowrap` table (or any min-content-wide content) in a column blows the track PAST its fraction — the column overflows into the page padding and the content touches / overlaps the frame on the right. This is the classic "right side is cramped / overlapping, left side is fine" bug. `minmax(0, fr)` lets the track shrink below its content's min-content width so the inner `overflow:auto` (table) scrolls instead of pushing the column wide. Same fix for flex layouts: `minWidth: 0` on the flex child.
 
 Inside each panel, give the content row `flex: 1` and the cell `display: flex; flex-direction: column; justify-content: space-between` so the headline value pins to the top and the visualization pins to the bottom. When the grid stretches the panel to its row height, the content distributes evenly instead of leaving a gap underneath.
 
@@ -404,6 +408,10 @@ Result: every row reads as a single horizontal grid line aligned with the header
 `must` — The bar lives as a child of the first `<td>` (which gets `position: relative`), not the `<tr>`. TR layout is unreliable as a positioning context across browsers, especially under `border-collapse: collapse`. The first cell already exists for the checkbox; it gives the bar a clean anchor.
 
 `should` — Inset the bar from the row's vertical edges by `spacing[1]` so it doesn't touch the dividers above/below. The bar reads as belonging to the row, not the row separator.
+
+### Selectable rows — the whole row is the hit target
+
+`must` — When a table row carries a leading checkbox, clicking ANYWHERE on the row toggles its selection, not just the 16px checkbox. Put `onClick={() => toggleRow(key)}` on the `<tr>` and `cursor: pointer` on the row. A tiny checkbox as the only hit target feels broken — users expect the row to be clickable. The checkbox cell (and any other interactive cell, e.g. a kebab) must `stopPropagation` so a direct click there doesn't fire BOTH the cell's handler and the row handler (which would toggle twice and cancel out). Keep the checkbox's own `onCheckedChange` so keyboard activation of the box still works.
 
 The bar is the system's selection language. Don't combine it with a background fill — the bar alone is enough.
 
