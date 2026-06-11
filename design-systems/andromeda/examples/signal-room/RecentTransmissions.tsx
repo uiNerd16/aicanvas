@@ -10,7 +10,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play } from '@phosphor-icons/react';
+import { Play, Pause } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
@@ -99,7 +99,7 @@ function BodyCell({ children, align = 'left', mono = true, color, width }) {
   );
 }
 
-export function RecentTransmissions() {
+export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
   return (
     <Card style={{ flex: 1, minWidth: 0 }}>
       <PanelHeader
@@ -158,7 +158,13 @@ export function RecentTransmissions() {
                   }}
                 >
                   <BodyCell width="48px">
-                    <IconButton variant="ghost" size="sm" icon={Play} aria-label={`Play ${r.track}`} />
+                    <IconButton
+                      variant={r.id === currentCode ? 'default' : 'ghost'}
+                      size="sm"
+                      icon={r.id === currentCode && isPlaying ? Pause : Play}
+                      aria-label={`Play ${r.track}`}
+                      onClick={() => onPlay?.(r)}
+                    />
                   </BodyCell>
                   <BodyCell width="104px" color={tokens.color.text.faint}>
                     {r.id}
