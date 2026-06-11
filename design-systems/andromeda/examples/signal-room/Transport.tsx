@@ -226,11 +226,13 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
               color: tokens.color.text.muted,
               letterSpacing: tokens.typography.tracking.wide,
               flexShrink: 0,
-              width: '40px',
+              width: '44px',
               textAlign: 'left',
             }}
           >
-            {formatTime(cur.duration)}
+            {/* Remaining time — counts down as the scrubber advances (was the
+                static total, which read as "stuck" next to a moving scrubber). */}
+            -{formatTime(Math.max(0, cur.duration - elapsed))}
           </span>
         </div>
       </div>
