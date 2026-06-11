@@ -45,6 +45,7 @@
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
+    "server-only": "^0.0.1",
     "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2"
