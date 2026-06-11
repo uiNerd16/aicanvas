@@ -241,7 +241,10 @@ export default function ServiceOrder() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        width: '100vw',
+        // 100% (not 100vw): 100vw includes the scrollbar gutter, so it runs wider
+        // than the visible area and eats the right padding (left looks fine, right
+        // is clipped). Matches mission-control / signal-room.
+        width: '100%',
         background: tokens.color.surface.base,
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
@@ -272,14 +275,16 @@ export default function ServiceOrder() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 400px',
+            // minmax(0, 1fr) so wide content can't blow the left track past its
+            // share and overflow into the page padding on the right.
+            gridTemplateColumns: 'minmax(0, 1fr) 400px',
             gap: tokens.spacing[3],
           }}
         >
-          <motion.div {...orderMetaMotion}>
+          <motion.div {...orderMetaMotion} style={{ minWidth: 0 }}>
             <OrderMetadataPanel />
           </motion.div>
-          <motion.div {...slaMotion}>
+          <motion.div {...slaMotion} style={{ minWidth: 0 }}>
             <SlaPanel />
           </motion.div>
         </div>

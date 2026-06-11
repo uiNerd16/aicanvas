@@ -272,13 +272,16 @@ export function RequestsTable() {
                   key={key}
                   variants={rowItem}
                   exit="exit"
+                  onClick={() => toggleRow(key)}
                   style={{
                     ...rowSeparatorStyle,
                     transition: 'background 100ms ease',
                   }}
                   className="rp-row"
                 >
-                  <td style={{ position: 'relative', padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
+                  {/* stopPropagation so a direct checkbox click doesn't ALSO
+                      trigger the row onClick (which would toggle twice). */}
+                  <td onClick={(e) => e.stopPropagation()} style={{ position: 'relative', padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
                     {/* Selection edge bar — slides in from left when the row
                         is selected. Anchored to the first TD which provides
                         the relative positioning context. transformOrigin:left

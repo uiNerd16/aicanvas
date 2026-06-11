@@ -260,7 +260,10 @@ export default function ResourcePlanning() {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        width: '100vw',
+        // 100% (not 100vw): 100vw includes the scrollbar gutter, so it runs wider
+        // than the visible area and eats the right padding (left looks fine, right
+        // is clipped). Matches mission-control / signal-room.
+        width: '100%',
         background: tokens.color.surface.base,
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
@@ -286,22 +289,25 @@ export default function ResourcePlanning() {
         style={{
           flex: 1,
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
+          // minmax(0, fr) — without the 0 minimum a wide nowrap table in the
+          // right column blows the track past its fraction and overflows into
+          // the page padding (content touches / overlaps the frame on the right).
+          gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
           gridTemplateRows: 'minmax(220px, auto) 1fr',
           gap: tokens.spacing[3],
           minHeight: 0,
         }}
       >
-        <motion.div {...capacityMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <motion.div {...capacityMotion} style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <CapacityPanel />
         </motion.div>
-        <motion.div {...requestsPanelMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <motion.div {...requestsPanelMotion} style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <RequestsPanel />
         </motion.div>
-        <motion.div {...allocationMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <motion.div {...allocationMotion} style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <AllocationChart />
         </motion.div>
-        <motion.div {...requestsTableMotion} style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <motion.div {...requestsTableMotion} style={{ minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <RequestsTable />
         </motion.div>
       </main>
