@@ -8,10 +8,34 @@
 
 import { chromium } from 'playwright'
 import { mkdir, readFile, rm } from 'fs/promises'
+import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// ─── .env.local loader (avoids adding dotenv as a dependency) ──────────────────
+function loadDotEnvLocal() {
+  const envPath = path.join(process.cwd(), '.env.local')
+  if (!existsSync(envPath)) return
+  for (const rawLine of readFileSync(envPath, 'utf8').split('\n')) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+    const eq = line.indexOf('=')
+    if (eq < 0) continue
+    const key = line.slice(0, eq).trim()
+    let value = line.slice(eq + 1).trim()
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1)
+    }
+    if (process.env[key] === undefined) process.env[key] = value
+  }
+}
+
+loadDotEnvLocal()
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -91,7 +115,11 @@ const arg   = process.argv[2]
 const SLUGS = arg ? [arg] : ALL_SLUGS
 
 const BASE_URL         = process.env.BASE_URL || 'http://localhost:3000'
-const IMAGEKIT_PRIVATE = 'private_REDACTED_KEY'
+const IMAGEKIT_PRIVATE = process.env.IMAGEKIT_PRIVATE_KEY
+if (!IMAGEKIT_PRIVATE) {
+  console.error('Missing IMAGEKIT_PRIVATE_KEY. Add it to .env.local (private_… key from the ImageKit dashboard).')
+  process.exit(1)
+}
 const IMAGEKIT_UPLOAD  = 'https://upload.imagekit.io/api/v1/files/upload'
 const TEMP_DIR         = path.join(__dirname, '../.screenshots-tmp')
 const SETTLE_MS        = 2500
