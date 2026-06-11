@@ -12,6 +12,8 @@
 //     presetLabel="Last month"      // optional chip prefix
 //     defaultOpen                   // calendar pre-opened (showcases / docs);
 //                                   // ESC + click-outside still dismiss
+//     staticOpen                    // pre-opened AND pinned — ESC + click-
+//                                   // outside do NOT dismiss (multi-popover docs)
 //   />
 //
 // All visual values come from `tokens.ts` — selection / preview /
@@ -115,10 +117,10 @@ function PickerStyles() {
 }
 
 export const DateRangePicker = forwardRef(function DateRangePicker(
-  { value, onChange, presetLabel, defaultOpen = false, style, ...props },
+  { value, onChange, presetLabel, defaultOpen = false, staticOpen = false, style, ...props },
   ref,
 ) {
-  const [open, setOpen]         = useState(defaultOpen);
+  const [open, setOpen]         = useState(defaultOpen || staticOpen);
   const [anchor, setAnchor]     = useState(null);
   const [hover, setHover]       = useState(null);
   const [viewDate, setViewDate] = useState(() => {
@@ -128,9 +130,11 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
   const wrapRef = useRef(null);
 
   // Click-outside + ESC to dismiss. Only attaches when open to avoid
-  // listening across the entire app lifetime.
+  // listening across the entire app lifetime. staticOpen pins the panel
+  // open (showcases / docs) so it survives clicks elsewhere on the page —
+  // skip the dismissers entirely in that mode.
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open || staticOpen) return undefined;
     const handleDown = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) close();
     };
@@ -143,7 +147,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
       document.removeEventListener('mousedown', handleDown);
       document.removeEventListener('keydown', handleKey);
     };
-  }, [open]);
+  }, [open, staticOpen]);
 
   // When the panel opens, jump the visible month to the current start.
   useEffect(() => {
