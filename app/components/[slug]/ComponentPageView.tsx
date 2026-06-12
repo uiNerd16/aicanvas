@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -69,12 +69,19 @@ interface ComponentPageViewProps {
   description: string
   headingSubtitle?: string
   tags: Tag[]
-  code: string
+  // code + highlightedCode are omitted when `enforcing` (source is fetched
+  // on demand from the gated endpoint instead of shipped in the HTML).
+  code?: string
   prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
   designSystem?: DesignSystemSlug
   related: ComponentMeta[]
-  highlightedCode: ReactNode
+  highlightedCode?: ReactNode
+  enforcing?: boolean
+  // The `// font:` / `// font-pkg:` / `// npm install` directive lines, always
+  // provided so the install UI (deps + font setup) survives even when the full
+  // `code` is withheld in enforcing mode.
+  codeDirectives?: string
   children: ReactNode
   // Per-component copy slots. Render when the slot is filled; components
   // without `about` simply omit that section. Sourced from the registry
@@ -97,6 +104,8 @@ export default function ComponentPageView({
   designSystem,
   related,
   highlightedCode,
+  enforcing = false,
+  codeDirectives,
   children,
   about,
   useCases,
@@ -138,6 +147,34 @@ export default function ComponentPageView({
     return () => { cancelled = true }
   }, [user])
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
+  // Enforcing mode (Plan 3): source isn't in the HTML — fetch it on demand from
+  // the gated endpoint when the Code tab opens. 200 -> source; 402 -> paywall.
+  type CodeState =
+    | { status: 'idle' | 'loading' }
+    | { status: 'ready'; code: string }
+    | { status: 'locked'; reason: PaywallReason }
+  const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
+  const openCode = useCallback(async () => {
+    setCodeState({ status: 'loading' })
+    try {
+      const res = await fetch(`/api/component-code?slug=${installSlug}`)
+      if (res.status === 402) {
+        const { error } = await res.json().catch(() => ({ error: 'premium-only' }))
+        setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only' })
+        return
+      }
+      const { code: fetched } = await res.json()
+      setCodeState({ status: 'ready', code: fetched ?? '' })
+    } catch {
+      setCodeState({ status: 'locked', reason: 'premium-only' })
+    }
+  }, [installSlug])
+  // Fetch on first Code-tab open (and re-fetch if the install tier changes).
+  useEffect(() => {
+    if (enforcing && activeTab === 'code' && codeState.status === 'idle') void openCode()
+  }, [enforcing, activeTab, codeState.status, openCode])
+  // Reset when switching components / install tier so the next open re-fetches.
+  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, installSlug])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -156,8 +193,12 @@ export default function ComponentPageView({
   const [fontPkgInstallCopied, setFontPkgInstallCopied] = useState(false)
   const [fontPkgSnippetCopied, setFontPkgSnippetCopied] = useState(false)
 
+  // Directive lines live in the source; when enforcing withholds `code`, the
+  // server still passes them via `codeDirectives` so the install UI is intact.
+  const directiveSource = code ?? codeDirectives ?? ''
+
   // Extract font name from code comment (e.g. "// font: Manrope") — Google Fonts
-  const fontMatch = code.match(/^\/\/ font: (.+)$/m)
+  const fontMatch = directiveSource.match(/^\/\/ font: (.+)$/m)
   const fontName = fontMatch ? fontMatch[1].trim() : null
   const fontGoogleId = fontName ? fontName.replace(/ /g, '+') : null
   const fontImportId = fontName ? fontName.replace(/ /g, '_') : null
@@ -167,7 +208,7 @@ export default function ComponentPageView({
   } : null
 
   // Extract package font from code comment (e.g. "// font-pkg: geist/font/pixel|GeistPixelCircle|--font-geist-pixel-circle")
-  const fontPkgMatch = code.match(/^\/\/ font-pkg: (.+)$/m)
+  const fontPkgMatch = directiveSource.match(/^\/\/ font-pkg: (.+)$/m)
   const fontPkgInfo = fontPkgMatch ? fontPkgMatch[1].trim().split('|') : null
   const fontPkgPath = fontPkgInfo?.[0] ?? null        // e.g. "geist/font/pixel"
   const fontPkgClass = fontPkgInfo?.[1] ?? null       // e.g. "GeistPixelCircle"
@@ -184,7 +225,7 @@ export default function ComponentPageView({
 
   // Extract npm install command from code comment (e.g. "// npm install framer-motion")
   // Extract package names from the "// npm install ..." comment
-  const depsMatch = code.match(/^\/\/ npm install (.+)$/m)
+  const depsMatch = directiveSource.match(/^\/\/ npm install (.+)$/m)
   const depsPackages = depsMatch ? depsMatch[1] : null
 
   const PKG_COMMANDS: Record<typeof pkgManager, string> = {
@@ -284,8 +325,13 @@ export default function ComponentPageView({
   const cliCommand = `npx shadcn@latest add ${installReference}`
 
   async function copyCode() {
+    // When enforcing, source only exists after the gated fetch resolves.
+    const source = enforcing
+      ? (codeState.status === 'ready' ? codeState.code : null)
+      : code
+    if (source == null) return
     try {
-      await navigator.clipboard.writeText(code)
+      await navigator.clipboard.writeText(source)
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
     } catch {}
@@ -577,9 +623,26 @@ export default function ComponentPageView({
                 }}
                 aria-hidden={activeTab !== 'code'}
               >
-                {/* Paywall replaces the source when the (stubbed) entitlement
-                    says locked. Flag off → paywallReason is always null. */}
-                {paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode}
+                {enforcing ? (
+                  // Real gating (Plan 3): source fetched on demand from the
+                  // gated endpoint. 402 -> paywall; otherwise plain source.
+                  codeState.status === 'locked' ? (
+                    <Paywall reason={codeState.reason} />
+                  ) : codeState.status === 'ready' ? (
+                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                      {codeState.code}
+                    </pre>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-sand-500">
+                      Loading source…
+                    </div>
+                  )
+                ) : (
+                  // Not enforcing: source is server-rendered (SEO preserved).
+                  // Plan 0's stub paywall previews states in dev when the
+                  // premium flag is on; otherwise it is always null.
+                  paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode
+                )}
               </motion.div>
             </div>
 
