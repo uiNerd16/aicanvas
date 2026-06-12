@@ -11,6 +11,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import { NerdSvg, SuperheroSvg } from '../components/auth/NerdToHero'
 import { premiumEnabled } from '../../lib/flags'
 import { useSession } from '../components/auth/SessionProvider'
+import { UpgradeButton } from '../components/billing/UpgradeButton'
 
 // ─── Plan data ──────────────────────────────────────────────────────────────
 // Two tiers, both free. Nerd is the unauthenticated baseline; Hero is the
@@ -314,12 +315,12 @@ function PremiumCards() {
             <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
           </div>
 
-          <Link
-            href={user ? '/pricing' : '/account/sign-up?intent=premium'}
+          <UpgradeButton
+            cycle={cycle}
             className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}`}
           >
             Go Premium
-          </Link>
+          </UpgradeButton>
         </div>
         <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
