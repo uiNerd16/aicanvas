@@ -213,16 +213,21 @@ function PremiumCards() {
   const suffix = cycle === 'yearly' ? 'year' : 'month'
 
   // Reflect the real subscription so a premium user isn't pitched "Go Premium".
-  const [isPremium, setIsPremium] = useState(false)
+  // Tri-state: while 'unknown' (loading or backend error) render a neutral
+  // disabled CTA instead of flashing the wrong one. Signed-out derives to
+  // 'not-premium' at render time (no setState needed in the effect body —
+  // sync setState in effects trips the react-compiler rule and can cascade).
+  const [fetchedState, setFetchedState] = useState<'unknown' | 'premium' | 'not-premium'>('unknown')
   useEffect(() => {
-    if (!user) { setIsPremium(false); return }
+    if (!user) return
     let cancelled = false
     fetch('/api/me/entitlement')
-      .then((r) => r.json())
-      .then((d) => { if (!cancelled) setIsPremium(d?.tier === 'premium') })
-      .catch(() => {})
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => { if (!cancelled) setFetchedState(d?.tier === 'premium' ? 'premium' : 'not-premium') })
+      .catch(() => { if (!cancelled) setFetchedState('unknown') })
     return () => { cancelled = true }
   }, [user])
+  const premiumState: 'unknown' | 'premium' | 'not-premium' = user ? fetchedState : 'not-premium'
 
   return (
     <div className="mt-12 grid gap-6 sm:mt-16 md:grid-cols-2">
@@ -327,7 +332,15 @@ function PremiumCards() {
             <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
           </div>
 
-          {isPremium ? (
+          {user && premiumState === 'unknown' ? (
+            <button
+              type="button"
+              disabled
+              className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+            >
+              Checking your plan…
+            </button>
+          ) : premiumState === 'premium' ? (
             <Link
               href="/account/settings"
               className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}

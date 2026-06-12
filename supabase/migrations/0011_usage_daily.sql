@@ -38,7 +38,13 @@ begin
     return true;
   end if;
 
-  -- New slug: insert iff under the limit (benign race tolerated, see plan).
+  -- Serialize concurrent consumes for the same subject+day so the count
+  -- check below is race-free and the limit is a hard ceiling (without the
+  -- lock, N concurrent first-pulls could each pass the count and overrun
+  -- the limit by N-1). Transaction-scoped; released at commit.
+  perform pg_advisory_xact_lock(hashtext(p_subject || ':' || p_day::text));
+
+  -- New slug: insert iff under the limit.
   insert into public.usage_daily (subject, day, slug)
   select p_subject, p_day, p_slug
   where (
@@ -56,3 +62,6 @@ end;
 $$;
 
 revoke all on function public.consume_quota(text, date, text, int) from public, anon, authenticated;
+-- Explicit grant for the server (secret-key) role. Supabase default privileges
+-- usually cover this, but never rely on defaults for the role the gate runs as.
+grant execute on function public.consume_quota(text, date, text, int) to service_role;

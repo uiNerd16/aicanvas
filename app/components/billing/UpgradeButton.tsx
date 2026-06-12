@@ -22,11 +22,17 @@ export function UpgradeButton({
   const router = useRouter()
   const { user } = useSession()
 
+  // Checkout is only possible once the Paddle env is configured. Render a
+  // disabled CTA instead of opening a broken overlay (or silently failing
+  // after payment because the server half is missing).
+  const configured = Boolean(PRICES[cycle] && process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN)
+
   async function onClick() {
     if (!user) {
       router.push('/account/sign-up?next=/pricing&intent=premium')
       return
     }
+    if (!configured) return
     const paddle = await getPaddle()
     paddle?.Checkout.open({
       items: [{ priceId: PRICES[cycle], quantity: 1 }],
@@ -37,7 +43,13 @@ export function UpgradeButton({
   }
 
   return (
-    <button type="button" className={className} onClick={onClick}>
+    <button
+      type="button"
+      className={className}
+      onClick={onClick}
+      disabled={Boolean(user) && !configured}
+      title={user && !configured ? 'Checkout is not configured yet' : undefined}
+    >
       {children}
     </button>
   )
