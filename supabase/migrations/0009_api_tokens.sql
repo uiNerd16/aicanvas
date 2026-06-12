@@ -28,6 +28,10 @@ create policy "api_keys: owner read" on public.user_api_keys
 grant select on table public.user_api_keys to authenticated;
 
 -- Issue a token on signup.
+-- NOTE: `set search_path = ''` hardens the function, but means EVERY call must
+-- be schema-qualified. pgcrypto lives in the `extensions` schema on Supabase,
+-- so `gen_random_bytes` MUST be `extensions.gen_random_bytes` or the trigger
+-- throws and aborts the signup. (`encode` is in pg_catalog, always resolvable.)
 create or replace function public.issue_api_token()
 returns trigger
 language plpgsql
@@ -36,7 +40,7 @@ set search_path = ''
 as $$
 begin
   insert into public.user_api_keys (user_id, token)
-  values (new.id, 'aic_' || encode(gen_random_bytes(24), 'hex'))
+  values (new.id, 'aic_' || encode(extensions.gen_random_bytes(24), 'hex'))
   on conflict (user_id) do nothing;
   return new;
 end;
