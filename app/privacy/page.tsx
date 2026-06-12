@@ -115,10 +115,14 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed text-sand-400">
             Requests to the public component registry endpoints (paths under{' '}
             <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">/r/</code>
-            ) are made by the shadcn CLI and the AI Canvas MCP without any user
-            session. These hits are aggregated anonymously so we can see which
-            components are being installed. No personal data is processed on
-            these paths and no account cookies are read.
+            ) are made by the shadcn CLI and the AI Canvas MCP. If you are signed
+            in, the command you copied carries your account API token so the pull
+            counts toward your account and unlocks any premium content you are
+            entitled to. For anonymous requests we enforce a daily free limit
+            using a salted, per-day hash of your IP address as a counter key. The
+            salt rotates daily, so these counters cannot be linked across days,
+            and we delete them after 30 days. We do not store your raw IP for
+            this purpose and read no account cookies on these paths.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -170,9 +174,12 @@ export default function PrivacyPage() {
               no cross-site tracking.
             </li>
             <li>
-              <strong className="text-sand-200">Anonymous registry hits:</strong>{' '}
-              the data is not personal under GDPR (no identifier links to a
-              person). Logged for product analytics under Art. 6 (1)(f).
+              <strong className="text-sand-200">Registry hits and the daily
+              limit:</strong>{' '}
+              Art. 6 (1)(f) GDPR — legitimate interest in operating a fair
+              free tier. The per-day hashed-IP counter is the minimum needed to
+              enforce the limit; it is pseudonymous, rotates daily, and is
+              deleted after 30 days. Signed-in pulls are tied to your account.
             </li>
             <li>
               <strong className="text-sand-200">Marketing communications:</strong>{' '}
