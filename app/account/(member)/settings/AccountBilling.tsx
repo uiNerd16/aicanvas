@@ -79,7 +79,7 @@ export function AccountBilling() {
       )}
       {rotateState === 'done' && (
         <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
-          Token rotated. Re-copy your CLI and MCP commands from any component page.
+          Done. The old token is now disabled. Grab a fresh install command from any component page.
         </p>
       )}
       {rotateState === 'error' && (
