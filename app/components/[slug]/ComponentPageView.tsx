@@ -1029,7 +1029,7 @@ export default function ComponentPageView({
                                     onClick={openCode}
                                     className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-300"
                                   >
-                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source (uses your daily pull for this component)'}
+                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source (uses one of your daily installs, re-viewing is free)'}
                                   </button>
                                 )
                               ) : (
@@ -1404,7 +1404,7 @@ export default function ComponentPageView({
                   Install command copied
                 </p>
                 <p className="mt-0.5 text-xs text-sand-400">
-                  Paste into your terminal to add this component.
+                  Paste into your terminal to install this component.
                 </p>
               </div>
             </div>

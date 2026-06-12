@@ -104,7 +104,7 @@ export default function PrivacyPage() {
             address, user-agent string, and timestamp for each request. These
             logs are short-lived and used to detect abuse and operate the
             service. Vercel Web Analytics produces aggregated, cookieless traffic
-            statistics — visitors are identified only by a per-day hash of the
+            statistics. Visitors are identified only by a per-day hash of the
             request and the hash is discarded after 24 hours. No personal
             identifier is created and no cross-site tracking is possible.
           </p>
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
             ) are made by the shadcn CLI and the AI Canvas MCP. If you are signed
             in, the command you copied carries your account API token so the pull
             counts toward your account and unlocks any premium content you are
-            entitled to. For anonymous requests we enforce a daily free limit
+            entitled to. For anonymous requests we enforce a daily limit of 2 installs
             using a salted, per-day hash of your IP address as a counter key. The
             salt rotates daily, so these counters cannot be linked across days,
             and we delete them after 30 days. We do not store your raw IP for
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
             </code>{' '}
             takes effect immediately. Transactional emails (sign-up
             confirmation, magic links, password reset) are not affected by
-            this flag &mdash; they are necessary to provide the account
+            this flag. They are necessary to provide the account
             service.
           </p>
 
@@ -163,12 +163,12 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-400">
             <li>
               <strong className="text-sand-200">Account &amp; usage data:</strong>{' '}
-              Art. 6 (1)(b) GDPR — processing is necessary to provide the AI
+              Art. 6 (1)(b) GDPR. Processing is necessary to provide the AI
               Canvas account service you signed up for.
             </li>
             <li>
               <strong className="text-sand-200">Server logs &amp; aggregate analytics:</strong>{' '}
-              Art. 6 (1)(f) GDPR — legitimate interest in operating, securing,
+              Art. 6 (1)(f) GDPR. Legitimate interest in operating, securing,
               and understanding usage of the service. We balance this against
               your interests by using only cookieless, aggregate analytics with
               no cross-site tracking.
@@ -176,7 +176,7 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-sand-200">Registry hits and the daily
               limit:</strong>{' '}
-              Art. 6 (1)(f) GDPR — legitimate interest in operating a fair
+              Art. 6 (1)(f) GDPR. Legitimate interest in operating a fair
               free tier. The per-day hashed-IP counter is the minimum needed to
               enforce the limit; it is pseudonymous, rotates daily, and is
               deleted after 30 days. Signed-in pulls are tied to your account.
@@ -202,8 +202,8 @@ export default function PrivacyPage() {
             Providing your email and password (or a Google account, if you sign
             in with Google) is necessary to create and use an AI Canvas account.
             If you do not provide them, you cannot create an account, but the
-            public site &mdash; component browsing, copying source, downloading
-            registry items via the CLI &mdash; remains fully usable without
+            public site (component browsing, copying source, downloading
+            registry items via the CLI) remains fully usable without
             signing in. There is no statutory obligation to provide any data.
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
@@ -224,26 +224,26 @@ export default function PrivacyPage() {
           </p>
           <ul className="mt-4 space-y-3 leading-relaxed text-sand-400">
             <li>
-              <strong className="text-sand-200">Vercel Inc.</strong> (USA) —
+              <strong className="text-sand-200">Vercel Inc.</strong> (USA):
               hosting, request logs, cookieless Web Analytics. Edge serving
               from Frankfurt where possible.
             </li>
             <li>
-              <strong className="text-sand-200">Supabase Inc.</strong> (USA) —
+              <strong className="text-sand-200">Supabase Inc.</strong> (USA):
               authentication, account database, transactional emails (sign-up
               confirmation, magic links, password reset). EU-region project
               where available.
             </li>
             <li>
               <strong className="text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
-              Google LLC (USA) — only if you choose &ldquo;Sign in with Google.&rdquo;
+              Google LLC (USA): only if you choose &ldquo;Sign in with Google.&rdquo;
               Google authenticates you and returns your email and profile
               identifier to us. Google&apos;s own privacy policy applies to their
               processing.
             </li>
             <li>
-              <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>{' '}
-              — delivers component preview screenshots. No user data is sent;
+              <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>:{' '}
+              delivers component preview screenshots. No user data is sent;
               ImageKit only serves public image URLs.
             </li>
           </ul>
@@ -280,7 +280,7 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-400">
             <li>Access the personal data we hold about you (Art. 15)</li>
             <li>Request correction of inaccurate data (Art. 16)</li>
-            <li>Request deletion of your data (Art. 17 — &ldquo;right to be forgotten&rdquo;)</li>
+            <li>Request deletion of your data (Art. 17, &ldquo;right to be forgotten&rdquo;)</li>
             <li>Restrict or object to processing (Art. 18, 21)</li>
             <li>Receive your data in a portable, machine-readable format (Art. 20)</li>
             <li>Withdraw consent at any time, where processing is based on consent</li>
@@ -292,7 +292,7 @@ export default function PrivacyPage() {
             </a>
             . We respond within 30 days. Before acting on a rights request we
             may ask for reasonable proof that you are the person the data
-            belongs to &mdash; this is to protect you from someone else
+            belongs to. This is to protect you from someone else
             requesting your data under false pretences.
           </p>
         </section>

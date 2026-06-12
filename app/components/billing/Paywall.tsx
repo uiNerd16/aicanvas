@@ -28,9 +28,9 @@ export function Paywall({ reason, limit: realLimit }: { reason: PaywallReason; l
 
   const body =
     reason === 'premium-only'
-      ? 'This is part of a design system. Premium unlocks every design system, template, and unlimited daily installs.'
+      ? 'This is part of a design system. Premium unlocks every design system, template, and unlimited installs.'
       : isAnonymous
-        ? `You have used your ${limit} free installs for today. A free account gets 10 a day.`
+        ? `You have used your ${limit} free installs for today. A free account gets 10 installs a day.`
         : `You have used your ${limit} installs for today. Premium removes the limit.`
 
   return (
