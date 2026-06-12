@@ -15,9 +15,12 @@ export type PaywallReason = 'premium-only' | 'quota-exceeded'
  * Plan 0: CTAs navigate to real routes, the overlay checkout arrives in
  * Plan 4. Designed for the dark code surface (bg-sand-950).
  */
-export function Paywall({ reason }: { reason: PaywallReason }) {
+export function Paywall({ reason, limit: realLimit }: { reason: PaywallReason; limit?: number }) {
   const { user } = useSession()
-  const { tier, limit } = useEntitlement()
+  const { tier, limit: stubLimit } = useEntitlement()
+  // When the real gate provides a limit (enforcing path), trust it; otherwise
+  // fall back to the stub (Plan 0 dev preview).
+  const limit = realLimit ?? stubLimit
   // The session is the real rung when available; the stub covers review mode.
   const isAnonymous = !user && tier === 'anonymous'
 

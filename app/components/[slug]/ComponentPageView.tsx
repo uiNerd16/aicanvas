@@ -152,15 +152,15 @@ export default function ComponentPageView({
   type CodeState =
     | { status: 'idle' | 'loading' }
     | { status: 'ready'; code: string }
-    | { status: 'locked'; reason: PaywallReason }
+    | { status: 'locked'; reason: PaywallReason; limit?: number }
   const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
   const openCode = useCallback(async () => {
     setCodeState({ status: 'loading' })
     try {
       const res = await fetch(`/api/component-code?slug=${installSlug}`)
       if (res.status === 402) {
-        const { error } = await res.json().catch(() => ({ error: 'premium-only' }))
-        setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only' })
+        const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
+        setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only', limit })
         return
       }
       const { code: fetched } = await res.json()
@@ -627,7 +627,7 @@ export default function ComponentPageView({
                   // Real gating (Plan 3): source fetched on demand from the
                   // gated endpoint. 402 -> paywall; otherwise plain source.
                   codeState.status === 'locked' ? (
-                    <Paywall reason={codeState.reason} />
+                    <Paywall reason={codeState.reason} limit={codeState.limit} />
                   ) : codeState.status === 'ready' ? (
                     <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
                       {codeState.code}
