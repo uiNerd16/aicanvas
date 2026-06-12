@@ -11,11 +11,11 @@ import {
   ImageSquare,
   Code,
   Palette,
-  UsersThree,
   HandTap,
   CaretLeft,
   CaretRight,
   Terminal,
+  Sparkle,
 } from '@phosphor-icons/react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -23,6 +23,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL } from '../lib/config'
 import { track } from '../lib/analytics'
+import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -651,6 +652,55 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   )
 }
 
+// ─── FAQ ────────────────────────────────────────────────────────────────────
+// Rendered in the homepage FAQ section AND mirrored into FAQPage JSON-LD for
+// rich results. Answers must stay plain text so both stay in sync.
+
+const FAQ_ITEMS: { q: string; a: string }[] = [
+  {
+    q: 'What is AI Canvas?',
+    a: 'AI Canvas is an open-source registry of animated React components, design systems, and templates. Every component ships with its full source code and tested AI reproduction prompts, so you can install it as-is or rebuild it your way.',
+  },
+  {
+    q: 'Is AI Canvas free?',
+    a: 'Browsing, previewing, and remixing with AI are free for everyone, and the source code is open. Installing components is free up to a daily limit, and a free account raises that limit. Premium unlocks design systems, templates, and unlimited installs.',
+  },
+  {
+    q: 'How do I install a component?',
+    a: 'Every component page gives you a one-line shadcn CLI command that drops the fully typed source into your project. Prefer manual control? Copy the code directly, or let your AI agent install it through the AI Canvas MCP.',
+  },
+  {
+    q: 'What is the AI Canvas MCP server?',
+    a: 'The MCP server connects AI Canvas to agents like Claude Code, Codex, and Cursor. Once installed with a single command, your agent can search the registry, inspect a component, and install it into your project without copy-paste.',
+  },
+  {
+    q: 'Which AI platforms do the prompts support?',
+    a: 'Each component ships with reproduction prompts for Claude Code, Lovable, and V0. They are precise briefs tested to recreate the component faithfully, not generic instructions. Pick your platform, paste, and go.',
+  },
+  {
+    q: 'Can I use AI Canvas components in commercial projects?',
+    a: 'Yes. The code is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution.',
+  },
+  {
+    q: 'What is included in a design system?',
+    a: `A complete, token-driven visual language. Andromeda includes ${ANDROMEDA_COMPONENT_META.length} components, 4 production templates, and a single token file that controls every color, spacing, and radius across the system.`,
+  },
+  {
+    q: 'What stack do the components use?',
+    a: 'React with TypeScript, Tailwind CSS, and Framer Motion for animation. Components are built for the Next.js App Router but work in any modern React setup. 3D components use Three.js.',
+  },
+]
+
+const FAQ_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+}
+
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 // ─── HomePageClient ────────────────────────────────────────────────────────────
@@ -658,6 +708,10 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 export function HomePageClient({ total, showcase, carouselItems }: Props) {
+  // Hero stat: standalone components + the Andromeda design-system components
+  // (those live in their own registry, so they aren't part of `total`).
+  const componentTotal = total + ANDROMEDA_COMPONENT_META.length
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
   return (
     <div className="flex min-h-full flex-col overflow-x-hidden bg-sand-950">
 
@@ -679,7 +733,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.1 }}
             className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
-            Free · Open source
+            Open source
           </motion.span>
 
           <motion.h1
@@ -696,9 +750,9 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               aria-hidden
               className="inline-block h-[0.6em] w-auto align-[0.02em]"
             />
-            {' '}Native Components
+            {' '}Native Components,
             <br />
-            <span className="mt-2 inline-block text-olive-500">for Designers and Developers.</span>
+            <span className="mt-2 inline-block text-olive-500">Design Systems and Templates</span>
           </motion.h1>
 
           <motion.p
@@ -707,8 +761,10 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.26 }}
             className="mt-4 max-w-xl text-base leading-relaxed text-sand-400"
           >
-            Install with one command, remix with AI, or just get inspired.
-            Everything here is free, open source, and ready to ship.
+            If your agent can pull it, you can build it. Claude Code, Codex,
+            and Cursor install finished components, design systems, and
+            templates with the shadcn CLI or the AI Canvas MCP, saving tokens
+            on every build.
           </motion.p>
 
           <motion.div
@@ -745,26 +801,27 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             {(
               [
                 [
-                  { value: total, suffix: '+', label: 'Components' },
+                  { value: componentTotal, suffix: '+', label: 'Components' },
                   { value: 3,     suffix: '',  label: 'AI Platforms' },
                 ],
                 [
                   { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
-                  { value: 0,     suffix: '',  prefix: '$', label: 'Free Forever' },
+                  { text: 'MCP',  suffix: '',  label: 'Ready' },
                 ],
               ] as {
-                value: number
+                value?: number
                 suffix: string
                 label: string
                 prefix?: string
                 minWidth?: string
+                text?: string
               }[][]
             ).map((row, rowIdx) => (
               <div key={rowIdx} className="flex items-center sm:contents">
                 {rowIdx > 0 && (
                   <div className="hidden h-10 w-px bg-sand-800 mx-6 sm:block" aria-hidden />
                 )}
-                {row.map(({ value, suffix, prefix = '', label, minWidth }, colIdx) => {
+                {row.map(({ value, suffix, prefix = '', label, minWidth, text }, colIdx) => {
                   const i = rowIdx * 2 + colIdx
                   return (
                     <div key={label} className="flex items-center sm:contents">
@@ -779,7 +836,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                         className="flex flex-col items-center text-center"
                       >
                         <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
-                          {prefix}<AnimatedCount to={value} suffix={suffix} />
+                          {text ? text : <>{prefix}<AnimatedCount to={value ?? 0} suffix={suffix} /></>}
                         </span>
                         <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
                       </motion.div>
@@ -810,10 +867,10 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Built for everyone</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              For designers. For developers. For everyone in between.
+              For designers. For developers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Most component libraries are built for one audience. AI Canvas works however you work.
+              Most component libraries serve one audience. AI Canvas fits however you build, whether you copy a prompt, run the shadcn CLI, or hand it to an AI agent.
             </p>
           </motion.div>
 
@@ -822,22 +879,22 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
-                description: 'Hit "Remix with AI" and try the component in Claude Code, Lovable, or V0. One click copies the prompt — paste it and go.',
+                description: 'Copy a component\'s AI prompt and rebuild it in Claude Code, Lovable, or V0. Change colors, motion, and layout in plain language, no code needed. Go from idea to a real animated UI in seconds.',
                 badges: ['Claude Code', 'Lovable', 'V0'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'One CLI command installs any component into your project. TypeScript, Motion, Tailwind CSS — all included, ready to run.',
+                description: 'Install any component with a single shadcn CLI command. Fully typed React with Tailwind CSS and Framer Motion, dropped into your project and ready to run. No boilerplate, no rebuilding from scratch.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
-                icon: <UsersThree weight="regular" size={18} />,
-                audience: 'Everyone else',
-                description: 'Not sure if you\'ll install it or remix it? Every component gives you both paths — CLI install and AI prompts, always.',
-                badges: ['CLI + AI', 'Always both', 'Always free'],
+                icon: <Sparkle weight="regular" size={18} />,
+                audience: 'AI agents',
+                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you, no copy-paste from the marketplace. The agent does the wiring. You keep control.',
+                badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
             ].map(({ icon, audience, description, badges, badgeStyle }, i) => (
@@ -901,19 +958,19 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 num: '01',
                 icon: <MagnifyingGlass weight="regular" size={16} />,
                 title: 'Browse',
-                desc: 'Find the perfect animated component from the curated, categorized collection.',
+                desc: 'Search animated components, design systems, and templates. Preview each one live before you choose.',
               },
               {
                 num: '02',
                 icon: <Terminal weight="regular" size={16} />,
                 title: 'Install or remix',
-                desc: 'Copy the CLI command to install directly, or hit Remix with AI to try it in Claude Code, Lovable, or V0.',
+                desc: 'Run the shadcn CLI command, copy the AI prompt, or let your agent pull it over MCP. The full typed source lands in your project, not a screenshot.',
               },
               {
                 num: '03',
                 icon: <RocketLaunch weight="regular" size={16} />,
                 title: 'Ship',
-                desc: 'The component is in your project. Customize it, extend it, or ship it as-is.',
+                desc: 'It arrives as real, open-source code in your codebase. Restyle it, extend it, or ship it as-is. It\'s yours.',
               },
             ].map((step, i) => (
               <motion.div
@@ -942,7 +999,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         </section>
 
 
-        {/* ── Prompt differentiator ── */}
+        {/* ── Design systems & templates showcase ── */}
         <section className="mt-16 sm:mt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -952,38 +1009,183 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             className="mb-6"
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">
-              The AI prompts
+              Design systems and templates
             </p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              Every component ships with prompts for three AI platforms.
+              More than components. Complete systems.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Not generic instructions. Each prompt is a precise reproduction brief —
-              tested to recreate the component faithfully. Pick your platform,
-              paste, and go.
+              Andromeda is a full design system for mission dashboards: token-driven
+              components and production templates that compose into real interfaces.
+              One token file controls every color, spacing, and radius, so the whole
+              system retunes at once.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {[
-              { name: 'Claude Code',  description: "Builds the component in your existing project with full environment setup." },
-              { name: 'Lovable',   description: 'Builds a full working app from the prompt — no setup needed.' },
-              { name: 'V0',           description: 'Ready for instant Vercel V0 generation.' },
-            ].map(({ name, description }, i) => (
-              <motion.div
-                key={name}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.07 }}
-                className="rounded-xl border border-sand-800 bg-sand-900 p-4"
-              >
-                <span className="mb-2 inline-block rounded-md bg-olive-500/10 px-2 py-0.5 text-xs font-semibold text-olive-500">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4 }}
+          >
+            <Link
+              href="/design-systems/andromeda"
+              className="group relative block overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 transition-colors hover:border-sand-700 sm:p-8"
+            >
+              {/* Andromeda signature corner brackets */}
+              <span aria-hidden className="absolute left-3 top-3 h-3 w-3 border-l border-t border-olive-500/50" />
+              <span aria-hidden className="absolute right-3 top-3 h-3 w-3 border-r border-t border-olive-500/50" />
+              <span aria-hidden className="absolute bottom-3 left-3 h-3 w-3 border-b border-l border-olive-500/50" />
+              <span aria-hidden className="absolute bottom-3 right-3 h-3 w-3 border-b border-r border-olive-500/50" />
+
+              <div className="flex flex-col gap-8 sm:flex-row sm:items-center">
+                {/* Mini dashboard mock, pure CSS */}
+                <div aria-hidden className="pointer-events-none w-full select-none rounded-xl border border-sand-800 bg-sand-950 p-4 sm:w-1/2">
+                  <div className="flex items-center justify-between border-b border-sand-800 pb-3">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-olive-500">Mission Control</span>
+                    <span className="flex gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-olive-500/80" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-sand-700" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-sand-700" />
+                    </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {[
+                      ['72%', 'Fuel'],
+                      ['114', 'Crew'],
+                      ['OK', 'Hull'],
+                    ].map(([v, l]) => (
+                      <div key={l} className="rounded-md border border-sand-800 px-2 py-1.5">
+                        <p className="text-sm font-bold tabular-nums text-sand-50">{v}</p>
+                        <p className="text-[9px] uppercase tracking-wider text-sand-500">{l}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-800">
+                      <div className="h-full w-2/3 rounded-full bg-olive-500/70" />
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-800">
+                      <div className="h-full w-1/3 rounded-full bg-sand-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Copy + stats */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-sand-50">Andromeda</h3>
+                  <p className="mt-1.5 text-base leading-relaxed text-sand-400">
+                    A sci-fi blueprint system. Every panel, table, and chart speaks
+                    the same visual language, ready to assemble into full dashboards.
+                  </p>
+                  <div className="mt-4 flex gap-6">
+                    {[
+                      [`${ANDROMEDA_COMPONENT_META.length}`, 'Components'],
+                      ['4', 'Templates'],
+                      ['1', 'Token file'],
+                    ].map(([v, l]) => (
+                      <div key={l}>
+                        <p className="text-xl font-bold tabular-nums text-sand-50">{v}</p>
+                        <p className="text-xs text-sand-500">{l}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-olive-500 transition-colors group-hover:text-olive-400">
+                    Explore Andromeda
+                    <ArrowRight weight="regular" size={14} className="transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Template quick links */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[
+                ['Mission Control', '/design-systems/andromeda/templates/mission-control'],
+                ['Resource Planning', '/design-systems/andromeda/templates/resource-planning'],
+                ['Service Order', '/design-systems/andromeda/templates/service-order'],
+                ['Signal Room', '/design-systems/andromeda/templates/signal-room'],
+              ].map(([name, href]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="rounded-full border border-sand-800 px-3 py-1.5 text-xs font-medium text-sand-400 transition-colors hover:border-sand-700 hover:text-sand-200"
+                >
                   {name}
-                </span>
-                <p className="text-xs leading-relaxed text-sand-500">{description}</p>
-              </motion.div>
-            ))}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section className="mt-16 sm:mt-24">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+          />
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-[2fr_3fr] sm:gap-12">
+            {/* Intro rail, sticky on desktop */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.35 }}
+              className="self-start sm:sticky sm:top-24"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">FAQ</p>
+              <h2 className="mt-1 text-xl font-bold text-sand-50">Questions, answered.</h2>
+              <p className="mt-3 text-base leading-relaxed text-sand-400">
+                The short version of everything people ask before shipping their
+                first component.
+              </p>
+            </motion.div>
+
+            {/* Accordion cards */}
+            <div className="space-y-2.5">
+              {FAQ_ITEMS.map(({ q, a }, i) => {
+                const open = openFaq === i
+                return (
+                  <motion.div
+                    key={q}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-30px' }}
+                    transition={{ duration: 0.3, delay: i * 0.04 }}
+                    className={`rounded-xl border transition-colors ${
+                      open
+                        ? 'border-sand-700 bg-sand-900'
+                        : 'border-sand-800 bg-sand-900/50 hover:border-sand-700'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(open ? null : i)}
+                      aria-expanded={open}
+                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+                    >
+                      <span className={`w-7 shrink-0 text-sm font-bold tabular-nums ${open ? 'text-olive-500' : 'text-sand-600'}`}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <h3 className="flex-1 text-base font-semibold text-sand-50">{q}</h3>
+                      <CaretRight
+                        weight="regular"
+                        size={16}
+                        className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-500' : 'text-sand-500'}`}
+                      />
+                    </button>
+                    {/* Answer stays in the DOM (SEO); grid-rows trick animates the collapse */}
+                    <div
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                    >
+                      <div className="overflow-hidden">
+                        <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-400">{a}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </section>
 
@@ -1003,18 +1205,27 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               Ready to build?
             </p>
             <h2 className="relative mt-2 text-xl font-bold text-sand-50">
-              Everything is free. Everything is open source.
+              Your agent already knows the way.
             </h2>
             <p className="relative mt-2 text-base text-sand-500">
-              {total}+ AI-native components with prompts for Claude Code, Lovable, and V0. Design systems coming soon.
+              {componentTotal}+ components, design systems, and templates, one command away.
+              Browse them yourself or tell your agent what to build.
             </p>
-            <Link
-              href="/components"
-              className={`relative mt-6 ${buttonClasses({ variant: 'primary', size: 'lg' })}`}
-            >
-              Browse Components
-              <ArrowRight weight="regular" size={14} />
-            </Link>
+            <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/components"
+                className={buttonClasses({ variant: 'primary', size: 'lg' })}
+              >
+                Browse Components
+                <ArrowRight weight="regular" size={14} />
+              </Link>
+              <Link
+                href="/mcp"
+                className={buttonClasses({ variant: 'outline', size: 'lg' })}
+              >
+                Connect the MCP
+              </Link>
+            </div>
           </motion.div>
         </section>
 
