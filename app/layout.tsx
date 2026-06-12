@@ -31,7 +31,7 @@ const geistMono = Geist_Mono({
 })
 
 const TOTAL = COMPONENTS.length
-const GLOBAL_DESCRIPTION = `Free, open-source registry of ${TOTAL} animated React components built with Tailwind CSS and Motion. Each ships with reproduction prompts for Claude Code, Lovable, and v0.`
+const GLOBAL_DESCRIPTION = `Open-source registry of ${TOTAL} animated React components, design systems, and templates. Free to browse and remix with AI. Premium unlocks design systems and unlimited installs. Built with Tailwind CSS and Motion.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

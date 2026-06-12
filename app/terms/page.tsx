@@ -165,7 +165,7 @@ export default function TermsPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
             By creating an account you agree that we may send you occasional
-            emails about AI Canvas itself &mdash; new components, design-system
+            emails about AI Canvas itself: new components, design-system
             updates, MCP releases, and other product news directly related to
             the Service. We do not send marketing for third-party products and
             we do not share your email with third-party advertisers.
@@ -179,7 +179,7 @@ export default function TermsPage() {
           </ul>
           <p className="mt-3 leading-relaxed text-sand-400">
             Opting out does not affect transactional emails (sign-up
-            confirmation, magic links, password reset) &mdash; those are
+            confirmation, magic links, password reset). Those are
             necessary to provide the account service. The legal basis for this
             processing is § 7 (3) UWG (existing-customer exception, as
             interpreted by the ECJ in Case C-654/23).
@@ -221,7 +221,7 @@ export default function TermsPage() {
             for indirect, incidental, special, consequential, or punitive
             damages, or any loss of profits, revenue, or data, arising out of
             or in connection with your use of AI Canvas. Nothing in these
-            terms limits liability that cannot lawfully be limited &mdash; in
+            terms limits liability that cannot lawfully be limited, in
             particular, liability for intent or gross negligence, or liability
             under the German Product Liability Act
             (Produkthaftungsgesetz) where applicable.
@@ -246,14 +246,14 @@ export default function TermsPage() {
           <p className="mt-3 leading-relaxed text-sand-400">
             Beyond breach-based termination, we may also terminate any account
             at our reasonable discretion with at least 14 days&apos; notice by
-            email &mdash; for example, if an account no longer fits the
+            email. For example, if an account no longer fits the
             purpose of the Service. In serious cases (abuse, fraud, security
             risk, repeated breach) we may terminate immediately. In either
             case you can export your data before the account is closed.
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
             We may also modify, suspend, or discontinue all or part of the
-            Service at any time &mdash; including individual features,
+            Service at any time, including individual features,
             components, or the registry itself. Where a change materially
             affects existing accounts we will give reasonable notice, but we
             do not commit to keeping any particular feature or to operating
@@ -272,7 +272,7 @@ export default function TermsPage() {
             existing accounts we will notify you by email or by an in-product
             notice before the change takes effect. Your continued use of AI
             Canvas after a change to these terms means you accept the new
-            version &mdash; if you do not, your remedy is to delete your
+            version. If you do not, your remedy is to delete your
             account.
           </p>
         </section>

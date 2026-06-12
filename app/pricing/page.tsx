@@ -14,8 +14,9 @@ import { useSession } from '../components/auth/SessionProvider'
 import { UpgradeButton } from '../components/billing/UpgradeButton'
 
 // ─── Plan data ──────────────────────────────────────────────────────────────
-// Two tiers, both free. Nerd is the unauthenticated baseline; Hero is the
-// signed-in experience that unlocks save/preset/export from the Lab.
+// Legacy fallback, rendered only when premiumEnabled() is false. Nerd is the
+// unauthenticated baseline; Hero is the signed-in experience. The live
+// Free vs Premium pricing is rendered separately when the premium flag is on.
 // Icons are reused from the sign-up auth animation (NerdToHero).
 
 type Plan = {

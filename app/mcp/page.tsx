@@ -88,7 +88,7 @@ export default function McpPage() {
           {[
             {
               title: 'One command, then forget it',
-              body: 'Install the MCP with a single command. After that your agent can search, inspect, and install AI Canvas components on its own. No copy-paste from the marketplace.',
+              body: 'Install the MCP with a single command. After that your agent can search, inspect, and install AI Canvas components on its own.',
             },
             {
               title: 'No more from-scratch UI',
@@ -96,7 +96,7 @@ export default function McpPage() {
             },
             {
               title: 'Always current',
-              body: 'The server fetches from the live registry at runtime, so new components reach your agent about five minutes after they ship. No reinstalls, ever.',
+              body: 'The server fetches from the live registry at runtime, so new components reach your agent about five minutes after they ship.',
             },
           ].map((card, i) => (
             <div
@@ -128,8 +128,8 @@ export default function McpPage() {
         <ul className="mt-5 space-y-2.5">
           {[
             'Use AI Canvas to show me what categories of components are available.',
-            'Find me an animated card stack and tell me how to install it.',
-            'I’m building a website and need a top bar navigation. What’s available in AI Canvas? Pick the best one.',
+            'Add the task cards from AI Canvas to my dashboard and match my dark theme.',
+            'My hero section feels boring. Find something animated in AI Canvas to fix it.',
             'I need an animated background for my landing page. Find me a good one in AI Canvas.',
           ].map((prompt) => (
             <li
