@@ -70,12 +70,38 @@ export default function TermsPage() {
         <section className="mt-10">
           <h2 className="text-lg font-bold text-sand-50">2. The Service</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            AI Canvas is a free, open-source registry of animated React
-            components. It also publishes design-system templates and an MCP
-            integration that exposes the registry to AI coding tools. Browsing,
-            copying source code, and installing components via the shadcn CLI
-            do not require an account. Saving favourites, viewing install
-            history, and unlocking gated design-system templates do.
+            AI Canvas is an open-source registry of animated React components,
+            offered through a free tier and an optional paid Premium tier. It
+            also publishes design-system templates and an MCP integration that
+            exposes the registry to AI coding tools. Browsing and remixing with
+            AI are always free. Installing standalone components is free up to a
+            daily limit; design systems, templates, and unlimited installs are
+            part of Premium.
+          </p>
+        </section>
+
+        {/* ── 2b. Premium subscription ─────────────────────────────────── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            2b. Premium subscription
+          </h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Premium is billed at $9.99 per month or $49.99 per year through
+            Paddle.com, our reseller and Merchant of Record. Paddle is the
+            seller of record for these transactions and handles payment and
+            applicable taxes; your purchase is also subject to Paddle&apos;s
+            terms. A subscription requires an account and renews automatically
+            at the end of each billing period until cancelled.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            You can cancel at any time from the customer portal linked in your
+            account settings; cancellation takes effect at the end of the
+            current period and you keep access until then. Because Premium is
+            digital content supplied immediately, by starting it you consent to
+            immediate performance and acknowledge that your EU/UK 14-day right
+            of withdrawal ends once access begins, except where the law provides
+            otherwise. Components you have already installed remain yours under
+            the MIT licence regardless of subscription status.
           </p>
         </section>
 
