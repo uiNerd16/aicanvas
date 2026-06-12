@@ -11,10 +11,15 @@ export function utcDay(now: Date): string {
  * Subject key for the counter. Anonymous IPs are hashed with a PER-DAY key
  * (HMAC of the salt and the day), so hashes cannot be linked across days and a
  * leaked salt exposes at most one day of subjects — GDPR data minimization.
+ * Fails CLOSED on a missing salt: an empty salt would make subjects
+ * attacker-reconstructable (targeted quota poisoning). The routes' metering
+ * fail-open catches the throw, so installs keep working while the
+ * misconfiguration is logged loudly.
  */
 export function subjectFor(userId: string | null, ip: string | null, day: string): string {
   if (userId) return `user:${userId}`
-  const salt = process.env.USAGE_IP_SALT ?? ''
+  const salt = process.env.USAGE_IP_SALT
+  if (!salt) throw new Error('USAGE_IP_SALT is not set — anonymous metering disabled')
   const dayKey = createHmac('sha256', salt).update(day).digest()
   const hash = createHmac('sha256', dayKey).update(ip ?? 'unknown').digest('hex')
   return `ip:${hash}`
@@ -50,8 +55,14 @@ export async function consume(
   return data === true
 }
 
-/** Read the client IP from request headers (Vercel sets x-forwarded-for). */
+/**
+ * Read the client IP from request headers. Prefer x-real-ip (set by Vercel's
+ * proxy, not client-forgeable there) over the x-forwarded-for chain, whose
+ * leftmost entry can be attacker-supplied on other hosts.
+ */
 export function ipFromHeaders(headers: Headers): string | null {
+  const real = headers.get('x-real-ip')
+  if (real) return real.trim()
   const xff = headers.get('x-forwarded-for')
   return xff ? xff.split(',')[0].trim() : null
 }
@@ -70,5 +81,9 @@ export function maybePruneUsage(day: string): void {
     .from('usage_daily')
     .delete()
     .lt('day', cutoff)
-    .then(() => {})
+    .then(({ error }) => {
+      // Best-effort, but never silent: a denied/failing prune means the 30-day
+      // retention promise in the privacy policy is not being kept.
+      if (error) console.error('[usage retention] prune failed:', error)
+    })
 }

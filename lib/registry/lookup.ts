@@ -1,32 +1,41 @@
+import 'server-only'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { ContentLookup } from './content-type'
-import { COMPONENTS, DESIGN_SYSTEM_META } from '@/app/lib/component-registry'
+import { buildLookup, type GateManifest } from './manifest'
 
 let cached: ContentLookup | null = null
 
 /**
- * Build (once) the lookup sets the classifier needs, from the registry's own
- * source of truth:
- * - `designSystemSlugs`: components carrying a `designSystem` flag.
- * - `systemSlugs` + `templateSlugs`: from DESIGN_SYSTEM_META, which mirrors
- *   what `generate-registry.mjs` emits (system aggregates + templates).
+ * Load the classifier lookup from registry-data/_manifest.json — written by
+ * scripts/generate-registry.mjs from what it ACTUALLY emits, so the paywall
+ * classifier can never drift from the registry contents (the previous
+ * approach read a designSystem flag off the component registry, which no
+ * entry set, silently classifying every design-system component as a free
+ * standalone). The underscore name keeps it unservable via /r (filename
+ * regex rejects it); outputFileTracingIncludes bundles it on Vercel.
  *
- * Server-only: imports the full component registry. Only the `/r` route uses it.
+ * If the manifest is missing (build misconfiguration), fall back to a
+ * minimal hardcoded set so SYSTEM aggregates and templates still gate, and
+ * log loudly — never fail silently open for the whole catalog.
  */
 export function loadContentLookup(): ContentLookup {
   if (cached) return cached
-
-  const designSystemSlugs = new Set<string>()
-  const templateSlugs = new Set<string>()
-  const systemSlugs = new Set<string>()
-
-  for (const entry of COMPONENTS) {
-    if (entry.designSystem) designSystemSlugs.add(entry.slug)
+  try {
+    const raw = readFileSync(join(process.cwd(), 'registry-data', '_manifest.json'), 'utf8')
+    cached = buildLookup(JSON.parse(raw) as GateManifest)
+  } catch (err) {
+    console.error('[registry gate] _manifest.json missing/unreadable — using minimal fallback:', err)
+    cached = buildLookup({
+      systemSlugs: ['andromeda'],
+      designSystemSlugs: [],
+      templateSlugs: [
+        'andromeda-mission-control',
+        'andromeda-service-order',
+        'andromeda-resource-planning',
+        'andromeda-signal-room',
+      ],
+    })
   }
-  for (const meta of Object.values(DESIGN_SYSTEM_META)) {
-    systemSlugs.add(meta.slug)
-    for (const t of meta.templates) templateSlugs.add(t.slug)
-  }
-
-  cached = { designSystemSlugs, templateSlugs, systemSlugs }
   return cached
 }

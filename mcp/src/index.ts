@@ -23,7 +23,7 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.1.1'
+const MCP_VERSION = '0.2.0'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 // Optional per-user token (the website bakes it into the copied MCP config).
 // Identifies the account so pulls count against the right quota and unlock
@@ -55,12 +55,14 @@ interface ComponentMeta {
   installCommand: string
 }
 
+// NOTE: fields mirror what scripts/generate-registry.mjs emits into
+// aicanvas-mcp.json — keep in sync (systems carry tokenFileCount, not fileCount).
 interface SystemMeta {
   slug: string
   name: string
   description: string
   componentCount: number
-  fileCount: number
+  tokenFileCount: number
   dependencies: string[]
   templateSlugs: string[]
   homepageUrl: string

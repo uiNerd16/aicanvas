@@ -111,13 +111,14 @@ export default function ComponentPageView({
   useCases,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
-  // Premium UI layer (Plan 0): flag-gated, driven by the entitlement stub.
-  // Flag off = today's behavior, byte for byte. Design systems and templates
-  // are premium-only; standalones draw from the daily pool. Remix is never
-  // gated. Real enforcement arrives with Plans 1-3; this is presentation.
+  // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub is driven by the
+  // DevTierSwitcher (localStorage), which only renders in development; in
+  // production its default ('anonymous, at limit') would wall off real code
+  // for everyone whenever the premium flag is on but enforcement is not.
+  // Real gating is the `enforcing` path below; the stub never ships.
   const entitlement = useEntitlement()
   const paywallReason: PaywallReason | null =
-    !premiumEnabled() || entitlement.tier === 'premium'
+    process.env.NODE_ENV === 'production' || !premiumEnabled() || enforcing || entitlement.tier === 'premium'
       ? null
       : designSystem
         ? 'premium-only'
@@ -140,11 +141,19 @@ export default function ComponentPageView({
   useEffect(() => {
     if (!user) { setUserToken(null); return }
     let cancelled = false
-    fetch('/api/me/token')
-      .then((r) => r.json())
-      .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
-      .catch(() => {})
-    return () => { cancelled = true }
+    const refresh = () =>
+      fetch('/api/me/token')
+        .then((r) => r.json())
+        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+        .catch(() => {})
+    refresh()
+    // Re-fetch on focus so a token rotated in another tab (settings) doesn't
+    // leave this page embedding a dead credential in the copied commands.
+    window.addEventListener('focus', refresh)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', refresh)
+    }
   }, [user])
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
   // Enforcing mode (Plan 3): source isn't in the HTML — fetch it on demand from
@@ -154,13 +163,21 @@ export default function ComponentPageView({
     | { status: 'ready'; code: string }
     | { status: 'locked'; reason: PaywallReason; limit?: number }
   const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
+  // Always fetch the PAGE's component source (`slug`), never `installSlug` —
+  // the Code tab shows this component regardless of the install-tier toggle,
+  // and a system slug would 404 (no entry in the code map) and mis-meter.
   const openCode = useCallback(async () => {
     setCodeState({ status: 'loading' })
     try {
-      const res = await fetch(`/api/component-code?slug=${installSlug}`)
+      const res = await fetch(`/api/component-code?slug=${slug}`)
       if (res.status === 402) {
         const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
         setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only', limit })
+        return
+      }
+      if (!res.ok) {
+        // Unexpected (404/5xx): show the lock rather than a blank pane.
+        setCodeState({ status: 'locked', reason: 'premium-only' })
         return
       }
       const { code: fetched } = await res.json()
@@ -168,13 +185,13 @@ export default function ComponentPageView({
     } catch {
       setCodeState({ status: 'locked', reason: 'premium-only' })
     }
-  }, [installSlug])
-  // Fetch on first Code-tab open (and re-fetch if the install tier changes).
+  }, [slug])
+  // Fetch on first Code-tab open.
   useEffect(() => {
     if (enforcing && activeTab === 'code' && codeState.status === 'idle') void openCode()
   }, [enforcing, activeTab, codeState.status, openCode])
-  // Reset when switching components / install tier so the next open re-fetches.
-  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, installSlug])
+  // Reset when switching components so the next open re-fetches.
+  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -974,7 +991,11 @@ export default function ComponentPageView({
                       </Step>
                       )}
 
-                      {/* Step — Copy the code */}
+                      {/* Step — Copy the code. In enforcing mode this mirrors
+                          the Code tab's gated state machine: source only
+                          renders once the gated fetch succeeded, the paywall
+                          shows when locked, and copy is disabled until ready
+                          (same pull — re-access is free, so no double count). */}
                       <Step number={manualStep.code}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Copy and paste the following code into your project:
@@ -986,7 +1007,8 @@ export default function ComponentPageView({
                               </span>
                               <button
                                 onClick={copyCode}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                disabled={enforcing && codeState.status !== 'ready'}
+                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 {codeCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -994,7 +1016,25 @@ export default function ComponentPageView({
                               </button>
                             </div>
                             <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
-                              {highlightedCode}
+                              {enforcing ? (
+                                codeState.status === 'locked' ? (
+                                  <Paywall reason={codeState.reason} limit={codeState.limit} />
+                                ) : codeState.status === 'ready' ? (
+                                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                                    {codeState.code}
+                                  </pre>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={openCode}
+                                    className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-300"
+                                  >
+                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source (uses your daily pull for this component)'}
+                                  </button>
+                                )
+                              ) : (
+                                highlightedCode
+                              )}
                             </div>
                           </div>
                       </Step>

@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/server'
+import { paddleApiBase } from '@/app/lib/paddle/server'
 
 export const runtime = 'nodejs'
-
-const PADDLE_API = process.env.PADDLE_ENV === 'sandbox'
-  ? 'https://sandbox-api.paddle.com'
-  : 'https://api.paddle.com'
 
 /** Returns a Paddle customer-portal URL for the signed-in user, or null. */
 export async function GET() {
@@ -25,7 +22,7 @@ export async function GET() {
   if (error || !sub?.paddle_customer_id) return NextResponse.json({ url: null })
 
   const res = await fetch(
-    `${PADDLE_API}/customers/${sub.paddle_customer_id}/portal-sessions`,
+    `${paddleApiBase()}/customers/${sub.paddle_customer_id}/portal-sessions`,
     { method: 'POST', headers: { Authorization: `Bearer ${apiKey}` } },
   )
   if (!res.ok) return NextResponse.json({ url: null })

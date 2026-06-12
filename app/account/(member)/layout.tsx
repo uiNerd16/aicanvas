@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Crown } from '@phosphor-icons/react/dist/ssr'
 import { createClient } from '../../lib/supabase/server'
 import { premiumEnabled } from '../../../lib/flags'
+import { isPremiumNow, type SubStatus } from '../../../lib/identity/tier'
 import { EmailAvatar } from '../../components/auth/EmailAvatar'
 import { AccountTabs } from './AccountTabs'
 import { AccountTopBar } from './AccountTopBar'
@@ -21,10 +22,12 @@ export default async function MemberLayout({ children }: { children: ReactNode }
     showTier = true
     const { data: sub } = await supabase
       .from('user_subscriptions')
-      .select('status')
+      .select('status, current_period_end')
       .eq('user_id', user.id)
       .maybeSingle()
-    isPremium = sub?.status === 'active' || sub?.status === 'trialing'
+    isPremium = sub
+      ? isPremiumNow(sub.status as SubStatus, sub.current_period_end ?? null)
+      : false
   }
 
   return (

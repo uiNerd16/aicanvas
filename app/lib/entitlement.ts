@@ -37,8 +37,11 @@ export async function getEntitlement(req: Request): Promise<Entitlement> {
       .update({ last_used_at: new Date().toISOString() })
       .eq('user_id', key.user_id)
       .then(() => {})
-    const status = await fetchStatus(admin, key.user_id)
-    return { tier: deriveTier({ hasUser: true, status }), userId: key.user_id }
+    const sub = await fetchSubscription(admin, key.user_id)
+    return {
+      tier: deriveTier({ hasUser: true, status: sub.status, currentPeriodEnd: sub.currentPeriodEnd }),
+      userId: key.user_id,
+    }
   }
 
   // No token: fall back to the website session (cookies).
@@ -46,15 +49,24 @@ export async function getEntitlement(req: Request): Promise<Entitlement> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { tier: 'anonymous', userId: null }
   const admin = createAdminClient()
-  const status = await fetchStatus(admin, user.id)
-  return { tier: deriveTier({ hasUser: true, status }), userId: user.id }
+  const sub = await fetchSubscription(admin, user.id)
+  return {
+    tier: deriveTier({ hasUser: true, status: sub.status, currentPeriodEnd: sub.currentPeriodEnd }),
+    userId: user.id,
+  }
 }
 
-async function fetchStatus(admin: AdminClient, userId: string): Promise<SubStatus> {
+async function fetchSubscription(
+  admin: AdminClient,
+  userId: string,
+): Promise<{ status: SubStatus; currentPeriodEnd: string | null }> {
   const { data } = await admin
     .from('user_subscriptions')
-    .select('status')
+    .select('status, current_period_end')
     .eq('user_id', userId)
     .maybeSingle()
-  return (data?.status as SubStatus) ?? 'none'
+  return {
+    status: (data?.status as SubStatus) ?? 'none',
+    currentPeriodEnd: data?.current_period_end ?? null,
+  }
 }
