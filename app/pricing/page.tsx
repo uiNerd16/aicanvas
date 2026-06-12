@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { CheckCircle, Crown, Lightning, Sparkle } from '@phosphor-icons/react'
@@ -212,6 +212,18 @@ function PremiumCards() {
   const price = cycle === 'yearly' ? '$49.99' : '$9.99'
   const suffix = cycle === 'yearly' ? 'year' : 'month'
 
+  // Reflect the real subscription so a premium user isn't pitched "Go Premium".
+  const [isPremium, setIsPremium] = useState(false)
+  useEffect(() => {
+    if (!user) { setIsPremium(false); return }
+    let cancelled = false
+    fetch('/api/me/entitlement')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setIsPremium(d?.tier === 'premium') })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user])
+
   return (
     <div className="mt-12 grid gap-6 sm:mt-16 md:grid-cols-2">
       {/* ── Free card ── */}
@@ -315,12 +327,21 @@ function PremiumCards() {
             <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
           </div>
 
-          <UpgradeButton
-            cycle={cycle}
-            className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}`}
-          >
-            Go Premium
-          </UpgradeButton>
+          {isPremium ? (
+            <Link
+              href="/account/settings"
+              className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+            >
+              You&rsquo;re on Premium · Manage
+            </Link>
+          ) : (
+            <UpgradeButton
+              cycle={cycle}
+              className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}`}
+            >
+              Go Premium
+            </UpgradeButton>
+          )}
         </div>
         <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
