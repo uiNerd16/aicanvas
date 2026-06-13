@@ -340,6 +340,12 @@ export default function ComponentPageView({
     ? `"https://aicanvas.me/r/${installSlug}.json?token=${userToken}"`
     : `@aicanvas/${installSlug}`
   const cliCommand = `npx shadcn@latest add ${installReference}`
+  // Displayed form masks the token so it never appears on screen or in
+  // screenshots. The copy buttons still write the REAL command to the
+  // clipboard, so the install works when pasted.
+  const installReferenceMasked = userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${installSlug}`
 
   async function copyCode() {
     // When enforcing, source only exists after the gated fetch resolves.
@@ -851,12 +857,12 @@ export default function ComponentPageView({
                             <div className="px-4 py-3.5">
                               <code className="font-mono text-sm text-sand-300 break-all">
                                 {pkgManager === 'pnpm'
-                                  ? `pnpm dlx shadcn@latest add ${installReference}`
+                                  ? `pnpm dlx shadcn@latest add ${installReferenceMasked}`
                                   : pkgManager === 'bun'
-                                  ? `bunx shadcn@latest add ${installReference}`
+                                  ? `bunx shadcn@latest add ${installReferenceMasked}`
                                   : pkgManager === 'yarn'
-                                  ? `yarn dlx shadcn@latest add ${installReference}`
-                                  : `npx shadcn@latest add ${installReference}`}
+                                  ? `yarn dlx shadcn@latest add ${installReferenceMasked}`
+                                  : `npx shadcn@latest add ${installReferenceMasked}`}
                               </code>
                             </div>
                           </div>

@@ -30,8 +30,8 @@ export function Paywall({ reason, limit: realLimit }: { reason: PaywallReason; l
     reason === 'premium-only'
       ? 'This is part of a design system. Premium unlocks every design system, template, and unlimited installs.'
       : isAnonymous
-        ? `You have used your ${limit} free installs for today. A free account gets 10 installs a day.`
-        : `You have used your ${limit} installs for today. Premium removes the limit.`
+        ? `You've used your ${limit} free installs for today. A free account gets you 10 a day, and Premium lifts the limit entirely.`
+        : `You've used your ${limit} installs for today. Premium lifts the daily limit entirely.`
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
