@@ -85,13 +85,14 @@ const ALL_SLUGS = [
   'new-project-modal',
   'signature-pad',
   'tilted-coverflow',
+  'crypto-swap',
 ]
 
 const arg   = process.argv[2]
 const SLUGS = arg ? [arg] : ALL_SLUGS
 
 const BASE_URL         = process.env.BASE_URL || 'http://localhost:3000'
-const IMAGEKIT_PRIVATE = 'private_REDACTED_KEY'
+const IMAGEKIT_PRIVATE = process.env.IMAGEKIT_PRIVATE_KEY
 const IMAGEKIT_UPLOAD  = 'https://upload.imagekit.io/api/v1/files/upload'
 const TEMP_DIR         = path.join(__dirname, '../.screenshots-tmp')
 const SETTLE_MS        = 2500

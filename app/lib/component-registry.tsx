@@ -146,6 +146,8 @@ import InteractiveCardStack from '../../components-workspace/interactive-card-st
 import { prompts as interactiveCardStackPrompts } from '../../components-workspace/interactive-card-stack/prompts'
 import ProductCardDeck from '../../components-workspace/product-card-deck'
 import { prompts as productCardDeckPrompts } from '../../components-workspace/product-card-deck/prompts'
+import CryptoSwap from '../../components-workspace/crypto-swap'
+import { prompts as cryptoSwapPrompts } from '../../components-workspace/crypto-swap/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1343,6 +1345,21 @@ Requirements:
     PreviewComponent: ProductCardDeck,
     code: componentCodes['product-card-deck'],
     prompts: productCardDeckPrompts,
+  },
+  {
+    slug: 'crypto-swap',
+    image: 'https://ik.imagekit.io/aitoolkit/crypto-swap.png?v=2',
+    name: 'Crypto Swap',
+    description: 'A crypto token-swap widget with live exchange rates, price impact, and an animated swap button.',
+    tags: [
+      { label: 'Widgets', accent: true },
+      { label: 'Interactive' },
+      { label: 'Motion' },
+    ],
+    dualTheme: true,
+    PreviewComponent: CryptoSwap,
+    code: componentCodes['crypto-swap'],
+    prompts: cryptoSwapPrompts,
   },
 ]
 
