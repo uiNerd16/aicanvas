@@ -154,7 +154,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
       </div>
 
       {/* Bottom — features inset */}
-      <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+      <div className="flex-1 rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
           {plan.listLabel}
         </p>
@@ -199,18 +199,17 @@ const FREE_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  'Unlimited component installs per day',
-  'Pull design systems through the CLI and MCP',
-  'Templates, full access',
+  'Unlimited component installs, no daily limit',
+  'Full design systems, one command installs the whole thing',
+  'Premium templates, full access',
   'Every new design system and template, included',
-  'One command installs a whole system, wired up',
   'Cancel anytime',
 ]
 
 function PremiumCards() {
   const { user } = useSession()
   const [cycle, setCycle] = useState<'monthly' | 'yearly'>('yearly')
-  const price = cycle === 'yearly' ? '$49.99' : '$9.99'
+  const price = cycle === 'yearly' ? '$49.99' : '$8.99'
   const suffix = cycle === 'yearly' ? 'year' : 'month'
 
   // Reflect the real subscription so a premium user isn't pitched "Go Premium".
@@ -240,11 +239,11 @@ function PremiumCards() {
               <NerdSvg />
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
-              Free
+              Nerd
             </h2>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-            Browse everything, install components daily, and remix with AI.
+            The whole canvas, free forever.
           </p>
           {/* Invisible mirror of the Premium card's billing-cycle toggle so the
               price and CTA align across both cards. Same box height, no toggle
@@ -268,7 +267,7 @@ function PremiumCards() {
             {user ? 'Browse Components' : 'Sign up free'}
           </Link>
         </div>
-        <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+        <div className="flex-1 rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
             ALWAYS INCLUDED
           </p>
@@ -291,13 +290,12 @@ function PremiumCards() {
               <SuperheroSvg />
             </div>
             <h2 className="flex items-center gap-2 text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
-              Premium
+              Hero
               <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-            Everything in Free, without limits. Whole design systems and
-            templates, installed with one command.
+            No daily limit. The whole premium library.
           </p>
 
           {/* Billing cycle toggle — yearly default + highlighted */}
@@ -322,7 +320,7 @@ function PremiumCards() {
                   : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
               }`}
             >
-              Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 58%</span>
+              Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 54%</span>
             </button>
           </div>
 
@@ -357,7 +355,7 @@ function PremiumCards() {
             </UpgradeButton>
           )}
         </div>
-        <div className="rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+        <div className="flex-1 rounded-2xl bg-sand-200/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
             EVERYTHING IN FREE, PLUS
           </p>
@@ -412,7 +410,7 @@ export default function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-sand-600 dark:text-sand-400">
             {premium
-              ? 'Free accounts install 10 components a day and remix with AI at no cost. Premium unlocks design systems, templates, and unlimited installs.'
+              ? 'Nerds install 10 components a day and remix with AI, free forever. Heroes go unlimited, with design systems and templates included.'
               : 'AI Canvas is free, forever. Browse as a Nerd or sign up as a Hero to save your work, keep Lab presets, and export to your machine.'}
           </p>
         </Section>
