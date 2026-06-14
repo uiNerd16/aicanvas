@@ -656,6 +656,10 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 // Rendered in the homepage FAQ section AND mirrored into FAQPage JSON-LD for
 // rich results. Answers must stay plain text so both stay in sync.
 
+// Flip to true when Andromeda is ready to feature on the homepage. Gates both
+// the design-systems showcase section and the design-system FAQ entry below.
+const ANDROMEDA_LIVE: boolean = false
+
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
@@ -681,10 +685,15 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
     q: 'Can I use AI Canvas components in commercial projects?',
     a: 'Yes. The code is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution.',
   },
-  {
-    q: 'What is included in a design system?',
-    a: `A complete, token-driven visual language. Andromeda includes ${ANDROMEDA_COMPONENT_META.length} components, 4 production templates, and a single token file that controls every color, spacing, and radius across the system.`,
-  },
+  // Hidden until Andromeda is featured on the homepage (ANDROMEDA_LIVE).
+  ...(ANDROMEDA_LIVE
+    ? [
+        {
+          q: 'What is included in a design system?',
+          a: `A complete, token-driven visual language. Andromeda includes ${ANDROMEDA_COMPONENT_META.length} components, 4 production templates, and a single token file that controls every color, spacing, and radius across the system.`,
+        },
+      ]
+    : []),
   {
     q: 'What stack do the components use?',
     a: 'React with TypeScript, Tailwind CSS, and Framer Motion for animation. Components are built for the Next.js App Router but work in any modern React setup. 3D components use Three.js.',
@@ -999,7 +1008,8 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         </section>
 
 
-        {/* ── Design systems & templates showcase ── */}
+        {/* ── Design systems & templates showcase (hidden until ANDROMEDA_LIVE) ── */}
+        {ANDROMEDA_LIVE && (
         <section className="mt-16 sm:mt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -1117,6 +1127,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             </div>
           </motion.div>
         </section>
+        )}
 
         {/* ── FAQ ── */}
         <section className="mt-16 sm:mt-24">
