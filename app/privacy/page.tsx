@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Last updated: 2026-05-10. This policy describes how AI Canvas processes
+          Last updated: 2026-06-14. This policy describes how AI Canvas processes
           personal data, in line with the EU General Data Protection Regulation
           (GDPR / DSGVO) and the German Bundesdatenschutzgesetz (BDSG).
         </p>
@@ -94,6 +94,16 @@ export default function PrivacyPage() {
             data is private to you, protected by row-level security, and only
             used to power features such as your saved list, your install history
             tab, and pre-selected defaults in the install drawer.
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Contact form
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            When you write to us through the contact form we receive the name,
+            email address, subject, and message you submit. We use them solely to
+            read and answer your enquiry. The message is delivered to our inbox by
+            Resend (see Section 5) with your email set as the reply-to address.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -182,6 +192,13 @@ export default function PrivacyPage() {
               deleted after 30 days. Signed-in pulls are tied to your account.
             </li>
             <li>
+              <strong className="text-sand-200">Contact form:</strong>{' '}
+              Art. 6 (1)(f) GDPR — legitimate interest in answering an enquiry you
+              chose to send us. We process only the name, email, subject, and
+              message you provide, and keep them no longer than needed to deal
+              with the matter.
+            </li>
+            <li>
               <strong className="text-sand-200">Marketing communications:</strong>{' '}
               § 7 (3) UWG (existing-customer exception under German competition
               law, as interpreted by the ECJ in Case C-654/23). Marketing is
@@ -229,10 +246,17 @@ export default function PrivacyPage() {
               from Frankfurt where possible.
             </li>
             <li>
-              <strong className="text-sand-200">Supabase Inc.</strong> (USA):
-              authentication, account database, transactional emails (sign-up
-              confirmation, magic links, password reset). EU-region project
-              where available.
+              <strong className="text-sand-200">Supabase Inc.</strong> (USA) —
+              authentication and account database. It also generates the account
+              emails (sign-up confirmation, magic links, password reset), which
+              are delivered via Resend (below). EU-region project where available.
+            </li>
+            <li>
+              <strong className="text-sand-200">Resend (Resend, Inc.)</strong> (USA) —
+              delivers our outbound email: the account emails above and any
+              message you send through the contact form. Mail is sent via Amazon
+              SES in the EU region (Ireland) and authenticated with SPF/DKIM; we
+              use no open- or click-tracking.
             </li>
             <li>
               <strong className="text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
@@ -258,6 +282,11 @@ export default function PrivacyPage() {
               as long as your account exists. When you delete your account, your
               account row, saved components, install history, and preferences
               are removed via cascade.
+            </li>
+            <li>
+              <strong className="text-sand-200">Contact messages</strong> are kept
+              only as long as needed to handle your enquiry and any follow-up,
+              then deleted.
             </li>
             <li>
               <strong className="text-sand-200">Server logs</strong> are kept for
