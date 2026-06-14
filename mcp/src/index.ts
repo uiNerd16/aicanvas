@@ -23,8 +23,20 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.1.1'
+const MCP_VERSION = '0.2.0'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
+// Optional per-user token (the website bakes it into the copied MCP config).
+// Identifies the account so pulls count against the right quota and unlock
+// premium content. Absent = anonymous (subject to the daily free limit).
+const USER_TOKEN = process.env.AICANVAS_TOKEN ?? ''
+
+function registryHeaders(): Record<string, string> {
+  return {
+    Accept: 'application/json',
+    'User-Agent': USER_AGENT,
+    ...(USER_TOKEN ? { Authorization: `Bearer ${USER_TOKEN}` } : {}),
+  }
+}
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,12 +55,14 @@ interface ComponentMeta {
   installCommand: string
 }
 
+// NOTE: fields mirror what scripts/generate-registry.mjs emits into
+// aicanvas-mcp.json — keep in sync (systems carry tokenFileCount, not fileCount).
 interface SystemMeta {
   slug: string
   name: string
   description: string
   componentCount: number
-  fileCount: number
+  tokenFileCount: number
   dependencies: string[]
   templateSlugs: string[]
   homepageUrl: string
@@ -98,9 +112,7 @@ async function fetchMeta(): Promise<MetaPayload> {
   if (metaCache && Date.now() - metaCache.fetchedAt < META_TTL_MS) {
     return metaCache.data
   }
-  const res = await fetch(META_URL, {
-    headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
-  })
+  const res = await fetch(META_URL, { headers: registryHeaders() })
   if (!res.ok) {
     throw new Error(
       `Failed to fetch AI Canvas registry meta from ${META_URL}: ${res.status} ${res.statusText}`,
@@ -113,9 +125,16 @@ async function fetchMeta(): Promise<MetaPayload> {
 
 async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
   const url = `${REGISTRY_BASE}/${encodeURIComponent(slug)}.json`
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': USER_AGENT },
-  })
+  const res = await fetch(url, { headers: registryHeaders() })
+  if (res.status === 402) {
+    const j = (await res.json().catch(() => ({}))) as { message?: string }
+    throw new Error(
+      j.message ??
+        'This requires AI Canvas Premium, or you have hit the daily free limit. ' +
+        'Upgrade at https://aicanvas.me/pricing. Set AICANVAS_TOKEN to use your account, ' +
+        'and update with: npx @aicanvas/mcp@latest',
+    )
+  }
   if (!res.ok) {
     throw new Error(
       `Failed to fetch source for "${slug}" from ${url}: ${res.status} ${res.statusText}`,

@@ -23,13 +23,20 @@ export default async function AndromedaComponentPage({
     (c) => ({ slug: c.slug, name: c.name }),
   )
 
+  // Design-system source is premium: when the registry gate is enforcing,
+  // never ship it in this page's HTML (same rule as the standalone pages).
+  // Note env vars take effect on deploy — pages re-prerender then.
+  const enforcing =
+    process.env.REGISTRY_ENFORCEMENT === 'enforce' &&
+    process.env.NEXT_PUBLIC_PREMIUM_ENABLED === 'true'
+
   return (
     <AndromedaComponentView
       slug={entry.slug}
       name={entry.name}
       description={entry.description}
-      rawCode={entry.code}
-      highlightedCode={<HighlightedCode code={entry.code} />}
+      rawCode={enforcing ? undefined : entry.code}
+      highlightedCode={enforcing ? undefined : <HighlightedCode code={entry.code} />}
       related={related}
     />
   )

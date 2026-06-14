@@ -4,7 +4,7 @@ import { COMPONENTS } from './lib/component-registry'
 import { SITE_URL } from './lib/config'
 
 const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENTS.length} Animated React Components with AI Reproduction Prompts`
-const HOMEPAGE_DESCRIPTION = `Free, open-source registry of ${COMPONENTS.length} animated React components built with Tailwind CSS and Motion. Install with one command or remix with AI prompts for Claude Code, Lovable, and v0.`
+const HOMEPAGE_DESCRIPTION = `Open-source registry of ${COMPONENTS.length} animated React components. Free to browse and remix with AI. Install components with one command up to a daily limit, or go Premium for design systems and unlimited installs.`
 
 export const metadata: Metadata = {
   title: { absolute: HOMEPAGE_TITLE },

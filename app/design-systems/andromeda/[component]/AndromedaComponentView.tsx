@@ -27,8 +27,11 @@ interface Props {
   slug: string
   name: string
   description: string
-  highlightedCode: ReactNode
-  rawCode: string
+  // Withheld (undefined) when the registry gate is enforcing — design-system
+  // source is premium and must not ship in the page HTML. The view then shows
+  // a locked note pointing at the CLI install / pricing.
+  highlightedCode?: ReactNode
+  rawCode?: string
   related: RelatedItem[]
 }
 
@@ -86,12 +89,25 @@ export function AndromedaComponentView({
   }, [fullscreen])
 
   async function copyCode() {
+    if (rawCode == null) return // source withheld (premium, enforcing)
     try {
       await navigator.clipboard.writeText(rawCode)
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
     } catch {}
   }
+
+  // Shown in place of the source when it is withheld (premium, enforcing).
+  const lockedCodeNote = (
+    <div className="p-8 text-center text-sm" style={{ color: tokens.color.text.secondary }}>
+      This is a premium design-system component. Install it with the CLI
+      command above, or see{' '}
+      <a href="/pricing" style={{ color: tokens.color.accent[300] }}>
+        aicanvas.me/pricing
+      </a>
+      .
+    </div>
+  )
 
   // Andromeda doesn't have a published shadcn registry yet — this command
   // mirrors the standalone pattern so the layout reads correctly. Wire to
@@ -181,7 +197,7 @@ export function AndromedaComponentView({
                 scrollbarWidth: 'thin',
               }}
             >
-              {highlightedCode}
+              {highlightedCode ?? lockedCodeNote}
             </div>
           )}
         </div>
@@ -367,7 +383,7 @@ export function AndromedaComponentView({
                       </button>
                     </div>
                     <div className="max-h-96 overflow-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
-                      {highlightedCode}
+                      {highlightedCode ?? lockedCodeNote}
                     </div>
                   </div>
                 </Step>

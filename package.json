@@ -10,6 +10,8 @@
     "build": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "screenshot": "node scripts/screenshot.mjs",
     "validate:registry": "npx ts-node scripts/validate-registry-json.ts",
     "gsc:audit": "npx ts-node scripts/gsc-audit.ts",
@@ -19,6 +21,7 @@
   "dependencies": {
     "@carbon/icons-react": "^11.78.0",
     "@chenglou/pretext": "^0.0.3",
+    "@paddle/paddle-js": "^1.6.4",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",
@@ -43,6 +46,7 @@
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
+    "server-only": "^0.0.1",
     "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2"
@@ -60,6 +64,7 @@
     "googleapis": "^171.4.0",
     "playwright": "^1.59.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.6"
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -36,6 +36,10 @@ import { useSession } from '../auth/SessionProvider'
 import { Button } from '../Button'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
+import { premiumEnabled } from '../../../lib/flags'
+import { useEntitlement } from '../billing/useEntitlement'
+import { PremiumBadge } from '../billing/PremiumBadge'
+import { Paywall, type PaywallReason } from '../billing/Paywall'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -65,12 +69,19 @@ interface ComponentPageViewProps {
   description: string
   headingSubtitle?: string
   tags: Tag[]
-  code: string
+  // code + highlightedCode are omitted when `enforcing` (source is fetched
+  // on demand from the gated endpoint instead of shipped in the HTML).
+  code?: string
   prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
   designSystem?: DesignSystemSlug
   related: ComponentMeta[]
-  highlightedCode: ReactNode
+  highlightedCode?: ReactNode
+  enforcing?: boolean
+  // The `// font:` / `// font-pkg:` / `// npm install` directive lines, always
+  // provided so the install UI (deps + font setup) survives even when the full
+  // `code` is withheld in enforcing mode.
+  codeDirectives?: string
   children: ReactNode
   // Per-component copy slots. Render when the slot is filled; components
   // without `about` simply omit that section. Sourced from the registry
@@ -93,19 +104,94 @@ export default function ComponentPageView({
   designSystem,
   related,
   highlightedCode,
+  enforcing = false,
+  codeDirectives,
   children,
   about,
   useCases,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
+  // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub is driven by the
+  // DevTierSwitcher (localStorage), which only renders in development; in
+  // production its default ('anonymous, at limit') would wall off real code
+  // for everyone whenever the premium flag is on but enforcement is not.
+  // Real gating is the `enforcing` path below; the stub never ships.
+  const entitlement = useEntitlement()
+  const paywallReason: PaywallReason | null =
+    process.env.NODE_ENV === 'production' || !premiumEnabled() || enforcing || entitlement.tier === 'premium'
+      ? null
+      : designSystem
+        ? 'premium-only'
+        : entitlement.usedToday >= entitlement.limit
+          ? 'quota-exceeded'
+          : null
   const [installTier, setInstallTier] = useState<'component' | 'system'>('component')
   // Reset to component tier on mount per slug — switching pages shouldn't carry tier
   // selection across components.
   useEffect(() => { setInstallTier('component') }, [slug])
   const installSlug = installTier === 'system' && systemMeta ? systemMeta.slug : slug
   const router = useRouter()
-  const { preferences } = useSession()
+  const { preferences, user } = useSession()
+  // Personalized install: when signed in, the copied command carries the
+  // user's API token so the registry can attribute the pull to the account
+  // (Plan 2). Signed out = today's plain @aicanvas/<slug> command, unchanged.
+  // The token route is resilient (returns null pre-migration), so this stays
+  // a no-op until the backend lands.
+  const [userToken, setUserToken] = useState<string | null>(null)
+  useEffect(() => {
+    if (!user) { setUserToken(null); return }
+    let cancelled = false
+    const refresh = () =>
+      fetch('/api/me/token')
+        .then((r) => r.json())
+        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+        .catch(() => {})
+    refresh()
+    // Re-fetch on focus so a token rotated in another tab (settings) doesn't
+    // leave this page embedding a dead credential in the copied commands.
+    window.addEventListener('focus', refresh)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', refresh)
+    }
+  }, [user])
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview')
+  // Enforcing mode (Plan 3): source isn't in the HTML — fetch it on demand from
+  // the gated endpoint when the Code tab opens. 200 -> source; 402 -> paywall.
+  type CodeState =
+    | { status: 'idle' | 'loading' }
+    | { status: 'ready'; code: string }
+    | { status: 'locked'; reason: PaywallReason; limit?: number }
+  const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
+  // Always fetch the PAGE's component source (`slug`), never `installSlug` —
+  // the Code tab shows this component regardless of the install-tier toggle,
+  // and a system slug would 404 (no entry in the code map) and mis-meter.
+  const openCode = useCallback(async () => {
+    setCodeState({ status: 'loading' })
+    try {
+      const res = await fetch(`/api/component-code?slug=${slug}`)
+      if (res.status === 402) {
+        const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
+        setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only', limit })
+        return
+      }
+      if (!res.ok) {
+        // Unexpected (404/5xx): show the lock rather than a blank pane.
+        setCodeState({ status: 'locked', reason: 'premium-only' })
+        return
+      }
+      const { code: fetched } = await res.json()
+      setCodeState({ status: 'ready', code: fetched ?? '' })
+    } catch {
+      setCodeState({ status: 'locked', reason: 'premium-only' })
+    }
+  }, [slug])
+  // Fetch on first Code-tab open.
+  useEffect(() => {
+    if (enforcing && activeTab === 'code' && codeState.status === 'idle') void openCode()
+  }, [enforcing, activeTab, codeState.status, openCode])
+  // Reset when switching components so the next open re-fetches.
+  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
@@ -124,8 +210,12 @@ export default function ComponentPageView({
   const [fontPkgInstallCopied, setFontPkgInstallCopied] = useState(false)
   const [fontPkgSnippetCopied, setFontPkgSnippetCopied] = useState(false)
 
+  // Directive lines live in the source; when enforcing withholds `code`, the
+  // server still passes them via `codeDirectives` so the install UI is intact.
+  const directiveSource = code ?? codeDirectives ?? ''
+
   // Extract font name from code comment (e.g. "// font: Manrope") — Google Fonts
-  const fontMatch = code.match(/^\/\/ font: (.+)$/m)
+  const fontMatch = directiveSource.match(/^\/\/ font: (.+)$/m)
   const fontName = fontMatch ? fontMatch[1].trim() : null
   const fontGoogleId = fontName ? fontName.replace(/ /g, '+') : null
   const fontImportId = fontName ? fontName.replace(/ /g, '_') : null
@@ -135,7 +225,7 @@ export default function ComponentPageView({
   } : null
 
   // Extract package font from code comment (e.g. "// font-pkg: geist/font/pixel|GeistPixelCircle|--font-geist-pixel-circle")
-  const fontPkgMatch = code.match(/^\/\/ font-pkg: (.+)$/m)
+  const fontPkgMatch = directiveSource.match(/^\/\/ font-pkg: (.+)$/m)
   const fontPkgInfo = fontPkgMatch ? fontPkgMatch[1].trim().split('|') : null
   const fontPkgPath = fontPkgInfo?.[0] ?? null        // e.g. "geist/font/pixel"
   const fontPkgClass = fontPkgInfo?.[1] ?? null       // e.g. "GeistPixelCircle"
@@ -152,7 +242,7 @@ export default function ComponentPageView({
 
   // Extract npm install command from code comment (e.g. "// npm install framer-motion")
   // Extract package names from the "// npm install ..." comment
-  const depsMatch = code.match(/^\/\/ npm install (.+)$/m)
+  const depsMatch = directiveSource.match(/^\/\/ npm install (.+)$/m)
   const depsPackages = depsMatch ? depsMatch[1] : null
 
   const PKG_COMMANDS: Record<typeof pkgManager, string> = {
@@ -243,11 +333,28 @@ export default function ComponentPageView({
     setPreviewKey((k) => k + 1)
   }
 
-  const cliCommand = `npx shadcn@latest add @aicanvas/${installSlug}`
+  // Signed-in users get a tokenized direct-URL install; anonymous users get
+  // the plain registry-namespace command. One reference, reused everywhere the
+  // install command is built or shown.
+  const installReference = userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=${userToken}"`
+    : `@aicanvas/${installSlug}`
+  const cliCommand = `npx shadcn@latest add ${installReference}`
+  // Displayed form masks the token so it never appears on screen or in
+  // screenshots. The copy buttons still write the REAL command to the
+  // clipboard, so the install works when pasted.
+  const installReferenceMasked = userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${installSlug}`
 
   async function copyCode() {
+    // When enforcing, source only exists after the gated fetch resolves.
+    const source = enforcing
+      ? (codeState.status === 'ready' ? codeState.code : null)
+      : code
+    if (source == null) return
     try {
-      await navigator.clipboard.writeText(code)
+      await navigator.clipboard.writeText(source)
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
     } catch {}
@@ -356,6 +463,7 @@ export default function ComponentPageView({
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
+                  {designSystem && <PremiumBadge />}
                   {categoryTags.map((tag) => (
                     <span key={tag.label} className="rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                       {tag.label}
@@ -538,7 +646,26 @@ export default function ComponentPageView({
                 }}
                 aria-hidden={activeTab !== 'code'}
               >
-                {highlightedCode}
+                {enforcing ? (
+                  // Real gating (Plan 3): source fetched on demand from the
+                  // gated endpoint. 402 -> paywall; otherwise plain source.
+                  codeState.status === 'locked' ? (
+                    <Paywall reason={codeState.reason} limit={codeState.limit} />
+                  ) : codeState.status === 'ready' ? (
+                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                      {codeState.code}
+                    </pre>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-sand-500">
+                      Loading source…
+                    </div>
+                  )
+                ) : (
+                  // Not enforcing: source is server-rendered (SEO preserved).
+                  // Plan 0's stub paywall previews states in dev when the
+                  // premium flag is on; otherwise it is always null.
+                  paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode
+                )}
               </motion.div>
             </div>
 
@@ -678,12 +805,12 @@ export default function ComponentPageView({
                               <button
                                 onClick={() => {
                                   const cmd = pkgManager === 'npm'
-                                    ? `npx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `npx shadcn@latest add ${installReference}`
                                     : pkgManager === 'pnpm'
-                                    ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `pnpm dlx shadcn@latest add ${installReference}`
                                     : pkgManager === 'yarn'
-                                    ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
-                                    : `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                    ? `yarn dlx shadcn@latest add ${installReference}`
+                                    : `bunx shadcn@latest add ${installReference}`
                                   navigator.clipboard.writeText(cmd)
                                   trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
@@ -728,14 +855,14 @@ export default function ComponentPageView({
 
                             {/* Command */}
                             <div className="px-4 py-3.5">
-                              <code className="font-mono text-sm text-sand-300">
+                              <code className="font-mono text-sm text-sand-300 break-all">
                                 {pkgManager === 'pnpm'
-                                  ? `pnpm dlx shadcn@latest add @aicanvas/${installSlug}`
+                                  ? `pnpm dlx shadcn@latest add ${installReferenceMasked}`
                                   : pkgManager === 'bun'
-                                  ? `bunx shadcn@latest add @aicanvas/${installSlug}`
+                                  ? `bunx shadcn@latest add ${installReferenceMasked}`
                                   : pkgManager === 'yarn'
-                                  ? `yarn dlx shadcn@latest add @aicanvas/${installSlug}`
-                                  : `npx shadcn@latest add @aicanvas/${installSlug}`}
+                                  ? `yarn dlx shadcn@latest add ${installReferenceMasked}`
+                                  : `npx shadcn@latest add ${installReferenceMasked}`}
                               </code>
                             </div>
                           </div>
@@ -870,7 +997,11 @@ export default function ComponentPageView({
                       </Step>
                       )}
 
-                      {/* Step — Copy the code */}
+                      {/* Step — Copy the code. In enforcing mode this mirrors
+                          the Code tab's gated state machine: source only
+                          renders once the gated fetch succeeded, the paywall
+                          shows when locked, and copy is disabled until ready
+                          (same pull — re-access is free, so no double count). */}
                       <Step number={manualStep.code}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Copy and paste the following code into your project:
@@ -882,7 +1013,8 @@ export default function ComponentPageView({
                               </span>
                               <button
                                 onClick={copyCode}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                disabled={enforcing && codeState.status !== 'ready'}
+                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 {codeCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -890,7 +1022,25 @@ export default function ComponentPageView({
                               </button>
                             </div>
                             <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
-                              {highlightedCode}
+                              {enforcing ? (
+                                codeState.status === 'locked' ? (
+                                  <Paywall reason={codeState.reason} limit={codeState.limit} />
+                                ) : codeState.status === 'ready' ? (
+                                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                                    {codeState.code}
+                                  </pre>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={openCode}
+                                    className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-300"
+                                  >
+                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source (uses one of your daily installs, re-viewing is free)'}
+                                  </button>
+                                )
+                              ) : (
+                                highlightedCode
+                              )}
                             </div>
                           </div>
                       </Step>
@@ -1260,7 +1410,7 @@ export default function ComponentPageView({
                   Install command copied
                 </p>
                 <p className="mt-0.5 text-xs text-sand-400">
-                  Paste into your terminal to add this component.
+                  Paste into your terminal to install this component.
                 </p>
               </div>
             </div>

@@ -398,27 +398,6 @@ export function MobileNav() {
                   <SignInCta />
                 </SignedOut>
               </div>
-
-              {/* Bottom card */}
-              {pathname !== '/support' && (
-              <div className="shrink-0 p-3">
-                <div className="overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-4 dark:border-sand-800 dark:bg-sand-900">
-                  <p className="text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-                    Hi, I&apos;m Alex. I build this in my evenings and weekends.
-                  </p>
-                  <a
-                    href="https://ko-fi.com/aicanvasme"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`mt-3 ${buttonClasses({ variant: 'outline', size: 'xs', fullWidth: true })}`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
-                    Send a Coffee
-                  </a>
-                </div>
-              </div>
-              )}
             </motion.div>
           </>
         )}
