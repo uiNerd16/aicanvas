@@ -60,33 +60,6 @@ export default function LabLayout({
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col">{children}</div>
-
-      {/* Bottom-left floating Ko-fi — icon-only, tooltip on hover. Fixed so it
-          stays in viewport over the canvas. */}
-      <div className="group fixed bottom-4 left-4 z-30">
-        <a
-          href="https://ko-fi.com/aicanvasme"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Send a Coffee — support AI Canvas on Ko-fi"
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-sand-300 bg-sand-100/90 backdrop-blur transition-colors hover:border-sand-400 dark:border-sand-700 dark:bg-sand-900/90 dark:hover:border-sand-600"
-        >
-          <img
-            src="/kofi.svg"
-            alt=""
-            aria-hidden="true"
-            width={16}
-            height={16}
-            className="shrink-0"
-          />
-        </a>
-        <span
-          role="tooltip"
-          className="pointer-events-none absolute bottom-full left-0 mb-2 whitespace-nowrap rounded-md border border-sand-300 bg-sand-100 px-2.5 py-1.5 text-xs font-semibold text-sand-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-200"
-        >
-          Send a Coffee
-        </span>
-      </div>
     </div>
     </LabNavActionsProvider>
   )

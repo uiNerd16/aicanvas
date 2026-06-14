@@ -38,7 +38,7 @@ const PLACEHOLDER_SYSTEMS = [
 // material difference is the Design Systems pole: instead of production's
 // disabled "Glass · soon" placeholder, this version expands Andromeda
 // into its own component tree + Examples folder. Components/SVGs/About/
-// Contact/Buy-me-a-coffee blocks are copied verbatim so the user can
+// Contact blocks are copied verbatim so the user can
 // visually verify chrome consistency.
 
 // ── Production component categories (must match COMPONENTS_LABELS in
@@ -534,29 +534,6 @@ export function IdeationSidebar() {
           </Link>
         </div>
       </nav>
-
-      {/* ── Buy me a coffee (production verbatim) ───────────────────────── */}
-      <div className="shrink-0 p-3">
-        <div className="group overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-4 dark:border-sand-800 dark:bg-sand-900">
-          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
-            <div className="overflow-hidden">
-              <p className="text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-                Hi, I&apos;m Alex. I build this in my evenings and weekends.
-              </p>
-              <div className="h-3" />
-            </div>
-          </div>
-          <a
-            href="https://ko-fi.com/aicanvasme"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-sand-300 bg-transparent px-3 py-2 text-xs font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
-          >
-            <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
-            Send a Coffee
-          </a>
-        </div>
-      </div>
     </aside>
   )
 }

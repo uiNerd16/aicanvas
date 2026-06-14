@@ -1,6 +1,9 @@
 /**
  * Generate shadcn-compatible registry JSON files from component source files.
- * Outputs to public/r/ — each component gets its own JSON file.
+ * Outputs to registry-data/ — each component gets its own JSON file. The files
+ * are served at /r/<slug>.json by the dynamic route in app/r/[file]/route.ts
+ * (NOT statically from public/), so the route can identify the caller and
+ * enforce entitlement. Same bytes as before; only the on-disk location moved.
  *
  * Usage: node scripts/generate-registry.mjs
  */
@@ -12,7 +15,7 @@ import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 import { DESIGN_SYSTEMS } from './lib/design-systems.config.mjs'
 
 const wsDir = 'components-workspace'
-const outDir = 'public/r'
+const outDir = 'registry-data'
 const SCHEMA = 'https://ui.shadcn.com/schema/registry-item.json'
 const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
 
@@ -383,10 +386,17 @@ function indexEntry(item, files) {
   }
 }
 
+// Content-type manifest consumed by the /r gate (lib/registry/lookup.ts).
+// Collected from what this generator ACTUALLY emits, so the paywall classifier
+// can never drift from the registry contents. Written as _manifest.json — the
+// /r route's filename regex rejects leading underscores, so it is not servable.
+const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [] }
+
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)
   const tokenEntriesAbs = (ds.tokenEntries ?? []).map((p) => resolve(rootDirAbs, p))
   const systemEntriesAbs = ds.systemEntries.map((p) => resolve(rootDirAbs, p))
+  manifest.systemSlugs.push(ds.slug)
 
   // ── 1. Tokens ────────────────────────────────────────────────────────────────
   const tokensSlug = `${ds.slug}-tokens`
@@ -514,6 +524,7 @@ for (const ds of DESIGN_SYSTEMS) {
     }
     writeFileSync(join(outDir, `${slug}.json`), JSON.stringify(compItem, null, 2) + '\n')
     registryItems.push(indexEntry(compItem, compFiles))
+    manifest.designSystemSlugs.push(slug)
     dsCount++
   }
 
@@ -538,6 +549,7 @@ for (const ds of DESIGN_SYSTEMS) {
     }
     writeFileSync(join(outDir, `${template.slug}.json`), JSON.stringify(templateItem, null, 2) + '\n')
     registryItems.push(indexEntry(templateItem, templateFiles))
+    manifest.templateSlugs.push(template.slug)
     dsCount++
   }
 
@@ -573,7 +585,13 @@ const registry = {
 
 writeFileSync(join(outDir, 'registry.json'), JSON.stringify(registry, null, 2) + '\n')
 
-console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/`)
+// Gate manifest (see lib/registry/lookup.ts). Sorted for stable diffs.
+manifest.systemSlugs.sort()
+manifest.designSystemSlugs.sort()
+manifest.templateSlugs.sort()
+writeFileSync(join(outDir, '_manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+
+console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/ (+ gate manifest: ${manifest.designSystemSlugs.length} ds components, ${manifest.templateSlugs.length} templates)`)
 
 // ── AI Canvas MCP metadata ────────────────────────────────────────────────
 // A separate JSON the MCP server fetches at runtime. Carries fields the

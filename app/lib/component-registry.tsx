@@ -207,6 +207,7 @@ export const DESIGN_SYSTEM_META: Record<DesignSystemSlug, DesignSystemMeta> = {
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom' },
       // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
       { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations' },
+      { slug: 'andromeda-signal-room',       name: 'Signal Room',       domain: 'Audio' },
     ],
   },
 }
@@ -922,7 +923,6 @@ Requirements:
       { label: 'Buttons & Toggles', accent: true },
       { label: 'Andromeda' },
     ],
-    designSystem: 'andromeda',
     PreviewComponent: AndromedaButton,
     code: componentCodes['andromeda-button'],
     prompts: andromedaButtonPrompts,

@@ -39,6 +39,12 @@ export function SiteFooter() {
             Terms
           </Link>
           <Link
+            href="/refund"
+            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
+          >
+            Refund
+          </Link>
+          <Link
             href="/impressum"
             className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
           >
