@@ -54,7 +54,7 @@ export function Sidebar() {
   // Hide the global sidebar on design-system preview routes so the design
   // system gets the full viewport. Also hidden on /ideation/* — that subtree
   // ships its own duplicated sidebar/topbar for the new design-systems flow.
-  // And on /lab/* — LAB has its own custom top bar (logo + Ko-fi icon),
+  // And on /lab/* — LAB has its own custom top bar (logo + auth pill),
   // no left rail, no search.
   const hideSidebar =
     pathname?.startsWith('/design-systems/') ||
@@ -310,8 +310,8 @@ export function Sidebar() {
 
       {/* ── Social icons ── */}
       {/* GitHub + X moved here from the page header so the top-right can
-          carry the auth pill + Get MCP CTA. Sits above the "Send a Coffee"
-          card. No top border — the icons float quietly above the card. */}
+          carry the auth pill + Get MCP CTA. No top border — the icons
+          float quietly at the bottom of the rail. */}
       <div className="shrink-0 px-3 pt-2 pb-1">
         <div className="flex items-center gap-1">
           <a
@@ -334,40 +334,6 @@ export function Sidebar() {
           </a>
         </div>
       </div>
-
-      {/* ── Bottom card ── */}
-      {pathname !== '/support' && <div className="shrink-0 px-3 pb-3 pt-0">
-        {/* Progressive disclosure — collapsed by default to just the CTA;
-            hovering reveals the "Hi, I'm Alex" intro. Container chrome
-            (border, surface, padding) stays constant so the widget never
-            jumps in width — only the height grows. */}
-        <div className="group overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-4 dark:border-sand-800 dark:bg-sand-900">
-
-          {/* Collapsible intro. The grid 0fr → 1fr trick animates height
-              smoothly without having to measure content in JS. */}
-          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
-            <div className="overflow-hidden">
-              <p className="text-xs leading-relaxed text-sand-500 dark:text-sand-400">
-                Hi, I&apos;m Alex. I build this in my evenings and weekends.
-              </p>
-              {/* Gap between intro and CTA — sits inside the collapsing
-                  region so it disappears along with the text. */}
-              <div className="h-3" />
-            </div>
-          </div>
-
-          {/* CTA — always visible. */}
-          <a
-            href="https://ko-fi.com/aicanvasme"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonClasses({ variant: 'outline', size: 'xs', fullWidth: true })}
-          >
-            <img src="/kofi.svg" alt="" aria-hidden="true" className="h-4 w-4 shrink-0" />
-            Send a Coffee
-          </a>
-        </div>
-      </div>}
 
     </aside>
   )
