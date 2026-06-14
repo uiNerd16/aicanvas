@@ -55,3 +55,10 @@ The Reviewer checks this list on every review. The Supervisor logs here after ev
 - **Detection rule**: If a Reviewer or Supervisor sees the user request a visual change (e.g. "make the lines waver more"), they must remember that the next prompt-write step needs to capture that change. Don't trust an old `prompts.ts` to still be accurate.
 - **Affected files**: `components-workspace/wave-lines/prompts.ts` (rewritten), `app/lib/component-registry.tsx` (already inlines the real source code, so it stayed accurate)
 - **Detected**: 2026-04-08
+
+## #009 — Inlined `useTheme` reads `<html>` only, ignores the preview's `[data-card-theme]` toggle
+- **Issue**: `crypto-swap` inlined its own `useTheme` that read `document.documentElement.classList.contains('dark')`. The per-component preview toggle on `/components/<slug>` does NOT toggle `<html>` — it flips a `dark` class on a local `[data-card-theme]` wrapper (the dark variant is `@variant dark (&:where(.dark, .dark *):not([data-card-theme="light"] *))`). So clicking Light did nothing for the component (it stayed dark). Tailwind-`dark:`-based components work because they cascade from the wrapper; inline-`useTheme` components that read `<html>` do not.
+- **Rule**: Any standalone that drives inline styles from theme MUST resolve theme **wrapper-first**: take the component's root element ref, `const card = el?.closest('[data-card-theme]')`; if present use `card.classList.contains('dark')`, else fall back to `document.documentElement.classList.contains('dark')`. Observe BOTH the card wrapper (`attributeFilter: ['class','data-card-theme']`) and `<html>` (`['class']`). This stays copy-paste portable (no `[data-card-theme]` in a user project → falls back to `<html>`).
+- **Reference (correct pattern)**: `components-workspace/charging-widget/index.tsx`, `peel-corner-reveal/index.tsx`, `radial-cards/index.tsx`. Copy one of these when inlining `useTheme`.
+- **Affected files**: `components-workspace/crypto-swap/index.tsx` (fixed)
+- **Detected**: 2026-06-14

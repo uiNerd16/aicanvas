@@ -27,6 +27,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'blind-pull-toggle': ['Motion', 'Tailwind CSS'],
   'bubble-field': ['Canvas', 'Tailwind CSS'],
   'charging-widget': ['Motion', 'Tailwind CSS'],
+  'crypto-swap': ['Motion', 'Tailwind CSS'],
   'cube-carousel': ['Motion', 'Tailwind CSS'],
   'curious-ai': ['Motion', 'Three.js', 'Tailwind CSS'],
   'danger-stripes': ['Motion', 'Tailwind CSS'],
@@ -481,5 +482,10 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Product showcase', 'E-commerce', 'Lookbook'],
     about:
       'Product Card Deck is a draggable stack of product cards you flick through one at a time, built for browsing a small catalogue the way you swipe a deck of cards. Grab the top card and it leans toward your drag like a real card being thrown, then spins off with momentum in whatever direction you flick it, while the card behind rises into its place and a fresh one slides in at the back so the deck never runs out. Each card pairs a full-bleed product image with a clean caption strip holding the name and a pill call-to-action button with hover and press states. Framer Motion drives the drag, tilt, and fly-off physics while Tailwind covers the surrounding chrome, and it is fully touch-friendly for a mobile-first shoppable gallery. Swap in your own images and labels to turn it into a lookbook, a featured-products carousel, or a swipe-to-shop experience.',
+  },
+  'crypto-swap': {
+    useCases: ['DeFi app', 'Crypto dashboard', 'Web3 landing'],
+    about:
+      'Crypto Swap is a Uniswap-style token-swap card for trading one crypto asset for another, not a fiat exchange — the dollar figures are reference valuations used only to derive the rate. Type a Sell amount, pick two tokens from a contained dropdown of real brand coin icons, and the Buy side recomputes live with an animated number that reflects a pool-depth price-impact model, a separate network-fee estimate, and a slippage-driven minimum received. A flip button swaps the direction and carries the amount across, each token shows its 24h trend, and the periwinkle Swap button runs an idle to swapping to success state machine with a check, glow, and spark burst. Motion drives every transition and Tailwind handles the borderless dual-theme surfaces, with adaptive decimal precision, full listbox keyboard accessibility, and reduced-motion support throughout. It is a polished fit for a DeFi app, a crypto dashboard widget, or a Web3 landing page.',
   },
 }
