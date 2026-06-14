@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { CONTACT_EMAIL, CONTACT_FROM } from '@/app/lib/config'
+import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
 
 export const runtime = 'nodejs'
 
 // ─── /api/contact ─────────────────────────────────────────────────────────────
 // The contact form's backend. Takes a {name, email, message} payload, validates
-// it, then sends a branded email to CONTACT_EMAIL via Resend's REST API. The
+// it, then sends a branded email to CONTACT_INBOX via Resend's REST API. The
 // aicanvas.me domain is already verified in Resend (DKIM/SPF/DMARC live), so the
 // message authenticates cleanly into the Gmail inbox.
 //
@@ -51,9 +51,10 @@ function escapeHtml(s: string): string {
 
 const FONT = "'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
 
-function emailHtml({ name, email, message }: { name: string; email: string; message: string }): string {
+function emailHtml({ name, email, subject, message }: { name: string; email: string; subject: string; message: string }): string {
   const safeName = escapeHtml(name)
   const safeEmail = escapeHtml(email)
+  const safeSubject = escapeHtml(subject)
   const safeMessage = escapeHtml(message)
   return `<!doctype html>
 <html>
@@ -68,6 +69,8 @@ function emailHtml({ name, email, message }: { name: string; email: string; mess
           <tr><td style="padding:20px 32px;">
             <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">From</p>
             <p style="margin:0 0 18px 0;font-family:${FONT};font-size:15px;color:#E8E8DF;">${safeName} &lt;<a href="mailto:${safeEmail}" style="color:#A8B94D;text-decoration:none;">${safeEmail}</a>&gt;</p>
+            <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">Subject</p>
+            <p style="margin:0 0 18px 0;font-family:${FONT};font-size:15px;color:#E8E8DF;">${safeSubject}</p>
             <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">Message</p>
             <div style="font-family:${FONT};font-size:15px;line-height:1.6;color:#FAFAF0;white-space:pre-wrap;word-break:break-word;">${safeMessage}</div>
           </td></tr>
@@ -112,6 +115,7 @@ export async function POST(req: NextRequest) {
 
   const name = typeof body.name === 'string' ? body.name.trim() : ''
   const email = typeof body.email === 'string' ? body.email.trim() : ''
+  const subject = typeof body.subject === 'string' ? body.subject.trim() : ''
   const message = typeof body.message === 'string' ? body.message.trim() : ''
 
   if (name.length < 1 || name.length > 100) {
@@ -119,6 +123,9 @@ export async function POST(req: NextRequest) {
   }
   if (!EMAIL_RE.test(email) || email.length > 200) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
+  }
+  if (subject.length < 1 || subject.length > 200) {
+    return NextResponse.json({ error: 'Please enter a subject.' }, { status: 400 })
   }
   if (message.length < 1 || message.length > 5000) {
     return NextResponse.json({ error: 'Please enter a message (up to 5000 characters).' }, { status: 400 })
@@ -132,11 +139,11 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       from: CONTACT_FROM,
-      to: [CONTACT_EMAIL],
+      to: [CONTACT_INBOX],
       reply_to: `${name} <${email}>`,
-      subject: `New contact message from ${name}`,
-      html: emailHtml({ name, email, message }),
-      text: `New contact message from ${name} <${email}>\n\n${message}\n\n— Reply to this email to answer ${name}.`,
+      subject: `New contact: ${subject}`,
+      html: emailHtml({ name, email, subject, message }),
+      text: `New contact message from ${name} <${email}>\nSubject: ${subject}\n\n${message}\n\nReply to this email to answer ${name}.`,
     }),
   })
 
