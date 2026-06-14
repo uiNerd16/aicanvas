@@ -100,7 +100,7 @@ const organizationSchema = {
   name: 'AI Canvas',
   url: SITE_URL,
   logo: `${SITE_URL}/ai-canvas-icon.svg`,
-  sameAs: [GITHUB_URL, 'https://ko-fi.com/aicanvasme'],
+  sameAs: [GITHUB_URL],
 }
 
 const websiteSchema = {
