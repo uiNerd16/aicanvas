@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { getPaddle, PRICES, type BillingCycle } from '../../lib/paddle/client'
 import { useSession } from '../auth/SessionProvider'
+import { checkoutComingSoon } from '../../../lib/flags'
 
 /**
  * Opens the Paddle overlay for the chosen cycle. Premium requires an account
@@ -22,17 +23,19 @@ export function UpgradeButton({
   const router = useRouter()
   const { user } = useSession()
 
-  // Checkout is only possible once the Paddle env is configured. Render a
-  // disabled CTA instead of opening a broken overlay (or silently failing
-  // after payment because the server half is missing).
+  // Checkout is only possible once the Paddle env is configured. We also show a
+  // deliberate "Coming soon" state during the rollout window (flag on, or
+  // env not configured): the Premium card stays visible during configuration of the
+  // product, but the CTA is dormant rather than opening a broken/erroring overlay.
   const configured = Boolean(PRICES[cycle] && process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN)
+  const comingSoon = checkoutComingSoon() || !configured
 
   async function onClick() {
+    if (comingSoon) return
     if (!user) {
       router.push('/account/sign-up?next=/pricing&intent=premium')
       return
     }
-    if (!configured) return
     const paddle = await getPaddle()
     paddle?.Checkout.open({
       items: [{ priceId: PRICES[cycle], quantity: 1 }],
@@ -47,10 +50,11 @@ export function UpgradeButton({
       type="button"
       className={className}
       onClick={onClick}
-      disabled={Boolean(user) && !configured}
-      title={user && !configured ? 'Checkout is not configured yet' : undefined}
+      disabled={comingSoon}
+      aria-disabled={comingSoon}
+      title={comingSoon ? 'Available soon' : undefined}
     >
-      {children}
+      {comingSoon ? 'Coming soon' : children}
     </button>
   )
 }
