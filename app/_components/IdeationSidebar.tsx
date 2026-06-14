@@ -15,7 +15,6 @@ import {
   MagnifyingGlass,
   X,
 } from '@phosphor-icons/react'
-import { CONTACT_EMAIL } from '../lib/config'
 import { COMPONENTS } from '../lib/component-registry'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 import { AndromedaIcon } from '../../design-systems/andromeda/AndromedaIcon'
@@ -526,13 +525,13 @@ export function IdeationSidebar() {
             <Info weight="regular" size={16} />
             <span>About</span>
           </Link>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
+          <Link
+            href="/contact"
             className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
           >
             <EnvelopeSimple weight="regular" size={16} />
             <span>Contact</span>
-          </a>
+          </Link>
         </div>
       </nav>
 

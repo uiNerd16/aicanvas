@@ -20,7 +20,7 @@ import {
   PiggyBank,
   Plug,
 } from '@phosphor-icons/react'
-import { GITHUB_URL, X_URL, CONTACT_EMAIL } from '../lib/config'
+import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
@@ -349,13 +349,13 @@ export function MobileNav() {
                     <span><Info weight="regular" size={16} /></span>
                     <span className="flex-1">About</span>
                   </Link>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
+                  <Link
+                    href="/contact"
                     className="mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
                   >
                     <span><EnvelopeSimple weight="regular" size={16} /></span>
                     <span className="flex-1">Contact</span>
-                  </a>
+                  </Link>
                 </div>
               </nav>
 
