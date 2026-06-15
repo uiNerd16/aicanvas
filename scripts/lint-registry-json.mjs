@@ -22,7 +22,7 @@ import { fileURLToPath } from 'url'
 import { findJSXReturnContentStart } from './lib/copy-paste-transform.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const REGISTRY_DIR = join(__dirname, '..', 'public', 'r')
+const REGISTRY_DIR = join(__dirname, '..', 'registry-data')
 
 // Index files (registry index, MCP metadata) don't have a `files[].content` to lint.
 const SKIP_FILES = new Set(['registry.json', 'aicanvas-mcp.json'])

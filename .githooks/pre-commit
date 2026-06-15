@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Block any commit that contains a secret. Scans only what is staged.
+# Bypass in a true emergency with: git commit --no-verify  (avoid this)
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠️  gitleaks not installed — secret scan SKIPPED."
+  echo "    Install it so commits are protected:  brew install gitleaks"
+  exit 0
+fi
+
+if ! gitleaks protect --staged --redact --no-banner; then
+  echo
+  echo "🚫 Commit blocked: a potential secret was found in your staged changes."
+  echo "   Remove the secret (move it to .env.local), then commit again."
+  echo "   False positive? Add an allowlist entry to .gitleaks.toml."
+  exit 1
+fi

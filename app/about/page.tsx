@@ -119,7 +119,7 @@ export default function AboutPage() {
             You can also grab the source code directly.
           </p>
           <p className="mt-4 text-sm font-bold leading-relaxed text-sand-50">
-            Everything is open, nothing is locked away.
+            Everything is open source and readable. The source is never hidden, and remix with AI stays free for everyone.
           </p>
         </Section>
 

@@ -5,11 +5,11 @@ import { COMPONENTS } from '../lib/component-registry'
 export const metadata: Metadata = {
   title: { absolute: 'AI Canvas — UI Components and Design Systems with AI Prompts' },
   description:
-    'Free animated React components and design systems with AI prompts built in. For designers, developers, and everyone in between. Copy the code or paste the prompt — always both, always free.',
+    'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Browse and remix with AI for free. Design systems and templates are Premium.',
   openGraph: {
     title: 'AI Canvas — UI Components and Design Systems with AI Prompts',
     description:
-      'Free animated React components and design systems with AI prompts built in. For designers, developers, and everyone in between.',
+      'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Design systems and templates are Premium.',
     url: 'https://aicanvas.me/home',
     type: 'website',
   },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AI Canvas — UI Components and Design Systems with AI Prompts',
     description:
-      'Free animated React components and design systems with AI prompts built in. For designers, developers, and everyone in between.',
+      'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Design systems and templates are Premium.',
   },
 }
 

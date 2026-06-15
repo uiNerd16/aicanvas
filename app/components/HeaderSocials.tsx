@@ -11,7 +11,7 @@ import { TopAuthPill } from './auth/TopAuthPill'
 // "Sign in" button that opens the auth modal when signed out).
 //
 // Get MCP moved into the sidebar nav (icon + label) alongside Pricing/About.
-// GitHub + X icons live in the sidebar above the "Send a Coffee" card.
+// GitHub + X icons live in the sidebar.
 
 export function HeaderSocials() {
   return (
