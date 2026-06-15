@@ -122,6 +122,20 @@ export default async function Page({
 
   const { PreviewComponent } = entry
 
+  // When the registry gate is enforcing (launch), source must NOT ship in the
+  // page HTML — otherwise anyone reads it without a metered pull. The Code tab
+  // then fetches it on demand from the gated endpoint. Until enforcement flips
+  // on, source stays server-rendered (preserves SEO / GEO indexing).
+  const enforcing = process.env.REGISTRY_ENFORCEMENT === 'enforce'
+
+  // Extract only the install-directive comment lines so the deps/font install
+  // UI works even when the full source is withheld in enforcing mode.
+  const codeDirectives = [
+    entry.code.match(/^\/\/ font: .+$/m)?.[0],
+    entry.code.match(/^\/\/ font-pkg: .+$/m)?.[0],
+    entry.code.match(/^\/\/ npm install .+$/m)?.[0],
+  ].filter(Boolean).join('\n')
+
   // ── Related ──────────────────────────────────────────────────────────────
   // Pass the full pool of accent-tag siblings; the client paginates 3 at a
   // time via the inline arrow controls.
@@ -182,12 +196,14 @@ export default async function Page({
         description={entry.description}
         headingSubtitle={headingSubtitle}
         tags={entry.tags}
-        code={entry.code}
+        code={enforcing ? undefined : entry.code}
         prompts={entry.prompts}
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         related={related}
-        highlightedCode={<HighlightedCode code={entry.code} />}
+        highlightedCode={enforcing ? undefined : <HighlightedCode code={entry.code} />}
+        enforcing={enforcing}
+        codeDirectives={codeDirectives}
         useCases={entry.useCases}
         about={entry.about}
       >

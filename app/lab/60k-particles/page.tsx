@@ -237,9 +237,9 @@ export default function ParticleMarkLabPage() {
     },
   })
 
-  // Record button lives in a fixed bottom-center strip rendered below
-  // (next to the Ko-fi icon's row). Export controls live back in the
-  // sidebar (Save image dropdown + Copy code button).
+  // Record button lives in a fixed bottom-center strip rendered below.
+  // Export controls live back in the sidebar (Save image dropdown + Copy
+  // code button).
 
   // Load presets when the user becomes available; clear them when they sign out.
   const refreshPresets = useCallback(async () => {

@@ -12,6 +12,7 @@ import { SessionProvider } from './components/auth/SessionProvider'
 import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { DevTierSwitcher } from './components/billing/DevTierSwitcher'
 import { COMPONENTS } from './lib/component-registry'
 import { GITHUB_URL, SITE_URL } from './lib/config'
 import { createClient } from './lib/supabase/server'
@@ -30,7 +31,7 @@ const geistMono = Geist_Mono({
 })
 
 const TOTAL = COMPONENTS.length
-const GLOBAL_DESCRIPTION = `Free, open-source registry of ${TOTAL} animated React components built with Tailwind CSS and Motion. Each ships with reproduction prompts for Claude Code, Lovable, and v0.`
+const GLOBAL_DESCRIPTION = `Open-source registry of ${TOTAL} animated React components, design systems, and templates. Free to browse and remix with AI. Premium unlocks design systems and unlimited installs. Built with Tailwind CSS and Motion.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -99,7 +100,7 @@ const organizationSchema = {
   name: 'AI Canvas',
   url: SITE_URL,
   logo: `${SITE_URL}/ai-canvas-icon.svg`,
-  sameAs: [GITHUB_URL, 'https://ko-fi.com/aicanvasme'],
+  sameAs: [GITHUB_URL],
 }
 
 const websiteSchema = {
@@ -184,6 +185,7 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <DevBranchBadge />
+        <DevTierSwitcher />
       </body>
     </html>
   )

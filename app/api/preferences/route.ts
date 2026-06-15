@@ -24,9 +24,9 @@ export async function GET() {
     preferences: {
       package_manager: data?.package_manager ?? null,
       ai_platform: data?.ai_platform ?? null,
-      // newsletter_opt_in defaults to true at the DB level (migration 0004) —
-      // mirror that here for users who don't yet have a row.
-      newsletter_opt_in: data?.newsletter_opt_in ?? true,
+      // newsletter_opt_in defaults to false at the DB level (migration 0007) —
+      // explicit opt-in, so mirror that for users who don't yet have a row.
+      newsletter_opt_in: data?.newsletter_opt_in ?? false,
     },
   })
 }

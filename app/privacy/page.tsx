@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Last updated: 2026-05-10. This policy describes how AI Canvas processes
+          Last updated: 2026-06-14. This policy describes how AI Canvas processes
           personal data, in line with the EU General Data Protection Regulation
           (GDPR / DSGVO) and the German Bundesdatenschutzgesetz (BDSG).
         </p>
@@ -97,6 +97,16 @@ export default function PrivacyPage() {
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Contact form
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            When you write to us through the contact form we receive the name,
+            email address, subject, and message you submit. We use them solely to
+            read and answer your enquiry. The message is delivered to our inbox by
+            Resend (see Section 5) with your email set as the reply-to address.
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
             Technical data (everyone)
           </h3>
           <p className="mt-2 leading-relaxed text-sand-400">
@@ -104,7 +114,7 @@ export default function PrivacyPage() {
             address, user-agent string, and timestamp for each request. These
             logs are short-lived and used to detect abuse and operate the
             service. Vercel Web Analytics produces aggregated, cookieless traffic
-            statistics — visitors are identified only by a per-day hash of the
+            statistics. Visitors are identified only by a per-day hash of the
             request and the hash is discarded after 24 hours. No personal
             identifier is created and no cross-site tracking is possible.
           </p>
@@ -115,10 +125,14 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed text-sand-400">
             Requests to the public component registry endpoints (paths under{' '}
             <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">/r/</code>
-            ) are made by the shadcn CLI and the AI Canvas MCP without any user
-            session. These hits are aggregated anonymously so we can see which
-            components are being installed. No personal data is processed on
-            these paths and no account cookies are read.
+            ) are made by the shadcn CLI and the AI Canvas MCP. If you are signed
+            in, the command you copied carries your account API token so the pull
+            counts toward your account and unlocks any premium content you are
+            entitled to. For anonymous requests we enforce a daily limit of 2 installs
+            using a salted, per-day hash of your IP address as a counter key. The
+            salt rotates daily, so these counters cannot be linked across days,
+            and we delete them after 30 days. We do not store your raw IP for
+            this purpose and read no account cookies on these paths.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -134,7 +148,7 @@ export default function PrivacyPage() {
             </code>{' '}
             takes effect immediately. Transactional emails (sign-up
             confirmation, magic links, password reset) are not affected by
-            this flag &mdash; they are necessary to provide the account
+            this flag. They are necessary to provide the account
             service.
           </p>
 
@@ -159,20 +173,30 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-400">
             <li>
               <strong className="text-sand-200">Account &amp; usage data:</strong>{' '}
-              Art. 6 (1)(b) GDPR — processing is necessary to provide the AI
+              Art. 6 (1)(b) GDPR. Processing is necessary to provide the AI
               Canvas account service you signed up for.
             </li>
             <li>
               <strong className="text-sand-200">Server logs &amp; aggregate analytics:</strong>{' '}
-              Art. 6 (1)(f) GDPR — legitimate interest in operating, securing,
+              Art. 6 (1)(f) GDPR. Legitimate interest in operating, securing,
               and understanding usage of the service. We balance this against
               your interests by using only cookieless, aggregate analytics with
               no cross-site tracking.
             </li>
             <li>
-              <strong className="text-sand-200">Anonymous registry hits:</strong>{' '}
-              the data is not personal under GDPR (no identifier links to a
-              person). Logged for product analytics under Art. 6 (1)(f).
+              <strong className="text-sand-200">Registry hits and the daily
+              limit:</strong>{' '}
+              Art. 6 (1)(f) GDPR. Legitimate interest in operating a fair
+              free tier. The per-day hashed-IP counter is the minimum needed to
+              enforce the limit; it is pseudonymous, rotates daily, and is
+              deleted after 30 days. Signed-in pulls are tied to your account.
+            </li>
+            <li>
+              <strong className="text-sand-200">Contact form:</strong>{' '}
+              Art. 6 (1)(f) GDPR — legitimate interest in answering an enquiry you
+              chose to send us. We process only the name, email, subject, and
+              message you provide, and keep them no longer than needed to deal
+              with the matter.
             </li>
             <li>
               <strong className="text-sand-200">Marketing communications:</strong>{' '}
@@ -195,8 +219,8 @@ export default function PrivacyPage() {
             Providing your email and password (or a Google account, if you sign
             in with Google) is necessary to create and use an AI Canvas account.
             If you do not provide them, you cannot create an account, but the
-            public site &mdash; component browsing, copying source, downloading
-            registry items via the CLI &mdash; remains fully usable without
+            public site (component browsing, copying source, downloading
+            registry items via the CLI) remains fully usable without
             signing in. There is no statutory obligation to provide any data.
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
@@ -217,27 +241,42 @@ export default function PrivacyPage() {
           </p>
           <ul className="mt-4 space-y-3 leading-relaxed text-sand-400">
             <li>
-              <strong className="text-sand-200">Vercel Inc.</strong> (USA) —
+              <strong className="text-sand-200">Vercel Inc.</strong> (USA):
               hosting, request logs, cookieless Web Analytics. Edge serving
               from Frankfurt where possible.
             </li>
             <li>
               <strong className="text-sand-200">Supabase Inc.</strong> (USA) —
-              authentication, account database, transactional emails (sign-up
-              confirmation, magic links, password reset). EU-region project
-              where available.
+              authentication and account database. It also generates the account
+              emails (sign-up confirmation, magic links, password reset), which
+              are delivered via Resend (below). EU-region project where available.
+            </li>
+            <li>
+              <strong className="text-sand-200">Resend (Resend, Inc.)</strong> (USA) —
+              delivers our outbound email: the account emails above and any
+              message you send through the contact form. Mail is sent via Amazon
+              SES in the EU region (Ireland) and authenticated with SPF/DKIM; we
+              use no open- or click-tracking.
             </li>
             <li>
               <strong className="text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
-              Google LLC (USA) — only if you choose &ldquo;Sign in with Google.&rdquo;
+              Google LLC (USA): only if you choose &ldquo;Sign in with Google.&rdquo;
               Google authenticates you and returns your email and profile
               identifier to us. Google&apos;s own privacy policy applies to their
               processing.
             </li>
             <li>
-              <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>{' '}
-              — delivers component preview screenshots. No user data is sent;
+              <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>:{' '}
+              delivers component preview screenshots. No user data is sent;
               ImageKit only serves public image URLs.
+            </li>
+            <li>
+              <strong className="text-sand-200">Paddle.com Market Ltd</strong> (UK) /{' '}
+              Paddle, Inc. (USA): our payment provider and Merchant of Record for
+              Premium subscriptions. Paddle handles checkout, payment processing,
+              billing, sales tax and VAT, and refunds, and processes the billing
+              and payment details you enter at checkout under its own privacy
+              policy. Legal basis: Art. 6(1)(b) GDPR (performance of the contract).
             </li>
           </ul>
         </section>
@@ -251,6 +290,11 @@ export default function PrivacyPage() {
               as long as your account exists. When you delete your account, your
               account row, saved components, install history, and preferences
               are removed via cascade.
+            </li>
+            <li>
+              <strong className="text-sand-200">Contact messages</strong> are kept
+              only as long as needed to handle your enquiry and any follow-up,
+              then deleted.
             </li>
             <li>
               <strong className="text-sand-200">Server logs</strong> are kept for
@@ -273,7 +317,7 @@ export default function PrivacyPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-400">
             <li>Access the personal data we hold about you (Art. 15)</li>
             <li>Request correction of inaccurate data (Art. 16)</li>
-            <li>Request deletion of your data (Art. 17 — &ldquo;right to be forgotten&rdquo;)</li>
+            <li>Request deletion of your data (Art. 17, &ldquo;right to be forgotten&rdquo;)</li>
             <li>Restrict or object to processing (Art. 18, 21)</li>
             <li>Receive your data in a portable, machine-readable format (Art. 20)</li>
             <li>Withdraw consent at any time, where processing is based on consent</li>
@@ -285,7 +329,7 @@ export default function PrivacyPage() {
             </a>
             . We respond within 30 days. Before acting on a rights request we
             may ask for reasonable proof that you are the person the data
-            belongs to &mdash; this is to protect you from someone else
+            belongs to. This is to protect you from someone else
             requesting your data under false pretences.
           </p>
         </section>

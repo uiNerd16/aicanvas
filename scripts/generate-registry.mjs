@@ -1,20 +1,32 @@
 /**
  * Generate shadcn-compatible registry JSON files from component source files.
- * Outputs to public/r/ — each component gets its own JSON file.
+ * Outputs to registry-data/ — each component gets its own JSON file. The files
+ * are served at /r/<slug>.json by the dynamic route in app/r/[file]/route.ts
+ * (NOT statically from public/), so the route can identify the caller and
+ * enforce entitlement. Same bytes as before; only the on-disk location moved.
  *
  * Usage: node scripts/generate-registry.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs'
 import { join, dirname, resolve, relative, sep, posix } from 'path'
 import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 import { DESIGN_SYSTEMS } from './lib/design-systems.config.mjs'
 
 const wsDir = 'components-workspace'
-const outDir = 'public/r'
+const outDir = 'registry-data'
 const SCHEMA = 'https://ui.shadcn.com/schema/registry-item.json'
 const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
+
+// Origin that serves the registry items (app/r/[file]/route.ts → /r/<slug>.json).
+// registryDependencies MUST be fully-qualified URLs (or @namespace/name). A BARE
+// slug makes shadcn resolve it against its DEFAULT registry (ui.shadcn.com) and
+// 404 — which silently broke every design-system + template install. Emitting
+// full URLs is the documented shadcn pattern for self-hosted/custom registries.
+// Overridable so the generator can emit a localhost variant for install tests.
+const REGISTRY_BASE = (process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me').replace(/\/+$/, '')
+const depUrl = (slug) => `${REGISTRY_BASE}/r/${slug}.json`
 
 // Folders to skip when building the public registry. `_template` is the
 // scaffold copy-source and is never publicly installable.
@@ -237,17 +249,25 @@ function componentSlug(systemSlug, fileBaseName) {
   // Convert PascalCase file name to kebab-case, prefix with system slug.
   // Button.tsx → andromeda-button; PanelHeader.tsx → andromeda-panel-header.
   const kebab = fileBaseName
-    .replace(/\.tsx$/, '')
+    .replace(/\.(tsx|ts|jsx|js|mjs|cjs)$/, '')
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     .toLowerCase()
   return `${systemSlug}-${kebab}`
+}
+// Resolve a system component's registry slug, honoring per-system `slugOverrides`
+// (keyed by the file's posix path relative to the system rootDir). Lets a
+// design-system component whose natural slug collides with a published standalone
+// (e.g. Button.tsx → andromeda-button) emit under its own unique slug instead of
+// being skipped.
+function dsComponentSlug(ds, entryRelPosix, baseName) {
+  return ds.slugOverrides?.[entryRelPosix] ?? componentSlug(ds.slug, baseName)
 }
 for (const ds of DESIGN_SYSTEMS) {
   expectedNames.add(`${ds.slug}-tokens`)
   expectedNames.add(ds.slug)
   for (const entry of ds.systemEntries) {
     const baseName = entry.split('/').pop()
-    expectedNames.add(componentSlug(ds.slug, baseName))
+    expectedNames.add(dsComponentSlug(ds, entry, baseName))
   }
   for (const template of ds.templates) expectedNames.add(template.slug)
   if (ds.templates.length > 0) expectedNames.add(`${ds.slug}-all`)
@@ -343,32 +363,17 @@ for (const dir of dirs) {
 
 let dsCount = 0
 
+// Every shipped file is code (.ts/.tsx) → registry:lib. The .md "brain" docs are
+// deliberately NOT shipped to consumers; they stay in design-systems/ for
+// internal use only.
 function makeFile(fileAbs, rootDirAbs, slug) {
+  const target = targetPathFor(fileAbs, rootDirAbs, slug)
   return {
-    path: targetPathFor(fileAbs, rootDirAbs, slug),
+    path: target,
     content: readFileSync(fileAbs, 'utf-8'),
     type: 'registry:lib',
-    target: targetPathFor(fileAbs, rootDirAbs, slug),
+    target,
   }
-}
-
-// Brain-file attachers — sidecar .md files that ride alongside the code.
-// `rules.md` ships with tokens (system-wide brain — every install gets it via
-// the dep chain). `<Component>.rules.md` ships with its sibling `<Component>.tsx`
-// in the system bundle. Skipped silently if the .md file doesn't exist yet.
-function readSibling(fileAbs) {
-  try { if (statSync(fileAbs).isFile()) return fileAbs } catch {}
-  return null
-}
-
-function brainSiblingFor(componentTsxAbs) {
-  // components/Button.tsx → components/Button.rules.md
-  const rulesPath = componentTsxAbs.replace(/\.tsx$/, '.rules.md')
-  return readSibling(rulesPath)
-}
-
-function systemRulesFile(rootDirAbs) {
-  return readSibling(join(rootDirAbs, 'rules.md'))
 }
 
 function indexEntry(item, files) {
@@ -383,20 +388,35 @@ function indexEntry(item, files) {
   }
 }
 
+// Content-type manifest consumed by the /r gate (lib/registry/lookup.ts).
+// Collected from what this generator ACTUALLY emits, so the paywall classifier
+// can never drift from the registry contents. Written as _manifest.json — the
+// /r route's filename regex rejects leading underscores, so it is not servable.
+const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [] }
+
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)
   const tokenEntriesAbs = (ds.tokenEntries ?? []).map((p) => resolve(rootDirAbs, p))
   const systemEntriesAbs = ds.systemEntries.map((p) => resolve(rootDirAbs, p))
+  manifest.systemSlugs.push(ds.slug)
 
   // ── 1. Tokens ────────────────────────────────────────────────────────────────
   const tokensSlug = `${ds.slug}-tokens`
   const tokensWalk = walkDependencies(tokenEntriesAbs, rootDirAbs)
   const tokensFiles = tokensWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-  // Attach the system-wide brain (`rules.md`). Lives with tokens so every
-  // install path that reaches tokens also reaches the brain — components,
-  // system, templates all inherit via `registryDependencies`.
-  const systemBrainAbs = systemRulesFile(rootDirAbs)
-  if (systemBrainAbs) tokensFiles.push(makeFile(systemBrainAbs, rootDirAbs, ds.slug))
+  // Self-load the system font for installed projects. The app provides the font
+  // via next/font; consumers don't — so inject the font import into the SHIPPED
+  // tokens file ONLY (on-disk source stays clean, app keeps using next/font) and
+  // declare the package so shadcn installs it for the consumer.
+  const fontPackages = ds.fontPackages ?? []
+  if (fontPackages.length > 0) {
+    const injectTarget = targetPathFor(resolve(rootDirAbs, ds.fontInjectInto), rootDirAbs, ds.slug)
+    const injectFile = tokensFiles.find((f) => f.target === injectTarget)
+    if (!injectFile) {
+      throw new Error(`generate-registry: fontInjectInto "${ds.fontInjectInto}" is not among the ${ds.slug} tokens files`)
+    }
+    injectFile.content = fontPackages.map((p) => `import '${p}';`).join('\n') + '\n' + injectFile.content
+  }
   const tokensItem = {
     $schema: SCHEMA,
     name: tokensSlug,
@@ -404,7 +424,7 @@ for (const ds of DESIGN_SYSTEMS) {
     title: `${ds.name} tokens`,
     description: `Foundation files for the ${ds.name} design system — tokens, shared utilities, and the system mark. Required by every ${ds.name} component and template.`,
     author: 'aicanvas <https://aicanvas.me>',
-    dependencies: tokensWalk.npmDeps,
+    dependencies: [...new Set([...tokensWalk.npmDeps, ...fontPackages])].sort(),
     files: tokensFiles,
   }
   writeFileSync(join(outDir, `${tokensSlug}.json`), JSON.stringify(tokensItem, null, 2) + '\n')
@@ -417,14 +437,6 @@ for (const ds of DESIGN_SYSTEMS) {
   // Excludes anything shipped by the tokens item; depends on it via registry deps.
   const systemWalk = walkDependencies(systemEntriesAbs, rootDirAbs, tokensFileSet)
   const systemFiles = systemWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-  // Attach per-component brain files. For every shipped `.tsx`, look for a
-  // sibling `<Component>.rules.md` and ship it in the same bundle. The user's
-  // AI editor reads both when editing the component.
-  for (const componentAbs of systemWalk.files) {
-    if (!componentAbs.endsWith('.tsx')) continue
-    const brainAbs = brainSiblingFor(componentAbs)
-    if (brainAbs) systemFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
-  }
   const systemItem = {
     $schema: SCHEMA,
     name: ds.slug,
@@ -432,7 +444,7 @@ for (const ds of DESIGN_SYSTEMS) {
     title: `${ds.name} design system`,
     description: `Every ${ds.name} component (${systemFiles.length} files). Installs the foundation tokens automatically.`,
     author: 'aicanvas <https://aicanvas.me>',
-    registryDependencies: [tokensSlug],
+    registryDependencies: [depUrl(tokensSlug)],
     dependencies: systemWalk.npmDeps,
     files: systemFiles,
   }
@@ -459,19 +471,38 @@ for (const ds of DESIGN_SYSTEMS) {
       try { return statSync(join(wsDir, d)).isDirectory() } catch { return false }
     }),
   )
+
+  // Files that are emitted as their OWN individual registry item. Only these may
+  // become another component's `registryDependencies`. Every OTHER file reached
+  // by the system walk — shared non-component helpers like components/lib/motion.ts
+  // (imported by Button/IconButton/StatTile but never published on its own) —
+  // must be BUNDLED into each component that imports it, or the installed file
+  // would carry an unresolved relative import (`./lib/motion`) and fail to build.
+  const emittedComponentFiles = new Set()
+  for (const entry of ds.systemEntries) {
+    const fileAbs = resolve(rootDirAbs, entry)
+    if (!systemFileSet.has(fileAbs)) continue
+    const slug = dsComponentSlug(ds, entry, entry.split('/').pop())
+    if (componentWorkspaceSlugs.has(slug)) continue   // emitted as a standalone instead
+    emittedComponentFiles.add(fileAbs)
+  }
+
   for (const entry of ds.systemEntries) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue   // not part of system walk (skipped)
     const baseName = entry.split('/').pop()
-    const slug = componentSlug(ds.slug, baseName)
+    const slug = dsComponentSlug(ds, entry, baseName)
 
-    // Slug collision with components-workspace — skip individual emit.
+    // Slug collision with components-workspace — skip individual emit (unless a
+    // slugOverride gave this file its own unique slug, which won't collide).
     if (componentWorkspaceSlugs.has(slug)) continue
 
     // Walk this component's transitive deps within the system, excluding tokens
-    // files (those come via registry deps) AND excluding sibling component files
-    // (those become registry deps too, not bundled inline).
-    const otherComponentFiles = [...systemFileSet].filter((f) => f !== fileAbs)
+    // files (those come via registry deps) AND excluding OTHER individually-emitted
+    // components (those become registry deps). Shared helpers that are NOT emitted
+    // on their own (e.g. lib/motion.ts) fall through and get bundled inline so the
+    // component's relative imports resolve after install.
+    const otherComponentFiles = [...emittedComponentFiles].filter((f) => f !== fileAbs)
     const componentBoundary = new Set([...tokensFileSet, ...otherComponentFiles])
     const compWalk = walkDependencies([fileAbs], rootDirAbs, componentBoundary)
 
@@ -483,11 +514,15 @@ for (const ds of DESIGN_SYSTEMS) {
     for (const spec of extractImportSpecifiers(sourceContent)) {
       if (!spec.startsWith('.') && !spec.startsWith('/')) continue
       const resolved = resolveImport(fileAbs, spec)
-      if (!resolved || !systemFileSet.has(resolved) || resolved === fileAbs) continue
+      // Only an individually-emitted sibling component becomes a registry dep.
+      // Non-emitted shared helpers (lib/motion.ts) are bundled inline above, so
+      // they must NOT be turned into a (non-existent) registry dependency.
+      if (!resolved || !emittedComponentFiles.has(resolved) || resolved === fileAbs) continue
       // Sibling component — find its slug
       const relPath = relative(rootDirAbs, resolved)
+      const relPosix = relPath.split(sep).join(posix.sep)
       const siblingBase = relPath.split(sep).pop()
-      const siblingSlug = componentSlug(ds.slug, siblingBase)
+      const siblingSlug = dsComponentSlug(ds, relPosix, siblingBase)
       // Only declare a dep if that sibling is itself published individually
       // (i.e. doesn't collide with a workspace standalone).
       if (!componentWorkspaceSlugs.has(siblingSlug)) {
@@ -496,9 +531,6 @@ for (const ds of DESIGN_SYSTEMS) {
     }
 
     const compFiles = compWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-    // Attach this component's brain rules sibling if present
-    const brainAbs = brainSiblingFor(fileAbs)
-    if (brainAbs) compFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
 
     const compName = baseName.replace(/\.tsx$/, '')
     const compItem = {
@@ -508,12 +540,13 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${compName} (${ds.name})`,
       description: `${ds.name} ${compName} component. Install just this piece — tokens and any sibling components are pulled in automatically.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [...componentRegistryDeps].sort(),
+      registryDependencies: [...componentRegistryDeps].sort().map(depUrl),
       dependencies: compWalk.npmDeps,
       files: compFiles,
     }
     writeFileSync(join(outDir, `${slug}.json`), JSON.stringify(compItem, null, 2) + '\n')
     registryItems.push(indexEntry(compItem, compFiles))
+    manifest.designSystemSlugs.push(slug)
     dsCount++
   }
 
@@ -532,12 +565,13 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${template.name} (${ds.name})`,
       description: `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent template installs reuse it.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [ds.slug],
+      registryDependencies: [depUrl(ds.slug)],
       dependencies: templateWalk.npmDeps,
       files: templateFiles,
     }
     writeFileSync(join(outDir, `${template.slug}.json`), JSON.stringify(templateItem, null, 2) + '\n')
     registryItems.push(indexEntry(templateItem, templateFiles))
+    manifest.templateSlugs.push(template.slug)
     dsCount++
   }
 
@@ -554,7 +588,7 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${ds.name} — full system`,
       description: `Every ${ds.name} component, token, and template in one install.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [ds.slug, ...ds.templates.map((t) => t.slug)],
+      registryDependencies: [depUrl(ds.slug), ...ds.templates.map((t) => depUrl(t.slug))],
       files: [],
     }
     writeFileSync(join(outDir, `${ds.slug}-all.json`), JSON.stringify(allItem, null, 2) + '\n')
@@ -573,7 +607,13 @@ const registry = {
 
 writeFileSync(join(outDir, 'registry.json'), JSON.stringify(registry, null, 2) + '\n')
 
-console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/`)
+// Gate manifest (see lib/registry/lookup.ts). Sorted for stable diffs.
+manifest.systemSlugs.sort()
+manifest.designSystemSlugs.sort()
+manifest.templateSlugs.sort()
+writeFileSync(join(outDir, '_manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+
+console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/ (+ gate manifest: ${manifest.designSystemSlugs.length} ds components, ${manifest.templateSlugs.length} templates)`)
 
 // ── AI Canvas MCP metadata ────────────────────────────────────────────────
 // A separate JSON the MCP server fetches at runtime. Carries fields the
