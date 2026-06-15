@@ -86,6 +86,7 @@ const ALL_SLUGS = [
   'signature-pad',
   'tilted-coverflow',
   'crypto-swap',
+  'mood-tracker',
 ]
 
 const arg   = process.argv[2]

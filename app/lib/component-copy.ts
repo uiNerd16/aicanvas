@@ -62,6 +62,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'magnetic-dots': ['Canvas', 'Tailwind CSS'],
   'mark-toggle': ['Motion', 'Tailwind CSS'],
   'meet-the-crew': ['Motion', 'Tailwind CSS'],
+  'mood-tracker': ['Motion', 'Tailwind CSS'],
   'neon-clock': ['Tailwind CSS'],
   'new-project-modal': ['Motion', 'Tailwind CSS'],
   'noise-bg': ['Canvas', 'Tailwind CSS'],
@@ -487,5 +488,10 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['DeFi app', 'Crypto dashboard', 'Web3 landing'],
     about:
       'Crypto Swap is a Uniswap-style token-swap card for trading one crypto asset for another, not a fiat exchange — the dollar figures are reference valuations used only to derive the rate. Type a Sell amount, pick two tokens from a contained dropdown of real brand coin icons, and the Buy side recomputes live with an animated number that reflects a pool-depth price-impact model, a separate network-fee estimate, and a slippage-driven minimum received. A flip button swaps the direction and carries the amount across, each token shows its 24h trend, and the periwinkle Swap button runs an idle to swapping to success state machine with a check, glow, and spark burst. Motion drives every transition and Tailwind handles the borderless dual-theme surfaces, with adaptive decimal precision, full listbox keyboard accessibility, and reduced-motion support throughout. It is a polished fit for a DeFi app, a crypto dashboard widget, or a Web3 landing page.',
+  },
+  'mood-tracker': {
+    useCases: ['Wellness app', 'Journaling app', 'Employee check-in'],
+    about:
+      'Mood Tracker is a "How are you feeling?" check-in card built around six hand-drawn SVG mood characters, each with its own body shape, color, and expression so they read instantly side by side. Drag the segmented slider, tap a face in the legend, or use the arrow keys, and the big focal face springs in while the feeling word crossfades and a soft liquid-gradient panel of drifting blobs retints to the chosen mood. A Save button morphs into a "Recorded" confirmation on click, and every surface tints to follow the mood in both light and dark themes with reduced-motion support. Drop it into a wellness or mood-journaling app, a daily reflection prompt, or a lightweight employee check-in.',
   },
 }
