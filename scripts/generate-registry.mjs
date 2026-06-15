@@ -404,6 +404,19 @@ for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensWalk = walkDependencies(tokenEntriesAbs, rootDirAbs)
   const tokensFiles = tokensWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+  // Self-load the system font for installed projects. The app provides the font
+  // via next/font; consumers don't — so inject the font import into the SHIPPED
+  // tokens file ONLY (on-disk source stays clean, app keeps using next/font) and
+  // declare the package so shadcn installs it for the consumer.
+  const fontPackages = ds.fontPackages ?? []
+  if (fontPackages.length > 0) {
+    const injectTarget = targetPathFor(resolve(rootDirAbs, ds.fontInjectInto), rootDirAbs, ds.slug)
+    const injectFile = tokensFiles.find((f) => f.target === injectTarget)
+    if (!injectFile) {
+      throw new Error(`generate-registry: fontInjectInto "${ds.fontInjectInto}" is not among the ${ds.slug} tokens files`)
+    }
+    injectFile.content = fontPackages.map((p) => `import '${p}';`).join('\n') + '\n' + injectFile.content
+  }
   const tokensItem = {
     $schema: SCHEMA,
     name: tokensSlug,
@@ -411,7 +424,7 @@ for (const ds of DESIGN_SYSTEMS) {
     title: `${ds.name} tokens`,
     description: `Foundation files for the ${ds.name} design system — tokens, shared utilities, and the system mark. Required by every ${ds.name} component and template.`,
     author: 'aicanvas <https://aicanvas.me>',
-    dependencies: tokensWalk.npmDeps,
+    dependencies: [...new Set([...tokensWalk.npmDeps, ...fontPackages])].sort(),
     files: tokensFiles,
   }
   writeFileSync(join(outDir, `${tokensSlug}.json`), JSON.stringify(tokensItem, null, 2) + '\n')

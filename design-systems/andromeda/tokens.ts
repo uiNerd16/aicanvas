@@ -78,12 +78,17 @@ export const tokens = {
   },
   typography: {
     // JetBrains Mono is the only font in the Andromeda design system.
-    // The --font-jetbrains-mono variable is provided by next/font
-    // (see app/design-systems/andromeda/page.tsx). Both fontSans and fontMono
-    // resolve to the same family — the sans/mono distinction is kept
-    // only so existing component references continue to work unchanged.
-    fontSans: "var(--font-jetbrains-mono), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
-    fontMono: "var(--font-jetbrains-mono), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
+    // In the AI Canvas app, --font-jetbrains-mono is provided by next/font (see
+    // app/design-systems/andromeda/layout.tsx). Installed projects don't have it,
+    // so the var carries an INNER fallback ('JetBrains Mono Variable'). Without an
+    // inner fallback, an undefined var invalidates the WHOLE declaration (invalid
+    // at computed-value time) and the named fallbacks below never apply — the font
+    // collapses to the page's inherited font. The registry self-loads
+    // 'JetBrains Mono Variable' via @fontsource-variable so the fallback resolves.
+    // Both fontSans and fontMono resolve to the same family — the sans/mono
+    // distinction is kept only so existing component references work unchanged.
+    fontSans: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
+    fontMono: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
     size: {
       xs:   '10px',
       sm:   '12px',
