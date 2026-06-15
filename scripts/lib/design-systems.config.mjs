@@ -87,6 +87,13 @@ export const DESIGN_SYSTEMS = [
     slugOverrides: {
       'components/Button.tsx': 'andromeda-button-system',
     },
+    // Fonts the system needs at runtime. The AI Canvas app provides
+    // --font-jetbrains-mono via next/font, but installed projects don't — so the
+    // shipped tokens item self-loads the font. The import is injected into the
+    // SHIPPED tokens file only (fontInjectInto); the on-disk source stays clean,
+    // so the app keeps using next/font with no double-load.
+    fontPackages: ['@fontsource-variable/jetbrains-mono'],
+    fontInjectInto: 'tokens.ts',
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom',    entryPath: 'examples/service-order/index.tsx' },
