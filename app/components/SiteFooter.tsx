@@ -21,7 +21,7 @@ export function SiteFooter() {
             <img src="/icon.svg" alt="AI Canvas" className="h-5 w-5" />
           </Link>
           <p className="text-xs text-sand-500">
-            AI native components. Free and open source.
+            AI native components.
           </p>
         </div>
 
