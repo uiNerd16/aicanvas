@@ -270,6 +270,14 @@ export default function PrivacyPage() {
               delivers component preview screenshots. No user data is sent;
               ImageKit only serves public image URLs.
             </li>
+            <li>
+              <strong className="text-sand-200">Paddle.com Market Ltd</strong> (UK) /{' '}
+              Paddle, Inc. (USA): our payment provider and Merchant of Record for
+              Premium subscriptions. Paddle handles checkout, payment processing,
+              billing, sales tax and VAT, and refunds, and processes the billing
+              and payment details you enter at checkout under its own privacy
+              policy. Legal basis: Art. 6(1)(b) GDPR (performance of the contract).
+            </li>
           </ul>
         </section>
 
