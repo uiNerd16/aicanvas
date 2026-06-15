@@ -148,6 +148,8 @@ import ProductCardDeck from '../../components-workspace/product-card-deck'
 import { prompts as productCardDeckPrompts } from '../../components-workspace/product-card-deck/prompts'
 import CryptoSwap from '../../components-workspace/crypto-swap'
 import { prompts as cryptoSwapPrompts } from '../../components-workspace/crypto-swap/prompts'
+import MoodTracker from '../../components-workspace/mood-tracker'
+import { prompts as moodTrackerPrompts } from '../../components-workspace/mood-tracker/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1360,6 +1362,21 @@ Requirements:
     PreviewComponent: CryptoSwap,
     code: componentCodes['crypto-swap'],
     prompts: cryptoSwapPrompts,
+  },
+  {
+    slug: 'mood-tracker',
+    image: 'https://ik.imagekit.io/aitoolkit/mood-tracker.png?v=1',
+    name: 'Mood Tracker',
+    description: 'A feelings check-in card with six expressive faces. Drag the segmented slider and the face, label, and liquid color wash shift with your mood.',
+    tags: [
+      { label: 'Cards & Modals', accent: true },
+      { label: 'Interactive' },
+      { label: 'Motion' },
+    ],
+    dualTheme: true,
+    PreviewComponent: MoodTracker,
+    code: componentCodes['mood-tracker'],
+    prompts: moodTrackerPrompts,
   },
 ]
 
