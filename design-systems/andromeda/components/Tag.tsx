@@ -15,7 +15,11 @@ import { cn, andromedaVars } from './lib/utils';
 
 const tagVariants = cva(
   [
+    // max-w-full + min-w-0 keep a long label from forcing horizontal scroll
+    // in a stacked (single-column) layout; the label span truncates while
+    // the close button stays pinned (see render below).
     'inline-flex items-center select-none whitespace-nowrap',
+    'max-w-full min-w-0',
     'gap-[var(--andromeda-2)]',
     'px-[var(--andromeda-2)] py-[3px]',
     'border border-solid',
@@ -61,7 +65,7 @@ const tagVariants = cva(
 
 
 const closeButtonClass = cn(
-  'inline-flex items-center justify-center',
+  'inline-flex items-center justify-center shrink-0',
   'p-0 m-0 bg-transparent border-0',
   'cursor-pointer leading-none',
   // Inherit the variant's text color so contrast against the variant
@@ -94,7 +98,9 @@ export const Tag = forwardRef(function Tag(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
-      {children}
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+        {children}
+      </span>
       {onClose ? (
         <button
           type="button"

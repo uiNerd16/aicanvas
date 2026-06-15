@@ -246,6 +246,7 @@ export function PairList() {
             alignItems: 'center',
             gap: tokens.spacing[2],
             flex: 1,
+            minWidth: 0,
             padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
             background: tokens.color.surface.hover,
             border: `${tokens.border.thin} ${tokens.color.border.base}`,
@@ -257,6 +258,7 @@ export function PairList() {
             placeholder="Search"
             style={{
               flex: 1,
+              minWidth: 0,
               background: 'transparent',
               border: 'none',
               outline: 'none',

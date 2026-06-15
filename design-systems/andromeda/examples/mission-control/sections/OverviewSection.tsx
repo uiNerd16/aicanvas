@@ -12,12 +12,20 @@
 // sequence (Sidebar=0, Header=1, then our rows pick up from 2).
 // Rendered standalone, the default startIndex=0 cascades from
 // scratch.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the two
+// dual-pane rows are flex on desktop. Below `mq.md` they collapse to
+// a single column (flex-direction:column) and the panels' fixed
+// flex-bases (60% / 65%) reset to full width — source order keeps
+// the primary panel first (RadarChart before SystemStatus,
+// VehiclesTable before CommsLog).
 // ============================================================
 
 'use client';
 
 import { motion } from 'framer-motion';
 import { tokens } from '../../../tokens';
+import { mq } from '../../../components/lib/responsive';
 import { useCascadeProps } from '../../../components/lib/motion';
 import { TelemetryRow } from '../TelemetryRow';
 import { RadarChart } from '../../../components/RadarChart';
@@ -44,8 +52,9 @@ export function OverviewSection({ startIndex = 0 }) {
         <NextDestination />
       </motion.div>
 
-      <motion.div {...row2} style={{ display: 'flex', gap: tokens.spacing[5] }}>
+      <motion.div {...row2} className="mc-pane-row" style={{ display: 'flex', gap: tokens.spacing[5] }}>
         <RadarChart
+          className="mc-pane-primary"
           style={{ flex: '0 0 calc(60% - 10px)', minWidth: 0 }}
           label="/// Systems"
           title="Ship Diagnostics"
@@ -54,10 +63,25 @@ export function OverviewSection({ startIndex = 0 }) {
         <SystemStatus />
       </motion.div>
 
-      <motion.div {...row3} style={{ display: 'flex', gap: tokens.spacing[5] }}>
-        <VehiclesTable />
+      <motion.div {...row3} className="mc-pane-row" style={{ display: 'flex', gap: tokens.spacing[5] }}>
+        <VehiclesTable className="mc-pane-primary" />
         <CommsLog />
       </motion.div>
+
+      <style>{`
+        ${mq.md} {
+          /* Dual-pane rows stack one column; panels with a fixed flex-basis
+             (60% / 65%) reset to full width. Tighter row gap on the stack. */
+          .mc-pane-row {
+            flex-direction: column !important;
+            gap: ${tokens.spacing[3]} !important;
+          }
+          .mc-pane-primary {
+            flex: 1 1 auto !important;
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

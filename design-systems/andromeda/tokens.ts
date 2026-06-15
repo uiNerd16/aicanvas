@@ -151,6 +151,21 @@ export const tokens = {
     sidebarWidth: '224px',
     headerHeight: '60px',
   },
+  // Breakpoints — max-width thresholds. Andromeda is DESKTOP-FIRST: the
+  // default (unqualified) styles are the desktop layout and these step
+  // DOWN from there. `md` (768px) is the primary stack threshold — at/below
+  // it, dense bento grids collapse to a single column and the sidebar
+  // becomes a Drawer. `sm` is for phone-only fine-tuning (display-type
+  // step-down, tighter insets); `lg` is the tablet ceiling where the full
+  // desktop grid is still guaranteed to fit. Media queries can't read a
+  // CSS var(), so the `mq` helper (components/lib/responsive.ts)
+  // interpolates these literals — tokens.ts stays the single source.
+  // See `rules.md` → Responsive for the mechanism + faithful-stack rules.
+  breakpoints: {
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+  },
   // Motion — durations, easings, and stagger presets that encode the
   // Andromeda tempo. Movement signals data movement or interaction
   // acknowledgement; never decoration. See `rules.md` → Motion for the

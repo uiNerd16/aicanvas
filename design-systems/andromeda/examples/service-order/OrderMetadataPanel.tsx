@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pencil, FileText, Clock, CaretDown } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 
 // Inset divider — 12px from each edge. Sibling of content inside a position:relative parent.
@@ -196,10 +197,12 @@ function HeaderStrip() {
 
   return (
     <div
+      className="so-meta-header"
       style={{
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
+        flexWrap: 'wrap',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
       }}
@@ -247,14 +250,26 @@ function HeaderStrip() {
         {formatSeconds(seconds)}
       </span>
 
-      <div style={{ flex: 1 }} />
+      <div className="so-meta-header-spacer" style={{ flex: 1 }} />
 
-      <Button variant="outline" size="sm" icon={Pencil}>
-        Edit
-      </Button>
-      <Button variant="default" size="sm" icon={FileText}>
-        Generate Report
-      </Button>
+      <div className="so-meta-actions" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3] }}>
+        <Button variant="outline" size="sm" icon={Pencil}>
+          Edit
+        </Button>
+        <Button variant="default" size="sm" icon={FileText}>
+          Generate Report
+        </Button>
+      </div>
+
+      <style>{`
+        ${mq.sm} {
+          /* Title + timer take the first line; the Edit / Generate Report
+             actions drop to their own full-width line so neither the long
+             order ID nor the two buttons force horizontal overflow. */
+          .so-meta-header-spacer { display: none !important; }
+          .so-meta-actions { flex-basis: 100% !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -313,9 +328,10 @@ export function OrderMetadataPanel() {
       <HeaderStrip />
 
       <div
+        className="so-meta-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
           columnGap: tokens.spacing[5],
           rowGap: tokens.spacing[5],
           padding: tokens.spacing[5],
@@ -326,6 +342,14 @@ export function OrderMetadataPanel() {
           <MetaCell key={`${cell.label}-${i}`} {...cell} />
         ))}
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Dense 3-col contract metadata collapses to a single column;
+             the label/value cells flow top-to-bottom in source order. */
+          .so-meta-grid { grid-template-columns: minmax(0, 1fr) !important; }
+        }
+      `}</style>
     </div>
   );
 }

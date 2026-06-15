@@ -54,8 +54,16 @@ const ITEM_HEIGHT = 26;
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 // Shared panel chrome for the dropdown (inline and portaled paths).
+// maxWidth / maxHeight cap the menu to a token-inset of the viewport so a wide
+// or tall menu on a phone never forces page scroll; a taller-than-viewport menu
+// scrolls internally instead of spilling off the bottom edge. boxSizing keeps
+// the border inside that cap.
 const MENU_PANEL_STYLE = {
   minWidth: '160px',
+  maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
+  maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
+  overflowY: 'auto',
+  boxSizing: 'border-box',
   background: tokens.color.surface.overlay,
   border: `${tokens.border.thin} ${tokens.color.border.bright}`,
   padding: tokens.spacing[1],
@@ -120,6 +128,36 @@ function MenuItem({ item, onClose }) {
       if (first) first.focus();
     }
     if (!submenuOpen) submenuOpenedByKey.current = false;
+  }, [submenuOpen]);
+
+  // Submenu side is measured, not breakpoint-driven: default to a right-flyout
+  // (left:100%) and flip to a left-flyout (right:100%) ONLY when the right side
+  // would overflow the viewport AND the left side has room. A blind CSS flip
+  // below `md` just moves the overflow to the opposite edge — off the LEFT edge
+  // when the parent menu is clamped near x=0 on a phone. Mirrors the parent
+  // menu's reposition clamp; runs before paint, re-measures on resize/scroll.
+  const [flipLeft, setFlipLeft] = useState(false);
+  useIsomorphicLayoutEffect(() => {
+    if (!submenuOpen) return;
+    const decide = () => {
+      const itemEl = itemRef.current;
+      const sub = submenuRef.current;
+      if (!itemEl || !sub) return;
+      const margin = parseInt(tokens.spacing[2], 10) || 8;
+      const gap = parseInt(tokens.spacing[1], 10) || 4;
+      const ir = itemEl.getBoundingClientRect();
+      const w = sub.getBoundingClientRect().width;
+      const rightOverflows = ir.right + gap + w > window.innerWidth - margin;
+      const leftFits = ir.left - gap - w >= margin;
+      setFlipLeft(rightOverflows && leftFits);
+    };
+    decide();
+    window.addEventListener('resize', decide);
+    window.addEventListener('scroll', decide, true);
+    return () => {
+      window.removeEventListener('resize', decide);
+      window.removeEventListener('scroll', decide, true);
+    };
   }, [submenuOpen]);
 
   if (item.type === 'separator') {
@@ -233,6 +271,7 @@ function MenuItem({ item, onClose }) {
         <div
           ref={submenuRef}
           role="menu"
+          className="andro-submenu"
           onKeyDown={(e) => {
             handleSubmenuKeyDown(e);
             handleMenuKeyDown(e);
@@ -240,9 +279,12 @@ function MenuItem({ item, onClose }) {
           style={{
             position: 'absolute',
             top: 0,
-            left: '100%',
-            marginLeft: tokens.spacing[1],
+            ...(flipLeft
+              ? { right: '100%', marginRight: tokens.spacing[1] }
+              : { left: '100%', marginLeft: tokens.spacing[1] }),
             minWidth: '160px',
+            maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
+            boxSizing: 'border-box',
             background: tokens.color.surface.overlay,
             border: `${tokens.border.thin} ${tokens.color.border.bright}`,
             padding: tokens.spacing[1],
@@ -335,7 +377,12 @@ export const PanelMenu = forwardRef(function PanelMenu(
       const mr = menu.getBoundingClientRect();
       const fitsDown = tr.bottom + margin + mr.height <= window.innerHeight - margin;
       const fitsUp = tr.top - margin - mr.height >= margin;
-      const top = !fitsDown && fitsUp ? tr.top - margin - mr.height : tr.bottom + margin;
+      let top = !fitsDown && fitsUp ? tr.top - margin - mr.height : tr.bottom + margin;
+      // Clamp vertically so a menu taller than the gap (or taller than the
+      // whole viewport on a phone) can never spill off the bottom or top edge.
+      // The panel itself caps its height (maxHeight below) and scrolls, so the
+      // clamped top keeps the first item on-screen either way.
+      top = Math.max(margin, Math.min(top, window.innerHeight - mr.height - margin));
       let left = align === 'right' ? tr.right - mr.width : tr.left;
       left = Math.max(margin, Math.min(left, window.innerWidth - mr.width - margin));
       setCoords({ top, left });

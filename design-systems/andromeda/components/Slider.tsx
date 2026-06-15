@@ -22,6 +22,7 @@ import {
   useState,
 } from 'react';
 import { cn, andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -220,6 +221,7 @@ export const Slider = forwardRef(function Slider(
         onPointerDown={handlePointerDown}
         onKeyDown={handleKeyDown}
         className={cn(
+          'andromeda-slider-track',
           'relative h-[18px] w-full select-none touch-none',
           'cursor-pointer',
           disabled && 'opacity-[0.4] cursor-not-allowed pointer-events-none',
@@ -261,6 +263,29 @@ export const Slider = forwardRef(function Slider(
           style={{ left: `${percent}%` }}
         />
       </div>
+
+      {/* Touch-target growth (rules.md → Responsive). Mirror Button/IconButton:
+          a centered transparent ::before overlay grows the *hit area* toward
+          spacing[10] (40px) on coarse pointers with ZERO layout impact — the
+          track keeps its 18px box, so neither the desktop visual nor the
+          surrounding row height inflate. The track owns onPointerDown and the
+          ::before is part of it, so taps in the enlarged zone still set the
+          value (the horizontal getBoundingClientRect mapping is unaffected by
+          the taller overlay). Growing the track's own height instead would
+          inflate the wrapper — the forbidden technique (rules.md). */}
+      <style>{`
+        ${mq.coarse} {
+          .andromeda-slider-track::before {
+            content: '' !important;
+            position: absolute !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            height: var(--andromeda-10) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 });

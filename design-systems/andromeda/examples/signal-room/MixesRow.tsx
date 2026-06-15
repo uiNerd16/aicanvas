@@ -7,10 +7,18 @@
 // a play count, and a signal-strength meter at the bottom. The
 // signal meter is the only colour — it's a live measurement, so
 // accent is on-rule.
+//
+// Responsive (desktop-first — see rules.md → Responsive): below
+// `mq.md` five flex-1 cards would crush into illegible slivers, so
+// the faithful-stack strategy applies — the row scrolls horizontally
+// inside its panel (overflow-x:auto) and each card holds a legible
+// token-sized minimum (flex:0 0 auto + min-width). On desktop the
+// cards keep their equal `flex-1` stretch.
 // ============================================================
 
 import { Play, Pause } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
 import { IconButton } from '../../components/IconButton';
@@ -64,6 +72,7 @@ function MixCard({ mix, onPlay, isCurrent, isPlaying }) {
   return (
     <Card
       markers={false}
+      className="sr-mix-card"
       style={{
         flex: 1,
         minWidth: 0,
@@ -181,6 +190,7 @@ export function MixesRow({ onPlay, currentCode, isPlaying }) {
         }
       />
       <div
+        className="sr-mixes-row"
         style={{
           display: 'flex',
           gap: tokens.spacing[3],
@@ -197,6 +207,21 @@ export function MixesRow({ onPlay, currentCode, isPlaying }) {
           />
         ))}
       </div>
+
+      <style>{`
+        ${mq.md} {
+          .sr-mixes-row {
+            overflow-x: auto !important;
+          }
+          /* Release the flex-1 stretch so the cards keep a legible width and
+             scroll horizontally instead of collapsing into slivers. The inline
+             flex:1 needs !important to beat the inline style. */
+          .sr-mix-card {
+            flex: 0 0 auto !important;
+            width: calc(${tokens.spacing[12]} * 4) !important;
+          }
+        }
+      `}</style>
     </Card>
   );
 }

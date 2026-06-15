@@ -15,7 +15,21 @@ import { Slot } from '@radix-ui/react-slot';
 import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+
+// Touch-target floor — a nav row is full-bleed (no isolated chrome to protect),
+// so on coarse pointers we raise its min-height to spacing[10] (40px) so the
+// whole row is a comfortable tap. Vertical centering is preserved by the row's
+// existing `items-center`. Scoped className, !important to out-specify the cva
+// base. rules.md → Responsive → "Grow touch targets on coarse pointers".
+const TOUCH_TARGET_STYLE = `
+  ${mq.coarse} {
+    .andromeda-navitem-touch {
+      min-height: ${tokens.spacing[10]} !important;
+    }
+  }
+`;
 
 // Sliding-indicator transition — token-driven. The active dot uses framer's
 // `layoutId` to animate between sibling NavItems when wrapped in a
@@ -108,38 +122,41 @@ export const NavItem = forwardRef(function NavItem(
   const Comp = asChild ? Slot : 'button';
 
   return (
-    <Comp
-      ref={ref}
-      type={asChild ? undefined : type}
-      data-active={active ? 'true' : 'false'}
-      aria-current={active ? 'page' : undefined}
-      className={cn(navItemVariants({ active, mono }), className)}
-      style={{ ...andromedaVars(), ...style }}
-      {...props}
-    >
-      {/* Right indicator square — when wrapped in <LayoutGroup>, this slides
-          between sibling NavItems on active change via `layoutId`. */}
-      {active ? (
-        <motion.span
-          layoutId={layoutGroupId}
-          aria-hidden="true"
-          transition={INDICATOR_TX}
-          style={{
-            position: 'absolute',
-            right: '12px',
-            top: '50%',
-            translateY: '-50%',
-            width: '4px',
-            height: '4px',
-            flexShrink: 0,
-            background: 'var(--andromeda-accent-300)',
-            boxShadow: '-2px 0 8px var(--andromeda-accent-500)',
-          }}
-        />
-      ) : null}
-      {Icon ? <Icon size={20} weight="regular" /> : null}
-      <span>{label}</span>
-    </Comp>
+    <>
+      <Comp
+        ref={ref}
+        type={asChild ? undefined : type}
+        data-active={active ? 'true' : 'false'}
+        aria-current={active ? 'page' : undefined}
+        className={cn(navItemVariants({ active, mono }), 'andromeda-navitem-touch', className)}
+        style={{ ...andromedaVars(), ...style }}
+        {...props}
+      >
+        {/* Right indicator square — when wrapped in <LayoutGroup>, this slides
+            between sibling NavItems on active change via `layoutId`. */}
+        {active ? (
+          <motion.span
+            layoutId={layoutGroupId}
+            aria-hidden="true"
+            transition={INDICATOR_TX}
+            style={{
+              position: 'absolute',
+              right: '12px',
+              top: '50%',
+              translateY: '-50%',
+              width: '4px',
+              height: '4px',
+              flexShrink: 0,
+              background: 'var(--andromeda-accent-300)',
+              boxShadow: '-2px 0 8px var(--andromeda-accent-500)',
+            }}
+          />
+        ) : null}
+        {Icon ? <Icon size={20} weight="regular" /> : null}
+        <span>{label}</span>
+      </Comp>
+      <style>{TOUCH_TARGET_STYLE}</style>
+    </>
   );
 });
 

@@ -15,7 +15,38 @@ import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
+import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+
+// Touch-target expander — the visible square stays its desktop size token; on
+// coarse pointers a centered, transparent ::before overlay grows the *hit area*
+// toward spacing[10] (40px). The sm/md squares (24/32px) sit below a comfortable
+// touch minimum; this enlarges only what the finger lands on. Scoped className,
+// !important to out-specify the cva/inline base. rules.md → Responsive.
+const TOUCH_TARGET_STYLE = `
+  ${mq.coarse} {
+    .andromeda-iconbtn-touch::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: ${tokens.spacing[10]} !important;
+      min-width: ${tokens.spacing[10]} !important;
+    }
+    /* Dense 'sm' clusters: a 40px overlay on a 24px square overflows 8px/side,
+       so two adjacent sm IconButtons at the system's standard gaps (spacing[2]–
+       [3]) would overlap and a seam tap could hit the wrong button. Cap the sm
+       floor at spacing[8] (32px → 4px/side) so adjacent sm buttons never overlap
+       at gap >= spacing[2]. Still a meaningful bump from the 24px chrome. */
+    .andromeda-iconbtn-touch[data-size="sm"]::before {
+      min-height: ${tokens.spacing[8]} !important;
+      min-width: ${tokens.spacing[8]} !important;
+    }
+  }
+`;
 
 const ms = (v) => parseInt(v, 10) / 1000;
 const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] };
@@ -130,18 +161,22 @@ export const IconButton = forwardRef(function IconButton(
 ) {
   const reducedMotion = useReducedMotion();
   return (
-    <motion.button
-      ref={ref}
-      type={type}
-      className={cn(iconButtonVariants({ variant, size }), className)}
-      style={{ ...andromedaVars(), ...style }}
-      disabled={disabled}
-      whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
-      whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
-      {...props}
-    >
-      {Icon ? <Icon size={ICON_SIZE[size]} weight="regular" /> : children}
-    </motion.button>
+    <>
+      <motion.button
+        ref={ref}
+        type={type}
+        className={cn(iconButtonVariants({ variant, size }), 'andromeda-iconbtn-touch', className)}
+        data-size={size}
+        style={{ ...andromedaVars(), ...style }}
+        disabled={disabled}
+        whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
+        whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
+        {...props}
+      >
+        {Icon ? <Icon size={ICON_SIZE[size]} weight="regular" /> : children}
+      </motion.button>
+      <style>{TOUCH_TARGET_STYLE}</style>
+    </>
   );
 });
 

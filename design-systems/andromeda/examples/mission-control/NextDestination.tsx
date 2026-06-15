@@ -9,6 +9,7 @@
 
 import { ArrowRight, MapTrifold } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { Card, CardHeader, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
@@ -50,6 +51,7 @@ export function NextDestination() {
       </CardHeader>
 
       <div
+        className="mc-dest-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(260px, 1fr) minmax(0, 1fr)',
@@ -60,6 +62,7 @@ export function NextDestination() {
       >
         {/* Planet — left half */}
         <div
+          className="mc-dest-planet"
           style={{
             position: 'relative',
             minHeight: 280,
@@ -145,7 +148,7 @@ export function NextDestination() {
           </div>
 
           {/* CTA row */}
-          <div style={{ display: 'flex', gap: tokens.spacing[2], marginTop: tokens.spacing[2] }}>
+          <div className="mc-dest-cta" style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacing[2], marginTop: tokens.spacing[2] }}>
             <Button variant="default" size="md">
               ENGAGE TRAJECTORY
               <ArrowRight weight="regular" size={16} />
@@ -156,6 +159,28 @@ export function NextDestination() {
           </div>
         </div>
       </div>
+
+      {/* Responsive (desktop-first — see rules.md → Responsive): the Planet |
+          readouts grid is two columns on desktop; below `mq.md` it collapses
+          to a single column (Planet first, readouts below — source order) and
+          the Planet's right divider + right padding become a bottom divider +
+          bottom padding so the seam still reads. Tighter inner padding on the
+          stack. */}
+      <style>{`
+        ${mq.md} {
+          .mc-dest-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+            gap: ${tokens.spacing[4]} !important;
+            padding: ${tokens.spacing[4]} !important;
+          }
+          .mc-dest-planet {
+            border-right: none !important;
+            padding-right: 0 !important;
+            border-bottom: ${tokens.border.thin} ${tokens.color.border.subtle} !important;
+            padding-bottom: ${tokens.spacing[4]} !important;
+          }
+        }
+      `}</style>
     </Card>
   );
 }

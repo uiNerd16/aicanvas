@@ -52,7 +52,11 @@ function useBlink() {
 
 const badgeVariants = cva(
   [
+    // max-w-full + min-w-0 keep a long label from forcing horizontal scroll
+    // when the Badge sits in a stacked (single-column) layout; the label
+    // span truncates instead (see render below).
     'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
+    'max-w-full min-w-0',
     'rounded-[var(--andromeda-radius-none)]',
     'px-[var(--andromeda-2)] py-[2px]',
     '[font-family:var(--andromeda-font-mono)]',
@@ -142,7 +146,9 @@ export const Badge = forwardRef(function Badge(
           transition: 'opacity 80ms ease-out',
         }}
       />
-      {children}
+      <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
+        {children}
+      </span>
     </span>
   );
 });

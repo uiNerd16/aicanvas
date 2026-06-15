@@ -125,7 +125,7 @@ export function AndromedaComponentView({
 
   return (
     <>
-    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
+    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -311,7 +311,7 @@ export function AndromedaComponentView({
                       </button>
                     </div>
                     <div className="px-4 py-3.5">
-                      <code className="font-mono text-sm text-sand-300">
+                      <code className="break-all font-mono text-sm text-sand-300">
                         {pkgManager === 'pnpm'
                           ? `pnpm dlx shadcn@latest add @aicanvas/andromeda-${slug}`
                           : pkgManager === 'bun'

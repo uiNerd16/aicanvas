@@ -5,6 +5,14 @@
 // dense, one row per track, with mono identifiers and a right-
 // aligned numeric peak meter. Row reveals use the row-stagger
 // pattern from the design-system rules.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the
+// fixed-layout table keeps all its columns at every width — the
+// faithful-stack strategy is "wide tables scroll horizontally
+// inside their panel", never reflow rows into cards. The table is
+// wrapped in an overflow-x:auto region and given a token-based
+// min-width so the columns stay legible and the scroll lives
+// inside the panel rather than on the page.
 // ============================================================
 
 'use client';
@@ -119,9 +127,11 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
           </span>
         }
       />
+      <div style={{ width: '100%', overflowX: 'auto' }}>
       <table
           style={{
             width: '100%',
+            minWidth: `calc(${tokens.spacing[12]} * 12)`,
             borderCollapse: 'collapse',
             tableLayout: 'fixed',
           }}
@@ -214,6 +224,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
             </AnimatePresence>
           </motion.tbody>
         </table>
+      </div>
     </Card>
   );
 }

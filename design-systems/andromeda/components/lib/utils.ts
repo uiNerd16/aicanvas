@@ -117,6 +117,13 @@ export function andromedaVars() {
     '--andromeda-radius-none': t.radius.none,
     '--andromeda-radius-sm':   t.radius.sm,
     '--andromeda-radius-md':   t.radius.md,
+    // Breakpoints — exposed for clamp()/calc() expressions that want the
+    // same thresholds (e.g. fluid type). NOTE: a CSS @media condition
+    // CANNOT read var(), so reflow media queries use the `mq` helper
+    // (components/lib/responsive.ts), which interpolates the literal token.
+    '--andromeda-bp-sm': t.breakpoints.sm,
+    '--andromeda-bp-md': t.breakpoints.md,
+    '--andromeda-bp-lg': t.breakpoints.lg,
     // Motion — every duration, easing, and stagger from tokens.motion.
     // Components and templates reference these as `var(--andromeda-duration-*)`
     // and `var(--andromeda-easing-*)` instead of hardcoding ms / cubic-bezier.

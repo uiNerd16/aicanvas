@@ -3,17 +3,29 @@
 // SERVICE ORDER
 // Composition shell. Top bar (brand + nav + connection + avatar),
 // page-header strip (back + title + micro KPIs + actions), then
-// the OrderSummaryPanel and ItemsPanel stacked vertically.
+// the OrderMetadataPanel + SlaPanel bento and the ItemsPanel.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the
+// default styles ARE the desktop layout; everything steps DOWN via
+// `mq`. Below `mq.md` the metadata/SLA bento collapses to one column
+// (metadata first, SLA second, in source order); the TopBar's inline
+// horizontal nav is hidden (`display:none`) and a hamburger appears
+// in its place that opens the same nav content in a left-side Drawer;
+// the PageHeaderStrip's KPI cluster wraps; and the header rows tighten
+// their inline padding. Drawer open/close is local client state,
+// starts closed — SSR-safe, no hydration flash.
 // ============================================================
 
 'use client';
 
+import { useState } from 'react';
 import {
   ArrowsClockwise,
   CheckCircle,
   EyeSlash,
   Gear,
   Keyboard,
+  List,
   SignOut,
   UserCircle,
   Warning,
@@ -21,11 +33,13 @@ import {
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Badge } from '../../components/Badge';
 import { IconButton } from '../../components/IconButton';
 import { Tooltip } from '../../components/Tooltip';
 import { UserMenu } from '../../components/UserMenu';
+import { Drawer, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody } from '../../components/Drawer';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { OrderMetadataPanel } from './OrderMetadataPanel';
@@ -43,6 +57,77 @@ function HoverStyles() {
   );
 }
 
+// ── Shared nav links ──────────────────────────────────────────────
+// Rendered both inline in the TopBar (desktop, horizontal) and inside
+// the mobile Drawer (vertical). `orientation` switches the flow.
+function NavLinks({ orientation = 'horizontal', onNavigate }) {
+  const vertical = orientation === 'vertical';
+  return (
+    <nav
+      style={{
+        display: 'flex',
+        flexDirection: vertical ? 'column' : 'row',
+        alignItems: vertical ? 'stretch' : 'center',
+        gap: vertical ? tokens.spacing[1] : tokens.spacing[5],
+      }}
+    >
+      {navItems.map((label, i) => {
+        const active = i === 0;
+        return (
+          <button
+            key={label}
+            type="button"
+            className="so-nav"
+            onClick={onNavigate}
+            style={{
+              position: 'relative',
+              padding: vertical
+                ? `${tokens.spacing[3]} ${tokens.spacing[4]}`
+                : `${tokens.spacing[2]} 0`,
+              background: vertical && active ? tokens.color.surface.active : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'left',
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.sm,
+              fontWeight: active ? tokens.typography.weight.semibold : tokens.typography.weight.regular,
+              color: active ? tokens.color.text.primary : tokens.color.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.wider,
+            }}
+          >
+            {label}
+            {active ? (
+              <span
+                aria-hidden
+                style={
+                  vertical
+                    ? {
+                        position: 'absolute',
+                        left: 0,
+                        top: tokens.spacing[2],
+                        bottom: tokens.spacing[2],
+                        width: '2px',
+                        background: tokens.color.accent[300],
+                      }
+                    : {
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: '-2px',
+                        height: '2px',
+                        background: tokens.color.accent[300],
+                      }
+                }
+              />
+            ) : null}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 // ── User menu items (shared shape with mission-control / resource-planning) ─
 const userMenuItems = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
@@ -53,9 +138,10 @@ const userMenuItems = [
 ];
 
 // ── Top bar ───────────────────────────────────────────────────────
-function TopBar() {
+function TopBar({ onMenuOpen, menuOpen = false }) {
   return (
     <header
+      className="so-topbar"
       style={{
         position: 'relative',
         height: tokens.layout.headerHeight,
@@ -68,6 +154,27 @@ function TopBar() {
       }}
     >
       <CornerMarkers />
+
+      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the inline nav
+          is visible there); shown below `mq.md` where the inline nav is
+          hidden. Carries the stateful data-state look while the drawer is open. */}
+      <IconButton
+        className="so-hamburger"
+        variant="ghost"
+        size="md"
+        icon={List}
+        aria-label="Open navigation"
+        aria-expanded={menuOpen}
+        data-state={menuOpen ? 'open' : 'closed'}
+        onClick={onMenuOpen}
+        style={{
+          display: 'none',
+          flexShrink: 0,
+          ...(menuOpen
+            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
+            : null),
+        }}
+      />
 
       {/* Brand — Andromeda over the template name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0 }}>
@@ -99,49 +206,12 @@ function TopBar() {
         </div>
       </div>
 
-      <span aria-hidden style={{ width: '1px', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
+      <span className="so-nav-divider" aria-hidden style={{ width: '1px', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
 
-      {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[5] }}>
-        {navItems.map((label, i) => {
-          const active = i === 0;
-          return (
-            <button
-              key={label}
-              type="button"
-              className="so-nav"
-              style={{
-                position: 'relative',
-                padding: `${tokens.spacing[2]} 0`,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: tokens.typography.fontMono,
-                fontSize: tokens.typography.size.sm,
-                fontWeight: active ? tokens.typography.weight.semibold : tokens.typography.weight.regular,
-                color: active ? tokens.color.text.primary : tokens.color.text.muted,
-                textTransform: 'uppercase',
-                letterSpacing: tokens.typography.tracking.wider,
-              }}
-            >
-              {label}
-              {active ? (
-                <span
-                  aria-hidden
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: '-2px',
-                    height: '2px',
-                    background: tokens.color.accent[300],
-                  }}
-                />
-              ) : null}
-            </button>
-          );
-        })}
-      </nav>
+      {/* Inline nav — hidden below `mq.md`, where the hamburger + Drawer take over. */}
+      <div className="so-inline-nav" style={{ display: 'flex', alignItems: 'center' }}>
+        <NavLinks orientation="horizontal" />
+      </div>
 
       <div style={{ flex: 1 }} />
 
@@ -150,6 +220,7 @@ function TopBar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3] }}>
         <Badge variant="accent">Live Connection</Badge>
         <span
+          className="so-connection"
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.sm,
@@ -168,6 +239,25 @@ function TopBar() {
           align="end"
         />
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Tighten the inline padding + gap so brand, hamburger and the
+             right cluster fit the narrow row without forcing page scroll. */
+          .so-topbar { padding: 0 ${tokens.spacing[4]} !important; gap: ${tokens.spacing[3]} !important; }
+          /* Hamburger appears; inline display:none is overridden here. */
+          .so-hamburger { display: inline-flex !important; }
+          /* Inline horizontal nav + its leading divider move into the Drawer. */
+          .so-inline-nav { display: none !important; }
+          .so-nav-divider { display: none !important; }
+        }
+        ${mq.sm} {
+          /* On the smallest phones drop the connection code — the Live
+             Connection badge already signals the live link, and this keeps
+             the avatar in view without crowding. */
+          .so-connection { display: none !important; }
+        }
+      `}</style>
     </header>
   );
 }
@@ -176,11 +266,13 @@ function TopBar() {
 function PageHeaderStrip() {
   return (
     <div
+      className="so-page-header"
       style={{
         position: 'relative',
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
+        flexWrap: 'wrap',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
         background: tokens.color.surface.raised,
@@ -201,9 +293,9 @@ function PageHeaderStrip() {
         Contract Registry
       </span>
 
-      <div style={{ flex: 1 }} />
+      <div className="so-page-header-spacer" style={{ flex: 1 }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[5] }}>
+      <div className="so-page-header-cluster" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: tokens.spacing[5] }}>
         {[
           { label: 'Issues',    value: pageMetrics[0].value, icon: Warning,      color: tokens.color.orange[300] },
           { label: 'Accidents', value: pageMetrics[2].value, icon: XCircle,      color: tokens.color.red[300]    },
@@ -233,6 +325,22 @@ function PageHeaderStrip() {
         <Tooltip label="Refresh"><IconButton aria-label="Refresh" variant="ghost" size="sm" icon={ArrowsClockwise} /></Tooltip>
         <Tooltip label="Hide"><IconButton aria-label="Hide"    variant="ghost" size="sm" icon={EyeSlash} /></Tooltip>
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Tighten the inline padding + KPI gaps so the wrapped cluster
+             doesn't run past the panel edges on a narrow row. */
+          .so-page-header { padding: ${tokens.spacing[3]} ${tokens.spacing[4]} !important; }
+          .so-page-header-cluster { gap: ${tokens.spacing[3]} !important; }
+        }
+        ${mq.sm} {
+          /* Title takes the full first line; the KPI/action cluster drops
+             to its own line and starts from the left instead of pinning
+             right, so it reads as a tidy stacked block on a phone. */
+          .so-page-header-spacer { display: none !important; }
+          .so-page-header-cluster { flex-basis: 100% !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -247,6 +355,10 @@ export default function ServiceOrder() {
   const orderMetaMotion      = useCascadeProps(2);
   const slaMotion            = useCascadeProps(3);
   const itemsMotion          = useCascadeProps(4);
+
+  // Mobile nav drawer — starts closed so SSR + first client render match the
+  // desktop-first base (the drawer is portaled + display:none-gated anyway).
+  const [navOpen, setNavOpen] = useState(false);
 
   return (
     <div
@@ -268,7 +380,7 @@ export default function ServiceOrder() {
     >
       <HoverStyles />
       <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
-        <TopBar />
+        <TopBar onMenuOpen={() => setNavOpen(true)} menuOpen={navOpen} />
       </motion.div>
       <motion.div {...pageHeaderMotion} style={{ flexShrink: 0 }}>
         <PageHeaderStrip />
@@ -284,8 +396,11 @@ export default function ServiceOrder() {
         }}
       >
         {/* Two independent panels side by side. SLA panel is narrower — it
-            doesn't need to be half; the metadata panel takes the rest. */}
+            doesn't need to be half; the metadata panel takes the rest.
+            Below `mq.md` the bento collapses to one column: metadata first,
+            SLA second, in source order. */}
         <div
+          className="so-bento"
           style={{
             display: 'grid',
             // minmax(0, 1fr) so wide content can't blow the left track past its
@@ -302,10 +417,31 @@ export default function ServiceOrder() {
           </motion.div>
         </div>
 
-        <motion.div {...itemsMotion}>
+        <motion.div {...itemsMotion} style={{ minWidth: 0 }}>
           <ItemsPanel />
         </motion.div>
       </main>
+
+      {/* Mobile nav — the same TopBar nav content, served in a left-side
+          Drawer below `mq.md`. The inline horizontal nav is hidden at that
+          width (see TopBar's <style>); the hamburger lives in the TopBar. */}
+      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
+        <DrawerHeader>
+          <DrawerTitle>Andromeda</DrawerTitle>
+          <DrawerDescription>Service Order</DrawerDescription>
+        </DrawerHeader>
+        <DrawerBody style={{ padding: 0 }}>
+          <NavLinks orientation="vertical" onNavigate={() => setNavOpen(false)} />
+        </DrawerBody>
+      </Drawer>
+
+      <style>{`
+        ${mq.md} {
+          /* Bento collapses to a single column; the two panels stack
+             top-to-bottom (metadata, then SLA) in source order. */
+          .so-bento { grid-template-columns: minmax(0, 1fr) !important; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -30,6 +30,7 @@ import { CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
 import { andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 
 // Motion locals — framer-motion takes seconds + a 4-tuple bezier, but
 // `tokens.motion` exposes ms strings and CSS cubic-bezier() strings.
@@ -215,11 +216,18 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
       role="menu"
       aria-label={ariaLabel}
       onKeyDown={handleMenuKeyDown}
+      className="andromeda-user-menu-panel"
+      data-align={align}
       style={{
         position: 'absolute',
         ...vertical,
         ...horizontal,
         minWidth: `${panelMinWidth}px`,
+        // Cap to a token-inset of the viewport so the absolutely-positioned
+        // panel can never push past the screen and force horizontal page
+        // scroll on a phone. box-sizing keeps the border inside that cap.
+        maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
+        boxSizing: 'border-box',
         background: tokens.color.surface.raised,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
         padding: tokens.spacing[1],
@@ -255,6 +263,18 @@ function UserMenuStyles() {
       .andromeda-user-menu-item:focus-visible {
         outline: none;
         box-shadow: inset 0 0 0 1px ${tokens.color.accent[400]};
+      }
+      /* Phone fit — a start-aligned (left:0) panel anchored to a trigger that
+         sits in the right half of a phone would open off the right edge. Below
+         sm, pin it to the trigger's RIGHT edge instead so it stays on-screen.
+         stretch (left:0 + right:0) and end (right:0) are already viewport-safe.
+         !important: left/right are inline styles (rules.md → "Hover on
+         inline-styled controls"). */
+      ${mq.sm} {
+        .andromeda-user-menu-panel[data-align="start"] {
+          left: auto !important;
+          right: 0 !important;
+        }
       }
     `}</style>
   );

@@ -17,6 +17,8 @@
 
 import { forwardRef } from 'react';
 import { tokens } from '../tokens';
+import { cn } from './lib/utils';
+import { mq } from './lib/responsive';
 
 /**
  * @typedef {object} PanelHeaderProps
@@ -35,18 +37,29 @@ export const PanelHeader = forwardRef(function PanelHeader(
     <div
       ref={ref}
       data-slot="panel-header"
-      className={className}
+      className={cn('am-panel-header', className)}
       style={{
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
+        // Desktop: title + actions on one row, actions pushed right by the spacer.
+        // Below md the row wraps (see <style>) so a long title or a wide actions
+        // slot stacks instead of overflowing the panel.
+        gap: tokens.spacing[3],
         padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
         ...style,
       }}
       {...props}
     >
       <span
+        className="am-panel-header-title"
         style={{
+          // min-width:0 lets the title shrink and the spacer keep working;
+          // a long title truncates rather than blowing the row out.
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
           fontFamily: tokens.typography.fontSans,
           fontSize: tokens.typography.size.xl,
           fontWeight: tokens.typography.weight.semibold,
@@ -58,8 +71,10 @@ export const PanelHeader = forwardRef(function PanelHeader(
       </span>
       {actions ? (
         <>
-          <div style={{ flex: 1 }} />
-          {actions}
+          <div className="am-panel-header-spacer" style={{ flex: 1 }} />
+          <div className="am-panel-header-actions" style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+            {actions}
+          </div>
         </>
       ) : null}
       {/* Inset divider — 12px from each edge, matches CardHeader convention. */}
@@ -75,6 +90,32 @@ export const PanelHeader = forwardRef(function PanelHeader(
           pointerEvents: 'none',
         }}
       />
+      <style>{`
+        ${mq.md} {
+          /* Tighten horizontal padding one step + let the row wrap so the
+             title and the actions slot stack when they can't share a row.
+             corner-marker clearance is N/A here (no markers) but the inset
+             divider still sits spacing[3] from each edge. */
+          .am-panel-header {
+            flex-wrap: wrap !important;
+            align-items: flex-start !important;
+            padding-left: ${tokens.spacing[4]} !important;
+            padding-right: ${tokens.spacing[4]} !important;
+          }
+          /* When the row wraps, the spacer would claim a whole line — collapse
+             it so the actions sit directly under the title. */
+          .am-panel-header .am-panel-header-spacer { display: none !important; }
+          /* On its own line the title can use full width and wrap to 2 lines
+             instead of truncating — more legible on a phone. */
+          .am-panel-header .am-panel-header-title {
+            white-space: normal !important;
+            overflow: visible !important;
+            flex-basis: 100% !important;
+          }
+          /* Actions wrap internally if the slot itself is wide. */
+          .am-panel-header .am-panel-header-actions { flex-wrap: wrap !important; }
+        }
+      `}</style>
     </div>
   );
 });

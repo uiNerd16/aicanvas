@@ -56,7 +56,7 @@ function VehicleRow({ vehicle, isLast }) {
       }}
     >
       {/* Callsign */}
-      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}` }}>
+      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, whiteSpace: 'nowrap' }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
@@ -69,7 +69,7 @@ function VehicleRow({ vehicle, isLast }) {
         </span>
       </td>
       {/* Type */}
-      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}` }}>
+      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, whiteSpace: 'nowrap' }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
@@ -81,13 +81,13 @@ function VehicleRow({ vehicle, isLast }) {
         </span>
       </td>
       {/* Status */}
-      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}` }}>
+      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, whiteSpace: 'nowrap' }}>
         <Badge variant={vehicleBadgeVariant[vehicle.status]}>
           {vehicleStatusLabel[vehicle.status]}
         </Badge>
       </td>
       {/* Distance */}
-      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, textAlign: 'right' }}>
+      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, textAlign: 'right', whiteSpace: 'nowrap' }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
@@ -98,7 +98,7 @@ function VehicleRow({ vehicle, isLast }) {
         </span>
       </td>
       {/* Last contact */}
-      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, textAlign: 'right' }}>
+      <td style={{ padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`, textAlign: 'right', whiteSpace: 'nowrap' }}>
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
@@ -113,9 +113,9 @@ function VehicleRow({ vehicle, isLast }) {
   );
 }
 
-export function VehiclesTable() {
+export function VehiclesTable({ className }) {
   return (
-    <Card style={{ flex: '0 0 calc(65% - 10px)', minWidth: 0 }}>
+    <Card className={className} style={{ flex: '0 0 calc(65% - 10px)', minWidth: 0 }}>
       <CardHeader>
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span style={{
@@ -141,7 +141,16 @@ export function VehiclesTable() {
         <Button variant="ghost" size="sm">View all</Button>
       </CardHeader>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {/* Horizontal scroller — the faithful-stack strategy: when the panel is
+          narrower than the table's natural width (stacked phone layout), the
+          columns scroll INSIDE the panel rather than reflowing into cards or
+          forcing page scroll. `width:max-content` lets the table size to its
+          content (cells never wrap — see whiteSpace below) while `minWidth:100%`
+          keeps it filling the panel on desktop. No hardcoded px — the columns'
+          natural widths set the scroll threshold. See rules.md → Responsive
+          (faithful-stack). */}
+      <div style={{ overflowX: 'auto', width: '100%' }}>
+        <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={headerSeparatorStyle}>
             {[
@@ -154,6 +163,7 @@ export function VehiclesTable() {
               <th key={i} style={{
                 padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
                 textAlign: col.align,
+                whiteSpace: 'nowrap',
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.xs,
                 fontWeight: tokens.typography.weight.medium,
@@ -182,7 +192,8 @@ export function VehiclesTable() {
             ))}
           </AnimatePresence>
         </motion.tbody>
-      </table>
+        </table>
+      </div>
     </Card>
   );
 }

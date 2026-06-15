@@ -1,6 +1,14 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Sidebar
+//
+// Responsive (desktop-first — see rules.md → Responsive): the
+// desktop <aside> is the canonical form; the shell hides it
+// (`display:none`) below `mq.md` and serves the SAME nav content
+// through the shared Drawer instead. To keep both paths in sync the
+// console nav (section label + NavItem list) is factored into the
+// exported `SidebarNav`, which the desktop aside and the mobile
+// Drawer both render — one source of truth for the nav rows.
 // ============================================================
 
 import { motion, LayoutGroup } from 'framer-motion';
@@ -42,10 +50,52 @@ const userMenuItems = [
   { id: 'signout',     label: 'Sign Out',            icon: SignOut },
 ];
 
-export function Sidebar({ activeNav, onNavChange, motionProps }) {
+// Console nav — section label + NavItem list. Shared verbatim by the desktop
+// sidebar and the mobile Drawer so the two never drift. LayoutGroup scopes
+// NavItem's `layoutId` so the active dot slides between siblings; the desktop
+// aside and the drawer get distinct group ids so a mounted-but-hidden copy
+// can't fight the visible one for the shared layout animation.
+export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-control-sidebar' }) {
+  return (
+    <>
+      {/* Section label */}
+      <div style={{
+        padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
+        fontFamily: tokens.typography.fontMono,
+        fontSize: tokens.typography.size.xs,
+        color: tokens.color.text.faint,
+        textTransform: 'uppercase',
+        letterSpacing: tokens.typography.tracking.widest,
+      }}>
+        /// Console
+      </div>
+
+      <nav style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        <LayoutGroup id={layoutGroupId}>
+          {navItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeNav === item.id}
+              onClick={() => onNavChange(item.id)}
+            />
+          ))}
+        </LayoutGroup>
+      </nav>
+    </>
+  );
+}
+
+export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
   return (
     <motion.aside
       {...(motionProps ?? {})}
+      className={className}
       style={{
         position: 'relative',
         width: tokens.layout.sidebarWidth,
@@ -92,37 +142,8 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
         </div>
       </div>
 
-      {/* Section label */}
-      <div style={{
-        padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
-        fontFamily: tokens.typography.fontMono,
-        fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.faint,
-        textTransform: 'uppercase',
-        letterSpacing: tokens.typography.tracking.widest,
-      }}>
-        /// Console
-      </div>
-
-      {/* Nav — LayoutGroup scopes NavItem's `layoutId` so the active dot
-          slides between siblings on selection change. */}
-      <nav style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <LayoutGroup id="mission-control-sidebar">
-          {navItems.map(item => (
-            <NavItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={activeNav === item.id}
-              onClick={() => onNavChange(item.id)}
-            />
-          ))}
-        </LayoutGroup>
-      </nav>
+      {/* Console nav — shared with the mobile Drawer via SidebarNav. */}
+      <SidebarNav activeNav={activeNav} onNavChange={onNavChange} />
 
       {/* User card — opens upward and stretches to the sidebar width so
           the panel sits flush. The inset divider above the card lives

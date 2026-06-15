@@ -38,6 +38,7 @@ import {
   UserCircle,
 } from '@phosphor-icons/react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { mq } from '../../../../design-systems/andromeda/components/lib/responsive'
 import { Button, buttonVariants } from '../../../../design-systems/andromeda/components/Button'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
 import { PanelHeader } from '../../../../design-systems/andromeda/components/PanelHeader'
@@ -275,9 +276,11 @@ export default function AndromedaShowcase({
       ]}
     />
     <div
-      className={jetbrainsMono.variable}
+      className={`as-shell ${jetbrainsMono.variable}`}
       style={{
         minHeight: '100vh',
+        width: '100%',
+        boxSizing: 'border-box',
         backgroundColor: tokens.color.surface.base,
         padding: `${tokens.spacing[10]} ${tokens.spacing[8]}`,
       }}
@@ -285,12 +288,41 @@ export default function AndromedaShowcase({
       <div
         style={{
           maxWidth: '1180px',
+          width: '100%',
           margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
           gap: tokens.spacing[6],
         }}
       >
+        {/* Responsive reflow — desktop-first. The default (unqualified)
+            rules ARE the desktop layout; the mq.md block collapses the dense
+            two/three-column section grids to a single column below 768px, and
+            mq.sm tightens the page gutter and steps the display title down on
+            phones. Grid tracks use minmax(0,…) and items get min-width:0 so a
+            wide child (chart/table) can never push the page past the viewport.
+            Overrides that compete with an inline style (shell padding, title
+            font-size) carry !important per the brain's inline-style rule. */}
+        <style>{`
+          .as-grid-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+          .as-grid-2 > * { min-width: 0; }
+          .as-grid-planet { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+          .as-grid-planet > * { min-width: 0; }
+          .as-usage-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .as-usage-grid > * { min-width: 0; }
+          ${mq.md} {
+            .as-grid-2 { grid-template-columns: minmax(0, 1fr); }
+            .as-grid-planet { grid-template-columns: minmax(0, 1fr); }
+            .as-usage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .as-shell { padding: ${tokens.spacing[8]} ${tokens.spacing[5]} !important; }
+          }
+          ${mq.sm} {
+            .as-usage-grid { grid-template-columns: minmax(0, 1fr); }
+            .as-shell { padding: ${tokens.spacing[6]} ${tokens.spacing[4]} !important; }
+            .as-title { font-size: ${tokens.typography.size['2xl']} !important; }
+          }
+        `}</style>
+
         {/* Page header */}
         <header style={{ marginBottom: tokens.spacing[6] }}>
           <div
@@ -306,6 +338,7 @@ export default function AndromedaShowcase({
             /// Andromeda Design System
           </div>
           <h1
+            className="as-title"
             style={{
               margin: 0,
               fontFamily: tokens.typography.fontMono,
@@ -474,7 +507,7 @@ export default function AndromedaShowcase({
             <div style={{ marginBottom: tokens.spacing[3], fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>
               Usage Reference
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing[2] }}>
+            <div className="as-usage-grid" style={{ display: 'grid', gap: tokens.spacing[2] }}>
               {[
                 { role: 'Page headings',       token: 'text.primary' },
                 { role: 'Body · descriptions', token: 'text.secondary' },
@@ -705,7 +738,7 @@ export default function AndromedaShowcase({
               textTransform: 'uppercase' as const,
               letterSpacing: tokens.typography.tracking.widest,
             };
-            const panelStyle = { width: 320, position: 'relative' as const, background: tokens.color.surface.raised };
+            const panelStyle = { width: 320, maxWidth: '100%', position: 'relative' as const, background: tokens.color.surface.raised };
             return (
               <div style={{
                 display: 'flex',
@@ -862,9 +895,9 @@ export default function AndromedaShowcase({
           description="Compound primitive: Card / CardHeader / CardContent / CardFooter / CardTitle / CardDescription. No continuous border by default — corner brackets do the framing."
         >
           <div
+            className="as-grid-2"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
               gap: tokens.spacing[5],
             }}
           >
@@ -979,9 +1012,9 @@ export default function AndromedaShowcase({
           description="Optional uppercase mono label, optional left icon, default + error states. Border transitions on focus."
         >
           <div
+            className="as-grid-2"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
               gap: tokens.spacing[5],
             }}
           >
@@ -1332,9 +1365,9 @@ export default function AndromedaShowcase({
           description="Multi-line counterpart to Input. Same border / focus / error behavior, vertical resize."
         >
           <div
+            className="as-grid-2"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
               gap: tokens.spacing[5],
             }}
           >
@@ -1424,7 +1457,7 @@ export default function AndromedaShowcase({
           kicker="Component · Charts"
           description="Polygon spider chart for multi-axis system diagnostics. Supports single or multiple overlapping series. Built on recharts, fully styled with andromeda tokens."
         >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[5] }}>
+          <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[5] }}>
             <RadarChart
               label="/// Systems"
               title="Ship Diagnostics"
@@ -1477,7 +1510,7 @@ export default function AndromedaShowcase({
           kicker="Component · Visualization"
           description="3D particle sphere — every point lit on a Lambert ramp from accent.500 (shadow) to accent.200 (lit), with 1% accent.100 sparkles on the day side. Self-contained Three.js, transparent canvas. Drop into a Card for status / next-destination widgets."
         >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: tokens.spacing[5] }}>
+          <div className="as-grid-planet" style={{ display: 'grid', gap: tokens.spacing[5] }}>
             {/* Standalone planet — full canvas */}
             <Card>
               <CardHeader>
@@ -1500,7 +1533,7 @@ export default function AndromedaShowcase({
                 </div>
                 <Badge variant="accent">LOCKED</Badge>
               </CardHeader>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[4], padding: tokens.spacing[4], alignItems: 'center' }}>
+              <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[4], padding: tokens.spacing[4], alignItems: 'center' }}>
                 <div style={{ height: 220, position: 'relative' }}>
                   <Planet particleCount={5500} />
                 </div>

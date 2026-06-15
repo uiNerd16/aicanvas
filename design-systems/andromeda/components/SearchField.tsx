@@ -89,6 +89,10 @@ export const SearchField = forwardRef(function SearchField(
         alignItems: 'center',
         gap: tokens.spacing[3],
         width: '100%',
+        // border-box so the horizontal padding stays INSIDE the 100% width —
+        // without it a full-width field overflows its container by the padding
+        // and forces horizontal page scroll on a phone.
+        boxSizing: 'border-box',
         padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
         border: `${tokens.border.thin} ${borderColor}`,
         background,

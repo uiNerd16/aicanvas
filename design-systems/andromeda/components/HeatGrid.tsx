@@ -159,7 +159,14 @@ export const HeatGrid = forwardRef(function HeatGrid(
         ...andromedaVars(),
         display: 'inline-flex',
         alignItems: 'center',
+        // Wrap so a narrow stacked column drops the readout BELOW the fixed
+        // cell matrix instead of forcing horizontal page scroll. The cells stay
+        // their true size (flexShrink:0) — a faithful stack, not a reflow. On
+        // desktop there's always room, so it stays inline (no visual change).
+        flexWrap: 'wrap',
         gap: tokens.spacing[6],
+        // Never let the fixed-size matrix push past its container's width.
+        maxWidth: '100%',
         ...style,
       }}
       {...props}

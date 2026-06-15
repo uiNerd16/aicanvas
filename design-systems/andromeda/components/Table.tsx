@@ -17,6 +17,7 @@ import { forwardRef, useEffect } from 'react';
 import { CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 
 // ── Global hover stylesheet ────────────────────────────────────────
 // Inject once per page. Class-based rules beat inline styles so the
@@ -26,6 +27,22 @@ const TABLE_STYLES = `
       .andro-tr         { transition: background-color 100ms ease; cursor: default; }
       .andro-tr-hover   { cursor: pointer; }
       .andro-tr-hover:hover { background-color: ${tokens.color.surface.hover} !important; }
+      /* Horizontal-scroll wrapper. The wide table scrolls INSIDE this panel
+         (faithful stack — never reflow rows into cards), and the panel itself
+         never grows past its grid cell, so it can't force horizontal page
+         scroll. overscroll-behavior-x:contain keeps a swipe that bottoms out
+         the table from chaining to a page-level horizontal scroll. */
+      .andro-scroll {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+      }
+      /* Touch devices hide the scrollbar (overlay), so a horizontally-
+         scrolled last column can sit flush against the panel edge with no
+         visible affordance. A small bottom gutter on coarse pointers keeps
+         the final row clear of the overlay scrollbar track. */
+      ${mq.coarse} {
+        .andro-scroll { padding-bottom: ${tokens.spacing[1]}; }
+      }
     `;
 
 export function TableStyles() {
@@ -56,7 +73,14 @@ export const Table = forwardRef(function Table(
 ) {
   return (
     <div
-      style={{ width: '100%', overflow: 'auto', ...andromedaVars() }}
+      className="andro-scroll"
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflow: 'auto',
+        ...andromedaVars(),
+      }}
     >
       <table
         ref={ref}

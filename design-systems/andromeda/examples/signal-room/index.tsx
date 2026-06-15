@@ -14,14 +14,25 @@
 // MixesRow → RecentTransmissions/LevelsPanel → Transport.
 // After each cell settles, its internal motion (waveform redraw,
 // stat-tile live drift, progress fills, row-stagger) takes over.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the shell
+// is a flex row on desktop. Below `mq.md` it becomes a flex COLUMN,
+// the desktop Sidebar is hidden (`display:none`), and the Header
+// gains a hamburger that opens the SAME console-nav content in a
+// left-side Drawer. The hero's dual-pane and the Recent/Levels split
+// collapse to one column at the same threshold; the stacked source
+// order reads sensibly (primary panel first, peripheral panels last).
+// Drawer open/close is local client state, starts closed — SSR-safe,
+// no hydration flash.
 // ============================================================
 
 'use client';
 
 import { useState } from 'react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { useCascadeProps } from '../../components/lib/motion';
-import { Sidebar } from './Sidebar';
+import { Sidebar, SidebarNav } from './Sidebar';
 import { Header } from './Header';
 import { NowTransmitting } from './NowTransmitting';
 import { TransmitStats } from './TransmitStats';
@@ -31,6 +42,7 @@ import { LevelsPanel } from './LevelsPanel';
 import { Transport } from './Transport';
 import { nowPlaying } from './data';
 import { motion } from 'framer-motion';
+import { Drawer, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody } from '../../components/Drawer';
 
 // Normalize a source item (mix card / transmission row) to the shape the
 // bottom player consumes: title, subtitle, code, cover (image url or null →
@@ -48,6 +60,9 @@ const recToNowPlaying = (r) => ({
 
 export default function SignalRoom() {
   const [activeNav, setActiveNav] = useState('library');
+  // Mobile nav drawer — starts closed so SSR + first client render match the
+  // desktop-first base (the drawer is portaled + display:none-gated anyway).
+  const [navOpen, setNavOpen] = useState(false);
 
   // The one source of truth for the player. Pressing play on a routine card or
   // a transmission row sets `current` and starts playback; the Transport bar
@@ -84,10 +99,12 @@ export default function SignalRoom() {
   const splitMotion     = useCascadeProps(5);
   const transportMotion = useCascadeProps(6);
 
-  const handleNavChange = (id) => setActiveNav(id);
+  // Selecting a nav item from the mobile drawer also closes the drawer.
+  const handleNavChange = (id) => { setActiveNav(id); setNavOpen(false); };
 
   return (
     <div
+      className="sr-shell"
       style={{
         display: 'flex',
         height: '100%',
@@ -102,12 +119,14 @@ export default function SignalRoom() {
       }}
     >
       <Sidebar
+        className="sr-sidebar"
         activeNav={activeNav}
         onNavChange={handleNavChange}
         motionProps={sidebarMotion}
       />
 
       <div
+        className="sr-main-col"
         style={{
           flex: 1,
           display: 'flex',
@@ -117,7 +136,12 @@ export default function SignalRoom() {
           gap: tokens.spacing[4],
         }}
       >
-        <Header sectionTitle="Library" motionProps={headerMotion} />
+        <Header
+          sectionTitle="Library"
+          motionProps={headerMotion}
+          onMenuOpen={() => setNavOpen(true)}
+          menuOpen={navOpen}
+        />
 
         <main
           style={{
@@ -144,10 +168,11 @@ export default function SignalRoom() {
 
           <motion.div
             {...splitMotion}
+            className="sr-split"
             style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'stretch' }}
           >
             <RecentTransmissions onPlay={playRec} currentCode={current.code} isPlaying={isPlaying} />
-            <div style={{ flex: '0 0 360px', display: 'flex' }}>
+            <div className="sr-levels" style={{ flex: '0 0 360px', display: 'flex', minWidth: 0 }}>
               <LevelsPanel />
             </div>
           </motion.div>
@@ -160,6 +185,43 @@ export default function SignalRoom() {
           onTogglePlay={togglePlay}
         />
       </div>
+
+      {/* Mobile nav — the same console nav content, served in a left-side
+          Drawer below `mq.md`. The desktop Sidebar is hidden at that width
+          (see <style> below); the hamburger lives in the Header. */}
+      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
+        <DrawerHeader>
+          <DrawerTitle>Andromeda</DrawerTitle>
+          <DrawerDescription>Signal Room</DrawerDescription>
+        </DrawerHeader>
+        <DrawerBody style={{ padding: 0 }}>
+          <SidebarNav
+            activeNav={activeNav}
+            onNavChange={handleNavChange}
+            layoutGroupId="signal-room-drawer-nav"
+          />
+        </DrawerBody>
+      </Drawer>
+
+      <style>{`
+        ${mq.md} {
+          /* Stack the shell top-to-bottom; the hidden sidebar slot collapses
+             cleanly and the main column fills the width. */
+          .sr-shell {
+            flex-direction: column !important;
+            gap: ${tokens.spacing[3]} !important;
+            padding: ${tokens.spacing[3]} !important;
+          }
+          /* Desktop sidebar hidden — its content lives in the Drawer. */
+          .sr-sidebar { display: none !important; }
+          .sr-main-col { gap: ${tokens.spacing[3]} !important; }
+          /* Recent/Levels dual-pane collapses to one column; the levels panel
+             releases its fixed 360px column and flows full-width below the
+             transmissions table. */
+          .sr-split { flex-direction: column !important; gap: ${tokens.spacing[4]} !important; }
+          .sr-levels { flex: 1 1 auto !important; }
+        }
+      `}</style>
     </div>
   );
 }

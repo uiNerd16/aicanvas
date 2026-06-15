@@ -18,6 +18,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Play, Heart } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
 import { Button } from '../../components/Button';
@@ -168,9 +169,10 @@ export function NowTransmitting() {
       />
 
       <div style={{ padding: tokens.spacing[5] }}>
-        <div style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'stretch' }}>
+        <div className="sr-hero-panes" style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'stretch' }}>
           {/* Left: stream metadata */}
           <div
+            className="sr-hero-meta"
             style={{
               flex: '0 0 36%',
               display: 'flex',
@@ -192,6 +194,7 @@ export function NowTransmitting() {
                 /// Featured stream
               </span>
               <h2
+                className="sr-hero-title"
                 style={{
                   margin: 0,
                   fontFamily: tokens.typography.fontSans,
@@ -283,6 +286,20 @@ export function NowTransmitting() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Hero dual-pane stacks: metadata block on top, waveform below.
+             The left pane releases its 36% basis to flow full width. */
+          .sr-hero-panes { flex-direction: column !important; gap: ${tokens.spacing[4]} !important; }
+          .sr-hero-meta { flex: 1 1 auto !important; }
+        }
+        ${mq.sm} {
+          /* Step the hero reading down one stop (3xl → 2xl) — the largest
+             display size on the page overpowers a phone at full size. */
+          .sr-hero-title { font-size: ${tokens.typography.size['2xl']} !important; }
+        }
+      `}</style>
     </Card>
   );
 }

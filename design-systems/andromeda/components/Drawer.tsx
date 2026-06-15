@@ -180,10 +180,16 @@ export const Drawer = forwardRef(function Drawer(
 
   const cfg = SIDE_MAP[side] ?? SIDE_MAP.right;
   const closedOffset = cfg.sign * 100;
+  const sizeValue = typeof size === 'number' ? `${size}px` : size;
+  // Cap the panel to the viewport on phones: a left/right drawer wider than
+  // the screen (size=420 on a 320px phone) must never exceed the viewport and
+  // force horizontal page scroll. min() keeps the desktop size on wide screens
+  // and clamps to a token-sized inset from the edge below it. tokens.spacing[6]
+  // (24px) leaves the backdrop peeking so the drawer still reads as an overlay.
   const sizeStyle =
     cfg.axis === 'x'
-      ? { width: typeof size === 'number' ? `${size}px` : size }
-      : { height: typeof size === 'number' ? `${size}px` : size };
+      ? { width: `min(${sizeValue}, calc(100% - ${tokens.spacing[6]}))` }
+      : { height: `min(${sizeValue}, calc(100% - ${tokens.spacing[6]}))` };
   const panelInitial = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
   const panelAnimate = { [cfg.axis]: 0, opacity: 1 };
   const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
