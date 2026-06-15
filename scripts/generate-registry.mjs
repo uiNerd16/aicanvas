@@ -254,12 +254,20 @@ function componentSlug(systemSlug, fileBaseName) {
     .toLowerCase()
   return `${systemSlug}-${kebab}`
 }
+// Resolve a system component's registry slug, honoring per-system `slugOverrides`
+// (keyed by the file's posix path relative to the system rootDir). Lets a
+// design-system component whose natural slug collides with a published standalone
+// (e.g. Button.tsx → andromeda-button) emit under its own unique slug instead of
+// being skipped.
+function dsComponentSlug(ds, entryRelPosix, baseName) {
+  return ds.slugOverrides?.[entryRelPosix] ?? componentSlug(ds.slug, baseName)
+}
 for (const ds of DESIGN_SYSTEMS) {
   expectedNames.add(`${ds.slug}-tokens`)
   expectedNames.add(ds.slug)
   for (const entry of ds.systemEntries) {
     const baseName = entry.split('/').pop()
-    expectedNames.add(componentSlug(ds.slug, baseName))
+    expectedNames.add(dsComponentSlug(ds, entry, baseName))
   }
   for (const template of ds.templates) expectedNames.add(template.slug)
   if (ds.templates.length > 0) expectedNames.add(`${ds.slug}-all`)
@@ -355,41 +363,17 @@ for (const dir of dirs) {
 
 let dsCount = 0
 
-// Pick the shadcn file `type` from the extension. Code files install as
-// registry:lib (proven). Non-code files (the .md "brain" docs) MUST be
-// registry:file or shadcn silently drops them on install — registry:file
-// requires a `target`, which makeFile always sets.
-function fileTypeFor(fileAbs) {
-  return /\.(tsx|ts|jsx|js|mjs|cjs)$/.test(fileAbs) ? 'registry:lib' : 'registry:file'
-}
-
+// Every shipped file is code (.ts/.tsx) → registry:lib. The .md "brain" docs are
+// deliberately NOT shipped to consumers; they stay in design-systems/ for
+// internal use only.
 function makeFile(fileAbs, rootDirAbs, slug) {
   const target = targetPathFor(fileAbs, rootDirAbs, slug)
   return {
     path: target,
     content: readFileSync(fileAbs, 'utf-8'),
-    type: fileTypeFor(fileAbs),
+    type: 'registry:lib',
     target,
   }
-}
-
-// Brain-file attachers — sidecar .md files that ride alongside the code.
-// `rules.md` ships with tokens (system-wide brain — every install gets it via
-// the dep chain). `<Component>.rules.md` ships with its sibling `<Component>.tsx`
-// in the system bundle. Skipped silently if the .md file doesn't exist yet.
-function readSibling(fileAbs) {
-  try { if (statSync(fileAbs).isFile()) return fileAbs } catch {}
-  return null
-}
-
-function brainSiblingFor(componentTsxAbs) {
-  // components/Button.tsx → components/Button.rules.md
-  const rulesPath = componentTsxAbs.replace(/\.tsx$/, '.rules.md')
-  return readSibling(rulesPath)
-}
-
-function systemRulesFile(rootDirAbs) {
-  return readSibling(join(rootDirAbs, 'rules.md'))
 }
 
 function indexEntry(item, files) {
@@ -420,11 +404,6 @@ for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensWalk = walkDependencies(tokenEntriesAbs, rootDirAbs)
   const tokensFiles = tokensWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-  // Attach the system-wide brain (`rules.md`). Lives with tokens so every
-  // install path that reaches tokens also reaches the brain — components,
-  // system, templates all inherit via `registryDependencies`.
-  const systemBrainAbs = systemRulesFile(rootDirAbs)
-  if (systemBrainAbs) tokensFiles.push(makeFile(systemBrainAbs, rootDirAbs, ds.slug))
   const tokensItem = {
     $schema: SCHEMA,
     name: tokensSlug,
@@ -445,14 +424,6 @@ for (const ds of DESIGN_SYSTEMS) {
   // Excludes anything shipped by the tokens item; depends on it via registry deps.
   const systemWalk = walkDependencies(systemEntriesAbs, rootDirAbs, tokensFileSet)
   const systemFiles = systemWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-  // Attach per-component brain files. For every shipped `.tsx`, look for a
-  // sibling `<Component>.rules.md` and ship it in the same bundle. The user's
-  // AI editor reads both when editing the component.
-  for (const componentAbs of systemWalk.files) {
-    if (!componentAbs.endsWith('.tsx')) continue
-    const brainAbs = brainSiblingFor(componentAbs)
-    if (brainAbs) systemFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
-  }
   const systemItem = {
     $schema: SCHEMA,
     name: ds.slug,
@@ -498,7 +469,7 @@ for (const ds of DESIGN_SYSTEMS) {
   for (const entry of ds.systemEntries) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue
-    const slug = componentSlug(ds.slug, entry.split('/').pop())
+    const slug = dsComponentSlug(ds, entry, entry.split('/').pop())
     if (componentWorkspaceSlugs.has(slug)) continue   // emitted as a standalone instead
     emittedComponentFiles.add(fileAbs)
   }
@@ -507,9 +478,10 @@ for (const ds of DESIGN_SYSTEMS) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue   // not part of system walk (skipped)
     const baseName = entry.split('/').pop()
-    const slug = componentSlug(ds.slug, baseName)
+    const slug = dsComponentSlug(ds, entry, baseName)
 
-    // Slug collision with components-workspace — skip individual emit.
+    // Slug collision with components-workspace — skip individual emit (unless a
+    // slugOverride gave this file its own unique slug, which won't collide).
     if (componentWorkspaceSlugs.has(slug)) continue
 
     // Walk this component's transitive deps within the system, excluding tokens
@@ -535,8 +507,9 @@ for (const ds of DESIGN_SYSTEMS) {
       if (!resolved || !emittedComponentFiles.has(resolved) || resolved === fileAbs) continue
       // Sibling component — find its slug
       const relPath = relative(rootDirAbs, resolved)
+      const relPosix = relPath.split(sep).join(posix.sep)
       const siblingBase = relPath.split(sep).pop()
-      const siblingSlug = componentSlug(ds.slug, siblingBase)
+      const siblingSlug = dsComponentSlug(ds, relPosix, siblingBase)
       // Only declare a dep if that sibling is itself published individually
       // (i.e. doesn't collide with a workspace standalone).
       if (!componentWorkspaceSlugs.has(siblingSlug)) {
@@ -545,9 +518,6 @@ for (const ds of DESIGN_SYSTEMS) {
     }
 
     const compFiles = compWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
-    // Attach this component's brain rules sibling if present
-    const brainAbs = brainSiblingFor(fileAbs)
-    if (brainAbs) compFiles.push(makeFile(brainAbs, rootDirAbs, ds.slug))
 
     const compName = baseName.replace(/\.tsx$/, '')
     const compItem = {

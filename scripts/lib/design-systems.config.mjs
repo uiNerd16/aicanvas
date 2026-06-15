@@ -79,6 +79,14 @@ export const DESIGN_SYSTEMS = [
       'components/UserCard.tsx',
       'components/UserMenu.tsx',
     ],
+    // Per-file slug overrides. Button.tsx's natural slug (andromeda-button) is
+    // owned by the standalone in components-workspace/andromeda-button/, so the
+    // design-system Button is given its own unique slug and ships as a
+    // first-class installable component (with Button.rules.md), fully separate
+    // from that standalone.
+    slugOverrides: {
+      'components/Button.tsx': 'andromeda-button-system',
+    },
     templates: [
       { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi',     entryPath: 'examples/mission-control/index.tsx' },
       { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom',    entryPath: 'examples/service-order/index.tsx' },
