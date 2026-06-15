@@ -8,7 +8,7 @@
  * Usage: node scripts/generate-registry.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs'
 import { join, dirname, resolve, relative, sep, posix } from 'path'
 import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
@@ -18,6 +18,15 @@ const wsDir = 'components-workspace'
 const outDir = 'registry-data'
 const SCHEMA = 'https://ui.shadcn.com/schema/registry-item.json'
 const REGISTRY_SCHEMA = 'https://ui.shadcn.com/schema/registry.json'
+
+// Origin that serves the registry items (app/r/[file]/route.ts → /r/<slug>.json).
+// registryDependencies MUST be fully-qualified URLs (or @namespace/name). A BARE
+// slug makes shadcn resolve it against its DEFAULT registry (ui.shadcn.com) and
+// 404 — which silently broke every design-system + template install. Emitting
+// full URLs is the documented shadcn pattern for self-hosted/custom registries.
+// Overridable so the generator can emit a localhost variant for install tests.
+const REGISTRY_BASE = (process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me').replace(/\/+$/, '')
+const depUrl = (slug) => `${REGISTRY_BASE}/r/${slug}.json`
 
 // Folders to skip when building the public registry. `_template` is the
 // scaffold copy-source and is never publicly installable.
@@ -240,7 +249,7 @@ function componentSlug(systemSlug, fileBaseName) {
   // Convert PascalCase file name to kebab-case, prefix with system slug.
   // Button.tsx → andromeda-button; PanelHeader.tsx → andromeda-panel-header.
   const kebab = fileBaseName
-    .replace(/\.tsx$/, '')
+    .replace(/\.(tsx|ts|jsx|js|mjs|cjs)$/, '')
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     .toLowerCase()
   return `${systemSlug}-${kebab}`
@@ -346,12 +355,21 @@ for (const dir of dirs) {
 
 let dsCount = 0
 
+// Pick the shadcn file `type` from the extension. Code files install as
+// registry:lib (proven). Non-code files (the .md "brain" docs) MUST be
+// registry:file or shadcn silently drops them on install — registry:file
+// requires a `target`, which makeFile always sets.
+function fileTypeFor(fileAbs) {
+  return /\.(tsx|ts|jsx|js|mjs|cjs)$/.test(fileAbs) ? 'registry:lib' : 'registry:file'
+}
+
 function makeFile(fileAbs, rootDirAbs, slug) {
+  const target = targetPathFor(fileAbs, rootDirAbs, slug)
   return {
-    path: targetPathFor(fileAbs, rootDirAbs, slug),
+    path: target,
     content: readFileSync(fileAbs, 'utf-8'),
-    type: 'registry:lib',
-    target: targetPathFor(fileAbs, rootDirAbs, slug),
+    type: fileTypeFor(fileAbs),
+    target,
   }
 }
 
@@ -442,7 +460,7 @@ for (const ds of DESIGN_SYSTEMS) {
     title: `${ds.name} design system`,
     description: `Every ${ds.name} component (${systemFiles.length} files). Installs the foundation tokens automatically.`,
     author: 'aicanvas <https://aicanvas.me>',
-    registryDependencies: [tokensSlug],
+    registryDependencies: [depUrl(tokensSlug)],
     dependencies: systemWalk.npmDeps,
     files: systemFiles,
   }
@@ -469,6 +487,22 @@ for (const ds of DESIGN_SYSTEMS) {
       try { return statSync(join(wsDir, d)).isDirectory() } catch { return false }
     }),
   )
+
+  // Files that are emitted as their OWN individual registry item. Only these may
+  // become another component's `registryDependencies`. Every OTHER file reached
+  // by the system walk — shared non-component helpers like components/lib/motion.ts
+  // (imported by Button/IconButton/StatTile but never published on its own) —
+  // must be BUNDLED into each component that imports it, or the installed file
+  // would carry an unresolved relative import (`./lib/motion`) and fail to build.
+  const emittedComponentFiles = new Set()
+  for (const entry of ds.systemEntries) {
+    const fileAbs = resolve(rootDirAbs, entry)
+    if (!systemFileSet.has(fileAbs)) continue
+    const slug = componentSlug(ds.slug, entry.split('/').pop())
+    if (componentWorkspaceSlugs.has(slug)) continue   // emitted as a standalone instead
+    emittedComponentFiles.add(fileAbs)
+  }
+
   for (const entry of ds.systemEntries) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue   // not part of system walk (skipped)
@@ -479,9 +513,11 @@ for (const ds of DESIGN_SYSTEMS) {
     if (componentWorkspaceSlugs.has(slug)) continue
 
     // Walk this component's transitive deps within the system, excluding tokens
-    // files (those come via registry deps) AND excluding sibling component files
-    // (those become registry deps too, not bundled inline).
-    const otherComponentFiles = [...systemFileSet].filter((f) => f !== fileAbs)
+    // files (those come via registry deps) AND excluding OTHER individually-emitted
+    // components (those become registry deps). Shared helpers that are NOT emitted
+    // on their own (e.g. lib/motion.ts) fall through and get bundled inline so the
+    // component's relative imports resolve after install.
+    const otherComponentFiles = [...emittedComponentFiles].filter((f) => f !== fileAbs)
     const componentBoundary = new Set([...tokensFileSet, ...otherComponentFiles])
     const compWalk = walkDependencies([fileAbs], rootDirAbs, componentBoundary)
 
@@ -493,7 +529,10 @@ for (const ds of DESIGN_SYSTEMS) {
     for (const spec of extractImportSpecifiers(sourceContent)) {
       if (!spec.startsWith('.') && !spec.startsWith('/')) continue
       const resolved = resolveImport(fileAbs, spec)
-      if (!resolved || !systemFileSet.has(resolved) || resolved === fileAbs) continue
+      // Only an individually-emitted sibling component becomes a registry dep.
+      // Non-emitted shared helpers (lib/motion.ts) are bundled inline above, so
+      // they must NOT be turned into a (non-existent) registry dependency.
+      if (!resolved || !emittedComponentFiles.has(resolved) || resolved === fileAbs) continue
       // Sibling component — find its slug
       const relPath = relative(rootDirAbs, resolved)
       const siblingBase = relPath.split(sep).pop()
@@ -518,7 +557,7 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${compName} (${ds.name})`,
       description: `${ds.name} ${compName} component. Install just this piece — tokens and any sibling components are pulled in automatically.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [...componentRegistryDeps].sort(),
+      registryDependencies: [...componentRegistryDeps].sort().map(depUrl),
       dependencies: compWalk.npmDeps,
       files: compFiles,
     }
@@ -543,7 +582,7 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${template.name} (${ds.name})`,
       description: `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent template installs reuse it.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [ds.slug],
+      registryDependencies: [depUrl(ds.slug)],
       dependencies: templateWalk.npmDeps,
       files: templateFiles,
     }
@@ -566,7 +605,7 @@ for (const ds of DESIGN_SYSTEMS) {
       title: `${ds.name} — full system`,
       description: `Every ${ds.name} component, token, and template in one install.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [ds.slug, ...ds.templates.map((t) => t.slug)],
+      registryDependencies: [depUrl(ds.slug), ...ds.templates.map((t) => depUrl(t.slug))],
       files: [],
     }
     writeFileSync(join(outDir, `${ds.slug}-all.json`), JSON.stringify(allItem, null, 2) + '\n')
