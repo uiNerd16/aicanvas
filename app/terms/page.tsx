@@ -86,7 +86,7 @@ export default function TermsPage() {
             2b. Premium subscription
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Premium is billed at $9.99 per month or $49.99 per year through
+            Premium is billed at $8.99 per month or $49.99 per year through
             Paddle.com, our reseller and Merchant of Record. Paddle is the
             seller of record for these transactions and handles payment and
             applicable taxes; your purchase is also subject to Paddle&apos;s

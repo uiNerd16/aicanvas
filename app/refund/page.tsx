@@ -65,7 +65,7 @@ export default function RefundPage() {
         <section className="mt-10">
           <h2 className="text-lg font-bold text-sand-50">2. How billing works</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Premium is billed at $9.99 per month or $49.99 per year through{' '}
+            Premium is billed at $8.99 per month or $49.99 per year through{' '}
             <a
               href="https://www.paddle.com"
               target="_blank"
