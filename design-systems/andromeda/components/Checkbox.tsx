@@ -23,7 +23,27 @@ function useSpacePopIn() {
 }
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+
+// Touch-target expander — the visible 16px box stays its desktop size; on coarse
+// pointers the invisible input (which receives the click, kept on top via z-10)
+// grows to spacing[10] (40px), centered over the box. inset-0 is released so the
+// input can overflow the small wrapper. Scoped className, !important to beat the
+// peer/absolute base classes. rules.md → Responsive + "Invisible inputs over
+// visual proxies" (input must stay above the proxy — z-10 is preserved).
+const TOUCH_TARGET_STYLE = `
+  ${mq.coarse} {
+    .andromeda-checkbox-touch {
+      inset: auto !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: ${tokens.spacing[10]} !important;
+      height: ${tokens.spacing[10]} !important;
+    }
+  }
+`;
 
 const boxVariants = cva(
   [
@@ -129,7 +149,7 @@ export const Checkbox = forwardRef(function Checkbox(
           // clicks reach the input. Both layers are positioned, so without
           // an explicit z-index the visual span paints last and swallows
           // every click — the box hovers but never toggles.
-          className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+          className="andromeda-checkbox-touch peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
           {...props}
         />
         <span
@@ -161,6 +181,7 @@ export const Checkbox = forwardRef(function Checkbox(
           {label}
         </label>
       ) : null}
+      <style>{TOUCH_TARGET_STYLE}</style>
     </div>
   );
 });

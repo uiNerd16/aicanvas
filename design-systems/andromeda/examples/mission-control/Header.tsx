@@ -2,12 +2,21 @@
 // ============================================================
 // MISSION CONTROL: Header
 // Title left, mission clock center, status + bell right.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the
+// header gains a hamburger IconButton, hidden on desktop and shown
+// (`inline-flex`) below `mq.md`, that opens the nav Drawer. Below
+// `mq.md` the inline padding tightens and the centered mission clock
+// is allowed to shrink so the row never overflows the viewport.
 // ============================================================
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { List } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
+import { IconButton } from '../../components/IconButton';
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -33,6 +42,7 @@ function MissionClock() {
       border: `${tokens.border.thin} ${tokens.color.border.base}`,
       background: tokens.color.surface.raised,
       position: 'relative',
+      minWidth: 0,
     }}>
       <CornerMarkers size={4} offset={2} />
       <span style={{
@@ -57,10 +67,11 @@ function MissionClock() {
   );
 }
 
-export function Header({ sectionTitle = 'Overview', motionProps }) {
+export function Header({ sectionTitle = 'Overview', motionProps, onMenuOpen, menuOpen = false }) {
   return (
     <motion.header
       {...(motionProps ?? {})}
+      className="mc-header"
       style={{
         position: 'relative',
         height: tokens.layout.headerHeight,
@@ -75,6 +86,27 @@ export function Header({ sectionTitle = 'Overview', motionProps }) {
       }}
     >
       <CornerMarkers />
+
+      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the sidebar is
+          visible there); shown below `mq.md` where the sidebar is hidden.
+          Carries the stateful data-state look while the drawer is open. */}
+      <IconButton
+        className="mc-hamburger"
+        variant="ghost"
+        size="lg"
+        icon={List}
+        aria-label="Open navigation"
+        aria-expanded={menuOpen}
+        data-state={menuOpen ? 'open' : 'closed'}
+        onClick={onMenuOpen}
+        style={{
+          display: 'none',
+          flexShrink: 0,
+          ...(menuOpen
+            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
+            : null),
+        }}
+      />
 
       {/* Title block — section-aware */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], flexShrink: 0 }}>
@@ -100,7 +132,7 @@ export function Header({ sectionTitle = 'Overview', motionProps }) {
       </div>
 
       {/* Mission clock — centered */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', minWidth: 0 }}>
         <MissionClock />
       </div>
 
@@ -119,16 +151,37 @@ export function Header({ sectionTitle = 'Overview', motionProps }) {
           border: `1px solid ${tokens.color.accent[400]}`,
           boxShadow: `0 0 6px ${tokens.color.accent[500]}`,
         }} />
-        <span style={{
-          fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.xs,
-          color: tokens.color.accent[100],
-          textTransform: 'uppercase',
-          letterSpacing: tokens.typography.tracking.wider,
-        }}>
+        <span
+          className="mc-status-label"
+          style={{
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size.xs,
+            color: tokens.color.accent[100],
+            textTransform: 'uppercase',
+            letterSpacing: tokens.typography.tracking.wider,
+          }}
+        >
           Nominal
         </span>
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Tighter inline padding + gap so the hamburger, title, clock and
+             status all fit the narrow row without forcing page scroll. */
+          .mc-header {
+            padding: 0 ${tokens.spacing[4]} !important;
+            gap: ${tokens.spacing[3]} !important;
+          }
+          /* Hamburger appears; inline display:none is overridden here. */
+          .mc-hamburger { display: inline-flex !important; }
+        }
+        ${mq.sm} {
+          /* On the smallest phones drop the status word — the glowing dot
+             still signals nominal status, and the clock keeps its room. */
+          .mc-status-label { display: none !important; }
+        }
+      `}</style>
     </motion.header>
   );
 }

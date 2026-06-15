@@ -13,7 +13,37 @@
 import { forwardRef, useId } from 'react';
 import { motion } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
+import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+
+// Narrow-width overflow guard — a multi-segment strip can be wider than a phone
+// viewport. Faithful-stack rule (mirrors the Table): the strip scrolls
+// HORIZONTALLY inside its own box, never wraps (wrapping would break the
+// fixed-height row, the borderLeft dividers, and the sliding indicator) and
+// never forces page scroll. Below `md` the control is capped at max-width:100%
+// and its segments scroll within. The buttons are flex-shrink:0 so they keep
+// their tap size while scrolling. !important to beat the inline-styled root.
+// rules.md → Responsive (faithful stack, no horizontal PAGE scroll).
+const RESPONSIVE_STYLE = `
+  ${mq.md} {
+    .andromeda-segmented {
+      display: flex !important;
+      max-width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      /* Hide the scroll affordance. The strip has a fixed cellSize height
+         (24/32/40px); a classic, space-consuming horizontal scrollbar (narrow
+         desktop window, some platforms) would eat that height and vertically
+         crush the segment row. Scrolling still works — the gutter just isn't
+         painted. */
+      scrollbar-width: none !important;
+    }
+    .andromeda-segmented::-webkit-scrollbar { display: none !important; }
+    .andromeda-segmented > .andromeda-segmented-item {
+      flex-shrink: 0 !important;
+    }
+  }
+`;
 
 const SIZE_PX = {
   sm: 24,
@@ -80,7 +110,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       role="tablist"
       data-size={size}
       data-slot="segmented-control"
-      className={cn('inline-flex relative select-none', className)}
+      className={cn('andromeda-segmented inline-flex relative select-none', className)}
       style={{
         ...andromedaVars(),
         height: `${cellSize}px`,
@@ -162,6 +192,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
           outline: none;
           box-shadow: inset 0 0 0 1px ${tokens.color.accent[400]};
         }
+        ${RESPONSIVE_STYLE}
       `}</style>
     </div>
   );

@@ -10,6 +10,7 @@
 
 import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { PanelHeader } from '../../components/PanelHeader';
 import { PanelMenu } from '../../components/PanelMenu';
@@ -17,9 +18,14 @@ import { ArrowClockwise, Sliders, Export, EyeSlash } from '@phosphor-icons/react
 import { clusterUtilisation, missionSuccessRate, activeAllocations } from './data';
 
 // ── Reusable cell wrapper ─────────────────────────────────────────
+// `rp-cap-cell` carries the responsive separator swap: the desktop
+// vertical border (borderRight, set inline below) is dropped below
+// `mq.md` and replaced with a horizontal one (borderBottom) when the
+// three cells stack — see <style> in CapacityPanel.
 function Cell({ label, children, last = false }) {
   return (
     <div
+      className={last ? 'rp-cap-cell rp-cap-cell-last' : 'rp-cap-cell'}
       style={{
         flex: '1 1 0',
         minWidth: 0,
@@ -52,6 +58,7 @@ function BigValue({ value, suffix, delta }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: tokens.spacing[2] }}>
       <span
+        className="rp-cap-value"
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size['3xl'],
@@ -232,8 +239,10 @@ export function CapacityPanel() {
       />
 
       {/* Three KPI cells — flex:1 so the row fills the panel height in
-          a bento grid where both top panels share a single row height. */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+          a bento grid where both top panels share a single row height.
+          Below `mq.md` the row stacks (flex-direction:column) and the
+          inter-cell separators flip from vertical to horizontal. */}
+      <div className="rp-cap-cells" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <Cell label="Cluster utilisation">
           <BigValue value={`${clusterUtilisation.value.toFixed(1)}`} suffix="%" />
           <BarGrid values={clusterUtilisation.segments} />
@@ -247,6 +256,25 @@ export function CapacityPanel() {
           <Sparkline data={activeAllocations.series} />
         </Cell>
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Stack the three KPI cells top-to-bottom; swap the vertical
+             inter-cell border for a horizontal one so the divider follows
+             the new flow. */
+          .rp-cap-cells { flex-direction: column !important; }
+          .rp-cap-cell {
+            border-right: none !important;
+            border-bottom: ${tokens.border.thin} ${tokens.color.border.subtle} !important;
+          }
+          .rp-cap-cell-last { border-bottom: none !important; }
+        }
+        ${mq.sm} {
+          /* Step the hero KPI reading down one stop (3xl → 2xl) so it stops
+             overpowering a phone. */
+          .rp-cap-value { font-size: ${tokens.typography.size['2xl']} !important; }
+        }
+      `}</style>
     </div>
   );
 }

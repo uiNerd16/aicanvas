@@ -12,6 +12,15 @@
 //
 // The scrub value lives in local state; dragging it doesn't
 // actually advance the (silent) "transmission" — purely visual.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the bar
+// stays a single transport bar at every width (a faithful stack,
+// never a bottom tab bar). Below `mq.md` the two 260px side regions
+// release their fixed width so the flexing centre keeps the play
+// controls usable, and inline padding/gap tighten. Below `mq.sm`
+// the right-side volume/queue cluster — the least essential on a
+// phone — is hidden so the cover, title and transport controls keep
+// their room.
 // ============================================================
 
 'use client';
@@ -32,6 +41,7 @@ import {
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { IconButton } from '../../components/IconButton';
 import { Slider } from '../../components/Slider';
@@ -102,6 +112,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
   return (
     <motion.div
       {...(motionProps ?? {})}
+      className="sr-transport"
       style={{
         position: 'relative',
         flexShrink: 0,
@@ -119,6 +130,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
 
       {/* Left: track metadata */}
       <div
+        className="sr-transport-meta"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -239,6 +251,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
 
       {/* Right: volume + queue actions */}
       <div
+        className="sr-transport-aux"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -261,6 +274,24 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
           />
         </div>
       </div>
+
+      <style>{`
+        ${mq.md} {
+          /* Tighten the bar; the two side regions release their fixed 260px
+             so the flexing centre keeps the transport controls usable. */
+          .sr-transport {
+            padding: 0 ${tokens.spacing[4]} !important;
+            gap: ${tokens.spacing[3]} !important;
+          }
+          .sr-transport-meta { flex: 1 1 0 !important; }
+          .sr-transport-aux { flex: 0 1 auto !important; }
+        }
+        ${mq.sm} {
+          /* The volume/queue cluster is the least essential control on a phone;
+             drop it so the cover, title and play controls keep their room. */
+          .sr-transport-aux { display: none !important; }
+        }
+      `}</style>
     </motion.div>
   );
 }

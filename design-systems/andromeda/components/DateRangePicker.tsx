@@ -26,6 +26,7 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarBlank, CaretDown, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
+import { mq } from './lib/responsive';
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -123,6 +124,30 @@ function PickerStyles() {
       }
       .adp-day:focus-visible {
         box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
+      }
+      /* Phone fit — below sm the absolutely-positioned panel must not push
+         past the viewport and force horizontal page scroll. Clamp its width to
+         a token-inset of the viewport and pin it to the trigger's RIGHT edge
+         (right:0) so a trigger sitting in the right half of the screen opens a
+         calendar that stays on-screen instead of overflowing rightward. The
+         fixed 7×32px grid then becomes fluid (1fr columns, cells fill their
+         track) so the calendar shrinks to whatever width survives the clamp.
+         !important: the panel width / grid columns / cell box are inline
+         styles, so the responsive override must outrank them (rules.md →
+         "Hover on inline-styled controls"). */
+      ${mq.sm} {
+        .adp-panel {
+          max-width: calc(100vw - ${tokens.spacing[4]}) !important;
+          left: auto !important;
+          right: 0 !important;
+        }
+        .adp-grid {
+          grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        }
+        .adp-day {
+          width: 100% !important;
+          min-width: 0 !important;
+        }
       }
     `}</style>
   );
@@ -323,11 +348,13 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
         <div
           role="dialog"
           aria-label="Select date range"
+          className="adp-panel"
           style={{
             position: 'absolute',
             top: `calc(100% + ${tokens.spacing[2]})`,
             left: 0,
             zIndex: 1000,
+            boxSizing: 'border-box',
             background: tokens.color.surface.raised,
             border: `${tokens.border.thin} ${tokens.color.border.base}`,
             padding: tokens.spacing[3],
@@ -403,6 +430,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           </div>
 
           <div
+            className="adp-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,
@@ -428,6 +456,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           </div>
 
           <div
+            className="adp-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,

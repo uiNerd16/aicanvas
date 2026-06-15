@@ -132,7 +132,9 @@ export const EmptyStateAction = forwardRef(function EmptyStateAction(
     <div
       ref={ref}
       data-slot="empty-state-action"
-      className={cn('mt-[var(--andromeda-3)] flex items-center gap-[var(--andromeda-3)]', className)}
+      // flex-wrap + justify-center so multiple buttons wrap and stay centered
+      // on narrow widths instead of overflowing the centered card.
+      className={cn('mt-[var(--andromeda-3)] flex flex-wrap items-center justify-center gap-[var(--andromeda-3)]', className)}
       {...props}
     >
       {children}

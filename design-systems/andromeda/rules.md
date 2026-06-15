@@ -426,6 +426,67 @@ volume area = LEGEND_H (28px) + bars (flex) + X_AXIS_H (24px)
 
 ---
 
+## Responsive
+
+`must` — Andromeda is **desktop-first**. The default, unqualified styles ARE the desktop layout; responsiveness steps DOWN from there via `max-width` media queries. This matches the system's origin — dense engineering dashboards on wide screens — and keeps the desktop composition, which is the system's identity, as the canonical form. Never author the mobile layout as the base and `min-width` up; the cascade then reads backwards from how every existing component is written.
+
+The agreed mobile strategy is a **faithful stack**: preserve the sci-fi / blueprint aesthetic at every width. Never re-skin Andromeda into a generic mobile UI (no row→card transforms, no bottom tab bars). The phone gets the same language, stacked.
+
+### Breakpoints (tokens)
+
+Thresholds live in `tokens.breakpoints` — the single source of truth. `must` — never hardcode a px width in a media query; interpolate the token via the `mq` helper (`components/lib/responsive.ts`).
+
+| Token | Value | Meaning |
+|---|---|---|
+| `sm` | 640px | phones — fine-tuning only (display-type step-down, tighter insets) |
+| `md` | 768px | **primary stack threshold** — at/below this, dense multi-column layouts collapse to one column and the sidebar becomes a Drawer |
+| `lg` | 1024px | tablet ceiling — at/above this the full desktop grid is guaranteed to fit |
+
+The threshold that matters most is `md` (768px): **below it, Andromeda stacks.**
+
+### The two mechanisms — pick by what changes
+
+`must` — Responsiveness uses exactly two mechanisms, both in `components/lib/responsive.ts`. Reach for the first by default.
+
+1. **CSS reflow — `mq` inside a scoped `<style>` block.** For anything that's a *style* change at a breakpoint: grid columns, flex direction, padding, font-size, show/hide. SSR-safe, **zero hydration flash**, default branch is desktop. This is the same sibling-`<style>`-block pattern the system already uses for `:hover`/`:active` (and inherits the same `!important` rule — see "Hover on inline-styled controls"). Media queries can't read `var()`, so `mq` interpolates the literal token value.
+
+   ```jsx
+   import { mq } from '../../components/lib/responsive';
+
+   <div className="mc-grid">…</div>
+   <style>{`
+     .mc-grid { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: ${tokens.spacing[3]}; }
+     ${mq.md} { .mc-grid { grid-template-columns: minmax(0,1fr); } }
+   `}</style>
+   ```
+
+2. **`useBreakpoint()` (JS)** — ONLY when the rendered output must branch in JavaScript (default a panel collapsed on phones, skip mounting an expensive desktop-only viz). It defaults to **desktop** on the server and first client render, then corrects in an effect, so a phone shows one frame of desktop before switching. Because of that flash, never use it for plain style reflow.
+
+`should` — **Prefer render-both-and-CSS-hide over JS branching for structural swaps.** The sidebar→drawer change renders BOTH the desktop sidebar and the mobile hamburger in the DOM, using `mq` to `display:none` whichever doesn't apply; the Drawer's open/close is client state (starts closed — SSR-safe). This keeps even the structural change flash-free. `useBreakpoint` is the escape hatch for the rare case render-both can't express.
+
+### Faithful-stack rules
+
+- `must` — **Bento grids collapse to a single column below `md`.** `grid-template-columns: minmax(0,2fr) minmax(0,1fr)` becomes `minmax(0,1fr)`; rows flow top-to-bottom in source order. Verify the source order reads sensibly stacked — headline/primary panel first, peripheral panels last.
+- `must` — **The sidebar becomes a top hamburger + `Drawer` (`side="left"`) below `md`.** Reuse the existing `Drawer` component — do not invent a second drawer. The header gains a hamburger `IconButton` (`display:none` on desktop via `mq`); the desktop sidebar is `display:none` below `md`.
+- `must` — **Wide tables scroll horizontally inside their panel; never reflow into cards.** The `Table`'s existing `overflow-x: auto` wrapper carries the columns, and the panel never grows past the viewport (`minWidth: 0` on the grid item, per the Layout rule). Transforming rows into stacked cards is the "full mobile transform" we explicitly did NOT choose.
+- `should` — **Display type steps down on phones.** Step the template's *largest hero display reading* down one stop below `sm` via `mq.sm` — that's whatever the dominant headline number actually is (often `3xl` in the existing dashboards, sometimes `4xl`/`5xl`), not literally only the two largest tokens. Only the single dominant reading steps down; secondary values hold. Body, label, and UI type stay fixed — the mono UI is already compact.
+- `should` — **Grow the touch target on coarse pointers, never the desktop chrome.** Under `${mq.coarse}` enlarge the *hit area* toward `spacing[10]` (40px) while the rendered control keeps its desktop size — raising the element's own `min-height` is wrong, it visibly inflates the chrome on touch laptops. Use the established techniques: a centered transparent `::before` overlay on `Button`/`IconButton` (and on the `Slider` *track*); a `min-height` on the full-bleed `NavItem` *row* (content stays centered); growing the invisible native `<input>`'s square (keep its `z-10`) on `Checkbox`/`Radio`/`Toggle`. `SegmentedControl` is deliberately exempt — a height bump fights its fixed-height row and sliding `layoutId` indicator, so enlarging its segments needs explicit design intent first. `must` — For dense `sm`-size clusters, cap the overlay floor at `spacing[8]` (32px), not 40px: a 40px overlay on a 24px control overflows 8px per side, so two adjacent overlays at the system's standard gaps (`spacing[2]`–`spacing[3]`) overlap and a seam tap fires the wrong control.
+- `should` — Panel and shell inline insets/gaps may tighten one step below `md` when content feels cramped, but corner-marker clearance never drops below `spacing[2]` (8px). This is *panel/shell-level* padding only — `Card`'s `CardHeader`/`CardContent`/`CardFooter` slot padding stays locked (`Card.rules.md` `must`); `PanelHeader`'s own padding and example-panel inline padding are the things that tighten.
+- `should` — **Popovers stay inside the viewport on phones.** A floating panel must never open off a screen edge. Portaled fixed menus (`PanelMenu`) clamp their computed `left`/`top` into the viewport and flip up — and flip a right-flyout submenu to a left-flyout — below `md` when a placement would overflow. Absolutely-positioned popovers (`DateRangePicker`, `UserMenu`, `UserCard`) cap `maxWidth` and re-anchor to the trigger's right edge below `sm`. A transient `pointerEvents:none` hover `Tooltip` needs no portal — a measured inline edge-shift (folded into its framer `x` transform, inset by `spacing[2]`) keeps it on-screen.
+- `should` — **Fixed-geometry primitives stack by wrapping or scrolling, never by shrinking.** Primitives whose cells can't shrink without distorting — `HeatGrid`'s matrix, `ProgressBar`'s 30 segments, seam-joined `StatTile`/tile strips — keep their intrinsic readable size. On a narrow column let them `flex-wrap` (the readout drops below the matrix) or scroll horizontally inside their panel. If a primitive's intrinsic width exceeds a stacked column (e.g. a sub-280px column for a ~270px `ProgressBar`), that's a *template-layout* fix — give the column a min width — not a primitive change. Never shrink or clip the segments.
+- `may` — **A stacked panel that must fill a phone screen may use `vh` for `min-height`.** The spacing scale tops out at 48px, so there's no token for "most of the viewport"; `vh` is a relative unit (not a raw px/hex, not a media-query threshold), so it doesn't violate token-driven authoring. Prefer reusing a layout literal already in the file before reaching for a fresh `vh` value.
+- `must` — **This section governs Andromeda token-system files only** (`design-systems/andromeda/**`). The site-chrome route wrappers under `app/design-systems/andromeda/**` are sand/olive chrome that merely *embed* Andromeda — they follow the site's Tailwind **`min-width`** (`sm:`/`md:`/`lg:`) convention, the opposite cascade from Andromeda's desktop-first `mq`. Don't force `mq` / desktop-first `<style>` blocks into those pages, and don't flag their existing `min-width` Tailwind utilities as an anti-pattern.
+
+### Anti-patterns — responsive (`must`)
+
+- No `min-width`-first (mobile-first) authoring — desktop is the base; step down.
+- No hardcoded px in a media query — interpolate `tokens.breakpoints.*` via `mq`.
+- No table→card-list transform — that's the unchosen strategy.
+- No horizontal **page** scroll at any width. (Table-internal `overflow-x` scroll is fine and intended; it's the page/shell that must never exceed `100%` — restated because `100vw` and min-width overflows are far more visible on a phone.)
+- Don't reach for `useBreakpoint` when `mq` (CSS) expresses it — the hook flashes desktop-first on phones.
+
+---
+
 ## Interaction states
 
 Every interactive element (button, menu item, nav, segment, dropdown trigger) should cover four distinct states. Missing one creates a "dead" feeling — the user clicks and nothing acknowledges them, or hovers and the affordance isn't visible.

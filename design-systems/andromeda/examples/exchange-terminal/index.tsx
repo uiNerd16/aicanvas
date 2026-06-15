@@ -5,19 +5,29 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
   Download,
   Gear,
   GridFour,
   PlayCircle,
   DotsThree,
+  List,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Avatar } from '../../components/Avatar';
 import { IconButton } from '../../components/IconButton';
+import {
+  Drawer,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerBody,
+} from '../../components/Drawer';
 import { useCascadeProps } from '../../components/lib/motion';
+import { mq } from '../../components/lib/responsive';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { OrderBook } from './OrderBook';
 import { ChartPanel } from './ChartPanel';
@@ -45,6 +55,51 @@ function HoverStyles() {
 
       .ex-link { transition: color 140ms ease; }
       .ex-link:hover { color: ${tokens.color.accent[300]} !important; }
+
+      /* ── Responsive (desktop-first; step DOWN via max-width) ──────────── */
+
+      /* Hamburger lives in the TopBar only below md; desktop nav hides there. */
+      .ex-nav-trigger { display: none; }
+      ${mq.md} {
+        .ex-nav-trigger { display: inline-flex !important; }
+        .ex-desktop-nav { display: none !important; }
+        .ex-app-switcher { display: none !important; }
+      }
+
+      /* PairHeader: the dense single-row cluster wraps below md; the
+         vertical rules that chunk it would float orphaned once wrapped,
+         so they collapse. Inset tightens one step. */
+      ${mq.md} {
+        .ex-pairheader { flex-wrap: wrap !important; gap: ${tokens.spacing[4]} !important; padding: ${tokens.spacing[3]} ${tokens.spacing[4]} !important; }
+        .ex-pairheader .ex-vrule { display: none !important; }
+        .ex-pairheader .ex-tutorial { margin-left: auto !important; }
+      }
+      /* Hero spot price is the only display-tier reading here; step it
+         down one stop on phones so it never overruns its wrapped row. */
+      ${mq.sm} {
+        .ex-hero-price { font-size: ${tokens.typography.size['2xl']} !important; }
+      }
+
+      /* Main bento to single column below md. Source order is
+         OrderBook, ChartPanel, PairList; on mobile the chart is the
+         primary panel, so CSS order floats it first, then the book,
+         then the list. Fixed-basis columns become full-width with a
+         sensible stacked min-height (internal scroll still carries the
+         long tables). Once stacked the panels overflow one screen, so
+         the shell itself scrolls vertically (overflow hidden to auto). */
+      ${mq.md} {
+        .ex-shell { height: auto !important; min-height: 100vh; overflow-y: auto !important; }
+        .ex-main { flex-direction: column !important; flex: 0 0 auto !important; }
+        .ex-main > * { flex: 0 0 auto !important; width: 100% !important; min-width: 0 !important; }
+        .ex-col-chart { order: 1; min-height: 60vh !important; }
+        .ex-col-book  { order: 2; min-height: 60vh !important; }
+        .ex-col-list  { order: 3; min-height: 70vh !important; }
+      }
+
+      /* OrderTabs: drop the decorative tag below sm so the live tabs keep
+         the row; tighten the inset one step below md. */
+      ${mq.md} { .ex-ordertabs { padding: 0 ${tokens.spacing[4]} !important; gap: ${tokens.spacing[5]} !important; } }
+      ${mq.sm} { .ex-ordertabs-tag { display: none !important; } }
     `}</style>
   );
 }
@@ -57,7 +112,7 @@ const NAV_MENUS = {
   'Finance':     ['Earn', 'Pool', 'Loans', 'BNB Vault', 'Liquidity Farming'],
 };
 
-function TopBar() {
+function TopBar({ onMenu }) {
   return (
     <header
       style={{
@@ -72,6 +127,12 @@ function TopBar() {
       }}
     >
       <CornerMarkers />
+
+      {/* Mobile nav trigger — hidden on desktop, shown ≤md via .ex-nav-trigger.
+          Opens the shared Drawer holding the same nav menus. */}
+      <span className="ex-nav-trigger" style={{ flexShrink: 0 }}>
+        <IconButton aria-label="Open navigation" variant="outline" size="md" icon={List} onClick={onMenu} />
+      </span>
 
       {/* Brand — Andromeda over the template name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[2], flexShrink: 0 }}>
@@ -103,11 +164,13 @@ function TopBar() {
         </div>
       </div>
 
-      {/* App switcher */}
-      <IconButton aria-label="App grid" variant="outline" size="md" icon={GridFour} />
+      {/* App switcher — desktop only */}
+      <span className="ex-app-switcher" style={{ display: 'inline-flex', flexShrink: 0 }}>
+        <IconButton aria-label="App grid" variant="outline" size="md" icon={GridFour} />
+      </span>
 
-      {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[1] }}>
+      {/* Nav — desktop only; collapses into the Drawer ≤md */}
+      <nav className="ex-desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[1] }}>
         <Dropdown
           variant="nav"
           label="Buy Crypto"
@@ -227,6 +290,7 @@ function VRule() {
   return (
     <span
       aria-hidden
+      className="ex-vrule"
       style={{
         width: '1px',
         height: tokens.spacing[8],
@@ -243,6 +307,7 @@ function PairHeader() {
 
   return (
     <div
+      className="ex-pairheader"
       style={{
         position: 'relative',
         flexShrink: 0,
@@ -309,6 +374,7 @@ function PairHeader() {
           without scanning across to a separate Stat tile. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
         <span
+          className="ex-hero-price"
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size['3xl'],
@@ -360,7 +426,7 @@ function PairHeader() {
 
       <button
         type="button"
-        className="ex-link"
+        className="ex-link ex-tutorial"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -374,6 +440,8 @@ function PairHeader() {
           color: tokens.color.accent[200],
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
         }}
       >
         <PlayCircle weight="regular" size={15} />
@@ -389,6 +457,7 @@ const ORDER_TABS = ['Spot', 'Cross 3x', 'Isolated 10x'];
 function OrderTabs() {
   return (
     <div
+      className="ex-ordertabs"
       style={{
         position: 'relative',
         flexShrink: 0,
@@ -444,17 +513,99 @@ function OrderTabs() {
       })}
       <div style={{ flex: 1 }} />
       <span
+        className="ex-ordertabs-tag"
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
           color: tokens.color.text.faint,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
+          whiteSpace: 'nowrap',
         }}
       >
         /// Andromeda Exchange
       </span>
     </div>
+  );
+}
+
+// ─── Composition ───────────────────────────────────────────────────────────
+// ─── Drawer nav — the same NAV_MENUS as the desktop TopBar, stacked. ─────────
+function NavDrawer({ open, onOpenChange }) {
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} side="left" size={280}>
+      <DrawerHeader>
+        <DrawerTitle>Navigation</DrawerTitle>
+        <DrawerDescription>Andromeda Exchange Terminal</DrawerDescription>
+      </DrawerHeader>
+      <DrawerBody>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[4] }}>
+          {Object.entries(NAV_MENUS).map(([group, items]) => (
+            <div key={group} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+              <span
+                style={{
+                  fontFamily: tokens.typography.fontMono,
+                  fontSize: tokens.typography.size.xs,
+                  fontWeight: tokens.typography.weight.semibold,
+                  color: tokens.color.text.primary,
+                  textTransform: 'uppercase',
+                  letterSpacing: tokens.typography.tracking.widest,
+                }}
+              >
+                {group}
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {items.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className="ex-menu-item-hover"
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontFamily: tokens.typography.fontMono,
+                      fontSize: tokens.typography.size.sm,
+                      color: tokens.color.text.secondary,
+                      textTransform: 'uppercase',
+                      letterSpacing: tokens.typography.tracking.wide,
+                    }}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          {/* Markets — a flat link in the desktop nav, kept as its own item. */}
+          <button
+            type="button"
+            className="ex-menu-item-hover"
+            style={{
+              display: 'block',
+              width: '100%',
+              textAlign: 'left',
+              padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.sm,
+              fontWeight: tokens.typography.weight.medium,
+              color: tokens.color.text.primary,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.wider,
+            }}
+          >
+            Markets
+          </button>
+        </nav>
+      </DrawerBody>
+    </Drawer>
   );
 }
 
@@ -470,13 +621,17 @@ export default function ExchangeTerminal() {
   const pairListMotion     = useCascadeProps(4);
   const orderTabsMotion    = useCascadeProps(5);
 
+  // Mobile nav drawer — local client state, starts closed (SSR-safe).
+  const [navOpen, setNavOpen] = useState(false);
+
   return (
     <div
+      className="ex-shell"
       style={{
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        width: '100vw',
+        width: '100%',
         background: tokens.color.surface.base,
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
@@ -487,16 +642,21 @@ export default function ExchangeTerminal() {
       }}
     >
       <HoverStyles />
+      <NavDrawer open={navOpen} onOpenChange={setNavOpen} />
       <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
-        <TopBar />
+        <TopBar onMenu={() => setNavOpen(true)} />
       </motion.div>
       <motion.div {...pairHeaderMotion} style={{ flexShrink: 0 }}>
         <PairHeader />
       </motion.div>
 
       {/* Main 3-column layout — flex gives each wrapper a definite height
-          so inner panels can use flex:1 reliably (grid auto-rows don't). */}
+          so inner panels can use flex:1 reliably (grid auto-rows don't).
+          Below md it stacks to one column (see .ex-main rules); each panel
+          then takes a viewport-relative min-height with its own internal
+          scroll, and the shell itself scrolls vertically. */}
       <main
+        className="ex-main"
         style={{
           flex: 1,
           display: 'flex',
@@ -504,13 +664,13 @@ export default function ExchangeTerminal() {
           minHeight: 0,
         }}
       >
-        <motion.div {...orderBookMotion} style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <motion.div {...orderBookMotion} className="ex-col-book" style={{ flex: '0 0 300px', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <OrderBook />
         </motion.div>
-        <motion.div {...chartPanelMotion} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <motion.div {...chartPanelMotion} className="ex-col-chart" style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <ChartPanel />
         </motion.div>
-        <motion.div {...pairListMotion} style={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <motion.div {...pairListMotion} className="ex-col-list" style={{ flex: '0 0 320px', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <PairList />
         </motion.div>
       </main>

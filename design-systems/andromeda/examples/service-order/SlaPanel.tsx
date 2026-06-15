@@ -16,6 +16,7 @@
 import { useEffect, useState } from 'react';
 import { PushPin, X, ArrowUpRight } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { IconButton } from '../../components/IconButton';
@@ -145,6 +146,7 @@ export function SlaPanel() {
         style={{
           display: 'flex',
           alignItems: 'center',
+          flexWrap: 'wrap',
           gap: tokens.spacing[5],
           padding: `${tokens.spacing[5]} ${tokens.spacing[5]} ${tokens.spacing[4]} ${tokens.spacing[5]}`,
         }}
@@ -153,8 +155,10 @@ export function SlaPanel() {
             gauge ships with showValue off and tracks the drifting liveValue. */}
         <HeatGrid value={liveValue} showValue={false} label="Window risk" />
 
-        {/* Percentage — accent-300 because it IS the measurement */}
+        {/* Percentage — accent-300 because it IS the measurement. The 4xl
+            hero reading steps down one stop below `mq.sm` (rules → Responsive). */}
         <span
+          className="so-sla-pct"
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size['4xl'],
@@ -187,6 +191,7 @@ export function SlaPanel() {
           position: 'relative',
           display: 'flex',
           alignItems: 'flex-end',
+          flexWrap: 'wrap',
           gap: tokens.spacing[5],
           padding: `${tokens.spacing[4]} ${tokens.spacing[5]} ${tokens.spacing[5]} ${tokens.spacing[5]}`,
           marginTop: 'auto',
@@ -233,6 +238,15 @@ export function SlaPanel() {
         <div style={{ flex: 1 }} />
         <Button variant="outline" size="sm" icon={ArrowUpRight} style={{ whiteSpace: 'nowrap' }}>See All</Button>
       </div>
+
+      <style>{`
+        ${mq.sm} {
+          /* Step the 4xl hero reading down one stop on phones so it doesn't
+             overpower the narrow panel (rules → Responsive: only 4xl/5xl
+             display sizes step down; the mono UI type stays fixed). */
+          .so-sla-pct { font-size: ${tokens.typography.size['3xl']} !important; }
+        }
+      `}</style>
     </Card>
   );
 }

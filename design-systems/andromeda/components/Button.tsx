@@ -17,7 +17,30 @@ import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
+import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+
+// Touch-target expander — desktop chrome stays exactly as authored; on coarse
+// pointers a centered, transparent ::before overlay grows the *hit area* toward
+// spacing[10] (40px) without enlarging the visible button. Scoped className so
+// the rule never leaks; declarations are !important because the cva/inline base
+// would otherwise out-specify a bare class rule (brain: "Hover on inline-styled
+// controls"). See rules.md → Responsive → "Grow touch targets on coarse pointers".
+const TOUCH_TARGET_STYLE = `
+  ${mq.coarse} {
+    .andromeda-btn-touch::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: ${tokens.spacing[10]} !important;
+      min-width: ${tokens.spacing[10]} !important;
+    }
+  }
+`;
 
 // Token-driven framer transitions. tokens.motion.duration values are
 // strings like "140ms"; framer expects seconds, so parseInt → /1000.
@@ -149,7 +172,7 @@ export const Button = forwardRef(function Button(
   // Icons render ~1.3× the label size so they read clearly next to the text.
   const iconSize = size === 'sm' ? 16 : size === 'md' ? 18 : 20;
   const reducedMotion = useReducedMotion();
-  const baseClass = cn(buttonVariants({ variant, size }), className);
+  const baseClass = cn(buttonVariants({ variant, size }), 'andromeda-btn-touch', className);
   const baseStyle = { ...andromedaVars(), ...style };
   const content = (
     <>
@@ -164,25 +187,31 @@ export const Button = forwardRef(function Button(
   // + press scale are skipped for this path; this is a known trade-off.
   if (asChild) {
     return (
-      <Slot ref={ref} className={baseClass} style={baseStyle} {...props}>
-        {content}
-      </Slot>
+      <>
+        <Slot ref={ref} className={baseClass} style={baseStyle} {...props}>
+          {content}
+        </Slot>
+        <style>{TOUCH_TARGET_STYLE}</style>
+      </>
     );
   }
 
   return (
-    <motion.button
-      ref={ref}
-      type={type}
-      className={baseClass}
-      style={baseStyle}
-      disabled={disabled}
-      whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
-      whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
-      {...props}
-    >
-      {content}
-    </motion.button>
+    <>
+      <motion.button
+        ref={ref}
+        type={type}
+        className={baseClass}
+        style={baseStyle}
+        disabled={disabled}
+        whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}
+        whileTap={reducedMotion || disabled ? undefined : PRESS_DOWN}
+        {...props}
+      >
+        {content}
+      </motion.button>
+      <style>{TOUCH_TARGET_STYLE}</style>
+    </>
   );
 });
 

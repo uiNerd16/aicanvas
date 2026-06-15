@@ -9,6 +9,7 @@
 'use client';
 
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { PanelHeader } from '../../components/PanelHeader';
 import { PanelMenu } from '../../components/PanelMenu';
@@ -22,9 +23,14 @@ const BUCKETS = [
 ];
 
 // ── Single breakdown cell ─────────────────────────────────────────
+// `rp-req-cell` carries the responsive separator swap: the desktop
+// vertical border (borderRight, inline below) drops below `mq.md` and
+// becomes a horizontal one when the three cells stack — see <style> in
+// RequestsPanel.
 function Cell({ label, value, share, last = false }) {
   return (
     <div
+      className={last ? 'rp-req-cell rp-req-cell-last' : 'rp-req-cell'}
       style={{
         flex: '1 1 0',
         minWidth: 0,
@@ -136,8 +142,10 @@ export function RequestsPanel() {
         }
       />
 
-      {/* Three cells — flex:1 so the row fills the panel height. */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+      {/* Three cells — flex:1 so the row fills the panel height. Below
+          `mq.md` the row stacks (flex-direction:column) and the inter-cell
+          separators flip from vertical to horizontal. */}
+      <div className="rp-req-cells" style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         {BUCKETS.map((b, i) => (
           <Cell
             key={b.key}
@@ -151,6 +159,20 @@ export function RequestsPanel() {
 
       {/* Stacked share bar */}
       <StackedBar />
+
+      <style>{`
+        ${mq.md} {
+          /* Stack the three breakdown cells top-to-bottom; swap the vertical
+             inter-cell border for a horizontal one so the divider follows the
+             new flow. */
+          .rp-req-cells { flex-direction: column !important; }
+          .rp-req-cell {
+            border-right: none !important;
+            border-bottom: ${tokens.border.thin} ${tokens.color.border.subtle} !important;
+          }
+          .rp-req-cell-last { border-bottom: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

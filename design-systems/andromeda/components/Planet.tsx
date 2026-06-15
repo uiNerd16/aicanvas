@@ -17,6 +17,8 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { tokens } from '../tokens';
 import { useReducedMotion } from './lib/motion';
+import { cn } from './lib/utils';
+import { mq } from './lib/responsive';
 
 /** Soft radial sprite. Multiplied by vertex color and blended additively
  *  so each particle reads as a tiny glow on the dark void. */
@@ -197,14 +199,32 @@ export function Planet({
   }, [particleCount, particleSize, rotationSpeed, paused, reducedMotion]);
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{
-        width: '100%',
-        height: '100%',
-        ...style,
-      }}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className={cn('andromeda-planet', className)}
+        style={{
+          width: '100%',
+          height: '100%',
+          // Hero set-piece: never let the WebGL canvas push past the viewport.
+          // The canvas sizes to clientWidth/clientHeight (ResizeObserver), so
+          // capping the container here caps the render too. boxSizing keeps any
+          // template padding inside the cap. 100% (not 100vw) avoids the
+          // scrollbar-width page-scroll trap.
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          ...style,
+        }}
+      />
+      <style>{`
+        /* On phones a hero Planet sized by a min-height parent can render a
+           canvas taller than the viewport. Cap its height to the viewport's
+           shorter side so a stacked hero panel never forces page scroll. The
+           canvas stays square via its own aspect; this only sets the ceiling. */
+        ${mq.md} {
+          .andromeda-planet { max-height: 60vh !important; }
+        }
+      `}</style>
+    </>
   );
 }

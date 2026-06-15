@@ -10,6 +10,7 @@ import { Eye, EyeSlash, X, ArrowsOutSimple, ListBullets } from '@phosphor-icons/
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { IconButton } from '../../components/IconButton';
+import { mq } from '../../components/lib/responsive';
 import { Dropdown } from './Dropdown';
 import { candles, last, maSeries } from './data';
 
@@ -161,6 +162,7 @@ function ViewTab({ label, active }) {
 function ChartHeader() {
   return (
     <div
+      className="ex-chart-header"
       style={{
         position: 'relative',
         display: 'flex',
@@ -168,6 +170,15 @@ function ChartHeader() {
       }}
     >
       <InsetDivider />
+      {/* The chart toolbar is a single dense row. On a narrow stacked panel
+          it scrolls horizontally INSIDE the panel rather than pushing the
+          page wide — see the .ex-chart-header rule below. */}
+      <style>{`
+        ${mq.md} {
+          .ex-chart-header { overflow-x: auto !important; }
+          .ex-chart-header > .ex-chart-header-spacer { flex: 0 0 ${tokens.spacing[4]} !important; }
+        }
+      `}</style>
       <div
         style={{
           display: 'flex',
@@ -175,6 +186,7 @@ function ChartHeader() {
           gap: tokens.spacing[1],
           padding: `0 ${tokens.spacing[3]}`,
           borderRight: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          flexShrink: 0,
         }}
       >
         <Dropdown variant="chip" label="Time" items={TIME_MENU} />
@@ -186,9 +198,9 @@ function ChartHeader() {
         <IconButton aria-label="More indicators" variant="ghost" size="sm" icon={ListBullets} />
       </div>
 
-      <div style={{ flex: 1 }} />
+      <div className="ex-chart-header-spacer" style={{ flex: 1 }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', paddingRight: tokens.spacing[3] }}>
+      <div style={{ display: 'flex', alignItems: 'center', paddingRight: tokens.spacing[3], flexShrink: 0 }}>
         <ViewTab label="Original" active />
         <ViewTab label="Trading View" />
         <ViewTab label="Depth" />

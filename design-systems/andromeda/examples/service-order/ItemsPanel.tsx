@@ -29,6 +29,7 @@ import {
 } from '@phosphor-icons/react';
 
 import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { IconButton } from '../../components/IconButton';
@@ -87,6 +88,10 @@ function HoverStyles() {
 }
 
 // ── Tab strip ──────────────────────────────────────────────────────
+// Wide tab row: scrolls horizontally inside the panel when it can't fit a
+// narrow viewport (faithful stack — same treatment as the table below it,
+// never a wrap or a re-skin). The inset divider stays edge-aligned because
+// it's a sibling outside the scroll container.
 function TabStrip({ value, onChange }) {
   return (
     <div
@@ -96,6 +101,8 @@ function TabStrip({ value, onChange }) {
         alignItems: 'stretch',
         gap: tokens.spacing[1],
         padding: `0 ${tokens.spacing[3]}`,
+        overflowX: 'auto',
+        minWidth: 0,
       }}
     >
       <InsetDivider />
@@ -116,6 +123,8 @@ function TabStrip({ value, onChange }) {
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
               fontWeight: active ? tokens.typography.weight.semibold : tokens.typography.weight.regular,
@@ -168,20 +177,28 @@ function FilterRow({ chips, onRemoveChip }) {
       }}
     >
       <InsetDivider />
-      <Funnel weight="regular" size={14} color={tokens.color.text.muted} />
+      <Funnel weight="regular" size={14} color={tokens.color.text.muted} style={{ flexShrink: 0 }} />
       <span
+        className="so-filter-label"
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
           color: tokens.color.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
+          // Shrink + truncate so the funnel, chips scroller and action
+          // buttons all fit a narrow row without forcing page scroll.
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
         List of Products
       </span>
 
       <span
+        className="so-filter-divider"
         aria-hidden
         style={{
           width: '1px',
@@ -217,6 +234,16 @@ function FilterRow({ chips, onRemoveChip }) {
       <Tooltip label="Export">
         <IconButton aria-label="Export" variant="ghost" size="md" icon={Export} />
       </Tooltip>
+
+      <style>{`
+        ${mq.sm} {
+          /* On the smallest phones drop the "List of Products" label and its
+             divider — the funnel icon still reads as "filter" — so the chip
+             scroller and the three action buttons keep their room. */
+          .so-filter-label { display: none !important; }
+          .so-filter-divider { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -334,6 +361,9 @@ export function ItemsPanel() {
         flexDirection: 'column',
         flex: 1,
         minHeight: 0,
+        // minWidth:0 so the wide table (inside its own overflow:auto wrapper)
+        // can't push the panel past its column and force page scroll.
+        minWidth: 0,
       }}
     >
       <CornerMarkers />

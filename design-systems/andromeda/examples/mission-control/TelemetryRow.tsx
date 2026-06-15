@@ -20,6 +20,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
 import { StatTile } from '../../components/StatTile';
 import { useReducedMotion } from '../../components/lib/motion';
 import { telemetryStats } from './data';
@@ -61,10 +63,11 @@ export function TelemetryRow() {
   }, [reducedMotion]);
 
   return (
-    <div style={{ display: 'flex', gap: 0 }}>
+    <div className="mc-telemetry-strip" style={{ display: 'flex', gap: 0 }}>
       {stats.map((stat, i) => (
         <StatTile
           key={stat.code}
+          className="mc-stat-tile"
           code={stat.code}
           label={stat.label}
           value={stat.value}
@@ -75,6 +78,24 @@ export function TelemetryRow() {
           style={{ marginLeft: i > 0 ? -1 : 0 }}
         />
       ))}
+
+      {/* Below `mq.md` the seam-joined tile strip would crush 4+ tiles into
+          illegible slivers, so the faithful-stack strategy applies here too:
+          the strip scrolls horizontally inside its row (overflow-x:auto) and
+          each tile holds a legible minimum (flex:0 0 auto + min-width). On
+          desktop the tiles keep their equal `flex-1` stretch. See rules.md →
+          Responsive (faithful-stack). */}
+      <style>{`
+        ${mq.md} {
+          .mc-telemetry-strip {
+            overflow-x: auto !important;
+          }
+          .mc-stat-tile {
+            flex: 0 0 auto !important;
+            min-width: calc(${tokens.spacing[12]} * 3) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

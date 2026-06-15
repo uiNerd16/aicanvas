@@ -5,6 +5,14 @@
 // mission-control sidebar so the system reads as one family;
 // the lower "pinned channels" rail replaces the playlists rail
 // in the Spotify reference.
+//
+// Responsive (desktop-first — see rules.md → Responsive): the
+// desktop <aside> is the canonical form; the shell hides it
+// (`display:none`) below `mq.md` and serves the SAME nav content
+// through the shared Drawer instead. To keep both paths in sync the
+// console nav (section label + NavItem list + channels rail) is
+// factored into the exported `SidebarNav`, which the desktop aside
+// and the mobile Drawer both render — one source of truth.
 // ============================================================
 
 import { motion, LayoutGroup } from 'framer-motion';
@@ -107,10 +115,84 @@ function ChannelRow({ ch }) {
   );
 }
 
-export function Sidebar({ activeNav, onNavChange, motionProps }) {
+// Console nav + channels rail — section labels, the NavItem list, and the
+// pinned-channels list. Shared verbatim by the desktop sidebar and the mobile
+// Drawer so the two never drift. LayoutGroup scopes NavItem's `layoutId` so the
+// active dot slides between siblings; the desktop aside and the drawer get
+// distinct group ids so a mounted-but-hidden copy can't fight the visible one
+// for the shared layout animation.
+export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-room-sidebar' }) {
+  return (
+    <>
+      {/* Section label */}
+      <div
+        style={{
+          padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
+          fontFamily: tokens.typography.fontMono,
+          fontSize: tokens.typography.size.xs,
+          color: tokens.color.text.faint,
+          textTransform: 'uppercase',
+          letterSpacing: tokens.typography.tracking.widest,
+        }}
+      >
+        /// Console
+      </div>
+
+      {/* Primary nav */}
+      <nav style={{ display: 'flex', flexDirection: 'column' }}>
+        <LayoutGroup id={layoutGroupId}>
+          {navItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeNav === item.id}
+              onClick={() => onNavChange(item.id)}
+            />
+          ))}
+        </LayoutGroup>
+      </nav>
+
+      {/* Channels rail */}
+      <div
+        style={{
+          position: 'relative',
+          marginTop: tokens.spacing[4],
+          padding: `${tokens.spacing[3]} 0 ${tokens.spacing[2]}`,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+        }}
+      >
+        <InsetDivider side="top" />
+        <div
+          style={{
+            padding: `0 ${tokens.spacing[3]} ${tokens.spacing[2]}`,
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size.xs,
+            color: tokens.color.text.faint,
+            textTransform: 'uppercase',
+            letterSpacing: tokens.typography.tracking.widest,
+          }}
+        >
+          /// Channels
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+          {channels.map(ch => (
+            <ChannelRow key={ch.id} ch={ch} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
   return (
     <motion.aside
       {...(motionProps ?? {})}
+      className={className}
       style={{
         position: 'relative',
         width: tokens.layout.sidebarWidth,
@@ -163,66 +245,8 @@ export function Sidebar({ activeNav, onNavChange, motionProps }) {
         </div>
       </div>
 
-      {/* Section label */}
-      <div
-        style={{
-          padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
-          fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.faint,
-          textTransform: 'uppercase',
-          letterSpacing: tokens.typography.tracking.widest,
-        }}
-      >
-        /// Console
-      </div>
-
-      {/* Primary nav */}
-      <nav style={{ display: 'flex', flexDirection: 'column' }}>
-        <LayoutGroup id="signal-room-sidebar">
-          {navItems.map(item => (
-            <NavItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={activeNav === item.id}
-              onClick={() => onNavChange(item.id)}
-            />
-          ))}
-        </LayoutGroup>
-      </nav>
-
-      {/* Channels rail */}
-      <div
-        style={{
-          position: 'relative',
-          marginTop: tokens.spacing[4],
-          padding: `${tokens.spacing[3]} 0 ${tokens.spacing[2]}`,
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
-        }}
-      >
-        <InsetDivider side="top" />
-        <div
-          style={{
-            padding: `0 ${tokens.spacing[3]} ${tokens.spacing[2]}`,
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
-            textTransform: 'uppercase',
-            letterSpacing: tokens.typography.tracking.widest,
-          }}
-        >
-          /// Channels
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-          {channels.map(ch => (
-            <ChannelRow key={ch.id} ch={ch} />
-          ))}
-        </div>
-      </div>
+      {/* Console nav + channels rail — shared with the mobile Drawer via SidebarNav. */}
+      <SidebarNav activeNav={activeNav} onNavChange={onNavChange} />
 
       {/* User card */}
       <div style={{ position: 'relative' }}>

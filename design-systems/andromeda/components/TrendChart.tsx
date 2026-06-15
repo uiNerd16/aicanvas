@@ -309,7 +309,7 @@ export const TrendChart = forwardRef(function TrendChart(
     >
       {/* Header — title + mode toggle */}
       {(title || modes.length > 1) ? (
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: tokens.spacing[3], paddingBottom: tokens.spacing[4] }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: tokens.spacing[3], paddingBottom: tokens.spacing[4] }}>
           <InsetDivider side="bottom" />
           {title ? (
             <span
@@ -364,7 +364,7 @@ export const TrendChart = forwardRef(function TrendChart(
 
       {/* Footer — legend + optional slot */}
       {(showLegend || footerSlot) ? (
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: tokens.spacing[3], paddingTop: tokens.spacing[4] }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: tokens.spacing[3], paddingTop: tokens.spacing[4] }}>
           <InsetDivider side="top" />
           {showLegend
             ? series.map((s) => (
