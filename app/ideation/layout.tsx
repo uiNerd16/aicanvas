@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
-import { IdeationSidebar } from '../_components/IdeationSidebar'
+import { Sidebar } from '../components/Sidebar'
 import { IdeationTopBar } from '../_components/IdeationTopBar'
 
 // Make JetBrains Mono available throughout the ideation subtree so any
@@ -18,7 +18,7 @@ export default function IdeationLayout({ children }: { children: ReactNode }) {
       className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
     >
       <Suspense fallback={null}>
-        <IdeationSidebar />
+        <Sidebar embedded />
       </Suspense>
       <div className="flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">
         <IdeationTopBar />

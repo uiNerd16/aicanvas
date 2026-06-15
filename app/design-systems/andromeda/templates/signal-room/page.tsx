@@ -6,7 +6,7 @@ import { tokens } from '../../../../../design-systems/andromeda/tokens'
 import { TemplateChrome } from '../../../../_components/TemplateChrome'
 
 // Distraction-free template. The Andromeda sidebar/topbar are suppressed for
-// routes matching TEMPLATE_LEAF_RE (see IdeationSidebar + IdeationTopBar) so
+// routes matching TEMPLATE_LEAF_RE (see Sidebar + IdeationTopBar) so
 // the dashboard fills the viewport. TemplateChrome is the floating widget
 // with Back, template name + system, and an Install CLI popover.
 
