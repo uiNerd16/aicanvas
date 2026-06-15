@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
-import { IdeationSidebar } from '../../_components/IdeationSidebar'
+import { Sidebar } from '../../components/Sidebar'
 import { AndromedaContentColumn } from './AndromedaContentColumn'
 
 // JetBrains Mono is the only font in the Andromeda design system.
@@ -23,7 +23,7 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
     >
       <Suspense fallback={null}>
-        <IdeationSidebar />
+        <Sidebar embedded />
       </Suspense>
       <AndromedaContentColumn>{children}</AndromedaContentColumn>
     </div>
