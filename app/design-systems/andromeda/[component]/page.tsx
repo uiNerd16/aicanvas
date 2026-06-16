@@ -20,7 +20,7 @@ export default async function AndromedaComponentPage({
   if (!entry) notFound()
 
   const related = ANDROMEDA_COMPONENTS.filter((c) => c.slug !== entry.slug).map(
-    (c) => ({ slug: c.slug, name: c.name }),
+    (c) => ({ slug: c.slug, name: c.name, image: c.image }),
   )
 
   // Design-system source is premium: when the registry gate is enforcing,

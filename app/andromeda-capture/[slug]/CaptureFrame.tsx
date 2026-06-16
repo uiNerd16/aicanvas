@@ -19,13 +19,15 @@ const jetbrainsMono = JetBrains_Mono({
 
 const FRAME_W = 1280
 const FRAME_H = 720
-const PAD = 64
+const PAD = 40
 const INNER_W = FRAME_W - PAD * 2
 const INNER_H = FRAME_H - PAD * 2
 // Demos are built for the tall detail page, so most occupy a small fraction of
-// a 16:9 frame. Scale each one UP to fill the frame (capped) so it reads at
-// card size. Contain-fit on the measured demo box — it enlarges, never crops.
-const MAX_SCALE = 2.6
+// a 16:9 frame and read tiny at card size. Scale each one UP past a plain fit
+// (× ZOOM) so the component fills the card and stays legible; the frame crops
+// the overflow. MAX_SCALE caps tiny demos from blowing up absurdly.
+const MAX_SCALE = 4.5
+const ZOOM = 1.5
 
 export function CaptureFrame({ slug }: { slug: string }) {
   const innerRef = useRef<HTMLDivElement>(null)
@@ -65,8 +67,8 @@ export function CaptureFrame({ slug }: { slug: string }) {
       const rootRect = root.getBoundingClientRect()
       const w = maxR > minL ? maxR - minL : rootRect.width
       const h = maxB > minT ? maxB - minT : rootRect.height
-      const s =
-        w > 0 && h > 0 ? Math.min(MAX_SCALE, INNER_W / w, INNER_H / h) : 1
+      const contain = Math.min(INNER_W / w, INNER_H / h)
+      const s = w > 0 && h > 0 ? Math.min(MAX_SCALE, contain * ZOOM) : 1
       setScale(s)
       requestAnimationFrame(() => {
         if (!cancelled) setReady(true)
@@ -99,8 +101,9 @@ export function CaptureFrame({ slug }: { slug: string }) {
       }}
     >
       {/* Kill body margins / scrollbars so the fixed frame fills the viewport
-          exactly and the element screenshot has no stray edges. */}
-      <style>{`html,body{margin:0;padding:0;overflow:hidden;}`}</style>
+          exactly, and hide dev-only chrome (the branch badge) that would
+          otherwise bleed into the corner of the shot. */}
+      <style>{`html,body{margin:0;padding:0;overflow:hidden;}[data-dev-overlay],nextjs-portal{display:none!important;}`}</style>
       <div
         ref={innerRef}
         style={{
