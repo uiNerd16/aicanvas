@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { HomeClient } from '../../HomeClient'
-import { COMPONENTS, toMeta } from '../../../lib/component-registry'
+// Registry-free metadata so category pages never bundle the heavy registry.
+import { COMPONENT_META } from '../../../lib/component-meta.generated'
 import { CATEGORIES, getCategoryBySlug } from '../../../lib/categories'
 import { SITE_URL } from '../../../lib/config'
 
@@ -58,7 +59,7 @@ export default async function CategoryPage({
   const category = getCategoryBySlug(slug)
   if (!category) notFound()
 
-  const filtered = COMPONENTS.filter((c) =>
+  const filtered = COMPONENT_META.filter((c) =>
     c.tags.some((t) => t.accent && t.label === category.label),
   )
 
@@ -87,7 +88,7 @@ export default async function CategoryPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <HomeClient components={filtered.map(toMeta)} categoryLabel={category.label} />
+      <HomeClient components={filtered} categoryLabel={category.label} />
     </>
   )
 }
