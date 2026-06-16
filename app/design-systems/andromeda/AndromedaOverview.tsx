@@ -4,7 +4,7 @@
 // component showcase → templates grid → components grid. This IS the system
 // root: page.tsx at /design-systems/andromeda renders it. The raw component
 // grid lives at /design-systems/andromeda/showcase; the old preview URL
-// /design-systems/andromeda/overview 301-redirects here (see next.config.ts).
+// /design-systems/andromeda/overview 308-redirects (permanent) here (see next.config.ts).
 //
 // IDENTITY: pure AI Canvas — sand/olive tokens (Tailwind), Manrope (the site
 // --font-sans default), and the site's button system (buttonClasses). It

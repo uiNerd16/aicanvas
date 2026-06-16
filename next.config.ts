@@ -33,7 +33,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/r", destination: "/components", permanent: true },
       // The Andromeda overview was promoted to the system root; the old preview
-      // URL 301s there so any stray link/index lands on the canonical page.
+      // URL permanently (308) redirects there so any stray link/index lands on
+      // the canonical page.
       {
         source: "/design-systems/andromeda/overview",
         destination: "/design-systems/andromeda",
