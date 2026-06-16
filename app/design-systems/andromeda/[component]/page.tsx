@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import {
   ANDROMEDA_COMPONENTS,
@@ -8,6 +9,21 @@ import { AndromedaComponentView } from './AndromedaComponentView'
 
 export function generateStaticParams() {
   return ANDROMEDA_COMPONENTS.map((c) => ({ component: c.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ component: string }>
+}): Promise<Metadata> {
+  const { component } = await params
+  const entry = getAndromedaComponent(component)
+  if (!entry) return {}
+  return {
+    title: `${entry.name} · Andromeda Design System`,
+    description: entry.description,
+    alternates: { canonical: `/design-systems/andromeda/${entry.slug}` },
+  }
 }
 
 export default async function AndromedaComponentPage({

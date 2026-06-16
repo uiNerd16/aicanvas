@@ -12,6 +12,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+// The /ideation subtree is the internal dev playground — keep every route
+// under it out of search indexes (it mirrors shipped pages). Pairs with the
+// Disallow: /ideation/ in app/robots.ts.
+export const metadata = {
+  robots: { index: false, follow: false },
+}
+
 export default function IdeationLayout({ children }: { children: ReactNode }) {
   return (
     <div
