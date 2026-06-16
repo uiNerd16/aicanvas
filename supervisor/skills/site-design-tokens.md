@@ -12,25 +12,25 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 | Token | Hex | Use in components |
 |---|---|---|
-| `sand-50` | `#FAF7F2` | Rarely needed in dark previews |
-| `sand-100` | `#F5F1EA` | Light card surfaces |
-| `sand-200` | `#EDEAE5` | Light backgrounds |
-| `sand-300` | `#DDD8CE` | Borders (light) |
-| `sand-400` | `#C8C2B8` | Muted icons, placeholders |
-| `sand-500` | `#9E9890` | Secondary text |
-| `sand-600` | `#736D65` | Body text |
-| `sand-700` | `#4A453F` | Labels, buttons (light) |
-| `sand-800` | `#2E2A24` | Dark card surfaces |
-| `sand-900` | `#1C1916` | Dark backgrounds |
-| `sand-950` | `#110F0C` | **Component preview bg** |
+| `sand-50` | `#FAFAF4` | Elevated surfaces, hover fills |
+| `sand-100` | `#E8E8E3` | Light card surfaces |
+| `sand-200` | `#D4D4D0` | Light page background |
+| `sand-300` | `#BABAB7` | Borders (light) |
+| `sand-400` | `#9E9E9B` | Muted icons, placeholders |
+| `sand-500` | `#7D7D7B` | Secondary text |
+| `sand-600` | `#666665` | Body text |
+| `sand-700` | `#4F4F4F` | Labels, buttons (light) |
+| `sand-800` | `#383839` | Dark card surfaces |
+| `sand-900` | `#212122` | Dark card / panel surfaces |
+| `sand-950` | `#0E0E0F` | **Dark page + component preview bg** |
 
 ## Olive scale (accent)
 
 | Token | Hex | Use |
 |---|---|---|
-| `olive-400` | `#96A452` | Hover state, gradient end |
-| `olive-500` | `#7D8D41` | **Primary accent** — buttons, badges, highlights |
-| `olive-600` | `#697535` | Pressed / active state |
+| `olive-400` | `#DAE4A0` | Hover state, gradient end |
+| `olive-500` | `#A8B94D` | **Primary accent** — buttons, badges, highlights |
+| `olive-600` | `#869631` | Pressed / active state |
 
 > Olive buttons must use `text-sand-950` — NOT white. Olive has insufficient contrast with white.
 

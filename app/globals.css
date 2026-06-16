@@ -35,17 +35,17 @@ body {
   --text-xxs--line-height: 0.875rem;
 
   /* ── Sand scale — warm neutral (Phosphor-inspired) ── */
-  --color-sand-50:  #FAFAF0;
-  --color-sand-100: #E8E8DF;
-  --color-sand-200: #D4D4CC;
-  --color-sand-300: #BABAB4;
-  --color-sand-400: #9E9E98;
-  --color-sand-500: #7D7D78;
-  --color-sand-600: #666662;
-  --color-sand-700: #4F4F4C;
-  --color-sand-800: #383836;
-  --color-sand-900: #21211F;
-  --color-sand-950: #1A1A19;
+  --color-sand-50:  #FAFAF4;
+  --color-sand-100: #E8E8E3;
+  --color-sand-200: #D4D4D0;
+  --color-sand-300: #BABAB7;
+  --color-sand-400: #9E9E9B;
+  --color-sand-500: #7D7D7B;
+  --color-sand-600: #666665;
+  --color-sand-700: #4F4F4F;
+  --color-sand-800: #383839;
+  --color-sand-900: #212122;
+  --color-sand-950: #0E0E0F;
 
   /* ── Olive accent — primary (actions) ── */
   --color-olive-400: #DAE4A0;
