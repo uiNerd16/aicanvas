@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { HomeClient } from '../../HomeClient'
-import { COMPONENTS } from '../../../lib/component-registry'
+import { COMPONENTS, toMeta } from '../../../lib/component-registry'
 import { CATEGORIES, getCategoryBySlug } from '../../../lib/categories'
 import { SITE_URL } from '../../../lib/config'
 
@@ -87,7 +87,7 @@ export default async function CategoryPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <HomeClient components={filtered} categoryLabel={category.label} />
+      <HomeClient components={filtered.map(toMeta)} categoryLabel={category.label} />
     </>
   )
 }

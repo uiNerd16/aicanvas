@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { HomeClient } from './HomeClient'
-import { COMPONENTS } from '../lib/component-registry'
+import { COMPONENTS, toMeta } from '../lib/component-registry'
 import { getCategoryByLabel } from '../lib/categories'
 import { SITE_URL } from '../lib/config'
 
@@ -59,5 +59,5 @@ export default async function ComponentsPage({
       ? COMPONENTS.filter((c) => c.tags.some((t) => t.accent && t.label === category))
       : COMPONENTS
 
-  return <HomeClient components={filtered} />
+  return <HomeClient components={filtered.map(toMeta)} />
 }

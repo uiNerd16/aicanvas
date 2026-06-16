@@ -27,8 +27,11 @@ import { PLATFORMS } from '../ComponentCard'
 import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
 import { HeaderSocials } from '../HeaderSocials'
 import { Step } from '../Step'
-import type { ComponentMeta, DesignSystemSlug } from '../../lib/component-registry'
-import { getDesignSystemMeta } from '../../lib/component-registry'
+import type { ComponentMeta } from '../../lib/component-registry'
+// Runtime + type from the light module so this client component never imports
+// the heavy registry (which would pull every preview component, incl. three.js,
+// into the bundle).
+import { getDesignSystemMeta, type DesignSystemSlug } from '../../lib/design-system-meta'
 import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'

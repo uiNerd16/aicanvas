@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
-import { COMPONENTS } from '../lib/component-registry'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { buttonClasses } from './Button'
 import { DesignSystemsPole, TEMPLATE_LEAF_RE } from '../_components/DesignSystemsPole'
@@ -33,13 +32,17 @@ const SECTIONS: Section[] = [
   // { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
-function countByLabel(label: string) {
-  return COMPONENTS.filter((c) =>
-    c.tags.some((t) => t.accent && t.label === label)
-  ).length
-}
-
-export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
+export function Sidebar({
+  embedded = false,
+  counts,
+  total,
+}: {
+  embedded?: boolean
+  // Server-computed nav counts (passed by the layout) so this client component
+  // never imports the heavy COMPONENTS registry.
+  counts: Record<string, number>
+  total: number
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -264,7 +267,7 @@ export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
                 >
                   <span>{section.icon}</span>
                   <span className="flex-1 text-left">{section.title}</span>
-                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{COMPONENTS.length}</span>
+                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
                   <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
                 </button>
               ) : isComponents ? (
@@ -278,7 +281,7 @@ export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
                 >
                   <span>{section.icon}</span>
                   <span className="flex-1">{section.title}</span>
-                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{COMPONENTS.length}</span>
+                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
                 </Link>
               ) : (
                 <button
@@ -325,7 +328,7 @@ export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
                     const href = cat
                       ? `/components/category/${cat.slug}`
                       : `/components?category=${encodeURIComponent(label)}`
-                    const count = countByLabel(label)
+                    const count = counts[label] ?? 0
                     return (
                       <li key={label}>
                         <Link
