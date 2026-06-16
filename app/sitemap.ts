@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next'
 import { COMPONENTS } from './lib/component-registry'
 import { CATEGORIES } from './lib/categories'
 import { SITE_URL } from './lib/config'
+import { ANDROMEDA_COMPONENT_META } from './_lib/andromeda/andromeda-meta'
+import { DESIGN_SYSTEMS } from '../scripts/lib/design-systems.config.mjs'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const componentPages: MetadataRoute.Sitemap = COMPONENTS.map((c) => ({
@@ -17,6 +19,46 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'weekly',
     priority: 0.85,
   }))
+
+  // Design systems. Each system's canonical landing is its bare root
+  // (/design-systems/<slug>), followed by the raw component grid (/showcase)
+  // and its template routes. Generated from the shared config so new systems
+  // and templates land in the sitemap automatically.
+  const designSystemPages: MetadataRoute.Sitemap = DESIGN_SYSTEMS.flatMap(
+    (s: { slug: string; templates?: { slug: string }[] }) => [
+      {
+        url: `${SITE_URL}/design-systems/${s.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.9,
+      },
+      {
+        url: `${SITE_URL}/design-systems/${s.slug}/showcase`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      },
+      ...(s.templates ?? []).map((t) => ({
+        url: `${SITE_URL}/design-systems/${s.slug}/templates/${t.slug.replace(
+          new RegExp(`^${s.slug}-`),
+          '',
+        )}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      })),
+    ],
+  )
+
+  // Andromeda per-component pages (/design-systems/andromeda/<component>).
+  const andromedaComponentPages: MetadataRoute.Sitemap = ANDROMEDA_COMPONENT_META.map(
+    (c: { slug: string }) => ({
+      url: `${SITE_URL}/design-systems/andromeda/${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }),
+  )
 
   return [
     {
@@ -43,7 +85,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    ...designSystemPages,
     ...categoryPages,
     ...componentPages,
+    ...andromedaComponentPages,
   ]
 }

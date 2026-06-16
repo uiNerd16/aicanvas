@@ -105,7 +105,7 @@ export function DesignSystemsPole({
             return (
               <li key={system.slug}>
                 <Link
-                  href={`/design-systems/${system.slug}/showcase`}
+                  href={`/design-systems/${system.slug}`}
                   className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
                     systemActive
                       ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
