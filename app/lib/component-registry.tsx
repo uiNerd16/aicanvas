@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { Tag, Platform } from '../components/ComponentCard'
 import { COMPONENT_COPY, ACCURATE_STACKS } from './component-copy'
+import type { DesignSystemSlug } from './design-system-meta'
 import FloatingCards from '../../components-workspace/floating-cards'
 import { prompts as floatingCardsPrompts } from '../../components-workspace/floating-cards/prompts'
 import TextBlurReveal from '../../components-workspace/text-blur-reveal'
@@ -184,51 +185,11 @@ export type ComponentMeta = Pick<
 >
 
 // ─── Design systems (site-side lookups) ───────────────────────────────────────
-// Path/file data needed by the registry generator lives in
-// `scripts/lib/design-systems.config.mjs`. The website only needs name +
-// template lookups, declared inline below to avoid a cross-tooling import.
-
-export type DesignSystemSlug = 'andromeda'
-
-export interface DesignSystemTemplateMeta {
-  slug: string
-  name: string
-  domain?: string
-}
-
-export interface DesignSystemMeta {
-  slug: DesignSystemSlug
-  name: string
-  templates: DesignSystemTemplateMeta[]
-}
-
-export const DESIGN_SYSTEM_META: Record<DesignSystemSlug, DesignSystemMeta> = {
-  andromeda: {
-    slug: 'andromeda',
-    name: 'Andromeda',
-    templates: [
-      { slug: 'andromeda-mission-control',   name: 'Mission Control',   domain: 'Sci-Fi' },
-      { slug: 'andromeda-service-order',     name: 'Service Order',     domain: 'Telecom' },
-      // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
-      { slug: 'andromeda-resource-planning', name: 'Resource Planning', domain: 'Operations' },
-      { slug: 'andromeda-signal-room',       name: 'Signal Room',       domain: 'Audio' },
-    ],
-  },
-}
-
-export function getDesignSystemMeta(slug: DesignSystemSlug): DesignSystemMeta | undefined {
-  return DESIGN_SYSTEM_META[slug]
-}
-
-export function getDesignSystemTemplateMeta(
-  slug: string,
-): { system: DesignSystemMeta; template: DesignSystemTemplateMeta } | undefined {
-  for (const system of Object.values(DESIGN_SYSTEM_META)) {
-    const template = system.templates.find((t) => t.slug === slug)
-    if (template) return { system, template }
-  }
-  return undefined
-}
+// Moved to a light, dependency-free module (./design-system-meta) so CLIENT
+// components can read these without importing this heavy registry. Re-exported
+// here so existing server importers are unaffected.
+export { DESIGN_SYSTEM_META, getDesignSystemMeta, getDesignSystemTemplateMeta } from './design-system-meta'
+export type { DesignSystemSlug, DesignSystemMeta, DesignSystemTemplateMeta } from './design-system-meta'
 
 
 // Code strings are now auto-generated from source files — see component-codes.generated.ts
@@ -1409,4 +1370,19 @@ export const COMPONENTS: ComponentEntry[] = [...COMPONENTS_RAW]
 
 export function getComponent(slug: string): ComponentEntry | undefined {
   return COMPONENTS.find((c) => c.slug === slug)
+}
+
+// Strip a full ComponentEntry to a serializable ComponentMeta — pass THIS
+// across the server/client boundary (grid cards, nav) so the heavy registry
+// (code strings, prompts, preview components incl. three.js) never reaches the
+// client bundle or the RSC payload.
+export function toMeta(c: ComponentEntry): ComponentMeta {
+  return {
+    slug: c.slug,
+    name: c.name,
+    description: c.description,
+    tags: c.tags,
+    image: c.image,
+    badge: c.badge,
+  }
 }

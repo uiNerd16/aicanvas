@@ -13,7 +13,9 @@ import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
 import { DevTierSwitcher } from './components/billing/DevTierSwitcher'
-import { COMPONENTS } from './lib/component-registry'
+// Registry-free nav counts (generated) — keeps the heavy component-registry,
+// and the three.js/matter-js it references, out of the shared client bundle.
+import { CATEGORY_COUNTS, TOTAL_COMPONENTS } from './lib/component-nav.generated'
 import { GITHUB_URL, SITE_URL } from './lib/config'
 import { createClient } from './lib/supabase/server'
 
@@ -30,7 +32,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-const TOTAL = COMPONENTS.length
+const TOTAL = TOTAL_COMPONENTS
 const GLOBAL_DESCRIPTION = `Open-source registry of ${TOTAL} animated React components, design systems, and templates. Free to browse and remix with AI. Premium unlocks design systems and unlimited installs. Built with Tailwind CSS and Motion.`
 
 export const metadata: Metadata = {
@@ -160,12 +162,12 @@ export default async function RootLayout({
               {/* Desktop sidebar — hidden on mobile */}
               <Suspense fallback={null}>
                 <div className="hidden md:flex">
-                  <Sidebar />
+                  <Sidebar counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
                 </div>
               </Suspense>
               {/* Mobile nav — visible only below md */}
               <Suspense fallback={null}>
-                <MobileNav />
+                <MobileNav counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
               </Suspense>
               {/* Content area scrolls independently of the sidebar.
                   scrollbar-gutter:stable reserves space for the vertical

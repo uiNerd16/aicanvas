@@ -22,7 +22,6 @@ import {
 } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
-import { COMPONENTS } from '../lib/component-registry'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { Button, buttonClasses } from './Button'
 import { SignedIn } from './auth/SignedIn'
@@ -46,15 +45,17 @@ const SECTIONS: Section[] = [
   { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
-function countByLabel(label: string) {
-  return COMPONENTS.filter((c) =>
-    c.tags.some((t) => t.accent && t.label === label)
-  ).length
-}
-
 // ─── MobileNav ────────────────────────────────────────────────────────────────
 
-export function MobileNav() {
+export function MobileNav({
+  counts,
+  total,
+}: {
+  // Server-computed nav counts (passed by the layout) so this client component
+  // never imports the heavy COMPONENTS registry.
+  counts: Record<string, number>
+  total: number
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -253,7 +254,7 @@ export function MobileNav() {
                         >
                           <span>{section.icon}</span>
                           <span className="flex-1">{section.title}</span>
-                          <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{COMPONENTS.length}</span>
+                          <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
                         </Link>
                       ) : (
                         <button
@@ -283,7 +284,7 @@ export function MobileNav() {
                             const href = cat
                               ? `/components/category/${cat.slug}`
                               : `/components?category=${encodeURIComponent(label)}`
-                            const count = countByLabel(label)
+                            const count = counts[label] ?? 0
                             return (
                               <li key={label}>
                                 <Link

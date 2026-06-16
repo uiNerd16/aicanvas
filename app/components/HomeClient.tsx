@@ -9,7 +9,7 @@ import { ComponentCard } from './ComponentCard'
 import { HeaderSocials } from './HeaderSocials'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
-import type { ComponentEntry } from '../lib/component-registry'
+import type { ComponentMeta } from '../lib/component-registry'
 import { LAST_DEPLOY } from '../lib/config'
 
 const NEW_BADGE_ACTIVE = Date.now() - new Date(LAST_DEPLOY).getTime() < 96 * 60 * 60 * 1000
@@ -47,7 +47,7 @@ function tokenize(text: string): string[] {
     .filter((w) => w.length >= 4 && !STOPWORDS.has(w))
 }
 
-function buildVocabulary(components: ComponentEntry[]): string[] {
+function buildVocabulary(components: ComponentMeta[]): string[] {
   const words = new Set<string>()
   for (const c of components) {
     for (const w of tokenize(c.name)) words.add(w)
@@ -81,7 +81,7 @@ export function HomeClient({
   components,
   categoryLabel,
 }: {
-  components: ComponentEntry[]
+  components: ComponentMeta[]
   /** Category name shown in the breadcrumb. Passed by /components/category/[slug];
    *  the legacy /components?category=X URL falls back to the query param. */
   categoryLabel?: string

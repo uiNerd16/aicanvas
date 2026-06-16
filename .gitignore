@@ -72,3 +72,4 @@ scripts/sync-output/
 
 # Generated registry JSON (served dynamically from app/r)
 /registry-data/*.json
+app/lib/component-nav.generated.ts
