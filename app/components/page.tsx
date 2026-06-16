@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { HomeClient } from './HomeClient'
-import { COMPONENTS, toMeta } from '../lib/component-registry'
+// Registry-free metadata so the grid never bundles the heavy registry
+// (three.js etc.); mirrors COMPONENTS.map(toMeta).
+import { COMPONENT_META } from '../lib/component-meta.generated'
 import { getCategoryByLabel } from '../lib/categories'
 import { SITE_URL } from '../lib/config'
 
-const INDEX_TITLE = `All Components: Browse ${COMPONENTS.length} Animated React Components`
-const INDEX_DESCRIPTION = `Browse all ${COMPONENTS.length} components in the AI Canvas registry: animated cards, glass morphism, backgrounds, buttons, and more. Each installable via the shadcn CLI.`
+const INDEX_TITLE = `All Components: Browse ${COMPONENT_META.length} Animated React Components`
+const INDEX_DESCRIPTION = `Browse all ${COMPONENT_META.length} components in the AI Canvas registry: animated cards, glass morphism, backgrounds, buttons, and more. Each installable via the shadcn CLI.`
 
 export async function generateMetadata({
   searchParams,
@@ -56,8 +58,8 @@ export default async function ComponentsPage({
   const { category } = await searchParams
   const filtered =
     category && category !== 'All Components'
-      ? COMPONENTS.filter((c) => c.tags.some((t) => t.accent && t.label === category))
-      : COMPONENTS
+      ? COMPONENT_META.filter((c) => c.tags.some((t) => t.accent && t.label === category))
+      : COMPONENT_META
 
-  return <HomeClient components={filtered.map(toMeta)} />
+  return <HomeClient components={filtered} />
 }

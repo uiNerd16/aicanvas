@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { HomePageClient } from './HomePageClient'
-import { COMPONENTS } from '../lib/component-registry'
+// Registry-free metadata so the homepage never bundles the heavy registry
+// (three.js etc.); mirrors COMPONENT_META.map(toMeta).
+import { COMPONENT_META } from '../lib/component-meta.generated'
 
 export const metadata: Metadata = {
   title: { absolute: 'AI Canvas — UI Components and Design Systems with AI Prompts' },
@@ -22,10 +24,10 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
-  const total = COMPONENTS.length
+  const total = COMPONENT_META.length
 
   // Pick up to 6 components with images for the hero showcase cycling card
-  const withImages = COMPONENTS.filter((c) => c.image).slice(0, 6).map((c) => ({
+  const withImages = COMPONENT_META.filter((c) => c.image).slice(0, 6).map((c) => ({
     slug: c.slug,
     name: c.name,
     description: c.description,
@@ -39,7 +41,7 @@ export default function HomePage() {
       ? withImages
       : [
           ...withImages,
-          ...COMPONENTS.filter((c) => !c.image)
+          ...COMPONENT_META.filter((c) => !c.image)
             .slice(0, 6 - withImages.length)
             .map((c) => ({
               slug: c.slug,
@@ -53,7 +55,7 @@ export default function HomePage() {
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
   const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
   const carouselItems = FEATURED_SLUGS
-    .map((slug) => COMPONENTS.find((c) => c.slug === slug))
+    .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
     .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
 

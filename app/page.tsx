@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { HomePageClient } from './home/HomePageClient'
-import { COMPONENTS } from './lib/component-registry'
+// Registry-free metadata so the homepage never bundles the heavy registry
+// (three.js etc.); mirrors COMPONENT_META.map(toMeta).
+import { COMPONENT_META } from './lib/component-meta.generated'
 import { SITE_URL } from './lib/config'
 
-const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENTS.length} Animated React Components with AI Reproduction Prompts`
-const HOMEPAGE_DESCRIPTION = `Open-source registry of ${COMPONENTS.length} animated React components. Free to browse and remix with AI. Install components with one command up to a daily limit, or go Premium for design systems and unlimited installs.`
+const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENT_META.length} Animated React Components with AI Reproduction Prompts`
+const HOMEPAGE_DESCRIPTION = `Open-source registry of ${COMPONENT_META.length} animated React components. Free to browse and remix with AI. Install components with one command up to a daily limit, or go Premium for design systems and unlimited installs.`
 
 export const metadata: Metadata = {
   title: { absolute: HOMEPAGE_TITLE },
@@ -33,10 +35,10 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
-  const total = COMPONENTS.length
+  const total = COMPONENT_META.length
 
   // Pick up to 6 components with images for the hero showcase cycling card
-  const withImages = COMPONENTS.filter((c) => c.image).slice(0, 6).map((c) => ({
+  const withImages = COMPONENT_META.filter((c) => c.image).slice(0, 6).map((c) => ({
     slug: c.slug,
     name: c.name,
     description: c.description,
@@ -50,7 +52,7 @@ export default function HomePage() {
       ? withImages
       : [
           ...withImages,
-          ...COMPONENTS.filter((c) => !c.image)
+          ...COMPONENT_META.filter((c) => !c.image)
             .slice(0, 6 - withImages.length)
             .map((c) => ({
               slug: c.slug,
@@ -64,7 +66,7 @@ export default function HomePage() {
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
   const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
   const carouselItems = FEATURED_SLUGS
-    .map((slug) => COMPONENTS.find((c) => c.slug === slug))
+    .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
     .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
 
