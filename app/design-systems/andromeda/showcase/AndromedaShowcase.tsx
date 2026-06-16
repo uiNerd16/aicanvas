@@ -153,7 +153,15 @@ function Section({
   children: ReactNode
 }) {
   return (
-    <Card>
+    <Card
+      // Perf: the showcase is a very tall single page, so let the browser skip
+      // rendering/layout of each section while it's offscreen. contain-intrinsic-size
+      // reserves a placeholder height (scrollbar stays stable), then `auto`
+      // remembers the real size after first render. Corner markers are inset
+      // (inside the card box), so paint containment never clips them. Degrades
+      // gracefully where content-visibility is unsupported.
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
+    >
       <CardHeader>
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span
