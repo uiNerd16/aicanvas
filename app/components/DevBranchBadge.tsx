@@ -9,6 +9,7 @@ export function DevBranchBadge() {
 
   return (
     <div
+      data-dev-overlay=""
       className="pointer-events-none fixed bottom-2 left-2 z-[9999] rounded-full bg-sand-950/80 px-2 py-0.5 font-mono text-[10px] text-sand-400 backdrop-blur-sm"
       aria-hidden="true"
     >

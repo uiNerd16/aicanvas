@@ -20,8 +20,9 @@ import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
+import { optimizeImageKitUrl } from '../../../lib/imagekit'
 
-type RelatedItem = { slug: string; name: string }
+type RelatedItem = { slug: string; name: string; image?: string }
 
 interface Props {
   slug: string
@@ -462,27 +463,39 @@ export function AndromedaComponentView({
                         className="relative aspect-video overflow-hidden"
                         style={{ backgroundColor: tokens.color.surface.base }}
                       >
-                        <div
-                          className="absolute inset-0"
-                          style={{
-                            backgroundImage:
-                              'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-                            backgroundSize: '18px 18px',
-                          }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span
-                            style={{
-                              fontFamily: tokens.typography.fontMono,
-                              fontSize: tokens.typography.size.xs,
-                              color: tokens.color.text.faint,
-                              textTransform: 'uppercase',
-                              letterSpacing: tokens.typography.tracking.widest,
-                            }}
-                          >
-                            /// {c.slug}
-                          </span>
-                        </div>
+                        {c.image ? (
+                          <img
+                            src={optimizeImageKitUrl(c.image, 'card')}
+                            alt={c.name}
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                          />
+                        ) : (
+                          <>
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                backgroundImage:
+                                  'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                                backgroundSize: '18px 18px',
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span
+                                style={{
+                                  fontFamily: tokens.typography.fontMono,
+                                  fontSize: tokens.typography.size.xs,
+                                  color: tokens.color.text.faint,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: tokens.typography.tracking.widest,
+                                }}
+                              >
+                                /// {c.slug}
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div className="px-3 py-2.5">
                         <h3 className="truncate text-sm font-semibold text-sand-900 dark:text-sand-50">

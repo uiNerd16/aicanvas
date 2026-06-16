@@ -129,6 +129,12 @@ async function main() {
   const page = await browser.newPage()
   await page.setViewportSize({ width: 1280, height: 720 })
 
+  // The dev-only devtools overlays (pufi/koko launcher buttons) are injected by
+  // the root layout and would bleed into the corner of the shot. Block them.
+  // (The branch badge is hidden by the capture page's own CSS.)
+  await page.route('**/pufi.js', (r) => r.abort())
+  await page.route('**/koko.js', (r) => r.abort())
+
   let ok = 0,
     fail = 0
   const results = []
