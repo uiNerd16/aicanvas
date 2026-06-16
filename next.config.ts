@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  // Barrel-optimize the big icon/animation packages so a `import { X } from
+  // '@phosphor-icons/react'` only pulls in X, not the whole barrel, off every
+  // page's shared bundle. Pure build-time transform, no behavior change.
+  experimental: {
+    optimizePackageImports: ['@phosphor-icons/react', 'framer-motion'],
+  },
   env: {
     NEXT_PUBLIC_GIT_BRANCH: currentGitBranch(),
   },
