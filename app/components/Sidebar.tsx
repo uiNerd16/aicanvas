@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { COMPONENTS } from '../lib/component-registry'
@@ -82,10 +82,11 @@ export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
     pathname?.startsWith('/ideation/design-systems') ||
     pathname?.startsWith('/design-systems') ||
     false
-  // Default the DS pole open when we're inside a design-system path (so
-  // navigating home → a design-system page feels seamless), collapsed
-  // otherwise — on the home page the Components pole is primary.
-  const [collapsedDS, setCollapsedDS] = useState(!onDesignSystems)
+  // The DS pole opens by default everywhere, so Andromeda + Meridian are
+  // visible without a click (it was already open on design-system paths; this
+  // also opens it on the home / components pages). The user can still collapse
+  // it, and the mutual-exclusion toggles below still apply on interaction.
+  const [collapsedDS, setCollapsedDS] = useState(false)
 
   // ── Embedded (design-systems / ideation) mutual-exclusion ─────────────────
   // In embedded mode the Components pole is a collapsible button (mirrors the
@@ -362,8 +363,19 @@ export function Sidebar({ embedded = false }: { embedded?: boolean } = {}) {
         {/* ── Divider ── */}
         <div className="my-2 border-t border-sand-300 dark:border-sand-800" />
 
-        {/* ── Get MCP, Pricing, About & Contact ── */}
+        {/* ── Lab, Get MCP, Pricing, About & Contact ── */}
         <div className="space-y-0.5">
+          <Link
+            href="/lab"
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+              pathname?.startsWith('/lab')
+                ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+            }`}
+          >
+            <Flask weight="regular" size={16} />
+            <span>Lab</span>
+          </Link>
           <Link
             href="/mcp"
             className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
