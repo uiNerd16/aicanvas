@@ -6,6 +6,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
+      // /ideation and /ideation/* are the internal dev playground (it renders
+      // duplicate previews of shipped pages); keep them out of the index.
+      disallow: ['/ideation', '/ideation/'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   }

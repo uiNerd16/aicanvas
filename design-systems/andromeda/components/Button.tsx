@@ -39,6 +39,13 @@ const TOUCH_TARGET_STYLE = `
       min-height: ${tokens.spacing[10]} !important;
       min-width: ${tokens.spacing[10]} !important;
     }
+    /* sm sits below the 40px floor; cap its hit area at spacing[8] (32px) so the
+       vertical hit-area seam between stacked sm buttons never overlaps, matching
+       IconButton's sm cap. */
+    .andromeda-btn-touch[data-size="sm"]::before {
+      min-height: ${tokens.spacing[8]} !important;
+      min-width: ${tokens.spacing[8]} !important;
+    }
   }
 `;
 
@@ -188,7 +195,7 @@ export const Button = forwardRef(function Button(
   if (asChild) {
     return (
       <>
-        <Slot ref={ref} className={baseClass} style={baseStyle} {...props}>
+        <Slot ref={ref} className={baseClass} data-size={size} style={baseStyle} {...props}>
           {content}
         </Slot>
         <style>{TOUCH_TARGET_STYLE}</style>
@@ -202,6 +209,7 @@ export const Button = forwardRef(function Button(
         ref={ref}
         type={type}
         className={baseClass}
+        data-size={size}
         style={baseStyle}
         disabled={disabled}
         whileHover={reducedMotion || disabled ? undefined : HOVER_LIFT}

@@ -1,4 +1,5 @@
 import AndromedaShowcase from '../../../design-systems/andromeda/showcase/AndromedaShowcase'
+import { ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta'
 import { DESIGN_SYSTEMS } from '../../../../scripts/lib/design-systems.config.mjs'
 
 // Andromeda Overview = the showcase rendered inside the ideation chrome.
@@ -11,7 +12,7 @@ import { DESIGN_SYSTEMS } from '../../../../scripts/lib/design-systems.config.mj
 
 export default function AndromedaPage() {
   const andromeda = DESIGN_SYSTEMS.find((s: { slug: string }) => s.slug === 'andromeda')
-  const componentCount = andromeda?.systemEntries.length ?? 0
+  const componentCount = ANDROMEDA_COMPONENT_META.length
   const templateCount = andromeda?.templates.length ?? 0
 
   return (

@@ -1,14 +1,22 @@
 // Thin route wrapper. The full showcase body lives in AndromedaShowcase.tsx
 // so the ideation Andromeda landing can render the same content without
-// duplication. Counts read from the design-system config so the header stays
-// in sync with the registry generator's source of truth — adding a 29th
-// component or a 5th template flips the stats line on the next build.
+// duplication. The component count reads from ANDROMEDA_COMPONENT_META — the
+// same browsable catalog the overview grid and sitemap use — so every surface
+// reports one consistent number; templateCount still reads from the config.
 import AndromedaShowcase from './AndromedaShowcase'
+import { ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta'
 import { DESIGN_SYSTEMS } from '../../../../scripts/lib/design-systems.config.mjs'
+
+export const metadata = {
+  title: 'Component Showcase · Andromeda Design System',
+  description:
+    'Every Andromeda primitive on one page, live and interactive: buttons, charts, tables, overlays, and more.',
+  alternates: { canonical: '/design-systems/andromeda/showcase' },
+}
 
 export default function ShowcasePage() {
   const andromeda = DESIGN_SYSTEMS.find((s: { slug: string }) => s.slug === 'andromeda')
-  const componentCount = andromeda?.systemEntries.length ?? 0
+  const componentCount = ANDROMEDA_COMPONENT_META.length
   const templateCount = andromeda?.templates.length ?? 0
 
   return (
