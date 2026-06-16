@@ -61,17 +61,17 @@ All colors come from two custom scales defined in `globals.css` via `@theme inli
 #### Sand scale — neutral (replaces zinc)
 | Token         | Hex       | Usage                                      |
 |---------------|-----------|--------------------------------------------|
-| `sand-50`     | `#FAFAF0` | Elevated surfaces (dropdowns, hover fills) |
-| `sand-100`    | `#E8E8DF` | Card backgrounds (light), input fills      |
-| `sand-200`    | `#D4D4CC` | Page background (light)                    |
-| `sand-300`    | `#BABAB4` | Borders (light), dividers                  |
-| `sand-400`    | `#9E9E98` | Muted borders, placeholder icons           |
-| `sand-500`    | `#7D7D78` | Muted / secondary text (light)             |
-| `sand-600`    | `#666662` | Body text, descriptions (light)            |
-| `sand-700`    | `#4F4F4C` | UI labels, buttons (light)                 |
-| `sand-800`    | `#383836` | Card backgrounds (dark)                    |
-| `sand-900`    | `#21211F` | Page background (dark)                     |
-| `sand-950`    | `#1A1A19` | Deepest dark — component preview bg        |
+| `sand-50`     | `#FAFAF4` | Elevated surfaces (dropdowns, hover fills) |
+| `sand-100`    | `#E8E8E3` | Card backgrounds (light), input fills      |
+| `sand-200`    | `#D4D4D0` | Page background (light)                    |
+| `sand-300`    | `#BABAB7` | Borders (light), dividers                  |
+| `sand-400`    | `#9E9E9B` | Muted borders, placeholder icons           |
+| `sand-500`    | `#7D7D7B` | Muted / secondary text (light)             |
+| `sand-600`    | `#666665` | Body text, descriptions (light)            |
+| `sand-700`    | `#4F4F4F` | UI labels, buttons (light)                 |
+| `sand-800`    | `#383839` | Card backgrounds (dark)                    |
+| `sand-900`    | `#212122` | Page background (dark)                     |
+| `sand-950`    | `#0E0E0F` | Deepest dark — page bg + component preview |
 
 #### Olive scale — lime-green accent
 | Token         | Hex       | Usage                                   |
