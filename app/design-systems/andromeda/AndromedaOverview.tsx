@@ -1,10 +1,10 @@
 // @ts-nocheck — consumes the JSDoc-typed Andromeda config/meta (no TS prop types).
 //
 // Andromeda OVERVIEW — the product landing for the system: hero → featured
-// component showcase → templates grid → components grid. TEST surface at
-// /design-systems/andromeda/overview. If it lands, page.tsx (the system root)
-// renders this instead of <AndromedaShowcase>, and the raw component grid keeps
-// living at /design-systems/andromeda/showcase.
+// component showcase → templates grid → components grid. This IS the system
+// root: page.tsx at /design-systems/andromeda renders it. The raw component
+// grid lives at /design-systems/andromeda/showcase; the old preview URL
+// /design-systems/andromeda/overview 301-redirects here (see next.config.ts).
 //
 // IDENTITY: pure AI Canvas — sand/olive tokens (Tailwind), Manrope (the site
 // --font-sans default), and the site's button system (buttonClasses). It
@@ -17,16 +17,16 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Robot, Wrench, CaretDown } from '@phosphor-icons/react'
-import { Button, buttonClasses } from '../../../components/Button'
-import { SiteFooter } from '../../../components/SiteFooter'
-import { optimizeImageKitUrl } from '../../../lib/imagekit'
-import { ANDROMEDA_META, ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta'
-import { DESIGN_SYSTEMS } from '../../../../scripts/lib/design-systems.config.mjs'
+import { Button, buttonClasses } from '../../components/Button'
+import { SiteFooter } from '../../components/SiteFooter'
+import { optimizeImageKitUrl } from '../../lib/imagekit'
+import { ANDROMEDA_META, ANDROMEDA_COMPONENT_META } from '../../_lib/andromeda/andromeda-meta'
+import { DESIGN_SYSTEMS } from '../../../scripts/lib/design-systems.config.mjs'
 // The ONE intentional Andromeda-token import on this otherwise AI-Canvas-chrome
 // page (see file header). It feeds the featured card's right panel, which is a
 // looping *preview of* the system and so must render in the system's own
 // language: surface.base void, JetBrains Mono, turquoise/orange/red scales.
-import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { tokens } from '../../../design-systems/andromeda/tokens'
 
 // Short blurbs for the four shipped templates — keyed by registry slug.
 const TEMPLATE_BLURBS = {

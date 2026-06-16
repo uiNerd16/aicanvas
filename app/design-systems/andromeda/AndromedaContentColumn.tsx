@@ -11,11 +11,12 @@ import { tokens } from '../../../design-systems/andromeda/tokens'
 // a thin empty strip on the right. This wrapper drops both `overflow-y-auto`
 // and the gutter for those routes so the template fills the column edge-to-edge.
 const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
-// The Andromeda overview is AI Canvas chrome (sand/olive), so its scroll column
-// takes the AI Canvas page surface, not the Andromeda void. The background must
-// live on the scroll container (not a min-h-full child) so it always covers the
-// full scrollable height — a child can two-tone when content overflows.
-const OVERVIEW_RE = /^\/design-systems\/andromeda\/overview\/?$/
+// The Andromeda overview (the system root /design-systems/andromeda) is AI
+// Canvas chrome (sand/olive), so its scroll column takes the AI Canvas page
+// surface, not the Andromeda void. The background must live on the scroll
+// container (not a min-h-full child) so it always covers the full scrollable
+// height — a child can two-tone when content overflows.
+const OVERVIEW_RE = /^\/design-systems\/andromeda\/?$/
 
 export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? ''

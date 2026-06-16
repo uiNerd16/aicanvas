@@ -1,19 +1,17 @@
-// /design-systems/andromeda is the Andromeda overview. It renders the
-// same showcase body as /design-systems/andromeda/showcase so the bare
-// system URL lands on the system overview, not the Mission Control
-// template (which now lives at /templates/mission-control).
-import AndromedaShowcase from './showcase/AndromedaShowcase'
-import { DESIGN_SYSTEMS } from '../../../scripts/lib/design-systems.config.mjs'
+// /design-systems/andromeda is the Andromeda system landing — the page the
+// sidebar's "Andromeda" link points at. It renders the overview (hero →
+// featured showcase → templates → components). The raw component grid lives at
+// /design-systems/andromeda/showcase; the former /overview preview URL
+// 301-redirects here (next.config.ts).
+import { AndromedaOverview } from './AndromedaOverview'
 
-export default function AndromedaOverviewPage() {
-  const andromeda = DESIGN_SYSTEMS.find((s: { slug: string }) => s.slug === 'andromeda')
-  const componentCount = andromeda?.systemEntries.length ?? 0
-  const templateCount = andromeda?.templates.length ?? 0
+export const metadata = {
+  title: 'Andromeda Design System for Dashboards and Control Panels',
+  description:
+    'A complete, token-driven design system for dashboards, control panels, and data-dense tools. Around 32 components and 4 templates, all live and installable.',
+  alternates: { canonical: '/design-systems/andromeda' },
+}
 
-  return (
-    <AndromedaShowcase
-      componentCount={componentCount}
-      templateCount={templateCount}
-    />
-  )
+export default function AndromedaPage() {
+  return <AndromedaOverview />
 }
