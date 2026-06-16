@@ -675,21 +675,14 @@ export default function ComponentPageView({
               {/* Save (logged-in only — no-op render otherwise) */}
               <SaveButton slug={slug} system={designSystem ?? null} />
 
-              {/* Copy CLI — copies npx shadcn install command */}
-              <Button variant="outline" size="sm" onClick={copyCli}>
-                {cliCopied
-                  ? <Check weight="regular" size={15} />
-                  : <Terminal weight="regular" size={15} />}
-                {cliCopied ? 'Copied!' : 'Copy CLI'}
-              </Button>
-
-              {/* Copy Prompt — dropdown with 3 platforms.
-                  Hidden entirely when no prompts are available so the button
-                  can never open an empty dropdown. */}
+              {/* Remix with AI — secondary action; dropdown with platform
+                  prompts. Hidden entirely when no prompts are available so the
+                  button can never open an empty dropdown. Sits left of the
+                  primary Copy CLI action. */}
               {availablePlatforms.length > 0 && (
                 <div className="relative" ref={promptDropdownRef}>
                   <Button
-                    variant="primary"
+                    variant="outline"
                     size="sm"
                     onClick={() => setPromptDropdownOpen((o) => {
                       if (!o) track('Remix Open', { component: slug })
@@ -719,6 +712,14 @@ export default function ComponentPageView({
                   )}
                 </div>
               )}
+
+              {/* Copy CLI — primary install action; copies the npx shadcn command */}
+              <Button variant="primary" size="sm" onClick={copyCli}>
+                {cliCopied
+                  ? <Check weight="regular" size={15} />
+                  : <Terminal weight="regular" size={15} />}
+                {cliCopied ? 'Copied!' : 'Copy CLI'}
+              </Button>
 
             </div>
           </div>
