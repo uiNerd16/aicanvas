@@ -50,9 +50,15 @@ export const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 export function DesignSystemsPole({
   collapsed,
   onToggle,
+  onNavigate,
 }: {
   collapsed: boolean
   onToggle: () => void
+  // Fired when any leaf link is tapped. The mobile drawer passes setOpen(false)
+  // so it closes even for template links (target="_blank" doesn't change
+  // pathname, so the drawer's close-on-route effect would never fire). The
+  // desktop rail omits it — there's no drawer to close.
+  onNavigate?: () => void
 }) {
   const pathname = usePathname() ?? ''
 
@@ -106,6 +112,7 @@ export function DesignSystemsPole({
               <li key={system.slug}>
                 <Link
                   href={`/design-systems/${system.slug}`}
+                  onClick={onNavigate}
                   className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
                     systemActive
                       ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
@@ -143,6 +150,7 @@ export function DesignSystemsPole({
                               <Link
                                 href={`/design-systems/${system.slug}/templates/${t.slug}`}
                                 target="_blank"
+                                onClick={onNavigate}
                                 className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                   isActive
                                     ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
@@ -172,6 +180,7 @@ export function DesignSystemsPole({
                             <li key={c.slug}>
                               <Link
                                 href={`/design-systems/${system.slug}/${c.slug}`}
+                                onClick={onNavigate}
                                 className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                   isActive
                                     ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
