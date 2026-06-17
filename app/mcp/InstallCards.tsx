@@ -178,14 +178,14 @@ function CodeBlock({
     >
       {multiline ? (
         <pre
-          className="flex-1 overflow-x-auto font-mono text-sm leading-relaxed text-sand-300"
+          className="min-w-0 flex-1 overflow-x-auto font-mono text-sm leading-relaxed text-sand-300"
           style={NO_LIGATURES}
         >
           {command}
         </pre>
       ) : (
         <code
-          className="flex-1 overflow-x-auto font-mono text-sm text-sand-300"
+          className="block min-w-0 flex-1 overflow-x-auto font-mono text-sm text-sand-300"
           style={NO_LIGATURES}
         >
           {command}

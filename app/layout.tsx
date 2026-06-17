@@ -174,7 +174,7 @@ export default async function RootLayout({
                   scrollbar regardless of whether content overflows, so the
                   visible width never shifts between auth states. */}
               <div
-                className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
+                className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
                 style={{ scrollbarGutter: 'stable' }}
               >
                 {children}
