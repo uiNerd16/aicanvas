@@ -23,10 +23,9 @@ export function UpgradeButton({
   const router = useRouter()
   const { user } = useSession()
 
-  // Checkout is only possible once the Paddle env is configured. We also show a
-  // deliberate "Coming soon" state during the rollout window (flag on, or
-  // env not configured): the Premium card stays visible during configuration of the
-  // product, but the CTA is dormant rather than opening a broken/erroring overlay.
+  // Checkout is only possible once the Paddle env is configured. When the flag
+  // is on (or env is not configured), the CTA renders as a dormant "Coming soon"
+  // button rather than opening a broken/erroring overlay.
   const configured = Boolean(PRICES[cycle] && process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN)
   const comingSoon = checkoutComingSoon() || !configured
 

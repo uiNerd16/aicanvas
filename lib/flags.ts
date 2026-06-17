@@ -20,10 +20,8 @@ export function isCheckoutComingSoon(raw: string | undefined): boolean {
 
 /**
  * When true, the upgrade CTA renders as a disabled "Coming soon" button even
- * if Paddle is configured. Use this during the rollout window: show the
- * pricing / Premium card during configuration, but keep the
- * checkout dormant until the account is approved. Flip to false (and set the
- * live Paddle keys) to go live. NEXT_PUBLIC_ so the client button can branch.
+ * if Paddle is configured. Flip to false (and set the live Paddle keys) to go
+ * live. NEXT_PUBLIC_ so the client button can branch.
  */
 export function checkoutComingSoon(): boolean {
   return isCheckoutComingSoon(process.env.NEXT_PUBLIC_CHECKOUT_COMING_SOON)

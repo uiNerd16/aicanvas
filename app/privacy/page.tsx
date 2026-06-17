@@ -13,10 +13,7 @@ import { HeaderSocials } from '../components/HeaderSocials'
 // enumeration, dedicated hosting/email subsections, AI usage disclosure) were
 // intentionally left out for cleanliness.
 //
-// Controller info lives entirely in /impressum (Alexandru Tatu, Munich).
-// If the operator ever changes (e.g. to another structure), update both the
-// controller link target's content and the supervisory authority below
-// (currently BayLDA — would become the relevant authority for a Romanian operator).
+// Controller info and supervisory authority live in /impressum and below.
 
 export default function PrivacyPage() {
   const ref = useRef<HTMLDivElement>(null)

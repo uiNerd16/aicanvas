@@ -8,11 +8,7 @@ import { HeaderSocials } from '../components/HeaderSocials'
 
 // ─── /terms ───────────────────────────────────────────────────────────────────
 // Terms & Conditions for AI Canvas. Operator details live in /impressum to
-// avoid duplication. Marketing-Communications section is the load-bearing
-// clause for the post-ECJ § 7 (3) UWG existing-customer exception — paired
-// with the inline "We may occasionally email you…" notice on the sign-up
-// form, it lets us send AI Canvas product updates to account holders without
-// a separate marketing checkbox.
+// avoid duplication.
 
 export default function TermsPage() {
   const ref = useRef<HTMLDivElement>(null)
