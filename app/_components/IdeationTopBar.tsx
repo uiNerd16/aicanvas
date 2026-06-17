@@ -114,7 +114,9 @@ export function IdeationTopBar() {
     isLast: i === segments.length - 1,
   }))
   return (
-    <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950">
+    // Hidden below md (like the other two branches) so it never stacks under
+    // the global MobileNav bar on /ideation/* — the drawer handles mobile nav.
+    <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center gap-2 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm">
         {crumbs.map((c, i) => (
           <span key={c.href} className="flex items-center gap-1">

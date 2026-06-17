@@ -13,7 +13,6 @@ import {
   XLogo,
   ArrowElbowDownRight,
   CaretDown,
-  Cube,
   DiamondsFour,
   Flask,
   MagnifyingGlass,
@@ -23,6 +22,7 @@ import {
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
+import { DesignSystemsPole, TEMPLATE_LEAF_RE } from '../_components/DesignSystemsPole'
 import { Button, buttonClasses } from './Button'
 import { SignedIn } from './auth/SignedIn'
 import { SignedOut } from './auth/SignedOut'
@@ -39,10 +39,12 @@ type Section = {
   disabled?: boolean
 }
 
+// The Design Systems pole is rendered separately via the shared
+// DesignSystemsPole (same component the desktop Sidebar uses) so the mobile
+// drawer and the desktop rail never drift. Only the Components pole lives here.
 const SECTIONS: Section[] = [
   { title: 'Components', icon: <DiamondsFour weight="regular" size={16} />, labels: COMPONENTS_LABELS },
   // { title: 'SVGs', icon: <PenNib weight="regular" size={16} />, labels: [], disabled: true },
-  { title: 'Design Systems', icon: <Cube weight="regular" size={16} />, labels: [], disabled: true },
 ]
 
 // ─── MobileNav ────────────────────────────────────────────────────────────────
@@ -71,6 +73,9 @@ export function MobileNav({
 
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  // Design Systems pole opens by default so Andromeda is one tap away (mirrors
+  // the desktop rail, where the DS pole is expanded out of the box).
+  const [collapsedDS, setCollapsedDS] = useState(false)
 
   const toggle = (title: string) =>
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
@@ -132,12 +137,14 @@ export function MobileNav({
     searchInputRef.current?.focus()
   }
 
-  // Hide on design-system preview routes and on the /ideation/* subtree —
-  // that subtree ships its own duplicated mobile/desktop chrome.
+  // The design-systems / ideation layouts only render the *desktop* embedded
+  // Sidebar (hidden below md), so this drawer is the only mobile nav on those
+  // routes — it must stay visible there. Suppress it only where a route owns
+  // the full viewport: full-screen template leaves and the /lab subtree (LAB
+  // ships its own top bar).
   const hideMobileNav =
-    pathname?.startsWith('/design-systems/') ||
-    pathname?.startsWith('/ideation') ||
-    pathname?.startsWith('/lab')
+    pathname?.startsWith('/lab') ||
+    TEMPLATE_LEAF_RE.test(pathname ?? '')
   if (hideMobileNav) return null
 
   return (
@@ -310,6 +317,13 @@ export function MobileNav({
                     </div>
                   )
                 })}
+
+                {/* ── Design Systems pole (shared, identical to the desktop rail) ── */}
+                <DesignSystemsPole
+                  collapsed={collapsedDS}
+                  onToggle={() => setCollapsedDS((prev) => !prev)}
+                  onNavigate={() => setOpen(false)}
+                />
 
                 {/* Lab, Get MCP, Pricing, About — follows same pattern as section headers */}
                 <div className="mb-3 h-px bg-sand-300 dark:bg-sand-800" />

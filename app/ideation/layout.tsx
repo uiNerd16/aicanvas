@@ -27,8 +27,13 @@ export default function IdeationLayout({ children }: { children: ReactNode }) {
     <div
       className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
     >
+      {/* Desktop-only rail. Below md the embedded Sidebar (a full-height 240px
+          aside) would fill the viewport and bury the page, so it's hidden and
+          the global MobileNav drawer takes over on mobile. */}
       <Suspense fallback={null}>
-        <Sidebar embedded counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+        <div className="hidden md:flex">
+          <Sidebar embedded counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+        </div>
       </Suspense>
       <div className="flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">
         <IdeationTopBar />

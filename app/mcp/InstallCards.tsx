@@ -254,7 +254,7 @@ export function InstallCards() {
                   setTestCopied(false)
                 }}
                 aria-pressed={active}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2.5 text-[13px] font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-sm ${
+                className={`relative flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-xs font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-sm ${
                   active
                     ? 'text-sand-900 dark:text-sand-50'
                     : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
@@ -267,7 +267,7 @@ export function InstallCards() {
                     transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 )}
-                <span className="relative z-10 flex items-center gap-1.5 whitespace-nowrap sm:gap-2">
+                <span className="relative z-10 flex items-center justify-center gap-1.5 text-center leading-tight sm:gap-2">
                   {t.mark}
                   {TOOL_META[t.id].label}
                 </span>
