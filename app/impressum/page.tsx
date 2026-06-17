@@ -7,24 +7,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import { HeaderSocials } from '../components/HeaderSocials'
 
 // ─── /impressum ───────────────────────────────────────────────────────────────
-// § 5 DDG-compliant imprint for a private-person / Kleinunternehmer
-// Einzelunternehmen operator based in Germany.
-//
-// Mandatory under § 5 DDG: Creator (name + ladungsfähige Anschrift) + Contact.
-// Everything above those two sections — liability for content, liability for
-// external links, copyright — is standard German boilerplate. Not legally
-// required, but every German reader expects to see it on an Impressum.
-//
-// Intentionally NOT included:
-//   • Editorial responsibility (§ 18 (2) MStV) — does not apply to a
-//     component marketplace per BGH case law.
-//   • EU online-dispute-resolution link — platform was discontinued
-//     20 July 2025; keeping the link is itself an Abmahnung risk under § 5 UWG.
-//   • Verbraucherstreitbeilegung notice (§ 36 VSBG) — only required for
-//     companies ≥10 employees; solo operator is exempt.
-//
-// Operator: Alexandru Daniel Tatu, Strahuberstr. 13, 81479 Munich, Germany.
-// This is the public ladungsfähige Anschrift on the live site.
+// § 5 DDG imprint.
 
 export default function ImpressumPage() {
   const ref = useRef<HTMLDivElement>(null)
