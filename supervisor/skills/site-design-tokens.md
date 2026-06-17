@@ -12,16 +12,16 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 | Token | Hex | Use in components |
 |---|---|---|
-| `sand-50` | `#FAFAF4` | Elevated surfaces, hover fills |
-| `sand-100` | `#E8E8E3` | Light card surfaces |
-| `sand-200` | `#D4D4D0` | Light page background |
-| `sand-300` | `#BABAB7` | Borders (light) |
-| `sand-400` | `#9E9E9B` | Muted icons, placeholders |
-| `sand-500` | `#7D7D7B` | Secondary text |
-| `sand-600` | `#666665` | Body text |
-| `sand-700` | `#4F4F4F` | Labels, buttons (light) |
-| `sand-800` | `#383839` | Dark card surfaces |
-| `sand-900` | `#212122` | Dark card / panel surfaces |
+| `sand-50` | `#F4F4FA` | Elevated surfaces, hover fills |
+| `sand-100` | `#E3E3E8` | Light card surfaces |
+| `sand-200` | `#D0D0D4` | Light page background |
+| `sand-300` | `#B7B7BA` | Borders (light) |
+| `sand-400` | `#9B9B9E` | Muted icons, placeholders |
+| `sand-500` | `#7B7B7D` | Secondary text |
+| `sand-600` | `#575759` | Body text |
+| `sand-700` | `#373738` | Labels, buttons (light) |
+| `sand-800` | `#2D2D2E` | Dark card surfaces |
+| `sand-900` | `#1B1B1C` | Dark card / panel surfaces |
 | `sand-950` | `#0E0E0F` | **Dark page + component preview bg** |
 
 ## Olive scale (accent)

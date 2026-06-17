@@ -61,16 +61,16 @@ All colors come from two custom scales defined in `globals.css` via `@theme inli
 #### Sand scale — neutral (replaces zinc)
 | Token         | Hex       | Usage                                      |
 |---------------|-----------|--------------------------------------------|
-| `sand-50`     | `#FAFAF4` | Elevated surfaces (dropdowns, hover fills) |
-| `sand-100`    | `#E8E8E3` | Card backgrounds (light), input fills      |
-| `sand-200`    | `#D4D4D0` | Page background (light)                    |
-| `sand-300`    | `#BABAB7` | Borders (light), dividers                  |
-| `sand-400`    | `#9E9E9B` | Muted borders, placeholder icons           |
-| `sand-500`    | `#7D7D7B` | Muted / secondary text (light)             |
-| `sand-600`    | `#666665` | Body text, descriptions (light)            |
-| `sand-700`    | `#4F4F4F` | UI labels, buttons (light)                 |
-| `sand-800`    | `#383839` | Card backgrounds (dark)                    |
-| `sand-900`    | `#212122` | Page background (dark)                     |
+| `sand-50`     | `#F4F4FA` | Elevated surfaces (dropdowns, hover fills) |
+| `sand-100`    | `#E3E3E8` | Card backgrounds (light), input fills      |
+| `sand-200`    | `#D0D0D4` | Page background (light)                    |
+| `sand-300`    | `#B7B7BA` | Borders (light), dividers                  |
+| `sand-400`    | `#9B9B9E` | Muted borders, placeholder icons           |
+| `sand-500`    | `#7B7B7D` | Muted / secondary text (light)             |
+| `sand-600`    | `#575759` | Body text, descriptions (light)            |
+| `sand-700`    | `#373738` | UI labels, buttons (light)                 |
+| `sand-800`    | `#2D2D2E` | Card backgrounds (dark)                    |
+| `sand-900`    | `#1B1B1C` | Page background (dark)                     |
 | `sand-950`    | `#0E0E0F` | Deepest dark — page bg + component preview |
 
 #### Olive scale — lime-green accent
