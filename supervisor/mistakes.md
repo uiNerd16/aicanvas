@@ -62,3 +62,13 @@ The Reviewer checks this list on every review. The Supervisor logs here after ev
 - **Reference (correct pattern)**: `components-workspace/charging-widget/index.tsx`, `peel-corner-reveal/index.tsx`, `radial-cards/index.tsx`. Copy one of these when inlining `useTheme`.
 - **Affected files**: `components-workspace/crypto-swap/index.tsx` (fixed)
 - **Detected**: 2026-06-14
+
+## #010 — Live component preview paints over the mobile menu / site chrome (z-index escape)
+
+- **Issue**: On `/components/product-card-deck`, opening the mobile burger menu showed the card deck floating ON TOP of the open drawer. The component's top card uses `position: absolute; zIndex: 100` (slot-based stacking). The preview container was `relative overflow-hidden` — but **`relative` without a `z-index`, and `overflow-hidden`, do NOT create a stacking context**. So the card's `z-index: 100` escaped the preview box and competed at page level against the drawer's `z-50` — and 100 > 50, so the component won.
+- **Root cause**: A live-preview container that renders arbitrary component children must trap those children's z-indexes. Components legitimately use any z-index they want internally; the container is responsible for scoping them.
+- **Fix applied (systemic)**: Added `isolate` (`isolation: isolate`) to every container that renders a live `<PreviewComponent />` / component `children`: the main preview box and the fullscreen panel in `app/components/[slug]/ComponentPageView.tsx`. `isolate` creates a stacking context with `z-index: auto`, so ALL descendant z-indexes (even `z-9999`) are scoped inside the box and can never exceed site chrome (drawer z-50, modals, etc.). This is future-proof — no per-component discipline required.
+- **Rule**: Any new surface that renders a live component preview MUST carry `isolate`. Never rely on the drawer/site-chrome z-index being "high enough" — components can use arbitrary z-indexes. (The homepage `ComponentCard` grid is safe because it renders static screenshot `<img>`s, not live components.)
+- **Related**: #007 (component covering the preview back button) is the same class of bug; `isolate` on the container is the general fix that supersedes per-element z-index bumps.
+- **Affected files**: `app/components/[slug]/ComponentPageView.tsx` (main preview box + fullscreen panel)
+- **Detected**: 2026-06-17
