@@ -311,9 +311,21 @@ export function MobileNav({
                   )
                 })}
 
-                {/* Get MCP, Pricing, About — follows same pattern as section headers */}
+                {/* Lab, Get MCP, Pricing, About — follows same pattern as section headers */}
                 <div className="mb-3 h-px bg-sand-300 dark:bg-sand-800" />
                 <div className="mb-3">
+                  <Link
+                    href="/lab"
+                    onClick={() => setOpen(false)}
+                    className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                      pathname?.startsWith('/lab')
+                        ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                        : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                    }`}
+                  >
+                    <span><Flask weight="regular" size={16} /></span>
+                    <span className="flex-1">Lab</span>
+                  </Link>
                   <Link
                     href="/mcp"
                     onClick={() => setOpen(false)}
@@ -380,14 +392,6 @@ export function MobileNav({
                 >
                   <XLogo weight="regular" size={20} />
                 </a>
-                <Link
-                  href="/lab"
-                  onClick={() => setOpen(false)}
-                  className={`ml-1 ${buttonClasses({ variant: 'primary', size: 'xs' })}`}
-                >
-                  <Flask weight="regular" size={16} className="shrink-0" />
-                  Lab
-                </Link>
               </div>
 
               {/* Auth row */}
