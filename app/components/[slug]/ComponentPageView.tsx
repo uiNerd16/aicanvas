@@ -611,7 +611,7 @@ export default function ComponentPageView({
             {/* Content area — background controlled by cardTheme, isolated from global theme */}
             <div
               data-card-theme={cardTheme}
-              className={`relative h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
+              className={`relative isolate h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
                 cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
               }`}
             >
@@ -1370,7 +1370,7 @@ export default function ComponentPageView({
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               data-card-theme={cardTheme}
-              className={`absolute inset-0 overflow-hidden transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl ${
+              className={`absolute inset-0 isolate overflow-hidden transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl ${
                 cardTheme === 'dark'
                   ? 'dark bg-sand-950 sm:border-sand-800'
                   : 'bg-sand-100 sm:border-sand-300'
