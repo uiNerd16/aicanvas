@@ -342,7 +342,7 @@ function FolderTabs({
               onKeyDown={(e) => { if (e.key === 'Escape') { setDraft(''); setCreating(false) } }}
               placeholder="Folder name…"
               maxLength={40}
-              className="w-full rounded-md border border-olive-500 bg-sand-50 px-2 py-1 text-xs text-sand-900 outline-none dark:bg-sand-900 dark:text-sand-50"
+              className="w-full rounded-md border border-olive-500 bg-sand-50 px-2 py-1 text-base text-sand-900 outline-none md:text-xs dark:bg-sand-900 dark:text-sand-50"
             />
             <p className="text-center text-[10px] text-sand-500">Enter to create · Esc to cancel</p>
           </form>
@@ -521,7 +521,7 @@ function CollectionPicker({
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="New collection…"
-                className="flex-1 rounded-md border border-sand-300 bg-white px-2 py-1 text-xs text-sand-900 outline-none focus:border-olive-500 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50"
+                className="flex-1 rounded-md border border-sand-300 bg-white px-2 py-1 text-base text-sand-900 outline-none focus:border-olive-500 md:text-xs dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50"
                 maxLength={40}
               />
               <button

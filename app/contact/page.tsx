@@ -22,7 +22,7 @@ import { HeaderSocials } from '../components/HeaderSocials'
 // left/right edges line up (matching /privacy and /terms).
 
 const INPUT_CLASS =
-  'w-full rounded-lg border border-sand-800 bg-sand-950 px-3 py-2 text-sm text-sand-50 outline-none transition-colors placeholder:text-sand-600 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20'
+  'w-full rounded-lg border border-sand-800 bg-sand-950 px-3 py-2 text-base text-sand-50 outline-none transition-colors placeholder:text-sand-600 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 md:text-sm'
 const LABEL_CLASS =
   'mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-400'
 
