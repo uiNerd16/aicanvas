@@ -468,10 +468,16 @@ export default function ResourcePlanning() {
           }
           /* The chart and table panels lay out against a parent-provided
              height on desktop (the fr track). Once the rows are content-sized
-             they would collapse, so pin a usable minimum — reusing the 220px
-             that already anchors the desktop top-row track in this file, so no
-             new magic number is introduced. */
-          .rp-grid-item-chart { min-height: 220px !important; }
+             they would collapse. The table just needs a usable minimum (220px,
+             reused from the desktop top-row track). The chart needs a DEFINITE
+             height, not only a min-height: TrendChart in fill mode is a
+             height:100% to ResponsiveContainer chain, and a percentage or flex
+             height only resolves against a definite ancestor height; a bare
+             min-height measures 0, so the plot collapses (chrome renders, the
+             graph does not). dvh is the relative unit the brain allows for
+             filling a phone screen; the 220px min keeps the panel usable on the
+             shortest viewports. */
+          .rp-grid-item-chart { height: 46dvh !important; min-height: 220px !important; }
           .rp-grid-item-table { min-height: 220px !important; }
           /* TopBar: tighten inline padding/gap; hide the inline nav + its
              divider — that content now lives in the Drawer — and reveal the

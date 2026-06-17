@@ -95,7 +95,7 @@ export default function MissionControl() {
           menuOpen={navOpen}
         />
 
-        <main style={{
+        <main className="mc-main" style={{
           flex: 1,
           overflowY: 'auto',
           display: 'flex',
@@ -127,16 +127,24 @@ export default function MissionControl() {
 
       <style>{`
         ${mq.md} {
-          /* Stack the shell top-to-bottom; the hidden sidebar slot collapses
-             cleanly and the main column fills the width. */
+          /* Stack the shell top-to-bottom AND release its desktop 100vh pin:
+             below md the dashboard grows to its stacked height and the route
+             column (AndromedaContentColumn, overflow-y:auto on mobile) scrolls
+             the whole page as one. The inner <main> stops being a fixed-height
+             scroller (flex:0 0 auto, overflow visible) so there's no nested
+             scroller and no blank strip. */
           .mc-shell {
             flex-direction: column !important;
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow: visible !important;
             gap: ${tokens.spacing[3]} !important;
             padding: ${tokens.spacing[3]} !important;
           }
           /* Desktop sidebar hidden — its content lives in the Drawer. */
           .mc-sidebar { display: none !important; }
-          .mc-main-col { gap: ${tokens.spacing[3]} !important; }
+          .mc-main-col { overflow: visible !important; gap: ${tokens.spacing[3]} !important; }
+          .mc-main { flex: 0 0 auto !important; overflow-y: visible !important; padding-right: 0 !important; }
         }
       `}</style>
     </div>

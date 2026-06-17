@@ -144,6 +144,7 @@ export default function SignalRoom() {
         />
 
         <main
+          className="sr-main"
           style={{
             flex: 1,
             overflowY: 'auto',
@@ -205,16 +206,22 @@ export default function SignalRoom() {
 
       <style>{`
         ${mq.md} {
-          /* Stack the shell top-to-bottom; the hidden sidebar slot collapses
-             cleanly and the main column fills the width. */
+          /* Stack the shell AND release its desktop 100vh pin: below md the
+             page grows to its stacked height and the route column scrolls it as
+             one (no nested inner scroller, no blank strip). The Transport flows
+             at the bottom of the scroll on mobile rather than staying pinned. */
           .sr-shell {
             flex-direction: column !important;
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow: visible !important;
             gap: ${tokens.spacing[3]} !important;
             padding: ${tokens.spacing[3]} !important;
           }
           /* Desktop sidebar hidden — its content lives in the Drawer. */
           .sr-sidebar { display: none !important; }
-          .sr-main-col { gap: ${tokens.spacing[3]} !important; }
+          .sr-main-col { overflow: visible !important; gap: ${tokens.spacing[3]} !important; }
+          .sr-main { flex: 0 0 auto !important; overflow-y: visible !important; padding-right: 0 !important; }
           /* Recent/Levels dual-pane collapses to one column; the levels panel
              releases its fixed 360px column and flows full-width below the
              transmissions table. */
