@@ -26,6 +26,7 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarBlank, CaretDown, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
+import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -125,20 +126,23 @@ function PickerStyles() {
       .adp-day:focus-visible {
         box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
       }
-      /* Phone fit — below sm the absolutely-positioned panel must not push
-         past the viewport and force horizontal page scroll. Clamp its width to
-         a token-inset of the viewport and pin it to the trigger's RIGHT edge
-         (right:0) so a trigger sitting in the right half of the screen opens a
-         calendar that stays on-screen instead of overflowing rightward. The
-         fixed 7×32px grid then becomes fluid (1fr columns, cells fill their
-         track) so the calendar shrinks to whatever width survives the clamp.
-         !important: the panel width / grid columns / cell box are inline
-         styles, so the responsive override must outrank them (rules.md →
-         "Hover on inline-styled controls"). */
+      /* Phone fit — below sm a trigger-anchored, right-pinned popover still
+         overflowed off-screen (the trigger's own width pushed it past the
+         edge). Instead make the picker root full-width so its absolutely-
+         positioned panel spans the whole component, and pin the panel to BOTH
+         edges (left:0; right:0). The calendar then matches the component width
+         and can never overflow sideways. The fixed 7×32px grid goes fluid (1fr
+         columns, cells fill their track) so it grows to fill that width.
+         !important: the root display, panel offsets, grid columns and cell box
+         are all inline styles, so the responsive override must outrank them
+         (rules.md → "Hover on inline-styled controls"). */
       ${mq.sm} {
+        .adp-root {
+          display: flex !important;
+          width: 100% !important;
+        }
         .adp-panel {
-          max-width: calc(100vw - ${tokens.spacing[4]}) !important;
-          left: auto !important;
+          left: 0 !important;
           right: 0 !important;
         }
         .adp-grid {
@@ -154,7 +158,7 @@ function PickerStyles() {
 }
 
 export const DateRangePicker = forwardRef(function DateRangePicker(
-  { value, onChange, presetLabel, defaultOpen = false, staticOpen = false, style, ...props },
+  { value, onChange, presetLabel, defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
   const [open, setOpen]         = useState(defaultOpen || staticOpen);
@@ -303,6 +307,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
         if (typeof ref === 'function') ref(node);
         else if (ref) ref.current = node;
       }}
+      className={cn('adp-root', className)}
       style={{ position: 'relative', display: 'inline-flex', ...style }}
       {...props}
     >

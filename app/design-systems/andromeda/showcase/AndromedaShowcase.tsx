@@ -141,6 +141,7 @@ function Section({
   kicker,
   description,
   slug,
+  allowOverflow,
   children,
 }: {
   title: string
@@ -150,6 +151,13 @@ function Section({
   // header pointing at /design-systems/andromeda/<slug>. Foundation
   // sections (Color Palette, Typography) omit this and have no button.
   slug?: string
+  // Skip content-visibility for sections whose demo opens an INLINE docs
+  // popover (defaultOpen/staticOpen menu, calendar, tooltip) that paints
+  // outside the card box. content-visibility implies `contain: paint`, which
+  // clips the open popover (the bug the kebab menus hit) — at every width, so
+  // this also un-clips desktop. Correctness beats the offscreen-skip perf win
+  // for these few sections.
+  allowOverflow?: boolean
   children: ReactNode
 }) {
   return (
@@ -159,8 +167,9 @@ function Section({
       // reserves a placeholder height (scrollbar stays stable), then `auto`
       // remembers the real size after first render. Corner markers are inset
       // (inside the card box), so paint containment never clips them. Degrades
-      // gracefully where content-visibility is unsupported.
-      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
+      // gracefully where content-visibility is unsupported. Sections with an
+      // open inline popover opt out via `allowOverflow`.
+      style={allowOverflow ? undefined : { contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
     >
       <CardHeader>
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
@@ -328,6 +337,16 @@ export default function AndromedaShowcase({
             .as-usage-grid { grid-template-columns: minmax(0, 1fr); }
             .as-shell { padding: ${tokens.spacing[6]} ${tokens.spacing[4]} !important; }
             .as-title { font-size: ${tokens.typography.size['2xl']} !important; }
+            /* Phones: drop the right-hand usage gloss on the Type Scale and
+               Spacing rows — at phone widths it crowds the specimen off-screen.
+               Desktop/tablet keep it (rule is mq.sm-only). */
+            .as-scale-usage { display: none !important; }
+            /* The ProgressBar segment row is fixed geometry (30×6px + 29×3px =
+               267px, segments don't shrink). On a sub-~323px phone it would
+               exceed the card and widen the page, so let it scroll inside its
+               own stack — the sanctioned fixed-geometry behaviour. Inert on
+               wider phones/desktop where 267px fits. */
+            .as-progress-stack { overflow-x: auto; }
           }
         `}</style>
 
@@ -570,7 +589,7 @@ export default function AndromedaShowcase({
                   <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 28, flexShrink: 0 }}>{token}</span>
                   <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, width: 32, flexShrink: 0 }}>{px}</span>
                   <span style={{ fontFamily: tokens.typography.fontMono, fontSize: px, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wide, lineHeight: 1.1, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap' }}>ANDROMEDA</span>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>{usage}</span>
+                  <span className="as-scale-usage" style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>{usage}</span>
                 </div>
               ))}
             </div>
@@ -655,7 +674,7 @@ export default function AndromedaShowcase({
                     }}
                   />
                 </div>
-                <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>
+                <span className="as-scale-usage" style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, flexShrink: 0, textAlign: 'right' }}>
                   {usage}
                 </span>
               </div>
@@ -727,6 +746,7 @@ export default function AndromedaShowcase({
 
         {/* ── PanelHeader ────────────────────────────────────────────────── */}
         <Section
+          allowOverflow
           title="PanelHeader"
           slug="panel-header"
           description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
@@ -790,6 +810,7 @@ export default function AndromedaShowcase({
 
         {/* ── PanelMenu ──────────────────────────────────────────────────── */}
         <Section
+          allowOverflow
           title="PanelMenu"
           slug="panel-menu"
           description="Kebab-trigger overflow menu for panel headers. The trigger (IconButton, ghost, sm) flips to a held-pressed look while the menu is open. Items support icons, separators, destructive styling, persistent selection, and a single level of right-flyout submenu. Closes on outside click or Escape."
@@ -1092,6 +1113,7 @@ export default function AndromedaShowcase({
           description="3 variants. 3px tall track with a gradient fill and soft glow halo. Smooth width transitions."
         >
           <div
+            className="as-progress-stack"
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -1220,7 +1242,10 @@ export default function AndromedaShowcase({
             <RadioGroup
               value={radioValue}
               onValueChange={setRadioValue}
-              style={{ flexDirection: 'row', gap: tokens.spacing[4] }}
+              // flexWrap so the four labeled radios drop to a second line on a
+              // phone instead of overflowing the card. Inert on desktop (all
+              // four fit one line in the 1180px shell), so desktop is unchanged.
+              style={{ flexDirection: 'row', flexWrap: 'wrap', gap: tokens.spacing[4] }}
             >
               <Radio value="default" label="Default" />
               <Radio value="alternate" label="Alternate" />
@@ -1293,6 +1318,7 @@ export default function AndromedaShowcase({
 
         {/* ── DateRangePicker ────────────────────────────────────────────── */}
         <Section
+          allowOverflow
           title="DateRangePicker"
           slug="date-range-picker"
           description="Trigger chip + drop-down calendar panel. Anchor-then-confirm range selection with hover preview, Monday-first 6×7 grid, ESC and click-outside to close. Selected endpoints fill in accent; the in-between band is a 1px accent outline so the eye stays on the picked dates."
@@ -1405,6 +1431,11 @@ export default function AndromedaShowcase({
               display: 'flex',
               flexDirection: 'column',
               gap: tokens.spacing[3],
+              // Cap the banner width so the alerts read as inline messages
+              // instead of stretching the full (very wide) showcase column on
+              // desktop. maxWidth caps; the alerts still fill the width on
+              // phones (where full-width is the right look).
+              maxWidth: 640,
             }}
           >
             <Alert variant="default">
@@ -1681,6 +1712,7 @@ export default function AndromedaShowcase({
 
         {/* ── UserMenu ───────────────────────────────────────────────────── */}
         <Section
+          allowOverflow
           title="UserMenu"
           slug="user-menu"
           description="Avatar-trigger popover with Profile, Preferences, Sign Out and friends. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; pairs with UserCard for sidebars that have room to spell out name and role."
@@ -1739,6 +1771,7 @@ export default function AndromedaShowcase({
 
         {/* ── UserCard ───────────────────────────────────────────────────── */}
         <Section
+          allowOverflow
           title="UserCard"
           slug="user-card"
           description="Wider user trigger that shows avatar, name, and role alongside the chevron — the canonical bottom-of-sidebar identity card. Same Profile / Preferences / Sign Out popover as UserMenu; opens upward by default and stretches to the card width."

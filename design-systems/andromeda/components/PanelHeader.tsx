@@ -42,9 +42,12 @@ export const PanelHeader = forwardRef(function PanelHeader(
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        // Desktop: title + actions on one row, actions pushed right by the spacer.
-        // Below md the row wraps (see <style>) so a long title or a wide actions
-        // slot stacks instead of overflowing the panel.
+        // Title + actions stay on ONE row at every width, actions pushed right
+        // by the spacer. The title truncates (min-width:0 + ellipsis below) so a
+        // long title shortens rather than wrapping the actions down to their own
+        // line — panel titles are short by design and a wrapped kebab reads as
+        // broken (its menu then opens off the left edge). See <style> for the
+        // phone padding step-down.
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
         ...style,
@@ -92,28 +95,17 @@ export const PanelHeader = forwardRef(function PanelHeader(
       />
       <style>{`
         ${mq.md} {
-          /* Tighten horizontal padding one step + let the row wrap so the
-             title and the actions slot stack when they can't share a row.
-             corner-marker clearance is N/A here (no markers) but the inset
-             divider still sits spacing[3] from each edge. */
+          /* Phones keep the single row (title left, actions right) — only the
+             horizontal padding steps down a notch for density. The title
+             truncates via its base ellipsis style, so the actions slot never
+             gets pushed onto its own line. Wrapping the row (the previous
+             behaviour) dropped the kebab to the left edge and opened its menu
+             off-screen, which read as broken. The inset divider still sits
+             spacing[3] from each edge. */
           .am-panel-header {
-            flex-wrap: wrap !important;
-            align-items: flex-start !important;
             padding-left: ${tokens.spacing[4]} !important;
             padding-right: ${tokens.spacing[4]} !important;
           }
-          /* When the row wraps, the spacer would claim a whole line — collapse
-             it so the actions sit directly under the title. */
-          .am-panel-header .am-panel-header-spacer { display: none !important; }
-          /* On its own line the title can use full width and wrap to 2 lines
-             instead of truncating — more legible on a phone. */
-          .am-panel-header .am-panel-header-title {
-            white-space: normal !important;
-            overflow: visible !important;
-            flex-basis: 100% !important;
-          }
-          /* Actions wrap internally if the slot itself is wide. */
-          .am-panel-header .am-panel-header-actions { flex-wrap: wrap !important; }
         }
       `}</style>
     </div>
