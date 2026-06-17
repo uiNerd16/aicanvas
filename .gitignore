@@ -74,3 +74,7 @@ scripts/sync-output/
 /registry-data/*.json
 app/lib/component-nav.generated.ts
 app/lib/component-meta.generated.ts
+
+# Private thoughts: planning, strategy, monetization, legal/tax reasoning, notes.
+# NEVER commit these — the repo is public. Local only. (See also /business-strategy/.)
+/_private/
