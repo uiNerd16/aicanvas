@@ -15,6 +15,26 @@ export type Category = {
 
 export const CATEGORIES: readonly Category[] = [
   {
+    label: 'Cards & Modals',
+    slug: 'cards-modals',
+    title: 'Animated React Cards and Modals: Free + Tailwind',
+    description:
+      'Free animated React cards and modal dialogs. Tailwind CSS and Motion. Copy-paste ready, MIT licensed, installable via the shadcn CLI.',
+    h1: 'Animated React Cards and Modals',
+    intro:
+      'Free animated card and modal dialog components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
+  },
+  {
+    label: 'Widgets',
+    slug: 'widgets',
+    title: 'Animated React Widgets: Copy and Paste UI Elements',
+    description:
+      'Free animated React widgets and UI elements. Built with Tailwind CSS and Motion. Copy-paste ready, MIT licensed, installable via the shadcn CLI.',
+    h1: 'Animated React Widgets',
+    intro:
+      'Free animated widgets and small UI elements for React. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
+  },
+  {
     label: 'Backgrounds',
     slug: 'backgrounds',
     title: 'Animated React Backgrounds: Tailwind + Motion',
@@ -43,26 +63,6 @@ export const CATEGORIES: readonly Category[] = [
     h1: 'React Navigation Components',
     intro:
       'Free navigation components for React: navbars, sidebars, tab bars, and docks. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
-  },
-  {
-    label: 'Widgets',
-    slug: 'widgets',
-    title: 'Animated React Widgets: Copy and Paste UI Elements',
-    description:
-      'Free animated React widgets and UI elements. Built with Tailwind CSS and Motion. Copy-paste ready, MIT licensed, installable via the shadcn CLI.',
-    h1: 'Animated React Widgets',
-    intro:
-      'Free animated widgets and small UI elements for React. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
-  },
-  {
-    label: 'Cards & Modals',
-    slug: 'cards-modals',
-    title: 'Animated React Cards and Modals: Free + Tailwind',
-    description:
-      'Free animated React cards and modal dialogs. Tailwind CSS and Motion. Copy-paste ready, MIT licensed, installable via the shadcn CLI.',
-    h1: 'Animated React Cards and Modals',
-    intro:
-      'Free animated card and modal dialog components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
   },
   {
     label: 'Inputs & Controls',
