@@ -51,7 +51,8 @@ export async function GET(req: NextRequest) {
       if (tier !== 'premium') {
         return NextResponse.json({ error: 'premium-only' }, { status: 402, headers: NO_STORE })
       }
-    } else if (contentType === 'standalone') {
+    } else if (contentType === 'standalone' || contentType === 'design-system-component') {
+      // Standalones AND individual design-system components are free-metered.
       // Metering: fail OPEN (an outage must not break the Code tab).
       try {
         const { tier, userId } = await getEntitlement(req)

@@ -30,4 +30,16 @@ describe('decide', () => {
     expect(decide({ contentType: 'standalone', tier: 'anonymous', dailyUsed: 2, dailyLimit: 2 }))
       .toEqual({ allow: false, reason: 'quota-exceeded', count: false })
   })
+
+  it('individual design-system components are free-metered, not premium-only', () => {
+    // Under the cap: allowed and counted, same as a standalone.
+    expect(decide({ contentType: 'design-system-component', tier: 'free', dailyUsed: 3, dailyLimit: 10 }))
+      .toEqual({ allow: true, count: true })
+    // At the cap: refused with quota-exceeded (NOT premium-only).
+    expect(decide({ contentType: 'design-system-component', tier: 'anonymous', dailyUsed: 2, dailyLimit: 2 }))
+      .toEqual({ allow: false, reason: 'quota-exceeded', count: false })
+    // Premium: unlimited, uncounted.
+    expect(decide({ contentType: 'design-system-component', tier: 'premium', dailyUsed: 0, dailyLimit: Infinity }))
+      .toEqual({ allow: true, count: false })
+  })
 })

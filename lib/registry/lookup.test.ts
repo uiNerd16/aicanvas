@@ -20,9 +20,9 @@ const manifest: GateManifest = {
 describe('buildLookup + classifyContent (manifest-driven gate)', () => {
   const lookup = buildLookup(manifest)
 
-  it('individual design-system components are design-system, not standalone', () => {
-    expect(classifyContent('andromeda-alert', lookup)).toBe('design-system')
-    expect(classifyContent('andromeda-card.json', lookup)).toBe('design-system')
+  it('individual design-system components classify as design-system-component (recognized via the manifest, free-metered, never bare standalone)', () => {
+    expect(classifyContent('andromeda-alert', lookup)).toBe('design-system-component')
+    expect(classifyContent('andromeda-card.json', lookup)).toBe('design-system-component')
   })
 
   it('every template is gated, including signal-room', () => {

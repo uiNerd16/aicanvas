@@ -10,6 +10,7 @@ import { Sidebar } from './components/Sidebar'
 import { MobileNav } from './components/MobileNav'
 import { SessionProvider } from './components/auth/SessionProvider'
 import { AuthModalProvider } from './components/auth/AuthModalProvider'
+import { PaywallModalProvider } from './components/billing/PaywallModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
 import { DevTierSwitcher } from './components/billing/DevTierSwitcher'
@@ -159,6 +160,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <SessionProvider initialUser={user}>
             <AuthModalProvider>
+             <PaywallModalProvider>
               {/* Desktop sidebar — hidden on mobile */}
               <Suspense fallback={null}>
                 <div className="hidden md:flex">
@@ -181,6 +183,7 @@ export default async function RootLayout({
               </div>
               {/* Global auth dialog — toggles between sign-in and sign-up modes */}
               <AuthModal />
+             </PaywallModalProvider>
             </AuthModalProvider>
           </SessionProvider>
         </ThemeProvider>

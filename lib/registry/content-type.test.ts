@@ -16,8 +16,10 @@ describe('classifyContent', () => {
     expect(classifyContent('andromeda-button', lookup)).toBe('standalone')
   })
 
-  it('classifies a real design-system component', () => {
-    expect(classifyContent('andromeda-card', lookup)).toBe('design-system')
+  it('classifies an individual design-system component as metered (not premium)', () => {
+    // Individual components are free-metered like standalones; only templates
+    // and whole-system aggregates stay premium.
+    expect(classifyContent('andromeda-card', lookup)).toBe('design-system-component')
   })
 
   it('classifies a template', () => {

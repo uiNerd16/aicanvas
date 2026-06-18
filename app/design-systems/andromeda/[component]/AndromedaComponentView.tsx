@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -21,6 +21,7 @@ import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
+import { Paywall, type PaywallReason } from '../../../components/billing/Paywall'
 
 type RelatedItem = { slug: string; name: string; image?: string }
 
@@ -28,11 +29,6 @@ interface Props {
   slug: string
   name: string
   description: string
-  // Withheld (undefined) when the registry gate is enforcing — design-system
-  // source is premium and must not ship in the page HTML. The view then shows
-  // a locked note pointing at the CLI install / pricing.
-  highlightedCode?: ReactNode
-  rawCode?: string
   related: RelatedItem[]
 }
 
@@ -40,8 +36,6 @@ export function AndromedaComponentView({
   slug,
   name,
   description,
-  highlightedCode,
-  rawCode,
   related,
 }: Props) {
   const { preferences } = useSession()
@@ -53,6 +47,46 @@ export function AndromedaComponentView({
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
   const [darkCopied, setDarkCopied] = useState(false)
   const mainCardRef = useRef<HTMLDivElement>(null)
+
+  // Source is never shipped in this page's HTML. It's fetched on demand from
+  // the gated endpoint when the Code tab (or Manual install) opens, so the
+  // server meters/gates per user: premium → code; free/anon → free up to the
+  // daily cap, then 402; templates + whole-system stay premium-only. The
+  // registry slug carries the system prefix (e.g. `andromeda-checkbox`).
+  type CodeState =
+    | { status: 'idle' | 'loading' }
+    | { status: 'ready'; code: string }
+    | { status: 'locked'; reason: PaywallReason; limit?: number }
+  const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
+  const openCode = useCallback(async () => {
+    setCodeState({ status: 'loading' })
+    try {
+      const res = await fetch(`/api/component-code?slug=andromeda-${slug}`)
+      if (res.status === 402) {
+        const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
+        setCodeState({
+          status: 'locked',
+          reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only',
+          limit,
+        })
+        return
+      }
+      if (!res.ok) {
+        setCodeState({ status: 'locked', reason: 'premium-only' })
+        return
+      }
+      const { code } = await res.json()
+      setCodeState({ status: 'ready', code: code ?? '' })
+    } catch {
+      setCodeState({ status: 'locked', reason: 'premium-only' })
+    }
+  }, [slug])
+  // Fetch the first time the source becomes visible (Code tab or Manual tab).
+  useEffect(() => {
+    if ((tab === 'code' || installTab === 'manual') && codeState.status === 'idle') void openCode()
+  }, [tab, installTab, codeState.status, openCode])
+  // Re-fetch when navigating to another component.
+  useEffect(() => { setCodeState({ status: 'idle' }) }, [slug])
 
   // Adopt the user's preferred package manager once preferences load.
   // We don't override an in-progress click — only the initial default.
@@ -90,25 +124,34 @@ export function AndromedaComponentView({
   }, [fullscreen])
 
   async function copyCode() {
-    if (rawCode == null) return // source withheld (premium, enforcing)
+    if (codeState.status !== 'ready') return
     try {
-      await navigator.clipboard.writeText(rawCode)
+      await navigator.clipboard.writeText(codeState.code)
       setCodeCopied(true)
       setTimeout(() => setCodeCopied(false), 2000)
     } catch {}
   }
 
-  // Shown in place of the source when it is withheld (premium, enforcing).
-  const lockedCodeNote = (
-    <div className="p-8 text-center text-sm" style={{ color: tokens.color.text.secondary }}>
-      This is a premium design-system component. Install it with the CLI
-      command above, or see{' '}
-      <a href="/pricing" style={{ color: tokens.color.accent[300] }}>
-        aicanvas.me/pricing
-      </a>
-      .
-    </div>
-  )
+  // Rendered wherever source appears (Code tab + Manual install). Locked → the
+  // ladder-aware paywall (sign-up / upgrade cards); ready → the source.
+  const renderCodePane = () =>
+    codeState.status === 'locked' ? (
+      <Paywall reason={codeState.reason} limit={codeState.limit} />
+    ) : codeState.status === 'ready' ? (
+      <pre
+        className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed"
+        style={{ color: tokens.color.text.secondary }}
+      >
+        {codeState.code}
+      </pre>
+    ) : (
+      <div
+        className="flex min-h-[200px] items-center justify-center text-sm"
+        style={{ color: tokens.color.text.faint }}
+      >
+        Loading source…
+      </div>
+    )
 
   // Andromeda doesn't have a published shadcn registry yet — this command
   // mirrors the standalone pattern so the layout reads correctly. Wire to
@@ -191,14 +234,14 @@ export function AndromedaComponentView({
             </div>
           ) : (
             <div
-              className="overflow-auto p-5"
+              className="min-h-[420px] overflow-auto p-5"
               style={{
                 backgroundColor: tokens.color.surface.base,
                 maxHeight: '70vh',
                 scrollbarWidth: 'thin',
               }}
             >
-              {highlightedCode ?? lockedCodeNote}
+              {renderCodePane()}
             </div>
           )}
         </div>
@@ -384,7 +427,7 @@ export function AndromedaComponentView({
                       </button>
                     </div>
                     <div className="max-h-96 overflow-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
-                      {highlightedCode ?? lockedCodeNote}
+                      {renderCodePane()}
                     </div>
                   </div>
                 </Step>

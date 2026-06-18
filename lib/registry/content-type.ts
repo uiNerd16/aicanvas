@@ -1,4 +1,9 @@
-export type ContentType = 'standalone' | 'design-system' | 'template' | 'meta'
+export type ContentType =
+  | 'standalone'
+  | 'design-system-component'
+  | 'design-system'
+  | 'template'
+  | 'meta'
 
 export interface ContentLookup {
   /** Slugs of individual design-system components (carry a `designSystem` flag). */
@@ -31,13 +36,20 @@ export function classifyContent(slugOrFile: string, lookup: ContentLookup): Cont
 
   if (META_SLUGS.has(slug)) return 'meta'
   if (lookup.templateSlugs.has(slug)) return 'template'
-  if (lookup.designSystemSlugs.has(slug)) return 'design-system'
 
+  // Whole-system aggregates stay premium-only (the "install the entire
+  // system" items). Matched EXACTLY (see note above) so a standalone sharing
+  // the name prefix — e.g. `andromeda-button` — is not caught here.
   for (const system of lookup.systemSlugs) {
     if (slug === system || slug === `${system}-all` || slug === `${system}-tokens`) {
       return 'design-system'
     }
   }
+
+  // Individual design-system components are FREE-METERED like standalones
+  // (anon 2 / free 10 / premium unlimited). Only templates and the whole-
+  // system aggregates above are premium-only.
+  if (lookup.designSystemSlugs.has(slug)) return 'design-system-component'
 
   return 'standalone'
 }

@@ -1,79 +1,58 @@
 'use client'
 
-import Link from 'next/link'
-import { LockSimple, Sparkle } from '@phosphor-icons/react'
-import { buttonClasses } from '../buttonClasses'
-import { useSession } from '../auth/SessionProvider'
-import { useEntitlement } from './useEntitlement'
+import { LockSimple } from '@phosphor-icons/react'
+import { usePaywallModal, type PaywallReason } from './PaywallModalProvider'
 
-export type PaywallReason = 'premium-only' | 'quota-exceeded'
+export type { PaywallReason }
+
+// Decorative, blurred faux-source — the REAL source is withheld server-side
+// (the gate 402s before any bytes ship), so there is nothing real to blur.
+const FAUX_SOURCE = `import { motion } from 'framer-motion'
+import { useState, useCallback } from 'react'
+
+export function Component({ value, onChange }: Props) {
+  const [active, setActive] = useState(false)
+  const handle = useCallback(() => setActive((a) => !a), [])
+
+  return (
+    <motion.button onClick={handle} animate={{ scale: active ? 1.02 : 1 }}>
+      {value}
+    </motion.button>
+  )
+}`
 
 /**
- * Ladder-aware locked panel rendered in place of gated content (Code tab).
- * Anonymous users are sold the FREE account first (sign up, 10/day); only
- * signed-in free users get the direct premium pitch. Presentation only in
- * Plan 0: CTAs navigate to real routes, the overlay checkout arrives in
- * Plan 4. Designed for the dark code surface (bg-sand-950).
+ * Inline locked state rendered in the Code tab when source is withheld. Shows
+ * a blurred teaser; clicking "See plans" opens the global full-screen upgrade
+ * modal (the actual pricing cards). The modal lives in PaywallModalProvider so
+ * it overlays the whole viewport.
  */
-export function Paywall({ reason, limit: realLimit }: { reason: PaywallReason; limit?: number }) {
-  const { user } = useSession()
-  const { tier, limit: stubLimit } = useEntitlement()
-  // When the real gate provides a limit (enforcing path), trust it; otherwise
-  // fall back to the stub (Plan 0 dev preview).
-  const limit = realLimit ?? stubLimit
-  // The session is the real rung when available; the stub covers review mode.
-  const isAnonymous = !user && tier === 'anonymous'
+export function Paywall({ reason, limit }: { reason: PaywallReason; limit?: number }) {
+  const { open } = usePaywallModal()
 
   const title = reason === 'premium-only' ? 'Premium component' : 'Daily limit reached'
 
-  const body =
-    reason === 'premium-only'
-      ? 'This is part of a design system. Premium unlocks every design system, template, and unlimited installs.'
-      : isAnonymous
-        ? `You've used your ${limit} free installs for today. A free account gets you 10 a day, and Premium lifts the limit entirely.`
-        : `You've used your ${limit} installs for today. Premium lifts the daily limit entirely.`
-
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-sand-800 bg-sand-900">
-        <LockSimple weight="regular" size={20} className="text-olive-400" />
+    <div className="relative min-h-[360px] w-full overflow-hidden">
+      <pre
+        aria-hidden
+        className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-sand-600 opacity-30 blur-[3px]"
+      >
+        {FAUX_SOURCE}
+      </pre>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-sand-950/70 px-4 text-center">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-sand-800 bg-sand-900">
+          <LockSimple weight="regular" size={20} className="text-olive-400" />
+        </div>
+        <h3 className="text-base font-bold text-sand-50">{title}</h3>
+        <button
+          type="button"
+          onClick={() => open({ reason, limit })}
+          className="rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+        >
+          See plans
+        </button>
       </div>
-
-      <div>
-        <h3 className="text-lg font-bold text-sand-50">{title}</h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-sand-400">{body}</p>
-      </div>
-
-      <div className="flex flex-col items-center gap-2 sm:flex-row">
-        {isAnonymous ? (
-          <>
-            <Link
-              href="/account/sign-up"
-              className={buttonClasses({ variant: 'primary', size: 'sm' })}
-            >
-              Sign up free, 10/day
-            </Link>
-            <Link
-              href="/pricing"
-              className={buttonClasses({ variant: 'outline', size: 'sm' })}
-            >
-              or go Premium
-            </Link>
-          </>
-        ) : (
-          <Link
-            href="/pricing"
-            className={buttonClasses({ variant: 'primary', size: 'sm' })}
-          >
-            Go Premium
-          </Link>
-        )}
-      </div>
-
-      <p className="inline-flex items-center gap-1.5 text-xs text-sand-500">
-        <Sparkle weight="regular" size={12} className="text-olive-400" />
-        Remix with AI stays free for everyone.
-      </p>
     </div>
   )
 }

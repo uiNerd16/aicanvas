@@ -1,0 +1,219 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { CheckCircle, Crown } from '@phosphor-icons/react'
+import { buttonClasses } from '../Button'
+import { NerdSvg, SuperheroSvg } from '../auth/NerdToHero'
+import { useSession } from '../auth/SessionProvider'
+import { UpgradeButton } from './UpgradeButton'
+
+// Single source of truth for the Free / Premium cards. Rendered full-size on
+// /pricing and `compact` inside the Code-tab paywall. The Premium card lists
+// ONLY the three real unlocks; every free perk stays on the Free card so the
+// copy never sells free things as premium.
+
+const FREE_FEATURES = [
+  'Browse every component, preview and prompts',
+  '10 component installs a day with a free account',
+  'Remix with AI, always free',
+  'MCP server for Claude Code, Codex, and Cursor',
+  'Lab access with presets and export',
+  'Save your favorite components',
+]
+
+const PREMIUM_FEATURES = [
+  'Unlimited component installs, no daily limit',
+  'Full design systems, one command installs the whole thing',
+  'Premium templates, full access',
+  'Every new design system and template, included',
+  'Cancel anytime',
+]
+
+export function PremiumCards({
+  show = 'both',
+  compact = false,
+  className,
+}: {
+  /** `both` = Free + Premium (anonymous); `premium-only` = just the Hero card. */
+  show?: 'both' | 'premium-only'
+  /** Tighter footprint for the Code-tab overlay. */
+  compact?: boolean
+  className?: string
+}) {
+  const { user } = useSession()
+  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('yearly')
+  const price = cycle === 'yearly' ? '$49.99' : '$8.99'
+  const suffix = cycle === 'yearly' ? 'year' : 'month'
+
+  // Reflect the real subscription so a premium user isn't pitched "Go Premium".
+  // Tri-state: while 'unknown' (loading or backend error) render a neutral
+  // disabled CTA instead of flashing the wrong one. Signed-out derives to
+  // 'not-premium' at render time.
+  const [fetchedState, setFetchedState] = useState<'unknown' | 'premium' | 'not-premium'>('unknown')
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    fetch('/api/me/entitlement')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => { if (!cancelled) setFetchedState(d?.tier === 'premium' ? 'premium' : 'not-premium') })
+      .catch(() => { if (!cancelled) setFetchedState('unknown') })
+    return () => { cancelled = true }
+  }, [user])
+  const premiumState: 'unknown' | 'premium' | 'not-premium' = user ? fetchedState : 'not-premium'
+
+  const showFree = show === 'both'
+  const iconBox = compact ? 'h-12 w-12' : 'h-16 w-16'
+  const heading = compact ? 'text-2xl' : 'text-3xl'
+  const priceText = compact ? 'text-4xl' : 'text-4xl sm:text-5xl'
+  const cardPad = compact ? 'px-5 pt-5 pb-5' : 'px-5 pt-6 pb-6 sm:px-6 sm:pt-7'
+  const listPad = compact ? 'px-5 py-4' : 'px-5 py-6 sm:px-6'
+
+  return (
+    <div
+      className={`grid gap-6 ${showFree ? 'md:grid-cols-2' : 'mx-auto max-w-md'} ${
+        compact ? '' : 'mt-12 sm:mt-16'
+      } ${className ?? ''}`}
+    >
+      {/* ── Free card ── */}
+      {showFree && (
+        <div className="relative flex flex-col rounded-3xl border border-sand-300 bg-sand-100 p-2 dark:border-sand-800 dark:bg-sand-900">
+          <div className={cardPad}>
+            <div className="flex items-center gap-4">
+              <div className={`flex ${iconBox} shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]`}>
+                <NerdSvg />
+              </div>
+              <h2 className={`${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
+                Nerd
+              </h2>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+              The whole canvas, free forever.
+            </p>
+            {/* Invisible mirror of the Premium card's billing-cycle toggle so the
+                price and CTA align across both cards. */}
+            <div
+              aria-hidden
+              className="invisible mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
+            >
+              <span className="rounded-md px-3 py-1 text-xs font-semibold">Monthly</span>
+            </div>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
+                $0
+              </span>
+              <span className="text-sm font-medium text-sand-500">/ forever</span>
+            </div>
+            <Link
+              href={user ? '/components' : '/account/sign-up'}
+              className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+            >
+              {user ? 'Browse Components' : 'Sign up free'}
+            </Link>
+          </div>
+          <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+              ALWAYS INCLUDED
+            </p>
+            <ul className="mt-4 space-y-3">
+              {FREE_FEATURES.map((feature) => (
+                <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
+                  <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-400 dark:text-sand-300" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* ── Premium card ── */}
+      <div className="relative flex flex-col rounded-3xl border border-olive-500/50 bg-sand-100 p-2 dark:border-olive-500/40 dark:bg-sand-900">
+        <div className={cardPad}>
+          <div className="flex items-center gap-4">
+            <div className={`flex ${iconBox} shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]`}>
+              <SuperheroSvg />
+            </div>
+            <h2 className={`flex items-center gap-2 ${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
+              Hero
+              <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
+            </h2>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            No daily limit. The whole premium library.
+          </p>
+
+          {/* Billing cycle toggle — yearly default + highlighted */}
+          <div className="mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
+            <button
+              type="button"
+              onClick={() => setCycle('monthly')}
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                cycle === 'monthly'
+                  ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              onClick={() => setCycle('yearly')}
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                cycle === 'yearly'
+                  ? 'bg-olive-500 text-sand-950'
+                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+              }`}
+            >
+              Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 54%</span>
+            </button>
+          </div>
+
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
+              {price}
+            </span>
+            <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
+          </div>
+
+          {user && premiumState === 'unknown' ? (
+            <button
+              type="button"
+              disabled
+              className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+            >
+              Checking your plan…
+            </button>
+          ) : premiumState === 'premium' ? (
+            <Link
+              href="/account/settings"
+              className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
+            >
+              You&rsquo;re on Premium · Manage
+            </Link>
+          ) : (
+            <UpgradeButton
+              cycle={cycle}
+              className={`mt-6 ${buttonClasses({ variant: 'primary', size: 'lg', fullWidth: true })}`}
+            >
+              Go Premium
+            </UpgradeButton>
+          )}
+        </div>
+        <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+            EVERYTHING IN FREE, PLUS
+          </p>
+          <ul className="mt-4 space-y-3">
+            {PREMIUM_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
+                <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
