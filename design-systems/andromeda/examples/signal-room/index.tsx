@@ -42,7 +42,7 @@ import { LevelsPanel } from './LevelsPanel';
 import { Transport } from './Transport';
 import { nowPlaying } from './data';
 import { motion } from 'framer-motion';
-import { Drawer, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody } from '../../components/Drawer';
+import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 
 // Normalize a source item (mix card / transmission row) to the shape the
 // bottom player consumes: title, subtitle, code, cover (image url or null →
@@ -136,11 +136,14 @@ export default function SignalRoom() {
           gap: tokens.spacing[4],
         }}
       >
+        <MobileTopBar
+          templateName="Signal Room"
+          onMenuOpen={() => setNavOpen(true)}
+          menuOpen={navOpen}
+        />
         <Header
           sectionTitle="Library"
           motionProps={headerMotion}
-          onMenuOpen={() => setNavOpen(true)}
-          menuOpen={navOpen}
         />
 
         <main
@@ -187,29 +190,35 @@ export default function SignalRoom() {
         />
       </div>
 
-      {/* Mobile nav — the same console nav content, served in a left-side
-          Drawer below `mq.md`. The desktop Sidebar is hidden at that width
-          (see <style> below); the hamburger lives in the Header. */}
-      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
-        <DrawerHeader>
-          <DrawerTitle>Andromeda</DrawerTitle>
-          <DrawerDescription>Signal Room</DrawerDescription>
-        </DrawerHeader>
-        <DrawerBody style={{ padding: 0 }}>
-          <SidebarNav
-            activeNav={activeNav}
-            onNavChange={handleNavChange}
-            layoutGroupId="signal-room-drawer-nav"
-          />
-        </DrawerBody>
-      </Drawer>
+      {/* Mobile nav — shared chrome below md: logo header + the console nav
+          (same SidebarNav the desktop aside uses) + the bottom user block,
+          mirroring the desktop sidebar at 70vw. */}
+      <MobileDrawer
+        open={navOpen}
+        onOpenChange={setNavOpen}
+        templateName="Signal Room"
+        user={{
+          name: 'Kerem Alkan',
+          role: 'Engineer · Premium',
+          src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
+          status: 'online',
+        }}
+      >
+        <SidebarNav
+          activeNav={activeNav}
+          onNavChange={handleNavChange}
+          layoutGroupId="signal-room-drawer-nav"
+        />
+      </MobileDrawer>
 
       <style>{`
         ${mq.md} {
           /* Stack the shell AND release its desktop 100vh pin: below md the
              page grows to its stacked height and the route column scrolls it as
-             one (no nested inner scroller, no blank strip). The Transport flows
-             at the bottom of the scroll on mobile rather than staying pinned. */
+             one (no nested inner scroller, no blank strip). The Transport stays
+             pinned near the bottom via position:sticky (see Transport.tsx); the
+             route column drops its bottom padding for this route (see
+             AndromedaContentColumn) so the sticky reaches its 20px pin. */
           .sr-shell {
             flex-direction: column !important;
             height: auto !important;

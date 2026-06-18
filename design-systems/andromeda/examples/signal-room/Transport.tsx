@@ -279,7 +279,14 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
         ${mq.md} {
           /* Tighten the bar; the two side regions release their fixed 260px
              so the flexing centre keeps the transport controls usable. */
+          /* Pin the player to the bottom of the viewport on mobile (music-app
+             style) so it stays visible while the page scrolls. The preview
+             TemplateChrome is lifted above it (raisedOnMobile) so they don't
+             overlap. */
           .sr-transport {
+            position: sticky !important;
+            bottom: ${tokens.spacing[5]} !important;
+            z-index: 20 !important;
             padding: 0 ${tokens.spacing[4]} !important;
             gap: ${tokens.spacing[3]} !important;
           }

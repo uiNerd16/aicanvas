@@ -1,0 +1,164 @@
+// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
+// ============================================================
+// SHARED TEMPLATE MOBILE CHROME
+//
+// One mobile navigation aesthetic for ALL Andromeda templates, so the
+// four stop drifting apart:
+//
+//   MobileTopBar — exactly two elements: the brand lockup (Andromeda
+//     icon + "Andromeda" over the template name) on the LEFT, and a
+//     hamburger on the RIGHT. Nothing else.
+//
+//   MobileDrawer — mirrors the desktop sidebar: a logo header (same
+//     icon + "Andromeda" + template name), the template's nav rows
+//     (passed as children), and a bottom user block (UserCard). Opens
+//     from the left at 70% of the viewport width.
+//
+// Both render below `mq.md` ONLY. Each template keeps its full desktop
+// chrome (sidebar / header / top bar) and renders these as siblings
+// hidden at md+ — render-both-and-CSS-hide, the brain's flash-free
+// pattern (rules.md → Responsive). The drawer is portaled, so it is
+// never clipped by a template's overflow.
+// ============================================================
+
+'use client';
+
+import { List, UserCircle, Gear, Keyboard, SignOut } from '@phosphor-icons/react';
+import { tokens } from '../../tokens';
+import { mq } from '../../components/lib/responsive';
+import { IconButton } from '../../components/IconButton';
+import { Drawer, DrawerBody } from '../../components/Drawer';
+import { UserCard } from '../../components/UserCard';
+import { AndromedaIcon } from '../../AndromedaIcon';
+
+// Generic account menu — same set the desktop sidebars use. Templates can
+// override via `user.items`, but they all share this by default.
+const DEFAULT_USER_MENU_ITEMS = [
+  { id: 'profile', label: 'Profile', icon: UserCircle },
+  { id: 'preferences', label: 'Preferences', icon: Gear },
+  { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
+  { id: 'sep1', type: 'separator' },
+  { id: 'signout', label: 'Sign Out', icon: SignOut },
+];
+
+// Brand lockup — icon + "Andromeda" over the template name, mono uppercase.
+// Mirrors the desktop sidebar's logo block (examples/*/Sidebar.tsx) so the
+// top bar and drawer header read identically to the web sidebar.
+function Brand({ templateName, iconSize }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], minWidth: 0 }}>
+      <AndromedaIcon size={iconSize} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
+        <span style={{
+          fontFamily: tokens.typography.fontMono,
+          fontSize: tokens.typography.size.xs,
+          color: tokens.color.text.primary,
+          textTransform: 'uppercase',
+          letterSpacing: tokens.typography.tracking.widest,
+          fontWeight: tokens.typography.weight.semibold,
+        }}>
+          Andromeda
+        </span>
+        <span style={{
+          fontFamily: tokens.typography.fontMono,
+          fontSize: tokens.typography.size.xs,
+          color: tokens.color.text.muted,
+          textTransform: 'uppercase',
+          letterSpacing: tokens.typography.tracking.widest,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}>
+          {templateName}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Mobile top bar: brand left, hamburger right. `display:none` on desktop,
+// shown (`flex`) below `mq.md` via the scoped <style> below.
+export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }) {
+  return (
+    <div
+      className="amc-topbar"
+      style={{
+        position: 'relative',
+        height: tokens.layout.headerHeight,
+        flexShrink: 0,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: tokens.spacing[3],
+        padding: `0 ${tokens.spacing[4]}`,
+        background: tokens.color.surface.raised,
+        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        display: 'none',
+      }}
+    >
+      <Brand templateName={templateName} iconSize={22} />
+      <IconButton
+        variant="ghost"
+        size="lg"
+        icon={List}
+        aria-label="Open navigation"
+        aria-expanded={menuOpen}
+        data-state={menuOpen ? 'open' : 'closed'}
+        onClick={onMenuOpen}
+        style={{
+          flexShrink: 0,
+          ...(menuOpen
+            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
+            : null),
+        }}
+      />
+      <style>{`
+        ${mq.md} { .amc-topbar { display: flex !important; } }
+      `}</style>
+    </div>
+  );
+}
+
+// Mobile drawer: mirrors the desktop sidebar — logo header, the template's
+// nav (children), and a bottom user block. Left side, 70vw.
+export function MobileDrawer({ open, onOpenChange, templateName, user, children }) {
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} side="left" size="70vw">
+      {/* Logo header — mirrors the sidebar logo block. */}
+      <div style={{
+        position: 'relative',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacing[3],
+        padding: `${tokens.spacing[4]} ${tokens.spacing[3]}`,
+        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+      }}>
+        <Brand templateName={templateName} iconSize={28} />
+      </div>
+
+      {/* Nav — the template's own rows, edge to edge like the sidebar. */}
+      <DrawerBody style={{ padding: 0 }}>
+        {children}
+      </DrawerBody>
+
+      {/* User block — mirrors the sidebar's bottom UserCard. */}
+      {user ? (
+        <div style={{
+          position: 'relative',
+          flexShrink: 0,
+          borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        }}>
+          <UserCard
+            name={user.name}
+            role={user.role}
+            src={user.src}
+            status={user.status ?? 'online'}
+            items={user.items ?? DEFAULT_USER_MENU_ITEMS}
+            placement="top"
+            align="stretch"
+          />
+        </div>
+      ) : null}
+    </Drawer>
+  );
+}

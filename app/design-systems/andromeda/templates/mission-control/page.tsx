@@ -13,7 +13,7 @@ import { TemplateChrome } from '../../../../_components/TemplateChrome'
 export default function MissionControlTemplate() {
   return (
     <div
-      className="relative h-full w-full overflow-hidden"
+      className="relative w-full min-h-full md:h-full md:overflow-hidden"
       style={{ backgroundColor: tokens.color.surface.base }}
     >
       <MissionControl />
