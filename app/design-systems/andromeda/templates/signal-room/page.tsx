@@ -13,7 +13,7 @@ import { TemplateChrome } from '../../../../_components/TemplateChrome'
 export default function SignalRoomTemplate() {
   return (
     <div
-      className="relative h-full w-full overflow-hidden"
+      className="relative w-full min-h-full md:h-full md:overflow-hidden"
       style={{ backgroundColor: tokens.color.surface.base }}
     >
       <SignalRoom />
@@ -22,6 +22,7 @@ export default function SignalRoomTemplate() {
         templateName="Signal Room"
         systemName="Andromeda"
         fallbackHref="/design-systems/andromeda/showcase"
+        raisedOnMobile
       />
     </div>
   )

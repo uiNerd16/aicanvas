@@ -32,7 +32,7 @@ import { useCascadeProps } from '../../components/lib/motion';
 import { Sidebar, SidebarNav } from './Sidebar';
 import { Header } from './Header';
 import { OverviewSection } from './sections/OverviewSection';
-import { Drawer, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody } from '../../components/Drawer';
+import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 
 export default function MissionControl() {
   const [activeNav] = useState('overview');
@@ -88,11 +88,14 @@ export default function MissionControl() {
           gap: tokens.spacing[4],
         }}
       >
+        <MobileTopBar
+          templateName="Mission Control"
+          onMenuOpen={() => setNavOpen(true)}
+          menuOpen={navOpen}
+        />
         <Header
           sectionTitle="Overview"
           motionProps={headerMotion}
-          onMenuOpen={() => setNavOpen(true)}
-          menuOpen={navOpen}
         />
 
         <main className="mc-main" style={{
@@ -108,22 +111,26 @@ export default function MissionControl() {
         </main>
       </div>
 
-      {/* Mobile nav — the same console nav content, served in a left-side
-          Drawer below `mq.md`. The desktop Sidebar is hidden at that width
-          (see <style> below); the hamburger lives in the Header. */}
-      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
-        <DrawerHeader>
-          <DrawerTitle>Andromeda</DrawerTitle>
-          <DrawerDescription>Mission Control</DrawerDescription>
-        </DrawerHeader>
-        <DrawerBody style={{ padding: 0 }}>
-          <SidebarNav
-            activeNav={activeNav}
-            onNavChange={handleNavChange}
-            layoutGroupId="mission-control-drawer-nav"
-          />
-        </DrawerBody>
-      </Drawer>
+      {/* Mobile nav — shared chrome below md: logo header + the console nav
+          (same SidebarNav the desktop aside uses) + the bottom user block,
+          mirroring the desktop sidebar at 70vw. */}
+      <MobileDrawer
+        open={navOpen}
+        onOpenChange={setNavOpen}
+        templateName="Mission Control"
+        user={{
+          name: 'Reza Quinn',
+          role: 'Flight Director',
+          src: 'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+          status: 'online',
+        }}
+      >
+        <SidebarNav
+          activeNav={activeNav}
+          onNavChange={handleNavChange}
+          layoutGroupId="mission-control-drawer-nav"
+        />
+      </MobileDrawer>
 
       <style>{`
         ${mq.md} {

@@ -11,15 +11,17 @@
 // minWidth:0. The 2×2 bento grid collapses to ONE column below
 // `mq.md`, rows flowing top-to-bottom in source order (Capacity →
 // Requests → Allocation → Table). This template carries its nav
-// HORIZONTALLY in the TopBar rather than in a left sidebar, so the
-// sidebar→drawer rule is met by hiding the inline nav below `mq.md`
-// and serving the SAME nav rows through a left-side Drawer opened
-// from a hamburger IconButton in the TopBar. The nav rows are
-// factored into <TopNav> so the inline strip and the Drawer never
-// drift. The StatusBar's date-picker / manage-layout row wraps, and
-// the CapacityPanel / RequestsPanel cell rows stack at the same
-// threshold. Drawer open/close is local client state, starts closed —
-// SSR-safe, no hydration flash.
+// HORIZONTALLY in the desktop TopBar rather than in a left sidebar.
+// Below `mq.md` the whole desktop TopBar is hidden and the shared
+// mobile chrome (examples/_shared/TemplateMobileChrome) takes over:
+// MobileTopBar (brand + hamburger) at the very top, and MobileDrawer
+// serving the SAME nav rows from a left-side drawer — one mobile nav
+// aesthetic across all Andromeda templates. The nav rows are factored
+// into <DrawerNav> so the inline strip and the drawer never drift. The
+// StatusBar's date-picker / manage-layout row wraps, and the
+// CapacityPanel / RequestsPanel cell rows stack at the same threshold.
+// Drawer open/close is local client state, starts closed — SSR-safe,
+// no hydration flash.
 // ============================================================
 
 'use client';
@@ -29,7 +31,6 @@ import {
   Download,
   Gear,
   Keyboard,
-  List,
   SignOut,
   Sliders,
   UserCircle,
@@ -39,17 +40,10 @@ import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Button } from '../../components/Button';
-import { IconButton } from '../../components/IconButton';
 import { NavItem } from '../../components/NavItem';
 import { DateRangePicker } from '../../components/DateRangePicker';
 import { UserMenu } from '../../components/UserMenu';
-import {
-  Drawer,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerBody,
-} from '../../components/Drawer';
+import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { CapacityPanel } from './CapacityPanel';
@@ -84,9 +78,9 @@ const userMenuItems = [
 ];
 
 // ─── Inline horizontal nav (desktop TopBar) ──────────────────────────────
-// Factored out so the desktop strip and the mobile Drawer render the SAME
-// rows from one source. Hidden below `mq.md` via the `rp-topnav` class; its
-// content reappears as Drawer NavItems at that width.
+// Lives inside the desktop TopBar, which is hidden as a whole below `mq.md`.
+// Its rows reappear at that width as Drawer NavItems via <DrawerNav>, sharing
+// the single `navItems` source so the two can never drift.
 function TopNav() {
   return (
     <nav className="rp-topnav" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[5] }}>
@@ -154,8 +148,11 @@ function DrawerNav({ onNavigate }) {
   );
 }
 
-// ─── Top bar ────────────────────────────────────────────────────────────
-function TopBar({ onMenuOpen, menuOpen = false }) {
+// ─── Top bar (desktop) ────────────────────────────────────────────────────
+// Hidden below `mq.md`; the shared MobileTopBar (brand + hamburger) replaces
+// it there. The drawer is opened from MobileTopBar, so this bar no longer
+// needs the menu-open wiring.
+function TopBar() {
   return (
     <header
       className="rp-topbar"
@@ -171,28 +168,6 @@ function TopBar({ onMenuOpen, menuOpen = false }) {
       }}
     >
       <CornerMarkers />
-
-      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the inline nav
-          is visible there); shown below `mq.md` where the inline nav is
-          hidden. Carries the stateful data-state look while the drawer is
-          open (see rules.md → Interaction states → stateful triggers). */}
-      <IconButton
-        className="rp-hamburger"
-        variant="ghost"
-        size="md"
-        icon={List}
-        aria-label="Open navigation"
-        aria-expanded={menuOpen}
-        data-state={menuOpen ? 'open' : 'closed'}
-        onClick={onMenuOpen}
-        style={{
-          display: 'none',
-          flexShrink: 0,
-          ...(menuOpen
-            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
-            : null),
-        }}
-      />
 
       {/* Brand — Andromeda over the template name */}
       <div className="rp-brand" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0, minWidth: 0 }}>
@@ -380,8 +355,12 @@ export default function ResourcePlanning() {
       }}
     >
       <HoverStyles />
+      {/* Mobile top bar — brand + hamburger, shown only below `mq.md`. Sits at
+          the very top on mobile; the desktop `.rp-topbar` is hidden at that
+          width via the <style> block below. */}
+      <MobileTopBar templateName="Resource Planning" onMenuOpen={() => setNavOpen(true)} menuOpen={navOpen} />
       <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
-        <TopBar onMenuOpen={() => setNavOpen(true)} menuOpen={navOpen} />
+        <TopBar />
       </motion.div>
       <motion.div {...statusBarMotion} style={{ flexShrink: 0 }}>
         <StatusBar />
@@ -421,19 +400,23 @@ export default function ResourcePlanning() {
         </motion.div>
       </main>
 
-      {/* Mobile nav — the same TopBar nav rows, served in a left-side Drawer
-          below `mq.md`. The inline TopNav strip is hidden at that width (see
-          <style> below); the hamburger lives in the TopBar. Selecting a row
-          closes the drawer. */}
-      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
-        <DrawerHeader>
-          <DrawerTitle>Andromeda</DrawerTitle>
-          <DrawerDescription>Resource Planning</DrawerDescription>
-        </DrawerHeader>
-        <DrawerBody style={{ padding: 0 }}>
-          <DrawerNav onNavigate={() => setNavOpen(false)} />
-        </DrawerBody>
-      </Drawer>
+      {/* Mobile nav — the same desktop nav rows, served through the shared
+          MobileDrawer below `mq.md`. The whole desktop TopBar is hidden at that
+          width (see <style> below); the hamburger lives in MobileTopBar.
+          Selecting a row closes the drawer. */}
+      <MobileDrawer
+        open={navOpen}
+        onOpenChange={setNavOpen}
+        templateName="Resource Planning"
+        user={{
+          name: 'OPS-01',
+          role: 'Capacity Planner',
+          src: 'https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+          items: userMenuItems,
+        }}
+      >
+        <DrawerNav onNavigate={() => setNavOpen(false)} />
+      </MobileDrawer>
 
       <style>{`
         ${mq.md} {
@@ -479,16 +462,10 @@ export default function ResourcePlanning() {
              shortest viewports. */
           .rp-grid-item-chart { height: 46dvh !important; min-height: 220px !important; }
           .rp-grid-item-table { min-height: 220px !important; }
-          /* TopBar: tighten inline padding/gap; hide the inline nav + its
-             divider — that content now lives in the Drawer — and reveal the
-             hamburger (its inline display:none is overridden here). */
-          .rp-topbar {
-            padding: 0 ${tokens.spacing[4]} !important;
-            gap: ${tokens.spacing[3]} !important;
-          }
-          .rp-topnav { display: none !important; }
-          .rp-nav-divider { display: none !important; }
-          .rp-hamburger { display: inline-flex !important; }
+          /* The whole desktop TopBar is hidden below md — the shared
+             MobileTopBar (brand + hamburger) takes its place at the very top of
+             the shell, matching the other Andromeda templates. */
+          .rp-topbar { display: none !important; }
           /* StatusBar: let the date-picker / last-update / manage-layout row
              wrap instead of overflowing the narrow viewport. */
           .rp-statusbar {
@@ -496,17 +473,6 @@ export default function ResourcePlanning() {
             padding: ${tokens.spacing[3]} ${tokens.spacing[4]} !important;
             row-gap: ${tokens.spacing[2]} !important;
           }
-        }
-        ${mq.sm} {
-          /* Smallest phones: drop the "Generate Report" label, keep the icon,
-             so the TopBar right cluster never pushes the row wider than the
-             viewport. The icon is a fixed-size SVG, so font-size:0 collapses
-             only the text label. */
-          .rp-report-btn { font-size: 0 !important; gap: 0 !important; }
-          /* Drop the brand subtitle — it already names the template in the
-             Drawer header — so the brand block can never force page scroll on
-             a 320px phone. The Andromeda wordmark stays. */
-          .rp-brand-sub { display: none !important; }
         }
       `}</style>
     </div>

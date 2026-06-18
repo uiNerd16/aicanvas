@@ -131,7 +131,12 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
       <table
           style={{
             width: '100%',
-            minWidth: `calc(${tokens.spacing[12]} * 12)`,
+            // 6 fixed columns sum to ~560px; the auto Track column needs real
+            // room or its title/artist collide with the Duration column on a
+            // narrow viewport. Size the min-width for fixed + a legible Track,
+            // and the panel's overflow-x:auto wrapper scrolls the rest (the
+            // sanctioned "wide tables scroll inside their panel" behaviour).
+            minWidth: `calc(${tokens.spacing[12]} * 16)`,
             borderCollapse: 'collapse',
             tableLayout: 'fixed',
           }}

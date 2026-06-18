@@ -5,26 +5,21 @@
 // right. Mirrors the mission-control header so the system reads
 // as one family.
 //
-// Responsive (desktop-first — see rules.md → Responsive): the
-// header gains a hamburger IconButton, hidden on desktop and shown
-// (`inline-flex`) below `mq.md`, that opens the nav Drawer. Below
-// `mq.md` the inline padding/gap tighten so the row never overflows
-// the viewport; below `mq.sm` the centered search collapses (the
-// row is too narrow for it) and the "Transmitting" word drops,
-// leaving the glowing dot to carry the live signal.
+// Responsive (desktop-first — see rules.md → Responsive): this is the
+// desktop header only. Below `mq.md` it is hidden entirely and the
+// shared MobileTopBar (brand + hamburger) replaces it — see
+// examples/_shared/TemplateMobileChrome.
 // ============================================================
 
 'use client';
 
 import { motion } from 'framer-motion';
-import { List } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
-import { IconButton } from '../../components/IconButton';
 import { SearchField } from '../../components/SearchField';
 
-export function Header({ sectionTitle = 'Library', motionProps, onMenuOpen, menuOpen = false }) {
+export function Header({ sectionTitle = 'Library', motionProps }) {
   return (
     <motion.header
       {...(motionProps ?? {})}
@@ -43,27 +38,6 @@ export function Header({ sectionTitle = 'Library', motionProps, onMenuOpen, menu
       }}
     >
       <CornerMarkers />
-
-      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the sidebar is
-          visible there); shown below `mq.md` where the sidebar is hidden.
-          Carries the stateful data-state look while the drawer is open. */}
-      <IconButton
-        className="sr-hamburger"
-        variant="ghost"
-        size="md"
-        icon={List}
-        aria-label="Open navigation"
-        aria-expanded={menuOpen}
-        data-state={menuOpen ? 'open' : 'closed'}
-        onClick={onMenuOpen}
-        style={{
-          display: 'none',
-          flexShrink: 0,
-          ...(menuOpen
-            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
-            : null),
-        }}
-      />
 
       {/* Section title */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], flexShrink: 0 }}>
@@ -131,23 +105,10 @@ export function Header({ sectionTitle = 'Library', motionProps, onMenuOpen, menu
       </div>
 
       <style>{`
-        ${mq.md} {
-          /* Tighter inline padding + gap so the hamburger, title, search and
-             status all fit the narrow row without forcing page scroll. */
-          .sr-header {
-            padding: 0 ${tokens.spacing[4]} !important;
-            gap: ${tokens.spacing[3]} !important;
-          }
-          /* Hamburger appears; inline display:none is overridden here. */
-          .sr-hamburger { display: inline-flex !important; }
-        }
-        ${mq.sm} {
-          /* On phones the row is too narrow for a centered search; drop it
-             (it lives in the command palette anyway) and drop the status word
-             so the title + glowing dot keep their room. */
-          .sr-search { display: none !important; }
-          .sr-status-label { display: none !important; }
-        }
+        /* Desktop only. The section title, search and status read as the
+           desktop header; below md the shared MobileTopBar (brand + hamburger)
+           replaces it — see examples/_shared/TemplateMobileChrome. */
+        ${mq.md} { .sr-header { display: none !important; } }
       `}</style>
     </motion.header>
   );

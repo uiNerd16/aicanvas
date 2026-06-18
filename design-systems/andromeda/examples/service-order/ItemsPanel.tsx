@@ -219,7 +219,7 @@ function FilterRow({ chips, onRemoveChip }) {
         }}
       >
         {chips.map((label) => (
-          <Tag key={label} variant="default" onClose={() => onRemoveChip(label)}>
+          <Tag key={label} variant="default" onClose={() => onRemoveChip(label)} style={{ flexShrink: 0 }}>
             {label}
           </Tag>
         ))}

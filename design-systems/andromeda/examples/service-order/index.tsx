@@ -25,21 +25,21 @@ import {
   EyeSlash,
   Gear,
   Keyboard,
-  List,
   SignOut,
   UserCircle,
   Warning,
   XCircle,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Badge } from '../../components/Badge';
 import { IconButton } from '../../components/IconButton';
+import { NavItem } from '../../components/NavItem';
 import { Tooltip } from '../../components/Tooltip';
 import { UserMenu } from '../../components/UserMenu';
-import { Drawer, DrawerHeader, DrawerTitle, DrawerDescription, DrawerBody } from '../../components/Drawer';
+import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { OrderMetadataPanel } from './OrderMetadataPanel';
@@ -60,6 +60,21 @@ function HoverStyles() {
 // ── Shared nav links ──────────────────────────────────────────────
 // Rendered both inline in the TopBar (desktop, horizontal) and inside
 // the mobile Drawer (vertical). `orientation` switches the flow.
+// Drawer nav (mobile) — the same nav items as the desktop strip, rendered as
+// Andromeda NavItems inside the left Drawer so the drawer reads like the other
+// templates' drawers. LayoutGroup scopes NavItem's active-dot layoutId.
+function SoDrawerNav({ onNavigate }) {
+  return (
+    <LayoutGroup id="so-drawer-nav">
+      <nav style={{ display: 'flex', flexDirection: 'column' }}>
+        {navItems.map((label, i) => (
+          <NavItem key={label} label={label} active={i === 0} onClick={onNavigate} />
+        ))}
+      </nav>
+    </LayoutGroup>
+  );
+}
+
 function NavLinks({ orientation = 'horizontal', onNavigate }) {
   const vertical = orientation === 'vertical';
   return (
@@ -138,7 +153,7 @@ const userMenuItems = [
 ];
 
 // ── Top bar ───────────────────────────────────────────────────────
-function TopBar({ onMenuOpen, menuOpen = false }) {
+function TopBar() {
   return (
     <header
       className="so-topbar"
@@ -154,27 +169,6 @@ function TopBar({ onMenuOpen, menuOpen = false }) {
       }}
     >
       <CornerMarkers />
-
-      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the inline nav
-          is visible there); shown below `mq.md` where the inline nav is
-          hidden. Carries the stateful data-state look while the drawer is open. */}
-      <IconButton
-        className="so-hamburger"
-        variant="ghost"
-        size="md"
-        icon={List}
-        aria-label="Open navigation"
-        aria-expanded={menuOpen}
-        data-state={menuOpen ? 'open' : 'closed'}
-        onClick={onMenuOpen}
-        style={{
-          display: 'none',
-          flexShrink: 0,
-          ...(menuOpen
-            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
-            : null),
-        }}
-      />
 
       {/* Brand — Andromeda over the template name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0 }}>
@@ -242,20 +236,10 @@ function TopBar({ onMenuOpen, menuOpen = false }) {
 
       <style>{`
         ${mq.md} {
-          /* Tighten the inline padding + gap so brand, hamburger and the
-             right cluster fit the narrow row without forcing page scroll. */
-          .so-topbar { padding: 0 ${tokens.spacing[4]} !important; gap: ${tokens.spacing[3]} !important; }
-          /* Hamburger appears; inline display:none is overridden here. */
-          .so-hamburger { display: inline-flex !important; }
-          /* Inline horizontal nav + its leading divider move into the Drawer. */
-          .so-inline-nav { display: none !important; }
-          .so-nav-divider { display: none !important; }
-        }
-        ${mq.sm} {
-          /* On the smallest phones drop the connection code — the Live
-             Connection badge already signals the live link, and this keeps
-             the avatar in view without crowding. */
-          .so-connection { display: none !important; }
+          /* Below md the desktop TopBar is replaced entirely by the shared
+             MobileTopBar (brand + hamburger); hide it so the mobile chrome
+             matches the other Andromeda templates. */
+          .so-topbar { display: none !important; }
         }
       `}</style>
     </header>
@@ -379,8 +363,11 @@ export default function ServiceOrder() {
       }}
     >
       <HoverStyles />
+      {/* Mobile top bar — brand + hamburger, shown below `mq.md` only. Sits at
+          the very top on mobile; the desktop TopBar below is hidden at that width. */}
+      <MobileTopBar templateName="Service Order" onMenuOpen={() => setNavOpen(true)} menuOpen={navOpen} />
       <motion.div {...topBarMotion} style={{ flexShrink: 0 }}>
-        <TopBar onMenuOpen={() => setNavOpen(true)} menuOpen={navOpen} />
+        <TopBar />
       </motion.div>
       <motion.div {...pageHeaderMotion} style={{ flexShrink: 0 }}>
         <PageHeaderStrip />
@@ -422,18 +409,22 @@ export default function ServiceOrder() {
         </motion.div>
       </main>
 
-      {/* Mobile nav — the same TopBar nav content, served in a left-side
-          Drawer below `mq.md`. The inline horizontal nav is hidden at that
-          width (see TopBar's <style>); the hamburger lives in the TopBar. */}
-      <Drawer open={navOpen} onOpenChange={setNavOpen} side="left" size={tokens.layout.sidebarWidth}>
-        <DrawerHeader>
-          <DrawerTitle>Andromeda</DrawerTitle>
-          <DrawerDescription>Service Order</DrawerDescription>
-        </DrawerHeader>
-        <DrawerBody style={{ padding: 0 }}>
-          <NavLinks orientation="vertical" onNavigate={() => setNavOpen(false)} />
-        </DrawerBody>
-      </Drawer>
+      {/* Mobile nav — the same TopBar nav content, served in the shared
+          left-side MobileDrawer below `mq.md`. The hamburger lives in the
+          MobileTopBar; the desktop TopBar is hidden at that width. */}
+      <MobileDrawer
+        open={navOpen}
+        onOpenChange={setNavOpen}
+        templateName="Service Order"
+        user={{
+          name: 'OPS-01',
+          role: 'Service Desk',
+          src: 'https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+          items: userMenuItems,
+        }}
+      >
+        <SoDrawerNav onNavigate={() => setNavOpen(false)} />
+      </MobileDrawer>
 
       <style>{`
         ${mq.md} {

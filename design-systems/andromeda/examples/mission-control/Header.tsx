@@ -3,20 +3,17 @@
 // MISSION CONTROL: Header
 // Title left, mission clock center, status + bell right.
 //
-// Responsive (desktop-first — see rules.md → Responsive): the
-// header gains a hamburger IconButton, hidden on desktop and shown
-// (`inline-flex`) below `mq.md`, that opens the nav Drawer. Below
-// `mq.md` the inline padding tightens and the centered mission clock
-// is allowed to shrink so the row never overflows the viewport.
+// Responsive (desktop-first — see rules.md → Responsive): this is the
+// desktop header only. Below `mq.md` it is hidden entirely and the
+// shared MobileTopBar (brand + hamburger) replaces it — see
+// examples/_shared/TemplateMobileChrome.
 // ============================================================
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { List } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
-import { IconButton } from '../../components/IconButton';
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -67,7 +64,7 @@ function MissionClock() {
   );
 }
 
-export function Header({ sectionTitle = 'Overview', motionProps, onMenuOpen, menuOpen = false }) {
+export function Header({ sectionTitle = 'Overview', motionProps }) {
   return (
     <motion.header
       {...(motionProps ?? {})}
@@ -86,27 +83,6 @@ export function Header({ sectionTitle = 'Overview', motionProps, onMenuOpen, men
       }}
     >
       <CornerMarkers />
-
-      {/* Hamburger — opens the nav Drawer. Hidden on desktop (the sidebar is
-          visible there); shown below `mq.md` where the sidebar is hidden.
-          Carries the stateful data-state look while the drawer is open. */}
-      <IconButton
-        className="mc-hamburger"
-        variant="ghost"
-        size="lg"
-        icon={List}
-        aria-label="Open navigation"
-        aria-expanded={menuOpen}
-        data-state={menuOpen ? 'open' : 'closed'}
-        onClick={onMenuOpen}
-        style={{
-          display: 'none',
-          flexShrink: 0,
-          ...(menuOpen
-            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
-            : null),
-        }}
-      />
 
       {/* Title block — section-aware */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], flexShrink: 0 }}>
@@ -166,21 +142,10 @@ export function Header({ sectionTitle = 'Overview', motionProps, onMenuOpen, men
       </div>
 
       <style>{`
-        ${mq.md} {
-          /* Tighter inline padding + gap so the hamburger, title, clock and
-             status all fit the narrow row without forcing page scroll. */
-          .mc-header {
-            padding: 0 ${tokens.spacing[4]} !important;
-            gap: ${tokens.spacing[3]} !important;
-          }
-          /* Hamburger appears; inline display:none is overridden here. */
-          .mc-hamburger { display: inline-flex !important; }
-        }
-        ${mq.sm} {
-          /* On the smallest phones drop the status word — the glowing dot
-             still signals nominal status, and the clock keeps its room. */
-          .mc-status-label { display: none !important; }
-        }
+        /* Desktop only. The section title, mission clock and status read as
+           the desktop header; below md the shared MobileTopBar (brand +
+           hamburger) replaces it — see examples/_shared/TemplateMobileChrome. */
+        ${mq.md} { .mc-header { display: none !important; } }
       `}</style>
     </motion.header>
   );

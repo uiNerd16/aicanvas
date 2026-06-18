@@ -14,6 +14,7 @@ interface TemplateChromeProps {
   fallbackHref: string              // where to send users if window.close fails
   hideBack?: boolean                // showcase bundle pill omits Back; templates keep it
   description?: string[]            // overrides the popover bullet copy
+  raisedOnMobile?: boolean          // lift the bar + popover above a template's own bottom bar on mobile (e.g. signal-room's player)
 }
 
 // Floating widget shared by design-system template pages and the showcase
@@ -28,6 +29,7 @@ export function TemplateChrome({
   fallbackHref,
   hideBack = false,
   description,
+  raisedOnMobile = false,
 }: TemplateChromeProps) {
   const { user } = useSession()
   const { open: openAuthModal } = useAuthModal()
@@ -79,7 +81,7 @@ export function TemplateChrome({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4"
+      className={`pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4 ${raisedOnMobile ? 'bottom-28 md:bottom-6' : 'bottom-6'}`}
       role="toolbar"
       aria-label={`${templateName} actions`}
     >
@@ -120,7 +122,7 @@ export function TemplateChrome({
             </Button>
 
             {installOpen && (
-              <div className="fixed bottom-[88px] left-1/2 z-50 w-[min(480px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-xl border border-sand-800 bg-sand-900 shadow-2xl">
+              <div className={`fixed left-1/2 z-50 w-[min(480px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-xl border border-sand-800 bg-sand-900 shadow-2xl ${raisedOnMobile ? 'bottom-[200px] md:bottom-[88px]' : 'bottom-[88px]'}`}>
                 <div className="space-y-3 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
