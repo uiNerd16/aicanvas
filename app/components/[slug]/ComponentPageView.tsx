@@ -43,6 +43,7 @@ import { premiumEnabled } from '../../../lib/flags'
 import { useEntitlement } from '../billing/useEntitlement'
 import { PremiumBadge } from '../billing/PremiumBadge'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
+import { usePaywallModal } from '../billing/PaywallModalProvider'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -363,14 +364,33 @@ export default function ComponentPageView({
     } catch {}
   }
 
-  async function copyCli() {
+  const { open: openPaywall } = usePaywallModal()
+
+  // Rolling-window quota guard: at the cap for a NEW component, pop the limit
+  // modal instead of copying a command that would 402 in the terminal. Fails
+  // open (copies on any hiccup).
+  async function guardInstall(write: () => void | Promise<void>) {
     try {
-      track('CLI Copy', { component: slug })
-      trackInstall(installSlug, designSystem ?? null, pkgManager)
-      await navigator.clipboard.writeText(cliCommand)
-      setCliCopied(true)
-      setTimeout(() => setCliCopied(false), 4000)
+      const res = await fetch(`/api/me/install-check?slug=${installSlug}`)
+      const d = await res.json().catch(() => null)
+      if (d?.blocked) {
+        openPaywall({ reason: d.reason ?? 'quota-exceeded', limit: d.limit, resetAt: d.resetAt })
+        return
+      }
     } catch {}
+    await write()
+  }
+
+  async function copyCli() {
+    await guardInstall(async () => {
+      try {
+        track('CLI Copy', { component: slug })
+        trackInstall(installSlug, designSystem ?? null, pkgManager)
+        await navigator.clipboard.writeText(cliCommand)
+        setCliCopied(true)
+        setTimeout(() => setCliCopied(false), 4000)
+      } catch {}
+    })
   }
 
   async function handlePlatformClick(platform: Platform) {
@@ -807,7 +827,7 @@ export default function ComponentPageView({
                                 </button>
                               ))}
                               <button
-                                onClick={() => {
+                                onClick={() => guardInstall(() => {
                                   const cmd = pkgManager === 'npm'
                                     ? `npx shadcn@latest add ${installReference}`
                                     : pkgManager === 'pnpm'
@@ -819,7 +839,7 @@ export default function ComponentPageView({
                                   trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
-                                }}
+                                })}
                                 className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
                                 {depsCopied

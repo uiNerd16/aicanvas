@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           const subject = subjectFor(userId, ipFromHeaders(req.headers), day)
           // Idempotent slug-aware consume: re-opening the Code tab of a
           // component already pulled today is free, even at the limit.
-          if (!(await consume(subject, day, slug, limit))) {
+          if (!(await consume(subject, slug, limit))) {
             return NextResponse.json({ error: 'quota-exceeded', limit }, { status: 402, headers: NO_STORE })
           }
         }

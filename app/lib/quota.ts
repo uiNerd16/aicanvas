@@ -25,34 +25,46 @@ export function subjectFor(userId: string | null, ip: string | null, day: string
   return `ip:${hash}`
 }
 
-/** How many UNIQUE components this subject has pulled today (row count). */
-export async function currentCount(subject: string, day: string): Promise<number> {
-  const admin = createAdminClient()
-  const { count } = await admin
-    .from('usage_daily')
-    .select('*', { count: 'exact', head: true })
-    .eq('subject', subject)
-    .eq('day', day)
-  return count ?? 0
-}
-
 /**
- * Idempotent slug-aware consume. True when allowed: already-pulled slug
- * (free re-access, no new unit) or under the limit (one new unit).
+ * Idempotent slug-aware consume over a ROLLING 24h window. True when allowed:
+ * a slug pulled in the last 24h (free re-access, no new unit) or the subject is
+ * under the limit within the window (one new unit). The DB function does the
+ * window math + a per-subject advisory lock so the limit is a hard ceiling.
  */
 export async function consume(
-  subject: string, day: string, slug: string, limit: number,
+  subject: string, slug: string, limit: number,
 ): Promise<boolean> {
   if (limit === Infinity) return true
   const admin = createAdminClient()
   const { data, error } = await admin.rpc('consume_quota', {
     p_subject: subject,
-    p_day: day,
     p_slug: slug,
     p_limit: limit,
   })
   if (error) throw error
   return data === true
+}
+
+/**
+ * Read-only usage snapshot for the website's proactive limit check (no consume).
+ * `oldestAt + 24h` is when the next slot frees — the reset time shown to the
+ * user. `slugCounted` means this slug is already in the window, so re-copying
+ * its install command is free even at the cap.
+ */
+export async function usageStatus(
+  subject: string, slug: string,
+): Promise<{ used: number; slugCounted: boolean; oldestAt: string | null }> {
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('usage_status', { p_subject: subject, p_slug: slug })
+  if (error) throw error
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { used: number; slug_counted: boolean; oldest_at: string | null }
+    | undefined
+  return {
+    used: row?.used ?? 0,
+    slugCounted: row?.slug_counted ?? false,
+    oldestAt: row?.oldest_at ?? null,
+  }
 }
 
 /**

@@ -21,7 +21,18 @@ import { PremiumCards } from './PremiumCards'
 
 export type PaywallReason = 'premium-only' | 'quota-exceeded'
 
-type PaywallState = { reason: PaywallReason; limit?: number }
+type PaywallState = { reason: PaywallReason; limit?: number; resetAt?: string | null }
+
+/** "1h 23m" / "8m" / "now" until the rolling-window slot frees, or null. */
+function formatCountdown(resetAt: string | null | undefined, nowMs: number): string | null {
+  if (!resetAt) return null
+  const ms = new Date(resetAt).getTime() - nowMs
+  if (!Number.isFinite(ms)) return null
+  if (ms <= 0) return 'now'
+  const h = Math.floor(ms / 3_600_000)
+  const m = Math.floor((ms % 3_600_000) / 60_000)
+  return h > 0 ? `${h}h ${m}m` : `${Math.max(1, m)}m`
+}
 
 type PaywallModalContextValue = {
   open: (state: PaywallState) => void
@@ -44,7 +55,14 @@ export function PaywallModalProvider({ children }: { children: ReactNode }) {
   return (
     <PaywallModalContext.Provider value={{ open, close }}>
       {children}
-      {state && <PaywallModalView reason={state.reason} limit={state.limit} onClose={close} />}
+      {state && (
+        <PaywallModalView
+          reason={state.reason}
+          limit={state.limit}
+          resetAt={state.resetAt}
+          onClose={close}
+        />
+      )}
     </PaywallModalContext.Provider>
   )
 }
@@ -52,10 +70,20 @@ export function PaywallModalProvider({ children }: { children: ReactNode }) {
 function PaywallModalView({
   reason,
   limit,
+  resetAt,
   onClose,
 }: PaywallState & { onClose: () => void }) {
   const { user } = useSession()
   const isAnonymous = !user
+
+  // Live-ish countdown to the next freed slot on the rolling 24h window.
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  useEffect(() => {
+    if (reason !== 'quota-exceeded' || !resetAt) return
+    const id = setInterval(() => setNowMs(Date.now()), 30_000)
+    return () => clearInterval(id)
+  }, [reason, resetAt])
+  const countdown = formatCountdown(resetAt, nowMs)
 
   // premium-only: a free account doesn't unlock it → just the Premium card.
   // quota-exceeded + anonymous: both cards (sign up free OR go Premium).
@@ -63,12 +91,13 @@ function PaywallModalView({
   const show = reason === 'quota-exceeded' && isAnonymous ? 'both' : 'premium-only'
 
   const title = reason === 'premium-only' ? 'Premium component' : 'Daily limit reached'
+  const resetLine = countdown ? `Resets in ${countdown}.` : 'Resets within 24 hours.'
   const subtitle =
     reason === 'premium-only'
       ? 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
       : isAnonymous
-        ? `You've used your ${limit ?? 2} free installs for today. A free account gets you 10 a day, and Premium lifts the limit entirely.`
-        : `You've used your ${limit ?? 10} installs for today. Premium lifts the daily limit entirely.`
+        ? `You've used your ${limit ?? 2} free installs. ${resetLine} A free account gets you 10 every 24 hours, and Premium lifts the limit entirely.`
+        : `You've reached your ${limit ?? 10} installs for now. ${resetLine} Premium lifts the limit entirely.`
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
   // (this is a soft "you hit a limit" notice, not a flow you must complete).

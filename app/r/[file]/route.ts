@@ -82,7 +82,7 @@ export async function GET(
           const subject = subjectFor(userId, ipFromHeaders(req.headers), day)
           // BINDING check = idempotent slug-aware consume: an already-pulled
           // slug stays free even at the limit; only a NEW slug is refused.
-          const ok = await consume(subject, day, slug, limit)
+          const ok = await consume(subject, slug, limit)
           if (!ok) {
             return paymentJson(
               { error: 'quota-exceeded', message: `Daily limit reached (${limit}/day). Upgrade for unlimited at https://aicanvas.me/pricing` },

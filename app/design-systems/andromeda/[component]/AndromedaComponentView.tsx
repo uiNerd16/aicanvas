@@ -22,6 +22,7 @@ import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
 import { Paywall, type PaywallReason } from '../../../components/billing/Paywall'
+import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
 
 type RelatedItem = { slug: string; name: string; image?: string }
 
@@ -38,7 +39,27 @@ export function AndromedaComponentView({
   description,
   related,
 }: Props) {
-  const { preferences } = useSession()
+  const { preferences, user } = useSession()
+
+  // Personalized install: when signed in, the copied command carries the
+  // user's API token so the registry attributes the pull to the account (and
+  // meters it against their daily quota). Signed out = plain @aicanvas command.
+  // The token route is resilient (returns null on any error), so this is a
+  // no-op fallback to the anonymous command rather than a break.
+  const [userToken, setUserToken] = useState<string | null>(null)
+  useEffect(() => {
+    if (!user) { setUserToken(null); return }
+    let cancelled = false
+    const refresh = () =>
+      fetch('/api/me/token')
+        .then((r) => r.json())
+        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+        .catch(() => {})
+    refresh()
+    // Re-fetch on focus so a token rotated in another tab isn't left stale here.
+    window.addEventListener('focus', refresh)
+    return () => { cancelled = true; window.removeEventListener('focus', refresh) }
+  }, [user])
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [codeCopied, setCodeCopied] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)
@@ -156,15 +177,44 @@ export function AndromedaComponentView({
   // Andromeda doesn't have a published shadcn registry yet — this command
   // mirrors the standalone pattern so the layout reads correctly. Wire to
   // a real registry once the system gets one.
-  const cliCommand = `npx shadcn@latest add @aicanvas/andromeda-${slug}`
+  // Signed-in users get a tokenized direct-URL install so the registry can
+  // attribute the pull to their account; anonymous users get the plain
+  // @aicanvas namespace command. The displayed form masks the token; copy
+  // buttons write the REAL token to the clipboard so the install works.
+  const installReference = userToken
+    ? `"https://aicanvas.me/r/andromeda-${slug}.json?token=${userToken}"`
+    : `@aicanvas/andromeda-${slug}`
+  const installReferenceMasked = userToken
+    ? `"https://aicanvas.me/r/andromeda-${slug}.json?token=aic_••••••••"`
+    : `@aicanvas/andromeda-${slug}`
+  const cliCommand = `npx shadcn@latest add ${installReference}`
+
+  const { open: openPaywall } = usePaywallModal()
+
+  // Before handing over an install command, check the rolling-window quota. If
+  // at the cap for a NEW component, pop the limit modal instead of copying a
+  // command that would 402 in the terminal. Fails open (copies on any hiccup).
+  async function guardInstall(write: () => void | Promise<void>) {
+    try {
+      const res = await fetch(`/api/me/install-check?slug=andromeda-${slug}`)
+      const d = await res.json().catch(() => null)
+      if (d?.blocked) {
+        openPaywall({ reason: d.reason ?? 'quota-exceeded', limit: d.limit, resetAt: d.resetAt })
+        return
+      }
+    } catch {}
+    await write()
+  }
 
   async function copyCli() {
-    try {
-      trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
-      await navigator.clipboard.writeText(cliCommand)
-      setCliCopied(true)
-      setTimeout(() => setCliCopied(false), 2000)
-    } catch {}
+    await guardInstall(async () => {
+      try {
+        trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
+        await navigator.clipboard.writeText(cliCommand)
+        setCliCopied(true)
+        setTimeout(() => setCliCopied(false), 2000)
+      } catch {}
+    })
   }
 
   return (
@@ -334,19 +384,19 @@ export function AndromedaComponentView({
                       ))}
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={() => guardInstall(() => {
                           const cmd = pkgManager === 'pnpm'
-                            ? `pnpm dlx shadcn@latest add @aicanvas/andromeda-${slug}`
+                            ? `pnpm dlx shadcn@latest add ${installReference}`
                             : pkgManager === 'bun'
-                            ? `bunx shadcn@latest add @aicanvas/andromeda-${slug}`
+                            ? `bunx shadcn@latest add ${installReference}`
                             : pkgManager === 'yarn'
-                            ? `yarn dlx shadcn@latest add @aicanvas/andromeda-${slug}`
-                            : `npx shadcn@latest add @aicanvas/andromeda-${slug}`
+                            ? `yarn dlx shadcn@latest add ${installReference}`
+                            : `npx shadcn@latest add ${installReference}`
                           navigator.clipboard.writeText(cmd)
                           trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
-                        }}
+                        })}
                         className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                       >
                         {cliCopied
@@ -357,12 +407,12 @@ export function AndromedaComponentView({
                     <div className="px-4 py-3.5">
                       <code className="break-all font-mono text-sm text-sand-300">
                         {pkgManager === 'pnpm'
-                          ? `pnpm dlx shadcn@latest add @aicanvas/andromeda-${slug}`
+                          ? `pnpm dlx shadcn@latest add ${installReferenceMasked}`
                           : pkgManager === 'bun'
-                          ? `bunx shadcn@latest add @aicanvas/andromeda-${slug}`
+                          ? `bunx shadcn@latest add ${installReferenceMasked}`
                           : pkgManager === 'yarn'
-                          ? `yarn dlx shadcn@latest add @aicanvas/andromeda-${slug}`
-                          : `npx shadcn@latest add @aicanvas/andromeda-${slug}`}
+                          ? `yarn dlx shadcn@latest add ${installReferenceMasked}`
+                          : `npx shadcn@latest add ${installReferenceMasked}`}
                       </code>
                     </div>
                   </div>
