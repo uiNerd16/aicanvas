@@ -6,7 +6,7 @@ import { AuthIntroAnimation } from './AuthIntroAnimation'
 // Sign-up intro pair. Thin wrapper around AuthIntroAnimation supplying the
 // two-tone nerd → superhero illustrations and the "Welcome, friend." → "YOU
 // just got superpowers." headline beat. The illustrations use the exact
-// Figma colors silhouette sand-950 (#1A1A19) and highlight sand-200 (#D4D4CC),
+// a pure-black silhouette (#000000) and a sand-200 highlight (#D4D4CC),
 // driven by CSS vars --ic-stroke / --ic-tint set on the engine's illustration
 // container so the SVGs stay easy to retint later if needed.
 

@@ -20,7 +20,7 @@ export type Decision =
  *   need them to browse, and metering them would break discovery after 2 pulls.
  * - `premium` tier: everything allowed, never metered.
  * - design systems + templates: premium-only for non-premium tiers.
- * - standalone (non-premium): drawn from the shared daily pool.
+ * - standalone + design-system-component (non-premium): drawn from the shared daily pool.
  *
  * NOTE: for standalone the quota check here is advisory (it feeds the
  * observability header). The BINDING check in Plan 3 is an idempotent,
@@ -38,7 +38,7 @@ export function decide(input: DecisionInput): Decision {
     return { allow: false, reason: 'premium-only', count: false }
   }
 
-  // standalone, non-premium
+  // standalone + design-system-component, non-premium
   if (dailyUsed >= dailyLimit) {
     return { allow: false, reason: 'quota-exceeded', count: false }
   }

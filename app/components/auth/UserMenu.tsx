@@ -3,13 +3,17 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CaretDown, ClockClockwise, Flask, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Crown, Flask, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { createClient } from '../../lib/supabase/client'
 import { EmailAvatar } from './EmailAvatar'
+import { usePaywallModal } from '../billing/PaywallModalProvider'
+import { usePremiumStatus } from '../billing/usePremiumStatus'
 
 export function UserMenu() {
   const { user } = useSession()
+  const { open: openPaywall } = usePaywallModal()
+  const status = usePremiumStatus()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -47,6 +51,16 @@ export function UserMenu() {
       </button>
       {open && (
         <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-sand-300 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
+          {status === 'not-premium' && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
+              className="flex w-full items-center gap-2 border-b border-sand-300 px-3 py-2 text-sm font-semibold text-olive-500 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:hover:bg-sand-800"
+            >
+              <Crown size={14} weight="regular" />
+              Upgrade to Premium
+            </button>
+          )}
           <Link
             href="/account/saved"
             onClick={() => setOpen(false)}

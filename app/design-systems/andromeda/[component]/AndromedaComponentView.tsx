@@ -46,20 +46,22 @@ export function AndromedaComponentView({
   // meters it against their daily quota). Signed out = plain @aicanvas command.
   // The token route is resilient (returns null on any error), so this is a
   // no-op fallback to the anonymous command rather than a break.
-  const [userToken, setUserToken] = useState<string | null>(null)
+  const [fetchedToken, setFetchedToken] = useState<string | null>(null)
   useEffect(() => {
-    if (!user) { setUserToken(null); return }
+    if (!user) return
     let cancelled = false
     const refresh = () =>
       fetch('/api/me/token')
         .then((r) => r.json())
-        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+        .then((d) => { if (!cancelled) setFetchedToken(d?.token ?? null) })
         .catch(() => {})
     refresh()
     // Re-fetch on focus so a token rotated in another tab isn't left stale here.
     window.addEventListener('focus', refresh)
     return () => { cancelled = true; window.removeEventListener('focus', refresh) }
   }, [user])
+  // Signed-out derives to null at render — no setState in the effect body.
+  const userToken = user ? fetchedToken : null
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [codeCopied, setCodeCopied] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)

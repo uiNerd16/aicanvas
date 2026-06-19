@@ -44,17 +44,19 @@ export function TemplateChrome({
   // to the account. Templates + full-system are premium, so a plain anonymous
   // command would 402 even for a premium user. The token is masked on screen;
   // the copy button writes the real one.
-  const [userToken, setUserToken] = useState<string | null>(null)
+  const [fetchedToken, setFetchedToken] = useState<string | null>(null)
   useEffect(() => {
-    if (!user) { setUserToken(null); return }
+    if (!user) return
     let cancelled = false
     const refresh = () =>
       fetch('/api/me/token').then((r) => r.json())
-        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) }).catch(() => {})
+        .then((d) => { if (!cancelled) setFetchedToken(d?.token ?? null) }).catch(() => {})
     refresh()
     window.addEventListener('focus', refresh)
     return () => { cancelled = true; window.removeEventListener('focus', refresh) }
   }, [user])
+  // Signed-out derives to null at render — no setState in the effect body.
+  const userToken = user ? fetchedToken : null
   const installReference = userToken
     ? `"https://aicanvas.me/r/${templateSlug}.json?token=${userToken}"`
     : `@aicanvas/${templateSlug}`

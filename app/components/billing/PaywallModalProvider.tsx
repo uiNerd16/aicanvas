@@ -19,7 +19,7 @@ import { PremiumCards } from './PremiumCards'
 // Any locked surface calls usePaywallModal().open({ reason }); calling it from
 // several locked panes at once is harmless — there is only ever one modal.
 
-export type PaywallReason = 'premium-only' | 'quota-exceeded'
+export type PaywallReason = 'premium-only' | 'quota-exceeded' | 'upgrade'
 
 type PaywallState = { reason: PaywallReason; limit?: number; resetAt?: string | null }
 
@@ -90,14 +90,19 @@ function PaywallModalView({
   // quota-exceeded + signed-in free: just the Premium card (already on 10/day).
   const show = reason === 'quota-exceeded' && isAnonymous ? 'both' : 'premium-only'
 
-  const title = reason === 'premium-only' ? 'Premium component' : 'Daily limit reached'
+  const title =
+    reason === 'upgrade' ? 'Upgrade to Premium'
+      : reason === 'premium-only' ? 'Premium component'
+        : 'Daily limit reached'
   const resetLine = countdown ? `Resets in ${countdown}.` : 'Resets within 24 hours.'
   const subtitle =
-    reason === 'premium-only'
-      ? 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
-      : isAnonymous
-        ? `You've used your ${limit ?? 2} free installs. ${resetLine} A free account gets you 10 every 24 hours, and Premium lifts the limit entirely.`
-        : `You've reached your ${limit ?? 10} installs for now. ${resetLine} Premium lifts the limit entirely.`
+    reason === 'upgrade'
+      ? 'Unlimited installs, every design system and template, all in one place.'
+      : reason === 'premium-only'
+        ? 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
+        : isAnonymous
+          ? `You've used your ${limit ?? 2} free installs. ${resetLine} A free account gets you 10 every 24 hours, and Premium lifts the limit entirely.`
+          : `You've reached your ${limit ?? 10} installs for now. ${resetLine} Premium lifts the limit entirely.`
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
   // (this is a soft "you hit a limit" notice, not a flow you must complete).

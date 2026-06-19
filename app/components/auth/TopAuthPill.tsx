@@ -3,12 +3,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { CaretDown, ClockClockwise, Flask, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Crown, Flask, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
 import { Button } from '../Button'
 import { EmailAvatar } from './EmailAvatar'
+import { usePaywallModal } from '../billing/PaywallModalProvider'
+import { usePremiumStatus } from '../billing/usePremiumStatus'
 
 /**
  * Compact auth control for chrome that doesn't include the global sidebar
@@ -18,6 +20,8 @@ export function TopAuthPill() {
   const { user } = useSession()
   const router = useRouter()
   const { open: openAuthModal } = useAuthModal()
+  const { open: openPaywall } = usePaywallModal()
+  const status = usePremiumStatus()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -63,6 +67,16 @@ export function TopAuthPill() {
           <div className="border-b border-sand-300 px-3 py-2 text-xs text-sand-500 dark:border-sand-800 dark:text-sand-400">
             <span className="block truncate">{email}</span>
           </div>
+          {status === 'not-premium' && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
+              className="flex w-full items-center gap-2 border-b border-sand-300 px-3 py-2 text-sm font-semibold text-olive-500 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:hover:bg-sand-800"
+            >
+              <Crown size={14} weight="regular" />
+              Upgrade to Premium
+            </button>
+          )}
           {/* Mirrors the account tabs (Saved · Made in Lab · Activity ·
               Settings · Profile) so the dropdown is a quick teleport into
               any account view. */}
