@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Check, Copy, SignIn, Terminal } from '@phosphor-icons/react'
 import { useSession } from '../components/auth/SessionProvider'
 import { useAuthModal } from '../components/auth/AuthModalProvider'
+import { usePaywallModal } from '../components/billing/PaywallModalProvider'
 import { Button } from '../components/Button'
 
 interface TemplateChromeProps {
@@ -33,11 +34,50 @@ export function TemplateChrome({
 }: TemplateChromeProps) {
   const { user } = useSession()
   const { open: openAuthModal } = useAuthModal()
+  const { open: openPaywall } = usePaywallModal()
   const pathname = usePathname() ?? '/'
   const [installOpen, setInstallOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
-  const cliCommand = `npx shadcn@latest add @aicanvas/${templateSlug}`
+
+  // Tokenized install for signed-in users so the registry attributes the pull
+  // to the account. Templates + full-system are premium, so a plain anonymous
+  // command would 402 even for a premium user. The token is masked on screen;
+  // the copy button writes the real one.
+  const [userToken, setUserToken] = useState<string | null>(null)
+  useEffect(() => {
+    if (!user) { setUserToken(null); return }
+    let cancelled = false
+    const refresh = () =>
+      fetch('/api/me/token').then((r) => r.json())
+        .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) }).catch(() => {})
+    refresh()
+    window.addEventListener('focus', refresh)
+    return () => { cancelled = true; window.removeEventListener('focus', refresh) }
+  }, [user])
+  const installReference = userToken
+    ? `"https://aicanvas.me/r/${templateSlug}.json?token=${userToken}"`
+    : `@aicanvas/${templateSlug}`
+  const installReferenceMasked = userToken
+    ? `"https://aicanvas.me/r/${templateSlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${templateSlug}`
+  const cliCommand = `npx shadcn@latest add ${installReference}`
+  const cliCommandMasked = `npx shadcn@latest add ${installReferenceMasked}`
+
+  // Premium-only content: a non-premium user hitting Install sees the paywall
+  // (Premium card) instead of the CLI popover. Premium → open the popover.
+  // Fails open (opens the popover) so a hiccup never dead-ends the button.
+  async function handleInstall() {
+    try {
+      const res = await fetch(`/api/me/install-check?slug=${templateSlug}`)
+      const d = await res.json().catch(() => null)
+      if (d?.blocked) {
+        openPaywall({ reason: d.reason ?? 'premium-only', limit: d.limit, resetAt: d.resetAt })
+        return
+      }
+    } catch {}
+    setInstallOpen((o) => !o)
+  }
 
   const bullets = description ?? [
     `Installs this template plus the full ${systemName} system.`,
@@ -116,7 +156,7 @@ export function TemplateChrome({
             to sign-in with `next=` set to the current path. */}
         {user ? (
           <div className="relative" ref={popoverRef}>
-            <Button variant="primary" size="md" onClick={() => setInstallOpen((o) => !o)}>
+            <Button variant="primary" size="md" onClick={handleInstall}>
               <Terminal weight="regular" size={15} />
               Install
             </Button>
@@ -154,7 +194,7 @@ export function TemplateChrome({
                   </div>
                   <div className="rounded-lg bg-sand-950 px-4 py-3">
                     <code className="block break-all font-mono text-xs text-sand-300">
-                      {cliCommand}
+                      {cliCommandMasked}
                     </code>
                   </div>
                   <div className="space-y-1.5">
