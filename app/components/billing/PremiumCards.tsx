@@ -42,7 +42,7 @@ export function PremiumCards({
   className?: string
 }) {
   const { user } = useSession()
-  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('yearly')
+  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly')
   const price = cycle === 'yearly' ? '$49.99' : '$8.99'
   const suffix = cycle === 'yearly' ? 'year' : 'month'
 
@@ -88,7 +88,7 @@ export function PremiumCards({
               </h2>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-              The whole canvas, free forever.
+              Install and remix components, free forever.
             </p>
             {/* Invisible mirror of the Premium card's billing-cycle toggle so the
                 price and CTA align across both cards. */}
@@ -140,10 +140,10 @@ export function PremiumCards({
             </h2>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-            No daily limit. The whole premium library.
+            Unlimited installs, systems and templates.
           </p>
 
-          {/* Billing cycle toggle — yearly default + highlighted */}
+          {/* Billing cycle toggle — defaults to Monthly; the selected option is highlighted. */}
           <div className="mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
             <button
               type="button"
