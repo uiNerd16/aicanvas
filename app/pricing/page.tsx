@@ -8,15 +8,16 @@ import type { ComponentType, ReactNode } from 'react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SiteFooter } from '../components/SiteFooter'
-import { NerdSvg, SuperheroSvg } from '../components/auth/NerdToHero'
+import { TerminatorCool, TerminatorSkull } from '../components/auth/TerminatorReveal'
 import { premiumEnabled } from '../../lib/flags'
 import { PremiumCards } from '../components/billing/PremiumCards'
 
 // ─── Plan data ──────────────────────────────────────────────────────────────
-// Legacy fallback, rendered only when premiumEnabled() is false. Nerd is the
-// unauthenticated baseline; Hero is the signed-in experience. The live
-// Free vs Premium pricing is rendered separately when the premium flag is on.
-// Icons are reused from the sign-up auth animation (NerdToHero).
+// Legacy fallback, rendered only when premiumEnabled() is false. The first card
+// is the anonymous baseline; the second is the signed-in (still free)
+// experience. The live Free vs Premium pricing is rendered separately when the
+// premium flag is on. Icons are reused from the sign-up auth animation
+// (NerdToHero — kept as brand art; the tier labels are Free / Premium).
 
 type Plan = {
   name: string
@@ -32,8 +33,8 @@ type Plan = {
 
 const PLANS: Plan[] = [
   {
-    name: 'Nerd',
-    Icon: NerdSvg,
+    name: 'Free',
+    Icon: TerminatorCool,
     tagline:
       'Browse the canvas freely. Copy any component or prompt with no account, no friction.',
     priceLabel: 'Free',
@@ -49,18 +50,18 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    name: 'Hero',
-    Icon: SuperheroSvg,
+    name: 'Free account',
+    Icon: TerminatorSkull,
     tagline:
       'Sign in and unlock the canvas. Save what you love, tune in the Lab, export to your machine.',
     priceLabel: 'Free',
     priceSuffix: 'Forever',
     cta: {
-      label: 'Become a Hero',
+      label: 'Sign up free',
       href: '/account/sign-up',
       variant: 'primary',
     },
-    listLabel: 'EVERYTHING IN NERD, PLUS',
+    listLabel: 'EVERYTHING IN FREE, PLUS',
     features: [
       'Save your favorite components',
       'Save preferences across sessions',
@@ -120,7 +121,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
       {/* Top — icon + name row, tagline below, then price, CTA */}
       <div className="px-5 pt-6 pb-6 sm:px-6 sm:pt-7">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]">
+          <div className="flex h-16 w-16 shrink-0 items-end justify-center [--ic-stroke:#000000] [--ic-tint:#D4D4CC]">
             <plan.Icon />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
@@ -219,8 +220,8 @@ export default function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-sand-600 dark:text-sand-400">
             {premium
-              ? 'Nerds install 10 components a day and remix with AI, free forever. Heroes go unlimited, with design systems and templates included.'
-              : 'AI Canvas is free, forever. Browse as a Nerd or sign up as a Hero to save your work, keep Lab presets, and export to your machine.'}
+              ? 'Free accounts install 10 components a day and remix with AI, free forever. Premium goes unlimited, with design systems and templates included.'
+              : 'AI Canvas is free, forever. Browse anonymously, or sign up to save your work, keep Lab presets, and export to your machine.'}
           </p>
         </Section>
 

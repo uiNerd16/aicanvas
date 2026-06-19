@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CheckCircle, Crown } from '@phosphor-icons/react'
 import { buttonClasses } from '../Button'
-import { NerdSvg, SuperheroSvg } from '../auth/NerdToHero'
+import { TerminatorCool, TerminatorSkull } from '../auth/TerminatorReveal'
 import { useSession } from '../auth/SessionProvider'
 import { UpgradeButton } from './UpgradeButton'
 
@@ -35,7 +35,7 @@ export function PremiumCards({
   compact = false,
   className,
 }: {
-  /** `both` = Free + Premium (anonymous); `premium-only` = just the Hero card. */
+  /** `both` = Free + Premium (anonymous); `premium-only` = just the Premium card. */
   show?: 'both' | 'premium-only'
   /** Tighter footprint for the Code-tab overlay. */
   compact?: boolean
@@ -80,11 +80,11 @@ export function PremiumCards({
         <div className="relative flex flex-col rounded-3xl border border-sand-300 bg-sand-100 p-2 dark:border-sand-800 dark:bg-sand-900">
           <div className={cardPad}>
             <div className="flex items-center gap-4">
-              <div className={`flex ${iconBox} shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]`}>
-                <NerdSvg />
+              <div className={`flex ${iconBox} shrink-0 items-end justify-center`}>
+                <TerminatorCool />
               </div>
               <h2 className={`${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
-                Nerd
+                Free
               </h2>
             </div>
             <p className="mt-4 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
@@ -131,11 +131,11 @@ export function PremiumCards({
       <div className="relative flex flex-col rounded-3xl border border-olive-500/50 bg-sand-100 p-2 dark:border-olive-500/40 dark:bg-sand-900">
         <div className={cardPad}>
           <div className="flex items-center gap-4">
-            <div className={`flex ${iconBox} shrink-0 items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]`}>
-              <SuperheroSvg />
+            <div className={`flex ${iconBox} shrink-0 items-end justify-center`}>
+              <TerminatorSkull />
             </div>
             <h2 className={`flex items-center gap-2 ${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
-              Hero
+              Premium
               <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>

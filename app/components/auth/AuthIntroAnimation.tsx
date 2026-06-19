@@ -100,7 +100,7 @@ export function AuthIntroAnimation({
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, scale: 0.9, rotate: 6 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 flex items-end justify-center [--ic-stroke:#1A1A19] [--ic-tint:#D4D4CC]"
+            className="absolute inset-0 flex items-end justify-center [--ic-stroke:#000000] [--ic-tint:#D4D4CC]"
           >
             {isAfter ? <AfterIllustration /> : <BeforeIllustration />}
           </motion.div>
