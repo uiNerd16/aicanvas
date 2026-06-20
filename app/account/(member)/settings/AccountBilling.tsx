@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Crown, Key } from '@phosphor-icons/react'
+import { Crown, Key, ShieldCheck } from '@phosphor-icons/react'
 import { premiumEnabled } from '../../../../lib/flags'
 import { buttonClasses } from '../../../components/buttonClasses'
 import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
@@ -25,15 +25,23 @@ export function AccountBilling() {
   async function manageSubscription() {
     setPortalLoading(true)
     setNoPortal(false)
+    // Open the portal in a NEW tab so AI Canvas stays open. The blank tab is
+    // opened synchronously inside the click gesture (popup blockers eat a
+    // window.open that happens after an await), then redirected once the
+    // session URL is ready.
+    const portalTab = window.open('', '_blank')
     try {
       const res = await fetch('/api/billing/portal')
       const { url } = await res.json()
       if (url) {
-        window.location.href = url
+        if (portalTab) portalTab.location.href = url
+        else window.open(url, '_blank', 'noopener,noreferrer') // fallback if blocked
         return
       }
+      portalTab?.close()
       setNoPortal(true)
     } catch {
+      portalTab?.close()
       setNoPortal(true)
     } finally {
       setPortalLoading(false)
@@ -51,67 +59,92 @@ export function AccountBilling() {
   }
 
   return (
-    <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
-      <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">Subscription &amp; access</h2>
-      <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
-        {status === 'premium'
-          ? "You're on Premium."
-          : status === 'not-premium'
-            ? "You're on the Free plan."
-            : 'Checking your plan…'}
-      </p>
+    <>
+      {/* ── Subscription ──────────────────────────────────────────────── */}
+      <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
+        <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">Subscription</h2>
+        <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
+          {status === 'premium'
+            ? "You're on Premium."
+            : status === 'not-premium'
+              ? "You're on the Free plan."
+              : 'Checking your plan…'}
+        </p>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        {status === 'premium' ? (
-          <button
-            type="button"
-            onClick={manageSubscription}
-            disabled={portalLoading}
-            className={buttonClasses({ variant: 'outline', size: 'sm' })}
-          >
-            <Crown weight="regular" size={15} />
-            {portalLoading ? 'Opening…' : 'Manage subscription'}
-          </button>
-        ) : status === 'not-premium' ? (
-          <button
-            type="button"
-            onClick={() => openPaywall({ reason: 'upgrade' })}
-            className={buttonClasses({ variant: 'primary', size: 'sm' })}
-          >
-            <Crown weight="regular" size={15} />
-            Upgrade to Premium
-          </button>
-        ) : (
-          <button type="button" disabled className={buttonClasses({ variant: 'outline', size: 'sm' })}>
-            <Crown weight="regular" size={15} />
-            Checking your plan…
-          </button>
+        <div className="mt-4">
+          {status === 'premium' ? (
+            <button
+              type="button"
+              onClick={manageSubscription}
+              disabled={portalLoading}
+              className={buttonClasses({ variant: 'outline', size: 'sm' })}
+            >
+              <Crown weight="regular" size={15} />
+              {portalLoading ? 'Opening…' : 'Manage subscription'}
+            </button>
+          ) : status === 'not-premium' ? (
+            <button
+              type="button"
+              onClick={() => openPaywall({ reason: 'upgrade' })}
+              className={buttonClasses({ variant: 'primary', size: 'sm' })}
+            >
+              <Crown weight="regular" size={15} />
+              Upgrade to Premium
+            </button>
+          ) : (
+            <button type="button" disabled className={buttonClasses({ variant: 'outline', size: 'sm' })}>
+              <Crown weight="regular" size={15} />
+              Checking your plan…
+            </button>
+          )}
+        </div>
+
+        {noPortal && (
+          <p className="mt-3 text-xs text-sand-500 dark:text-sand-400">
+            No active subscription to manage.
+          </p>
         )}
 
-        <button
-          type="button"
-          onClick={rotateToken}
-          disabled={rotateState === 'rotating'}
-          className={buttonClasses({ variant: 'outline', size: 'sm' })}
-        >
-          <Key weight="regular" size={15} />
-          {rotateState === 'rotating' ? 'Rotating…' : 'Rotate API token'}
-        </button>
-      </div>
+        <p className="mt-4 flex items-start gap-2 border-t border-sand-300 pt-4 text-xs leading-relaxed text-sand-500 dark:border-sand-800 dark:text-sand-400">
+          <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-500" />
+          <span>
+            Billing is securely handled by{' '}
+            <span className="font-semibold text-sand-700 dark:text-sand-300">Paddle</span>, our
+            payments partner and merchant of record. Your card details go straight to Paddle and
+            never touch AI Canvas servers.
+          </span>
+        </p>
+      </section>
 
-      {noPortal && (
-        <p className="mt-3 text-xs text-sand-500 dark:text-sand-400">
-          No active subscription to manage.
+      {/* ── API access ────────────────────────────────────────────────── */}
+      <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
+        <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">API access</h2>
+        <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
+          Your API token authorizes CLI and MCP installs from your account. Rotate it if it&rsquo;s
+          ever exposed; the old one stops working immediately.
         </p>
-      )}
-      {rotateState === 'done' && (
-        <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
-          Done. The old token is now disabled. Grab a fresh install command from any component page.
-        </p>
-      )}
-      {rotateState === 'error' && (
-        <p className="mt-3 text-xs text-red-500">Could not rotate the token. Try again.</p>
-      )}
-    </section>
+
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={rotateToken}
+            disabled={rotateState === 'rotating'}
+            className={buttonClasses({ variant: 'outline', size: 'sm' })}
+          >
+            <Key weight="regular" size={15} />
+            {rotateState === 'rotating' ? 'Rotating…' : 'Rotate API token'}
+          </button>
+        </div>
+
+        {rotateState === 'done' && (
+          <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
+            Done. The old token is now disabled. Grab a fresh install command from any component page.
+          </p>
+        )}
+        {rotateState === 'error' && (
+          <p className="mt-3 text-xs text-red-500">Could not rotate the token. Try again.</p>
+        )}
+      </section>
+    </>
   )
 }
