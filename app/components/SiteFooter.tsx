@@ -1,66 +1,70 @@
 import Link from 'next/link'
-import { ArrowUpRight } from '@phosphor-icons/react/dist/ssr'
 
 // ─── SiteFooter ───────────────────────────────────────────────────────────────
-// Shared page footer used at the bottom of /, /mcp, /about, /impressum,
-// /privacy, /terms, and any other long-form page. The icon links home, the
-// left side holds the tagline next to it, and the right side groups the
-// legal links (Impressum / Privacy must be "easily and directly available"
-// per § 5 DDG) plus a permanent pointer to the @aicanvas/mcp npm package.
+// Shared page footer: a single flat, wrapped row of text links. Order is
+// internal nav first (sitewide internal-linking helps SEO), then the legal
+// links (Impressum and "Verträge hier kündigen" must be easily and directly
+// available per § 5 DDG / § 312k BGB), then external (the shadcn registry
+// directory and the @aicanvas/mcp npm package). Text only by design — no logo
+// or images. External links open in a new tab.
+
+const linkCls = 'transition-colors hover:text-sand-700 dark:hover:text-sand-200'
 
 export function SiteFooter() {
   return (
-    <footer className="mt-20">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            aria-label="AI Canvas home"
-            className="transition-opacity hover:opacity-70"
-          >
-            <img src="/icon.svg" alt="AI Canvas" className="h-5 w-5" />
-          </Link>
-          <p className="text-xs text-sand-500">
-            AI native components.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-sand-500">
-          <Link
-            href="/privacy"
-            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
-            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
-          >
-            Terms
-          </Link>
-          <Link
-            href="/refund"
-            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
-          >
-            Refund
-          </Link>
-          <Link
-            href="/impressum"
-            className="transition-colors hover:text-sand-700 dark:hover:text-sand-200"
-          >
-            Impressum
-          </Link>
-          <a
-            href="https://www.npmjs.com/package/@aicanvas/mcp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden items-center gap-1 transition-colors hover:text-sand-700 dark:hover:text-sand-200 sm:inline-flex"
-          >
-            @aicanvas/mcp on npm
-            <ArrowUpRight weight="regular" size={12} />
-          </a>
-        </div>
-      </div>
+    <footer className="mt-8 border-t border-sand-300 pt-8 dark:border-sand-800">
+      <p className="text-xs text-sand-500">© 2026 AI Canvas - AI Native Components, Design Systems and Templates</p>
+      <nav
+        aria-label="Footer"
+        className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-sand-500"
+      >
+        <Link href="/components" className={linkCls}>
+          Components
+        </Link>
+        <Link href="/design-systems/andromeda" className={linkCls}>
+          Andromeda Design System
+        </Link>
+        <Link href="/lab" className={linkCls}>
+          Lab
+        </Link>
+        <Link href="/pricing" className={linkCls}>
+          Pricing
+        </Link>
+        <Link href="/contact" className={linkCls}>
+          Contact
+        </Link>
+        <Link href="/privacy" className={linkCls}>
+          Privacy Policy
+        </Link>
+        <Link href="/terms" className={linkCls}>
+          Terms
+        </Link>
+        <Link href="/refund" className={linkCls}>
+          Refund
+        </Link>
+        <Link href="/kuendigen" className={linkCls}>
+          Verträge hier kündigen
+        </Link>
+        <Link href="/impressum" className={linkCls}>
+          Impressum
+        </Link>
+        <a
+          href="https://ui.shadcn.com/docs/directory"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={linkCls}
+        >
+          shadcn registry
+        </a>
+        <a
+          href="https://www.npmjs.com/package/@aicanvas/mcp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={linkCls}
+        >
+          @aicanvas/mcp
+        </a>
+      </nav>
     </footer>
   )
 }

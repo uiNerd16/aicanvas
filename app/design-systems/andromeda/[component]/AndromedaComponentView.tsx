@@ -15,6 +15,7 @@ import {
   Terminal,
 } from '@phosphor-icons/react'
 import { Step } from '../../../components/Step'
+import { SiteFooter } from '../../../components/SiteFooter'
 import { Button } from '../../../components/Button'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
@@ -221,7 +222,7 @@ export function AndromedaComponentView({
 
   return (
     <>
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-14">
+    <main className="mx-auto w-full max-w-4xl px-4 pt-8 pb-8 sm:px-6 sm:pt-14">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -605,6 +606,8 @@ export function AndromedaComponentView({
           </div>
         </section>
       )}
+
+      <SiteFooter />
     </main>
 
     <AnimatePresence>

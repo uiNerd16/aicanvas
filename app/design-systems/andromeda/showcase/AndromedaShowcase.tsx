@@ -9,6 +9,7 @@
 import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
+import { SiteFooter } from '../../../components/SiteFooter'
 import {
   MagnifyingGlass,
   Bell,
@@ -299,7 +300,13 @@ export default function AndromedaShowcase({
         width: '100%',
         boxSizing: 'border-box',
         backgroundColor: tokens.color.surface.base,
-        padding: `${tokens.spacing[10]} ${tokens.spacing[8]}`,
+        // All-longhand (no `padding` shorthand) so paddingBottom isn't clobbered.
+        paddingTop: tokens.spacing[10],
+        paddingLeft: tokens.spacing[8],
+        paddingRight: tokens.spacing[8],
+        // Extra bottom clearance so the footer sits ABOVE the fixed "Install"
+        // bar (TemplateChrome, bottom-6) instead of behind it.
+        paddingBottom: '7.5rem',
       }}
     >
       <div
@@ -331,11 +338,11 @@ export default function AndromedaShowcase({
             .as-grid-2 { grid-template-columns: minmax(0, 1fr); }
             .as-grid-planet { grid-template-columns: minmax(0, 1fr); }
             .as-usage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .as-shell { padding: ${tokens.spacing[8]} ${tokens.spacing[5]} !important; }
+            .as-shell { padding: ${tokens.spacing[8]} ${tokens.spacing[5]} !important; padding-bottom: 7.5rem !important; }
           }
           ${mq.sm} {
             .as-usage-grid { grid-template-columns: minmax(0, 1fr); }
-            .as-shell { padding: ${tokens.spacing[6]} ${tokens.spacing[4]} !important; }
+            .as-shell { padding: ${tokens.spacing[6]} ${tokens.spacing[4]} !important; padding-bottom: 7.5rem !important; }
             .as-title { font-size: ${tokens.typography.size['2xl']} !important; }
             /* Phones: drop the right-hand usage gloss on the Type Scale and
                Spacing rows — at phone widths it crowds the specimen off-screen.
@@ -1834,6 +1841,7 @@ export default function AndromedaShowcase({
           })()}
         </Section>
       </div>
+      <SiteFooter />
     </div>
     </>
   )

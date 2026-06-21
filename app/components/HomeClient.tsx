@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ComponentCard } from './ComponentCard'
 import { HeaderSocials } from './HeaderSocials'
+import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
 import type { ComponentMeta } from '../lib/component-registry'
@@ -177,7 +178,7 @@ export function HomeClient({
       </div>
 
       {/* ── Grid ── */}
-      <div className="flex flex-1 flex-col bg-sand-200 p-4 dark:bg-sand-950 md:p-6">
+      <div className="flex flex-1 flex-col bg-sand-200 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
         {/* Mobile breadcrumb — shown above cards on small screens */}
         <p className="mb-4 text-sm font-semibold md:hidden">
           <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
@@ -296,6 +297,9 @@ export function HomeClient({
         )}
       </div>
 
+      <div className="mx-auto w-full max-w-[1800px] px-4 pb-8 md:px-6">
+        <SiteFooter />
+      </div>
     </div>
   )
 }

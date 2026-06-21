@@ -26,6 +26,7 @@ import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
 import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
 import { HeaderSocials } from '../HeaderSocials'
+import { SiteFooter } from '../SiteFooter'
 import { Step } from '../Step'
 import type { ComponentMeta } from '../../lib/component-registry'
 // Runtime + type from the light module so this client component never imports
@@ -449,7 +450,7 @@ export default function ComponentPageView({
       </div>
 
       <main className="bg-sand-200 dark:bg-sand-950">
-        <div className="relative mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
+        <div className="relative mx-auto max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
 
           {/* Mobile back button */}
           <button
@@ -1368,6 +1369,7 @@ export default function ComponentPageView({
             </section>
           )}
 
+          <SiteFooter />
         </div>
       </main>
 
