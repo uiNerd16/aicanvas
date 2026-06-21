@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://aicanvas.me">
-    <img width="100%" alt="AI Canvas: open-source animated React and Tailwind components, design systems, and templates, installable with the shadcn CLI or your AI editor over MCP" src="https://github.com/user-attachments/assets/9490eea8-880f-4f78-8c6f-4c8e7407d88b" />
+    <img width="100%" alt="AI Canvas: open-source animated React and Tailwind components, design systems, and templates, installable with the shadcn CLI or your AI editor over MCP" src="https://ik.imagekit.io/aitoolkit/readme-banner.png" />
   </a>
 </p>
 
