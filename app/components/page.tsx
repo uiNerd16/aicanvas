@@ -34,10 +34,10 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: '/AIcanvas-OG.png',
+          url: '/AIcanvas-OG-v2.png',
           width: 1200,
           height: 630,
-          alt: 'AI Canvas: animated React component registry',
+          alt: 'AI Canvas: native React components, design systems, and templates',
         },
       ],
     },
@@ -45,7 +45,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: INDEX_TITLE,
       description: INDEX_DESCRIPTION,
-      images: ['/AIcanvas-OG.png'],
+      images: ['/AIcanvas-OG-v2.png'],
     },
   }
 }

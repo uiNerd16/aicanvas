@@ -19,10 +19,10 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/AIcanvas-OG.png',
+        url: '/AIcanvas-OG-v2.png',
         width: 1200,
         height: 630,
-        alt: 'AI Canvas — animated React component registry',
+        alt: 'AI Canvas: native React components, design systems, and templates',
       },
     ],
   },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: HOMEPAGE_TITLE,
     description: HOMEPAGE_DESCRIPTION,
-    images: ['/AIcanvas-OG.png'],
+    images: ['/AIcanvas-OG-v2.png'],
   },
 }
 
