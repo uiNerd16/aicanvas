@@ -146,6 +146,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'A slowly rotating 3D particle sphere built with Three.js, lit from one side, with every particle colored from the Andromeda accent ramp so it follows the system palette. The canvas is transparent, so drop it inside a Card and the void shows through.',
     sourceFile: 'Planet.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/planet.png?v=1',
   },
   {
     slug: 'progress-bar',
