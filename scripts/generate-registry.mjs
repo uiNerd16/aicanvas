@@ -538,7 +538,7 @@ for (const ds of DESIGN_SYSTEMS) {
       name: slug,
       type: 'registry:ui',
       title: `${compName} (${ds.name})`,
-      description: `${ds.name} ${compName} component. Install just this piece — tokens and any sibling components are pulled in automatically.`,
+      description: `${ds.name} ${compName} component. Install just this piece. Tokens and any sibling components are pulled in automatically.`,
       author: 'aicanvas <https://aicanvas.me>',
       registryDependencies: [...componentRegistryDeps].sort().map(depUrl),
       dependencies: compWalk.npmDeps,

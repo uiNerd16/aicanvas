@@ -64,6 +64,7 @@ import { Toggle } from '../../../design-systems/andromeda/components/Toggle'
 import { Tooltip } from '../../../design-systems/andromeda/components/Tooltip'
 import { UserCard } from '../../../design-systems/andromeda/components/UserCard'
 import { UserMenu } from '../../../design-systems/andromeda/components/UserMenu'
+import { Planet } from '../../../design-systems/andromeda/components/Planet'
 import {
   Table, TableHead, TableBody, TableRow, TableHeader, TableCell, TableStyles,
 } from '../../../design-systems/andromeda/components/Table'
@@ -410,6 +411,14 @@ function HeatGridDemo() {
         <HeatGrid value={25} cellSize={16} gap={2} label="Low" />
         <HeatGrid value={85} cellSize={16} gap={2} label="High" />
       </div>
+    </div>
+  )
+}
+
+function PlanetDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 360, height: 300, position: 'relative', margin: '0 auto' }}>
+      <Planet />
     </div>
   )
 }
@@ -952,6 +961,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'nav-item': NavItemDemo,
   'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,
+  planet: PlanetDemo,
   'search-field': SearchFieldDemo,
   'segmented-control': SegmentedControlDemo,
   'progress-bar': ProgressBarDemo,
