@@ -67,10 +67,10 @@ export const metadata: Metadata = {
     locale: 'en_US',
     images: [
       {
-        url: '/AIcanvas-OG.png',
+        url: '/AIcanvas-OG-v2.png',
         width: 1200,
         height: 630,
-        alt: 'AI Canvas — animated React component registry',
+        alt: 'AI Canvas: native React components, design systems, and templates',
       },
     ],
   },
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AI Canvas — Animated React Components with AI Reproduction Prompts',
     description: GLOBAL_DESCRIPTION,
-    images: ['/AIcanvas-OG.png'],
+    images: ['/AIcanvas-OG-v2.png'],
   },
   icons: {
     icon: '/ai-canvas-icon.svg',
