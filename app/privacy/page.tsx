@@ -46,7 +46,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Last updated: 2026-06-14. This policy describes how AI Canvas processes
+          Last updated: 2026-06-21. This policy describes how AI Canvas processes
           personal data, in line with the EU General Data Protection Regulation
           (GDPR / DSGVO) and the German Bundesdatenschutzgesetz (BDSG).
         </p>
@@ -91,6 +91,23 @@ export default function PrivacyPage() {
             data is private to you, protected by row-level security, and only
             used to power features such as your saved list, your install history
             tab, and pre-selected defaults in the install drawer.
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Subscription &amp; billing data
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            When you take out a Premium subscription, payment is handled by our
+            payment provider and Merchant of Record, Paddle (Section 5). You enter
+            your card and billing details at Paddle&apos;s checkout; those details
+            are held by Paddle under its own privacy policy, and we never receive
+            or store your card number. From Paddle&apos;s notifications we store a
+            small amount of subscription metadata on your account: your
+            subscription status, the plan (monthly or yearly), the current renewal
+            date, and the customer and subscription identifiers Paddle assigns. We
+            use it to unlock your Premium access, show your current plan, and let
+            you cancel. If you cancel through the cancellation form, we also
+            process the details you submit there in order to end your subscription.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -204,6 +221,21 @@ export default function PrivacyPage() {
               unsubscribe link in any email; an objection ends this processing
               immediately.
             </li>
+            <li>
+              <strong className="text-sand-200">Subscription &amp; billing:</strong>{' '}
+              Art. 6 (1)(b) GDPR. Processing your subscription metadata is
+              necessary to perform the Premium contract you entered into. Keeping
+              billing and accounting records for the statutory period rests on
+              Art. 6 (1)(c) GDPR (compliance with our retention duties under
+              German commercial and tax law).
+            </li>
+            <li>
+              <strong className="text-sand-200">Bot protection on the cancellation
+              form:</strong>{' '}
+              Art. 6 (1)(f) GDPR. Legitimate interest in protecting the login-free
+              cancellation form from automated abuse. The check (Cloudflare
+              Turnstile, Section 5) is cookieless and runs only on that page.
+            </li>
           </ul>
         </section>
 
@@ -275,6 +307,14 @@ export default function PrivacyPage() {
               and payment details you enter at checkout under its own privacy
               policy. Legal basis: Art. 6(1)(b) GDPR (performance of the contract).
             </li>
+            <li>
+              <strong className="text-sand-200">Cloudflare, Inc.</strong> (USA):
+              provides the cookieless bot-protection check (Turnstile) on the
+              login-free cancellation form. To assess whether a request is
+              automated, Cloudflare receives the visitor&apos;s IP address and
+              browser interaction signals for that form. It sets no cookies on our
+              site. Legal basis: Art. 6 (1)(f) GDPR.
+            </li>
           </ul>
         </section>
 
@@ -301,6 +341,15 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-sand-200">Aggregate analytics</strong> are
               not tied to your identity and are kept indefinitely as aggregates.
+            </li>
+            <li>
+              <strong className="text-sand-200">Billing and accounting records</strong>{' '}
+              that we must keep under German commercial and tax law (HGB § 257,
+              AO § 147) are retained for the statutory period, generally six to ten
+              years depending on the record type, even after you delete your
+              account. During that period we restrict their processing to what the
+              law requires. As Merchant of Record, Paddle issues and retains the
+              invoices for your purchases under its own obligations.
             </li>
           </ul>
         </section>
@@ -337,8 +386,9 @@ export default function PrivacyPage() {
             8. Cookies and local storage
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            AI Canvas uses only strictly necessary storage. No tracking, advertising,
-            or third-party cookies are set, and there is therefore no cookie banner.
+            AI Canvas sets only strictly necessary cookies on its own site. We use
+            no tracking or advertising cookies and set nothing on your device that
+            requires consent under § 25 (2) TDDDG, so there is no cookie banner.
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-400">
             <li>
@@ -356,6 +406,14 @@ export default function PrivacyPage() {
             Both are exempt from the consent requirement of § 25 (2) TDDDG /
             TTDSG because they are strictly necessary to deliver the
             functionality you actively requested.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Two third-party features deliberately avoid setting cookies on our
+            site: the bot-protection check on the cancellation form (Cloudflare
+            Turnstile) is cookieless, and the Premium checkout opens only when you
+            click to upgrade. That checkout runs inside Paddle&apos;s payment
+            overlay, and any cookies there are set by Paddle under its own cookie
+            and privacy policy, not by us.
           </p>
         </section>
 
