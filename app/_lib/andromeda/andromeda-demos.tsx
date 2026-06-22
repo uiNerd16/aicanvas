@@ -266,7 +266,7 @@ function CornerMarkersDemo() {
         { label: 'Default', props: {} },
         { label: 'Larger', props: { size: 18 } },
         { label: 'Inset 6px', props: { offset: 6 } },
-        { label: 'Accent', props: { color: tokens.color.accent.base } },
+        { label: 'Accent', props: { color: tokens.color.accent[300] } },
       ].map(({ label, props }) => (
         <div
           key={label}
@@ -670,7 +670,7 @@ function RadarChartDemo() {
           { axis: 'SECURITY', score: 65 },
           { axis: 'API', score: 90 },
         ]}
-        series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent.base }]}
+        series={[{ key: 'score', label: 'Readiness', color: tokens.color.accent[300] }]}
       />
     </div>
   )

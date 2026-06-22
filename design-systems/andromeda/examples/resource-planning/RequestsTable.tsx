@@ -210,24 +210,40 @@ export function RequestsTable() {
             ))}
           </LayoutGroup>
         </div>
-        <button
-          type="button"
-          aria-label="Search"
+        <label
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            width: tokens.spacing[8],
+            gap: tokens.spacing[2],
             height: tokens.spacing[8],
             flexShrink: 0,
+            padding: `0 ${tokens.spacing[2]}`,
             background: 'transparent',
             border: `${tokens.border.thin} ${tokens.color.border.base}`,
-            cursor: 'pointer',
             color: tokens.color.text.muted,
           }}
         >
           <MagnifyingGlass weight="regular" size={14} />
-        </button>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search by team"
+            placeholder="SEARCH"
+            style={{
+              width: tokens.spacing[12],
+              maxWidth: '100%',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: tokens.color.text.primary,
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              letterSpacing: tokens.typography.tracking.wider,
+              textTransform: 'uppercase',
+            }}
+          />
+        </label>
       </div>
 
       {/* Table — auto layout so columns size to content; cells nowrap so the

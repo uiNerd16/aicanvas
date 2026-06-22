@@ -121,7 +121,7 @@ components-workspace/
 Strict, token-driven visual languages. Each system has its own folder:
 ```
 design-systems/
-  andromeda/          ← sci-fi / blueprint, 19 components, /design-systems/andromeda
+  andromeda/          ← sci-fi / blueprint, a growing set of components (TODO: reconcile count after parity), /design-systems/andromeda
     tokens.ts         ← source of truth for every color, spacing, radius
     components/       ← 20 .tsx files + lib/utils.ts
     examples/         ← mission-control dashboard showing the system composed

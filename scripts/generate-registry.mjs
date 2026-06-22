@@ -619,6 +619,11 @@ console.log(`Generated ${count} components + ${dsCount} system/template items in
 // A separate JSON the MCP server fetches at runtime. Carries fields the
 // shadcn registry schema doesn't (image, categories, dualTheme, badge,
 // homepage URL, install command). Keeps the shadcn registry strict-clean.
+//
+// Buckets: components[] (standalones only), systems[], templates[], and
+// systemComponents[] (per-component design-system items — installable + searchable
+// via the MCP, but kept OUT of components[] so the standalone catalog/categories
+// stay clean). componentCount counts standalones only.
 
 const mcpComponents = []
 const categoryCounts = {}
@@ -655,11 +660,33 @@ for (const dir of dirs) {
   })
 }
 
+// ── Per-system meta-slug map (for design-system component homepage URLs) ──────
+// A DS component's homepage lives at /design-systems/<system>/<metaSlug>, where
+// metaSlug is the WEBSITE slug declared in app/_lib/<system>/<system>-meta.ts —
+// usually the registry slug minus the `<system>-` prefix, but not always
+// (andromeda-button-system → button via a slugOverride). Parse the meta file's
+// `slug:` values so the URLs match the live routes instead of guessing.
+function loadSystemMetaSlugs(systemSlug) {
+  const metaPath = join('app', '_lib', systemSlug, `${systemSlug}-meta.ts`)
+  let src
+  try { src = readFileSync(metaPath, 'utf-8') } catch { return null }
+  // Scope to the *_COMPONENT_META array so the system-level ANDROMEDA_META
+  // (which has no `slug:`) and any other objects can't leak in.
+  const arrStart = src.search(/_COMPONENT_META[^=]*=\s*\[/)
+  const scoped = arrStart === -1 ? src : src.slice(arrStart)
+  const slugs = new Set()
+  const re = /\bslug:\s*'([^']+)'/g
+  let m
+  while ((m = re.exec(scoped)) !== null) slugs.add(m[1])
+  return slugs
+}
+
 // Build design-system / template metadata from the same source-of-truth config.
 // Each entry mirrors the per-slug JSON's shape at a high level — enough for an
 // AI agent to decide what to install and to surface the dep chain.
 const mcpSystems = []
 const mcpTemplates = []
+const mcpSystemComponents = []
 for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensJsonPath = join(outDir, `${tokensSlug}.json`)
@@ -667,6 +694,58 @@ for (const ds of DESIGN_SYSTEMS) {
   let tokensItem, sysItem
   try { tokensItem = JSON.parse(readFileSync(tokensJsonPath, 'utf-8')) } catch { tokensItem = null }
   try { sysItem = JSON.parse(readFileSync(sysJsonPath, 'utf-8')) } catch { sysItem = null }
+
+  // ── Per-component (design-system) metadata for the MCP ──────────────────────
+  // Mirrors the individual component registry items emitted above. The MCP keeps
+  // these in a SEPARATE `systemComponents` bucket (NOT in `components[]`) so the
+  // standalone catalog + categories stay clean, while get_component /
+  // get_install_command / search_components can still resolve every DS slug.
+  const metaSlugs = loadSystemMetaSlugs(ds.slug)
+  const systemComponentSlugs = []
+  for (const entry of ds.systemEntries) {
+    const baseName = entry.split('/').pop()
+    const slug = dsComponentSlug(ds, entry, baseName)
+    // Skip files that were emitted as a standalone instead of an individual DS
+    // item (same condition the per-component emit loop uses), and any entry that
+    // never produced a per-slug JSON.
+    const compJsonPath = join(outDir, `${slug}.json`)
+    let compItem
+    try { compItem = JSON.parse(readFileSync(compJsonPath, 'utf-8')) } catch { compItem = null }
+    if (!compItem) continue
+
+    // metaSlug: registry slug minus the `<system>-` prefix, unless a slugOverride
+    // already mapped it to a distinct meta slug. Validate against the website meta.
+    const overrideMeta = ds.slugOverrides?.[entry]
+      ? slug.replace(new RegExp(`^${ds.slug}-`), '')
+      : null
+    let metaSlug = slug.replace(new RegExp(`^${ds.slug}-`), '')
+    if (overrideMeta && metaSlugs && !metaSlugs.has(metaSlug)) {
+      // andromeda-button-system → its registry slug strips to "button-system",
+      // but the website route is "button". Resolve via the meta file.
+      const baseGuess = baseName.replace(/\.(tsx|ts)$/, '')
+        .replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+      if (metaSlugs.has(baseGuess)) metaSlug = baseGuess
+    }
+    if (metaSlugs && !metaSlugs.has(metaSlug)) {
+      console.warn(
+        `generate-registry: WARNING — DS component "${slug}" has metaSlug "${metaSlug}" ` +
+          `with no matching entry in ${ds.slug}-meta.ts. Homepage URL may 404.`,
+      )
+    }
+
+    systemComponentSlugs.push(slug)
+    mcpSystemComponents.push({
+      slug,
+      name: compItem.title ?? slug,
+      description: compItem.description ?? '',
+      system: ds.slug,
+      dependencies: compItem.dependencies ?? [],
+      registryDependencies: compItem.registryDependencies ?? [],
+      homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}/${metaSlug}`,
+      sourceUrl: `https://aicanvas.me/r/${slug}.json`,
+      installCommand: `npx shadcn@latest add @aicanvas/${slug}`,
+    })
+  }
 
   mcpSystems.push({
     slug: ds.slug,
@@ -677,6 +756,7 @@ for (const ds of DESIGN_SYSTEMS) {
     dependencies: [...new Set([...(tokensItem?.dependencies ?? []), ...(sysItem?.dependencies ?? [])])].sort(),
     registryDependencies: sysItem?.registryDependencies ?? [],
     tokensSlug,
+    componentSlugs: systemComponentSlugs,
     templateSlugs: ds.templates.map((t) => t.slug),
     homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}`,
     sourceUrl: `https://aicanvas.me/r/${ds.slug}.json`,
@@ -716,6 +796,11 @@ const mcpMeta = {
   components: mcpComponents,
   systems: mcpSystems,
   templates: mcpTemplates,
+  // Design-system COMPONENTS kept in their own bucket, never merged into
+  // components[] (which is standalones only). The MCP's get_component /
+  // get_install_command / search_components fall back to this list so every DS
+  // slug resolves, while list_components and the categories stay standalone-only.
+  systemComponents: mcpSystemComponents,
 }
 
 // ── Integrity guard ──────────────────────────────────────────────────────────
@@ -729,7 +814,7 @@ const mcpMeta = {
     if (bucketOf.has(slug)) {
       throw new Error(
         `generate-registry: slug "${slug}" is in both "${bucketOf.get(slug)}" and "${bucket}". ` +
-          `Each slug must belong to exactly one of components/systems/templates, ` +
+          `Each slug must belong to exactly one of components/systems/templates/systemComponents, ` +
           `otherwise the MCP hands AI agents a URL that 404s.`,
       )
     }
@@ -738,10 +823,11 @@ const mcpMeta = {
   for (const c of mcpComponents) claim(c.slug, 'components')
   for (const s of mcpSystems) claim(s.slug, 'systems')
   for (const t of mcpTemplates) claim(t.slug, 'templates')
+  for (const sc of mcpSystemComponents) claim(sc.slug, 'systemComponents')
 }
 
 writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')
-console.log(`Generated MCP metadata: ${mcpComponents.length} components, ${Object.keys(categoryCounts).length} categories`)
+console.log(`Generated MCP metadata: ${mcpComponents.length} components, ${Object.keys(categoryCounts).length} categories, ${mcpSystems.length} systems, ${mcpSystemComponents.length} system components, ${mcpTemplates.length} templates`)
 
 // ── Lightweight nav counts (sidebar / mobile-nav) ─────────────────────────────
 // The client nav imports THIS registry-free module instead of component-registry,

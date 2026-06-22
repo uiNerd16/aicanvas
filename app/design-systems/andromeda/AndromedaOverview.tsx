@@ -33,7 +33,7 @@ const TEMPLATE_BLURBS = {
   'andromeda-mission-control':
     'Spacecraft telemetry — live altitude, vehicle roster, comms log, and a system-status readout in one mission view.',
   'andromeda-service-order':
-    'A field-service work order: SLA gauge, line items, order metadata, and a customer summary panel.',
+    'A field-service work order: an SLA gauge, line items, and order metadata.',
   'andromeda-resource-planning':
     'Capacity, allocation trend, and request triage across teams on one planning board.',
   'andromeda-signal-room':

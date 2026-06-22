@@ -16,7 +16,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'alert',
     name: 'Alert',
     description:
-      'Banner-style status component for inline messages. Default, accent, warning, fault — each with its own icon color and title color.',
+      'Banner-style status component for inline messages. Default, accent, warning, fault — each with its own per-variant color set. Severity-aware ARIA (warning and fault announce assertively, the rest politely) and compound parts: AlertIcon, AlertContent, AlertTitle, AlertDescription.',
     sourceFile: 'Alert.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/alert.png?v=5',
   },
@@ -24,14 +24,15 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'avatar',
     name: 'Avatar',
     description:
-      'Square initials tile in 3 sizes. Initials derived from name; optional status dot in 4 states.',
+      'Square tile in 3 sizes. Shows an image when src is provided, with a fallback to initials; optional status bar in 4 states.',
     sourceFile: 'Avatar.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/avatar.png?v=3',
   },
   {
     slug: 'badge',
     name: 'Badge',
-    description: '6 variants for status, metric tags, and inline labels.',
+    description:
+      '6 variants for status, metric tags, and inline labels. A leading per-variant status dot blinks on a loop to carry the signal, and holds steady when reduced motion is requested.',
     sourceFile: 'Badge.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/badge.png?v=3',
   },
@@ -47,7 +48,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'card',
     name: 'Card',
     description:
-      'Compound primitive: Card / Header / Content / Footer / Title / Description. No continuous border — corner brackets do the framing.',
+      'Compound primitive: Card / Header / Content / Footer / Title / Description. Corner brackets do the framing by default, with a bordered toggle for a continuous 1px border and a glow variant that adds an accent tint.',
     sourceFile: 'Card.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/card.png?v=4',
   },
@@ -55,7 +56,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'checkbox',
     name: 'Checkbox',
     description:
-      'Square boolean control. Controlled or uncontrolled. Inline label, accent fill on checked.',
+      'Square boolean control. Controlled or uncontrolled. Inline label, accent fill on checked, an accent focus ring, a press scale, a pop-in on the checkmark, and a 40px touch target on coarse pointers.',
     sourceFile: 'Checkbox.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/checkbox.png?v=3',
   },
@@ -79,7 +80,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'drawer',
     name: 'Drawer',
     description:
-      'Right-side slide-in panel with backdrop, ESC to close, body scroll lock, and the bracket motif. Portaled.',
+      'Slide-in panel on any side (left, right, top, or bottom), with focus trap and a size prop. Backdrop, ESC to close, body scroll lock, and the bracket motif. Portaled.',
     sourceFile: 'Drawer.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/drawer.png?v=3',
   },
@@ -119,7 +120,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'nav-item',
     name: 'Nav Item',
     description:
-      'Sidebar item with icon, active state, accent left bar. Mono label by default; sans available.',
+      'Sidebar item with icon, active state, right-edge indicator dot. Mono label by default; sans available.',
     sourceFile: 'NavItem.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/nav-item.png?v=4',
   },
@@ -127,7 +128,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'panel-header',
     name: 'Panel Header',
     description:
-      'Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border for separation.',
+      'Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Inset bottom divider.',
     sourceFile: 'PanelHeader.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/panel-header.png?v=3',
   },
@@ -140,10 +141,17 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/panel-menu.png?v=4',
   },
   {
+    slug: 'planet',
+    name: 'Planet',
+    description:
+      'A slowly rotating 3D particle sphere built with Three.js, lit from one side, with every particle colored from the Andromeda accent ramp so it follows the system palette. The canvas is transparent, so drop it inside a Card and the void shows through.',
+    sourceFile: 'Planet.tsx',
+  },
+  {
     slug: 'progress-bar',
     name: 'Progress Bar',
     description:
-      '3 variants. 3px tall track with a gradient fill and soft glow halo. Smooth width transitions.',
+      '3 status variants. 30 skewed segments fill left to right with a scroll-gated staggered cascade.',
     sourceFile: 'ProgressBar.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/progress-bar.png?v=4',
   },
@@ -191,7 +199,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'spinner',
     name: 'Spinner',
     description:
-      'SVG arc that rotates via a CSS keyframe — runs on the compositor. 4 color variants × 3 sizes.',
+      'A 3x3 pixel grid with a snake-game trail cycling via a single CSS keyframe, running on the compositor. 4 color variants and 3 sizes.',
     sourceFile: 'Spinner.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/spinner.png?v=3',
   },
@@ -199,7 +207,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'stat-tile',
     name: 'Stat Tile',
     description:
-      'Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign.',
+      'Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop.',
     sourceFile: 'StatTile.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/stat-tile.png?v=3',
   },
@@ -231,7 +239,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'table',
     name: 'Table',
     description:
-      'Compound data-table primitive: Table / TableHead / TableBody / TableRow / TableHeader / TableCell. Sortable column headers, row hover lift, selected-row accent edge.',
+      'Compound data-table primitive: Table / TableHead / TableBody / TableRow / TableHeader / TableCell. Sortable column headers, row hover highlight, selected-row accent edge. Render TableStyles once on the page to enable the hover styling.',
     sourceFile: 'Table.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/table.png?v=3',
   },
@@ -239,7 +247,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'tooltip',
     name: 'Tooltip',
     description:
-      'Hover label for icon-only controls. Wraps any child, floats above or below, sharp corners, mono uppercase text.',
+      'Hover label for icon-only controls. Wraps any child, floats above or below, sharp corners, mono uppercase text. Shows on keyboard focus too, carries role="tooltip", and clamps itself away from the viewport edges.',
     sourceFile: 'Tooltip.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/tooltip.png?v=4',
   },
@@ -255,7 +263,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'user-card',
     name: 'User Card',
     description:
-      'Wider user trigger that shows avatar, name, and role alongside the chevron — the canonical bottom-of-sidebar identity card. Same Profile / Preferences / Sign Out popover as User Menu; opens upward by default and stretches to the card width.',
+      'Wider user trigger that shows avatar, name, and role alongside the chevron, the canonical bottom-of-sidebar identity card. Same popover as User Menu, with menu rows supplied by the caller via an `items` prop; opens upward by default and stretches to the card width.',
     sourceFile: 'UserCard.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/user-card.png?v=3',
   },
@@ -263,7 +271,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'user-menu',
     name: 'User Menu',
     description:
-      'Avatar-trigger popover with Profile, Preferences, Sign Out and friends. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; closes on outside-click and Escape.',
+      'Avatar-trigger popover whose menu rows are supplied by the caller via an `items` prop. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; closes on outside-click and Escape.',
     sourceFile: 'UserMenu.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/user-menu.png?v=3',
   },

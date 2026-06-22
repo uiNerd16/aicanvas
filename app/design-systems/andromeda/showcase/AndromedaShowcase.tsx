@@ -756,7 +756,7 @@ export default function AndromedaShowcase({
           allowOverflow
           title="PanelHeader"
           slug="panel-header"
-          description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Bottom border separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
+          description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Inset bottom divider separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
         >
           {(() => {
             // Both demos sit side-by-side on one line. Each cell carries its
@@ -893,7 +893,7 @@ export default function AndromedaShowcase({
         <Section
           title="Badge"
           slug="badge"
-          description="6 variants for status, metric tags, and inline labels."
+          description="6 variants for status, metric tags, and inline labels. A leading per-variant status dot blinks on a loop to carry the signal, and holds steady when reduced motion is requested."
         >
           <Row>
             <Badge variant="default">Default</Badge>
@@ -909,7 +909,7 @@ export default function AndromedaShowcase({
         <Section
           title="Avatar"
           slug="avatar"
-          description="3 sizes. Initials derived from `name`. Optional status dot in 4 states."
+          description="3 sizes. Shows an image when `src` is provided, with a fallback to initials. Optional status bar in 4 states."
         >
           <Row label="Sizes">
             <Avatar name="Reza Quinn" size="sm" />
@@ -928,7 +928,7 @@ export default function AndromedaShowcase({
         <Section
           title="Card"
           slug="card"
-          description="Compound primitive: Card / CardHeader / CardContent / CardFooter / CardTitle / CardDescription. No continuous border by default — corner brackets do the framing."
+          description="Compound primitive: Card / CardHeader / CardContent / CardFooter / CardTitle / CardDescription. Corner brackets do the framing by default, with a bordered toggle for a continuous 1px border and a glow variant that adds an accent tint."
         >
           <div
             className="as-grid-2"
@@ -1117,7 +1117,7 @@ export default function AndromedaShowcase({
         <Section
           title="ProgressBar"
           slug="progress-bar"
-          description="3 variants. 3px tall track with a gradient fill and soft glow halo. Smooth width transitions."
+          description="3 status variants. 30 skewed segments fill left to right with a scroll-gated staggered cascade."
         >
           <div
             className="as-progress-stack"
@@ -1174,7 +1174,7 @@ export default function AndromedaShowcase({
         <Section
           title="StatTile"
           slug="stat-tile"
-          description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign."
+          description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop."
         >
           <div
             style={{
@@ -1229,7 +1229,7 @@ export default function AndromedaShowcase({
         <Section
           title="Checkbox"
           slug="checkbox"
-          description="Square boolean control. Controlled or uncontrolled. Inline label, accent fill on checked."
+          description="Square boolean control. Controlled or uncontrolled. Inline label, accent fill on checked, an accent focus ring, a press scale, a pop-in on the checkmark, and a 40px touch target on coarse pointers."
         >
           <Row label="States">
             <Checkbox label="Unchecked" />
@@ -1284,7 +1284,7 @@ export default function AndromedaShowcase({
         <Section
           title="SegmentedControl"
           slug="segmented-control"
-          description="Row of icon-or-label buttons that share a single border. The active background slides between segments via a CSS transform, so the indicator transition is on the compositor. Sized sm/md/lg to align with the Button/IconButton baseline."
+          description="Row of icon-or-label buttons that share a single border. The active background slides between segments on selection (Framer Motion layout animation). Sized sm/md/lg to align with the Button/IconButton baseline."
         >
           <Row label="Icons · sm">
             <SegmentedControl
@@ -1352,7 +1352,7 @@ export default function AndromedaShowcase({
         <Section
           title="Spinner"
           slug="spinner"
-          description="SVG arc that rotates via a CSS keyframe — runs on the compositor, no React per-frame work. 4 color variants × 3 sizes."
+          description="A 3x3 pixel grid with a snake-game trail cycling via a single CSS keyframe, running on the compositor. 4 color variants and 3 sizes."
         >
           <Row label="Sizes">
             <Spinner size="sm" />
@@ -1431,7 +1431,7 @@ export default function AndromedaShowcase({
           title="Alert"
           slug="alert"
           kicker="Component · Error"
-          description="Banner-style status component for inline messages. 4 variants — default, accent, warning, fault — each with its own icon color and title color."
+          description="Banner-style status component for inline messages. 4 variants — default, accent, warning, fault — each with its own per-variant color set. Severity-aware ARIA (warning and fault announce assertively, the rest politely) and compound parts: AlertIcon, AlertContent, AlertTitle, AlertDescription."
         >
           <div
             style={{
@@ -1615,7 +1615,7 @@ export default function AndromedaShowcase({
         <Section
           title="Table"
           slug="table"
-          description="Compound primitive for dense data tables. Sortable column headers with caret indicators, row hover lift, and selected-row accent-300 left edge. TableStyles injects the hover class rules once per page."
+          description="Compound primitive for dense data tables. Sortable column headers with caret indicators, row hover highlight, and selected-row accent-300 left edge. TableStyles must be rendered once per page to inject the hover class rules."
         >
           <TableStyles />
           <Table>
@@ -1653,7 +1653,7 @@ export default function AndromedaShowcase({
         <Section
           title="Tooltip"
           slug="tooltip"
-          description="Hover label for icon-only controls. Wraps any child and floats a mono uppercase label above (or below) it. No portal — stays in the nearest stacking context."
+          description="Hover label for icon-only controls. Wraps any child and floats a mono uppercase label above (or below) it. Shows on keyboard focus too, carries role='tooltip', and clamps itself away from the viewport edges. No portal, so it stays in the nearest stacking context."
         >
           <Row label="Position · top (default)">
             <Tooltip label="Refresh">
@@ -1686,7 +1686,7 @@ export default function AndromedaShowcase({
         <Section
           title="Drawer"
           slug="drawer"
-          description="Right-side slide-in panel with backdrop, ESC to close, body scroll lock, and the bracket motif. React Portal escapes any clipped ancestor."
+          description="Slide-in panel on any side (left, right, top, or bottom), with focus trap and a size prop. Backdrop, ESC to close, body scroll lock, and the bracket motif. React Portal escapes any clipped ancestor."
         >
           <Row label="Trigger">
             <Button onClick={() => setDrawerOpen(true)}>Open drawer</Button>
@@ -1722,7 +1722,7 @@ export default function AndromedaShowcase({
           allowOverflow
           title="UserMenu"
           slug="user-menu"
-          description="Avatar-trigger popover with Profile, Preferences, Sign Out and friends. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; pairs with UserCard for sidebars that have room to spell out name and role."
+          description="Avatar-trigger popover whose menu rows are supplied by the caller via an `items` prop. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; pairs with UserCard for sidebars that have room to spell out name and role."
         >
           {(() => {
             const items = [
@@ -1781,7 +1781,7 @@ export default function AndromedaShowcase({
           allowOverflow
           title="UserCard"
           slug="user-card"
-          description="Wider user trigger that shows avatar, name, and role alongside the chevron — the canonical bottom-of-sidebar identity card. Same Profile / Preferences / Sign Out popover as UserMenu; opens upward by default and stretches to the card width."
+          description="Wider user trigger that shows avatar, name, and role alongside the chevron, the canonical bottom-of-sidebar identity card. Same popover as UserMenu, with menu rows supplied by the caller via an `items` prop; opens upward by default and stretches to the card width."
         >
           {(() => {
             const items = [

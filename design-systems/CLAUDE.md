@@ -6,7 +6,7 @@ This folder contains **strict design systems**. Every component here is part of 
 
 | System | Components | Aesthetic | Showcase |
 |---|---|---|---|
-| `andromeda/` | 19 | Sci-fi / blueprint. Transparent surfaces, 1px corner markers, JetBrains Mono only, electric-blue accent. | `/design-systems/andromeda` and `/design-systems/andromeda/showcase` |
+| `andromeda/` | a growing set of components <!-- TODO: reconcile count after parity --> | Sci-fi / blueprint. Transparent surfaces, 1px corner markers, JetBrains Mono only, turquoise accent. | `/design-systems/andromeda` and `/design-systems/andromeda/showcase` |
 | `meridian/` | 9 | Editorial dashboard. Intentionally smaller surface area today; will grow over time to match Andromeda's coverage. | `/design-systems/meridian` |
 
 ## The three pillars of a design system

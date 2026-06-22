@@ -258,7 +258,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
   {
     slug: 'noise-bg',
     image: 'https://ik.imagekit.io/aitoolkit/noise-bg.png',
-    name: 'Noise Background',
+    name: 'Grain Background',
     description: 'A canvas-based grain background of randomly scattered dots that illuminate with a soft Gaussian glow and organic connection lines on hover.',
     tags: [
       { label: 'Backgrounds', accent: true },
@@ -442,7 +442,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     image: 'https://ik.imagekit.io/aitoolkit/floating-cards.png?v=3',
     name: 'Travel Deck',
     description:
-      'A swipeable deck of destination cards. Drag the front card down to send it to the back — each card reveals an animated hotels counter as it comes forward.',
+      'A swipeable deck of destination cards. Drag the front card down to fling it off-screen and reveal the next. Each card reveals an animated hotels counter as it comes forward.',
     tags: [
       { label: 'Cards & Modals', accent: true },
       { label: 'Motion' },
@@ -545,7 +545,7 @@ Requirements:
   {
     slug: 'sphere-lines',
     image: 'https://ik.imagekit.io/aitoolkit/sphere-lines.png',
-    name: 'Living Sphere',
+    name: 'Wireframe Globe',
     description: 'A wire-frame globe that breathes on its own — a narrow wave band drifts quietly across the surface. Hover to ripple the lines right where your cursor lands.',
     tags: [
       { label: 'Backgrounds', accent: true },
@@ -590,7 +590,7 @@ Requirements:
   {
     slug: 'scramble-text',
     image: 'https://ik.imagekit.io/aitoolkit/scramble-text.png?v=3',
-    name: 'Encrypted Text',
+    name: 'Scramble Text',
     description: 'Two words scramble continuously in a pixel cipher. Hover the container to decrypt them one by one — mouse out and they snap back to noise.',
     tags: [
       { label: 'Typography', accent: true },
@@ -604,7 +604,7 @@ Requirements:
   {
     slug: 'neon-clock',
     image: 'https://ik.imagekit.io/aitoolkit/neon-clock.png?v=9',
-    name: 'LCD Clock',
+    name: 'Seven-Segment Clock',
     description: 'A retro 7-segment LCD clock with pixel-grid overlay. Shows live HH:MM:SS with blinking colon, AM/PM indicator, day of week row, and full date.',
     tags: [
       { label: 'Widgets', accent: true },
@@ -867,7 +867,7 @@ Requirements:
   },
   {
     slug: 'glass-ai-compose',
-    name: 'Glass AI Chat',
+    name: 'Glass AI Composer',
     description: 'Glassmorphism AI chat input with image upload, web search toggle, and model switcher.',
     image: 'https://ik.imagekit.io/aitoolkit/glass-ai-compose.png',
     tags: [
@@ -1008,9 +1008,9 @@ Requirements:
   },
   {
     slug: 'jar-of-emotions',
-    name: 'The Verdict Jar',
+    name: 'Emoji Reaction Jar',
     image: 'https://ik.imagekit.io/aitoolkit/jar-of-emotions.png',
-    description: 'Glass jar widget — click a reaction to spring the lid and watch the emoji bounce down.',
+    description: 'Glass jar widget. Click a reaction to spring the lid and watch the emoji bounce down.',
     tags: [
       { label: 'Widgets', accent: true },
       { label: 'Matter.js' },
