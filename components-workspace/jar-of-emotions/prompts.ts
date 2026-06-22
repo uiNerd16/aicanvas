@@ -10,13 +10,13 @@ Install: npm install matter-js framer-motion && npm install -D @types/matter-js
 ---
 
 ## Overview
-A physics-based reaction widget called "The Verdict Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
+A physics-based reaction widget called "Emoji Reaction Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
 
 ---
 
 ## Layout (top → bottom, vertically centered on screen)
 1. SVG jar (largest element)
-2. Title "The Verdict Jar" + tagline "Reactions on tap" (below the jar)
+2. Title "Emoji Reaction Jar" + tagline "Reactions on tap" (below the jar)
 3. Row of 6 reaction buttons
 
 Container: flex-col, justify-center, gap-7. Root: min-h-screen, bg-sand-100 dark:bg-sand-950 (or equivalent neutral dark/light surfaces).
@@ -106,13 +106,13 @@ Install: npm install matter-js framer-motion && npm install -D @types/matter-js
 ---
 
 ## Overview
-A physics-based reaction widget called "The Verdict Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
+A physics-based reaction widget called "Emoji Reaction Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
 
 ---
 
 ## Layout (top → bottom, vertically centered on screen)
 1. SVG jar (largest element)
-2. Title "The Verdict Jar" + tagline "Reactions on tap" (below the jar)
+2. Title "Emoji Reaction Jar" + tagline "Reactions on tap" (below the jar)
 3. Row of 6 reaction buttons
 
 Container: flex-col, justify-center, gap-7. Root: min-h-screen with neutral dark/light surface.
@@ -174,13 +174,13 @@ Install: npm install matter-js framer-motion && npm install -D @types/matter-js
 ---
 
 ## Overview
-A physics-based reaction widget called "The Verdict Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
+A physics-based reaction widget called "Emoji Reaction Jar". A centered SVG glass jar holds emoji reactions inside. Clicking a reaction button springs the lid open and a matching emoji flies up out of the jar, then bounces down onto the clicked button. Emojis accumulate on the button row with real 2D physics.
 
 ---
 
 ## Layout (top → bottom, vertically centered on screen)
 1. SVG jar (largest element)
-2. Title "The Verdict Jar" + tagline "Reactions on tap" (below the jar)
+2. Title "Emoji Reaction Jar" + tagline "Reactions on tap" (below the jar)
 3. Row of 6 reaction buttons
 
 Container: flex-col, justify-center, gap-7. Root: min-h-screen with neutral dark/light surface.

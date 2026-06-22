@@ -124,7 +124,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'noise-bg': {
     useCases: ['Hero section', 'Editorial', 'Landing page'],
     about:
-      'Noise Background scatters thousands of tiny dots at random across a 2D canvas, with a subtle Gaussian glow that pools where they cluster. On hover, organic connection lines stretch between the dots near your cursor, briefly turning the noise into a network. It is a quiet, ambient background built for editorial layouts, hero sections, and any long-form page that needs texture without color competition. The whole effect runs in one canvas with Tailwind for the surrounding container.',
+      'Grain Background scatters thousands of tiny dots at random across a 2D canvas, with a subtle Gaussian glow that pools where they cluster. On hover, organic connection lines stretch between the dots near your cursor, briefly turning the noise into a network. It is a quiet, ambient background built for editorial layouts, hero sections, and any long-form page that needs texture without color competition. The whole effect runs in one canvas with Tailwind for the surrounding container.',
   },
   'x-grid': {
     useCases: ['Hero section', 'Marketing site', 'Empty state'],
@@ -144,7 +144,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'sphere-lines': {
     useCases: ['Hero section', 'AI product', 'Marketing site'],
     about:
-      'Living Sphere is a wireframe globe drawn entirely in a 2D canvas, with a single narrow band of wave-displacement that drifts continuously across its surface so the thing never looks frozen. Move your cursor near it and a localised ripple bows the wireframe at exactly that spot, then settles back. There is no Three.js involved, just trigonometry and one render loop, which keeps the build size tiny. Pair it with an AI hero, a research-style marketing page, or as a quiet centerpiece that signals depth without screaming.',
+      'Wireframe Globe is a wireframe globe drawn entirely in a 2D canvas, with a single narrow band of wave-displacement that drifts continuously across its surface so the thing never looks frozen. Move your cursor near it and a localised ripple bows the wireframe at exactly that spot, then settles back. There is no Three.js involved, just trigonometry and one render loop, which keeps the build size tiny. Pair it with an AI hero, a research-style marketing page, or as a quiet centerpiece that signals depth without screaming.',
   },
   'magnetic-dots': {
     useCases: ['Hero section', 'Portfolio', 'Marketing site'],
@@ -250,7 +250,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'neon-clock': {
     useCases: ['Dashboard', 'Game UI', 'Portfolio'],
     about:
-      'LCD Clock is a retro 7-segment clock built from CSS alone, with a faint pixel-grid overlay that gives the digits a real vintage-display feel. It shows live hours, minutes, and seconds with a blinking colon, plus AM/PM, a row for the day of the week, and the full date underneath. Because there is no canvas or external font, the whole thing renders instantly and styles cleanly with Tailwind. It is a strong fit for retro game UI, terminal-themed dashboards, or portfolio sites leaning on a nostalgic palette.',
+      'Seven-Segment Clock is a retro clock whose digits are drawn as SVG polygons, one shape per segment, with a faint pixel-grid overlay that gives them a real vintage-display feel. It shows live hours, minutes, and seconds with a blinking colon, plus AM/PM, a row for the day of the week, and the full date underneath. Because there is no external font and no canvas to repaint, the whole thing renders instantly and styles cleanly with Tailwind. It is a strong fit for retro game UI, terminal-themed dashboards, or portfolio sites leaning on a nostalgic palette.',
   },
   'glass-music-player': {
     useCases: ['Marketing site', 'Portfolio', 'Mobile app'],
@@ -275,7 +275,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'jar-of-emotions': {
     useCases: ['Reactions', 'Feedback', 'Empty state'],
     about:
-      'The Verdict Jar is a glass jar widget with a lid that springs open when you tap one of the reaction buttons below it, sending the corresponding emoji bouncing down through the jar. The bounce and pile-up are real Matter.js physics, so multiple emojis stack and jostle each other as you keep clicking. Motion drives the lid hinge and the spawning animation. It is a delightful drop-in for feedback widgets, end-of-article reaction bars, and empty states that want users to leave a mark.',
+      'Emoji Reaction Jar is a glass jar widget with a lid that springs open when you tap one of the reaction buttons below it, sending the matching reaction emoji bouncing down through the jar. The bounce and pile-up are real Matter.js physics, so multiple emojis stack and jostle each other as you keep clicking. Motion drives the lid hinge and the spawning animation. It is a delightful drop-in for feedback widgets, end-of-article reaction bars, and empty states that want users to leave a mark.',
   },
   'upload-progress': {
     useCases: ['Dashboard', 'File manager', 'Onboarding'],
@@ -292,7 +292,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'traveldeck': {
     useCases: ['Image gallery', 'Portfolio', 'E-commerce'],
     about:
-      'Travel Deck is a swipeable stack of destination cards that you flick through with a downward drag on the front card. As the top card recedes it animates a hotel-count badge that counts up to its destination total, then settles into the back of the stack. Motion handles both the drag tracking and the spring-back of dismissed cards into the back of the deck. It is a strong choice for image galleries, travel marketing pages, portfolio sliders, and product showcases that benefit from a tactile, deck-of-cards interaction.',
+      'Travel Deck is a swipeable stack of destination cards: flick the front card with a downward drag and it flings off-screen to reveal the next one behind it. As each card comes forward it animates a hotel-count badge that counts up to its destination total. Motion handles both the drag tracking and the fling-away exit of dismissed cards. It is a strong choice for image galleries, travel marketing pages, portfolio sliders, and product showcases that benefit from a tactile, deck-of-cards interaction.',
   },
   'polaroid-stack': {
     useCases: ['Image gallery', 'Portfolio', 'Wedding site'],
@@ -337,7 +337,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'peel-corner-reveal': {
     useCases: ['Marketing site', 'Onboarding', 'Event'],
     about:
-      'Peel to Scan is a portrait card whose top corner curls back when you tap it, revealing a scannable Wi-Fi QR code underneath. The peel uses Motion to drive both the rotation of the curl and the shadow that follows it, so the gesture feels like real paper rather than a transform. Tap again to seal it. It is a small but memorable detail for event signage, hotel marketing pages, onboarding flows that need to surface a secondary asset, and anywhere a QR code deserves a little theater.',
+      'Peel to Scan is a portrait card whose bottom-right corner peels back when you tap it, revealing a scannable Wi-Fi QR code underneath. The peel uses Motion to drive both the rotation of the curl and the shadow that follows it, so the gesture feels like real paper rather than a transform. Tap again to seal it. It is a small but memorable detail for event signage, hotel marketing pages, onboarding flows that need to surface a secondary asset, and anywhere a QR code deserves a little theater.',
   },
   'radial-cards': {
     useCases: ['Dashboard', 'Health app', 'Marketing site'],
@@ -369,7 +369,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'glass-ai-compose': {
     useCases: ['AI product', 'SaaS', 'Editor'],
     about:
-      'Glass AI Compose is an AI chat input with everything modern conversation interfaces tend to bolt on: an image-upload slot, a web-search toggle that visibly engages, and a model switcher dropdown for picking between fast and frontier models. The whole thing sits inside a glassmorphism surface with Motion-driven focus and toggle states, so the composer feels like part of the product rather than a third-party widget. Drop it into AI products, SaaS support consoles, editor command surfaces, and any chat-style entry point.',
+      'Glass AI Composer is an AI chat input with everything modern conversation interfaces tend to bolt on: an image-upload slot, a web-search toggle that visibly engages, and a segmented pill switcher for picking between fast and frontier models. The whole thing sits inside a glassmorphism surface with Motion-driven focus and toggle states, so the composer feels like part of the product rather than a third-party widget. Drop it into AI products, SaaS support consoles, editor command surfaces, and any chat-style entry point.',
   },
 
   // ─── Notifications ───────────────────────────────────────────────────────
@@ -398,7 +398,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'scramble-text': {
     useCases: ['Hero section', 'Portfolio', 'AI product'],
     about:
-      'Encrypted Text is two words running a continuous pixel-cipher scramble until you hover the container, at which point they decrypt one letter at a time and reveal themselves cleanly. Move away and they re-encrypt. Motion drives both the scramble loop and the reveal sequencing; the glyph set is intentionally constrained so the noise reads as deliberate. Use it for hero headlines, portfolio splash sections, AI-product tags, and any interaction where the act of reading is part of the experience.',
+      'Scramble Text is two words running a continuous scramble effect, each letter flickering through a constrained glyph set, until you hover the container, at which point they resolve one letter at a time and settle into the real words. Move away and they scramble back into noise. Motion drives both the scramble loop and the reveal sequencing; the glyph set is intentionally constrained so the noise reads as deliberate. Use it for hero headlines, portfolio splash sections, AI-product tags, and any interaction where the act of reading is part of the experience.',
   },
   'responsive-letters': {
     useCases: ['Hero section', 'Editorial', 'Type specimen'],

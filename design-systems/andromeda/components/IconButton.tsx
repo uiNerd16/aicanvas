@@ -5,7 +5,6 @@
 // vocabulary so the two compose into a single coherent toolbar.
 // Variants: default | outline | ghost | destructive
 // Sizes:    sm (24px) | md (32px) | lg (40px)
-// Optional `badge` slot for unread counters / status pips.
 // ============================================================
 
 'use client';

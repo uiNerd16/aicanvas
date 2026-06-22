@@ -7,7 +7,8 @@
  * inspect, and install components without leaving the chat.
  *
  * Data flow:
- *   - aicanvas.me/r/aicanvas-mcp.json   → all 64+ components' metadata
+ *   - aicanvas.me/r/aicanvas-mcp.json   → metadata for the 75 standalone
+ *     components plus the Andromeda design system, its components, and templates
  *   - aicanvas.me/r/<slug>.json         → full source code per component
  *
  * Both are static files, served from Vercel's CDN. Stateless server.
@@ -64,7 +65,29 @@ interface SystemMeta {
   componentCount: number
   tokenFileCount: number
   dependencies: string[]
+  // registryDependencies, tokens*, and componentSlugs are emitted by the
+  // generator so an agent doing a MANUAL (non-CLI) write knows the shared
+  // foundation it must also install and can enumerate the system's components.
+  registryDependencies?: string[]
+  tokensInstallCommand?: string
+  tokensSourceUrl?: string
+  componentSlugs?: string[]
   templateSlugs: string[]
+  homepageUrl: string
+  sourceUrl: string
+  installCommand: string
+}
+
+// A single design-system COMPONENT (e.g. andromeda-heat-grid). Kept in its own
+// `systemComponents` bucket — installable + searchable via the MCP, but NOT part
+// of the standalone components[] catalog or its categories.
+interface SystemComponentMeta {
+  slug: string
+  name: string
+  description: string
+  system: string
+  dependencies: string[]
+  registryDependencies?: string[]
   homepageUrl: string
   sourceUrl: string
   installCommand: string
@@ -78,6 +101,9 @@ interface TemplateMeta {
   description: string
   fileCount: number
   dependencies: string[]
+  // The base components + tokens a manual write must also install. The CLI
+  // resolves these automatically; a hand-written file copy does not.
+  registryDependencies?: string[]
   homepageUrl: string
   sourceUrl: string
   installCommand: string
@@ -93,6 +119,7 @@ interface MetaPayload {
   // Older deploys may not include these fields — treat as optional.
   systems?: SystemMeta[]
   templates?: TemplateMeta[]
+  systemComponents?: SystemComponentMeta[]
 }
 
 interface ShadcnRegistryItem {
@@ -184,6 +211,36 @@ function scoreMatch(query: string, c: ComponentMeta): number {
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+// Minimal searchable surface for design-system components — slug, name,
+// description, and the system name. Mirrors scoreMatch's token logic so DS
+// components rank alongside standalones in search results.
+function scoreSystemComponent(query: string, c: SystemComponentMeta): number {
+  const q = normalize(query)
+  if (!q) return 0
+  const tokens = q.split(/\s+/).filter((t) => t.length > 2)
+  if (tokens.length === 0) return 0
+
+  const fields = [
+    { text: normalize(c.slug), weight: 5 },
+    { text: normalize(c.name), weight: 4 },
+    { text: normalize(c.description), weight: 1 },
+    { text: normalize(c.system), weight: 2 },
+  ]
+
+  let score = 0
+  for (const tok of tokens) {
+    for (const f of fields) {
+      if (!f.text) continue
+      if (new RegExp(`\\b${escapeRegExp(tok)}\\b`).test(f.text)) {
+        score += f.weight * 2
+      } else if (f.text.includes(tok)) {
+        score += f.weight
+      }
+    }
+  }
+  return score
 }
 
 function asTextContent(value: unknown): { type: 'text'; text: string } {
@@ -339,16 +396,28 @@ server.registerTool(
   async ({ query, limit = 10 }) => {
     try {
       const meta = await fetchMeta()
-      const ranked = meta.components
-        .map((c) => ({ component: c, score: scoreMatch(query, c) }))
+      // Rank standalones AND design-system components together so DS slugs
+      // (e.g. "andromeda-heat-grid") surface in search. Each result object stays
+      // usable: standalones keep their full shape; DS components carry their
+      // metadata (slug, name, description, system, install command, …).
+      const standaloneRanked = meta.components.map((c) => ({
+        item: c as ComponentMeta | SystemComponentMeta,
+        score: scoreMatch(query, c),
+      }))
+      const systemRanked = (meta.systemComponents ?? []).map((c) => ({
+        item: c as ComponentMeta | SystemComponentMeta,
+        score: scoreSystemComponent(query, c),
+      }))
+
+      const ranked = [...standaloneRanked, ...systemRanked]
         .filter((r) => r.score > 0)
         .sort((a, b) => b.score - a.score)
         .slice(0, limit)
-        .map((r) => r.component)
+        .map((r) => r.item)
 
       const summary =
         ranked.length === 0
-          ? `No matches for "${query}". Try \`list_categories\` to browse what exists.`
+          ? `No matches for "${query}". Try \`list_categories\` to browse standalones, or \`list_systems\` for design systems.`
           : `${ranked.length} match${ranked.length === 1 ? '' : 'es'} for "${query}"`
 
       return {
@@ -383,17 +452,51 @@ server.registerTool(
     try {
       const meta = await fetchMeta()
       const component = meta.components.find((c) => c.slug === slug)
-      if (!component) {
+      // Fall back to design-system components (kept out of components[]).
+      const systemComponent = component
+        ? undefined
+        : (meta.systemComponents ?? []).find((c) => c.slug === slug)
+
+      if (!component && !systemComponent) {
         return errorResult(
-          `No component found with slug "${slug}". Use \`search_components\` or \`list_components\` to find valid slugs.`,
+          `No component found with slug "${slug}". Use \`search_components\` or \`list_components\` to find standalone slugs, ` +
+            `or \`list_systems\` / \`get_system\` for design-system components (e.g. "andromeda-heat-grid").`,
         )
       }
+
       const source = await fetchComponentSource(slug)
       const code = source.files[0]?.content ?? ''
       const filePath = source.files[0]?.path ?? `components/aicanvas/${slug}.tsx`
 
+      if (systemComponent) {
+        const result = { ...systemComponent, filePath, code }
+        return {
+          content: [
+            asTextContent(
+              [
+                `# ${systemComponent.name}`,
+                '',
+                systemComponent.description,
+                '',
+                `Design system: ${systemComponent.system}`,
+                `Dependencies: ${systemComponent.dependencies.join(', ') || '(none)'}`,
+                `Registry dependencies: ${(systemComponent.registryDependencies ?? []).join(', ') || '(none)'}`,
+                `Install: ${systemComponent.installCommand}`,
+                `Homepage: ${systemComponent.homepageUrl}`,
+                '',
+                'Note: a manual (non-CLI) write must ALSO install the shared tokens this component depends on (see registry dependencies above and `get_system`). The CLI install resolves them automatically.',
+                '',
+                `--- ${filePath} ---`,
+                code,
+              ].join('\n'),
+            ),
+          ],
+          structuredContent: result,
+        }
+      }
+
       const result = {
-        ...component,
+        ...component!,
         filePath,
         code,
       }
@@ -402,14 +505,14 @@ server.registerTool(
         content: [
           asTextContent(
             [
-              `# ${component.name}`,
+              `# ${component!.name}`,
               '',
-              component.description,
+              component!.description,
               '',
-              `Categories: ${component.categories.join(', ') || '(none)'}`,
-              `Dependencies: ${component.dependencies.join(', ') || '(none)'}`,
-              `Install: ${component.installCommand}`,
-              `Homepage: ${component.homepageUrl}`,
+              `Categories: ${component!.categories.join(', ') || '(none)'}`,
+              `Dependencies: ${component!.dependencies.join(', ') || '(none)'}`,
+              `Install: ${component!.installCommand}`,
+              `Homepage: ${component!.homepageUrl}`,
               '',
               `--- ${filePath} ---`,
               code,
@@ -443,10 +546,13 @@ server.registerTool(
   async ({ slug }) => {
     try {
       const meta = await fetchMeta()
-      const component = meta.components.find((c) => c.slug === slug)
+      const component =
+        meta.components.find((c) => c.slug === slug) ??
+        (meta.systemComponents ?? []).find((c) => c.slug === slug)
       if (!component) {
         return errorResult(
-          `No component found with slug "${slug}". Use \`search_components\` to find valid slugs.`,
+          `No component found with slug "${slug}". Use \`search_components\` to find standalone slugs, ` +
+            `or \`list_systems\` / \`get_system\` for design-system components.`,
         )
       }
       const out = {
@@ -545,6 +651,15 @@ server.registerTool(
         )
       }
       const item = await fetchComponentSource(slug)
+
+      // The system's own design-system components, with their per-component
+      // install commands — so an agent can install (or hand-write) any subset.
+      const components = (meta.systemComponents ?? []).filter(
+        (c) =>
+          c.system === system.slug ||
+          (system.componentSlugs ?? []).includes(c.slug),
+      )
+
       const summary = [
         `# ${system.name} design system`,
         '',
@@ -552,8 +667,18 @@ server.registerTool(
         '',
         `Files: ${item.files.length}`,
         `Dependencies: ${system.dependencies.join(', ') || '(none)'}`,
-        `Install: ${system.installCommand}`,
+        `Registry dependencies: ${(system.registryDependencies ?? []).join(', ') || '(none)'}`,
+        `Install (whole system): ${system.installCommand}`,
+        ...(system.tokensInstallCommand
+          ? [`Install (shared tokens only): ${system.tokensInstallCommand}`]
+          : []),
+        ...(system.tokensSourceUrl ? [`Tokens source: ${system.tokensSourceUrl}`] : []),
         `Homepage: ${system.homepageUrl}`,
+        '',
+        'Note: the shared tokens ship as a SEPARATE registry dependency. For a manual (non-CLI) file write you must ALSO install the tokens (see "Install (shared tokens only)" above); the CLI resolves them automatically.',
+        '',
+        `--- components (${components.length}) ---`,
+        ...components.map((c) => `  ${c.slug.padEnd(28)}  ${c.installCommand}`),
         '',
         `--- file index ---`,
         ...item.files.map((f) => `  ${f.path}`),
@@ -563,6 +688,7 @@ server.registerTool(
         content: [asTextContent(summary)],
         structuredContent: {
           ...system,
+          components,
           files: item.files,
         },
       }
@@ -607,8 +733,11 @@ server.registerTool(
         '',
         `Files: ${item.files.length}`,
         `Dependencies: ${template.dependencies.join(', ') || '(none)'}`,
+        `Registry dependencies: ${(template.registryDependencies ?? []).join(', ') || '(none)'}`,
         `Install: ${template.installCommand}`,
         `Preview: ${template.homepageUrl}`,
+        '',
+        'Note: a manual (non-CLI) file write must ALSO install the registry dependencies above (the base components + shared tokens) for the composition to build. The CLI install resolves them automatically.',
         '',
         `--- file index ---`,
         ...item.files.map((f) => `  ${f.path}`),

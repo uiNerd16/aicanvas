@@ -13,8 +13,8 @@
 //   description — card description line
 //   className / style passthrough
 //
-// Defaults to a single series "NOMINAL" vs "CRITICAL" ship-systems
-// diagnostic if no data/series are provided.
+// Defaults to two series, "Nominal" and "Critical", forming a
+// ship-systems diagnostic if no data/series are provided.
 // ============================================================
 
 'use client';

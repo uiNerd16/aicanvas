@@ -12,7 +12,6 @@
 import { forwardRef, useState } from 'react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { CornerMarkers } from './CornerMarkers';
 
 /**
  * @typedef {object} SearchFieldProps

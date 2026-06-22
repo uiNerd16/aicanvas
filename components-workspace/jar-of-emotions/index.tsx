@@ -817,7 +817,7 @@ export default function JarOfEmotions() {
             className="font-sans text-xl font-extrabold tracking-tight sm:text-2xl"
             style={{ color: styles.promptColor, letterSpacing: '-0.02em' }}
           >
-            The Verdict Jar
+            Emoji Reaction Jar
           </h2>
           <p
             className="font-sans text-xs font-medium sm:text-sm"

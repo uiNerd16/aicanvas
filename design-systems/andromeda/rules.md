@@ -85,7 +85,7 @@ These are the canonical compositions Andromeda was built to produce. When the us
 
 Use for: KPI grids, mission summary, telemetry overview.
 
-- Wrap in `<Card>` with `<PanelHeader>` (uppercase title, optional right-side controls)
+- Wrap in `<Card>` with `<PanelHeader>` (sentence-case title, optional right-side controls)
 - Inside: row of 3-5 `<StatTile>` components, equal flex share
 - Tiles share borders edge-to-edge with `marginLeft: -1` so the seam is a single 1px line
 - Each tile: code label (top-right, `text.faint`), big numeric value (count-up animation), delta arrow + percentage
@@ -247,6 +247,7 @@ Chart ink is neutral by default because the chart itself is the data. Color ente
 - Default: `surface.raised` bg, no perimeter stroke, corner markers as the frame
 - Glow: `gradient.accentSweep` bg, `accent-500` border, corner markers
 - The accentSweep gradient is a barely-visible teal whisper — if it reads as a colored card it's too strong
+- `CornerMarkers` default to grey (`color.border.bright`, `#5B5B5C`), not the accent. The grey frame is the system's resting motif; turquoise corner brackets are opt-in (pass an accent `color` prop) and reserved for surfaces that genuinely need to draw the eye, never the default.
 - CardHeader, CardContent, CardFooter use consistent padding from `tokens.spacing` — never override
 
 ### Frames don't nest
@@ -907,7 +908,7 @@ Pick the right component when two could plausibly fit. These are the most common
 
 ### "I want a labeled section"
 
-- Top-level dashboard panel: **`<Card>` + `<PanelHeader>`** (uppercase, `size.xl`, `tracking.tight`, `spacing[4] spacing[5]` padding)
+- Top-level dashboard panel: **`<Card>` + `<PanelHeader>`** (sentence-case, `size.xl`, `tracking.tight`, `spacing[4] spacing[5]` padding)
 - Nested sub-region inside a panel: **`<Card>` + `<CardHeader>`** (uppercase, `size.sm`, `tracking.wider`, `spacing[3]` all sides)
 - Single-line label with right-side action: PanelHeader (with action slot)
 - Two visual weights signal hierarchy. Don't mix.

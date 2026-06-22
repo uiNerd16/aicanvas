@@ -84,7 +84,7 @@ function buildMonthGrid(viewDate) {
 }
 
 function formatRangeChip(range) {
-  if (!range || !range.start) return '—';
+  if (!range || !range.start) return 'Any dates';
   const fmt = (d) => `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
   if (!range.end || isSameDay(range.start, range.end)) return fmt(range.start);
   return `${fmt(range.start)} → ${fmt(range.end)}`;
@@ -336,7 +336,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
         }}
       >
         <CalendarBlank weight="regular" size={13} />
-        {presetLabel ? `${presetLabel} — ` : ''}
+        {presetLabel ? `${presetLabel} · ` : ''}
         {formatRangeChip(value)}
         <CaretDown
           weight="bold"

@@ -177,9 +177,9 @@ export function AndromedaComponentView({
       </div>
     )
 
-  // Andromeda doesn't have a published shadcn registry yet — this command
-  // mirrors the standalone pattern so the layout reads correctly. Wire to
-  // a real registry once the system gets one.
+  // Andromeda ships through the published @aicanvas shadcn registry, so this
+  // command installs a real component — it mirrors the standalone pattern for
+  // a consistent layout.
   // Signed-in users get a tokenized direct-URL install so the registry can
   // attribute the pull to their account; anonymous users get the plain
   // @aicanvas namespace command. The displayed form masks the token; copy
