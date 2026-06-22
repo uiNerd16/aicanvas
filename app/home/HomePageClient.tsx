@@ -1150,6 +1150,13 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 The short version of everything people ask before shipping their
                 first component.
               </p>
+              <Link
+                href="/faq"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400"
+              >
+                See all FAQs
+                <CaretRight weight="regular" size={14} />
+              </Link>
             </motion.div>
 
             {/* Accordion cards */}
