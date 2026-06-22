@@ -128,6 +128,22 @@ export default function TermsPage() {
           </p>
         </section>
 
+        {/* ── 4b. Trademarks & independence ────────────────────────────── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            4b. Trademarks &amp; independence
+          </h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            AI Canvas is an independent project. It is not partnered with,
+            sponsored by, endorsed by, or an official integration of the
+            third-party tools, platforms, and brands referenced on the site,
+            including Claude Code, Lovable, V0, and shadcn. All product names,
+            logos, and trademarks are the property of their respective owners and
+            are used here only nominatively, to describe compatibility and
+            interoperability.
+          </p>
+        </section>
+
         {/* ── 5. Acceptable use ────────────────────────────────────────── */}
         <section className="mt-10">
           <h2 className="text-lg font-bold text-sand-50">5. Acceptable use</h2>

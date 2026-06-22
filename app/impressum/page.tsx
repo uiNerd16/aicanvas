@@ -7,7 +7,9 @@ import { SiteFooter } from '../components/SiteFooter'
 import { HeaderSocials } from '../components/HeaderSocials'
 
 // ─── /impressum ───────────────────────────────────────────────────────────────
-// § 5 DDG imprint.
+// § 5 DDG imprint. Bilingual: German (authoritative) first, English alongside
+// in a muted tone. Order: Haftung -> Urheberrecht -> Diensteanbieter -> Kontakt
+// -> Verantwortlicher (§ 18 MStV) -> Verbraucherstreitbeilegung.
 
 export default function ImpressumPage() {
   const ref = useRef<HTMLDivElement>(null)
@@ -40,71 +42,155 @@ export default function ImpressumPage() {
           Impressum
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Information pursuant to § 5 DDG (Digital Services Act, Germany).
+          Angaben gemäß § 5 DDG. / Information pursuant to § 5 DDG (Digital
+          Services Act, Germany).
         </p>
 
+        {/* ── Haftung für Inhalte / Liability for content ────────────────── */}
         <section className="mt-12">
-          <h2 className="text-lg font-bold text-sand-50">Liability for content</h2>
+          <h2 className="text-lg font-bold text-sand-50">
+            Haftung für Inhalte / Liability for content
+          </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            As a service provider we are responsible for our own content on
-            these pages in accordance with general legislation pursuant to § 7
-            (1) DDG. Pursuant to §§ 8 to 10 DDG we are not obliged to monitor
-            transmitted or stored third-party information or to investigate
-            circumstances that indicate illegal activity. Obligations to remove
-            or block the use of information under general law remain unaffected.
-            Liability in this respect is, however, only possible from the time
-            we become aware of a specific infringement. Upon notification of a
-            corresponding infringement we will remove the content immediately.
+            Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte
+            auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach
+            §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht
+            verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
+            überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
+            Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der
+            Nutzung von Informationen nach den allgemeinen Gesetzen bleiben
+            hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem
+            Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei
+            Bekanntwerden entsprechender Rechtsverletzungen werden wir diese
+            Inhalte umgehend entfernen.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-500">
+            As a service provider we are responsible for our own content on these
+            pages in accordance with general legislation pursuant to § 7 (1) DDG.
+            Pursuant to §§ 8 to 10 DDG we are not obliged to monitor transmitted
+            or stored third-party information or to investigate circumstances that
+            indicate illegal activity. Obligations to remove or block the use of
+            information under general law remain unaffected. Liability in this
+            respect is, however, only possible from the time we become aware of a
+            specific infringement. Upon notification of a corresponding
+            infringement we will remove the content immediately.
           </p>
         </section>
 
+        {/* ── Haftung für Links / Liability for external links ───────────── */}
         <section className="mt-10">
-          <h2 className="text-lg font-bold text-sand-50">Liability for external links</h2>
+          <h2 className="text-lg font-bold text-sand-50">
+            Haftung für Links / Liability for external links
+          </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
+            Unser Angebot enthält Links zu externen Websites Dritter, auf deren
+            Inhalte wir keinen Einfluss haben. Deshalb können wir für diese
+            fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der
+            verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der
+            Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der
+            Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige
+            Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine
+            permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne
+            konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei
+            Bekanntwerden von Rechtsverletzungen werden wir derartige Links
+            umgehend entfernen.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-500">
             Our site contains links to external websites of third parties, on
             whose content we have no influence. We therefore cannot assume any
             liability for these external contents. The respective provider or
-            operator of the linked pages is always responsible for their
-            content. The linked pages were checked for possible legal
-            violations at the time of linking. Illegal contents were not
-            recognisable at the time of linking. A permanent control of the
-            content of the linked pages is, however, not reasonable without
-            concrete evidence of an infringement. Upon notification of legal
-            violations, we will remove such links immediately.
+            operator of the linked pages is always responsible for their content.
+            The linked pages were checked for possible legal violations at the
+            time of linking. Illegal contents were not recognisable at the time of
+            linking. A permanent control of the content of the linked pages is,
+            however, not reasonable without concrete evidence of an infringement.
+            Upon notification of legal violations, we will remove such links
+            immediately.
           </p>
         </section>
 
+        {/* ── Urheberrecht / Copyright ───────────────────────────────────── */}
         <section className="mt-10">
-          <h2 className="text-lg font-bold text-sand-50">Copyright</h2>
+          <h2 className="text-lg font-bold text-sand-50">Urheberrecht / Copyright</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Components published in the AI Canvas registry are released under
-            the MIT licence. You are free to copy them, modify them, and ship
-            them.
+            Die im AI Canvas Registry veröffentlichten Komponenten stehen unter
+            der MIT-Lizenz. Sie dürfen sie frei kopieren, ändern und einsetzen.
+            Die Website selbst (Layout, Texte, Branding) ist das Werk des
+            Betreibers und urheberrechtlich geschützt. Auf dieser Seite
+            verwendete Inhalte Dritter (Icons, Schriften, eingebundene
+            Bibliotheken) sind als solche gekennzeichnet und bleiben Eigentum des
+            jeweiligen Rechteinhabers.
           </p>
-          <p className="mt-3 leading-relaxed text-sand-400">
+          <p className="mt-3 leading-relaxed text-sand-500">
+            Components published in the AI Canvas registry are released under the
+            MIT licence. You are free to copy them, modify them, and ship them.
             The website itself (page layout, written copy, branding) is the
-            Creator&apos;s work and copyright. Third-party content used on
-            this site (icons, fonts, embedded libraries) is identified as such
-            and remains the property of its respective rights holder.
+            Creator&apos;s work and copyright. Third-party content used on this
+            site (icons, fonts, embedded libraries) is identified as such and
+            remains the property of its respective rights holder.
           </p>
         </section>
 
+        {/* ── Diensteanbieter / Service provider ─────────────────────────── */}
         <section className="mt-10">
-          <h2 className="text-lg font-bold text-sand-50">Creator</h2>
+          <h2 className="text-lg font-bold text-sand-50">
+            Diensteanbieter / Service provider
+          </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Daniel Tatu <span className="mx-2 text-sand-600">•</span> Strahuberstr. 13
-            <span className="mx-2 text-sand-600">•</span> 81479 Munich
-            <span className="mx-2 text-sand-600">•</span> Germany
+            Alexandru Daniel Tatu, Strahuberstr. 13, 81479 München, Deutschland
           </p>
         </section>
 
+        {/* ── Kontakt / Contact ──────────────────────────────────────────── */}
         <section className="mt-10">
-          <h2 className="text-lg font-bold text-sand-50">Contact</h2>
+          <h2 className="text-lg font-bold text-sand-50">Kontakt / Contact</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Email:{' '}
+            E-Mail / Email:{' '}
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
+          </p>
+        </section>
+
+        {/* ── Verantwortlich für den Inhalt / Responsible for content ─────── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            Verantwortlich für den Inhalt / Responsible for content
+          </h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: Alexandru Daniel
+            Tatu (Anschrift wie oben).
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-500">
+            Responsible for the editorial content pursuant to § 18 (2) MStV:
+            Alexandru Daniel Tatu (address as above).
+          </p>
+        </section>
+
+        {/* ── Verbraucherstreitbeilegung / Consumer dispute resolution ───── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            Verbraucherstreitbeilegung / Consumer dispute resolution
+          </h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Wir sind nicht verpflichtet und nicht bereit, an
+            Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle im
+            Sinne des § 36 VSBG teilzunehmen. Als Einzelunternehmer ohne
+            Beschäftigte sind wir von dieser Informationspflicht ohnehin
+            ausgenommen. Die EU-Plattform zur Online-Streitbeilegung (OS) wurde
+            von der Europäischen Kommission zum 20. Juli 2025 eingestellt und
+            steht nicht mehr zur Verfügung; bitte wenden Sie sich bei Anliegen
+            direkt per E-Mail an uns.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-500">
+            We are not obliged and not willing to participate in
+            dispute-resolution proceedings before a consumer arbitration board
+            (Verbraucherschlichtungsstelle) within the meaning of § 36 VSBG. As a
+            sole trader with no employees, we are in any event exempt from this
+            information duty. The EU Online Dispute Resolution (ODR) platform was
+            discontinued by the European Commission on 20 July 2025 and is no
+            longer available; for any concern, please contact us directly by
+            email.
           </p>
         </section>
 
