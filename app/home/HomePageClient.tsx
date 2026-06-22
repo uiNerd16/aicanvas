@@ -653,8 +653,8 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 }
 
 // ─── FAQ ────────────────────────────────────────────────────────────────────
-// Rendered in the homepage FAQ section AND mirrored into FAQPage JSON-LD for
-// rich results. Answers must stay plain text so both stay in sync.
+// Rendered in the homepage FAQ section. The FAQPage JSON-LD for rich results
+// lives on the dedicated /faq page, so it is not duplicated here.
 
 // Flip to true when Andromeda is ready to feature on the homepage. Gates the
 // design-systems showcase section below.
@@ -694,16 +694,6 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
     a: 'One person. AI Canvas is a solo project, built and cared for one component at a time by someone who worries about the easing curve more than is strictly reasonable. It is still early and still growing, and if it makes your work easier, going Premium is the most direct way to help one maker keep building it with the same care.',
   },
 ]
-
-const FAQ_JSON_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-    '@type': 'Question',
-    name: q,
-    acceptedAnswer: { '@type': 'Answer', text: a },
-  })),
-}
 
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
@@ -1126,10 +1116,6 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
 
         {/* ── FAQ ── */}
         <section className="mt-16 sm:mt-24">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
-          />
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-[2fr_3fr] sm:gap-12">
             {/* Intro rail, sticky on desktop */}
             <motion.div
