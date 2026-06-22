@@ -864,7 +864,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               For designers. For developers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Most component libraries serve one audience. AI Canvas fits however you build, whether you copy a prompt, run the shadcn CLI, or hand it to an AI agent.
+              Most component libraries serve one audience. AI Canvas fits however you build: shape a finished component your way, install it with the shadcn CLI, or let an AI agent do it for you.
             </p>
           </motion.div>
 
@@ -873,21 +873,21 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
-                description: 'Copy a component\'s AI prompt and rebuild it in Claude Code, Lovable, or V0. Change colors, motion, and layout in plain language, no code needed. Go from idea to a real animated UI in seconds.',
+                description: 'A polished starting point, not a blank canvas. Every component is crafted down to the last state and easing curve, so you begin from something already good and shape it into your own. Reskin it by hand, or remix it with AI in Claude Code, Lovable, or V0.',
                 badges: ['Claude Code', 'Lovable', 'V0'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'Install any component with a single shadcn CLI command. Fully typed React with Tailwind CSS and Framer Motion, dropped into your project and ready to run. No boilerplate, no rebuilding from scratch.',
+                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source. No boilerplate, no screenshot to rebuild.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
                 icon: <Sparkle weight="regular" size={18} />,
                 audience: 'AI agents',
-                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you, no copy-paste from the marketplace. The agent does the wiring. You keep control.',
+                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. The agent does the wiring. You keep control.',
                 badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
