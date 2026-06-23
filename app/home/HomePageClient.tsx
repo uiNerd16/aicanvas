@@ -653,62 +653,47 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 }
 
 // ─── FAQ ────────────────────────────────────────────────────────────────────
-// Rendered in the homepage FAQ section AND mirrored into FAQPage JSON-LD for
-// rich results. Answers must stay plain text so both stay in sync.
+// Rendered in the homepage FAQ section. The FAQPage JSON-LD for rich results
+// lives on the dedicated /faq page, so it is not duplicated here.
 
-// Flip to true when Andromeda is ready to feature on the homepage. Gates both
-// the design-systems showcase section and the design-system FAQ entry below.
+// Flip to true when Andromeda is ready to feature on the homepage. Gates the
+// design-systems showcase section below.
 const ANDROMEDA_LIVE: boolean = false
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
-    a: 'AI Canvas is an open-source registry of animated React components, design systems, and templates. Every component ships with its full source code and tested AI reproduction prompts, so you can install it as-is or rebuild it your way.',
+    a: 'AI Canvas is an open-source registry of animated React components, design systems, and templates you can install straight into your project. Every component ships with its full source code, so you use it as is or rebuild it your way.',
+  },
+  {
+    q: 'Do I need to know how to code?',
+    a: 'No. If you can copy and paste, you can use AI Canvas. And if you do not write code, paste the install command into your AI agent and it will pull the component, design system, or template into your project for you.',
   },
   {
     q: 'Is AI Canvas free?',
-    a: 'Browsing, previewing, and remixing with AI are free for everyone, and the source code is open. Installing components is free up to a daily limit, and a free account raises that limit. Premium unlocks design systems, templates, and unlimited installs.',
+    a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a Free account gives you 10 installs a day, free forever. Premium adds unlimited installs and full design systems at $8.99 per month or $49.99 per year when you want more.',
   },
   {
-    q: 'How do I install a component?',
-    a: 'Every component page gives you a one-line shadcn CLI command that drops the fully typed source into your project. Prefer manual control? Copy the code directly, or let your AI agent install it through the AI Canvas MCP.',
+    q: 'How do I get my first component in under a minute?',
+    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a Free account lets you do this for 10 installs a day, free forever.',
   },
   {
     q: 'What is the AI Canvas MCP server?',
-    a: 'The MCP server connects AI Canvas to agents like Claude Code, Codex, and Cursor. Once installed with a single command, your agent can search the registry, inspect a component, and install it into your project without copy-paste.',
+    a: 'MCP, short for Model Context Protocol, is a standard way for AI tools to plug into outside services. The AI Canvas MCP is a small server that connects your AI coding agent to AI Canvas, so it can find and install components without you leaving the chat. It is free to use.',
   },
   {
-    q: 'Which AI platforms do the prompts support?',
-    a: 'Each component ships with reproduction prompts for Claude Code, Lovable, and V0. They are precise briefs tested to recreate the component faithfully, not generic instructions. Pick your platform, paste, and go.',
+    q: 'Can I use the components in commercial projects?',
+    a: 'Yes. They are released under the MIT license, so you can use them in personal and commercial projects, modify them freely, and ship them without giving credit. Any third-party assets, fonts, or images a component references may carry their own terms, so check those before shipping.',
   },
   {
-    q: 'Can I use AI Canvas components in commercial projects?',
-    a: 'Yes. The code is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution.',
+    q: 'How is AI Canvas different from other component libraries?',
+    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real open-source code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
   },
-  // Hidden until Andromeda is featured on the homepage (ANDROMEDA_LIVE).
-  ...(ANDROMEDA_LIVE
-    ? [
-        {
-          q: 'What is included in a design system?',
-          a: `A complete, token-driven visual language. Andromeda includes ${ANDROMEDA_COMPONENT_META.length} components, 4 production templates, and a single token file that controls every color, spacing, and radius across the system.`,
-        },
-      ]
-    : []),
   {
-    q: 'What stack do the components use?',
-    a: 'React with TypeScript, Tailwind CSS, and Framer Motion for animation. Components are built for the Next.js App Router but work in any modern React setup. 3D components use Three.js.',
+    q: 'Who is behind AI Canvas?',
+    a: 'One person. AI Canvas is a solo project, built and cared for one component at a time by someone who worries about the easing curve more than is strictly reasonable. It is still early and still growing, and if it makes your work easier, going Premium is the most direct way to help one maker keep building it with the same care.',
   },
 ]
-
-const FAQ_JSON_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-    '@type': 'Question',
-    name: q,
-    acceptedAnswer: { '@type': 'Answer', text: a },
-  })),
-}
 
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
@@ -879,7 +864,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               For designers. For developers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Most component libraries serve one audience. AI Canvas fits however you build, whether you copy a prompt, run the shadcn CLI, or hand it to an AI agent.
+              Most component libraries serve one audience. AI Canvas fits however you build: shape a finished component your way, install it with the shadcn CLI, or let an AI agent do it for you.
             </p>
           </motion.div>
 
@@ -888,21 +873,21 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
-                description: 'Copy a component\'s AI prompt and rebuild it in Claude Code, Lovable, or V0. Change colors, motion, and layout in plain language, no code needed. Go from idea to a real animated UI in seconds.',
+                description: 'A polished starting point, not a blank canvas. Every component is crafted down to the last state and easing curve, so you begin from something already good and shape it into your own. Reskin it by hand, or remix it with AI in Claude Code, Lovable, or V0.',
                 badges: ['Claude Code', 'Lovable', 'V0'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
               },
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'Install any component with a single shadcn CLI command. Fully typed React with Tailwind CSS and Framer Motion, dropped into your project and ready to run. No boilerplate, no rebuilding from scratch.',
+                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source. No boilerplate, no screenshot to rebuild.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
                 icon: <Sparkle weight="regular" size={18} />,
                 audience: 'AI agents',
-                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you, no copy-paste from the marketplace. The agent does the wiring. You keep control.',
+                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. The agent does the wiring. You keep control.',
                 badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
@@ -1131,10 +1116,6 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
 
         {/* ── FAQ ── */}
         <section className="mt-16 sm:mt-24">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
-          />
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-[2fr_3fr] sm:gap-12">
             {/* Intro rail, sticky on desktop */}
             <motion.div
@@ -1150,6 +1131,13 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 The short version of everything people ask before shipping their
                 first component.
               </p>
+              <Link
+                href="/faq"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400"
+              >
+                See all FAQs
+                <CaretRight weight="regular" size={14} />
+              </Link>
             </motion.div>
 
             {/* Accordion cards */}

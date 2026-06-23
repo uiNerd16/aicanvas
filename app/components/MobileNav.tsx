@@ -18,6 +18,7 @@ import {
   MagnifyingGlass,
   PiggyBank,
   Plug,
+  Question,
 } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
@@ -375,6 +376,18 @@ export function MobileNav({
                   >
                     <span><Info weight="regular" size={16} /></span>
                     <span className="flex-1">About</span>
+                  </Link>
+                  <Link
+                    href="/faq"
+                    onClick={() => setOpen(false)}
+                    className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+                      pathname === '/faq'
+                        ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                        : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                    }`}
+                  >
+                    <span><Question weight="regular" size={16} /></span>
+                    <span className="flex-1">FAQ</span>
                   </Link>
                   <Link
                     href="/contact"

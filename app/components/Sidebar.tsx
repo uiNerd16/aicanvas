@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, X, XLogo } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, Question, X, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
@@ -411,6 +411,17 @@ export function Sidebar({
           >
             <Info weight="regular" size={16} />
             <span>About</span>
+          </Link>
+          <Link
+            href="/faq"
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
+              pathname === '/faq'
+                ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+            }`}
+          >
+            <Question weight="regular" size={16} />
+            <span>FAQ</span>
           </Link>
           <Link
             href="/contact"
