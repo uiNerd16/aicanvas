@@ -13,9 +13,9 @@ export const runtime = 'nodejs'
 
 const DATA_DIR = join(process.cwd(), 'registry-data')
 
-// Catalog/index files — never gated, never metered (the CLI + MCP need them to
-// browse; metering them would break discovery after 2 anonymous requests).
-const META_FILES = new Set(['registry', 'aicanvas-mcp'])
+// 'meta' content (catalog/index files + the free token foundation) is never
+// gated or metered — see classifyContent. The gate below skips it via the
+// contentType check, so there's no slug list to maintain here.
 
 export async function GET(
   req: NextRequest,
@@ -52,7 +52,7 @@ export async function GET(
           ? 'private, no-store'
           : 'public, max-age=300'
 
-  if (mode === 'enforce' && !META_FILES.has(slug)) {
+  if (mode === 'enforce' && contentType !== 'meta') {
     // ── Premium-only content: fail CLOSED ─────────────────────────────────
     // Gating design systems/templates is binary and needs only the tier — if
     // entitlement errors we deny (503), never hand out the premium bytes.
