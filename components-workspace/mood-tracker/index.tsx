@@ -3,20 +3,6 @@
 // npm install framer-motion
 // font: Manrope
 
-// ─── Design scale (strict, disciplined sizing system) ────────────────────────
-// Type scale (font-size, px):  10 · 12 · 14 · 16 · 20 · 24 · 28
-//   The feeling word sits at the top of the scale (24–28). The big mood face is
-//   the single focal element and is allowed to scale past the cap via clamp()
-//   (≈96–140px) — every other size snaps to a step.
-// Spacing (padding / margin / gap / layout px): a 2px grid, favouring the 4px
-//   steps  4 · 8 · 12 · 16 · 20 · 24  (with 2 · 6 · 10 · 14 allowed).
-//   Tailwind spacing classes already map onto this grid (gap-2=8, gap-3=12,
-//   p-4=16, px-2.5=10, py-1=4), so inline px values are the only place off-grid
-//   numbers can creep in — those are kept on the grid here.
-// Icon / control sizes are exempt; the 44px touch-target minimum is honoured
-//   on the slider track and every legend button.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import {
   useState,
   useRef,
@@ -379,12 +365,10 @@ export default function MoodTracker() {
   }, [saved])
 
   // ── Mood-derived washes ──────────────────────────────────────────────────
-  // The focal panel is no longer a near-black base: its blobs/gradient are soft,
-  // same-hue tints of the current mood so the saturated face body sits on an airy
-  // background of its own colour with a clear lightness gap for contrast.
+  // Soft, same-hue tints of the current mood so the saturated face sits on an
+  // airy background of its own colour with a clear lightness gap for contrast:
   //   light → mood lerped toward white (soft pastel + a slightly richer sibling)
-  //   dark  → mood lerped toward a soft dark neutral (muted, coloured, clearly
-  //           lighter than the old #101014, never muddy)
+  //   dark  → mood lerped toward a soft dark neutral (muted, coloured)
   const baseTint = useMemo(
     () => (isDark ? shadeHex(mood.color, 0.5) : tintHex(mood.color, 0.5)),
     [mood.color, isDark],
@@ -398,8 +382,7 @@ export default function MoodTracker() {
     () => (isDark ? shadeHex(mood.color, 0.56) : tintHex(mood.color, 0.62)),
     [mood.color, isDark],
   )
-  // Deep, mood-tinted ink for the feeling word on the softer panel (AA-legible
-  // in both themes — verified ≥4.5:1 against the wash for all six moods).
+  // Deep, mood-tinted ink for the feeling word — AA-legible on the wash in both themes.
   const panelInk = useMemo(
     () => (isDark ? tintHex(mood.color, 0.88) : inkHex(mood.color)),
     [mood.color, isDark],
