@@ -41,9 +41,14 @@ function rateLimited(ip: string): boolean {
 
 type FoundSub = { id: string; endsAt: string | null; plan: string }
 
-/** Look up the caller's active Paddle subscription by email. Source of truth is
- *  Paddle, so we never need an email→user-id mapping for the no-login flow. */
-async function findActiveSubscription(email: string): Promise<FoundSub | null> {
+/** Look up ALL of the caller's active Paddle subscriptions by email — a single
+ *  email can map to more than one customer record and/or more than one active
+ *  subscription, and the cancel must cover every one. Source of truth is Paddle,
+ *  so the no-login flow needs no email→user-id mapping. Returns every active sub
+ *  id plus a primary one for the receipt display. */
+async function findActiveSubscriptions(
+  email: string,
+): Promise<{ sids: string[]; primary: FoundSub } | null> {
   const apiKey = process.env.PADDLE_API_KEY
   if (!apiKey) return null
   const headers = { Authorization: `Bearer ${apiKey}` }
@@ -51,32 +56,39 @@ async function findActiveSubscription(email: string): Promise<FoundSub | null> {
   const cRes = await fetch(`${paddleApiBase()}/customers?email=${encodeURIComponent(email)}`, { headers })
   if (!cRes.ok) return null
   const cJson = (await cRes.json().catch(() => null)) as { data?: Array<{ id?: string }> } | null
-  const customerId = cJson?.data?.[0]?.id
-  if (!customerId) return null
+  const customerIds = (cJson?.data ?? [])
+    .map((c) => c.id)
+    .filter((id): id is string => typeof id === 'string')
+  if (customerIds.length === 0) return null
 
-  const sRes = await fetch(
-    `${paddleApiBase()}/subscriptions?customer_id=${customerId}&status=active`,
-    { headers },
-  )
-  if (!sRes.ok) return null
-  const sJson = (await sRes.json().catch(() => null)) as {
-    data?: Array<{
-      id?: string
-      current_billing_period?: { ends_at?: string | null }
-      billing_cycle?: { interval?: string }
-    }>
-  } | null
-  const sub = sJson?.data?.[0]
-  if (!sub?.id) return null
-
-  const interval = sub.billing_cycle?.interval
-  const plan =
-    interval === 'year'
-      ? 'AI Canvas Premium (Yearly)'
-      : interval === 'month'
-        ? 'AI Canvas Premium (Monthly)'
-        : 'AI Canvas Premium'
-  return { id: sub.id, endsAt: sub.current_billing_period?.ends_at ?? null, plan }
+  const found: FoundSub[] = []
+  for (const customerId of customerIds) {
+    const sRes = await fetch(
+      `${paddleApiBase()}/subscriptions?customer_id=${customerId}&status=active`,
+      { headers },
+    )
+    if (!sRes.ok) continue
+    const sJson = (await sRes.json().catch(() => null)) as {
+      data?: Array<{
+        id?: string
+        current_billing_period?: { ends_at?: string | null }
+        billing_cycle?: { interval?: string }
+      }>
+    } | null
+    for (const sub of sJson?.data ?? []) {
+      if (!sub?.id) continue
+      const interval = sub.billing_cycle?.interval
+      const plan =
+        interval === 'year'
+          ? 'AI Canvas Premium (Yearly)'
+          : interval === 'month'
+            ? 'AI Canvas Premium (Monthly)'
+            : 'AI Canvas Premium'
+      found.push({ id: sub.id, endsAt: sub.current_billing_period?.ends_at ?? null, plan })
+    }
+  }
+  if (found.length === 0) return null
+  return { sids: found.map((f) => f.id), primary: found[0] }
 }
 
 async function sendReceipt(
@@ -141,15 +153,18 @@ export async function POST(req: NextRequest) {
   // Always neutral from here: we never reveal whether the email matched.
   const resendKey = process.env.RESEND_API_KEY
   try {
-    const sub = await findActiveSubscription(email)
-    if (sub && resendKey) {
+    const result = await findActiveSubscriptions(email)
+    if (result && resendKey) {
+      if (result.sids.length > 1) {
+        console.warn(`[cancel-request] ${result.sids.length} active subscriptions for one email — cancelling all`)
+      }
       const exp = Math.floor(Date.now() / 1000) + 24 * 3600
-      const token = signCancelToken({ sid: sub.id, email, kind, reason: reason || undefined, exp })
+      const token = signCancelToken({ sids: result.sids, email, kind, reason: reason || undefined, exp })
       const confirmUrl = `${req.nextUrl.origin}/api/billing/cancel-confirm?token=${encodeURIComponent(token)}`
       const mail = cancellationReceiptEmail({
-        plan: sub.plan,
+        plan: result.primary.plan,
         receivedAt: new Date(),
-        endsAt: sub.endsAt ? new Date(sub.endsAt) : null,
+        endsAt: result.primary.endsAt ? new Date(result.primary.endsAt) : null,
         confirmUrl,
         extraordinary: kind === 'ausserordentlich',
       })

@@ -96,11 +96,15 @@ export async function POST(req: NextRequest) {
 
   // Conditional patch: spread only the fields the event carries (via the shared
   // mapper — same mapping the daily reconcile uses, so the two can't drift) so a
-  // partial payload can never null out ids / period end.
+  // partial payload can never null out ids / period end. last_event_at is written
+  // ONLY when occurred_at is present — writing a null would CLEAR the watermark
+  // and disable the ordering/idempotency guard for every later event, letting an
+  // old replayed event overwrite newer state. Omitting it preserves the existing
+  // value (an upsert only sets columns present in the payload).
   const patch: Record<string, unknown> = {
     user_id: userId,
-    last_event_at: occurredAt,
     updated_at: new Date().toISOString(),
+    ...(occurredAt ? { last_event_at: occurredAt } : {}),
     ...fields,
   }
 

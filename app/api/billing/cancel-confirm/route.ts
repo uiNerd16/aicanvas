@@ -14,7 +14,7 @@ async function notifySupportIfExtraordinary(claims: CancelClaims): Promise<void>
   if (!apiKey) return
   const text = `Außerordentliche Kündigung bestätigt (Eigentum per E-Mail-Link verifiziert).
 
-Subscription: ${claims.sid}
+Subscriptions: ${claims.sids.join(', ')}
 E-Mail: ${claims.email}
 Grund / reason: ${claims.reason || '(kein Grund angegeben)'}
 
@@ -56,30 +56,40 @@ export async function GET(req: NextRequest) {
   if (!apiKey) return back('error')
   const auth = { Authorization: `Bearer ${apiKey}` }
 
-  // Already canceled, or already scheduled to cancel at period end? Tell the
-  // user that — don't surface a generic error. Paddle rejects re-cancelling a
-  // sub that already has a scheduled cancellation, and a period-end cancel keeps
-  // status 'active' with scheduled_change.action === 'cancel' until it lands.
-  const cur = await fetch(`${paddleApiBase()}/subscriptions/${claims.sid}`, { headers: auth })
-  if (cur.ok) {
-    const sub = ((await cur.json().catch(() => null)) as
-      | { data?: { status?: string; scheduled_change?: { action?: string } | null } }
-      | null)?.data
-    if (sub?.status === 'canceled' || sub?.scheduled_change?.action === 'cancel') {
-      return back('already')
+  // Cancel EVERY active subscription the token covers (one email can rarely have
+  // more than one). Per sub: skip any already canceled / already scheduled to
+  // cancel (Paddle rejects re-cancelling those; a period-end cancel stays status
+  // 'active' with scheduled_change.action === 'cancel' until it lands), and cancel
+  // the rest at period end. Idempotent — a retry re-skips the ones already done.
+  let anyError = false
+  let anyConfirmed = false
+  let allAlready = true
+  for (const sid of claims.sids) {
+    const cur = await fetch(`${paddleApiBase()}/subscriptions/${sid}`, { headers: auth })
+    if (cur.ok) {
+      const sub = ((await cur.json().catch(() => null)) as
+        | { data?: { status?: string; scheduled_change?: { action?: string } | null } }
+        | null)?.data
+      if (sub?.status === 'canceled' || sub?.scheduled_change?.action === 'cancel') {
+        continue // already canceled / scheduled — nothing to do for this one
+      }
+    }
+    allAlready = false
+    const res = await fetch(`${paddleApiBase()}/subscriptions/${sid}/cancel`, {
+      method: 'POST',
+      headers: { ...auth, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ effective_from: 'next_billing_period' }),
+    })
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '')
+      console.error('[cancel-confirm] Paddle cancel failed:', sid, res.status, detail)
+      anyError = true
+    } else {
+      anyConfirmed = true
     }
   }
-
-  const res = await fetch(`${paddleApiBase()}/subscriptions/${claims.sid}/cancel`, {
-    method: 'POST',
-    headers: { ...auth, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ effective_from: 'next_billing_period' }),
-  })
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '')
-    console.error('[cancel-confirm] Paddle cancel failed:', res.status, detail)
-    return back('error')
-  }
+  if (anyError) return back('error')
+  if (allAlready && !anyConfirmed) return back('already')
 
   await notifySupportIfExtraordinary(claims)
   return back('confirmed')
