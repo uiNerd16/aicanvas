@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyPaddleSignature } from '@/lib/identity/paddle-signature'
 import { createAdminClient } from '@/app/lib/supabase/admin'
-import type { SubStatus } from '@/lib/identity/tier'
+import { mapSubscriptionFields } from '@/lib/identity/sub-mapping'
 
 export const runtime = 'nodejs'
 
@@ -20,15 +20,6 @@ const SUBSCRIPTION_EVENTS = new Set([
   'subscription.resumed',
   'subscription.canceled',
 ])
-
-// Paddle data.status values -> our SubStatus. Unknown statuses are ignored.
-const PADDLE_STATUS: Record<string, SubStatus> = {
-  active: 'active',
-  trialing: 'trialing',
-  past_due: 'past_due',
-  paused: 'paused',
-  canceled: 'canceled',
-}
 
 export async function POST(req: NextRequest) {
   // Fail CLOSED on misconfiguration: HMAC with an empty key is publicly
@@ -59,8 +50,8 @@ export async function POST(req: NextRequest) {
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const data: any = evt.data ?? {}
-  const status = PADDLE_STATUS[data.status as string]
-  if (!status) return NextResponse.json({ ok: true, ignored_status: data.status })
+  const fields = mapSubscriptionFields(data)
+  if (!fields.status) return NextResponse.json({ ok: true, ignored_status: data.status })
 
   const admin = createAdminClient()
 
@@ -103,21 +94,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Conditional patch: only write fields the event actually carries, so a
-  // partial payload can never null out paddle ids / period end.
+  // Conditional patch: spread only the fields the event carries (via the shared
+  // mapper — same mapping the daily reconcile uses, so the two can't drift) so a
+  // partial payload can never null out ids / period end.
   const patch: Record<string, unknown> = {
     user_id: userId,
-    status,
     last_event_at: occurredAt,
     updated_at: new Date().toISOString(),
+    ...fields,
   }
-  if (data.customer_id) patch.paddle_customer_id = data.customer_id
-  if (data.id) patch.paddle_subscription_id = data.id
-  if (data.current_billing_period?.ends_at) {
-    patch.current_period_end = data.current_billing_period.ends_at
-  }
-  const interval = data.items?.[0]?.price?.billing_cycle?.interval
-  if (interval) patch.plan = interval === 'year' ? 'annual' : 'monthly'
 
   const { error } = await admin
     .from('user_subscriptions')

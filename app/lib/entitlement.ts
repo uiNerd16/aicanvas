@@ -60,11 +60,18 @@ async function fetchSubscription(
   admin: AdminClient,
   userId: string,
 ): Promise<{ status: SubStatus; currentPeriodEnd: string | null }> {
-  const { data } = await admin
+  const { data, error } = await admin
     .from('user_subscriptions')
     .select('status, current_period_end')
     .eq('user_id', userId)
     .maybeSingle()
+  // A FAILED read must NOT be coerced to 'none' — that silently downgrades a
+  // paying customer to free and 402s them on content they paid for. maybeSingle()
+  // returns data:null WITHOUT an error for the legit "no subscription row" case,
+  // so only a real read failure throws here. The premium gate's try/catch turns
+  // that throw into a retryable 503; the standalone path catches it and fails
+  // OPEN — so a paying customer is never wrongly blocked on a transient DB blip.
+  if (error) throw error
   return {
     status: (data?.status as SubStatus) ?? 'none',
     currentPeriodEnd: data?.current_period_end ?? null,
