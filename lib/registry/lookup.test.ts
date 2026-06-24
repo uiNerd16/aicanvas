@@ -34,7 +34,6 @@ describe('buildLookup + classifyContent (manifest-driven gate)', () => {
   it('system aggregates are design-system', () => {
     expect(classifyContent('andromeda', lookup)).toBe('design-system')
     expect(classifyContent('andromeda-all', lookup)).toBe('design-system')
-    expect(classifyContent('andromeda-tokens', lookup)).toBe('design-system')
   })
 
   it('the name-colliding free standalone stays standalone', () => {
@@ -44,5 +43,7 @@ describe('buildLookup + classifyContent (manifest-driven gate)', () => {
   it('meta files stay meta', () => {
     expect(classifyContent('registry', lookup)).toBe('meta')
     expect(classifyContent('aicanvas-mcp', lookup)).toBe('meta')
+    // the free token foundation is meta — uncounted, never gated (c3a3a1e)
+    expect(classifyContent('andromeda-tokens', lookup)).toBe('meta')
   })
 })

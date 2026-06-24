@@ -2,17 +2,6 @@
 
 // npm install framer-motion @phosphor-icons/react
 
-// ─── Design scale (strict, disciplined sizing system) ────────────────────────
-// Type scale (font-size, px):  10 · 12 · 14 · 16 · 20 · 24 · 28
-//   No off-grid sizes (13/15/17/18 are snapped to the nearest step).
-// Spacing (padding / margin / gap / layout px): a 2px grid, favouring the 4px
-//   steps  4 · 8 · 12 · 16 · 20 · 24  (with 2 · 6 · 10 · 14 allowed).
-//   Tailwind spacing classes already map onto this grid
-//   (gap-2=8, gap-3=12, p-4=16, px-2.5=10, py-1=4), so inline px values are the
-//   only place off-grid numbers can creep in — those are kept on the grid here.
-// Icon sizes (12 · 14 · 16 · 18 · 20) and 44px touch targets are exempt.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import {
   useState,
   useRef,

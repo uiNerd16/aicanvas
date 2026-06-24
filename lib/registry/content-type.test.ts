@@ -29,12 +29,13 @@ describe('classifyContent', () => {
   it('classifies the whole-system aggregates', () => {
     expect(classifyContent('andromeda', lookup)).toBe('design-system')
     expect(classifyContent('andromeda-all', lookup)).toBe('design-system')
-    expect(classifyContent('andromeda-tokens', lookup)).toBe('design-system')
   })
 
   it('classifies catalog/meta files', () => {
     expect(classifyContent('registry', lookup)).toBe('meta')
     expect(classifyContent('aicanvas-mcp', lookup)).toBe('meta')
+    // the free token foundation is meta — uncounted, never gated (c3a3a1e)
+    expect(classifyContent('andromeda-tokens', lookup)).toBe('meta')
   })
 
   it('strips a .json suffix before classifying', () => {
