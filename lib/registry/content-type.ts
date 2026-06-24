@@ -37,13 +37,17 @@ export function classifyContent(slugOrFile: string, lookup: ContentLookup): Cont
   if (META_SLUGS.has(slug)) return 'meta'
   if (lookup.templateSlugs.has(slug)) return 'template'
 
-  // Whole-system aggregates stay premium-only (the "install the entire
-  // system" items). Matched EXACTLY (see note above) so a standalone sharing
-  // the name prefix — e.g. `andromeda-button` — is not caught here.
+  // Whole-system aggregates stay premium-only (the "install the entire system"
+  // items). Matched EXACTLY (see note above) so a standalone sharing the name
+  // prefix — e.g. `andromeda-button` — is not caught here.
+  // The token foundation (`<system>-tokens`) is the ONE exception: it is a free,
+  // un-metered shared dependency. Every free-metered DS component depends on it,
+  // so gating it would block free/anon installs of those components (and
+  // double-count the daily quota). Classifying it 'meta' keeps it free +
+  // uncounted, while the aggregates and templates stay premium.
   for (const system of lookup.systemSlugs) {
-    if (slug === system || slug === `${system}-all` || slug === `${system}-tokens`) {
-      return 'design-system'
-    }
+    if (slug === `${system}-tokens`) return 'meta'
+    if (slug === system || slug === `${system}-all`) return 'design-system'
   }
 
   // Individual design-system components are FREE-METERED like standalones

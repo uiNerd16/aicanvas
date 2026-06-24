@@ -7,14 +7,15 @@ import { getEntitlement } from '@/app/lib/entitlement'
 import { dailyLimitFor } from '@/lib/registry/limits'
 import { premiumEnabled } from '@/lib/flags'
 import { utcDay, subjectFor, consume, ipFromHeaders, maybePruneUsage } from '@/app/lib/quota'
+import { extractToken } from '@/lib/identity/token'
 
 export const runtime = 'nodejs'
 
 const DATA_DIR = join(process.cwd(), 'registry-data')
 
-// Catalog/index files — never gated, never metered (the CLI + MCP need them to
-// browse; metering them would break discovery after 2 anonymous requests).
-const META_FILES = new Set(['registry', 'aicanvas-mcp'])
+// 'meta' content (catalog/index files + the free token foundation) is never
+// gated or metered — see classifyContent. The gate below skips it via the
+// contentType check, so there's no slug list to maintain here.
 
 export async function GET(
   req: NextRequest,
@@ -51,7 +52,7 @@ export async function GET(
           ? 'private, no-store'
           : 'public, max-age=300'
 
-  if (mode === 'enforce' && !META_FILES.has(slug)) {
+  if (mode === 'enforce' && contentType !== 'meta') {
     // ── Premium-only content: fail CLOSED ─────────────────────────────────
     // Gating design systems/templates is binary and needs only the tier — if
     // entitlement errors we deny (503), never hand out the premium bytes.
@@ -96,12 +97,42 @@ export async function GET(
     }
   }
 
-  return new NextResponse(body, {
+  // Token propagation: the shadcn CLI fetches each registryDependency URL
+  // VERBATIM (no auth header, no query token). They ship as bare aicanvas.me /r
+  // URLs, so a premium/gated dependency would 402 on that follow-up fetch and
+  // abort the whole install. If THIS request carried a token the gate already
+  // honored, stamp it onto every aicanvas.me /r dependency so the CLI's next
+  // fetch is authorized too. It propagates the whole chain automatically: each
+  // rewritten dep URL carries the token, so when the CLI fetches it, this route
+  // re-runs and rewrites that file's deps in turn (resource-planning ->
+  // andromeda -> andromeda-tokens). Anon requests (no token) are untouched —
+  // deps stay bare and 402 correctly.
+  const token = extractToken(req)
+  let outBody = body
+  let outCache = cacheControl
+  if (token) {
+    try {
+      const parsed = JSON.parse(body)
+      const deps = parsed?.registryDependencies
+      if (Array.isArray(deps)) {
+        const stamped = deps.map((d: unknown) => (typeof d === 'string' ? withToken(d, token) : d))
+        if (stamped.some((d, i) => d !== deps[i])) {
+          parsed.registryDependencies = stamped
+          outBody = JSON.stringify(parsed)
+          outCache = 'private, no-store' // a token-bearing body must never be shared-cached
+        }
+      }
+    } catch {
+      // Non-JSON / malformed body: serve as-is (defensive; registry files are JSON).
+    }
+  }
+
+  return new NextResponse(outBody, {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
       'X-AICanvas-Content-Type': contentType,
-      'Cache-Control': cacheControl,
+      'Cache-Control': outCache,
     },
   })
 }
@@ -122,4 +153,24 @@ function paymentJson(bodyObj: Record<string, unknown>, status: number) {
     status,
     headers: { 'Cache-Control': 'private, no-store' },
   })
+}
+
+/**
+ * Append a token to our OWN /r registry-dependency URLs so the shadcn CLI's
+ * verbatim follow-up fetch of a dependency is authorized. Leaves non-aicanvas
+ * URLs, bare component names, and already-tokened URLs untouched. URLSearchParams
+ * handles the `?` vs `&` separator automatically.
+ */
+function withToken(dep: string, token: string): string {
+  let u: URL
+  try {
+    u = new URL(dep)
+  } catch {
+    return dep // bare component name, not a URL
+  }
+  if (u.hostname !== 'aicanvas.me') return dep // foreign registry — never stamp our token on it
+  if (!u.pathname.startsWith('/r/')) return dep // non-/r aicanvas URL
+  if (u.searchParams.has('token')) return dep // already carries a token
+  u.searchParams.set('token', token)
+  return u.toString()
 }

@@ -34,6 +34,14 @@ interface Props {
   related: RelatedItem[]
 }
 
+// The registry slug is normally `andromeda-<metaSlug>`. The lone exception is the
+// slugOverride (scripts/lib/design-systems.config.mjs): Button.tsx ships as the
+// registry item `andromeda-button-system` because the free standalone owns
+// `andromeda-button`. Map the page's meta slug back to the REGISTRY slug so the
+// Code tab, install command, install-check, and analytics all target the right
+// item — otherwise the Button page silently serves the standalone.
+const REGISTRY_SLUG_OVERRIDES: Record<string, string> = { button: 'andromeda-button-system' }
+
 export function AndromedaComponentView({
   slug,
   name,
@@ -41,6 +49,7 @@ export function AndromedaComponentView({
   related,
 }: Props) {
   const { preferences, user } = useSession()
+  const registrySlug = REGISTRY_SLUG_OVERRIDES[slug] ?? `andromeda-${slug}`
 
   // Personalized install: when signed in, the copied command carries the
   // user's API token so the registry attributes the pull to the account (and
@@ -85,7 +94,7 @@ export function AndromedaComponentView({
   const openCode = useCallback(async () => {
     setCodeState({ status: 'loading' })
     try {
-      const res = await fetch(`/api/component-code?slug=andromeda-${slug}`)
+      const res = await fetch(`/api/component-code?slug=${registrySlug}`)
       if (res.status === 402) {
         const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
         setCodeState({
@@ -104,7 +113,7 @@ export function AndromedaComponentView({
     } catch {
       setCodeState({ status: 'locked', reason: 'premium-only' })
     }
-  }, [slug])
+  }, [registrySlug])
   // Fetch the first time the source becomes visible (Code tab or Manual tab).
   useEffect(() => {
     if ((tab === 'code' || installTab === 'manual') && codeState.status === 'idle') void openCode()
@@ -185,11 +194,11 @@ export function AndromedaComponentView({
   // @aicanvas namespace command. The displayed form masks the token; copy
   // buttons write the REAL token to the clipboard so the install works.
   const installReference = userToken
-    ? `"https://aicanvas.me/r/andromeda-${slug}.json?token=${userToken}"`
-    : `@aicanvas/andromeda-${slug}`
+    ? `"https://aicanvas.me/r/${registrySlug}.json?token=${userToken}"`
+    : `@aicanvas/${registrySlug}`
   const installReferenceMasked = userToken
-    ? `"https://aicanvas.me/r/andromeda-${slug}.json?token=aic_••••••••"`
-    : `@aicanvas/andromeda-${slug}`
+    ? `"https://aicanvas.me/r/${registrySlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${registrySlug}`
   const cliCommand = `npx shadcn@latest add ${installReference}`
 
   const { open: openPaywall } = usePaywallModal()
@@ -199,7 +208,7 @@ export function AndromedaComponentView({
   // command that would 402 in the terminal. Fails open (copies on any hiccup).
   async function guardInstall(write: () => void | Promise<void>) {
     try {
-      const res = await fetch(`/api/me/install-check?slug=andromeda-${slug}`)
+      const res = await fetch(`/api/me/install-check?slug=${registrySlug}`)
       const d = await res.json().catch(() => null)
       if (d?.blocked) {
         openPaywall({ reason: d.reason ?? 'quota-exceeded', limit: d.limit, resetAt: d.resetAt })
@@ -212,7 +221,7 @@ export function AndromedaComponentView({
   async function copyCli() {
     await guardInstall(async () => {
       try {
-        trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
+        trackInstall(registrySlug, 'andromeda', pkgManager)
         await navigator.clipboard.writeText(cliCommand)
         setCliCopied(true)
         setTimeout(() => setCliCopied(false), 2000)
@@ -396,7 +405,7 @@ export function AndromedaComponentView({
                             ? `yarn dlx shadcn@latest add ${installReference}`
                             : `npx shadcn@latest add ${installReference}`
                           navigator.clipboard.writeText(cmd)
-                          trackInstall(`andromeda-${slug}`, 'andromeda', pkgManager)
+                          trackInstall(registrySlug, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
                         })}
