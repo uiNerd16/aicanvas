@@ -38,6 +38,21 @@ describe('mapSubscriptionFields', () => {
     expect(out.current_period_end).toBe('2026-08-01T00:00:00Z')
   })
 
+  it('seeds current_period_end from the top-level next_billed_at when current_billing_period AND item-level are absent', () => {
+    const out = mapSubscriptionFields({
+      status: 'active',
+      id: 'sub_123',
+      next_billed_at: '2026-07-23T00:00:00Z',
+      items: [{ price: { billing_cycle: { interval: 'month' } } }],
+    })
+    expect(out.current_period_end).toBe('2026-07-23T00:00:00Z')
+  })
+
+  it('never persists an empty-string period (rejects a garbage timestamp)', () => {
+    const out = mapSubscriptionFields({ status: 'active', current_billing_period: { ends_at: '' } })
+    expect('current_period_end' in out).toBe(false)
+  })
+
   it('maps an annual plan from the billing interval', () => {
     const out = mapSubscriptionFields({ status: 'active', items: [{ price: { billing_cycle: { interval: 'year' } } }] })
     expect(out.plan).toBe('annual')

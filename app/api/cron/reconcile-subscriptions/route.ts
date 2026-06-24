@@ -67,13 +67,23 @@ export async function GET(req: NextRequest) {
       const fields = mapSubscriptionFields(sub)
       if (!fields.status) { skipped++; continue } // unmodeled status — ignore
 
-      // Same ordering discipline as the webhook: never let a read OLDER than the
-      // last applied event overwrite newer state. Paddle's subscription.updated_at
-      // is the modified-instant; if our last_event_at is already >= it, we're fresh.
+      // Ordering: never let a read OLDER than the last applied event overwrite
+      // newer state. Paddle's subscription.updated_at is the modified-instant.
+      // CRITICAL — re-read last_event_at HERE, immediately before writing, NOT
+      // against the pre-loop snapshot: a multi-second Paddle round-trip happened
+      // since the snapshot, during which a webhook (e.g. a cancel) could have
+      // landed. Deciding against the fresh value closes that TOCTOU window so our
+      // older read can't clobber a newer webhook. Same discipline the webhook +
+      // checkout/completed writers already use.
       const subUpdated = typeof sub.updated_at === 'string' ? sub.updated_at : undefined
-      if (subUpdated && row.last_event_at &&
-          new Date(subUpdated).getTime() <= new Date(row.last_event_at).getTime()) {
-        fresh++; continue
+      const { data: cur } = await admin
+        .from('user_subscriptions')
+        .select('last_event_at')
+        .eq('user_id', row.user_id)
+        .maybeSingle()
+      if (subUpdated && cur?.last_event_at &&
+          new Date(cur.last_event_at).getTime() >= new Date(subUpdated).getTime()) {
+        fresh++; continue // a newer event landed during the Paddle fetch — don't overwrite it
       }
 
       const patch: Record<string, unknown> = {

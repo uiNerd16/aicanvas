@@ -40,15 +40,18 @@ export function mapSubscriptionFields(data: any): SubscriptionRowFields {
   if (data?.customer_id) out.paddle_customer_id = data.customer_id
   if (data?.id) out.paddle_subscription_id = data.id
 
-  // Period end: prefer the authoritative current_billing_period.ends_at; fall
-  // back to the first item's next_billed_at. A `subscription.created` event
-  // carries next_billed_at but NO current_billing_period — without this fallback
-  // a created-only row would have a null period, and isPremiumNow('active', null)
-  // grants premium with no expiry backstop (indefinite if a later cancel webhook
-  // is ever dropped). The fallback seeds the period from the first event.
+  // Period end: prefer the authoritative current_billing_period.ends_at, then the
+  // canonical top-level next_billed_at, then the item-level one. A `subscription
+  // .created` event carries next_billed_at but NO current_billing_period — without
+  // a fallback a created-only row would have a null period, and isPremiumNow(
+  // 'active', null) grants premium with no expiry backstop (indefinite if a later
+  // cancel webhook is dropped). We read BOTH next_billed_at locations because
+  // Paddle populates them independently (top-level can be set when items[0] is
+  // not). The `&& periodEnd` guard also rejects an empty string so a garbage
+  // timestamp can never be persisted.
   const periodEnd: unknown =
-    data?.current_billing_period?.ends_at ?? data?.items?.[0]?.next_billed_at
-  if (typeof periodEnd === 'string') out.current_period_end = periodEnd
+    data?.current_billing_period?.ends_at ?? data?.next_billed_at ?? data?.items?.[0]?.next_billed_at
+  if (typeof periodEnd === 'string' && periodEnd) out.current_period_end = periodEnd
 
   const interval = data?.items?.[0]?.price?.billing_cycle?.interval
   if (interval) out.plan = interval === 'year' ? 'annual' : 'monthly'
