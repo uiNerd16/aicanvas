@@ -16,7 +16,13 @@ export async function getComponentCode(slug: string): Promise<string | null> {
   if (map[slug] != null) return map[slug]
 
   if (slug.startsWith('andromeda-')) {
-    const entry = getAndromedaComponent(slug.slice('andromeda-'.length))
+    const bare = slug.slice('andromeda-'.length)
+    // Registry slugOverride (scripts/lib/design-systems.config.mjs): Button.tsx
+    // ships as the registry item `andromeda-button-system` because the free
+    // standalone owns `andromeda-button`, but the meta registers it under
+    // `button`. Map it back so the Code tab resolves instead of 404ing.
+    const SLUG_OVERRIDES: Record<string, string> = { 'button-system': 'button' }
+    const entry = getAndromedaComponent(SLUG_OVERRIDES[bare] ?? bare)
     if (entry) return entry.code
   }
 
