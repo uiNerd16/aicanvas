@@ -36,11 +36,14 @@ export function UpgradeButton({
       return
     }
     const paddle = await getPaddle()
+    // showAddDiscounts:false hides the public "Add discount" box. Promos are
+    // applied via targeted links/codes (passed to Checkout.open), not offered to
+    // every visitor — protects conversion + margin against coupon-fishing.
     paddle?.Checkout.open({
       items: [{ priceId: PRICES[cycle], quantity: 1 }],
       customer: user.email ? { email: user.email } : undefined,
       customData: { user_id: user.id },
-      settings: { displayMode: 'overlay', theme: 'dark' },
+      settings: { displayMode: 'overlay', theme: 'light', showAddDiscounts: false },
     })
   }
 
