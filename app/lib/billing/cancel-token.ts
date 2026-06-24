@@ -26,8 +26,9 @@ function fromB64url(s: string): Buffer {
 }
 
 export type CancelClaims = {
-  /** Paddle subscription id to cancel. */
-  sid: string
+  /** Paddle subscription ids to cancel. One token covers ALL of an email's
+   *  active subscriptions (a customer can rarely have more than one). */
+  sids: string[]
   /** Account email the request came from (audit / display). */
   email: string
   /** Ordinary vs extraordinary cancellation (§312k Abs. 2 Nr. 1). */
@@ -54,13 +55,24 @@ export function verifyCancelToken(token: string, now: number = Date.now()): Canc
   const b = Buffer.from(expected)
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null
   try {
-    const claims = JSON.parse(fromB64url(payload).toString('utf8')) as CancelClaims
-    if (typeof claims.sid !== 'string' || typeof claims.email !== 'string' || typeof claims.exp !== 'number') {
-      return null
+    const raw = JSON.parse(fromB64url(payload).toString('utf8')) as Record<string, unknown>
+    // Back-compat: legacy tokens carried a single `sid`; normalize to `sids`.
+    const sids = Array.isArray(raw.sids)
+      ? raw.sids
+      : typeof raw.sid === 'string'
+        ? [raw.sid]
+        : null
+    if (!sids || sids.length === 0 || !sids.every((s) => typeof s === 'string')) return null
+    if (typeof raw.email !== 'string' || typeof raw.exp !== 'number') return null
+    if (raw.kind !== 'ordentlich' && raw.kind !== 'ausserordentlich') return null
+    if (raw.exp * 1000 < now) return null
+    return {
+      sids: sids as string[],
+      email: raw.email,
+      kind: raw.kind,
+      reason: typeof raw.reason === 'string' ? raw.reason : undefined,
+      exp: raw.exp,
     }
-    if (claims.kind !== 'ordentlich' && claims.kind !== 'ausserordentlich') return null
-    if (claims.exp * 1000 < now) return null
-    return claims
   } catch {
     return null
   }
