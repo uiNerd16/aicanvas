@@ -51,7 +51,27 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
     const supabase = createClient()
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) {
-      setError(formatAuthError(signInError))
+      // A common dead-end: the user signed up with Google and forgot, so the
+      // password never matches. Ask the server if this email is a Google-only
+      // account and, if so, point them at the Google button instead.
+      let handled = false
+      try {
+        const r = await fetch('/api/auth/login-hint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        if (r.ok) {
+          const j = (await r.json()) as { provider?: string }
+          if (j.provider === 'google') {
+            setError('You signed up with Google. Use "Sign in with Google" above to continue.')
+            handled = true
+          }
+        }
+      } catch {
+        // network hiccup → fall through to the generic message
+      }
+      if (!handled) setError(formatAuthError(signInError))
       setSubmitting(false)
       return
     }
