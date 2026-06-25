@@ -1,5 +1,6 @@
 import { createClient } from '../../../lib/supabase/server'
 import { SettingsForm } from './SettingsForm'
+import { PasswordSection } from './PasswordSection'
 import { AccountBilling } from './AccountBilling'
 import { DeleteAccountSection } from './DeleteAccountSection'
 import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
@@ -23,9 +24,16 @@ export default async function SettingsPage() {
     newsletter_opt_in: data?.newsletter_opt_in ?? false,
   }
 
+  // change vs set mode = whether the account has a usable password. Providers
+  // can't tell us (setting a password on a Google account doesn't add an
+  // 'email' identity), so read encrypted_password via a self-scoped RPC.
+  const { data: hasPw } = await supabase.rpc('current_user_has_password')
+  const hasPassword = hasPw === true
+
   return (
     <div className="space-y-4">
       <SettingsForm initial={initial} />
+      <PasswordSection hasPassword={hasPassword} email={user.email ?? ''} />
       <AccountBilling />
       <DeleteAccountSection />
     </div>
