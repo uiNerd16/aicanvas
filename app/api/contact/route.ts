@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
+import { emailShell, emailText } from '@/app/lib/email/layout'
 
 export const runtime = 'nodejs'
 
@@ -49,39 +50,26 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-const FONT = "'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
-
 function emailHtml({ name, email, subject, message }: { name: string; email: string; subject: string; message: string }): string {
   const safeName = escapeHtml(name)
   const safeEmail = escapeHtml(email)
   const safeSubject = escapeHtml(subject)
   const safeMessage = escapeHtml(message)
-  return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#1A1A19;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1A1A19;padding:32px 12px;">
-      <tr><td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#21211F;border:1px solid #383836;border-radius:16px;">
-          <tr><td style="padding:28px 32px 0 32px;">
-            <p style="margin:0;font-family:${FONT};font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#A8B94D;font-weight:700;">AI Canvas &middot; Contact</p>
-            <h1 style="margin:8px 0 0 0;font-family:${FONT};font-size:20px;line-height:1.3;color:#FAFAF0;font-weight:800;">New message from ${safeName}</h1>
-          </td></tr>
-          <tr><td style="padding:20px 32px;">
-            <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">From</p>
-            <p style="margin:0 0 18px 0;font-family:${FONT};font-size:15px;color:#E8E8DF;">${safeName} &lt;<a href="mailto:${safeEmail}" style="color:#A8B94D;text-decoration:none;">${safeEmail}</a>&gt;</p>
-            <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">Subject</p>
-            <p style="margin:0 0 18px 0;font-family:${FONT};font-size:15px;color:#E8E8DF;">${safeSubject}</p>
-            <p style="margin:0 0 4px 0;font-family:${FONT};font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9E9E98;font-weight:700;">Message</p>
-            <div style="font-family:${FONT};font-size:15px;line-height:1.6;color:#FAFAF0;white-space:pre-wrap;word-break:break-word;">${safeMessage}</div>
-          </td></tr>
-          <tr><td style="padding:0 32px 28px 32px;border-top:1px solid #383836;padding-top:18px;">
-            <p style="margin:0;font-family:${FONT};font-size:12px;line-height:1.5;color:#7D7D78;">Reply straight to this email to answer ${safeName}.</p>
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-  </body>
-</html>`
+  const label = 'margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;'
+
+  const bodyHtml = `<p ${emailText('muted', label)}>From</p>
+              <p ${emailText('primary', 'margin:0 0 18px 0;font-size:15px;')}>${safeName} &lt;<a href="mailto:${safeEmail}" style="color:#869631;text-decoration:none;">${safeEmail}</a>&gt;</p>
+              <p ${emailText('muted', label)}>Subject</p>
+              <p ${emailText('primary', 'margin:0 0 18px 0;font-size:15px;')}>${safeSubject}</p>
+              <p ${emailText('muted', label)}>Message</p>
+              <div ${emailText('primary', 'font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;')}>${safeMessage}</div>`
+
+  return emailShell({
+    title: `New message from ${safeName}`,
+    heading: `New message from ${safeName}`,
+    bodyHtml,
+    footerNoteHtml: `Reply straight to this email to answer ${safeName}.`,
+  })
 }
 
 export async function POST(req: NextRequest) {
