@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, Crown } from '@phosphor-icons/react'
+import { CheckCircle, Crown, Lightning, Lock } from '@phosphor-icons/react'
 import { buttonClasses } from '../Button'
 import { TerminatorCool, TerminatorSkull } from '../auth/TerminatorReveal'
 import { useSession } from '../auth/SessionProvider'
@@ -42,9 +42,12 @@ export function PremiumCards({
   className?: string
 }) {
   const { user } = useSession()
-  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly')
+  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('yearly')
   const price = cycle === 'yearly' ? '$49.99' : '$8.99'
   const suffix = cycle === 'yearly' ? 'year' : 'month'
+  // Per-month equivalent of the yearly plan ($49.99 / 12 ≈ $4.17) — a hook that
+  // shows how low the effective monthly cost is. Only shown on the yearly cycle.
+  const perMonthHint = cycle === 'yearly' ? '$4.17/mo' : null
 
   // Reflect the real subscription so a premium user isn't pitched "Go Premium".
   // Tri-state: while 'unknown' (loading or backend error) render a neutral
@@ -70,6 +73,7 @@ export function PremiumCards({
   const listPad = compact ? 'px-5 py-4' : 'px-5 py-6 sm:px-6'
 
   return (
+    <>
     <div
       className={`grid gap-6 ${showFree ? 'md:grid-cols-2' : 'mx-auto max-w-md'} ${
         compact ? '' : 'mt-12 sm:mt-16'
@@ -87,14 +91,14 @@ export function PremiumCards({
                 Free
               </h2>
             </div>
-            <p className="mt-4 min-h-[2.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
               Install and remix components, free forever.
             </p>
             {/* Invisible mirror of the Premium card's billing-cycle toggle so the
                 price and CTA align across both cards. */}
             <div
               aria-hidden
-              className="invisible mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
+              className="invisible mt-3 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
             >
               <span className="rounded-md px-3 py-1 text-xs font-semibold">Monthly</span>
             </div>
@@ -108,7 +112,7 @@ export function PremiumCards({
               href={user ? '/components' : '/account/sign-up'}
               className={`mt-6 ${buttonClasses({ variant: 'outline', size: 'lg', fullWidth: true })}`}
             >
-              {user ? 'Browse Components' : 'Sign up free'}
+              {user ? 'Browse Components' : 'Sign up Free'}
             </Link>
           </div>
           <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
@@ -139,12 +143,12 @@ export function PremiumCards({
               <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>
-          <p className="mt-4 min-h-[2.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
             Unlimited installs, systems and templates.
           </p>
 
-          {/* Billing cycle toggle — defaults to Monthly; the selected option is highlighted. */}
-          <div className="mt-5 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
+          {/* Billing cycle toggle — defaults to Yearly; the selected option is highlighted. */}
+          <div className="mt-3 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
             <button
               type="button"
               onClick={() => setCycle('monthly')}
@@ -174,6 +178,11 @@ export function PremiumCards({
               {price}
             </span>
             <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
+            {perMonthHint && (
+              <span className="text-sm font-semibold text-olive-600 dark:text-olive-400">
+                ({perMonthHint})
+              </span>
+            )}
           </div>
 
           {user && premiumState === 'unknown' ? (
@@ -213,6 +222,48 @@ export function PremiumCards({
             ))}
           </ul>
         </div>
+      </div>
+    </div>
+    {!compact && <TrustStrip />}
+    </>
+  )
+}
+
+// Full-width trust strip below the Free/Premium bento. Checkout runs through
+// Paddle (PCI-DSS compliant, TLS, cardholder data encrypted — verified), so
+// "secure payment encryption" is accurate. "Cancel anytime" already lives in the
+// Premium feature list, so this surfaces a different signal (instant access).
+// Logos are real SVGs in /public/payment, shown on white chips so the colored
+// brand marks stay legible on the dark strip.
+const PAYMENT_LOGOS: [string, string][] = [
+  ['visa', 'Visa'],
+  ['mastercard', 'Mastercard'],
+  ['amex', 'American Express'],
+  ['paypal', 'PayPal'],
+  ['unionpay', 'UnionPay'],
+]
+
+function TrustStrip() {
+  return (
+    <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sand-300 bg-sand-100/60 px-6 py-4 dark:border-sand-800 dark:bg-sand-900/50 sm:flex-row">
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-sand-700 dark:text-sand-200">
+        <span className="flex items-center gap-1.5">
+          <Lock weight="regular" size={16} className="text-olive-600 dark:text-olive-400" />
+          Secure payment encryption
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Lightning weight="regular" size={16} className="text-olive-600 dark:text-olive-400" />
+          Instant access
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {PAYMENT_LOGOS.map(([file, label]) => (
+          <span key={file} className="flex h-7 items-center rounded-md bg-white px-1.5 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/payment/${file}.svg`} alt={label} className="h-4 w-auto" />
+          </span>
+        ))}
+        <span className="ml-1 text-xs text-sand-500 dark:text-sand-400">powered by Paddle</span>
       </div>
     </div>
   )
