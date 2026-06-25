@@ -3,7 +3,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
-import { CheckCircle, Lightning, Sparkle } from '@phosphor-icons/react'
+import { CheckCircle, Sparkle } from '@phosphor-icons/react'
 import type { ComponentType, ReactNode } from 'react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -11,6 +11,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import { TerminatorCool } from '../components/auth/TerminatorReveal'
 import { premiumEnabled } from '../../lib/flags'
 import { PremiumCards } from '../components/billing/PremiumCards'
+import { FaqAccordion, type FaqItem } from '../components/FaqAccordion'
 
 // ─── Plan data ──────────────────────────────────────────────────────────────
 // Legacy fallback, rendered only when premiumEnabled() is false. The first card
@@ -57,7 +58,7 @@ const PLANS: Plan[] = [
     priceLabel: 'Free',
     priceSuffix: 'Forever',
     cta: {
-      label: 'Sign up free',
+      label: 'Sign up Free',
       href: '/account/sign-up',
       variant: 'primary',
     },
@@ -183,6 +184,31 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
 }
 
 
+// Curated billing/about FAQ shown under the pricing cards. These mirror entries
+// on /faq — keep the answers in sync if those change.
+const PRICING_FAQ: FaqItem[] = [
+  {
+    q: 'How are payments handled, and what is Paddle?',
+    a: 'Payments run through Paddle, a trusted billing company that acts as the seller of record, meaning it sells Premium and processes the payment on our behalf. Checkout happens in a secure Paddle popup right on the page, so it stays simple and quick.',
+  },
+  {
+    q: 'Is paying secure?',
+    a: 'Yes. Payment is handled entirely by Paddle, a professional billing company and seller of record, so your payment details go straight to them and never sit with us. Your account only unlocks Premium after Paddle confirms the payment, keeping everything verified and safe.',
+  },
+  {
+    q: 'Do you handle taxes?',
+    a: 'Yes. As the seller of record, Paddle calculates and handles any applicable taxes for your country at checkout, so the right amount is included automatically. You see the full total before you confirm, with nothing to file yourself.',
+  },
+  {
+    q: 'Who is AI Canvas for?',
+    a: 'It is built for three ways of working. Designers get a polished starting point and shape it toward their own goals. Developers install a component with one command. And AI agents like Claude Code, Codex, or Cursor browse and install components for you. Pick whichever fits how you work.',
+  },
+  {
+    q: 'Is AI Canvas affiliated with Claude, Cursor, Lovable, or V0?',
+    a: 'No. AI Canvas is an independent, solo-built project and is not sponsored by, partnered with, or endorsed by any of those tools. It simply works alongside them so your existing AI workflow gets finished components.',
+  },
+]
+
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function PricingPage() {
@@ -236,11 +262,13 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* ── Footnote ── */}
-        <Section className="mt-12 text-center sm:mt-16" delay={0.2}>
-          <div className="inline-flex items-center gap-2 text-xs text-sand-500 dark:text-sand-500">
-            <Lightning weight="regular" size={14} className="text-olive-500 dark:text-olive-400" />
-            Everything is possible.
+        {/* ── Pricing FAQ ── */}
+        <Section className="mt-16 sm:mt-20" delay={0.15}>
+          <h2 className="text-center text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
+            Frequently asked questions
+          </h2>
+          <div className="mx-auto mt-8 max-w-3xl">
+            <FaqAccordion items={PRICING_FAQ} idPrefix="pricing-faq" />
           </div>
         </Section>
 
