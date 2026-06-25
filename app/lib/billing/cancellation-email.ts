@@ -6,7 +6,7 @@
 // actually completes the cancellation (clicking proves control of the account
 // email). Bilingual: German first (statutory market), English alongside.
 
-import { emailShell, emailText } from '../email/layout'
+import { emailShell, emailText } from '../email/shell'
 
 function esc(s: string): string {
   return s

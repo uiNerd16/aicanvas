@@ -4,7 +4,7 @@
 // Senders/triggers live in the routes that call these (auth callback, cancel-
 // confirm) along with their send-once guards.
 
-import { emailShell, emailText } from './layout'
+import { emailShell, emailText } from './shell'
 
 /** Onboarding email, sent once after a brand-new account's first confirmation.
  *  The "send only for accounts created after launch, once" guard lives in the

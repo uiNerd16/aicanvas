@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
-import { emailShell, emailText } from '@/app/lib/email/layout'
+import { emailShell, emailText } from '@/app/lib/email/shell'
 
 export const runtime = 'nodejs'
 
