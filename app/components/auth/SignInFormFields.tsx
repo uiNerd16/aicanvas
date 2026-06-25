@@ -39,6 +39,10 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(initialError)
+  // Magic-link ("email me a sign-in link") state. Separate submitting flag so it
+  // doesn't fight the password Sign in button's spinner.
+  const [magicSubmitting, setMagicSubmitting] = useState(false)
+  const [magicSent, setMagicSent] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -47,11 +51,81 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
     const supabase = createClient()
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) {
-      setError(formatAuthError(signInError))
+      // A common dead-end: the user signed up with Google and forgot, so the
+      // password never matches. Ask the server if this email is a Google-only
+      // account and, if so, point them at the Google button instead.
+      let handled = false
+      try {
+        const r = await fetch('/api/auth/login-hint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        if (r.ok) {
+          const j = (await r.json()) as { provider?: string }
+          if (j.provider === 'google') {
+            setError('You signed up with Google. Use "Sign in with Google" above to continue.')
+            handled = true
+          }
+        }
+      } catch {
+        // network hiccup → fall through to the generic message
+      }
+      if (!handled) setError(formatAuthError(signInError))
       setSubmitting(false)
       return
     }
     onSuccess()
+  }
+
+  // Passwordless sign-in: email the user a one-time link that lands on
+  // /account/auth/callback (the same route OAuth + confirmations use, which
+  // already exchanges the code for a session). shouldCreateUser:false keeps
+  // account creation on the deliberate sign-up path. We stay neutral about
+  // whether the email has an account, so this can't be used to probe who's
+  // registered — only a genuine rate-limit surfaces an error.
+  async function handleMagicLink() {
+    if (!email) {
+      setError('Enter your email to get a sign-in link.')
+      return
+    }
+    setMagicSubmitting(true)
+    setError(null)
+    const supabase = createClient()
+    const emailRedirectTo = `${window.location.origin}/account/auth/callback?next=${encodeURIComponent(next)}`
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo, shouldCreateUser: false },
+    })
+    if (otpError) {
+      const msg = (otpError.message ?? '').toLowerCase()
+      if (msg.includes('rate') || msg.includes('too many') || (otpError as { status?: number }).status === 429) {
+        setError('Too many requests. Please wait a minute and try again.')
+        setMagicSubmitting(false)
+        return
+      }
+      // Any other error (e.g. no account for this email) stays neutral.
+    }
+    setMagicSent(true)
+    setMagicSubmitting(false)
+  }
+
+  if (magicSent) {
+    return (
+      <>
+        <TerminatorReveal />
+        <div className="mt-6 rounded-lg border border-olive-500/30 bg-olive-500/10 px-4 py-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
+          Check your inbox. If an account exists for <strong>{email}</strong>, a one-time sign-in link is on its way. It expires in 1 hour.
+        </div>
+        <button
+          type="button"
+          onClick={() => setMagicSent(false)}
+          className="mt-4 text-sm font-semibold text-olive-500 hover:underline dark:text-olive-400"
+        >
+          Use a different email
+        </button>
+      </>
+    )
   }
 
   return (
@@ -130,6 +204,18 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
           className="mt-6"
         >
           {submitting ? 'Signing in…' : 'Sign in'}
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="md"
+          fullWidth
+          disabled={submitting || magicSubmitting}
+          onClick={handleMagicLink}
+          className="mt-3"
+        >
+          {magicSubmitting ? 'Sending link…' : 'Email me a sign-in link'}
         </Button>
       </form>
 

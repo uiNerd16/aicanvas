@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { paddleApiBase } from '@/app/lib/paddle/server'
 import { verifyCancelToken, type CancelClaims } from '@/app/lib/billing/cancel-token'
 import { CONTACT_FROM, CONTACT_INBOX } from '@/app/lib/config'
+import { cancellationConfirmedEmail } from '@/app/lib/email/messages'
 
 export const runtime = 'nodejs'
 
@@ -64,15 +65,27 @@ export async function GET(req: NextRequest) {
   let anyError = false
   let anyConfirmed = false
   let allAlready = true
+  let endsAt: string | null = null
   for (const sid of claims.sids) {
     const cur = await fetch(`${paddleApiBase()}/subscriptions/${sid}`, { headers: auth })
     if (cur.ok) {
       const sub = ((await cur.json().catch(() => null)) as
-        | { data?: { status?: string; scheduled_change?: { action?: string } | null } }
+        | {
+            data?: {
+              status?: string
+              scheduled_change?: { action?: string } | null
+              current_billing_period?: { ends_at?: string | null }
+            }
+          }
         | null)?.data
       if (sub?.status === 'canceled' || sub?.scheduled_change?.action === 'cancel') {
         continue // already canceled / scheduled — nothing to do for this one
       }
+      // Track the LATEST period-end across the subs we cancel, so a multi-sub
+      // account is never told access ends sooner than it does. (ISO-8601 UTC
+      // strings sort chronologically, so a string compare is enough.)
+      const e = sub?.current_billing_period?.ends_at
+      if (e && (!endsAt || e > endsAt)) endsAt = e
     }
     allAlready = false
     const res = await fetch(`${paddleApiBase()}/subscriptions/${sid}/cancel`, {
@@ -92,5 +105,26 @@ export async function GET(req: NextRequest) {
   if (allAlready && !anyConfirmed) return back('already')
 
   await notifySupportIfExtraordinary(claims)
+
+  // Courtesy confirmation to the customer — only when a real cancel was executed
+  // this request (anyConfirmed). A replayed link finds the sub already scheduled
+  // to cancel, takes the `continue` path, and never reaches here, so this can't
+  // double-send.
+  if (anyConfirmed) {
+    const resendKey = process.env.RESEND_API_KEY
+    if (resendKey) {
+      try {
+        const mail = cancellationConfirmedEmail({ endsAt: endsAt ? new Date(endsAt) : null })
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: CONTACT_FROM, to: [claims.email], subject: mail.subject, html: mail.html }),
+        })
+      } catch (e) {
+        console.error('[cancel-confirm] confirmation email failed (non-fatal):', e)
+      }
+    }
+  }
+
   return back('confirmed')
 }
