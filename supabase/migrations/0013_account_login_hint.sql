@@ -34,5 +34,9 @@ as $$
   end;
 $$;
 
-revoke all on function public.account_login_hint(text) from public;
+-- Supabase auto-grants EXECUTE on public functions to anon + authenticated via
+-- default privileges, so a bare `revoke ... from public` leaves those explicit
+-- grants in place (the function would stay callable from the browser via
+-- PostgREST rpc — a public enumeration oracle). Revoke them explicitly.
+revoke all on function public.account_login_hint(text) from public, anon, authenticated;
 grant execute on function public.account_login_hint(text) to service_role;
