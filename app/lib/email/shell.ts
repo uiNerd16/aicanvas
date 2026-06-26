@@ -85,6 +85,7 @@ export function emailShell(opts: {
       .ac-footer, .ac-footer a { color:#7D7D78 !important; }
       .ac-mark-light { display:none !important; }
       .ac-mark-dark  { display:inline-block !important; }
+      .ac-accent { color:#DAE4A0 !important; }
     }
   </style>
 </head>

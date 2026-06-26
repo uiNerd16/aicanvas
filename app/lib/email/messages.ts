@@ -19,6 +19,21 @@ export function welcomeEmail(): { subject: string; html: string } {
   return { subject: 'Welcome to AI Canvas', html }
 }
 
+/** Sent ONCE when a subscription goes active (the upgrade moment), in the
+ *  site's superhero voice. The send-once guard (premium_welcome_sent in
+ *  user_metadata) lives in the Paddle webhook, and it's non-fatal there so it
+ *  can never block subscription activation. */
+export function welcomeToPremiumEmail(): { subject: string; html: string } {
+  const html = emailShell({
+    title: 'You just got superpowers',
+    heading: 'You just got <span class="ac-accent" style="color:#869631;">superpowers</span>.',
+    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Premium is live on your account. The daily install limit is gone, every design system drops in with one command, and every premium template is yours, including every new one the moment it ships. Go build something only you could.</p>`,
+    button: { label: 'Use your powers', url: 'https://aicanvas.me/components' },
+    footerNoteHtml: 'Manage or cancel your plan anytime from your account settings.',
+  })
+  return { subject: 'You just got superpowers', html }
+}
+
 /** Closes the loop after the cancellation-confirm link actually cancels the
  *  Paddle subscription. Only sent when a real cancel was executed this request
  *  (see app/api/billing/cancel-confirm), so a replayed link can't re-send. */
