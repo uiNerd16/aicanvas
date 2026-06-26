@@ -4,6 +4,8 @@ import { COMPONENTS, type ComponentEntry, type ComponentMeta } from '../../lib/c
 import ComponentPageView from './ComponentPageView'
 import { HighlightedCode } from '../../components/HighlightedCode'
 import { GITHUB_URL, SITE_URL } from '../../lib/config'
+import { classifyContent } from '@/lib/registry/content-type'
+import { loadContentLookup } from '@/lib/registry/lookup'
 
 export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }))
@@ -128,6 +130,21 @@ export default async function Page({
   // on, source stays server-rendered (preserves SEO / GEO indexing).
   const enforcing = process.env.REGISTRY_ENFORCEMENT === 'enforce'
 
+  // Premium content (closed source) must NEVER appear in the server-rendered
+  // page payload — not the source, not the highlighted HTML, not the prompts —
+  // REGARDLESS of REGISTRY_ENFORCEMENT (the default is permissive). Classify
+  // server-side and withhold for premium; free content keeps today's behaviour
+  // (source ships in permissive mode for SEO). A degraded lookup (missing
+  // manifest) withholds for everything, to fail closed rather than risk a leak.
+  const lookup = loadContentLookup()
+  const contentType = classifyContent(slug, lookup)
+  const isPremium =
+    lookup.degraded === true ||
+    contentType === 'premium-standalone' ||
+    contentType === 'design-system' ||
+    contentType === 'template'
+  const withholdSource = isPremium || enforcing
+
   // Extract only the install-directive comment lines so the deps/font install
   // UI works even when the full source is withheld in enforcing mode.
   const codeDirectives = [
@@ -157,10 +174,11 @@ export default async function Page({
     '@type': 'SoftwareSourceCode',
     name: entry.name,
     description: entry.description,
-    codeRepository: GITHUB_URL,
+    // Premium components are NOT MIT and NOT in the public repo — never claim so.
+    ...(isPremium ? {} : { codeRepository: GITHUB_URL }),
     programmingLanguage: 'TypeScript',
     runtimePlatform: 'React',
-    license: 'https://opensource.org/licenses/MIT',
+    ...(isPremium ? {} : { license: 'https://opensource.org/licenses/MIT' }),
     url,
     ...(entry.image ? { image: entry.image } : {}),
     author: {
@@ -196,13 +214,15 @@ export default async function Page({
         description={entry.description}
         headingSubtitle={headingSubtitle}
         tags={entry.tags}
-        code={enforcing ? undefined : entry.code}
-        prompts={entry.prompts}
+        code={withholdSource ? undefined : entry.code}
+        // Premium prompts are withheld (empty = drawer shows no platforms). Free
+        // components keep their prompts. Never ship premium prompt text here.
+        prompts={isPremium ? {} : entry.prompts}
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         related={related}
-        highlightedCode={enforcing ? undefined : <HighlightedCode code={entry.code} />}
-        enforcing={enforcing}
+        highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
+        enforcing={enforcing || isPremium}
         codeDirectives={codeDirectives}
         useCases={entry.useCases}
         about={entry.about}
