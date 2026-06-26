@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyPaddleSignature } from '@/lib/identity/paddle-signature'
 import { createAdminClient } from '@/app/lib/supabase/admin'
 import { mapSubscriptionFields } from '@/lib/identity/sub-mapping'
+import { welcomeToPremiumEmail } from '@/app/lib/email/messages'
+import { NOREPLY_FROM } from '@/app/lib/config'
 
 export const runtime = 'nodejs'
 
@@ -80,19 +82,23 @@ export async function POST(req: NextRequest) {
   // out-of-order events. Compare as INSTANTS (stored value is a Postgres
   // timestamptz whose text form differs from Paddle's ISO string — a string
   // compare would misorder them). Discard anything not newer than stored.
-  if (occurredAt) {
-    const { data: existing } = await admin
-      .from('user_subscriptions')
-      .select('last_event_at')
-      .eq('user_id', userId)
-      .maybeSingle()
-    if (
-      existing?.last_event_at &&
-      new Date(existing.last_event_at).getTime() >= new Date(occurredAt).getTime()
-    ) {
-      return NextResponse.json({ ok: true, stale: true })
-    }
+  // Read the prior row once: its watermark guards ordering, and its status lets
+  // the "welcome to Premium" email fire ONLY on a real non-active→active
+  // transition — so an existing subscriber is never re-welcomed on a renewal
+  // (active→active) or any later active event.
+  const { data: existing } = await admin
+    .from('user_subscriptions')
+    .select('status, last_event_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (
+    occurredAt &&
+    existing?.last_event_at &&
+    new Date(existing.last_event_at).getTime() >= new Date(occurredAt).getTime()
+  ) {
+    return NextResponse.json({ ok: true, stale: true })
   }
+  const wasActive = existing?.status === 'active'
 
   // Conditional patch: spread only the fields the event carries (via the shared
   // mapper — same mapping the daily reconcile uses, so the two can't drift) so a
@@ -117,6 +123,42 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error('[paddle webhook] upsert failed:', error)
     return NextResponse.json({ error: 'write failed' }, { status: 500 })
+  }
+
+  // First-activation welcome ("you just got superpowers"). Fires once, only on a
+  // genuine non-active -> active transition, so renewals and existing subscribers
+  // are excluded; a user_metadata flag adds idempotency. Fully non-fatal: an email
+  // hiccup must never fail the webhook (Paddle's receipt still goes out, and a
+  // failed webhook would re-run the grant).
+  //
+  // We gate on 'active' only, NOT 'trialing' (which tier.ts also counts as
+  // premium): AI Canvas sells no-trial plans, so a first activation never carries
+  // 'trialing'. If a trial product is ever added, switch this to
+  // PREMIUM_STATUSES.has(fields.status).
+  if (fields.status === 'active' && !wasActive) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY
+      const {
+        data: { user },
+      } = await admin.auth.admin.getUserById(userId)
+      if (apiKey && user?.email && !user.user_metadata?.premium_welcome_sent) {
+        // Claim the flag FIRST and only send if it persisted: a flag-write
+        // failure must never leave the door open to a later double-send.
+        const { error: flagErr } = await admin.auth.admin.updateUserById(userId, {
+          user_metadata: { ...(user.user_metadata ?? {}), premium_welcome_sent: true },
+        })
+        if (!flagErr) {
+          const mail = welcomeToPremiumEmail()
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: NOREPLY_FROM, to: [user.email], subject: mail.subject, html: mail.html }),
+          })
+        }
+      }
+    } catch (e) {
+      console.error('[paddle webhook] premium welcome email failed (non-fatal):', e)
+    }
   }
 
   return NextResponse.json({ ok: true })
