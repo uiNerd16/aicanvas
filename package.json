@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
     "predev": "node scripts/check-deps.mjs",
     "dev": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --turbopack",
     "dev:webpack": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --webpack",

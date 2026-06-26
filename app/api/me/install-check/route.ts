@@ -26,6 +26,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'bad slug' }, { status: 400, headers: NO_STORE })
   }
 
+  // Premium standalones are closed-source and gate regardless of
+  // REGISTRY_ENFORCEMENT (mirrors the /r registry route), so the UI must show
+  // the paywall instead of handing over a CLI command that then 402s. Checked
+  // BEFORE the permissive early-return. Fails OPEN on error — this is only a UX
+  // hint; the registry route is the real gate. Inert until a premium slug exists.
+  try {
+    if (classifyContent(slug, loadContentLookup()) === 'premium-standalone') {
+      const { tier } = await getEntitlement(req)
+      return NextResponse.json(
+        tier === 'premium'
+          ? { blocked: false, tier, remaining: null }
+          : { blocked: true, reason: 'premium-only', tier },
+        { headers: NO_STORE },
+      )
+    }
+  } catch (err) {
+    console.error('[install-check] premium-standalone check failing open:', err)
+  }
+
   // Only meaningful when the gate is actually enforcing (matches the registry
   // route). Permissive/off → installs aren't metered, so never block a copy.
   const enforcing =

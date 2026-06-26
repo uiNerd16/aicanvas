@@ -36,18 +36,34 @@ export async function GET(req: NextRequest) {
     mode = 'permissive'
   }
 
-  if (mode === 'enforce') {
-    const lookup = loadContentLookup()
-    const contentType = classifyContent(slug, lookup)
+  const lookup = loadContentLookup()
+  const contentType = classifyContent(slug, lookup)
 
-    // Degraded lookup (missing _manifest.json) → fail closed for non-meta, so a
-    // premium standalone is never handed out free during a build misconfig.
-    if (lookup.degraded && contentType !== 'meta') {
-      console.error('[component-code gate] degraded lookup — failing closed on', slug)
+  // ── Mode-INDEPENDENT gating for closed content (mirrors /r) ───────────────
+  // Premium gating must not hang off REGISTRY_ENFORCEMENT — closed source can
+  // never be handed out free in permissive mode (the prod default). Inert until
+  // a premium slug exists / the manifest goes missing.
+  if (lookup.degraded && contentType !== 'meta') {
+    console.error('[component-code gate] degraded lookup — failing closed on', slug)
+    return NextResponse.json({ error: 'temporarily-unavailable' }, { status: 503, headers: NO_STORE })
+  }
+  if (contentType === 'premium-standalone') {
+    let tier
+    try {
+      tier = (await getEntitlement(req)).tier
+    } catch (err) {
+      console.error('[component-code gate] entitlement error on premium standalone — failing closed:', err)
       return NextResponse.json({ error: 'temporarily-unavailable' }, { status: 503, headers: NO_STORE })
     }
+    if (tier !== 'premium') {
+      return NextResponse.json({ error: 'premium-only' }, { status: 402, headers: NO_STORE })
+    }
+  }
 
-    if (contentType === 'design-system' || contentType === 'template' || contentType === 'premium-standalone') {
+  if (mode === 'enforce') {
+    // Premium DESIGN SYSTEMS / TEMPLATES: enforce-gated (unchanged). premium-
+    // standalone is handled mode-independently above.
+    if (contentType === 'design-system' || contentType === 'template') {
       // Premium-only: fail CLOSED — never hand out premium bytes on error.
       let tier
       try {

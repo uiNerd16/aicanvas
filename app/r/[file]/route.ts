@@ -57,20 +57,41 @@ export async function GET(
           ? 'private, no-store'
           : 'public, max-age=300'
 
-  if (mode === 'enforce' && contentType !== 'meta') {
-    // ── Degraded lookup: fail CLOSED ──────────────────────────────────────
-    // A missing _manifest.json means we cannot tell a premium standalone from
-    // a free one. Refuse all non-meta content (503) rather than risk handing
-    // out premium bytes for free. Loud + temporary, never a silent leak.
-    if (lookup.degraded) {
-      console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
+  // ── Mode-INDEPENDENT gating for closed content ────────────────────────────
+  // Premium gating must NOT hang off REGISTRY_ENFORCEMENT: closed-source bytes
+  // can never be served free just because the flag is permissive (the prod
+  // default). Both branches below are inert until a premium slug exists or the
+  // manifest goes missing, so current free / DS / template / meta behaviour is
+  // byte-for-byte unchanged.
+  if (contentType !== 'meta' && lookup.degraded) {
+    // Missing _manifest.json → cannot tell a premium standalone from a free one
+    // → fail CLOSED for all non-meta, in ANY mode. Loud + temporary, never a leak.
+    console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
+    return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
+  }
+  if (contentType === 'premium-standalone') {
+    // Closed-source standalone: ALWAYS requires premium entitlement, in any mode.
+    // Fail CLOSED on any entitlement error — never hand out premium bytes.
+    let tier
+    try {
+      tier = (await getEntitlement(req)).tier
+    } catch (err) {
+      console.error('[registry gate] entitlement error on premium standalone — failing closed:', err)
       return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
     }
+    if (tier !== 'premium') {
+      return paymentJson(
+        { error: 'premium-only', message: 'This is a premium component. Upgrade at https://aicanvas.me/pricing' },
+        402,
+      )
+    }
+  }
 
-    // ── Premium-only content: fail CLOSED ─────────────────────────────────
-    // Gating design systems/templates is binary and needs only the tier — if
-    // entitlement errors we deny (503), never hand out the premium bytes.
-    if (premiumContent) {
+  if (mode === 'enforce' && contentType !== 'meta') {
+    // ── Premium DESIGN SYSTEMS / TEMPLATES: fail CLOSED ───────────────────
+    // The existing soft-gate model — gated only when enforcing. (premium-
+    // standalone is gated mode-independently above, so it is excluded here.)
+    if (contentType === 'design-system' || contentType === 'template') {
       let tier
       try {
         tier = (await getEntitlement(req)).tier
@@ -84,8 +105,8 @@ export async function GET(
           402,
         )
       }
-    } else {
-      // ── Standalone metering: fail OPEN ───────────────────────────────────
+    } else if (contentType === 'standalone' || contentType === 'design-system-component') {
+      // ── Free metering: fail OPEN ───────────────────────────────────────
       // A Supabase outage must never break installs for paying customers;
       // worst case is a few uncounted free pulls. Log loudly.
       try {

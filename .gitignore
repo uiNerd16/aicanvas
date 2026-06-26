@@ -75,6 +75,15 @@ scripts/sync-output/
 app/lib/component-nav.generated.ts
 app/lib/component-meta.generated.ts
 
+# Premium injection — closed-source material that lives ONLY in the private
+# aicanvas-premium repo and is pulled in at BUILD time. NEVER tracked here.
+# (The check-no-premium-leak.mjs guard is the backstop; these are the first line.)
+/components-workspace/zz-premium-*/
+/design-systems/zz-premium-*/
+/registry-data/_premium.json
+app/lib/premium-registry.generated.tsx
+app/lib/component-copy.premium.generated.ts
+
 # Private thoughts: planning, strategy, monetization, legal/tax reasoning, notes.
 # NEVER commit these — the repo is public. Local only. (See also /business-strategy/.)
 /_private/
