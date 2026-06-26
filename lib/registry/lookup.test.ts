@@ -15,6 +15,7 @@ const manifest: GateManifest = {
     'andromeda-resource-planning',
     'andromeda-signal-room',
   ],
+  premiumSlugs: ['aurora-pricing-table'],
 }
 
 describe('buildLookup + classifyContent (manifest-driven gate)', () => {
@@ -38,6 +39,19 @@ describe('buildLookup + classifyContent (manifest-driven gate)', () => {
 
   it('the name-colliding free standalone stays standalone', () => {
     expect(classifyContent('andromeda-button', lookup)).toBe('standalone')
+  })
+
+  it('a premium standalone from the manifest gates as premium-standalone', () => {
+    expect(classifyContent('aurora-pricing-table', lookup)).toBe('premium-standalone')
+  })
+
+  it('a manifest with no premiumSlugs key still builds (defensive ?? [])', () => {
+    const legacy = buildLookup({
+      systemSlugs: ['andromeda'],
+      designSystemSlugs: [],
+      templateSlugs: [],
+    } as unknown as GateManifest)
+    expect(classifyContent('aurora-pricing-table', legacy)).toBe('standalone')
   })
 
   it('meta files stay meta', () => {

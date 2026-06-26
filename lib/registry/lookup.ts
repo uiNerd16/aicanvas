@@ -17,7 +17,9 @@ let cached: ContentLookup | null = null
  *
  * If the manifest is missing (build misconfiguration), fall back to a
  * minimal hardcoded set so SYSTEM aggregates and templates still gate, and
- * log loudly — never fail silently open for the whole catalog.
+ * log loudly. The fallback cannot know which standalones are premium, so it is
+ * marked `degraded: true` — routes must then fail CLOSED for non-meta content
+ * rather than risk serving a premium standalone for free.
  */
 export function loadContentLookup(): ContentLookup {
   if (cached) return cached
@@ -25,7 +27,7 @@ export function loadContentLookup(): ContentLookup {
     const raw = readFileSync(join(process.cwd(), 'registry-data', '_manifest.json'), 'utf8')
     cached = buildLookup(JSON.parse(raw) as GateManifest)
   } catch (err) {
-    console.error('[registry gate] _manifest.json missing/unreadable — using minimal fallback:', err)
+    console.error('[registry gate] _manifest.json missing/unreadable — DEGRADED, failing closed:', err)
     cached = buildLookup({
       systemSlugs: ['andromeda'],
       designSystemSlugs: [],
@@ -35,7 +37,9 @@ export function loadContentLookup(): ContentLookup {
         'andromeda-resource-planning',
         'andromeda-signal-room',
       ],
+      premiumSlugs: [],
     })
+    cached.degraded = true
   }
   return cached
 }

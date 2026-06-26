@@ -5,10 +5,20 @@ const lookup: ContentLookup = {
   designSystemSlugs: new Set(['andromeda-card']),
   templateSlugs: new Set(['andromeda-mission-control', 'andromeda-service-order']),
   systemSlugs: new Set(['andromeda']),
+  premiumSlugs: new Set(['aurora-pricing-table']),
 }
 
 describe('classifyContent', () => {
   it('classifies a plain standalone', () => {
+    expect(classifyContent('glass-navbar', lookup)).toBe('standalone')
+  })
+
+  it('classifies a premium standalone (gated, not free)', () => {
+    expect(classifyContent('aurora-pricing-table', lookup)).toBe('premium-standalone')
+    expect(classifyContent('aurora-pricing-table.json', lookup)).toBe('premium-standalone')
+  })
+
+  it('a non-listed standalone stays free even if premiumSlugs is non-empty', () => {
     expect(classifyContent('glass-navbar', lookup)).toBe('standalone')
   })
 

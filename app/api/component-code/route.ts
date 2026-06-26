@@ -40,7 +40,14 @@ export async function GET(req: NextRequest) {
     const lookup = loadContentLookup()
     const contentType = classifyContent(slug, lookup)
 
-    if (contentType === 'design-system' || contentType === 'template') {
+    // Degraded lookup (missing _manifest.json) → fail closed for non-meta, so a
+    // premium standalone is never handed out free during a build misconfig.
+    if (lookup.degraded && contentType !== 'meta') {
+      console.error('[component-code gate] degraded lookup — failing closed on', slug)
+      return NextResponse.json({ error: 'temporarily-unavailable' }, { status: 503, headers: NO_STORE })
+    }
+
+    if (contentType === 'design-system' || contentType === 'template' || contentType === 'premium-standalone') {
       // Premium-only: fail CLOSED — never hand out premium bytes on error.
       let tier
       try {

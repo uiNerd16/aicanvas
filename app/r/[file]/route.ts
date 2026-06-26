@@ -38,7 +38,12 @@ export async function GET(
   const contentType = classifyContent(file, lookup)
   const slug = file.replace(/\.json$/, '')
   const mode = effectiveMode()
-  const premiumContent = contentType === 'design-system' || contentType === 'template'
+  // premium-standalone gates exactly like a design system / template: binary,
+  // fail-closed, never free-metered, never shared-cached.
+  const premiumContent =
+    contentType === 'design-system' ||
+    contentType === 'template' ||
+    contentType === 'premium-standalone'
 
   // Cache policy: meta is truly public; premium content is never shared-cached
   // in ANY mode (a permissive-mode CDN entry must not survive an enforce flip);
@@ -53,6 +58,15 @@ export async function GET(
           : 'public, max-age=300'
 
   if (mode === 'enforce' && contentType !== 'meta') {
+    // ── Degraded lookup: fail CLOSED ──────────────────────────────────────
+    // A missing _manifest.json means we cannot tell a premium standalone from
+    // a free one. Refuse all non-meta content (503) rather than risk handing
+    // out premium bytes for free. Loud + temporary, never a silent leak.
+    if (lookup.degraded) {
+      console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
+      return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
+    }
+
     // ── Premium-only content: fail CLOSED ─────────────────────────────────
     // Gating design systems/templates is binary and needs only the tier — if
     // entitlement errors we deny (503), never hand out the premium bytes.

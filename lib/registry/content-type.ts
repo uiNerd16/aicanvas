@@ -1,5 +1,6 @@
 export type ContentType =
   | 'standalone'
+  | 'premium-standalone'
   | 'design-system-component'
   | 'design-system'
   | 'template'
@@ -12,6 +13,14 @@ export interface ContentLookup {
   templateSlugs: Set<string>
   /** Bare system names whose whole-system aggregates are premium (e.g. andromeda). */
   systemSlugs: Set<string>
+  /** Slugs of premium-only STANDALONE components (closed-source, born premium). */
+  premiumSlugs: Set<string>
+  /**
+   * True when this lookup came from the missing-manifest fallback. The fallback
+   * cannot know which standalones are premium, so routes MUST fail closed for
+   * non-meta content rather than risk serving a premium standalone for free.
+   */
+  degraded?: boolean
 }
 
 // Catalog/index files the CLI and MCP need to browse — never gated, never metered.
@@ -54,6 +63,11 @@ export function classifyContent(slugOrFile: string, lookup: ContentLookup): Cont
   // (anon 2 / free 10 / premium unlimited). Only templates and the whole-
   // system aggregates above are premium-only.
   if (lookup.designSystemSlugs.has(slug)) return 'design-system-component'
+
+  // Premium-only standalones (closed-source, born premium). They gate like a
+  // design system — binary access, never free-metered. The list is empty until
+  // the first premium component ships, so this is inert today.
+  if (lookup.premiumSlugs.has(slug)) return 'premium-standalone'
 
   return 'standalone'
 }

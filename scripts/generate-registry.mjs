@@ -388,11 +388,21 @@ function indexEntry(item, files) {
   }
 }
 
+// Premium standalone slugs (closed-source, born premium) come from
+// registry-data/_premium.json, written by scripts/inject-premium.mjs at build
+// time from the private repo's manifest. Absent (no premium injected, or a
+// public fork with no PAT) → empty, so premium gating is fully inert.
+let premiumSlugs = []
+try {
+  const premiumRaw = JSON.parse(readFileSync(join(outDir, '_premium.json'), 'utf8'))
+  premiumSlugs = Array.isArray(premiumRaw.standalones) ? [...premiumRaw.standalones] : []
+} catch { /* no _premium.json — no premium standalones */ }
+
 // Content-type manifest consumed by the /r gate (lib/registry/lookup.ts).
 // Collected from what this generator ACTUALLY emits, so the paywall classifier
 // can never drift from the registry contents. Written as _manifest.json — the
 // /r route's filename regex rejects leading underscores, so it is not servable.
-const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [] }
+const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [], premiumSlugs }
 
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)
@@ -611,6 +621,7 @@ writeFileSync(join(outDir, 'registry.json'), JSON.stringify(registry, null, 2) +
 manifest.systemSlugs.sort()
 manifest.designSystemSlugs.sort()
 manifest.templateSlugs.sort()
+manifest.premiumSlugs.sort()
 writeFileSync(join(outDir, '_manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
 
 console.log(`Generated ${count} components + ${dsCount} system/template items in ${outDir}/ (+ gate manifest: ${manifest.designSystemSlugs.length} ds components, ${manifest.templateSlugs.length} templates)`)
