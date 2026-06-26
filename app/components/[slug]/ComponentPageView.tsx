@@ -40,6 +40,7 @@ import { useSession } from '../auth/SessionProvider'
 import { Button } from '../Button'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
+import { HighlightedCodeView } from '../HighlightedCodeView'
 import { premiumEnabled } from '../../../lib/flags'
 import { useEntitlement } from '../billing/useEntitlement'
 import { PremiumBadge } from '../billing/PremiumBadge'
@@ -165,7 +166,7 @@ export default function ComponentPageView({
   // the gated endpoint when the Code tab opens. 200 -> source; 402 -> paywall.
   type CodeState =
     | { status: 'idle' | 'loading' }
-    | { status: 'ready'; code: string }
+    | { status: 'ready'; code: string; highlighted?: string }
     | { status: 'locked'; reason: PaywallReason; limit?: number }
   const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
   // Always fetch the PAGE's component source (`slug`), never `installSlug` —
@@ -185,8 +186,8 @@ export default function ComponentPageView({
         setCodeState({ status: 'locked', reason: 'premium-only' })
         return
       }
-      const { code: fetched } = await res.json()
-      setCodeState({ status: 'ready', code: fetched ?? '' })
+      const { code: fetched, highlighted } = await res.json()
+      setCodeState({ status: 'ready', code: fetched ?? '', highlighted })
     } catch {
       setCodeState({ status: 'locked', reason: 'premium-only' })
     }
@@ -676,9 +677,13 @@ export default function ComponentPageView({
                   codeState.status === 'locked' ? (
                     <Paywall reason={codeState.reason} limit={codeState.limit} />
                   ) : codeState.status === 'ready' ? (
-                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
-                      {codeState.code}
-                    </pre>
+                    codeState.highlighted ? (
+                      <HighlightedCodeView html={codeState.highlighted} />
+                    ) : (
+                      <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                        {codeState.code}
+                      </pre>
+                    )
                   ) : (
                     <div className="flex h-full items-center justify-center text-sm text-sand-500">
                       Loading source…
@@ -1051,9 +1056,13 @@ export default function ComponentPageView({
                                 codeState.status === 'locked' ? (
                                   <Paywall reason={codeState.reason} limit={codeState.limit} />
                                 ) : codeState.status === 'ready' ? (
-                                  <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
-                                    {codeState.code}
-                                  </pre>
+                                  codeState.highlighted ? (
+                                    <HighlightedCodeView html={codeState.highlighted} />
+                                  ) : (
+                                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                                      {codeState.code}
+                                    </pre>
+                                  )
                                 ) : (
                                   <button
                                     type="button"

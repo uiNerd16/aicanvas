@@ -6,6 +6,7 @@ import { dailyLimitFor } from '@/lib/registry/limits'
 import { premiumEnabled } from '@/lib/flags'
 import { utcDay, subjectFor, consume, ipFromHeaders } from '@/app/lib/quota'
 import { getComponentCode } from '@/app/lib/component-source'
+import { codeToHtml } from 'shiki'
 
 export const runtime = 'nodejs'
 
@@ -72,5 +73,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ code }, { headers: NO_STORE })
+  // Highlight server-side so the gated Code tab matches the build-time look
+  // (same Shiki lang/theme as HighlightedCode). Fail open to raw code on any
+  // Shiki hiccup — the client falls back to a plain <pre>.
+  let highlighted: string | undefined
+  try {
+    highlighted = await codeToHtml(code, { lang: 'tsx', theme: 'github-dark' })
+  } catch (err) {
+    console.error('[component-code] highlight failed, serving raw:', err)
+  }
+
+  return NextResponse.json({ code, highlighted }, { headers: NO_STORE })
 }
