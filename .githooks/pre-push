@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Pre-push guard — block premium source / generated shims / GitHub PATs from
+# reaching the PUBLIC remote, even if a commit slipped past pre-commit (bypass,
+# different machine, or a hook that wasn't installed). Checks the whole tracked
+# tree, not just staged files.
+# Bypass in a true emergency with: git push --no-verify  (do not).
+set -euo pipefail
+
+node scripts/check-no-premium-leak.mjs

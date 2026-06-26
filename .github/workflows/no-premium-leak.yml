@@ -1,0 +1,20 @@
+name: no-premium-leak
+
+# Machine-independent backstop for the local git hooks: fails the build if any
+# premium source, premium generated shim, or GitHub PAT ever lands in the public
+# repo. Runs on every push and PR. No secrets required.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Premium leak guard
+        run: node scripts/check-no-premium-leak.mjs

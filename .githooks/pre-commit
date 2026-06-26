@@ -3,6 +3,11 @@
 # Bypass in a true emergency with: git commit --no-verify  (avoid this)
 set -euo pipefail
 
+# 1. Premium leak guard — ALWAYS runs (no external dependency). Blocks premium
+#    source / generated shims / GitHub PATs from entering the public repo.
+node scripts/check-no-premium-leak.mjs --staged
+
+# 2. Secret scan (gitleaks). Skipped only if gitleaks isn't installed.
 if ! command -v gitleaks >/dev/null 2>&1; then
   echo "⚠️  gitleaks not installed — secret scan SKIPPED."
   echo "    Install it so commits are protected:  brew install gitleaks"
