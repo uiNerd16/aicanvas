@@ -8,9 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { LockSimple, Sparkle, X } from '@phosphor-icons/react'
+import { X } from '@phosphor-icons/react'
 import { useSession } from '../auth/SessionProvider'
 import { PremiumCards } from './PremiumCards'
+import { PaymentMethods } from './PaymentMethods'
 
 // ─── PaywallModalProvider ───────────────────────────────────────────────────
 // Global, full-screen upgrade modal — the paywall equivalent of AuthModal.
@@ -97,7 +98,7 @@ function PaywallModalView({
   const resetLine = countdown ? `Resets in ${countdown}.` : 'Resets within 24 hours.'
   const subtitle =
     reason === 'upgrade'
-      ? 'Unlimited installs, every design system and template, all in one place.'
+      ? null
       : reason === 'premium-only'
         ? 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
         : isAnonymous
@@ -132,7 +133,9 @@ function PaywallModalView({
         className="fixed inset-0 bg-sand-950/85 backdrop-blur-sm"
       />
 
-      <div className="relative z-10 my-auto w-full max-w-3xl rounded-2xl border border-sand-800 bg-sand-950 p-6 shadow-2xl sm:p-8">
+      {/* Width hugs the content: wide enough for two cards only when both are
+          shown; slimmer (just the single Premium card + padding) otherwise. */}
+      <div className={`relative z-10 my-auto w-full ${show === 'both' ? 'max-w-3xl' : 'max-w-lg'} rounded-2xl bg-sand-950 p-6 shadow-2xl sm:p-8`}>
         <button
           type="button"
           onClick={onClose}
@@ -143,21 +146,21 @@ function PaywallModalView({
         </button>
 
         <div className="text-center">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-sand-800 bg-sand-900">
-            <LockSimple weight="regular" size={20} className="text-olive-400" />
-          </div>
           <h3 className="text-xl font-bold text-sand-50">{title}</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-sand-400">{subtitle}</p>
+          {subtitle && (
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-sand-400">{subtitle}</p>
+          )}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-5">
           <PremiumCards show={show} compact />
         </div>
 
-        <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-sand-500">
-          <Sparkle weight="regular" size={12} className="text-olive-400" />
-          Remix with AI stays free for everyone.
-        </p>
+        {/* Accepted payment methods — a card-width container matching the
+            Premium card so it reads as the bottom of the same column. */}
+        <div className="mx-auto mt-5 max-w-md rounded-2xl border border-sand-800 bg-sand-900/50 px-4 py-3">
+          <PaymentMethods />
+        </div>
       </div>
     </div>
   )
