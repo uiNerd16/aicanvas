@@ -80,10 +80,10 @@ export async function GET(
       return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
     }
     if (tier !== 'premium') {
-      return paymentJson(
-        { error: 'premium-only', message: 'This is a premium component. Upgrade at https://aicanvas.me/pricing' },
-        402,
-      )
+      // Free / anon: don't 402 (shadcn renders that as a cryptic, misleading
+      // error). Serve a 200 PLACEHOLDER item — the install succeeds and drops a
+      // single clearly-labelled file pointing to /pricing. ZERO real source.
+      return premiumStub(body, slug)
     }
   }
 
@@ -169,6 +169,58 @@ export async function GET(
       'X-AICanvas-Content-Type': contentType,
       'Cache-Control': outCache,
     },
+  })
+}
+
+/**
+ * Free/anon request for a premium standalone → a 200 PLACEHOLDER registry item.
+ * The CLI install SUCCEEDS and writes ONE clearly-labelled file pointing to
+ * /pricing (far clearer than shadcn's cryptic 402 rendering), and it carries
+ * ZERO real source — the placeholder replaces every file's content and drops
+ * the npm deps.
+ */
+function premiumStub(realBody: string, slug: string): NextResponse {
+  let title = slug
+  let parsed: Record<string, unknown> = {}
+  try {
+    parsed = JSON.parse(realBody)
+    if (typeof parsed.title === 'string') title = parsed.title
+  } catch {
+    /* defaults below */
+  }
+  // The message must be RENDERABLE, not a comment — shadcn's add transform
+  // strips comments. A string const + JSX text both survive and show the upgrade
+  // path when the placeholder is used.
+  const msg =
+    `"${title}" is a premium AI Canvas component. ` +
+    `This is a placeholder — unlock the real source with an AI Canvas Premium ` +
+    `account at https://aicanvas.me/pricing`
+  const stub =
+    `const PREMIUM_NOTICE =\n` +
+    `  ${JSON.stringify(msg)}\n\n` +
+    `export default function PremiumLocked() {\n` +
+    `  return (\n` +
+    `    <div style={{ padding: 24, fontFamily: 'ui-monospace, monospace', fontSize: 13, lineHeight: 1.6, color: '#9aa3af' }}>\n` +
+    `      {PREMIUM_NOTICE}\n` +
+    `    </div>\n` +
+    `  )\n` +
+    `}\n`
+  const files = Array.isArray(parsed.files)
+    ? (parsed.files as Array<Record<string, unknown>>).map((f) => ({ ...f, content: stub }))
+    : [{ path: `components/aicanvas/${slug}.tsx`, type: 'registry:ui', target: `components/aicanvas/${slug}.tsx`, content: stub }]
+  const item = {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: slug,
+    type: 'registry:ui',
+    title: `${title} (Premium — locked)`,
+    description: 'Premium AI Canvas component. Upgrade to install the real source: https://aicanvas.me/pricing',
+    dependencies: [],
+    registryDependencies: [],
+    files,
+  }
+  return NextResponse.json(item, {
+    status: 200,
+    headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'premium-standalone' },
   })
 }
 
