@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Premium components are injected at BUILD time into the gitignored
+   components-workspace-premium/ dir. Tailwind v4's automatic content detection
+   skips gitignored paths, so without this their utilities (e.g. h-[420px]) would
+   never be generated and the components would render unstyled. Register it
+   explicitly — Tailwind tolerates the dir being absent (free-only builds). */
+@source "../components-workspace-premium";
+
 /* Class-based dark mode — toggle .dark on <html> instead of OS preference */
 @variant dark (&:where(.dark, .dark *):not([data-card-theme="light"] *));
 

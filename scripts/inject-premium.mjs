@@ -42,10 +42,13 @@ function writeStubShim() {
   )
 }
 
-// Always start from a clean slate so a removed slug actually disappears.
+// Always start from a clean slate so a removed slug actually disappears. Recreate
+// the (possibly empty) target dir so the Tailwind `@source` for it always resolves,
+// even on free-only builds.
 rmSync(TARGET, { recursive: true, force: true })
 rmSync(SHIM, { force: true })
 rmSync(PREMIUM_JSON, { force: true })
+mkdirSync(TARGET, { recursive: true })
 
 // ── 1. Resolve the source ──────────────────────────────────────────────────
 let source = process.env.PREMIUM_LOCAL_PATH || ''
