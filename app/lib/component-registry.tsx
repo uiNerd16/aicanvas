@@ -1349,22 +1349,39 @@ Requirements:
 //   2. Per-component `useCases` + `about` copy from COMPONENT_COPY — drives the
 //      use-case chips in the header and the "About <name>" body section.
 // Anything not in either map keeps its original tags / omits the copy slots.
-export const COMPONENTS: ComponentEntry[] = [...COMPONENTS_RAW]
-  .reverse()
-  .map((entry) => {
-    const copy = COMPONENT_COPY[entry.slug]
-    const stack = ACCURATE_STACKS[entry.slug]
-    let tags: Tag[] = entry.tags
-    if (stack) {
-      // Preserve every accent tag, not just the first — Glass components
-      // carry two (their UI category + "Glass") so the sidebar can list
-      // them under both, and dropping the second was emptying the Glass
-      // category landing page.
-      const categories = entry.tags.filter((t) => t.accent)
-      tags = [...categories, ...stack.map((label) => ({ label }))]
-    }
-    return { ...entry, tags, ...(copy ?? {}) }
-  })
+// Injected premium components live in a GITIGNORED generated shim, present only
+// when the premium source was injected at build (scripts/inject-premium.mjs).
+// Guarded require — NOT a static import — so a public fork with no shim still
+// compiles. inject always leaves at least an empty stub, so this resolves.
+let PREMIUM_COMPONENTS: ComponentEntry[] = []
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  PREMIUM_COMPONENTS = (require('./premium-registry.generated') as {
+    PREMIUM_COMPONENTS: ComponentEntry[]
+  }).PREMIUM_COMPONENTS
+} catch {
+  /* no premium injected — free-only build */
+}
+
+export const COMPONENTS: ComponentEntry[] = [
+  ...[...COMPONENTS_RAW]
+    .reverse()
+    .map((entry) => {
+      const copy = COMPONENT_COPY[entry.slug]
+      const stack = ACCURATE_STACKS[entry.slug]
+      let tags: Tag[] = entry.tags
+      if (stack) {
+        // Preserve every accent tag, not just the first — Glass components
+        // carry two (their UI category + "Glass") so the sidebar can list
+        // them under both, and dropping the second was emptying the Glass
+        // category landing page.
+        const categories = entry.tags.filter((t) => t.accent)
+        tags = [...categories, ...stack.map((label) => ({ label }))]
+      }
+      return { ...entry, tags, ...(copy ?? {}) }
+    }),
+  ...PREMIUM_COMPONENTS,
+]
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 

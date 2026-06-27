@@ -234,6 +234,17 @@ mkdirSync(outDir, { recursive: true })
 
 const metadata = parseRegistryMetadata()
 
+// Injected premium components (gitignored components-workspace-premium/, absent
+// on forks). Emitted as GATED registry JSON under their clean slug from their own
+// meta.json — never added to the public registry.json index.
+const premiumWsDir = 'components-workspace-premium'
+let premiumSlugDirs = []
+try {
+  premiumSlugDirs = readdirSync(premiumWsDir).filter((d) => {
+    try { return statSync(join(premiumWsDir, d)).isDirectory() } catch { return false }
+  })
+} catch { /* none injected */ }
+
 // Build the set of expected output filenames (slug-based) so we can
 // delete any stale folder-named files left over from previous runs.
 const expectedNames = new Set(
@@ -243,6 +254,9 @@ const expectedNames = new Set(
 )
 expectedNames.add('registry') // keep the root index
 expectedNames.add('aicanvas-mcp') // MCP metadata file
+for (const slug of premiumSlugDirs) expectedNames.add(slug) // keep gated premium JSON
+expectedNames.add('_premium') // gate input (written by inject-premium) — must survive cleanup
+expectedNames.add('_manifest') // gate manifest
 // Reserve filenames for design systems (tokens + per-component + system +
 // templates) so they survive the stale-file cleanup pass.
 function componentSlug(systemSlug, fileBaseName) {
@@ -345,6 +359,38 @@ for (const dir of dirs) {
 
   count++
 }
+
+// ── Premium standalones (gated) ───────────────────────────────────────────────
+// Emitted under their clean slug from their own meta.json. Served gated by /r
+// (premiumSlugs); deliberately NOT added to registryItems (the public index).
+let premiumCount = 0
+for (const slug of premiumSlugDirs) {
+  const file = join(premiumWsDir, slug, 'index.tsx')
+  let content
+  try { content = readFileSync(file, 'utf-8') } catch { continue }
+  let pmeta = {}
+  try { pmeta = JSON.parse(readFileSync(join(premiumWsDir, slug, 'meta.json'), 'utf-8')) } catch { /* fall back below */ }
+  const item = {
+    $schema: SCHEMA,
+    name: slug,
+    type: 'registry:ui',
+    title: pmeta.name || toTitle(slug),
+    description: pmeta.description || '',
+    author: 'aicanvas <https://aicanvas.me>',
+    dependencies: getDeps(content),
+    files: [
+      {
+        path: `components/aicanvas/${slug}.tsx`,
+        content: transformRootHeightClass(content),
+        type: 'registry:ui',
+        target: `components/aicanvas/${slug}.tsx`,
+      },
+    ],
+  }
+  writeFileSync(join(outDir, `${slug}.json`), JSON.stringify(item, null, 2) + '\n')
+  premiumCount++
+}
+if (premiumCount > 0) console.log(`Generated ${premiumCount} GATED premium component(s) in ${outDir}/`)
 
 // ── Design systems & templates ───────────────────────────────────────────────
 // Three-layer registry items connected by `registryDependencies` so files are

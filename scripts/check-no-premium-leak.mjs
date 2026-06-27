@@ -52,7 +52,8 @@ function readContent(f) {
   }
 }
 
-const PREMIUM_PATH = /(^|\/)(components-workspace|design-systems)\/zz-premium-/
+const PREMIUM_PATH =
+  /(^|\/)(components-workspace-premium|design-systems-premium)\/|(^|\/)(components-workspace|design-systems)\/zz-premium-/
 const PREMIUM_GENERATED =
   /\.premium\.generated\.(ts|tsx|js)$|(^|\/)premium-registry\.generated\.|(^|\/)component-copy\.premium\.generated\./
 // Assembled from parts so THIS file does not contain the literal marker (which

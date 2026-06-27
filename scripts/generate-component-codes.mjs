@@ -12,14 +12,22 @@ import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 
 const wsDir = 'components-workspace'
+const premiumDir = 'components-workspace-premium' // injected, gitignored (may be absent)
 const outFile = 'app/lib/component-codes.generated.ts'
 
-const dirs = readdirSync(wsDir)
-  .filter(d => {
-    const p = join(wsDir, d)
-    return statSync(p).isDirectory() && d !== '_template'
-  })
-  .sort()
+function listDirs(base) {
+  try {
+    return readdirSync(base).filter((d) => {
+      try { return statSync(join(base, d)).isDirectory() && d !== '_template' } catch { return false }
+    })
+  } catch { return [] }
+}
+
+// Free components + any injected premium components, keyed by their clean slug.
+const entries = [
+  ...listDirs(wsDir).map((d) => ({ base: wsDir, dir: d })),
+  ...listDirs(premiumDir).map((d) => ({ base: premiumDir, dir: d })),
+].sort((a, b) => a.dir.localeCompare(b.dir))
 
 const lines = [
   '// AUTO-GENERATED — do not edit manually.',
@@ -29,8 +37,8 @@ const lines = [
 ]
 
 let count = 0
-for (const dir of dirs) {
-  const file = join(wsDir, dir, 'index.tsx')
+for (const { base, dir } of entries) {
+  const file = join(base, dir, 'index.tsx')
   let content
   try {
     content = readFileSync(file, 'utf-8')

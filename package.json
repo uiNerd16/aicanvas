@@ -6,9 +6,9 @@
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
     "predev": "node scripts/check-deps.mjs",
-    "dev": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --turbopack",
-    "dev:webpack": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --webpack",
-    "build": "node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
+    "dev": "node scripts/inject-premium.mjs && node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --turbopack",
+    "dev:webpack": "node scripts/inject-premium.mjs && node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next dev -p 3001 --webpack",
+    "build": "node scripts/inject-premium.mjs && node scripts/generate-component-codes.mjs && node scripts/generate-registry.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
