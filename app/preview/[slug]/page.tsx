@@ -1,17 +1,21 @@
-'use client'
-
 import { notFound } from 'next/navigation'
-import { use } from 'react'
-import Link from 'next/link'
-import { ArrowLeft } from '@phosphor-icons/react'
 import { COMPONENTS } from '../../lib/component-registry'
+import { BackButton } from './BackButton'
 
-export default function FullScreenPreview({
+// SERVER component (deliberately no 'use client'). COMPONENTS carries every
+// entry's raw `code` string — including the closed-source premium ones — so it
+// must stay on the server. As a client component this route bundled the entire
+// registry (source and all) into a browser-downloadable JS chunk. The live
+// <PreviewComponent /> is itself a client component and still hydrates fine;
+// only the source strings now stay server-side. The back button lives in its
+// own client child (BackButton) so its Phosphor icon — which calls
+// React.createContext at module load — never evaluates in this server module.
+export default async function FullScreenPreview({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const { slug } = use(params)
+  const { slug } = await params
   const entry = COMPONENTS.find((c) => c.slug === slug)
   if (!entry) notFound()
 
@@ -24,15 +28,7 @@ export default function FullScreenPreview({
       style={{ contain: 'strict' }}
     >
       <PreviewComponent />
-
-      {/* Back button — always above component content regardless of stacking contexts */}
-      <Link
-        href={`/components/${slug}`}
-        className="absolute top-4 left-4 z-[100] flex items-center gap-1.5 rounded-lg border border-sand-700 bg-sand-900/80 px-3 py-1.5 text-xs font-semibold text-sand-400 backdrop-blur-sm transition-colors hover:border-sand-600 hover:text-sand-200"
-      >
-        <ArrowLeft weight="regular" size={13} />
-        Back
-      </Link>
+      <BackButton slug={slug} />
     </div>
   )
 }

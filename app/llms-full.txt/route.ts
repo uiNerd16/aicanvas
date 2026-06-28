@@ -28,8 +28,16 @@ Install any component with: \`npx shadcn@latest add ${SITE_URL}/r/<component-nam
 
   for (const c of COMPONENTS) {
     const category = categoryOf(c.tags)
+    const head = `---\n\n## ${c.name}\n\nCategory: ${category}\nSlug: \`${c.slug}\`\nURL: ${SITE_URL}/components/${c.slug}\n\n${c.description}\n\nInstall:\n\n\`\`\`bash\nnpx shadcn@latest add ${SITE_URL}/r/${c.slug}.json\n\`\`\``
+    // Premium (closed-source) components carry badge:'Premium' (set by the inject
+    // shim). This route is PUBLIC + un-authenticated, so it must NEVER emit their
+    // source — list them for discovery, but withhold the bytes (the /r gate is the
+    // only place premium source is served, and only to a premium token). Free
+    // components keep their full source here, unchanged.
     parts.push(
-      `---\n\n## ${c.name}\n\nCategory: ${category}\nSlug: \`${c.slug}\`\nURL: ${SITE_URL}/components/${c.slug}\n\n${c.description}\n\nInstall:\n\n\`\`\`bash\nnpx shadcn@latest add ${SITE_URL}/r/${c.slug}.json\n\`\`\`\n\n\`\`\`tsx\n${c.code}\n\`\`\``,
+      c.badge === 'Premium'
+        ? `${head}\n\n_Premium component — source is gated. Preview, details, and install at ${SITE_URL}/components/${c.slug}._`
+        : `${head}\n\n\`\`\`tsx\n${c.code}\n\`\`\``,
     )
   }
 
