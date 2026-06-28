@@ -9,6 +9,7 @@ import {
   CopySimple,
   RocketLaunch,
   ImageSquare,
+  Crown,
   Code,
   Palette,
   HandTap,
@@ -408,6 +409,12 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-sand-800/60 bg-sand-900">
       <div className="relative h-56 overflow-hidden bg-sand-900">
+        {entry.badge && (
+          <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-sand-950/85 px-2.5 py-1 text-[11px] font-semibold text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
+            <Crown weight="fill" size={12} />
+            {entry.badge === 'Premium' ? 'Premium component' : entry.badge}
+          </span>
+        )}
         {entry.image ? (
           <img
             src={entry.image}
@@ -596,6 +603,12 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                   className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900"
                 >
                   <div className="relative h-64 overflow-hidden">
+                    {current.badge && (
+                      <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-sand-950/85 px-2.5 py-1 text-[11px] font-semibold text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
+                        <Crown weight="fill" size={12} />
+                        {current.badge === 'Premium' ? 'Premium component' : current.badge}
+                      </span>
+                    )}
                     {current.image ? (
                       <img
                         src={current.image}

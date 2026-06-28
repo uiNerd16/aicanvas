@@ -21,6 +21,7 @@ import {
   DotsThreeVertical,
   Terminal,
   Sparkle,
+  Crown,
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
@@ -81,6 +82,8 @@ interface ComponentPageViewProps {
   prompts: Partial<Record<Platform, string>>
   dualTheme: boolean
   designSystem?: DesignSystemSlug
+  /** Premium standalone component — shows a "Premium component" label by the title. */
+  premium?: boolean
   related: ComponentMeta[]
   highlightedCode?: ReactNode
   enforcing?: boolean
@@ -108,6 +111,7 @@ export default function ComponentPageView({
   prompts,
   dualTheme,
   designSystem,
+  premium = false,
   related,
   highlightedCode,
   enforcing = false,
@@ -489,8 +493,21 @@ export default function ComponentPageView({
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
                   {designSystem && <PremiumBadge />}
+                  {premium && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                      <Crown weight="regular" size={12} />
+                      Premium component
+                    </span>
+                  )}
                   {categoryTags.map((tag) => (
-                    <span key={tag.label} className="rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                    <span
+                      key={tag.label}
+                      className={
+                        premium
+                          ? 'rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400'
+                          : 'rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400'
+                      }
+                    >
                       {tag.label}
                     </span>
                   ))}

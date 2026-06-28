@@ -257,6 +257,7 @@ Before building anything, write a brief in this format and wait for user approva
 Component: <name>
 Slug: <kebab-case>
 design-system: standalone | andromeda | meridian   ← required
+tier: free | premium                                ← required (default: free)
 Description: <one sentence>
 Visual: <what it looks like>
 Behaviour: <interactions, animations>
@@ -268,6 +269,8 @@ The `design-system:` field routes the Builder to the right ruleset and spec loca
 
 - `standalone` → save spec at `components-workspace/<slug>/spec.md`; Builder reads `components-workspace/CLAUDE.md` + `../components-workspace/skills/aesthetic-freedom.md`
 - `andromeda` / `meridian` / etc. → save spec at `design-systems/<system>/specs/<slug>.md`; Builder reads `../design-systems/CLAUDE.md` + `../design-systems/<system>/tokens.ts` + `../design-systems/skills/designing-a-system.md`
+
+**`tier: premium` (closed-source).** The pipeline is identical — build and preview here as usual — but the *finished source* is stored in the private `aicanvas-premium` repo and never committed to this public one. Before delegating a premium brief, read `_private/premium-workflow.md` (gitignored): it covers tagging every file with the premium marker, the manifest, `PREMIUM_LOCAL_PATH` preview, and the leak guard. Routing for `design-system:` is unchanged (a premium component is still `standalone` or a named system).
 
 If a user's request doesn't specify a tier, ask before writing the brief — don't guess. Most component requests default to `standalone`; DS work is usually explicit ("add a new Andromeda component…", "extend Meridian with a Select").
 

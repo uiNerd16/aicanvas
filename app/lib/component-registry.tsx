@@ -1363,24 +1363,27 @@ try {
   /* no premium injected — free-only build */
 }
 
+// Merge per-component copy (about/useCases) and the accurate "Built with" stack
+// onto a registry entry. Applied to free AND premium components alike, so a
+// premium component's page also gets its use-case chips + About paragraph.
+function withCopyAndStack(entry: ComponentEntry): ComponentEntry {
+  const copy = COMPONENT_COPY[entry.slug]
+  const stack = ACCURATE_STACKS[entry.slug]
+  let tags: Tag[] = entry.tags
+  if (stack) {
+    // Preserve every accent tag, not just the first — Glass components
+    // carry two (their UI category + "Glass") so the sidebar can list
+    // them under both, and dropping the second was emptying the Glass
+    // category landing page.
+    const categories = entry.tags.filter((t) => t.accent)
+    tags = [...categories, ...stack.map((label) => ({ label }))]
+  }
+  return { ...entry, tags, ...(copy ?? {}) }
+}
+
 export const COMPONENTS: ComponentEntry[] = [
-  ...[...COMPONENTS_RAW]
-    .reverse()
-    .map((entry) => {
-      const copy = COMPONENT_COPY[entry.slug]
-      const stack = ACCURATE_STACKS[entry.slug]
-      let tags: Tag[] = entry.tags
-      if (stack) {
-        // Preserve every accent tag, not just the first — Glass components
-        // carry two (their UI category + "Glass") so the sidebar can list
-        // them under both, and dropping the second was emptying the Glass
-        // category landing page.
-        const categories = entry.tags.filter((t) => t.accent)
-        tags = [...categories, ...stack.map((label) => ({ label }))]
-      }
-      return { ...entry, tags, ...(copy ?? {}) }
-    }),
-  ...PREMIUM_COMPONENTS,
+  ...[...COMPONENTS_RAW].reverse().map(withCopyAndStack),
+  ...PREMIUM_COMPONENTS.map(withCopyAndStack),
 ]
 
 // ─── Helper ───────────────────────────────────────────────────────────────────

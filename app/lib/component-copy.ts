@@ -22,6 +22,7 @@ export type ComponentCopy = {
 // `meet-the-crew` aliases the `avatar-picker` source; `traveldeck` aliases
 // the `floating-cards` source.
 export const ACCURATE_STACKS: Record<string, string[]> = {
+  '3d-product-card': ['Three.js', 'Tailwind CSS'],
   'ai-job-cards': ['Motion', 'Tailwind CSS'],
   'andromeda-button': ['Tailwind CSS'],
   'blind-pull-toggle': ['Motion', 'Tailwind CSS'],
@@ -100,6 +101,12 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
 }
 
 export const COMPONENT_COPY: Record<string, ComponentCopy> = {
+  '3d-product-card': {
+    useCases: ['Product page', 'Online store', '3D showcase'],
+    about:
+      '3D Product Card turns a normal shop listing into an interactive turntable. At rest it reads like any product card, with a name, price, wishlist, and add-to-cart button, but hovering tilts the card into a 3D display floor while the product itself lifts and slowly spins, and shoppers can drag to orbit it and study every angle. It loads a real glTF/.glb model so you can drop in your own product, fits any model to frame automatically, and adapts to both light and dark themes. The copy and call-to-action stay flat and readable in 2D while the card leans behind them. Built with raw Three.js.',
+  },
+
   // ─── Backgrounds ─────────────────────────────────────────────────────────
   'wave-lines': {
     useCases: ['Hero section', 'Landing page', 'Section divider'],

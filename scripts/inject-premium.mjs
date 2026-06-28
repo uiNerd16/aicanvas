@@ -130,7 +130,10 @@ for (const slug of standalones) {
 
   const promptsPath = join(srcDir, 'prompts.ts')
   const hasPrompts = existsSync(promptsPath)
-  if (hasPrompts) writeFileSync(join(outDir, 'prompts.ts'), readFileSync(promptsPath, 'utf8'))
+  if (hasPrompts) {
+    const strippedPrompts = readFileSync(promptsPath, 'utf8').split('\n').filter((l) => !l.includes(MARKER)).join('\n')
+    writeFileSync(join(outDir, 'prompts.ts'), strippedPrompts)
+  }
 
   injected.push({ slug, meta, hasPrompts })
 }
@@ -170,6 +173,7 @@ for (const { slug, meta, hasPrompts } of injected) {
       `    description: ${JSON.stringify(meta.description)},\n` +
       `    tags: ${tags},\n` +
       (meta.image ? `    image: ${JSON.stringify(meta.image)},\n` : '') +
+      (meta.dualTheme ? '    dualTheme: true,\n' : '') +
       `    badge: 'Premium',\n` +
       `    PreviewComponent: ${v},\n` +
       `    code: componentCodes[${JSON.stringify(slug)}] ?? '',\n` +

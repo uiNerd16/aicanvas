@@ -64,11 +64,11 @@ export default function HomePage() {
         ]
 
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
-  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const FEATURED_SLUGS = ['3d-product-card', 'ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
   const carouselItems = FEATURED_SLUGS
     .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
-    .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
+    .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image, badge: c!.badge }))
 
   return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
 }

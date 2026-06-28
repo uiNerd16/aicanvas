@@ -131,6 +131,15 @@ const SETTLE_MS        = 2500
 // `preview` is the Playwright Locator for [data-card-theme].
 
 const INTERACTIONS = {
+  // 3D Product Card — wait for the .glb to load + reveal in, then hover the
+  // centre so the card tilts to its display floor and the product lifts.
+  '3d-product-card': async (preview, page) => {
+    await page.waitForTimeout(1800)
+    const box = await preview.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.waitForTimeout(900)
+  },
+
   // Toggles — click once to put them in the ON state
   'pill-toggle':       async (preview) => {
     await preview.locator('button').first().click()

@@ -215,11 +215,13 @@ export default async function Page({
         headingSubtitle={headingSubtitle}
         tags={entry.tags}
         code={withholdSource ? undefined : entry.code}
-        // Premium prompts are withheld (empty = drawer shows no platforms). Free
-        // components keep their prompts. Never ship premium prompt text here.
-        prompts={isPremium ? {} : entry.prompts}
+        // Prompts (Remix with AI) ship for ALL components — Remix is free, only the
+        // exact source (Code tab / CLI / MCP) is gated. A premium component enables
+        // its Remix drawer simply by having a prompts.ts in the private vault.
+        prompts={entry.prompts}
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
+        premium={contentType === 'premium-standalone'}
         related={related}
         highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
         enforcing={enforcing || isPremium}

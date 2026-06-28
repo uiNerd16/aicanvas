@@ -199,7 +199,7 @@ export function HomeClient({
                     description={entry.description}
                     tags={entry.tags}
                     image={entry.image}
-                    badge={NEW_BADGE_ACTIVE ? entry.badge : undefined}
+                    badge={entry.badge === 'Premium' || NEW_BADGE_ACTIVE ? entry.badge : undefined}
                     href={`/components/${entry.slug}`}
                     slug={entry.slug}
                     position={i}

@@ -8,7 +8,7 @@ import { premiumEnabled } from '../../../lib/flags'
  * Olive backgrounds pair with text-sand-950, never white (token rule).
  * Renders nothing while the premium flag is off.
  */
-export function PremiumBadge({ className = '' }: { className?: string }) {
+export function PremiumBadge({ className = '', label = 'Premium' }: { className?: string; label?: string }) {
   if (!premiumEnabled()) return null
 
   return (
@@ -16,7 +16,7 @@ export function PremiumBadge({ className = '' }: { className?: string }) {
       className={`inline-flex items-center gap-1 rounded-full bg-olive-500 px-2 py-0.5 text-[11px] font-semibold text-sand-950 ${className}`}
     >
       <Crown weight="regular" size={11} />
-      Premium
+      {label}
     </span>
   )
 }

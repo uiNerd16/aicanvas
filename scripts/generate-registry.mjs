@@ -364,12 +364,14 @@ for (const dir of dirs) {
 // Emitted under their clean slug from their own meta.json. Served gated by /r
 // (premiumSlugs); deliberately NOT added to registryItems (the public index).
 let premiumCount = 0
+const premiumMetas = []
 for (const slug of premiumSlugDirs) {
   const file = join(premiumWsDir, slug, 'index.tsx')
   let content
   try { content = readFileSync(file, 'utf-8') } catch { continue }
   let pmeta = {}
   try { pmeta = JSON.parse(readFileSync(join(premiumWsDir, slug, 'meta.json'), 'utf-8')) } catch { /* fall back below */ }
+  premiumMetas.push({ slug, name: pmeta.name || toTitle(slug), description: pmeta.description || '', tags: pmeta.tags || [], image: pmeta.image, dependencies: getDeps(content) })
   const item = {
     $schema: SCHEMA,
     name: slug,
@@ -717,6 +719,30 @@ for (const dir of dirs) {
   })
 }
 
+// Premium components — first-class in the website listings (grid, search,
+// categories) and the MCP, exactly like free ones. Their SOURCE stays gated
+// (served via /r/<slug>.json); only metadata is listed here. Never added to
+// registryItems (the registry.json index carries source).
+for (const m of premiumMetas) {
+  const pcats = (m.tags || []).filter((t) => t.accent).map((t) => t.label)
+  const psub = (m.tags || []).filter((t) => !t.accent).map((t) => t.label)
+  for (const c of pcats) categoryCounts[c] = (categoryCounts[c] ?? 0) + 1
+  mcpComponents.push({
+    slug: m.slug,
+    name: m.name,
+    description: m.description,
+    categories: pcats,
+    tags: psub,
+    image: m.image || undefined,
+    badge: 'Premium',
+    dualTheme: false,
+    dependencies: m.dependencies || [],
+    homepageUrl: `https://aicanvas.me/components/${m.slug}`,
+    sourceUrl: `https://aicanvas.me/r/${m.slug}.json`,
+    installCommand: `npx shadcn@latest add @aicanvas/${m.slug}`,
+  })
+}
+
 // ── Per-system meta-slug map (for design-system component homepage URLs) ──────
 // A DS component's homepage lives at /design-systems/<system>/<metaSlug>, where
 // metaSlug is the WEBSITE slug declared in app/_lib/<system>/<system>-meta.ts —
@@ -926,18 +952,27 @@ console.log(`Generated app/lib/component-nav.generated.ts (${Object.keys(categor
   }
 
   // metadata is keyed in COMPONENTS_RAW source order; COMPONENTS reverses it.
-  const metaList = Object.values(metadata)
+  const transformTags = (m) =>
+    stacks[m.slug]
+      ? [...m.tags.filter((t) => t.accent), ...stacks[m.slug].map((label) => ({ label }))]
+      : m.tags
+  const freeMetaList = Object.values(metadata)
     .reverse()
     .map((m) => {
-      let tags = m.tags
-      if (stacks[m.slug]) {
-        tags = [...m.tags.filter((t) => t.accent), ...stacks[m.slug].map((label) => ({ label }))]
-      }
-      const entry = { slug: m.slug, name: m.name, description: m.description, tags }
+      const entry = { slug: m.slug, name: m.name, description: m.description, tags: transformTags(m) }
       if (m.image) entry.image = m.image
       if (m.badge) entry.badge = m.badge
       return entry
     })
+  // Premium components are first-class listings — prepended (they're the newest)
+  // so they appear in the grid, search and category like any free component.
+  // component-meta is metadata only; the premium SOURCE is never here.
+  const premiumMetaList = premiumMetas.map((m) => {
+    const entry = { slug: m.slug, name: m.name, description: m.description, tags: transformTags(m), badge: 'Premium' }
+    if (m.image) entry.image = m.image
+    return entry
+  })
+  const metaList = [...premiumMetaList, ...freeMetaList]
 
   if (metaList.length !== mcpComponents.length) {
     throw new Error(
