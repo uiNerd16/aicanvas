@@ -363,6 +363,15 @@ for (const dir of dirs) {
 // ── Premium standalones (gated) ───────────────────────────────────────────────
 // Emitted under their clean slug from their own meta.json. Served gated by /r
 // (premiumSlugs); deliberately NOT added to registryItems (the public index).
+//
+// HIDDEN_SLUGS — temporarily withheld from the website's discovery surfaces
+// (grid, homepage carousel, sidebar counts, MCP listing, search). These derive
+// solely from `premiumMetas`, so excluding a slug there hides it everywhere at
+// once while keeping the build assertions balanced. The gated JSON below is
+// STILL written, so a hidden component stays installable via the CLI/MCP. Keep
+// in sync with HIDDEN_SLUGS in app/lib/component-registry.tsx, which hides it
+// from the runtime surfaces (detail page + sitemap). Remove a slug to unhide.
+const HIDDEN_SLUGS = new Set(['3d-product-card'])
 let premiumCount = 0
 const premiumMetas = []
 for (const slug of premiumSlugDirs) {
@@ -371,7 +380,9 @@ for (const slug of premiumSlugDirs) {
   try { content = readFileSync(file, 'utf-8') } catch { continue }
   let pmeta = {}
   try { pmeta = JSON.parse(readFileSync(join(premiumWsDir, slug, 'meta.json'), 'utf-8')) } catch { /* fall back below */ }
-  premiumMetas.push({ slug, name: pmeta.name || toTitle(slug), description: pmeta.description || '', tags: pmeta.tags || [], image: pmeta.image, dependencies: getDeps(content) })
+  if (!HIDDEN_SLUGS.has(slug)) {
+    premiumMetas.push({ slug, name: pmeta.name || toTitle(slug), description: pmeta.description || '', tags: pmeta.tags || [], image: pmeta.image, dependencies: getDeps(content) })
+  }
   const item = {
     $schema: SCHEMA,
     name: slug,
