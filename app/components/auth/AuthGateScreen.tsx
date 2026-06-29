@@ -13,16 +13,20 @@ import { buttonClasses } from '../buttonClasses'
 type AuthGateScreenProps = {
   onChooseSignIn: () => void
   onChooseSignUp: () => void
+  // Optional copy overrides so a gated action (e.g. an install) can tailor the
+  // pitch. Absent for the Lab callers, which keep the default canvas copy.
+  title?: string
+  subtitle?: string
 }
 
-export function AuthGateScreen({ onChooseSignIn, onChooseSignUp }: AuthGateScreenProps) {
+export function AuthGateScreen({ onChooseSignIn, onChooseSignUp, title, subtitle }: AuthGateScreenProps) {
   return (
     <div className="flex flex-col">
       <h2 className="text-xl font-bold leading-tight tracking-tight text-sand-900 dark:text-sand-50">
-        Sign in and unlock the canvas.
+        {title ?? 'Sign in and unlock the canvas.'}
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-        Save what you love, tune in the Lab, export to your machine. AI Canvas is open source and completely free.
+        {subtitle ?? 'Save what you love, tune in the Lab, export to your machine. AI Canvas is open source and completely free.'}
       </p>
 
       <div className="mt-7 flex flex-col gap-3">

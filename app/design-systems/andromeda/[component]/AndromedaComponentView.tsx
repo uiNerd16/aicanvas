@@ -211,13 +211,24 @@ export function AndromedaComponentView({
   // first paint).
   const needsFreeAccount = !!freeAccountGate && !user
 
-  // Open the sign-up modal, returning the visitor to this component page after
-  // they create their free account.
+  // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
+  // returning the visitor here after they create their free account. The install
+  // UI stays fully visible; only the COPY actions route here when signed out.
   function promptFreeAccount() {
-    openAuthModal({ mode: 'sign-up', next: `/design-systems/andromeda/${slug}` })
+    openAuthModal({
+      mode: 'gate',
+      next: `/design-systems/andromeda/${slug}`,
+      title: 'Grab this component.',
+      subtitle: 'Sign in or create a free account to install with one command. Free and unlimited.',
+    })
   }
 
   async function copyCli() {
+    // Soft gate: signed-out + gated → open the auth modal instead of copying.
+    if (needsFreeAccount) {
+      promptFreeAccount()
+      return
+    }
     try {
       trackInstall(registrySlug, 'andromeda', pkgManager)
       await navigator.clipboard.writeText(cliCommand)
@@ -310,21 +321,17 @@ export function AndromedaComponentView({
             component breaks the system contract. Users compose AT the
             system level, not per-component. */}
         <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
-          {needsFreeAccount ? (
-            <Button variant="primary" size="sm" onClick={promptFreeAccount}>
+          {/* Copy CLI — the button and command stay visible at all times; when
+              the install is account-gated and the visitor is signed out,
+              copyCli() opens the auth modal instead of copying. */}
+          <Button variant="primary" size="sm" onClick={copyCli}>
+            {cliCopied ? (
+              <Check weight="regular" size={15} />
+            ) : (
               <Terminal weight="regular" size={15} />
-              Create a free account to install
-            </Button>
-          ) : (
-            <Button variant="primary" size="sm" onClick={copyCli}>
-              {cliCopied ? (
-                <Check weight="regular" size={15} />
-              ) : (
-                <Terminal weight="regular" size={15} />
-              )}
-              {cliCopied ? 'Copied!' : 'Copy CLI'}
-            </Button>
-          )}
+            )}
+            {cliCopied ? 'Copied!' : 'Copy CLI'}
+          </Button>
         </div>
       </div>
 
@@ -373,28 +380,11 @@ export function AndromedaComponentView({
           <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
             {installTab === 'cli' ? (
               <div className="space-y-6">
-                {/* Step 1 — shadcn add */}
+                {/* Step 1 — shadcn add. The command + package-manager row stay
+                    visible at all times. When the install is account-gated and
+                    the visitor is signed out, the copy button opens the auth
+                    modal instead of copying. */}
                 <Step number={1}>
-                  {needsFreeAccount ? (
-                    // Account-gated install, signed out: the one-command install
-                    // needs a free account (unlimited, uncounted). Reading the
-                    // source stays public (Manual tab below). Swap the runnable
-                    // command + copy button + package-manager row for a sign-up CTA.
-                    <>
-                      <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                        Create a free account to install with one command. Reading the source stays free.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={promptFreeAccount}
-                        className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
-                      >
-                        <Terminal weight="regular" size={15} />
-                        Create a free account to install
-                      </button>
-                    </>
-                  ) : (
-                  <>
                   <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                     Run the following command. New project? Run{' '}
                     <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
@@ -421,6 +411,9 @@ export function AndromedaComponentView({
                       <button
                         type="button"
                         onClick={() => {
+                          // Soft gate: signed-out + gated → open the auth modal
+                          // instead of copying.
+                          if (needsFreeAccount) { promptFreeAccount(); return }
                           const cmd = pkgManager === 'pnpm'
                             ? `pnpm dlx shadcn@latest add ${installReference}`
                             : pkgManager === 'bun'
@@ -452,8 +445,6 @@ export function AndromedaComponentView({
                       </code>
                     </div>
                   </div>
-                  </>
-                  )}
                 </Step>
 
                 {/* Step 2 — dark mode */}

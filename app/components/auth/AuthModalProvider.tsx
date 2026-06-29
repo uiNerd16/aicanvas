@@ -14,6 +14,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 //   open({ mode: 'sign-up' })               // opens in sign-up mode
 //   open({ mode: 'gate' })                  // soft-gate confidence screen (Sign in / Sign up)
 //   open({ next: '/account/saved' })        // opens, redirect after success
+//   open({ title, subtitle })               // override the modal's default copy
 //   setMode('sign-up')                      // toggle mode while open
 //
 // The 'gate' mode is used when a value-extracting action (Lab Save / Record /
@@ -27,7 +28,12 @@ type AuthModalContextValue = {
   isOpen: boolean
   mode: AuthModalMode
   next: string | null
-  open: (opts?: { mode?: AuthModalMode; next?: string }) => void
+  // Optional copy overrides for the sign-in / sign-up screens. When null the
+  // modal renders its default headline + sub-copy. Per-open() so a caller can
+  // tailor the pitch ("Grab this component.") without changing the global copy.
+  title: string | null
+  subtitle: string | null
+  open: (opts?: { mode?: AuthModalMode; next?: string; title?: string; subtitle?: string }) => void
   close: () => void
   setMode: (mode: AuthModalMode) => void
 }
@@ -38,16 +44,22 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setModeState] = useState<AuthModalMode>('sign-in')
   const [next, setNext] = useState<string | null>(null)
+  const [title, setTitle] = useState<string | null>(null)
+  const [subtitle, setSubtitle] = useState<string | null>(null)
 
-  const open = useCallback((opts?: { mode?: AuthModalMode; next?: string }) => {
+  const open = useCallback((opts?: { mode?: AuthModalMode; next?: string; title?: string; subtitle?: string }) => {
     setModeState(opts?.mode ?? 'sign-in')
     setNext(opts?.next ?? null)
+    setTitle(opts?.title ?? null)
+    setSubtitle(opts?.subtitle ?? null)
     setIsOpen(true)
   }, [])
 
   const close = useCallback(() => {
     setIsOpen(false)
     setNext(null)
+    setTitle(null)
+    setSubtitle(null)
     // mode is preserved across closes — most users return to whichever
     // tab they last had open. Reset on next open() call.
   }, [])
@@ -57,7 +69,7 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthModalContext.Provider value={{ isOpen, mode, next, open, close, setMode }}>
+    <AuthModalContext.Provider value={{ isOpen, mode, next, title, subtitle, open, close, setMode }}>
       {children}
     </AuthModalContext.Provider>
   )

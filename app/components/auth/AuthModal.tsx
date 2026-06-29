@@ -26,7 +26,7 @@ const FOCUSABLE_SELECTOR =
 export function AuthModal() {
   const router = useRouter()
   const pathname = usePathname()
-  const { isOpen, mode, next, close, setMode } = useAuthModal()
+  const { isOpen, mode, next, title, subtitle, close, setMode } = useAuthModal()
   const dialogRef = useRef<HTMLDivElement>(null)
 
   // Close on route change. The "Forgot password?" link inside the sign-in
@@ -135,6 +135,8 @@ export function AuthModal() {
 
         {mode === 'gate' ? (
           <AuthGateScreen
+            title={title ?? undefined}
+            subtitle={subtitle ?? undefined}
             onChooseSignIn={() => setMode('sign-in')}
             onChooseSignUp={() => setMode('sign-up')}
           />

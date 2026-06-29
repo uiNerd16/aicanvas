@@ -384,13 +384,24 @@ export default function ComponentPageView({
   // CTA on first paint). Premium content keeps its own (unchanged) gating.
   const needsFreeAccount = !!freeAccountGate && !user && !premium
 
-  // Open the sign-up modal, returning the visitor to this component page after
-  // they create their free account.
+  // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
+  // returning the visitor here after they create their free account. The install
+  // UI stays fully visible; only the COPY actions route here when signed out.
   function promptFreeAccount() {
-    openAuthModal({ mode: 'sign-up', next: '/components/' + slug })
+    openAuthModal({
+      mode: 'gate',
+      next: '/components/' + slug,
+      title: 'Grab this component.',
+      subtitle: 'Sign in or create a free account to install with one command. Free and unlimited.',
+    })
   }
 
   async function copyCli() {
+    // Soft gate: signed-out + gated → open the auth modal instead of copying.
+    if (needsFreeAccount) {
+      promptFreeAccount()
+      return
+    }
     try {
       track('CLI Copy', { component: slug })
       trackInstall(installSlug, designSystem ?? null, pkgManager)
@@ -761,21 +772,15 @@ export default function ComponentPageView({
               )}
 
               {/* Copy CLI — primary install action; copies the npx shadcn
-                  command. When the install is account-gated and the visitor is
-                  signed out, swap in a "create a free account" CTA instead. */}
-              {needsFreeAccount ? (
-                <Button variant="primary" size="sm" onClick={promptFreeAccount}>
-                  <Terminal weight="regular" size={15} />
-                  Create a free account to install
-                </Button>
-              ) : (
-                <Button variant="primary" size="sm" onClick={copyCli}>
-                  {cliCopied
-                    ? <Check weight="regular" size={15} />
-                    : <Terminal weight="regular" size={15} />}
-                  {cliCopied ? 'Copied!' : 'Copy CLI'}
-                </Button>
-              )}
+                  command. The button and command stay visible at all times;
+                  when the install is account-gated and the visitor is signed
+                  out, copyCli() opens the auth modal instead of copying. */}
+              <Button variant="primary" size="sm" onClick={copyCli}>
+                {cliCopied
+                  ? <Check weight="regular" size={15} />
+                  : <Terminal weight="regular" size={15} />}
+                {cliCopied ? 'Copied!' : 'Copy CLI'}
+              </Button>
 
             </div>
           </div>
@@ -838,29 +843,11 @@ export default function ComponentPageView({
                 <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
                   {installTab === 'cli' ? (
                     <div className="space-y-6">
-                      {/* Step 1 — shadcn add */}
+                      {/* Step 1 — shadcn add. The command + package-manager row
+                          stay visible at all times. When the install is
+                          account-gated and the visitor is signed out, the copy
+                          button opens the auth modal instead of copying. */}
                       <Step number={1}>
-                          {needsFreeAccount ? (
-                            // Account-gated install, signed out: the one-command
-                            // install needs a free account. Reading the source
-                            // stays public (Manual tab below). Swap the runnable
-                            // command + copy button + package-manager row for a
-                            // sign-up CTA.
-                            <>
-                              <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                                Create a free account to install with one command. Reading the source stays free.
-                              </p>
-                              <button
-                                type="button"
-                                onClick={promptFreeAccount}
-                                className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
-                              >
-                                <Terminal weight="regular" size={15} />
-                                Create a free account to install
-                              </button>
-                            </>
-                          ) : (
-                          <>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
@@ -882,6 +869,9 @@ export default function ComponentPageView({
                               ))}
                               <button
                                 onClick={() => {
+                                  // Soft gate: signed-out + gated → open the auth
+                                  // modal instead of copying.
+                                  if (needsFreeAccount) { promptFreeAccount(); return }
                                   const cmd = pkgManager === 'npm'
                                     ? `npx shadcn@latest add ${installReference}`
                                     : pkgManager === 'pnpm'
@@ -944,8 +934,6 @@ export default function ComponentPageView({
                               </code>
                             </div>
                           </div>
-                          </>
-                          )}
                       </Step>
 
                       {/* Step 2 — Dark mode (optional) */}
@@ -1266,7 +1254,33 @@ export default function ComponentPageView({
                   While the token is still fetching, show a matching skeleton so
                   the slot never blank-flashes between sign-in and token arrival.
                   Signed out: a small link to create a free account first. */}
-              {user ? (
+              {/* Signed out: keep the token row visible (no swap). Copy routes
+                  through the soft gate — clicking it opens the auth modal.
+                  Signed in: the real masked token, copy writes the live value.
+                  While the token is still fetching, show a matching skeleton. */}
+              {needsFreeAccount ? (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
+                    Add your token to your MCP server config so installs authenticate as your account:
+                  </p>
+                  <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                    <code className="font-mono text-sm text-sand-300 break-all">
+                      AICANVAS_TOKEN=aic_••••••••
+                    </code>
+                    <button
+                      onClick={() => {
+                        // Soft gate: signed-out + gated → open the auth modal
+                        // instead of copying.
+                        if (needsFreeAccount) { promptFreeAccount(); return }
+                      }}
+                      className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                      aria-label="Copy MCP token"
+                    >
+                      <Copy weight="regular" size={14} />
+                    </button>
+                  </div>
+                </div>
+              ) : user ? (
                 userToken ? (
                   <div className="mt-4">
                     <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
@@ -1278,6 +1292,9 @@ export default function ComponentPageView({
                       </code>
                       <button
                         onClick={() => {
+                          // Soft gate: signed-out + gated → open the auth modal
+                          // instead of copying.
+                          if (needsFreeAccount) { promptFreeAccount(); return }
                           navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
                           setMcpTokenCopied(true)
                           setTimeout(() => setMcpTokenCopied(false), 2000)
