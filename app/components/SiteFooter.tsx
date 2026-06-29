@@ -45,6 +45,9 @@ export function SiteFooter() {
         <Link href="/refund" className={linkCls}>
           Refund
         </Link>
+        <Link href="/premium-license" className={linkCls}>
+          Premium License
+        </Link>
         <Link href="/kuendigen" className={linkCls}>
           Verträge hier kündigen
         </Link>

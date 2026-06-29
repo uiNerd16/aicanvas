@@ -150,11 +150,23 @@ export default function RefundPage() {
             6. Components you&apos;ve installed
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Components you have already installed are released under the MIT
-            licence and remain yours to keep and use regardless of whether you
-            cancel Premium or receive a refund. Cancelling only stops future
-            access to Premium-only downloads; it does not reach back into code
-            already in your project.
+            Free registry components are released under the MIT License and stay
+            yours forever; there is no purchase and nothing to refund for them.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            For Premium, the licence to Premium Components you have already
+            installed survives cancellation and refund: a refund returns your
+            fee, but it does not revoke what you already installed, so you may
+            keep using and shipping those components in your projects. This is
+            set out in the{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>
+            . Cancelling only stops future access to Premium downloads, updates,
+            and new components; it does not reach back into code already in your
+            project. This survival does not apply where your payment is reversed
+            or charged back, or where the licence is terminated for breach of
+            its terms (for example, redistributing or publishing the source).
           </p>
         </section>
 

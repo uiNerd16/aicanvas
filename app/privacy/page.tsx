@@ -64,6 +64,56 @@ export default function PrivacyPage() {
           </p>
         </section>
 
+        {/* ── 1b. Payments and the install token ────────────────────────── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            1b. Payments and the install token
+          </h2>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Payments via Paddle (independent controller)
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            Premium purchases are processed by Paddle (Paddle.com Market Ltd, and
+            Paddle, Inc.) as our reseller and Merchant of Record. For your
+            purchase, Paddle is the seller of record and acts as an independent
+            data controller for the personal data it collects and holds, such as
+            your card and billing details. We and Paddle each act as independent
+            controllers for the data each of us holds: Paddle controls the
+            payment and billing data you enter at its checkout under{' '}
+            <a
+              href="https://www.paddle.com/legal/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-olive-400 hover:underline"
+            >
+              its own privacy policy
+            </a>
+            , and we control the limited subscription metadata Paddle sends back
+            to us (Section 2). Because Paddle is in the UK and the USA, your data
+            may be processed outside the EU under Paddle&apos;s own safeguards.
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Per-user install token
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            When you have an account we issue a per-user install token (a key that
+            begins with{' '}
+            <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">aic_</code>
+            ). The CLI and the AI Canvas MCP send this token when you install a
+            component so we can recognise your account and unlock any Premium
+            content you are entitled to. The token is tied to your identity, so we
+            treat it as personal data. We process it to authenticate your installs
+            and to keep installs secure against abuse. The lawful basis is Art. 6
+            (1)(b) GDPR (performance of the contract for your account and any
+            Premium subscription) and Art. 6 (1)(f) GDPR (our legitimate interest
+            in securing installs and preventing token abuse). We retain the token
+            while your account is active and delete or invalidate it when you
+            delete your account or when the token is revoked or regenerated.
+          </p>
+        </section>
+
         {/* ── 2. What we collect and why ────────────────────────────────── */}
         <section className="mt-10">
           <h2 className="text-lg font-bold text-sand-50">2. What we collect</h2>

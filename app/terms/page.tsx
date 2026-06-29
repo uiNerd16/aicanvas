@@ -96,8 +96,20 @@ export default function TermsPage() {
             digital content supplied immediately, by starting it you consent to
             immediate performance and acknowledge that your EU/UK 14-day right
             of withdrawal ends once access begins, except where the law provides
-            otherwise. Components you have already installed remain yours under
-            the MIT licence regardless of subscription status.
+            otherwise.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Premium Components, design systems, and templates are closed-source
+            and are licensed, not sold, under the separate{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>
+            , not under MIT. A paid subscription provides ongoing access,
+            updates, and new Premium Components; the licence to Premium
+            Components you have already installed is perpetual and survives
+            cancellation, so you may keep using and shipping them in your
+            projects, except where your payment is reversed or charged back or
+            the licence is terminated for breach. See &sect; 7 below.
           </p>
         </section>
 
@@ -121,10 +133,24 @@ export default function TermsPage() {
             4. Component licensing
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Components published in the AI Canvas registry are released under
-            the MIT licence. You are free to copy them, modify them, and ship
-            them. The website chrome itself (page layout, navigation,
-            branding, non-component code) is the Creator&apos;s copyright.
+            Free components published in the public AI Canvas registry and
+            source repository are released under the MIT License, as set out in
+            the LICENSE file of that repository. You are free to copy them,
+            modify them, distribute them, and ship them in your own projects,
+            commercial or non-commercial, subject only to the MIT License. This
+            applies whether you are on the Free or Premium plan.
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            The MIT License does not cover Premium Components. AI Canvas Premium
+            Components, design systems, and templates are proprietary, are not
+            part of the public registry or repository, and are not
+            redistributable. They are licensed separately under the{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>{' '}
+            (see &sect; 2b and &sect; 7). The website chrome itself (page
+            layout, navigation, branding, non-component code) is the
+            Creator&apos;s copyright.
           </p>
         </section>
 
@@ -216,10 +242,38 @@ export default function TermsPage() {
           <p className="mt-3 leading-relaxed text-sand-400">
             You evaluate, test, and ship the components at your own risk. You
             are responsible for deciding whether a component fits your
-            project, testing it in your context, complying with its open-source
-            licence, and securing the application you build with it. AI Canvas
-            does not review or audit how its components are used downstream
-            and is not a party to anything you build, ship, or sell with them.
+            project, testing it in your context, complying with the licence
+            that governs it (the MIT License for free components, the AI Canvas
+            Premium License for Premium Components), and securing the
+            application you build with it. AI Canvas does not review or audit
+            how its components are used downstream and is not a party to
+            anything you build, ship, or sell with them.
+          </p>
+        </section>
+
+        {/* ── 7b. Premium components ───────────────────────────────────── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">
+            7b. Premium components
+          </h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            AI Canvas Premium Components, design systems, and templates are NOT
+            released under the MIT License and are not part of the public
+            registry or repository. They are proprietary works, made available
+            only to subscribers with an active Premium subscription, and are
+            licensed solely under the{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>
+            , which forms part of these terms by reference. By subscribing to or
+            installing any Premium Component, you agree to that License. In
+            particular, you may not redistribute, resell, sublicense, or
+            publicly publish the source of any Premium Component, nor use Premium
+            Components to build a competing component library, template, theme,
+            starter kit, or builder. The licence to Premium Components you have
+            already installed is perpetual and survives cancellation and refund,
+            except where your payment is reversed or charged back or the licence
+            is terminated for breach.
           </p>
         </section>
 
