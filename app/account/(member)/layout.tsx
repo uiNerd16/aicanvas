@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { Crown } from '@phosphor-icons/react/dist/ssr'
+import { Lightning } from '@phosphor-icons/react/dist/ssr'
 import { createClient } from '../../lib/supabase/server'
 import { premiumEnabled } from '../../../lib/flags'
 import { isPremiumNow, type SubStatus } from '../../../lib/identity/tier'
@@ -42,7 +42,7 @@ export default async function MemberLayout({ children }: { children: ReactNode }
               {showTier && (
                 isPremium ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-olive-500 px-2 py-0.5 text-[11px] font-semibold text-sand-950">
-                    <Crown weight="regular" size={11} />
+                    <Lightning weight="regular" size={11} />
                     Premium
                   </span>
                 ) : (

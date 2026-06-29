@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactElement } from 'react'
-import { ArrowElbowDownRight, Cube, Hexagon } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, Cube, Hexagon, Lightning } from '@phosphor-icons/react'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 import { AndromedaIcon } from '../../design-systems/andromeda/AndromedaIcon'
 
@@ -158,9 +158,18 @@ export function DesignSystemsPole({
                                 }`}
                               >
                                 <span className="flex-1 truncate">{t.name}</span>
-                                <span className="ml-auto text-xxs uppercase tracking-wider text-sand-500 dark:text-sand-500">
-                                  {t.domain}
-                                </span>
+                                {/* Lightning marks the template as Premium (replaces
+                                    the old domain tag). The bolt is decorative; the
+                                    sr-only word folds "Premium" into the link's
+                                    accessible name (Phosphor renders a bare <svg>, so
+                                    an aria-label on it is unreliably announced). */}
+                                <Lightning
+                                  weight="regular"
+                                  size={13}
+                                  aria-hidden
+                                  className="ml-auto shrink-0 text-sand-500 dark:text-sand-500"
+                                />
+                                <span className="sr-only">Premium</span>
                               </Link>
                             </li>
                           )

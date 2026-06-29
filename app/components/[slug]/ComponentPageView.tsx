@@ -21,7 +21,7 @@ import {
   DotsThreeVertical,
   Terminal,
   Sparkle,
-  Crown,
+  Lightning,
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
@@ -126,11 +126,12 @@ export default function ComponentPageView({
   useCases,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
-  // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub is driven by the
-  // DevTierSwitcher (localStorage), which only renders in development; in
-  // production it is always null. Per-install metering is gone, so the only
-  // locked state the Code tab can preview is premium content (design systems).
-  // Real gating is the `enforcing` path below; the stub never ships.
+  // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub returns a fixed
+  // entitlement (see useEntitlement) so premium UI states can be eyeballed in
+  // development; in production this branch is always null. Per-install metering
+  // is gone, so the only locked state the Code tab can preview is premium
+  // content (design systems). Real gating is the `enforcing` path below; the
+  // stub never ships.
   const entitlement = useEntitlement()
   const paywallReason: PaywallReason | null =
     process.env.NODE_ENV === 'production' || !premiumEnabled() || enforcing || entitlement.tier === 'premium'
@@ -507,7 +508,7 @@ export default function ComponentPageView({
                   {designSystem && <PremiumBadge />}
                   {premium && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
-                      <Crown weight="regular" size={12} />
+                      <Lightning weight="regular" size={12} />
                       Premium component
                     </span>
                   )}

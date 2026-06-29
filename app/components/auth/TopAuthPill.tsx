@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { CaretDown, ClockClockwise, Crown, Flask, Gear, Heart, SignIn, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Flask, Gear, Heart, Lightning, SignIn, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
@@ -33,12 +33,53 @@ export function TopAuthPill() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [open])
 
+  // Standalone status pill — a Lightning bolt sitting to the LEFT of the auth
+  // control in every top bar (HeaderSocials feeds all sticky headers, plus the
+  // Lab layout). Always present: logged-out, free, and premium alike. Mirrors
+  // the premium-component card badge: a dark chrome pill (kept dark in BOTH
+  // themes so the olive-500 bolt clears contrast on a light bar) with an olive
+  // ring, that fills olive on hover and slides its label open via the
+  // grid-cols-[0fr]->[1fr] width trick.
+  //
+  // Tri-state from usePremiumStatus(): 'unknown' while the entitlement fetch is
+  // in flight. We collapse it to NEITHER CTA (no label, neutral aria, account
+  // href) so a paying customer is never flashed an upgrade pitch mid-load — the
+  // whole reason the hook reports 'unknown'. Signed-out derives to 'not-premium'
+  // synchronously, so it never sits in 'unknown'. Premium → "Hero Mode" linking
+  // to subscription management; free → "Upgrade to Premium" linking to /pricing.
+  const isPremium = status === 'premium'
+  const isFree = status === 'not-premium'
+  const pillLabel = isPremium ? 'Hero Mode' : isFree ? 'Upgrade to Premium' : ''
+  const pillHref = isPremium ? '/account/settings' : isFree ? '/pricing' : '/account'
+  const pillAria = isPremium ? 'Hero Mode, manage your subscription' : isFree ? 'Upgrade to Premium' : 'Premium'
+  const statusPill = (
+    <Link
+      href={pillHref}
+      aria-label={pillAria}
+      className="group/upgrade flex h-7 items-center rounded-lg border border-olive-500/40 bg-sand-950/85 px-[7px] text-olive-500 backdrop-blur-sm transition-colors duration-200 hover:border-olive-500 hover:bg-olive-500 hover:text-sand-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500/40"
+    >
+      <Lightning size={15} weight="fill" className="shrink-0" />
+      {pillLabel && (
+        <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover/upgrade:grid-cols-[1fr]">
+          <span className="overflow-hidden">
+            <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-xs font-semibold">
+              {pillLabel}
+            </span>
+          </span>
+        </span>
+      )}
+    </Link>
+  )
+
   if (!user) {
     return (
-      <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
-        <SignIn size={13} weight="regular" />
-        Sign in
-      </Button>
+      <div className="flex items-center gap-2">
+        {statusPill}
+        <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
+          <SignIn size={13} weight="regular" />
+          Sign in
+        </Button>
+      </div>
     )
   }
 
@@ -53,28 +94,7 @@ export function TopAuthPill() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Standalone upgrade CTA — an icon-only crown sitting to the LEFT of the
-          avatar pill in every top bar (HeaderSocials feeds all sticky headers,
-          plus the Lab layout). Shown only for a signed-in free user; mirrors
-          the dropdown's upgrade item below (same 'not-premium' gate + paywall)
-          so the two never disagree. Styled hover tooltip carries the label
-          (matching the top-bar tooltips); aria-label keeps it accessible. */}
-      {status === 'not-premium' && (
-        <div className="group/upgrade relative">
-          <Button
-            variant="primary"
-            size="xs"
-            iconOnly
-            onClick={() => openPaywall({ reason: 'upgrade' })}
-            aria-label="Upgrade to Premium"
-          >
-            <Crown size={15} weight="regular" />
-          </Button>
-          <div className="pointer-events-none absolute top-full right-0 z-20 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/upgrade:block">
-            Upgrade to Premium
-          </div>
-        </div>
-      )}
+      {statusPill}
       <div className="relative" ref={ref}>
         <Button
           variant="outline"
@@ -96,7 +116,7 @@ export function TopAuthPill() {
                 onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
                 className="flex w-full items-center gap-2 border-b border-sand-300 px-3 py-2 text-sm font-semibold text-olive-500 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:hover:bg-sand-800"
               >
-                <Crown size={14} weight="regular" />
+                <Lightning size={14} weight="regular" />
                 Upgrade to Premium
               </button>
             )}

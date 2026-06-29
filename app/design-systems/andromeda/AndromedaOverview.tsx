@@ -16,7 +16,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, ArrowUpRight, Robot, Wrench, CaretDown } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Lightning, Robot, Wrench, CaretDown } from '@phosphor-icons/react'
 import { Button, buttonClasses } from '../../components/Button'
 import { SiteFooter } from '../../components/SiteFooter'
 import { optimizeImageKitUrl } from '../../lib/imagekit'
@@ -411,6 +411,19 @@ export function AndromedaOverview() {
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
             >
               <div className="relative aspect-video overflow-hidden bg-sand-900">
+                {/* Premium badge — same Aceternity-style pill as premium
+                    component cards: a filled bolt at rest, slides open to the
+                    label on card hover. Templates are premium. */}
+                <div className="absolute left-3 top-3 z-10 flex items-center rounded-full bg-sand-950/85 p-1.5 text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
+                  <Lightning weight="fill" size={14} className="shrink-0" />
+                  <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover:grid-cols-[1fr]">
+                    <span className="overflow-hidden">
+                      <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">
+                        Premium template
+                      </span>
+                    </span>
+                  </span>
+                </div>
                 <img
                   src={t.image}
                   alt={t.name}

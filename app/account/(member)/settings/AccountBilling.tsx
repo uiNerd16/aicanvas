@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Crown, Key, ShieldCheck } from '@phosphor-icons/react'
+import { Lightning, Key, ShieldCheck } from '@phosphor-icons/react'
 import { premiumEnabled } from '../../../../lib/flags'
 import { buttonClasses } from '../../../components/buttonClasses'
 import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
@@ -79,7 +79,7 @@ export function AccountBilling() {
               disabled={portalLoading}
               className={buttonClasses({ variant: 'outline', size: 'sm' })}
             >
-              <Crown weight="regular" size={15} />
+              <Lightning weight="regular" size={15} />
               {portalLoading ? 'Opening…' : 'Manage subscription'}
             </button>
           ) : status === 'not-premium' ? (
@@ -88,12 +88,12 @@ export function AccountBilling() {
               onClick={() => openPaywall({ reason: 'upgrade' })}
               className={buttonClasses({ variant: 'primary', size: 'sm' })}
             >
-              <Crown weight="regular" size={15} />
+              <Lightning weight="regular" size={15} />
               Upgrade to Premium
             </button>
           ) : (
             <button type="button" disabled className={buttonClasses({ variant: 'outline', size: 'sm' })}>
-              <Crown weight="regular" size={15} />
+              <Lightning weight="regular" size={15} />
               Checking your plan…
             </button>
           )}

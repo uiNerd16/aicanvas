@@ -34,6 +34,23 @@ export function welcomeToPremiumEmail(): { subject: string; html: string } {
   return { subject: 'You just got superpowers', html }
 }
 
+/** Sent ONCE when an ANONYMOUS checkout provisions a fresh account (the buyer
+ *  paid without signing in first). Carries a passwordless magic link to our
+ *  /account/auth/confirm route so they can claim the account in one click,
+ *  Premium already active. The send-once guard (premium_welcome_sent in
+ *  user_metadata) lives in the Paddle webhook, shared with the welcome email so
+ *  a buyer never gets both. */
+export function claimPremiumAccountEmail(opts: { claimUrl: string }): { subject: string; html: string } {
+  const html = emailShell({
+    title: 'Access your Premium account',
+    heading: 'You just got <span class="ac-accent" style="color:#869631;">superpowers</span>.',
+    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Your payment went through and Premium is live on your account. Click below to sign in, no password needed. Every design system, premium component, and template is yours, including every new one the moment it ships.</p>`,
+    button: { label: 'Access your account', url: opts.claimUrl },
+    footerNoteHtml: 'This link signs you in and expires shortly. You can set a password later in your account settings.',
+  })
+  return { subject: 'Access your AI Canvas Premium account', html }
+}
+
 /** Closes the loop after the cancellation-confirm link actually cancels the
  *  Paddle subscription. Only sent when a real cancel was executed this request
  *  (see app/api/billing/cancel-confirm), so a replayed link can't re-send. */

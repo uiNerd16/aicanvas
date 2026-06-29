@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, Crown, Lightning, Lock } from '@phosphor-icons/react'
+import { CheckCircle, Lightning, Lock } from '@phosphor-icons/react'
 import { buttonClasses } from '../Button'
 import { TerminatorCool, TerminatorSkull } from '../auth/TerminatorReveal'
 import { useSession } from '../auth/SessionProvider'
@@ -140,7 +140,7 @@ export function PremiumCards({
             </div>
             <h2 className={`flex items-center gap-2 ${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
               Premium
-              <Crown weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
+              <Lightning weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>
           <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">

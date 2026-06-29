@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CaretDown, ClockClockwise, Crown, Flask, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
+import { CaretDown, ClockClockwise, Lightning, Flask, Gear, Heart, SignOut, User } from '@phosphor-icons/react'
 import { useSession } from './SessionProvider'
 import { createClient } from '../../lib/supabase/client'
 import { EmailAvatar } from './EmailAvatar'
@@ -57,7 +57,7 @@ export function UserMenu() {
               onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
               className="flex w-full items-center gap-2 border-b border-sand-300 px-3 py-2 text-sm font-semibold text-olive-500 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:hover:bg-sand-800"
             >
-              <Crown size={14} weight="regular" />
+              <Lightning size={14} weight="regular" />
               Upgrade to Premium
             </button>
           )}

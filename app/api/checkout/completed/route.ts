@@ -23,7 +23,11 @@ const MAX_TXN_AGE_MS = 60 * 60 * 1000
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
+  // Anonymous checkout: there is no session to fast-path. Acknowledge so the
+  // overlay shows the "check your email" claim flow; the webhook provisions the
+  // account (keyed off the Paddle checkout email) and emails the magic link.
+  // No DB write happens here — a session alone never grants premium.
+  if (!user) return NextResponse.json({ status: 'pending-claim' })
 
   const apiKey = process.env.PADDLE_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'not configured' }, { status: 503 })

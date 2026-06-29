@@ -22,7 +22,15 @@ export function getPaddle(): Promise<Paddle | undefined> {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ transactionId }),
           })
-            .then((res) => {
+            .then(async (res) => {
+              const body = (await res.json().catch(() => null)) as { status?: string } | null
+              // Anonymous buyer: no session to activate. Send them to the claim
+              // page ("check your email") — the webhook creates the account and
+              // mails the magic link.
+              if (body?.status === 'pending-claim') {
+                window.location.href = '/welcome'
+                return
+              }
               if (!res.ok) {
                 console.error('[paddle] activation deferred to webhook, status', res.status)
                 alert('Payment received. Your account is being activated — this can take a minute. Refresh shortly; contact support if it persists.')

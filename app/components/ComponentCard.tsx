@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, ImageSquare, Crown } from '@phosphor-icons/react'
+import { ArrowRight, ImageSquare, Lightning } from '@phosphor-icons/react'
 import { track, type CardSource } from '../lib/analytics'
 import { optimizeImageKitUrl } from '../lib/imagekit'
 import { buttonClasses } from './Button'
@@ -42,10 +42,10 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
           off the card keeps the preview surface uncluttered. */}
       <div className="relative aspect-video overflow-hidden bg-sand-900">
         {badge && (
-          // Aceternity-style pill: just a filled crown at rest, slides open to
+          // Aceternity-style pill: just a filled bolt at rest, slides open to
           // the label on card hover.
           <div className="absolute left-3 top-3 z-10 flex items-center rounded-full bg-sand-950/85 p-1.5 text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
-            <Crown weight="fill" size={14} className="shrink-0" />
+            <Lightning weight="fill" size={14} className="shrink-0" />
             <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover:grid-cols-[1fr]">
               <span className="overflow-hidden">
                 <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">

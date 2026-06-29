@@ -2,10 +2,57 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyPaddleSignature } from '@/lib/identity/paddle-signature'
 import { createAdminClient } from '@/app/lib/supabase/admin'
 import { mapSubscriptionFields } from '@/lib/identity/sub-mapping'
-import { welcomeToPremiumEmail } from '@/app/lib/email/messages'
-import { NOREPLY_FROM } from '@/app/lib/config'
+import { welcomeToPremiumEmail, claimPremiumAccountEmail } from '@/app/lib/email/messages'
+import { NOREPLY_FROM, SITE_URL } from '@/app/lib/config'
+import { paddleApiBase } from '@/app/lib/paddle/server'
 
 export const runtime = 'nodejs'
+
+type AdminClient = ReturnType<typeof createAdminClient>
+
+/** Read the email a buyer entered at Paddle checkout (anonymous purchases carry
+ *  no user_id). Subscription events only include customer_id, so we resolve the
+ *  email from the Paddle API. Returns null on any miss — the caller drops the
+ *  event rather than guessing. */
+async function fetchPaddleCustomerEmail(customerId: string): Promise<string | null> {
+  const apiKey = process.env.PADDLE_API_KEY
+  if (!apiKey) return null
+  try {
+    const res = await fetch(`${paddleApiBase()}/customers/${customerId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
+    if (!res.ok) return null
+    const { data } = await res.json()
+    return typeof data?.email === 'string' ? data.email : null
+  } catch {
+    return null
+  }
+}
+
+/** Provision (or link) a Supabase account from the checkout email. generateLink
+ *  with type 'magiclink' CREATES the user if the email is new, or returns the
+ *  existing user if the email already has an account (auth-js handles user
+ *  creation for signup/invite/magiclink). It also yields a token_hash we turn
+ *  into a one-click claim link to /account/auth/confirm — sent on first
+ *  activation so a passwordless buyer can get in. Returns null on failure so the
+ *  event is retried by Paddle rather than silently lost. */
+async function provisionUserByEmail(
+  admin: AdminClient,
+  email: string,
+): Promise<{ userId: string; claimUrl: string } | null> {
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    options: { redirectTo: `${SITE_URL}/account` },
+  })
+  const hashedToken = data?.properties?.hashed_token
+  if (error || !data?.user?.id || !hashedToken) {
+    console.error('[paddle webhook] provision generateLink failed:', error?.message)
+    return null
+  }
+  const params = new URLSearchParams({ token_hash: hashedToken, type: 'magiclink', next: '/account' })
+  return { userId: data.user.id, claimUrl: `${SITE_URL}/account/auth/confirm?${params.toString()}` }
+}
 
 // Only react to subscription lifecycle events; the STATUS comes from the
 // payload's data.status, NEVER from the event name. (An event-name map is a
@@ -70,8 +117,28 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
     userId = byCustomer?.user_id
   }
+
+  // Anonymous checkout: no user_id was passed and we've never seen this
+  // customer. Provision (or link) an account from the email the buyer entered
+  // at Paddle checkout, then send them a magic-link claim on first activation.
+  // Only the FIRST event for a new customer reaches here — once the upsert below
+  // stores paddle_customer_id, later events resolve via the fallback above.
+  let claimUrl: string | undefined
+  let provisionedFromEmail = false
+  if (!userId && data.customer_id) {
+    const email = await fetchPaddleCustomerEmail(data.customer_id)
+    if (email) {
+      const provisioned = await provisionUserByEmail(admin, email)
+      if (provisioned) {
+        userId = provisioned.userId
+        claimUrl = provisioned.claimUrl
+        provisionedFromEmail = true
+      }
+    }
+  }
+
   if (!userId) {
-    console.error('[paddle webhook] unmatched event — no user_id and unknown customer:', evt.event_type, data.customer_id)
+    console.error('[paddle webhook] unmatched event — no user_id, unknown customer, no email:', evt.event_type, data.customer_id)
     return NextResponse.json({ ok: true, unmatched: true })
   }
 
@@ -148,7 +215,13 @@ export async function POST(req: NextRequest) {
           user_metadata: { ...(user.user_metadata ?? {}), premium_welcome_sent: true },
         })
         if (!flagErr) {
-          const mail = welcomeToPremiumEmail()
+          // Anonymous buyers were just provisioned and have no session/password,
+          // so they get the magic-link CLAIM email (their way in). Everyone else
+          // (signed-in upgrade, or an email that already had an account) gets the
+          // plain welcome — they can already log in.
+          const mail = provisionedFromEmail && claimUrl
+            ? claimPremiumAccountEmail({ claimUrl })
+            : welcomeToPremiumEmail()
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },

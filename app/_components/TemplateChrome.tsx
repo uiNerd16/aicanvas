@@ -1,12 +1,12 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Check, Copy, SignIn, Terminal } from '@phosphor-icons/react'
+import { ArrowLeft, Check, Copy, Lightning, Terminal } from '@phosphor-icons/react'
 import { useSession } from '../components/auth/SessionProvider'
-import { useAuthModal } from '../components/auth/AuthModalProvider'
 import { usePaywallModal } from '../components/billing/PaywallModalProvider'
-import { Button } from '../components/Button'
+import { usePremiumStatus } from '../components/billing/usePremiumStatus'
+import { Button, buttonClasses } from '../components/Button'
 
 interface TemplateChromeProps {
   templateSlug: string              // registry slug, e.g. 'andromeda-mission-control' or 'andromeda-all'
@@ -19,9 +19,9 @@ interface TemplateChromeProps {
 }
 
 // Floating widget shared by design-system template pages and the showcase
-// "install full system" pill. Three slots — Back (optional), name + system,
-// Install. Install is gated: signed-in users see the CLI popover; signed-out
-// users see a "Sign in to install" pill that routes to /account/sign-in.
+// "install full system" pill. Templates and the full system are premium, so
+// install is gated by tier: premium users see the CLI popover; everyone else
+// (anonymous or free) sees "Unlock with Premium", which routes to /pricing.
 
 export function TemplateChrome({
   templateSlug,
@@ -33,9 +33,15 @@ export function TemplateChrome({
   raisedOnMobile = false,
 }: TemplateChromeProps) {
   const { user } = useSession()
-  const { open: openAuthModal } = useAuthModal()
   const { open: openPaywall } = usePaywallModal()
-  const pathname = usePathname() ?? '/'
+  const status = usePremiumStatus()
+  // Show Install (CLI popover) for premium AND while entitlement is still loading
+  // ('unknown'); only a RESOLVED free/anon tier sees the Unlock-with-Premium
+  // pitch. usePremiumStatus reports 'unknown' specifically so callers avoid
+  // flashing the wrong CTA — collapsing it into non-premium would momentarily
+  // pitch an upgrade at a paying customer. handleInstall fails open, so
+  // defaulting the load window to Install is safe.
+  const canInstall = status !== 'not-premium'
   const [installOpen, setInstallOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -156,9 +162,10 @@ export function TemplateChrome({
           </span>
         </div>
 
-        {/* Install — gated. SignedIn opens the CLI popover; SignedOut routes
-            to sign-in with `next=` set to the current path. */}
-        {user ? (
+        {/* Install — gated by tier. Premium (and the in-flight 'unknown' window)
+            opens the CLI popover; a resolved free/anon tier is routed to /pricing
+            to unlock. */}
+        {canInstall ? (
           <div className="relative" ref={popoverRef}>
             <Button variant="primary" size="md" onClick={handleInstall}>
               <Terminal weight="regular" size={15} />
@@ -214,10 +221,13 @@ export function TemplateChrome({
             )}
           </div>
         ) : (
-          <Button variant="primary" size="md" onClick={() => openAuthModal({ next: pathname })}>
-            <SignIn weight="regular" size={15} />
-            Sign in to install
-          </Button>
+          <Link
+            href="/pricing"
+            className={buttonClasses({ variant: 'primary', size: 'md' })}
+          >
+            <Lightning weight="regular" size={15} />
+            Unlock with Premium
+          </Link>
         )}
       </div>
     </div>
