@@ -5,8 +5,11 @@ import { useSyncExternalStore } from 'react'
 export type Tier = 'anonymous' | 'free' | 'premium'
 
 /**
- * Shape mirrors the future server-backed entitlement (Plan 2's getEntitlement
- * returns `{ tier, userId }`; Plan 3 adds usage) so the swap is mechanical.
+ * Shape mirrors the server-backed entitlement, whose only load-bearing field is
+ * `tier` (installs are uncounted now, so there is no live usage to track). The
+ * `usedToday`/`limit` pair is vestigial: kept so the dev switcher can still
+ * render the historical "under vs at limit" free-tier previews, never read by
+ * production UI (only `tier` is consumed).
  */
 export interface Entitlement {
   tier: Tier
@@ -16,9 +19,10 @@ export interface Entitlement {
 }
 
 /**
- * Dev-only override store so reviewers can flip every premium UI state by
- * hand before any backend exists. Four states instead of three tiers so the
- * free tier can be previewed both under and at its daily limit.
+ * Dev-only override store so reviewers can flip every premium UI state by hand.
+ * Four states instead of three tiers so the free tier can be previewed both
+ * under and at the old daily limit. Installs are uncounted in production, so
+ * these counts are illustration only, not a real metering signal.
  */
 export type DevTierState = 'anonymous' | 'free-under' | 'free-at-limit' | 'premium'
 
@@ -53,7 +57,8 @@ export function useDevTierState(): DevTierState {
 }
 
 const ENTITLEMENTS: Record<DevTierState, Entitlement> = {
-  // Anonymous previews AT the 2/day limit so the wall is visible by default.
+  // The usedToday/limit numbers are illustrative only (installs are uncounted);
+  // they exist so the dev switcher can reproduce the old tier previews.
   'anonymous': { tier: 'anonymous', userId: null, usedToday: 2, limit: 2 },
   'free-under': { tier: 'free', userId: 'dev-stub', usedToday: 3, limit: 10 },
   'free-at-limit': { tier: 'free', userId: 'dev-stub', usedToday: 10, limit: 10 },
@@ -61,8 +66,10 @@ const ENTITLEMENTS: Record<DevTierState, Entitlement> = {
 }
 
 /**
- * STUB. Returns a fake entitlement driven by the dev override.
- * Replaced by the real server-backed entitlement in Plan 3.
+ * DEV-ONLY STUB. Returns a fake entitlement driven by the dev override so the
+ * tier-based premium UI states can be previewed by hand. Production never
+ * renders these values: real gating happens server-side at the /r registry
+ * gate, and only `tier` is ever read off the result.
  */
 export function useEntitlement(): Entitlement {
   const state = useDevTierState()

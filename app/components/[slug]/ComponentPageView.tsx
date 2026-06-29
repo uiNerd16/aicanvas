@@ -1263,9 +1263,11 @@ export default function ComponentPageView({
               {/* MCP token — so AI-agent / MCP installs authenticate as your
                   account. Signed in: surface a masked AICANVAS_TOKEN line to
                   add to the MCP server config (copy writes the real value).
+                  While the token is still fetching, show a matching skeleton so
+                  the slot never blank-flashes between sign-in and token arrival.
                   Signed out: a small link to create a free account first. */}
               {user ? (
-                userToken && (
+                userToken ? (
                   <div className="mt-4">
                     <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
                       Add your token to your MCP server config so installs authenticate as your account:
@@ -1287,6 +1289,16 @@ export default function ComponentPageView({
                           ? <Check weight="regular" size={14} className="text-olive-500" />
                           : <Copy weight="regular" size={14} />}
                       </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Token still loading — placeholder mirrors the real layout
+                     (intro line + dark token row) so nothing jumps when it lands. */
+                  <div className="mt-4" aria-hidden>
+                    <div className="mb-2 h-4 w-3/4 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
+                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                      <div className="h-4 w-40 animate-pulse rounded bg-sand-800" />
+                      <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-800" />
                     </div>
                   </div>
                 )

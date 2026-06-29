@@ -19,11 +19,10 @@ import { PaymentMethods } from './PaymentMethods'
 // Any locked surface calls usePaywallModal().open({ reason }); calling it from
 // several locked panes at once is harmless — there is only ever one modal.
 
-// Per-install metering is gone, so nothing in the install flow produces
-// 'quota-exceeded' any more — the only locked state is premium content. The
-// literal is kept in the union solely so other surfaces that still reference
-// it stay type-correct; it now renders the same premium-only modal.
-export type PaywallReason = 'premium-only' | 'quota-exceeded' | 'upgrade'
+// Per-install metering is gone, so nothing produces a quota reason any more.
+// The only locked state is premium content; 'upgrade' is the same pitch opened
+// from a generic upgrade affordance rather than a specific locked component.
+export type PaywallReason = 'premium-only' | 'upgrade'
 
 type PaywallState = { reason: PaywallReason; limit?: number; resetAt?: string | null }
 
@@ -63,8 +62,8 @@ function PaywallModalView({
   onClose,
 }: PaywallState & { onClose: () => void }) {
   // Metering is gone, so the modal only ever pitches Premium content now.
-  // Both the 'premium-only' and the legacy 'quota-exceeded' reason collapse to
-  // a single Premium card.
+  // Both 'premium-only' and 'upgrade' resolve to a single Premium card; the
+  // reason just tunes the heading and subtitle.
   const title = reason === 'upgrade' ? 'Upgrade to Premium' : 'Premium component'
   const subtitle =
     reason === 'upgrade'
