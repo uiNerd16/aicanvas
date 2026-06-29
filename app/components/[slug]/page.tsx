@@ -37,12 +37,17 @@ function computeTitle(entry: ComponentEntry): string {
   return `${entry.name} — ${descriptor} React Component`
 }
 
-function computeMetaDescription(entry: ComponentEntry): string {
+function computeMetaDescription(entry: ComponentEntry, isPremium: boolean): string {
   const max = 150
   const base = entry.description.length > max
     ? entry.description.slice(0, max).replace(/\s+\S*$/, '').trim() + '…'
     : entry.description
-  return `${base} | Install via shadcn CLI. Free and open source.`
+  // Free content keeps the open-source tail; premium content must never claim
+  // MIT / open source, so it gets a premium-accurate tail instead.
+  const tail = isPremium
+    ? 'Install via shadcn CLI. Premium AI Canvas component.'
+    : 'Install via shadcn CLI. Free and open source.'
+  return `${base} | ${tail}`
 }
 
 export async function generateMetadata({
@@ -56,8 +61,18 @@ export async function generateMetadata({
 
   const accentTag = entry.tags.find((t) => t.accent)
   const category = accentTag?.label ?? 'Component'
+  // Mirror the page-level isPremium classification so the meta never claims
+  // "Free and open source" on premium (closed-source) content. A degraded
+  // lookup fails closed (treated as premium) so we never overclaim.
+  const lookup = loadContentLookup()
+  const contentType = classifyContent(slug, lookup)
+  const isPremium =
+    lookup.degraded === true ||
+    contentType === 'premium-standalone' ||
+    contentType === 'design-system' ||
+    contentType === 'template'
   const title = computeTitle(entry)
-  const description = computeMetaDescription(entry)
+  const description = computeMetaDescription(entry, isPremium)
   const url = `${SITE_URL}/components/${slug}`
 
   return {

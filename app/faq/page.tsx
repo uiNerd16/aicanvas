@@ -67,7 +67,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Can I copy the source code instead of using the CLI?',
-        a: 'Absolutely. Each component page has a Manual tab that lists the packages to install and the full source to paste in. Everything is open source under the MIT license, so you can read it, change it, and ship it however you like.',
+        a: 'Absolutely. Each component page has a Manual tab that lists the packages to install and the full source to paste in. The free library is open source under MIT, and that source is never hidden. Premium is proprietary: a durable licence to use and ship, not to redistribute.',
       },
       {
         q: 'Which frameworks and stacks do the components work in?',
@@ -219,11 +219,11 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: 'Is AI Canvas open source?',
-        a: 'Yes. The repository is public, the source is never hidden, and remix with AI stays free for everyone. Open source means the code is openly available for you to read, use, and change.',
+        a: 'The free library is open source under MIT, and that source is never hidden. Premium is proprietary: a durable licence to use and ship, not to redistribute. Either way, remix with AI stays free for everyone, and the public repository keeps the free source openly available to read, use, and change.',
       },
       {
-        q: 'What license are the components under, and can I use them commercially?',
-        a: 'They are released under the MIT license, one of the most permissive open-source licenses. You can use them in personal and commercial projects, modify them freely, and ship them without giving credit. Any third-party assets, fonts, or images a component references may carry their own terms, so check those before shipping.',
+        q: 'What licence are the components under, and can I use them commercially?',
+        a: 'Free components are MIT, one of the most permissive open-source licences, so you can use them in personal and commercial projects, modify them freely, and ship them without giving credit. Premium is proprietary: a durable licence to use and ship, not to redistribute. Any third-party assets, fonts, or images a component references may carry their own terms, so check those before shipping.',
       },
       {
         q: 'What tech stack do the components use?',

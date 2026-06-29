@@ -696,7 +696,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'Can I use the components in commercial projects?',
-    a: 'Yes. They are released under the MIT license, so you can use them in personal and commercial projects, modify them freely, and ship them without giving credit. Any third-party assets, fonts, or images a component references may carry their own terms, so check those before shipping.',
+    a: 'Yes. Free components are MIT. Premium components, design systems, and templates are proprietary under the AI Canvas Premium License. Either way you can use what you install in personal and commercial projects and ship it. Any third-party assets, fonts, or images a component references may carry their own terms, so check those before shipping.',
   },
   {
     q: 'How is AI Canvas different from other component libraries?',
@@ -740,7 +740,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.1 }}
             className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
-            Open source
+            Open core
           </motion.span>
 
           <motion.h1
@@ -812,7 +812,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                   { value: 3,     suffix: '',  label: 'AI Platforms' },
                 ],
                 [
-                  { value: 100,   suffix: '%', label: 'Open Source', minWidth: '6rem' },
+                  { text: 'MIT',  suffix: '',  label: 'Open core', minWidth: '6rem' },
                   { text: 'MCP',  suffix: '',  label: 'Ready' },
                 ],
               ] as {

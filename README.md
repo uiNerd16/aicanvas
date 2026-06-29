@@ -22,7 +22,7 @@
   <b><a href="https://aicanvas.me">Browse the live catalog at aicanvas.me</a></b>
 </p>
 
-A growing collection of animated React components, plus a token-driven design system and ready-made templates. Every component arrives as real source code in your project, and many include reproduction prompts for Claude Code, Lovable, and V0. Open source, MIT licensed, free to start.
+A growing collection of animated React components, plus a token-driven design system and ready-made templates. Every component arrives as real source code in your project, and many include reproduction prompts for Claude Code, Lovable, and V0. Open core: the free library is MIT, and Premium is proprietary.
 
 ## Install
 
@@ -51,12 +51,12 @@ Browse the full catalog and copy the exact command for any component at [aicanva
 
 ## Why AI Canvas
 
-- **Open source and free to start.** The code is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution.
+- **Open core, free to start.** The free library is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution. Premium components, design systems, and templates are proprietary.
 - **Full source, no lock-in.** Every component arrives as real React and TypeScript code in your codebase, not a black-box dependency. Restyle it, extend it, or ship it as is. It is yours.
 - **Built for AI workflows.** Install with the shadcn CLI, connect the MCP so your agent installs for you, or hand it a reproduction prompt for Claude Code, Lovable, or V0.
 - **Animated by default.** Built with Framer Motion and Tailwind CSS, ready for the Next.js App Router or any modern React setup. 3D pieces use Three.js.
 
-AI Canvas is free to start. A Premium tier with unlimited installs and the full design systems and templates is on the way.
+AI Canvas is free to start. Premium unlocks design systems, templates, and closed-source components.
 
 ## Featured components
 
@@ -154,4 +154,4 @@ AI Canvas is open source under MIT. Issues, ideas, and pull requests are welcome
 
 ## License
 
-MIT licensed. Use it in personal and commercial projects, modify it freely, and ship it without attribution. See [LICENSE](./LICENSE).
+The free library is MIT licensed. Use it in personal and commercial projects, modify it freely, and ship it without attribution. See [LICENSE](./LICENSE). Premium components, design systems, and templates are proprietary under the AI Canvas Premium License.

@@ -259,16 +259,15 @@ export default function AboutPage() {
             Open, and free to start
           </h2>
           <p className="mt-6 text-base leading-relaxed text-sand-400">
-            The whole thing is open source under the MIT license. Use it in
-            personal and commercial work, modify it freely, ship without
-            attribution. The source is never hidden, and remixing with AI stays
-            free for everyone.
+            The free library is open source under MIT, and that source is never
+            hidden. Premium is our one paid exception: proprietary components,
+            design systems, and templates whose sales keep the free library
+            free. Remixing with AI stays free for everyone.
           </p>
           <p className="mt-4 text-base leading-relaxed text-sand-400">
             Browsing and previewing are free. Installing is free with a free
-            account, unlimited. Premium is there for people who
-            lean on AI Canvas every day. It sells convenience, never secrecy.
-            Paying never hides code. There is nothing here to hide.
+            account, unlimited. Premium is there for people who lean on AI
+            Canvas every day, and what you pay keeps the open library growing.
           </p>
         </Section>
 

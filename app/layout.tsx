@@ -34,7 +34,7 @@ const geistMono = Geist_Mono({
 })
 
 const TOTAL = TOTAL_COMPONENTS
-const GLOBAL_DESCRIPTION = `Open-source registry of ${TOTAL} animated React components, design systems, and templates. Free to browse and remix with AI. Premium unlocks design systems and unlimited installs. Built with Tailwind CSS and Motion.`
+const GLOBAL_DESCRIPTION = `Open-core registry of ${TOTAL} animated React components, design systems, and templates. The free library is MIT. Premium unlocks design systems, templates, and new components. Built with Tailwind CSS and Motion.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
