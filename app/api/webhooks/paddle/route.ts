@@ -10,48 +10,92 @@ export const runtime = 'nodejs'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
-/** Read the email a buyer entered at Paddle checkout (anonymous purchases carry
- *  no user_id). Subscription events only include customer_id, so we resolve the
- *  email from the Paddle API. Returns null on any miss — the caller drops the
- *  event rather than guessing. */
-async function fetchPaddleCustomerEmail(customerId: string): Promise<string | null> {
+/** Resolve the email a buyer entered at Paddle checkout (anonymous purchases
+ *  carry no user_id). Subscription events only include customer_id, so we read
+ *  the email from the Paddle API. Crucially this DISTINGUISHES a transient
+ *  failure (rate limit / 5xx / network) — which the caller turns into a 500 so
+ *  Paddle re-delivers — from a genuine miss, so one API hiccup never permanently
+ *  strands a charged customer (the webhook is the SOLE provisioning path for an
+ *  anonymous buyer). */
+type EmailLookup = { email: string } | { transient: true } | { missing: true }
+async function fetchPaddleCustomerEmail(customerId: string): Promise<EmailLookup> {
   const apiKey = process.env.PADDLE_API_KEY
-  if (!apiKey) return null
+  if (!apiKey) return { transient: true }
   try {
     const res = await fetch(`${paddleApiBase()}/customers/${customerId}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     })
-    if (!res.ok) return null
+    // 429/5xx = transient. A 404 right after subscription.activated is usually
+    // the customer record not yet being queryable (eventual consistency), so
+    // treat it as transient too — a Paddle retry recovers it rather than
+    // permanently stranding a charged buyer. Other 4xx = a genuine miss.
+    if (res.status === 429 || res.status === 404 || res.status >= 500) return { transient: true }
+    if (!res.ok) return { missing: true }
     const { data } = await res.json()
-    return typeof data?.email === 'string' ? data.email : null
+    // A 200 with no email is also treated as transient (eventual consistency):
+    // a real anonymous checkout always yields a customer carrying an email, so
+    // an empty one is a not-yet-consistent read, not a permanent absence.
+    return typeof data?.email === 'string' && data.email ? { email: data.email } : { transient: true }
   } catch {
-    return null
+    return { transient: true }
   }
 }
 
-/** Provision (or link) a Supabase account from the checkout email. generateLink
- *  with type 'magiclink' CREATES the user if the email is new, or returns the
- *  existing user if the email already has an account (auth-js handles user
- *  creation for signup/invite/magiclink). It also yields a token_hash we turn
- *  into a one-click claim link to /account/auth/confirm — sent on first
- *  activation so a passwordless buyer can get in. Returns null on failure so the
- *  event is retried by Paddle rather than silently lost. */
+/** Provision (or link) a Supabase account from the checkout email. We use
+ *  createUser so we can tell a genuinely NEW buyer (created) from an email that
+ *  already has an account (email_exists): only the new account is flagged
+ *  `anon_provisioned`, which is what later routes the first-activation email to
+ *  the sign-in CLAIM (vs the logged-in welcome) regardless of which event
+ *  activates.
+ *
+ *  We deliberately DO NOT mint or email a one-time magic-link token here. The
+ *  claim is the existing self-service sign-in (the buyer requests a fresh OTP),
+ *  so there is no single-slot token a concurrent webhook delivery could
+ *  invalidate — the previous design's created+activated race that could email a
+ *  dead claim link is gone. generateLink is used ONLY to resolve an EXISTING
+ *  user's id (its token is never sent). Returns 'transient' on a recoverable
+ *  failure so the caller forces a Paddle retry instead of stranding the buyer.
+ *
+ *  SECURITY / ACCEPTED RESIDUAL: Paddle does not prove the buyer controls the
+ *  email typed at one-off checkout, so this provisions an account from an
+ *  attacker-controllable address. The DANGEROUS half is closed — the claim path
+ *  is self-service OTP (no emailed token), so the account is reachable ONLY by
+ *  whoever controls the inbox; an attacker who pays with someone else's email
+ *  gets no session and no premium. What remains is self-limiting griefing (each
+ *  attempt costs a full paid subscription): an unsolicited account/premium under
+ *  a victim's address. Do NOT widen this (e.g. never email a one-time token to
+ *  this address, never grant access without an OTP). A fuller fix (defer account
+ *  creation until the buyer proves mailbox control) is tracked for a tested pass. */
 async function provisionUserByEmail(
   admin: AdminClient,
   email: string,
-): Promise<{ userId: string; claimUrl: string } | null> {
-  const { data, error } = await admin.auth.admin.generateLink({
+): Promise<{ userId: string; createdNew: boolean } | 'transient'> {
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { anon_provisioned: true },
+  })
+  if (!createErr && created?.user?.id) return { userId: created.user.id, createdNew: true }
+
+  const errCode = (createErr as { code?: string } | null)?.code
+  const errStatus = (createErr as { status?: number } | null)?.status
+  const alreadyExists = errCode === 'email_exists' || errCode === 'user_already_exists' || errStatus === 422
+  if (!alreadyExists) {
+    console.error('[paddle webhook] createUser failed (transient):', createErr?.message)
+    return 'transient'
+  }
+  // Email already has an account — resolve its id. generateLink returns the
+  // existing user; we use ONLY data.user.id (the token is irrelevant, never sent).
+  const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
     type: 'magiclink',
     email,
     options: { redirectTo: `${SITE_URL}/account` },
   })
-  const hashedToken = data?.properties?.hashed_token
-  if (error || !data?.user?.id || !hashedToken) {
-    console.error('[paddle webhook] provision generateLink failed:', error?.message)
-    return null
+  if (linkErr || !link?.user?.id) {
+    console.error('[paddle webhook] existing-user resolve failed (transient):', linkErr?.message)
+    return 'transient'
   }
-  const params = new URLSearchParams({ token_hash: hashedToken, type: 'magiclink', next: '/account' })
-  return { userId: data.user.id, claimUrl: `${SITE_URL}/account/auth/confirm?${params.toString()}` }
+  return { userId: link.user.id, createdNew: false }
 }
 
 // Only react to subscription lifecycle events; the STATUS comes from the
@@ -119,26 +163,30 @@ export async function POST(req: NextRequest) {
   }
 
   // Anonymous checkout: no user_id was passed and we've never seen this
-  // customer. Provision (or link) an account from the email the buyer entered
-  // at Paddle checkout, then send them a magic-link claim on first activation.
-  // Only the FIRST event for a new customer reaches here — once the upsert below
-  // stores paddle_customer_id, later events resolve via the fallback above.
-  let claimUrl: string | undefined
-  let provisionedFromEmail = false
-  if (!userId && data.customer_id) {
-    const email = await fetchPaddleCustomerEmail(data.customer_id)
-    if (email) {
-      const provisioned = await provisionUserByEmail(admin, email)
-      if (provisioned) {
-        userId = provisioned.userId
-        claimUrl = provisioned.claimUrl
-        provisionedFromEmail = true
+  // customer. Provision (or link) an account from the email the buyer entered at
+  // Paddle checkout. Gate to an ACTIVATING event only — a stray
+  // canceled/past_due/updated event for an unknown customer must never create an
+  // orphan account. A transient Paddle-API / Supabase failure returns 500 so
+  // Paddle re-delivers within its retry window rather than 200-and-dropping a
+  // charged customer (whose row would otherwise never exist for reconcile to
+  // heal). The first activating event provisions; once the upsert below stores
+  // paddle_customer_id, later events resolve via the fallback above.
+  if (!userId && data.customer_id && fields.status === 'active') {
+    const lookup = await fetchPaddleCustomerEmail(data.customer_id)
+    if ('transient' in lookup) {
+      return NextResponse.json({ error: 'customer lookup failed' }, { status: 500 })
+    }
+    if ('email' in lookup) {
+      const provisioned = await provisionUserByEmail(admin, lookup.email)
+      if (provisioned === 'transient') {
+        return NextResponse.json({ error: 'provisioning failed' }, { status: 500 })
       }
+      userId = provisioned.userId
     }
   }
 
   if (!userId) {
-    console.error('[paddle webhook] unmatched event — no user_id, unknown customer, no email:', evt.event_type, data.customer_id)
+    console.error('[paddle webhook] unmatched event — no user_id, unknown customer, or no checkout email:', evt.event_type, data.customer_id)
     return NextResponse.json({ ok: true, unmatched: true })
   }
 
@@ -192,11 +240,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'write failed' }, { status: 500 })
   }
 
-  // First-activation welcome ("you just got superpowers"). Fires once, only on a
-  // genuine non-active -> active transition, so renewals and existing subscribers
-  // are excluded; a user_metadata flag adds idempotency. Fully non-fatal: an email
-  // hiccup must never fail the webhook (Paddle's receipt still goes out, and a
-  // failed webhook would re-run the grant).
+  // First-activation email. Fires once, only on a genuine non-active -> active
+  // transition, so renewals and existing subscribers are excluded; a
+  // user_metadata flag adds idempotency.
+  //
+  // Which email: an `anon_provisioned` account (created here from the checkout
+  // email) has no session/password, so it gets the sign-in CLAIM email; everyone
+  // else (signed-in upgrade, or an email that already had an account) gets the
+  // plain welcome. The flag lives on the USER, so the correct email is chosen no
+  // matter which event flips the subscription active (a non-active event may have
+  // provisioned the row first). The send stays best-effort and never fails the
+  // webhook: a lost claim email is NOT a lockout, because /welcome already told
+  // the anonymous buyer to sign in with the email they paid with, and the sign-in
+  // page self-serves a fresh OTP on demand.
   //
   // We gate on 'active' only, NOT 'trialing' (which tier.ts also counts as
   // premium): AI Canvas sells no-trial plans, so a first activation never carries
@@ -215,22 +271,21 @@ export async function POST(req: NextRequest) {
           user_metadata: { ...(user.user_metadata ?? {}), premium_welcome_sent: true },
         })
         if (!flagErr) {
-          // Anonymous buyers were just provisioned and have no session/password,
-          // so they get the magic-link CLAIM email (their way in). Everyone else
-          // (signed-in upgrade, or an email that already had an account) gets the
-          // plain welcome — they can already log in.
-          const mail = provisionedFromEmail && claimUrl
-            ? claimPremiumAccountEmail({ claimUrl })
+          const mail = user.user_metadata?.anon_provisioned
+            ? claimPremiumAccountEmail()
             : welcomeToPremiumEmail()
-          await fetch('https://api.resend.com/emails', {
+          const sendRes = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ from: NOREPLY_FROM, to: [user.email], subject: mail.subject, html: mail.html }),
           })
+          if (!sendRes.ok) {
+            console.error('[paddle webhook] activation email send failed (non-fatal), status', sendRes.status)
+          }
         }
       }
     } catch (e) {
-      console.error('[paddle webhook] premium welcome email failed (non-fatal):', e)
+      console.error('[paddle webhook] activation email failed (non-fatal):', e)
     }
   }
 

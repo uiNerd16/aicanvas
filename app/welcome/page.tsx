@@ -11,10 +11,12 @@ export const metadata: Metadata = {
 
 // ─── /welcome ─────────────────────────────────────────────────────────────────
 // Where an ANONYMOUS buyer lands right after a successful Paddle checkout. They
-// have no session yet: the webhook provisions the account from the email they
-// paid with and emails a one-click magic link. This page just sets expectations
-// ("check your inbox") so the success/webhook race is never user-visible.
-// Signed-in upgrades never reach here (their overlay reloads in place).
+// have no session yet: the webhook provisions a passwordless account under the
+// email they paid with. This page is the PRIMARY claim path — it tells them to
+// sign in (self-service OTP) with that email; the emailed sign-in link is a
+// secondary convenience, not a required one-click confirm (there is no token
+// route). Because the claim is self-service, a lost/delayed email is never a
+// lockout. Signed-in upgrades never reach here (their overlay reloads in place).
 
 export default function WelcomePage() {
   return (
@@ -39,21 +41,22 @@ export default function WelcomePage() {
         </h1>
 
         <p className="mt-4 text-base leading-relaxed text-sand-300">
-          Check your inbox. We just sent a one-click link to the email you used at
-          checkout. Open it to access your account, your Premium is already active.
+          Your account is ready under the email you used at checkout. Sign in with
+          that email to access it, no password needed, just choose &ldquo;Email me a
+          sign-in link.&rdquo; Premium is already active.
         </p>
 
-        <div className="mt-8 flex items-center gap-2 rounded-xl border border-sand-800 bg-sand-900 px-4 py-3 text-sm text-sand-400">
-          <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
-          No email after a minute? Check spam, or contact support.
-        </div>
-
         <Link
-          href="/components"
-          className="mt-8 text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400"
+          href="/account/sign-in?next=/account"
+          className="mt-8 inline-flex h-11 items-center justify-center rounded-lg bg-olive-500 px-6 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
         >
-          Browse components while you wait
+          Sign in to access Premium
         </Link>
+
+        <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-800 bg-sand-900 px-4 py-3 text-sm text-sand-400">
+          <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
+          We also emailed you a sign-in link. No email? You can still sign in above.
+        </div>
       </main>
     </div>
   )

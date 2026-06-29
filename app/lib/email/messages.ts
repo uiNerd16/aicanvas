@@ -35,18 +35,20 @@ export function welcomeToPremiumEmail(): { subject: string; html: string } {
 }
 
 /** Sent ONCE when an ANONYMOUS checkout provisions a fresh account (the buyer
- *  paid without signing in first). Carries a passwordless magic link to our
- *  /account/auth/confirm route so they can claim the account in one click,
- *  Premium already active. The send-once guard (premium_welcome_sent in
+ *  paid without signing in first). Points to self-service sign-in rather than a
+ *  one-time magic-link token: the buyer requests a fresh OTP themselves, so
+ *  there is no single-slot token a concurrent webhook delivery could invalidate,
+ *  and a lost/delayed email is not a lockout (they can sign in any time with the
+ *  email they paid with). The send-once guard (premium_welcome_sent in
  *  user_metadata) lives in the Paddle webhook, shared with the welcome email so
  *  a buyer never gets both. */
-export function claimPremiumAccountEmail(opts: { claimUrl: string }): { subject: string; html: string } {
+export function claimPremiumAccountEmail(): { subject: string; html: string } {
   const html = emailShell({
     title: 'Access your Premium account',
     heading: 'You just got <span class="ac-accent" style="color:#869631;">superpowers</span>.',
-    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Your payment went through and Premium is live on your account. Click below to sign in, no password needed. Every design system, premium component, and template is yours, including every new one the moment it ships.</p>`,
-    button: { label: 'Access your account', url: opts.claimUrl },
-    footerNoteHtml: 'This link signs you in and expires shortly. You can set a password later in your account settings.',
+    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Your payment went through and Premium is live on your account. Sign in with the email you used at checkout to get in, no password needed. Every design system, premium component, and template is yours, including every new one the moment it ships.</p>`,
+    button: { label: 'Sign in to AI Canvas', url: 'https://aicanvas.me/account/sign-in?next=/account' },
+    footerNoteHtml: 'On the sign-in page choose "Email me a sign-in link" and use this address. You can set a password later in your account settings. If you did not purchase AI Canvas Premium, you can ignore this email and contact support to have the account removed.',
   })
   return { subject: 'Access your AI Canvas Premium account', html }
 }
