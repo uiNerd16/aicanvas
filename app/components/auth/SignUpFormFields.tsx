@@ -27,6 +27,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
+  const [existing, setExisting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -34,7 +35,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
     setSubmitting(true)
     setError(null)
     const supabase = createClient()
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -44,6 +45,16 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
     setSubmitting(false)
     if (signUpError) {
       setError(formatAuthError(signUpError))
+      return
+    }
+    // GoTrue returns a user with an EMPTY identities array when the email already
+    // has a confirmed account (its anti-enumeration signal): it does NOT send a
+    // confirmation and does NOT apply the password. Showing "confirmation sent"
+    // there is a dead end (no email ever arrives), so steer the user to sign in,
+    // where the magic-link / password-reset path gets them in. This also covers an
+    // account auto-provisioned by anonymous checkout under their email.
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+      setExisting(true)
       return
     }
     setSent(true)
@@ -57,6 +68,32 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
         <div className="mt-6 rounded-lg border border-olive-500/30 bg-olive-500/10 p-4 text-sm text-sand-900 dark:text-sand-100">
           Confirmation email sent to <strong>{email}</strong>. Click the link
           inside to finish creating your account.
+        </div>
+      ) : existing ? (
+        <div className="mt-6 rounded-lg border border-olive-500/30 bg-olive-500/10 p-4 text-sm text-sand-900 dark:text-sand-100">
+          <p>
+            <strong>{email}</strong> already has an account. Sign in to continue,
+            no password needed if you choose &ldquo;Email me a sign-in link.&rdquo;
+            You can reset your password from there too.
+          </p>
+          <div className="mt-3">
+            {onSwitchToSignIn ? (
+              <button
+                type="button"
+                onClick={onSwitchToSignIn}
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-olive-500 px-4 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              >
+                Sign in
+              </button>
+            ) : (
+              <Link
+                href={`/account/sign-in?next=${encodeURIComponent(next)}`}
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-olive-500 px-4 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
         </div>
       ) : (
         <>
