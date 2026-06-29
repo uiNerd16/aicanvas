@@ -52,12 +52,12 @@ export default function RefundPage() {
           <h2 className="text-lg font-bold text-sand-50">1. Overview</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
             Browsing AI Canvas, remixing components with AI, and installing
-            standalone components up to the daily free limit are always free:
+            standalone components with a free account are always free:
             there is nothing to pay and nothing to refund. This policy covers the
             optional paid{' '}
             <strong className="font-semibold text-sand-300">Premium</strong>{' '}
-            subscription, which unlocks unlimited daily installs, premium design
-            systems, and premium templates.
+            subscription, which unlocks the premium closed-source components,
+            design systems and templates.
           </p>
         </section>
 

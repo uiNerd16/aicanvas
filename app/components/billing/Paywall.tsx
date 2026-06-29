@@ -5,8 +5,9 @@ import { usePaywallModal, type PaywallReason } from './PaywallModalProvider'
 
 export type { PaywallReason }
 
-// Decorative, blurred faux-source — the REAL source is withheld server-side
-// (the gate 402s before any bytes ship), so there is nothing real to blur.
+// Decorative, blurred faux-source — for PREMIUM content the REAL source is
+// withheld server-side (the gate 402s before any bytes ship), so there is
+// nothing real to blur. Free component source stays public to read.
 const FAUX_SOURCE = `import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
 
@@ -30,7 +31,8 @@ export function Component({ value, onChange }: Props) {
 export function Paywall({ reason, limit }: { reason: PaywallReason; limit?: number }) {
   const { open } = usePaywallModal()
 
-  const title = reason === 'premium-only' ? 'Premium component' : 'Daily limit reached'
+  // Metering is gone — the inline lock only ever covers premium content now.
+  const title = 'Premium component'
 
   return (
     <div className="relative min-h-[360px] w-full overflow-hidden">

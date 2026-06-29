@@ -38,6 +38,7 @@ import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
 import { useSession } from '../auth/SessionProvider'
+import { useAuthModal } from '../auth/AuthModalProvider'
 import { Button } from '../Button'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
@@ -46,7 +47,6 @@ import { premiumEnabled } from '../../../lib/flags'
 import { useEntitlement } from '../billing/useEntitlement'
 import { PremiumBadge } from '../billing/PremiumBadge'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
-import { usePaywallModal } from '../billing/PaywallModalProvider'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -87,6 +87,10 @@ interface ComponentPageViewProps {
   related: ComponentMeta[]
   highlightedCode?: ReactNode
   enforcing?: boolean
+  // Account-gated install: when on, a signed-out visitor of a FREE component
+  // sees a "create a free account to install" CTA instead of the runnable
+  // command. Reading the source (Code tab) stays public either way.
+  freeAccountGate?: boolean
   // The `// font:` / `// font-pkg:` / `// npm install` directive lines, always
   // provided so the install UI (deps + font setup) survives even when the full
   // `code` is withheld in enforcing mode.
@@ -115,6 +119,7 @@ export default function ComponentPageView({
   related,
   highlightedCode,
   enforcing = false,
+  freeAccountGate = false,
   codeDirectives,
   children,
   about,
@@ -123,8 +128,8 @@ export default function ComponentPageView({
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
   // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub is driven by the
   // DevTierSwitcher (localStorage), which only renders in development; in
-  // production its default ('anonymous, at limit') would wall off real code
-  // for everyone whenever the premium flag is on but enforcement is not.
+  // production it is always null. Per-install metering is gone, so the only
+  // locked state the Code tab can preview is premium content (design systems).
   // Real gating is the `enforcing` path below; the stub never ships.
   const entitlement = useEntitlement()
   const paywallReason: PaywallReason | null =
@@ -132,9 +137,7 @@ export default function ComponentPageView({
       ? null
       : designSystem
         ? 'premium-only'
-        : entitlement.usedToday >= entitlement.limit
-          ? 'quota-exceeded'
-          : null
+        : null
   const [installTier, setInstallTier] = useState<'component' | 'system'>('component')
   // Reset to component tier on mount per slug — switching pages shouldn't carry tier
   // selection across components.
@@ -181,8 +184,10 @@ export default function ComponentPageView({
     try {
       const res = await fetch(`/api/component-code?slug=${slug}`)
       if (res.status === 402) {
-        const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
-        setCodeState({ status: 'locked', reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only', limit })
+        // The Code tab can now only lock for PREMIUM content — per-install
+        // metering is gone, so a 402 here is always "premium-only".
+        const { limit } = await res.json().catch(() => ({}))
+        setCodeState({ status: 'locked', reason: 'premium-only', limit })
         return
       }
       if (!res.ok) {
@@ -204,6 +209,7 @@ export default function ComponentPageView({
   useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
+  const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [depsCopied, setDepsCopied] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
@@ -370,33 +376,28 @@ export default function ComponentPageView({
     } catch {}
   }
 
-  const { open: openPaywall } = usePaywallModal()
+  const { open: openAuthModal } = useAuthModal()
 
-  // Rolling-window quota guard: at the cap for a NEW component, pop the limit
-  // modal instead of copying a command that would 402 in the terminal. Fails
-  // open (copies on any hiccup).
-  async function guardInstall(write: () => void | Promise<void>) {
-    try {
-      const res = await fetch(`/api/me/install-check?slug=${installSlug}`)
-      const d = await res.json().catch(() => null)
-      if (d?.blocked) {
-        openPaywall({ reason: d.reason ?? 'quota-exceeded', limit: d.limit, resetAt: d.resetAt })
-        return
-      }
-    } catch {}
-    await write()
+  // Account-gated install: a free component, signed out, with the gate active
+  // needs a free account before the one-command install works. We use `user`
+  // from useSession (immediate) rather than userToken (async, would flash the
+  // CTA on first paint). Premium content keeps its own (unchanged) gating.
+  const needsFreeAccount = !!freeAccountGate && !user && !premium
+
+  // Open the sign-up modal, returning the visitor to this component page after
+  // they create their free account.
+  function promptFreeAccount() {
+    openAuthModal({ mode: 'sign-up', next: '/components/' + slug })
   }
 
   async function copyCli() {
-    await guardInstall(async () => {
-      try {
-        track('CLI Copy', { component: slug })
-        trackInstall(installSlug, designSystem ?? null, pkgManager)
-        await navigator.clipboard.writeText(cliCommand)
-        setCliCopied(true)
-        setTimeout(() => setCliCopied(false), 4000)
-      } catch {}
-    })
+    try {
+      track('CLI Copy', { component: slug })
+      trackInstall(installSlug, designSystem ?? null, pkgManager)
+      await navigator.clipboard.writeText(cliCommand)
+      setCliCopied(true)
+      setTimeout(() => setCliCopied(false), 4000)
+    } catch {}
   }
 
   async function handlePlatformClick(platform: Platform) {
@@ -759,13 +760,22 @@ export default function ComponentPageView({
                 </div>
               )}
 
-              {/* Copy CLI — primary install action; copies the npx shadcn command */}
-              <Button variant="primary" size="sm" onClick={copyCli}>
-                {cliCopied
-                  ? <Check weight="regular" size={15} />
-                  : <Terminal weight="regular" size={15} />}
-                {cliCopied ? 'Copied!' : 'Copy CLI'}
-              </Button>
+              {/* Copy CLI — primary install action; copies the npx shadcn
+                  command. When the install is account-gated and the visitor is
+                  signed out, swap in a "create a free account" CTA instead. */}
+              {needsFreeAccount ? (
+                <Button variant="primary" size="sm" onClick={promptFreeAccount}>
+                  <Terminal weight="regular" size={15} />
+                  Create a free account to install
+                </Button>
+              ) : (
+                <Button variant="primary" size="sm" onClick={copyCli}>
+                  {cliCopied
+                    ? <Check weight="regular" size={15} />
+                    : <Terminal weight="regular" size={15} />}
+                  {cliCopied ? 'Copied!' : 'Copy CLI'}
+                </Button>
+              )}
 
             </div>
           </div>
@@ -830,6 +840,27 @@ export default function ComponentPageView({
                     <div className="space-y-6">
                       {/* Step 1 — shadcn add */}
                       <Step number={1}>
+                          {needsFreeAccount ? (
+                            // Account-gated install, signed out: the one-command
+                            // install needs a free account. Reading the source
+                            // stays public (Manual tab below). Swap the runnable
+                            // command + copy button + package-manager row for a
+                            // sign-up CTA.
+                            <>
+                              <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                                Create a free account to install with one command. Reading the source stays free.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={promptFreeAccount}
+                                className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+                              >
+                                <Terminal weight="regular" size={15} />
+                                Create a free account to install
+                              </button>
+                            </>
+                          ) : (
+                          <>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
@@ -850,7 +881,7 @@ export default function ComponentPageView({
                                 </button>
                               ))}
                               <button
-                                onClick={() => guardInstall(() => {
+                                onClick={() => {
                                   const cmd = pkgManager === 'npm'
                                     ? `npx shadcn@latest add ${installReference}`
                                     : pkgManager === 'pnpm'
@@ -862,7 +893,7 @@ export default function ComponentPageView({
                                   trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
-                                })}
+                                }}
                                 className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
                                 {depsCopied
@@ -913,6 +944,8 @@ export default function ComponentPageView({
                               </code>
                             </div>
                           </div>
+                          </>
+                          )}
                       </Step>
 
                       {/* Step 2 — Dark mode (optional) */}
@@ -1086,7 +1119,7 @@ export default function ComponentPageView({
                                     onClick={openCode}
                                     className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-300"
                                   >
-                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source (uses one of your daily installs, re-viewing is free)'}
+                                    {codeState.status === 'loading' ? 'Loading source…' : 'Load the source'}
                                   </button>
                                 )
                               ) : (
@@ -1226,6 +1259,46 @@ export default function ComponentPageView({
                 Get MCP
                 <ArrowRight weight="regular" size={13} />
               </Link>
+
+              {/* MCP token — so AI-agent / MCP installs authenticate as your
+                  account. Signed in: surface a masked AICANVAS_TOKEN line to
+                  add to the MCP server config (copy writes the real value).
+                  Signed out: a small link to create a free account first. */}
+              {user ? (
+                userToken && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
+                      Add your token to your MCP server config so installs authenticate as your account:
+                    </p>
+                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                      <code className="font-mono text-sm text-sand-300 break-all">
+                        AICANVAS_TOKEN=aic_••••••••
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
+                          setMcpTokenCopied(true)
+                          setTimeout(() => setMcpTokenCopied(false), 2000)
+                        }}
+                        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                        aria-label="Copy MCP token"
+                      >
+                        {mcpTokenCopied
+                          ? <Check weight="regular" size={14} className="text-olive-500" />
+                          : <Copy weight="regular" size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <button
+                  type="button"
+                  onClick={promptFreeAccount}
+                  className="mt-4 block text-sm font-semibold text-olive-600 transition-colors hover:text-olive-500 dark:text-olive-400 dark:hover:text-olive-400"
+                >
+                  Create a free account to get your MCP token
+                </button>
+              )}
             </section>
 
           {/* About this component — long-form body copy that gives Google a

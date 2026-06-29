@@ -15,7 +15,7 @@ import { UpgradeButton } from './UpgradeButton'
 
 const FREE_FEATURES = [
   'Browse every component, preview and prompts',
-  '10 component installs a day with a free account',
+  'Unlimited one-command installs with a free account',
   'Remix with AI, always free',
   'MCP server for Claude Code, Codex, and Cursor',
   'Lab access with presets and export',
@@ -23,7 +23,7 @@ const FREE_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  'Unlimited component installs, no daily limit',
+  'Premium closed-source components, one command',
   'Full design systems, one command installs the whole thing',
   'Premium templates, full access',
   'Every new design system and template, included',
@@ -144,7 +144,7 @@ export function PremiumCards({
             </h2>
           </div>
           <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-            Unlimited installs, systems and templates.
+            Design systems, templates and premium components.
           </p>
 
           {/* Billing cycle toggle — defaults to Yearly; the selected option is highlighted. */}

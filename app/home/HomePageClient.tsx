@@ -684,11 +684,11 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'Is AI Canvas free?',
-    a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a Free account gives you 10 installs a day, free forever. Premium adds unlimited installs and full design systems at $8.99 per month or $49.99 per year when you want more.',
+    a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
   },
   {
     q: 'How do I get my first component in under a minute?',
-    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a Free account lets you do this for 10 installs a day, free forever.',
+    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a free account unlocks unlimited one-command installs, free forever.',
   },
   {
     q: 'What is the AI Canvas MCP server?',

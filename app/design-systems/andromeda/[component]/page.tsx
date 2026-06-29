@@ -38,15 +38,22 @@ export default async function AndromedaComponentPage({
     (c) => ({ slug: c.slug, name: c.name, image: c.image }),
   )
 
+  // Account-gated install: when on, a signed-out visitor of this FREE
+  // design-system component sees a "create a free account to install" CTA
+  // instead of the runnable command. Reading the source (Code tab) stays
+  // public either way. Threaded to the client so the install CTAs swap.
+  const freeAccountGate = process.env.FREE_ACCOUNT_GATE === 'on'
+
   // Source is NOT shipped in this page's HTML — the Code tab fetches it on
   // demand from the gated /api/component-code endpoint, so access is decided
-  // (and metered) per user, never by a build-time flag.
+  // per user, never by a build-time flag.
   return (
     <AndromedaComponentView
       slug={entry.slug}
       name={entry.name}
       description={entry.description}
       related={related}
+      freeAccountGate={freeAccountGate}
     />
   )
 }

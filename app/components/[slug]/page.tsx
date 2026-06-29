@@ -130,6 +130,14 @@ export default async function Page({
   // on, source stays server-rendered (preserves SEO / GEO indexing).
   const enforcing = process.env.REGISTRY_ENFORCEMENT === 'enforce'
 
+  // Account-gated install: when on, anonymous installs of FREE components are
+  // walled behind a free account (the /r route returns a "create a free
+  // account" placeholder). Reading the source stays public — only the
+  // one-command install needs an account. Threaded to the client so the
+  // install CTAs swap to a "create a free account" prompt for signed-out
+  // visitors of free components.
+  const freeAccountGate = process.env.FREE_ACCOUNT_GATE === 'on'
+
   // Premium content (closed source) must NEVER appear in the server-rendered
   // page payload — not the source, not the highlighted HTML, not the prompts —
   // REGARDLESS of REGISTRY_ENFORCEMENT (the default is permissive). Classify
@@ -225,6 +233,7 @@ export default async function Page({
         related={related}
         highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
         enforcing={enforcing || isPremium}
+        freeAccountGate={freeAccountGate}
         codeDirectives={codeDirectives}
         useCases={entry.useCases}
         about={entry.about}

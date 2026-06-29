@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getEntitlement } from '@/app/lib/entitlement'
 import { classifyContent } from '@/lib/registry/content-type'
 import { loadContentLookup } from '@/lib/registry/lookup'
-import { dailyLimitFor } from '@/lib/registry/limits'
 import { premiumEnabled } from '@/lib/flags'
-import { utcDay, subjectFor, consume, ipFromHeaders } from '@/app/lib/quota'
 import { getComponentCode } from '@/app/lib/component-source'
 import { codeToHtml } from 'shiki'
 
@@ -13,11 +11,12 @@ export const runtime = 'nodejs'
 const NO_STORE = { 'Cache-Control': 'private, no-store' }
 
 /**
- * On-demand source for the web Code tab. Gated so premium/over-limit users
- * never receive the bytes. Mirrors the registry-route gate: premium-only
- * content fails CLOSED on entitlement errors; standalone metering fails open.
- * Permissive/off: serve source (today's behavior). Enforce additionally
- * requires the premium UI flag (no upgrade path without it).
+ * On-demand source for the web Code tab. Free standalone / design-system-
+ * component source is PUBLIC and uncounted — reading the code never needs an
+ * account (only the one-command install does). Premium content stays gated:
+ * premium-standalone is mode-independent + fails CLOSED; premium design systems
+ * / templates are enforce-gated + fail CLOSED. Enforce requires the premium UI
+ * flag (no upgrade path without it).
  */
 export async function GET(req: NextRequest) {
   const slug = new URL(req.url).searchParams.get('slug') ?? ''
@@ -75,25 +74,9 @@ export async function GET(req: NextRequest) {
       if (tier !== 'premium') {
         return NextResponse.json({ error: 'premium-only' }, { status: 402, headers: NO_STORE })
       }
-    } else if (contentType === 'standalone' || contentType === 'design-system-component') {
-      // Standalones AND individual design-system components are free-metered.
-      // Metering: fail OPEN (an outage must not break the Code tab).
-      try {
-        const { tier, userId } = await getEntitlement(req)
-        if (tier !== 'premium') {
-          const limit = dailyLimitFor(tier)
-          const day = utcDay(new Date())
-          const subject = subjectFor(userId, ipFromHeaders(req.headers), day)
-          // Idempotent slug-aware consume: re-opening the Code tab of a
-          // component already pulled today is free, even at the limit.
-          if (!(await consume(subject, slug, limit))) {
-            return NextResponse.json({ error: 'quota-exceeded', limit }, { status: 402, headers: NO_STORE })
-          }
-        }
-      } catch (err) {
-        console.error('[component-code gate] failing open (metering):', err)
-      }
     }
+    // Free standalone / design-system-component source is public + uncounted —
+    // no gate here (reading the code never requires an account).
   }
 
   // Highlight server-side so the gated Code tab matches the build-time look

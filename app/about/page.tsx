@@ -265,8 +265,8 @@ export default function AboutPage() {
             free for everyone.
           </p>
           <p className="mt-4 text-base leading-relaxed text-sand-400">
-            Browsing and previewing are free. Installing is free up to a daily
-            limit, and a free account raises it. Premium is there for people who
+            Browsing and previewing are free. Installing is free with a free
+            account, unlimited. Premium is there for people who
             lean on AI Canvas every day. It sells convenience, never secrecy.
             Paying never hides code. There is nothing here to hide.
           </p>

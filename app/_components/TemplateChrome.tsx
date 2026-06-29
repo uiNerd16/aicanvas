@@ -68,13 +68,15 @@ export function TemplateChrome({
 
   // Premium-only content: a non-premium user hitting Install sees the paywall
   // (Premium card) instead of the CLI popover. Premium → open the popover.
+  // Templates + full-system always resolve to 'premium-only' (per-install
+  // metering is gone, so install-check no longer returns 'quota-exceeded').
   // Fails open (opens the popover) so a hiccup never dead-ends the button.
   async function handleInstall() {
     try {
       const res = await fetch(`/api/me/install-check?slug=${templateSlug}`)
       const d = await res.json().catch(() => null)
       if (d?.blocked) {
-        openPaywall({ reason: d.reason ?? 'premium-only', limit: d.limit, resetAt: d.resetAt })
+        openPaywall({ reason: 'premium-only', limit: d.limit, resetAt: d.resetAt })
         return
       }
     } catch {}

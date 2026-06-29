@@ -70,9 +70,9 @@ export default function TermsPage() {
             offered through a free tier and an optional paid Premium tier. It
             also publishes design-system templates and an MCP integration that
             exposes the registry to AI coding tools. Browsing and remixing with
-            AI are always free. Installing standalone components is free up to a
-            daily limit; design systems, templates, and unlimited installs are
-            part of Premium.
+            AI are always free. Installing standalone components is free with a
+            free account; the closed-source premium components, design systems
+            and templates are part of Premium.
           </p>
         </section>
 

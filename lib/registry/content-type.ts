@@ -23,7 +23,7 @@ export interface ContentLookup {
   degraded?: boolean
 }
 
-// Catalog/index files the CLI and MCP need to browse — never gated, never metered.
+// Catalog/index files the CLI and MCP need to browse — never gated.
 const META_SLUGS = new Set(['registry', 'aicanvas-mcp'])
 
 /**
@@ -49,19 +49,18 @@ export function classifyContent(slugOrFile: string, lookup: ContentLookup): Cont
   // Whole-system aggregates stay premium-only (the "install the entire system"
   // items). Matched EXACTLY (see note above) so a standalone sharing the name
   // prefix — e.g. `andromeda-button` — is not caught here.
-  // The token foundation (`<system>-tokens`) is the ONE exception: it is a free,
-  // un-metered shared dependency. Every free-metered DS component depends on it,
-  // so gating it would block free/anon installs of those components (and
-  // double-count the daily quota). Classifying it 'meta' keeps it free +
+  // The token foundation (`<system>-tokens`) is the ONE exception: it is a free
+  // shared dependency every free DS component pulls in. Gating it would break
+  // free installs of those components, so classifying it 'meta' keeps it free +
   // uncounted, while the aggregates and templates stay premium.
   for (const system of lookup.systemSlugs) {
     if (slug === `${system}-tokens`) return 'meta'
     if (slug === system || slug === `${system}-all`) return 'design-system'
   }
 
-  // Individual design-system components are FREE-METERED like standalones
-  // (anon 2 / free 10 / premium unlimited). Only templates and the whole-
-  // system aggregates above are premium-only.
+  // Individual design-system components are FREE like standalones: the source is
+  // public, and the one-command install just needs a free account (unlimited,
+  // uncounted). Only templates and the whole-system aggregates above are premium.
   if (lookup.designSystemSlugs.has(slug)) return 'design-system-component'
 
   // Premium-only standalones (closed-source, born premium). They gate like a

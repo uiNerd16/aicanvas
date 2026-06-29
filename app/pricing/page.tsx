@@ -246,7 +246,7 @@ export default function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-sand-600 dark:text-sand-400">
             {premium
-              ? 'Free accounts install 10 components a day and remix with AI, free forever. Premium goes unlimited, with design systems and templates included.'
+              ? 'A free account unlocks unlimited one-command installs and remix with AI, free forever. Premium adds the closed-source components, design systems and templates.'
               : 'AI Canvas is free, forever. Browse anonymously, or sign up to save your work, keep Lab presets, and export to your machine.'}
           </p>
         </Section>

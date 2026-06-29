@@ -4,9 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { classifyContent } from '@/lib/registry/content-type'
 import { loadContentLookup } from '@/lib/registry/lookup'
 import { getEntitlement } from '@/app/lib/entitlement'
-import { dailyLimitFor } from '@/lib/registry/limits'
 import { premiumEnabled } from '@/lib/flags'
-import { utcDay, subjectFor, consume, ipFromHeaders, maybePruneUsage } from '@/app/lib/quota'
 import { extractToken } from '@/lib/identity/token'
 
 export const runtime = 'nodejs'
@@ -48,12 +46,16 @@ export async function GET(
   // Cache policy: meta is truly public; premium content is never shared-cached
   // in ANY mode (a permissive-mode CDN entry must not survive an enforce flip);
   // standalones are per-caller once enforcing. 402/503 are always no-store.
+  // When the free-account gate is active, standalone / DS-component installs are
+  // per-caller (anon → stub, signed-in → source), so they must NEVER be shared-
+  // cached: a public CDN entry would let an anon request reuse a signed-in user's
+  // real-source response and bypass the gate.
   const cacheControl =
     contentType === 'meta'
       ? 'public, max-age=300'
       : premiumContent
         ? 'private, no-store'
-        : mode === 'enforce'
+        : mode === 'enforce' || freeAccountGateActive()
           ? 'private, no-store'
           : 'public, max-age=300'
 
@@ -87,10 +89,32 @@ export async function GET(
     }
   }
 
+  // ── Mode-INDEPENDENT free-account install gate (behind a kill-switch flag) ──
+  // Free standalone / DS-component SOURCE is public to read (Code tab, page); the
+  // one-command INSTALL requires a free account. Anonymous → a 200 placeholder
+  // steering to sign-up (never a 402). Any signed-in account → real source,
+  // unlimited, never counted. FAIL OPEN: an entitlement/infra error serves the
+  // real (public) source. Gated behind FREE_ACCOUNT_GATE so it ships dormant and
+  // flips on/off via a Vercel env var without a redeploy (one-step kill switch).
+  if (
+    freeAccountGateActive() &&
+    (contentType === 'standalone' || contentType === 'design-system-component')
+  ) {
+    let tier
+    try {
+      tier = (await getEntitlement(req)).tier
+    } catch (err) {
+      console.error('[registry gate] entitlement error on free content — failing open:', err)
+      tier = 'free' // fail OPEN — free source is public anyway
+    }
+    if (tier === 'anonymous') return freeAccountStub(body, slug)
+  }
+
   if (mode === 'enforce' && contentType !== 'meta') {
-    // ── Premium DESIGN SYSTEMS / TEMPLATES: fail CLOSED ───────────────────
-    // The existing soft-gate model — gated only when enforcing. (premium-
-    // standalone is gated mode-independently above, so it is excluded here.)
+    // ── Premium DESIGN SYSTEMS / TEMPLATES: fail CLOSED (enforce-gated) ────
+    // premium-standalone is gated mode-independently above; free standalone /
+    // DS-component installs are account-gated above (flag-driven) and never
+    // metered — so this enforce block now handles ONLY premium DS / templates.
     if (contentType === 'design-system' || contentType === 'template') {
       let tier
       try {
@@ -104,30 +128,6 @@ export async function GET(
           { error: 'premium-only', message: 'This is a premium component. Upgrade at https://aicanvas.me/pricing' },
           402,
         )
-      }
-    } else if (contentType === 'standalone' || contentType === 'design-system-component') {
-      // ── Free metering: fail OPEN ───────────────────────────────────────
-      // A Supabase outage must never break installs for paying customers;
-      // worst case is a few uncounted free pulls. Log loudly.
-      try {
-        const { tier, userId } = await getEntitlement(req)
-        if (tier !== 'premium') {
-          const limit = dailyLimitFor(tier)
-          const day = utcDay(new Date())
-          maybePruneUsage(day) // best-effort, once/instance/day — IP-row retention
-          const subject = subjectFor(userId, ipFromHeaders(req.headers), day)
-          // BINDING check = idempotent slug-aware consume: an already-pulled
-          // slug stays free even at the limit; only a NEW slug is refused.
-          const ok = await consume(subject, slug, limit)
-          if (!ok) {
-            return paymentJson(
-              { error: 'quota-exceeded', message: `Daily limit reached (${limit}/day). Upgrade for unlimited at https://aicanvas.me/pricing` },
-              402,
-            )
-          }
-        }
-      } catch (err) {
-        console.error('[registry gate] failing open (metering):', err)
       }
     }
   }
@@ -222,6 +222,67 @@ function premiumStub(realBody: string, slug: string): NextResponse {
     status: 200,
     headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'premium-standalone' },
   })
+}
+
+/**
+ * Anonymous request for a FREE standalone / DS component while the free-account
+ * gate is active → a 200 PLACEHOLDER registry item. The CLI install SUCCEEDS and
+ * writes ONE clearly-labelled file telling the user to create a free account and
+ * re-run (never a 402 — shadcn renders that cryptically). ZERO counting. The
+ * source stays public to READ (Code tab / page); only the one-command install is
+ * account-gated.
+ */
+function freeAccountStub(realBody: string, slug: string): NextResponse {
+  let title = slug
+  let parsed: Record<string, unknown> = {}
+  try {
+    parsed = JSON.parse(realBody)
+    if (typeof parsed.title === 'string') title = parsed.title
+  } catch {
+    /* defaults below */
+  }
+  const msg =
+    `"${title}" installs free with an AI Canvas account. ` +
+    `Create one (free, unlimited installs) at https://aicanvas.me/account/sign-up, ` +
+    `then re-run this command.`
+  const stub =
+    `const ACCOUNT_NOTICE =\n` +
+    `  ${JSON.stringify(msg)}\n\n` +
+    `export default function AccountRequired() {\n` +
+    `  return (\n` +
+    `    <div style={{ padding: 24, fontFamily: 'ui-monospace, monospace', fontSize: 13, lineHeight: 1.6, color: '#9aa3af' }}>\n` +
+    `      {ACCOUNT_NOTICE}\n` +
+    `    </div>\n` +
+    `  )\n` +
+    `}\n`
+  const files = Array.isArray(parsed.files)
+    ? (parsed.files as Array<Record<string, unknown>>).map((f) => ({ ...f, content: stub }))
+    : [{ path: `components/aicanvas/${slug}.tsx`, type: 'registry:ui', target: `components/aicanvas/${slug}.tsx`, content: stub }]
+  const item = {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: slug,
+    type: 'registry:ui',
+    title: `${title} (free account required)`,
+    description:
+      'Create a free AI Canvas account for unlimited one-command installs: https://aicanvas.me/account/sign-up',
+    dependencies: [],
+    registryDependencies: [],
+    files,
+  }
+  return NextResponse.json(item, {
+    status: 200,
+    headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'free-account-required' },
+  })
+}
+
+/**
+ * The free-account install gate ships behind an env flag so it can be flipped on
+ * — and instantly off — via a Vercel env var without a redeploy (one-step kill
+ * switch). Default OFF: until FREE_ACCOUNT_GATE=on, anonymous installs receive
+ * the real (public) source exactly as before, just no longer counted.
+ */
+function freeAccountGateActive(): boolean {
+  return process.env.FREE_ACCOUNT_GATE === 'on'
 }
 
 /** Enforce requires the premium UI flag, else blocked users would have no

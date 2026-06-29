@@ -9,8 +9,10 @@ import { FaqView, type FaqCategory } from './FaqView'
 // on-site upgrade button still renders "Coming soon" (NEXT_PUBLIC_CHECKOUT_COMING_SOON)
 // and the customer portal / cancel flow is not wired yet, so flip the checkout
 // flag and wire cancel before this copy fully matches the live site.
-// Prices ($8.99/mo, $49.99/yr) and limits (anonymous 2/day, Free 10/day, Premium
-// unlimited) mirror PremiumCards.tsx and lib/registry/limits.ts — update in lockstep.
+// Model: browsing + remix-with-AI are free and public; the one-command install
+// needs a free account (unlimited, uncounted); Premium adds the closed-source
+// premium components, design systems, and templates. Prices ($8.99/mo, $49.99/yr)
+// mirror PremiumCards.tsx — update in lockstep.
 const FAQ_CATEGORIES: FaqCategory[] = [
   {
     category: 'Getting started',
@@ -28,7 +30,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'How do I get my first component in under a minute?',
-        a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a Free account lets you do this for 10 installs a day, free forever.',
+        a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a free account unlocks unlimited one-command installs, free forever.',
       },
       {
         q: 'What is a CLI?',
@@ -45,7 +47,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is AI Canvas free to use?',
-        a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a Free account gives you 10 installs a day, free forever. Premium adds unlimited installs and full design systems at $8.99 per month or $49.99 per year when you want more.',
+        a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
       },
     ],
   },
@@ -81,7 +83,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'How many components can I install for free?',
-        a: 'Free accounts get 10 installs a day, and remix with AI is free forever. When you are building a lot, Premium gives you unlimited installs plus full design systems and templates, the natural next step once those daily installs are already paying off.',
+        a: 'A free account unlocks unlimited one-command installs, uncounted, and remix with AI is free forever. When you want more, Premium adds the closed-source premium components, full design systems, and templates, the natural next step once AI Canvas is already paying off.',
       },
     ],
   },
@@ -118,7 +120,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is the AI Canvas MCP free?',
-        a: 'Yes, the MCP is free and browsing component details is never metered. Pulling actual component, design system, or template source counts toward the daily free limit, which on a Free account is 10 installs a day, and Premium gives you unlimited installs with no daily limit. Premium is $8.99 per month or $49.99 per year.',
+        a: 'Yes, the MCP is free and browsing component details is never metered. Pulling actual component, design system, or template source needs a free account, which gives you unlimited one-command installs. Premium adds the closed-source premium components, design systems, and templates at $8.99 per month or $49.99 per year.',
       },
     ],
   },
@@ -138,50 +140,46 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Are design systems Free or Premium?',
-        a: 'Individual components from a system install on the Free plan just like any standalone component, with 10 installs a day on a Free account. Installing a whole system in one command, plus the premium templates, is part of Premium.',
+        a: 'Individual components from a system install with a free account just like any standalone component, with unlimited one-command installs. Installing a whole system in one command, plus the premium components and templates, is part of Premium.',
       },
       {
         q: 'What does Premium add for design systems?',
-        a: 'Premium turns a design system into a one-command install for the entire set and unlocks the premium templates built on top of it, plus unlimited component installs with no daily limit. It is the natural next step once a system is already saving you time, priced at $8.99 per month or $49.99 per year.',
+        a: 'Premium turns a design system into a one-command install for the entire set and unlocks the closed-source premium components and templates built on top of it. It is the natural next step once a system is already saving you time, priced at $8.99 per month or $49.99 per year.',
       },
     ],
   },
   {
-    category: 'Plans and limits',
+    category: 'Plans and Premium',
     slug: 'plans',
-    blurb: 'What you get for Free, the daily install limits, and what Premium unlocks.',
+    blurb: 'What you get with a free account, and what Premium unlocks.',
     items: [
       {
         q: 'What can I do on AI Canvas for free?',
-        a: 'A lot. Browsing components, previewing them, copying AI prompts, using the MCP, the Lab, and saving favorites are all free. You also get daily component installs, and you can remix with AI for free, forever.',
+        a: 'A lot. Browsing components, previewing them, copying AI prompts, using the MCP, the Lab, and saving favorites are all free. A free account also unlocks unlimited one-command installs, and you can remix with AI for free, forever.',
       },
       {
         q: 'What does install mean here?',
         a: 'Install means pulling a component’s real source code into your own project, usually with one command. You get the actual code to edit and ship, not a screenshot to copy by hand.',
       },
       {
-        q: 'How many installs do I get?',
-        a: 'Without an account you get 2 component installs a day. A Free account gives you 10 a day, free forever, and is the simplest way to get more at no cost.',
-      },
-      {
-        q: 'Do installs reset, and does re-installing the same component count?',
-        a: 'Yes, the daily limit is a rolling 24 hour window, so it refreshes over time. Re-pulling a component you already installed within 24 hours is free even at the cap, so only a brand new component counts toward your daily total.',
+        q: 'Do I need an account to install?',
+        a: 'Yes, a free account. Browsing, previewing, and remixing with AI are public and need no account, but the one-command install runs against your account, which unlocks unlimited installs at no cost. Run the install anonymously and the CLI returns a friendly placeholder asking you to create a free account, not an error.',
       },
       {
         q: 'Is remixing with AI free?',
-        a: 'Yes. Remix with AI is free at every tier and never counts against your daily installs.',
+        a: 'Yes. Remix with AI is free and public at every tier, with no account required.',
       },
       {
         q: 'What does Premium unlock?',
-        a: 'Premium gives you unlimited component installs with no daily limit. It also unlocks full design systems, which you can install as a whole system in one command, plus premium templates.',
+        a: 'Premium unlocks the closed-source premium components, full design systems you can install as a whole system in one command, and premium templates.',
       },
       {
         q: 'How much does Premium cost?',
-        a: 'Premium is $8.99 per month or $49.99 per year, and the yearly plan is a big saving. Free stays $0 forever, so you only upgrade once AI Canvas is already paying off for you.',
+        a: 'Premium is $8.99 per month or $49.99 per year, and the yearly plan is a big saving. A free account stays $0 forever, so you only upgrade once AI Canvas is already paying off for you.',
       },
       {
         q: 'Is Premium worth it for someone just starting out?',
-        a: 'Start Free to build confidence, since 10 installs a day and remix with AI cover most early projects. When you are installing more, shipping faster, or want full design systems and templates, Premium is the natural next step.',
+        a: 'Start with a free account, since unlimited installs and remix with AI cover most early projects. When you want the closed-source premium components, full design systems, and templates, Premium is the natural next step.',
       },
     ],
   },

@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from 'react'
 import { X } from '@phosphor-icons/react'
-import { useSession } from '../auth/SessionProvider'
 import { PremiumCards } from './PremiumCards'
 import { PaymentMethods } from './PaymentMethods'
 
@@ -20,20 +19,13 @@ import { PaymentMethods } from './PaymentMethods'
 // Any locked surface calls usePaywallModal().open({ reason }); calling it from
 // several locked panes at once is harmless — there is only ever one modal.
 
+// Per-install metering is gone, so nothing in the install flow produces
+// 'quota-exceeded' any more — the only locked state is premium content. The
+// literal is kept in the union solely so other surfaces that still reference
+// it stay type-correct; it now renders the same premium-only modal.
 export type PaywallReason = 'premium-only' | 'quota-exceeded' | 'upgrade'
 
 type PaywallState = { reason: PaywallReason; limit?: number; resetAt?: string | null }
-
-/** "1h 23m" / "8m" / "now" until the rolling-window slot frees, or null. */
-function formatCountdown(resetAt: string | null | undefined, nowMs: number): string | null {
-  if (!resetAt) return null
-  const ms = new Date(resetAt).getTime() - nowMs
-  if (!Number.isFinite(ms)) return null
-  if (ms <= 0) return 'now'
-  const h = Math.floor(ms / 3_600_000)
-  const m = Math.floor((ms % 3_600_000) / 60_000)
-  return h > 0 ? `${h}h ${m}m` : `${Math.max(1, m)}m`
-}
 
 type PaywallModalContextValue = {
   open: (state: PaywallState) => void
@@ -59,8 +51,6 @@ export function PaywallModalProvider({ children }: { children: ReactNode }) {
       {state && (
         <PaywallModalView
           reason={state.reason}
-          limit={state.limit}
-          resetAt={state.resetAt}
           onClose={close}
         />
       )}
@@ -70,43 +60,19 @@ export function PaywallModalProvider({ children }: { children: ReactNode }) {
 
 function PaywallModalView({
   reason,
-  limit,
-  resetAt,
   onClose,
 }: PaywallState & { onClose: () => void }) {
-  const { user } = useSession()
-  const isAnonymous = !user
-
-  // Live-ish countdown to the next freed slot on the rolling 24h window.
-  const [nowMs, setNowMs] = useState(() => Date.now())
-  useEffect(() => {
-    if (reason !== 'quota-exceeded' || !resetAt) return
-    const id = setInterval(() => setNowMs(Date.now()), 30_000)
-    return () => clearInterval(id)
-  }, [reason, resetAt])
-  const countdown = formatCountdown(resetAt, nowMs)
-
-  // premium-only: a free account doesn't unlock it → just the Premium card.
-  // quota-exceeded + anonymous: both cards (sign up free OR go Premium).
-  // quota-exceeded + signed-in free: just the Premium card (already on 10/day).
-  const show = reason === 'quota-exceeded' && isAnonymous ? 'both' : 'premium-only'
-
-  const title =
-    reason === 'upgrade' ? 'Upgrade to Premium'
-      : reason === 'premium-only' ? 'Premium component'
-        : 'Daily limit reached'
-  const resetLine = countdown ? `Resets in ${countdown}.` : 'Resets within 24 hours.'
+  // Metering is gone, so the modal only ever pitches Premium content now.
+  // Both the 'premium-only' and the legacy 'quota-exceeded' reason collapse to
+  // a single Premium card.
+  const title = reason === 'upgrade' ? 'Upgrade to Premium' : 'Premium component'
   const subtitle =
     reason === 'upgrade'
       ? null
-      : reason === 'premium-only'
-        ? 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
-        : isAnonymous
-          ? `You've used your ${limit ?? 2} free installs. ${resetLine} A free account gets you 10 every 24 hours, and Premium lifts the limit entirely.`
-          : `You've reached your ${limit ?? 10} installs for now. ${resetLine} Premium lifts the limit entirely.`
+      : 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
-  // (this is a soft "you hit a limit" notice, not a flow you must complete).
+  // (this is a soft upgrade pitch, not a flow you must complete).
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -133,9 +99,8 @@ function PaywallModalView({
         className="fixed inset-0 bg-sand-950/85 backdrop-blur-sm"
       />
 
-      {/* Width hugs the content: wide enough for two cards only when both are
-          shown; slimmer (just the single Premium card + padding) otherwise. */}
-      <div className={`relative z-10 my-auto w-full ${show === 'both' ? 'max-w-3xl' : 'max-w-lg'} rounded-2xl bg-sand-950 p-6 shadow-2xl sm:p-8`}>
+      {/* Width hugs the content: just the single Premium card + padding. */}
+      <div className="relative z-10 my-auto w-full max-w-lg rounded-2xl bg-sand-950 p-6 shadow-2xl sm:p-8">
         <button
           type="button"
           onClick={onClose}
@@ -153,7 +118,7 @@ function PaywallModalView({
         </div>
 
         <div className="mt-5">
-          <PremiumCards show={show} compact />
+          <PremiumCards show="premium-only" compact />
         </div>
 
         {/* Accepted payment methods — a card-width container matching the

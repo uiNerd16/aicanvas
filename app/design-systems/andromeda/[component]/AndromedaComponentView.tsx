@@ -21,9 +21,9 @@ import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
+import { useAuthModal } from '../../../components/auth/AuthModalProvider'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
 import { Paywall, type PaywallReason } from '../../../components/billing/Paywall'
-import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
 
 type RelatedItem = { slug: string; name: string; image?: string }
 
@@ -32,14 +32,18 @@ interface Props {
   name: string
   description: string
   related: RelatedItem[]
+  // Account-gated install: when on, a signed-out visitor of this FREE
+  // design-system component sees a "create a free account to install" CTA in
+  // place of the runnable command. Reading the source (Code tab) stays public.
+  freeAccountGate?: boolean
 }
 
 // The registry slug is normally `andromeda-<metaSlug>`. The lone exception is the
 // slugOverride (scripts/lib/design-systems.config.mjs): Button.tsx ships as the
 // registry item `andromeda-button-system` because the free standalone owns
 // `andromeda-button`. Map the page's meta slug back to the REGISTRY slug so the
-// Code tab, install command, install-check, and analytics all target the right
-// item — otherwise the Button page silently serves the standalone.
+// Code tab, install command, and analytics all target the right item —
+// otherwise the Button page silently serves the standalone.
 const REGISTRY_SLUG_OVERRIDES: Record<string, string> = { button: 'andromeda-button-system' }
 
 export function AndromedaComponentView({
@@ -47,15 +51,17 @@ export function AndromedaComponentView({
   name,
   description,
   related,
+  freeAccountGate = false,
 }: Props) {
   const { preferences, user } = useSession()
+  const { open: openAuthModal } = useAuthModal()
   const registrySlug = REGISTRY_SLUG_OVERRIDES[slug] ?? `andromeda-${slug}`
 
   // Personalized install: when signed in, the copied command carries the
-  // user's API token so the registry attributes the pull to the account (and
-  // meters it against their daily quota). Signed out = plain @aicanvas command.
-  // The token route is resilient (returns null on any error), so this is a
-  // no-op fallback to the anonymous command rather than a break.
+  // user's API token so the registry attributes the pull to the account.
+  // Signed out = plain @aicanvas command. The token route is resilient
+  // (returns null on any error), so this is a no-op fallback to the anonymous
+  // command rather than a break.
   const [fetchedToken, setFetchedToken] = useState<string | null>(null)
   useEffect(() => {
     if (!user) return
@@ -82,10 +88,11 @@ export function AndromedaComponentView({
   const mainCardRef = useRef<HTMLDivElement>(null)
 
   // Source is never shipped in this page's HTML. It's fetched on demand from
-  // the gated endpoint when the Code tab (or Manual install) opens, so the
-  // server meters/gates per user: premium → code; free/anon → free up to the
-  // daily cap, then 402; templates + whole-system stay premium-only. The
-  // registry slug carries the system prefix (e.g. `andromeda-checkbox`).
+  // the gated endpoint when the Code tab (or Manual install) opens. Reading a
+  // FREE component's source is public; the endpoint only locks PREMIUM content
+  // (templates + whole-system). Per-install metering is gone, so a 402 here is
+  // always "premium-only". The registry slug carries the system prefix
+  // (e.g. `andromeda-checkbox`).
   type CodeState =
     | { status: 'idle' | 'loading' }
     | { status: 'ready'; code: string }
@@ -96,12 +103,8 @@ export function AndromedaComponentView({
     try {
       const res = await fetch(`/api/component-code?slug=${registrySlug}`)
       if (res.status === 402) {
-        const { error, limit } = await res.json().catch(() => ({ error: 'premium-only' }))
-        setCodeState({
-          status: 'locked',
-          reason: error === 'quota-exceeded' ? 'quota-exceeded' : 'premium-only',
-          limit,
-        })
+        const { limit } = await res.json().catch(() => ({}))
+        setCodeState({ status: 'locked', reason: 'premium-only', limit })
         return
       }
       if (!res.ok) {
@@ -201,32 +204,26 @@ export function AndromedaComponentView({
     : `@aicanvas/${registrySlug}`
   const cliCommand = `npx shadcn@latest add ${installReference}`
 
-  const { open: openPaywall } = usePaywallModal()
+  // Account-gated install: a FREE design-system component, signed out, with the
+  // gate active needs a free account before the one-command install works
+  // (unlimited, uncounted). Reading the source stays public. We use `user` from
+  // useSession (immediate) rather than userToken (async, would flash the CTA on
+  // first paint).
+  const needsFreeAccount = !!freeAccountGate && !user
 
-  // Before handing over an install command, check the rolling-window quota. If
-  // at the cap for a NEW component, pop the limit modal instead of copying a
-  // command that would 402 in the terminal. Fails open (copies on any hiccup).
-  async function guardInstall(write: () => void | Promise<void>) {
-    try {
-      const res = await fetch(`/api/me/install-check?slug=${registrySlug}`)
-      const d = await res.json().catch(() => null)
-      if (d?.blocked) {
-        openPaywall({ reason: d.reason ?? 'quota-exceeded', limit: d.limit, resetAt: d.resetAt })
-        return
-      }
-    } catch {}
-    await write()
+  // Open the sign-up modal, returning the visitor to this component page after
+  // they create their free account.
+  function promptFreeAccount() {
+    openAuthModal({ mode: 'sign-up', next: `/design-systems/andromeda/${slug}` })
   }
 
   async function copyCli() {
-    await guardInstall(async () => {
-      try {
-        trackInstall(registrySlug, 'andromeda', pkgManager)
-        await navigator.clipboard.writeText(cliCommand)
-        setCliCopied(true)
-        setTimeout(() => setCliCopied(false), 2000)
-      } catch {}
-    })
+    try {
+      trackInstall(registrySlug, 'andromeda', pkgManager)
+      await navigator.clipboard.writeText(cliCommand)
+      setCliCopied(true)
+      setTimeout(() => setCliCopied(false), 2000)
+    } catch {}
   }
 
   return (
@@ -313,14 +310,21 @@ export function AndromedaComponentView({
             component breaks the system contract. Users compose AT the
             system level, not per-component. */}
         <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
-          <Button variant="primary" size="sm" onClick={copyCli}>
-            {cliCopied ? (
-              <Check weight="regular" size={15} />
-            ) : (
+          {needsFreeAccount ? (
+            <Button variant="primary" size="sm" onClick={promptFreeAccount}>
               <Terminal weight="regular" size={15} />
-            )}
-            {cliCopied ? 'Copied!' : 'Copy CLI'}
-          </Button>
+              Create a free account to install
+            </Button>
+          ) : (
+            <Button variant="primary" size="sm" onClick={copyCli}>
+              {cliCopied ? (
+                <Check weight="regular" size={15} />
+              ) : (
+                <Terminal weight="regular" size={15} />
+              )}
+              {cliCopied ? 'Copied!' : 'Copy CLI'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -371,6 +375,26 @@ export function AndromedaComponentView({
               <div className="space-y-6">
                 {/* Step 1 — shadcn add */}
                 <Step number={1}>
+                  {needsFreeAccount ? (
+                    // Account-gated install, signed out: the one-command install
+                    // needs a free account (unlimited, uncounted). Reading the
+                    // source stays public (Manual tab below). Swap the runnable
+                    // command + copy button + package-manager row for a sign-up CTA.
+                    <>
+                      <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
+                        Create a free account to install with one command. Reading the source stays free.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={promptFreeAccount}
+                        className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+                      >
+                        <Terminal weight="regular" size={15} />
+                        Create a free account to install
+                      </button>
+                    </>
+                  ) : (
+                  <>
                   <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                     Run the following command. New project? Run{' '}
                     <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
@@ -396,7 +420,7 @@ export function AndromedaComponentView({
                       ))}
                       <button
                         type="button"
-                        onClick={() => guardInstall(() => {
+                        onClick={() => {
                           const cmd = pkgManager === 'pnpm'
                             ? `pnpm dlx shadcn@latest add ${installReference}`
                             : pkgManager === 'bun'
@@ -408,7 +432,7 @@ export function AndromedaComponentView({
                           trackInstall(registrySlug, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
-                        })}
+                        }}
                         className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                       >
                         {cliCopied
@@ -428,6 +452,8 @@ export function AndromedaComponentView({
                       </code>
                     </div>
                   </div>
+                  </>
+                  )}
                 </Step>
 
                 {/* Step 2 — dark mode */}

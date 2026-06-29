@@ -27,7 +27,7 @@ export function welcomeToPremiumEmail(): { subject: string; html: string } {
   const html = emailShell({
     title: 'You just got superpowers',
     heading: 'You just got <span class="ac-accent" style="color:#869631;">superpowers</span>.',
-    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Premium is live on your account. The daily install limit is gone, every design system drops in with one command, and every premium template is yours, including every new one the moment it ships. Go build something only you could.</p>`,
+    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Premium is live on your account. Every design system drops in with one command, and every premium component and template is yours, including every new one the moment it ships. Go build something only you could.</p>`,
     button: { label: 'Use your powers', url: 'https://aicanvas.me/components' },
     footerNoteHtml: 'Manage or cancel your plan anytime from your account settings.',
   })
