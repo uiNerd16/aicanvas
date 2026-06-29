@@ -1381,10 +1381,18 @@ function withCopyAndStack(entry: ComponentEntry): ComponentEntry {
   return { ...entry, tags, ...(copy ?? {}) }
 }
 
+// Slugs temporarily hidden from every runtime website surface that reads the
+// registry (detail page + generateStaticParams, sitemap, related lists) by
+// filtering them out of COMPONENTS. The gated CLI/MCP install path is governed
+// separately by the premium injection, so a hidden component stays installable.
+// Keep in sync with HIDDEN_SLUGS in scripts/generate-registry.mjs, which hides
+// it from the generated grid/homepage/nav/MCP metadata. Remove a slug to unhide.
+const HIDDEN_SLUGS = new Set<string>(['3d-product-card'])
+
 export const COMPONENTS: ComponentEntry[] = [
   ...[...COMPONENTS_RAW].reverse().map(withCopyAndStack),
   ...PREMIUM_COMPONENTS.map(withCopyAndStack),
-]
+].filter((c) => !HIDDEN_SLUGS.has(c.slug))
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
