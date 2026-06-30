@@ -1,4 +1,14 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
+//
+// Andromeda v1: free and open source (MIT). These components and tokens
+// are free to use, forever. This public repo is frozen at v1; new
+// Andromeda components are developed privately and are not published
+// here (they stay free to use via the platform).
+//
+// Andromeda v2 is premium: the full design brain (deep rules + build
+// workflow), the template library, and one-command bulk install.
+// https://aicanvas.me/andromeda
+//
 // ============================================================
 // ANDROMEDA DESIGN TOKENS
 // Sci-fi / blueprint aesthetic. Solid surfaces by default — every
