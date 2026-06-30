@@ -14,7 +14,7 @@
 // width so the panel sits flush.
 //
 // Follows the same popover rules as `UserMenu` — see that file's
-// header and rules.md → Popovers. Panel state + items rendering
+// header and the Andromeda interaction-states rules. Panel state + items rendering
 // are reused from `./UserMenu` so the two components can never
 // drift apart visually.
 // ============================================================

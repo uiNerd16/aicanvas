@@ -476,7 +476,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
         /* !important is required: the menuitem button carries inline
            style={{ background:'transparent', color }} which would otherwise
            beat any class rule on hover/active. Same precedence trap as
-           DateRangePicker — see rules.md "Hover on inline-styled controls". */
+           DateRangePicker — see the Andromeda interaction-states rules. */
         .andromeda-panel-menu-item:hover {
           background: ${tokens.color.surface.hover} !important;
           color: ${tokens.color.text.primary} !important;

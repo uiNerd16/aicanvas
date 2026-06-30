@@ -22,7 +22,7 @@ import { tokens } from '../tokens';
 // so on coarse pointers we raise its min-height to spacing[10] (40px) so the
 // whole row is a comfortable tap. Vertical centering is preserved by the row's
 // existing `items-center`. Scoped className, !important to out-specify the cva
-// base. rules.md → Responsive → "Grow touch targets on coarse pointers".
+// base. the Andromeda responsive rules → "Grow touch targets on coarse pointers".
 const TOUCH_TARGET_STYLE = `
   ${mq.coarse} {
     .andromeda-navitem-touch {
@@ -33,7 +33,7 @@ const TOUCH_TARGET_STYLE = `
 
 // Sliding-indicator transition — token-driven. The active dot uses framer's
 // `layoutId` to animate between sibling NavItems when wrapped in a
-// <LayoutGroup>. See `rules.md` → Active indicator pattern.
+// <LayoutGroup>. See the Andromeda motion rules.
 const ms = (v) => parseInt(v, 10) / 1000;
 const INDICATOR_TX = {
   duration: ms(tokens.motion.duration.slow),
@@ -54,7 +54,7 @@ const navItemVariants = cva(
     'active:translate-x-[1px]',
     'focus-visible:outline-none',
     'focus-visible:shadow-[inset_0_0_0_1px_var(--andromeda-accent-400)]',
-    'disabled:opacity-[0.4] disabled:pointer-events-none',
+    'disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:pointer-events-none',
   ],
   {
     variants: {

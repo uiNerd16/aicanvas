@@ -18,7 +18,7 @@
 //
 // All visual values come from `tokens.ts` — selection / preview /
 // today markers reuse the system accent stops because date selection
-// IS a measurement (the rules.md "color is for meaning" exception).
+// IS a measurement (the the Andromeda color-philosophy rules "color is for meaning" exception).
 // ============================================================
 
 'use client';
@@ -135,7 +135,7 @@ function PickerStyles() {
          columns, cells fill their track) so it grows to fill that width.
          !important: the root display, panel offsets, grid columns and cell box
          are all inline styles, so the responsive override must outrank them
-         (rules.md → "Hover on inline-styled controls"). */
+         (the Andromeda interaction-states rules). */
       ${mq.sm} {
         .adp-root {
           display: flex !important;

@@ -5,7 +5,7 @@
 // component that renders as line, area (filled line), or bar, with
 // a built-in mode toggle, custom tooltip, and a toggleable legend.
 //
-// Series colour follows the rules.md multi-series hierarchy via a
+// Series colour follows the the Andromeda charts rules hierarchy via a
 // `role`: baseline (white) · live (accent) · context (faint) ·
 // threshold (red dashed). Pass an explicit `color` only when a
 // series genuinely needs one outside that vocabulary.
@@ -34,7 +34,7 @@ import { SegmentedControl } from './SegmentedControl';
 const sec = (v) => parseInt(v, 10) / 1000; // "500ms" → 0.5
 const EASE_OUT = [0, 0, 0.2, 1];           // = tokens.motion.easing.out
 
-// Multi-series colour hierarchy (rules.md "Charts · Multi-series").
+// Multi-series colour hierarchy (the Andromeda charts rules).
 const ROLE_COLOR = {
   baseline:  tokens.color.text.primary,
   live:      tokens.color.accent[300],
@@ -77,9 +77,13 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
         style={{
           background: tokens.color.surface.overlay,
           border: `${tokens.border.thin} ${tokens.color.border.bright}`,
-          padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+          padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
           fontFamily: tokens.typography.fontMono,
-          minWidth: '180px',
+          maxWidth: '220px',
+          // Compact + non-interactive: the readout must never swallow the plot
+          // on small charts, and must not eat the pointer. Position is pinned to
+          // the top of the plot below (so the line + crosshair stay visible).
+          pointerEvents: 'none',
         }}
       >
         <div
@@ -186,6 +190,10 @@ const AXIS_TICK = {
  * @property {(value:any)=>string} [valueFormatter]
  * @property {number} [xInterval=4]
  * @property {boolean} [showLegend=true]
+ * @property {boolean} [showYAxis=true]   Reserve the left Y-axis tick gutter.
+ *   Set false on compact cards where an external headline already states the
+ *   magnitude — the plot then fills its card content box edge-to-edge with no
+ *   stray left inset (the Andromeda spacing rules).
  * @property {React.ReactNode} [footerSlot]   Right side of the footer (custom controls).
  * @property {number} [height=240]
  * @property {string} [className]
@@ -206,6 +214,7 @@ export const TrendChart = forwardRef(function TrendChart(
     valueFormatter,
     xInterval = 4,
     showLegend = true,
+    showYAxis = true,
     footerSlot,
     height = 240,
     className,
@@ -252,14 +261,27 @@ export const TrendChart = forwardRef(function TrendChart(
   const xAxis = (
     <XAxis dataKey={xKey} tick={AXIS_TICK} axisLine={{ stroke: tokens.color.border.subtle }} tickLine={false} interval={xInterval} />
   );
-  const yAxis = <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={48} />;
+  // YAxis reserves a left tick gutter. On compact cards (showYAxis=false) the
+  // gutter is dropped so the plot fills its card edge-to-edge with no stray
+  // left inset (the Andromeda spacing rules). width=0 keeps
+  // the scale (so bars/areas still compute) while reserving no horizontal band.
+  const yAxis = (
+    <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={showYAxis ? 48 : 0} hide={!showYAxis} />
+  );
 
   let chart;
   if (mode === 'bar') {
     chart = (
       <BarChart data={data} margin={chartMargin}>
         {grid}{xAxis}{yAxis}
-        <RechartsTooltip content={<ChartTooltip />} cursor={{ fill: tokens.color.surface.hover }} />
+        <RechartsTooltip
+          content={<ChartTooltip />}
+          cursor={{ fill: tokens.color.surface.hover }}
+          position={{ y: 0 }}
+          allowEscapeViewBox={{ x: true, y: true }}
+          offset={12}
+          wrapperStyle={{ zIndex: 40 }}
+        />
         {shown.map((s) => (
           <Bar key={s.key} dataKey={s.key} fill={colorOf(s)} isAnimationActive={false} />
         ))}
@@ -281,6 +303,10 @@ export const TrendChart = forwardRef(function TrendChart(
         <RechartsTooltip
           content={<ChartTooltip />}
           cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }}
+          position={{ y: 0 }}
+          allowEscapeViewBox={{ x: true, y: true }}
+          offset={12}
+          wrapperStyle={{ zIndex: 40 }}
         />
         {shown.map((s) => (
           <Area

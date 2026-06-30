@@ -26,7 +26,7 @@ const textareaVariants = cva(
     'outline-none',
     'transition-[border-color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'placeholder:text-[color:var(--andromeda-text-muted)]',
-    'disabled:opacity-[0.4] disabled:cursor-not-allowed disabled:resize-none',
+    'disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:cursor-not-allowed disabled:resize-none',
   ],
   {
     variants: {

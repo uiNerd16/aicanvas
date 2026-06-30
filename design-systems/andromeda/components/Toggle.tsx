@@ -19,7 +19,7 @@ import { tokens } from '../tokens';
 // coarse pointers the invisible input (which receives the click, kept on top via
 // z-10) grows to spacing[10] (40px), centered over the track. inset-0 is released
 // so the input can overflow the short track. Scoped className, !important to beat
-// the peer/absolute base classes. rules.md → Responsive + "Invisible inputs over
+// the peer/absolute base classes. the Andromeda responsive rules + the Andromeda interaction-states rules "Invisible inputs over
 // visual proxies" (input must stay above the proxy — z-10 is preserved).
 const TOUCH_TARGET_STYLE = `
   ${mq.coarse} {
@@ -59,7 +59,7 @@ const trackVariants = cva(
         ],
       },
       disabled: {
-        true:  'opacity-[0.35] pointer-events-none cursor-not-allowed',
+        true:  'opacity-[var(--andromeda-opacity-disabled)] pointer-events-none cursor-not-allowed',
         false: '',
       },
     },

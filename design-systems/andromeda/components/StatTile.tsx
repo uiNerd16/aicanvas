@@ -24,6 +24,8 @@ import { tokens } from '../tokens';
 import { Card, CardContent } from './Card';
 
 const ms = (v) => parseInt(v, 10) / 1000;
+// Count-up duration in ms, read from tokens.motion.duration.countup (single source of truth).
+const COUNTUP_MS = parseInt(tokens.motion.duration.countup, 10);
 // Inline cubic-beziers — framer wants arrays, tokens.motion.easing values are
 // CSS strings. Keep these in sync with tokens.motion.easing.sharp.
 const SHARP_EASE = [0.4, 0, 0.6, 1];
@@ -135,7 +137,7 @@ function easeOutExpo(t) {
 // gates the animation so tiles below the fold don't burn their reveal
 // off-screen. Templates with multi-screen height get the count-up at
 // the moment the user actually sees the value.
-function useCountUp(rawValue, duration = 1800, live = false, inView = true) {
+function useCountUp(rawValue, duration = COUNTUP_MS, live = false, inView = true) {
   const num = parseFloat(rawValue);
   const isNumeric = !isNaN(num);
   const decimals = isNumeric
@@ -283,7 +285,7 @@ export const StatTile = forwardRef(function StatTile(
   // animate per-position on change — count-up is suppressed entirely so
   // the user reads the *value*, not a tween. The first paint still fades
   // in via the `andromeda-value-in` keyframe on the value wrapper below.
-  const countUpDisplay = useCountUp(value, 1800, live, inView);
+  const countUpDisplay = useCountUp(value, COUNTUP_MS, live, inView);
   const displayValue = liveRoll ? String(value) : countUpDisplay;
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   const isPositive = hasDelta && delta >= 0;

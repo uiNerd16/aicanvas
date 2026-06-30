@@ -224,7 +224,7 @@ export const Slider = forwardRef(function Slider(
           'andromeda-slider-track',
           'relative h-[18px] w-full select-none touch-none',
           'cursor-pointer',
-          disabled && 'opacity-[0.4] cursor-not-allowed pointer-events-none',
+          disabled && 'opacity-[var(--andromeda-opacity-disabled)] cursor-not-allowed pointer-events-none',
           'focus-visible:outline-none',
           'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
         )}
@@ -264,7 +264,7 @@ export const Slider = forwardRef(function Slider(
         />
       </div>
 
-      {/* Touch-target growth (rules.md → Responsive). Mirror Button/IconButton:
+      {/* Touch-target growth (the Andromeda responsive rules). Mirror Button/IconButton:
           a centered transparent ::before overlay grows the *hit area* toward
           spacing[10] (40px) on coarse pointers with ZERO layout impact — the
           track keeps its 18px box, so neither the desktop visual nor the
@@ -272,7 +272,7 @@ export const Slider = forwardRef(function Slider(
           ::before is part of it, so taps in the enlarged zone still set the
           value (the horizontal getBoundingClientRect mapping is unaffected by
           the taller overlay). Growing the track's own height instead would
-          inflate the wrapper — the forbidden technique (rules.md). */}
+          inflate the wrapper — the forbidden technique (the Andromeda responsive rules). */}
       <style>{`
         ${mq.coarse} {
           .andromeda-slider-track::before {

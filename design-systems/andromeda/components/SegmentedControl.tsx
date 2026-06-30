@@ -23,7 +23,7 @@ import { tokens } from '../tokens';
 // never forces page scroll. Below `md` the control is capped at max-width:100%
 // and its segments scroll within. The buttons are flex-shrink:0 so they keep
 // their tap size while scrolling. !important to beat the inline-styled root.
-// rules.md → Responsive (faithful stack, no horizontal PAGE scroll).
+// the Andromeda responsive rules (faithful stack, no horizontal PAGE scroll).
 const RESPONSIVE_STYLE = `
   ${mq.md} {
     .andromeda-segmented {
@@ -147,6 +147,13 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               border: 'none',
               borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${tokens.color.border.base}`,
               cursor: 'pointer',
+              flexShrink: 0,
+              // A segment never wraps its label — a wrapped label breaks the
+              // fixed-height row, the borderLeft dividers and the sliding
+              // indicator (the strip scrolls horizontally instead, see
+              // RESPONSIVE_STYLE). Without this a label squeezed in a narrow
+              // container ("View all") drops to a second line.
+              whiteSpace: 'nowrap',
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
               fontWeight: active ? tokens.typography.weight.medium : tokens.typography.weight.regular,

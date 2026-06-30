@@ -4,8 +4,8 @@
 //
 // Andromeda is DESKTOP-FIRST: the default, unqualified styles ARE the
 // desktop layout, and responsiveness steps DOWN from there via max-width
-// media queries. Two mechanisms, deliberately split — see rules.md →
-// Responsive. Reach for the first by default:
+// media queries. Two mechanisms, deliberately split — see
+// the Andromeda responsive rules. Reach for the first by default:
 //
 //  1. CSS reflow via `mq` inside a scoped <style> block. For everything
 //     that's a *style* change at a breakpoint — grid columns, flex

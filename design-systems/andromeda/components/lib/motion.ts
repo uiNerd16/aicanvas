@@ -12,7 +12,7 @@
 // physics, AnimatePresence for unmount, and reduced-motion handled at
 // the source. Pure CSS works for trivial cases; framer-motion scales.
 //
-// See `rules.md` → Motion for philosophy and approved patterns.
+// See the Andromeda motion rules for philosophy and approved patterns.
 // ============================================================
 
 'use client';

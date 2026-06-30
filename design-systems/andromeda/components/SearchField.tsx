@@ -4,7 +4,7 @@
 // Command-bar-style search input with an optional ⌘-K shortcut chip.
 // Five states: idle, hover, focus (selected), text-inactive (placeholder),
 // text-active (typed). All values resolve through tokens.ts — see
-// design-systems/andromeda/rules.md → Interaction states for the model.
+// the Andromeda interaction-states rules for the model.
 // ============================================================
 
 'use client';

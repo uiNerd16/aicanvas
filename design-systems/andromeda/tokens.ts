@@ -148,6 +148,11 @@ export const tokens = {
     sm:   '2px',
     md:   '3px',
   },
+  opacity: {
+    // Disabled controls. One system-wide constant so every primitive and
+    // input dims identically. Exposed as --andromeda-opacity-disabled.
+    disabled: 0.4,
+  },
   border: {
     thin: '1px solid',
   },
@@ -170,7 +175,7 @@ export const tokens = {
   // desktop grid is still guaranteed to fit. Media queries can't read a
   // CSS var(), so the `mq` helper (components/lib/responsive.ts)
   // interpolates these literals — tokens.ts stays the single source.
-  // See `rules.md` → Responsive for the mechanism + faithful-stack rules.
+  // See the Andromeda responsive rules for the mechanism + faithful-stack rules.
   breakpoints: {
     sm: '640px',
     md: '768px',
@@ -178,7 +183,7 @@ export const tokens = {
   },
   // Motion — durations, easings, and stagger presets that encode the
   // Andromeda tempo. Movement signals data movement or interaction
-  // acknowledgement; never decoration. See `rules.md` → Motion for the
+  // acknowledgement; never decoration. See the Andromeda motion rules for the
   // philosophy and approved/forbidden patterns.
   motion: {
     duration: {
@@ -204,7 +209,7 @@ export const tokens = {
       // StatTile count-up. Long enough that the eye reads the value as
       // animating in, short enough that the final number is what the
       // user remembers.
-      countup: '800ms',
+      countup: '1800ms',
     },
     easing: {
       // Material standard — accelerate then decelerate. Default for

@@ -9,7 +9,7 @@
 //
 // Use it when a level reads better as a heat-matrix than a bar —
 // risk meters, capacity gauges, saturation. The fill IS a
-// measurement, so accent is allowed (the rules.md "colour is for
+// measurement, so accent is allowed (the the Andromeda color-philosophy rules "colour is for
 // meaning" exception, same as ProgressBar / charts).
 //
 // The entrance fill is gated on `useInView` so a HeatGrid below the

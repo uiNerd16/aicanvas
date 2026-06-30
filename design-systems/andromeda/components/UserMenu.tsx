@@ -6,7 +6,7 @@
 // Preferences / Sign Out etc. Pair with `UserCard` when the
 // trigger needs to also show the user's name and role.
 //
-// Follows the Andromeda popover spec (rules.md → Popovers):
+// Follows the Andromeda popover spec (the Andromeda interaction-states rules):
 //  - position: relative wrapper, position: absolute panel
 //  - solid `surface.raised` panel, `0 8px 32px surface.base` shadow
 //  - frame is a single 1px `border.base` — no CornerMarkers (the
@@ -245,7 +245,7 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
 // Hover/focus styles for the menuitem buttons. Marked `!important`
 // because the buttons carry inline `style={{ background:'transparent' }}`
 // which would otherwise beat any non-important class rule — same
-// precedence trap covered in rules.md → "Hover on inline-styled controls".
+// precedence trap covered in the Andromeda interaction-states rules.
 function UserMenuStyles() {
   return (
     <style>{`
@@ -268,8 +268,7 @@ function UserMenuStyles() {
          sits in the right half of a phone would open off the right edge. Below
          sm, pin it to the trigger's RIGHT edge instead so it stays on-screen.
          stretch (left:0 + right:0) and end (right:0) are already viewport-safe.
-         !important: left/right are inline styles (rules.md → "Hover on
-         inline-styled controls"). */
+         !important: left/right are inline styles (the Andromeda interaction-states rules). */
       ${mq.sm} {
         .andromeda-user-menu-panel[data-align="start"] {
           left: auto !important;

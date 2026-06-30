@@ -30,7 +30,7 @@ import { tokens } from '../tokens';
 // pointers the invisible input (which receives the click, kept on top via z-10)
 // grows to spacing[10] (40px), centered over the box. inset-0 is released so the
 // input can overflow the small wrapper. Scoped className, !important to beat the
-// peer/absolute base classes. rules.md → Responsive + "Invisible inputs over
+// peer/absolute base classes. the Andromeda responsive rules + the Andromeda interaction-states rules "Invisible inputs over
 // visual proxies" (input must stay above the proxy — z-10 is preserved).
 const TOUCH_TARGET_STYLE = `
   ${mq.coarse} {
@@ -72,7 +72,7 @@ const boxVariants = cva(
         ],
       },
       disabled: {
-        true:  'opacity-[0.35] pointer-events-none cursor-not-allowed',
+        true:  'opacity-[var(--andromeda-opacity-disabled)] pointer-events-none cursor-not-allowed',
         false: '',
       },
     },

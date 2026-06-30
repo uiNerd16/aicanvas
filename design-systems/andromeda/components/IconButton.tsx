@@ -21,7 +21,7 @@ import { tokens } from '../tokens';
 // coarse pointers a centered, transparent ::before overlay grows the *hit area*
 // toward spacing[10] (40px). The sm/md squares (24/32px) sit below a comfortable
 // touch minimum; this enlarges only what the finger lands on. Scoped className,
-// !important to out-specify the cva/inline base. rules.md → Responsive.
+// !important to out-specify the cva/inline base. the Andromeda responsive rules.
 const TOUCH_TARGET_STYLE = `
   ${mq.coarse} {
     .andromeda-iconbtn-touch::before {
@@ -71,7 +71,7 @@ const iconButtonVariants = cva(
     // focus + disabled — match Button.tsx exactly
     'focus-visible:outline-none',
     'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
-    'disabled:cursor-not-allowed disabled:opacity-[0.35] disabled:pointer-events-none',
+    'disabled:cursor-not-allowed disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:pointer-events-none',
   ],
   {
     variants: {

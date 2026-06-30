@@ -24,8 +24,8 @@ import { tokens } from '../tokens';
 // pointers a centered, transparent ::before overlay grows the *hit area* toward
 // spacing[10] (40px) without enlarging the visible button. Scoped className so
 // the rule never leaks; declarations are !important because the cva/inline base
-// would otherwise out-specify a bare class rule (brain: "Hover on inline-styled
-// controls"). See rules.md → Responsive → "Grow touch targets on coarse pointers".
+// would otherwise out-specify a bare class rule (Andromeda rule: "Hover on inline-styled
+// controls"). See the Andromeda responsive rules → "Grow touch targets on coarse pointers".
 const TOUCH_TARGET_STYLE = `
   ${mq.coarse} {
     .andromeda-btn-touch::before {
@@ -82,7 +82,7 @@ const buttonVariants = cva(
     // focus & disabled
     'focus-visible:outline-none',
     'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
-    'disabled:cursor-not-allowed disabled:opacity-[0.35] disabled:pointer-events-none',
+    'disabled:cursor-not-allowed disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:pointer-events-none',
   ],
   {
     variants: {

@@ -117,6 +117,8 @@ export function andromedaVars() {
     '--andromeda-radius-none': t.radius.none,
     '--andromeda-radius-sm':   t.radius.sm,
     '--andromeda-radius-md':   t.radius.md,
+    // Opacity — disabled-control constant (unitless; used via opacity-[var(--andromeda-opacity-disabled)])
+    '--andromeda-opacity-disabled': String(t.opacity.disabled),
     // Breakpoints — exposed for clamp()/calc() expressions that want the
     // same thresholds (e.g. fluid type). NOTE: a CSS @media condition
     // CANNOT read var(), so reflow media queries use the `mq` helper
