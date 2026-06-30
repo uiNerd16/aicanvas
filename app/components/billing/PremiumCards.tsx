@@ -208,19 +208,6 @@ export function PremiumCards({
               Go Premium
             </UpgradeButton>
           )}
-          {/* §312d pre-checkout disclosure: Premium source is proprietary, not
-              MIT. Stated plainly near the CTA so the licence terms are clear
-              before purchase. */}
-          {premiumState !== 'premium' && (
-            <p className="mt-3 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
-              Premium source is proprietary, not MIT. You get a durable license
-              to use and ship it, not to redistribute it. See the{' '}
-              <Link href="/premium-license" className="text-olive-600 underline hover:text-olive-500 dark:text-olive-400">
-                AI Canvas Premium License
-              </Link>
-              .
-            </p>
-          )}
         </div>
         <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
