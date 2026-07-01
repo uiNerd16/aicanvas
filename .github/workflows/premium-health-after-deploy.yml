@@ -32,7 +32,9 @@ jobs:
           while (( SECONDS < deadline )); do
             body="$(curl -fsS "$URL" || echo '{}')"
             sha="$(echo "$body" | jq -r '.premiumSha // "null"')"
-            deg="$(echo "$body" | jq -r '.degraded // true')"
+            # NOTE: plain '.degraded' — do NOT use '.degraded // true'; jq's // treats
+            # the healthy value `false` as empty and would flip it to true (false alarm).
+            deg="$(echo "$body" | jq -r '.degraded')"
             cnt="$(echo "$body" | jq -r '.premiumStandaloneCount // 0')"
             last="premiumSha=$sha degraded=$deg count=$cnt"
             echo "health -> $last"
