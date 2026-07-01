@@ -84,6 +84,7 @@ app/lib/component-meta.generated.ts
 /design-systems/zz-premium-*/
 /registry-data/_premium.json
 app/lib/premium-registry.generated.tsx
+app/lib/premium-build-info.generated.ts
 app/lib/component-copy.premium.generated.ts
 
 # Private thoughts: planning, strategy, monetization, legal/tax reasoning, notes.
