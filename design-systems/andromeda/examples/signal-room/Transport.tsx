@@ -294,6 +294,14 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
             position: sticky !important;
             bottom: ${tokens.spacing[4]} !important;
             z-index: 20 !important;
+            /* Clear the content above it. Desktop keeps the player a separate
+               bottom region (main scrolls inside its own box, gap:spacing[4]
+               above the bar), so it never touches content. On mobile the bar is
+               sticky inside the single page scroll, so without a margin it butts
+               right up against the last panel (only the spacing[3] flow gap) and
+               reads as overlapping it. A generous top margin restores that clean
+               desktop-style separation. */
+            margin-top: ${tokens.spacing[6]} !important;
           }
           /* Row 1 — track meta across the width; the title takes the slack so
              the like button sits at the far right. */
