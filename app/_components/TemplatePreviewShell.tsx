@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowClockwise,
   Check,
@@ -277,6 +278,9 @@ function PreviewChrome({
   // the hidden one) and never changes the device.
   const [desktopNonce, setDesktopNonce] = useState(0)
   const [frameNonce, setFrameNonce] = useState(0)
+  // Honour the OS "reduce motion" setting — the device-toggle crossfade/scale
+  // below collapses to an instant swap when it's on.
+  const reduce = useReducedMotion()
   const reload = () =>
     device === 'desktop'
       ? setDesktopNonce((n) => n + 1)
@@ -303,44 +307,67 @@ function PreviewChrome({
 
       {/* Preview region */}
       <div className="relative min-h-0 flex-1">
-        {/* Desktop: native, full-bleed. Keyed by desktopNonce so Refresh
-            remounts the composition and replays its entrance animation. */}
-        <div key={desktopNonce} className={device === 'desktop' ? 'h-full w-full' : 'hidden'}>{children}</div>
+        {/* Desktop: native, full-bleed. Kept mounted AND visible so the mobile
+            overlay crossfades over/off it on the device toggle (below); once the
+            mobile frame is fully in, its opaque backdrop covers this. Keyed by
+            desktopNonce so Refresh remounts the composition and replays its
+            entrance animation; aria-hidden while the mobile frame is on top. */}
+        <div key={desktopNonce} aria-hidden={device !== 'desktop'} className="h-full w-full">
+          {children}
+        </div>
 
-        {/* Mobile: real viewport via iframe on a device backdrop. Keyed by
+        {/* Mobile: real viewport via iframe on a device backdrop. AnimatePresence
+            gives the device toggle a small motion — the backdrop crossfades and
+            the phone frame scales in (and back out) instead of snapping. Keyed by
             frameNonce so Refresh reloads the iframe (fresh animation) without
             leaving the mobile view. */}
-        {device !== 'desktop' && (
-          <div className="absolute inset-0 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6">
-            {/* Dotted-grid backdrop (the dot-grid standalone) behind the device
-                frame. pointer-events off so it never steals a click/drag from
-                the frame; it tracks the cursor at the window level regardless,
-                so dots in the margin still light up as you move the mouse. */}
-            <div className="pointer-events-none absolute inset-0">
-              {/* Themed to match the page: seamless sand-950 backdrop, faint
-                  sand-neutral dots that light up to the olive accent near the
-                  cursor. Raw rgb values (a canvas can't read Tailwind tokens);
-                  the token each value maps to is noted inline below. */}
-              <InteractiveDotGrid
-                showLabel={false}
-                colors={{
-                  background: '#0E0E0F', // sand-950 — matches bg-sand-950 backdrop
-                  dot: '123,123,125', //     sand-500 — faint neutral grid
-                  highlight: '218,228,160', // olive-400 — accent, lit near the cursor
-                  baseAlpha: 0.22,
-                  peakAlpha: 0.95,
-                }}
+        <AnimatePresence>
+          {device !== 'desktop' && (
+            <motion.div
+              key="mobile-frame"
+              className="absolute inset-0 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduce ? 0 : 0.2, ease: 'easeOut' }}
+            >
+              {/* Dotted-grid backdrop (the dot-grid standalone) behind the device
+                  frame. pointer-events off so it never steals a click/drag from
+                  the frame; it tracks the cursor at the window level regardless,
+                  so dots in the margin still light up as you move the mouse. */}
+              <div className="pointer-events-none absolute inset-0">
+                {/* Themed to match the page: seamless sand-950 backdrop, faint
+                    sand-neutral dots that light up to the olive accent near the
+                    cursor. Raw rgb values (a canvas can't read Tailwind tokens);
+                    the token each value maps to is noted inline below. */}
+                <InteractiveDotGrid
+                  showLabel={false}
+                  colors={{
+                    background: '#0E0E0F', // sand-950 — matches bg-sand-950 backdrop
+                    dot: '123,123,125', //     sand-500 — faint neutral grid
+                    highlight: '218,228,160', // olive-400 — accent, lit near the cursor
+                    baseAlpha: 0.22,
+                    peakAlpha: 0.95,
+                  }}
+                />
+              </div>
+              <motion.iframe
+                key={frameNonce}
+                title={`${templateName} responsive preview`}
+                src={`${pathname}?frame=1`}
+                // Only the phone frame exists, so its width is constant. Read
+                // DEVICES.phone directly (not DEVICES[device]) — the exit render
+                // still runs while `device` is already 'desktop', which would
+                // otherwise index DEVICES with a non-frame key.
+                style={{ width: DEVICES.phone.width }}
+                className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl"
+                initial={{ scale: reduce ? 1 : 0.985 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: reduce ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
               />
-            </div>
-            <iframe
-              key={frameNonce}
-              title={`${templateName} responsive preview`}
-              src={`${pathname}?frame=1`}
-              style={{ width: DEVICES[device].width }}
-              className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl"
-            />
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
