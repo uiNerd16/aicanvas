@@ -219,6 +219,22 @@ function FramePayload({ children }: { children: ReactNode }) {
   return (
     <div className="mc-frame-viewport relative h-full w-full">
       <style>{`
+        /* Kill the "cream flash": the framed document is ALWAYS the dark
+           Andromeda surface. The app paints body via background:var(--background),
+           which is a warm cream (#EDEAE5) in the LIGHT theme, and body carries a
+           0.2s background-color transition. During the iframe's load+hydration the
+           'dark' class can blip off for a frame (the root layout documents this),
+           and the transition stretches that blip into a visible 200ms cream fade
+           across the whole phone screen before the dashboard covers it. Force the
+           frame's html/body to the surface color with NO transition so no cream
+           can ever show, and set color-scheme:dark so the browser's own default
+           canvas is dark while this document is still loading. Scoped to the
+           iframe — the main site's theme-toggle transition is untouched. */
+        html { color-scheme: dark; }
+        html, body {
+          background: #0E0E0F !important;
+          transition: none !important;
+        }
         /* Overlay-style scrollbars: hide the bar AND drop the reserved 18px
            gutter for every element, so the frame matches a real phone. */
         * {
