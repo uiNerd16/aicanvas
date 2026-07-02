@@ -218,6 +218,9 @@ export function CapacityPanel() {
         background: tokens.color.surface.raised,
         display: 'flex',
         flexDirection: 'column',
+        // Fill the grid cell so the top-row panels (Capacity + Requests) always
+        // share one height — the seams line up across the left/right divide.
+        height: '100%',
       }}
     >
       <CornerMarkers />

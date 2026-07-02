@@ -18,7 +18,7 @@ export default function MissionControlTemplate() {
       templateSlug="andromeda-mission-control"
       templateName="Mission Control"
       systemName="Andromeda"
-      systemHref="/design-systems/andromeda/showcase"
+      systemHref="/design-systems/andromeda"
     >
       <div
         className="relative h-full min-h-full w-full md:overflow-hidden"

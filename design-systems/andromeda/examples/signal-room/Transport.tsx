@@ -140,7 +140,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
         }}
       >
         <Cover cover={cur.cover} title={cur.title} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+        <div className="sr-transport-title" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
           <span
             style={{
               fontFamily: tokens.typography.fontSans,
@@ -172,6 +172,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
 
       {/* Center: transport controls + scrub */}
       <div
+        className="sr-transport-center"
         style={{
           flex: 1,
           minWidth: 0,
@@ -182,6 +183,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
         }}
       >
         <div
+          className="sr-transport-controls"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -277,25 +279,37 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
 
       <style>{`
         ${mq.md} {
-          /* Tighten the bar; the two side regions release their fixed 260px
-             so the flexing centre keeps the transport controls usable. */
-          /* Pin the player to the bottom of the viewport on mobile (music-app
-             style) so it stays visible while the page scrolls. The preview
-             TemplateChrome is lifted above it (raisedOnMobile) so they don't
-             overlap. */
+          /* Phone / narrow: the desktop bar squeezed onto a phone was crowded, so
+             the transport STACKS into three rows — track meta, then the
+             timer/scrub, then the transport controls — one clear row each, like
+             a real mobile music player. Sticky to the bottom (music-app style)
+             so it stays put while the page scrolls; the shell top bar owns the
+             top, so there's nothing to overlap. */
           .sr-transport {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            height: auto !important;
+            padding: ${tokens.spacing[4]} !important;
+            gap: ${tokens.spacing[3]} !important;
             position: sticky !important;
-            bottom: ${tokens.spacing[5]} !important;
+            bottom: ${tokens.spacing[4]} !important;
             z-index: 20 !important;
-            padding: 0 ${tokens.spacing[4]} !important;
+          }
+          /* Row 1 — track meta across the width; the title takes the slack so
+             the like button sits at the far right. */
+          .sr-transport-meta { flex: 0 0 auto !important; }
+          .sr-transport-title { flex: 1 1 auto !important; }
+          /* Rows 2 + 3 — reverse the centre column so the timer/scrub sits ABOVE
+             the transport controls (meta / timer / controls, top to bottom). */
+          .sr-transport-center {
+            flex: 0 0 auto !important;
+            flex-direction: column-reverse !important;
             gap: ${tokens.spacing[3]} !important;
           }
-          .sr-transport-meta { flex: 1 1 0 !important; }
-          .sr-transport-aux { flex: 0 1 auto !important; }
-        }
-        ${mq.sm} {
-          /* The volume/queue cluster is the least essential control on a phone;
-             drop it so the cover, title and play controls keep their room. */
+          /* A little more room between the transport controls on a phone. */
+          .sr-transport-controls { gap: ${tokens.spacing[4]} !important; }
+          /* Volume/queue — least essential on a phone; dropped so the three
+             rows stay uncrowded. */
           .sr-transport-aux { display: none !important; }
         }
       `}</style>

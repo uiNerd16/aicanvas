@@ -340,7 +340,14 @@ export default function ResourcePlanning() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        // 100% (not 100vh): the shell fills its PARENT's height, not the raw
+        // viewport. In the AI Canvas preview that parent is the region below the
+        // TemplatePreviewShell top bar, so 100vh would overflow ~56px past the
+        // fold with everything overflow:hidden → nothing reachable ("can't
+        // scroll"). Matches mission-control / signal-room; internal panels (the
+        // requests table) own the scrolling. A standalone CLI install renders it
+        // in a full-height container the same way the other templates do.
+        height: '100%',
         // 100% (not 100vw): 100vw includes the scrollbar gutter, so it runs wider
         // than the visible area and eats the right padding (left looks fine, right
         // is clipped). Matches mission-control / signal-room.
@@ -425,12 +432,12 @@ export default function ResourcePlanning() {
           .rp-shell {
             gap: ${tokens.spacing[3]} !important;
             padding: ${tokens.spacing[3]} !important;
-            /* Desktop pins the shell to a fixed 100vh + overflow:hidden so the
-               bento fr-tracks align the seams. On a phone that fixed height is
-               the LARGE viewport (address bar retracted), so the internally-
-               scrolling grid's bottom hides under the address bar with no way to
-               reach it. Below md, let the SHELL scroll to the dynamic viewport
-               instead (matches exchange-terminal) — nothing clips. */
+            /* Desktop gives the shell a definite 100% height + overflow:hidden
+               so the bento fr-tracks align the seams. On a phone a fixed height
+               would trap the internally-scrolling grid's bottom under the
+               address bar with no way to reach it. Below md, let the SHELL
+               scroll to the dynamic viewport instead (matches exchange-terminal)
+               — nothing clips. */
             height: auto !important;
             min-height: 100dvh !important;
             overflow-y: auto !important;

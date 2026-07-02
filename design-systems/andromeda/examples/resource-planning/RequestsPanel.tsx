@@ -122,6 +122,9 @@ export function RequestsPanel() {
         background: tokens.color.surface.raised,
         display: 'flex',
         flexDirection: 'column',
+        // Fill the grid cell so this matches the Capacity panel's height in the
+        // shared top row (the two were drifting — Requests sat shorter).
+        height: '100%',
       }}
     >
       <CornerMarkers />

@@ -16,7 +16,7 @@ import { usePremiumStatus } from '../billing/usePremiumStatus'
  * Compact auth control for chrome that doesn't include the global sidebar
  * (e.g. design-system topbar). Replaces UserMenu in cramped spaces.
  */
-export function TopAuthPill() {
+export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolean } = {}) {
   const { user } = useSession()
   const router = useRouter()
   const { open: openAuthModal } = useAuthModal()
@@ -74,7 +74,7 @@ export function TopAuthPill() {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        {statusPill}
+        {showStatusPill && statusPill}
         <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
           <SignIn size={13} weight="regular" />
           Sign in
@@ -94,7 +94,7 @@ export function TopAuthPill() {
 
   return (
     <div className="flex items-center gap-2">
-      {statusPill}
+      {showStatusPill && statusPill}
       <div className="relative" ref={ref}>
         <Button
           variant="outline"

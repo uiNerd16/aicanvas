@@ -74,11 +74,14 @@ export const requestRows = [
   { team: 'Comms Relay',     submitted: '08/13/25', owner: 'OPS-10',  amount: '9 PFLOPS',  status: 'approved' },
 ];
 
+// Three filter tabs — All, Pending, Recent. On the narrow table panel a 4th
+// tab (Approved) pushed the strip into an overflow-scroll that crowded the
+// search field, so the strip now fits without scrolling and the search sits
+// cleanly to its right.
 export const filterTabs = [
   { id: 'all',      label: 'All',      count: 24 },
   { id: 'pending',  label: 'Pending',  count: 9  },
   { id: 'recent',   label: 'Recent',   count: 6  },
-  { id: 'approved', label: 'Approved', count: 9  },
 ];
 
 export const navItems = [

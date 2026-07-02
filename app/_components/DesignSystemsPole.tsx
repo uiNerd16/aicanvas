@@ -55,9 +55,10 @@ export function DesignSystemsPole({
   collapsed: boolean
   onToggle: () => void
   // Fired when any leaf link is tapped. The mobile drawer passes setOpen(false)
-  // so it closes even for template links (target="_blank" doesn't change
-  // pathname, so the drawer's close-on-route effect would never fire). The
-  // desktop rail omits it — there's no drawer to close.
+  // so it closes immediately on tap. Templates now navigate in the SAME tab
+  // (the TemplatePreviewShell top bar carries you back), so a route change also
+  // fires — but closing on tap avoids any flash. The desktop rail omits it —
+  // there's no drawer to close.
   onNavigate?: () => void
 }) {
   const pathname = usePathname() ?? ''
@@ -149,7 +150,6 @@ export function DesignSystemsPole({
                             <li key={t.slug}>
                               <Link
                                 href={`/design-systems/${system.slug}/templates/${t.slug}`}
-                                target="_blank"
                                 onClick={onNavigate}
                                 className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                   isActive

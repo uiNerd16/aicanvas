@@ -20,22 +20,17 @@ const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 // container (not a min-h-full child) so it always covers the full scrollable
 // height — a child can two-tone when content overflows.
 const OVERVIEW_RE = /^\/design-systems\/andromeda\/?$/
-// Signal Room pins a bottom player (sticky, 20px above the edge) on mobile, so
-// it provides its own bottom clearance. The route column must NOT add `pb-28`
-// there: the extra reserve below the player's containing block would stop the
-// sticky from reaching its pin and make the player lift up at terminal scroll.
-const SIGNAL_ROOM_RE = /^\/design-systems\/andromeda\/templates\/signal-room/
-
 export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? ''
   const isTemplate = TEMPLATE_LEAF_RE.test(pathname)
-  const isSignalRoom = SIGNAL_ROOM_RE.test(pathname)
   const isOverview = OVERVIEW_RE.test(pathname)
 
+  // No bottom padding on template leaves: the old `pb-28` was terminal-scroll
+  // clearance for the retired floating TemplateChrome widget. Templates now
+  // carry a TOP bar (TemplatePreviewShell), so the reserve would just read as
+  // a dead 112px band at the end of the mobile scroll.
   const className = isTemplate
-    ? isSignalRoom
-      ? 'flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:overflow-y-hidden'
-      : 'flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto pb-28 md:overflow-y-hidden md:pb-0'
+    ? 'flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:overflow-y-hidden'
     : isOverview
       ? 'flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950'
       : 'flex flex-1 scroll-smooth flex-col overflow-y-auto'

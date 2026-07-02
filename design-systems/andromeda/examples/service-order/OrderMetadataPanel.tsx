@@ -321,6 +321,10 @@ export function OrderMetadataPanel() {
         background: tokens.color.surface.raised,
         display: 'flex',
         flexDirection: 'column',
+        // Fill the grid cell so this always matches the SlaPanel's height in
+        // the shared bento row (the SlaPanel Card already fills; without this
+        // the two panel bottoms drift apart).
+        height: '100%',
       }}
     >
       <CornerMarkers />

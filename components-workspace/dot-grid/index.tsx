@@ -10,10 +10,29 @@ const RADIUS  = 130    // px — hover influence radius
 const BASE_A  = 0.13   // resting dot opacity
 const PEAK_A  = 0.92   // fully-lit dot opacity
 
-export default function InteractiveDotGrid({ showLabel = true }: { showLabel?: boolean } = {}) {
+export default function InteractiveDotGrid({
+  showLabel = true,
+  colors,
+}: {
+  showLabel?: boolean
+  // Optional theme override. Omit it and the component keeps its original look
+  // (faint white dots on near-black in dark mode). `dot`/`highlight` are "r,g,b"
+  // strings; each dot interpolates from `dot` (resting) to `highlight` (fully
+  // lit near the cursor) — pass only `dot` for a single-colour grid.
+  colors?: {
+    background?: string
+    dot?: string
+    highlight?: string
+    baseAlpha?: number
+    peakAlpha?: number
+  }
+} = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
+  // Latest theme override, read by the RAF loop without re-subscribing it.
+  const colorsRef    = useRef(colors)
+  colorsRef.current  = colors
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
@@ -116,7 +135,17 @@ export default function InteractiveDotGrid({ showLabel = true }: { showLabel?: b
       const mx      = mouseRef.current?.x ?? -99999
       const my      = mouseRef.current?.y ?? -99999
       const r2      = RADIUS * RADIUS
-      const dotRGB  = isDarkRef.current ? '255,255,255' : '28,25,22'
+
+      // Resting + lit colours (and opacities), from the theme override when
+      // given, else the original dark/light defaults. Parsed once per frame.
+      const ov      = colorsRef.current
+      const dark    = isDarkRef.current
+      const restRGB = ov?.dot ?? (dark ? '255,255,255' : '28,25,22')
+      const litRGB  = ov?.highlight ?? restRGB
+      const baseA   = ov?.baseAlpha ?? (dark ? BASE_A : 0.25)
+      const peakA   = ov?.peakAlpha ?? PEAK_A
+      const [r0, g0, b0] = restRGB.split(',').map(Number)
+      const [r1, g1, b1] = litRGB.split(',').map(Number)
 
       for (const d of dots) {
         const dx    = d.x - mx
@@ -128,10 +157,13 @@ export default function InteractiveDotGrid({ showLabel = true }: { showLabel?: b
         d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
         if (d.b < 0.004) d.b = 0
 
-        const baseA = isDarkRef.current ? BASE_A : 0.25
-        const alpha = baseA + (PEAK_A - baseA) * d.b
+        const alpha = baseA + (peakA - baseA) * d.b
         const sz    = 1 + d.b * 1.2   // grow slightly when lit (1px → 2.2px max)
-        ctx.fillStyle = `rgba(${dotRGB},${alpha.toFixed(2)})`
+        // Interpolate rest → lit by illumination (a no-op when litRGB === restRGB).
+        const r = Math.round(r0 + (r1 - r0) * d.b)
+        const g = Math.round(g0 + (g1 - g0) * d.b)
+        const b = Math.round(b0 + (b1 - b0) * d.b)
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(2)})`
         ctx.fillRect(d.x - sz / 2, d.y - sz / 2, sz, sz)
       }
 
@@ -151,7 +183,7 @@ export default function InteractiveDotGrid({ showLabel = true }: { showLabel?: b
     }
   }, [])
 
-  const bg        = isDark ? '#110F0C' : '#F5F1EA'
+  const bg        = colors?.background ?? (isDark ? '#110F0C' : '#F5F1EA')
   const labelColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,25,22,0.45)'
   const hintColor  = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(28,25,22,0.22)'
 

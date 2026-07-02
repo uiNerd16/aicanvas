@@ -346,10 +346,18 @@ export default function ServiceOrder() {
 
   return (
     <div
+      className="so-shell"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        // 100% (not 100vh): fill the parent, don't measure the raw viewport —
+        // in the AI Canvas preview the parent is the region below the shell's
+        // top bar, and the hosting column is overflow-hidden on desktop, so a
+        // viewport-sized shell would clip below the fold with no way to reach
+        // it. The <main> below is the desktop scroller (pinned pattern, same
+        // as resource-planning). Standalone (CLI install) 100% degrades to
+        // content height and the page scrolls as a normal document.
+        height: '100%',
         // 100% (not 100vw): 100vw includes the scrollbar gutter, so it runs wider
         // than the visible area and eats the right padding (left looks fine, right
         // is clipped). Matches mission-control / signal-room.
@@ -357,6 +365,7 @@ export default function ServiceOrder() {
         background: tokens.color.surface.base,
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
+        overflow: 'hidden',
         gap: tokens.spacing[3],
         padding: tokens.spacing[6],
         boxSizing: 'border-box',
@@ -374,12 +383,17 @@ export default function ServiceOrder() {
       </motion.div>
 
       <main
+        className="so-main"
         style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           gap: tokens.spacing[3],
           minHeight: 0,
+          // The desktop scroller: the shell is pinned to its parent height, so
+          // the metadata/SLA bento + items log scroll inside this column while
+          // the TopBar and page-header strip stay put.
+          overflowY: 'auto',
         }}
       >
         {/* Two independent panels side by side. SLA panel is narrower — it
@@ -428,6 +442,16 @@ export default function ServiceOrder() {
 
       <style>{`
         ${mq.md} {
+          /* Below md the shell releases its desktop pin: it grows to content
+             height and the ROUTE COLUMN scrolls the page as one document
+             (matches resource-planning). The inner <main> stops being a
+             fixed-height scroller so there's no nested scroller on a phone. */
+          .so-shell {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow: visible !important;
+          }
+          .so-main { overflow-y: visible !important; }
           /* Bento collapses to a single column; the two panels stack
              top-to-bottom (metadata, then SLA) in source order. */
           .so-bento { grid-template-columns: minmax(0, 1fr) !important; }

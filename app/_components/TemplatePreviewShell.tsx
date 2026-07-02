@@ -8,50 +8,53 @@ import {
   Check,
   Copy,
   DeviceMobile,
-  DeviceTablet,
   Lightning,
   Monitor,
-  SignIn,
   Terminal,
 } from '@phosphor-icons/react'
 import { useSession } from '../components/auth/SessionProvider'
-import { useAuthModal } from '../components/auth/AuthModalProvider'
 import { usePaywallModal } from '../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../components/billing/usePremiumStatus'
-import { EmailAvatar } from '../components/auth/EmailAvatar'
+import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Button, buttonClasses } from '../components/Button'
+import dynamic from 'next/dynamic'
+// The dot-grid standalone, reused as the mobile preview backdrop. Loaded
+// dynamically (client-only) so it never enters the initial page bundle — it
+// ships only when a desktop user opens the Mobile preview. The page an end user
+// actually lands on carries none of its weight (JS, canvas, or RAF loop).
+const InteractiveDotGrid = dynamic(() => import('../../components-workspace/dot-grid'), { ssr: false })
 
 // ────────────────────────────────────────────────────────────────────────────
 // TemplatePreviewShell — the shared top-bar chrome for design-system template
 // previews (replaces the old floating TemplateChrome widget on these routes).
 //
-//   ┌ logo · System / Template ──── ▢ desktop tablet phone | ↺ ──── Install / Unlock · auth ┐
+//   ┌ logo · System / Template ──── ▢ desktop mobile | ↺ ──── Install / Unlock · auth ┐
 //
-// Device toggles give TRUE responsive previews: tablet/phone load the same
+// The device toggle gives a TRUE responsive preview: mobile loads the same
 // route inside an <iframe> so the composition's CSS @media queries fire against
 // the iframe's own viewport width (Andromeda is desktop-first / max-width).
-// Desktop renders the children directly (native, full-bleed — no frame).
+// Desktop renders the children directly (native, full-bleed — no frame). The
+// ↺ button replays the current view's entrance animation (it does not switch
+// device).
 //
 // The iframe payload is this same route with `?frame=1`, which makes the shell
 // render ONLY the children (no recursive chrome).
 // ────────────────────────────────────────────────────────────────────────────
 
-type Device = 'desktop' | 'tablet' | 'phone'
+type Device = 'desktop' | 'phone'
 
-// Honest device viewport widths. Desktop is frameless (width doesn't matter —
-// it fills). Tablet ≈ iPad portrait, phone ≈ iPhone 14.
+// Honest device viewport width. Desktop is frameless (width doesn't matter —
+// it fills); mobile ≈ iPhone 14.
 const DEVICES: Record<
   Exclude<Device, 'desktop'>,
   { label: string; width: number }
 > = {
-  tablet: { label: 'Tablet', width: 834 },
-  phone: { label: 'Phone', width: 390 },
+  phone: { label: 'Mobile', width: 390 },
 }
 
 const DEVICE_ORDER: { key: Device; label: string; icon: ComponentType<{ weight?: 'regular'; size?: number }> }[] = [
   { key: 'desktop', label: 'Desktop', icon: Monitor },
-  { key: 'tablet', label: 'Tablet', icon: DeviceTablet },
-  { key: 'phone', label: 'Phone', icon: DeviceMobile },
+  { key: 'phone', label: 'Mobile', icon: DeviceMobile },
 ]
 
 interface TemplatePreviewShellProps {
@@ -85,9 +88,12 @@ function ShellInner({
   const searchParams = useSearchParams()
   const isFramePayload = forceFrame ?? searchParams.get('frame') === '1'
 
-  // Inside the iframe: render the composition bare, no chrome, no recursion.
+  // Inside the iframe: render the composition bare, no chrome, no recursion —
+  // wrapped in FramePayload, which makes the framed view behave like a real
+  // touch device (hidden overlay-style scrollbars, no reserved gutter, and
+  // click-drag panning instead of text selection). See FramePayload below.
   if (isFramePayload) {
-    return <div className="relative h-full w-full">{children}</div>
+    return <FramePayload>{children}</FramePayload>
   }
 
   return (
@@ -103,6 +109,162 @@ function ShellInner({
   )
 }
 
+// ── Frame payload (renders INSIDE the preview iframe) ────────────────────────
+// Makes the framed composition behave like a real touch device viewed on a
+// desktop:
+//   • Hidden, overlay-style scrollbars with no reserved gutter — the app
+//     reserves an 18px scrollbar gutter on every scroller (globals.css
+//     scrollbar-gutter:stable + a custom 18px ::-webkit-scrollbar, echoed on
+//     AndromedaContentColumn); inside the mobile frame that strip reads
+//     as dead space on the right and keeps painting a desktop bar. We cancel
+//     both for every element.
+//   • Text isn't selectable, so a click-drag PANS instead of highlighting the
+//     telemetry numbers.
+//   • Click-drag scrolls the nearest scrollable ancestor (x and/or y) the way a
+//     finger-swipe would — the horizontal telemetry strip and the vertical
+//     dashboard both respond. Wheel/trackpad are unchanged; real touch input is
+//     left to the browser's native momentum scrolling (mouse-only hijack).
+// This only ever renders inside the preview iframe, so it can't touch the rest
+// of the app or the desktop full-bleed view.
+function FramePayload({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const doc = document
+    let dragging = false
+    let startX = 0
+    let startY = 0
+    let baseLeft = 0
+    let baseTop = 0
+    let sx: Element | null = null
+    let sy: Element | null = null
+
+    const scrollableX = (el: Element) => {
+      const o = getComputedStyle(el).overflowX
+      return (o === 'auto' || o === 'scroll') && el.scrollWidth > el.clientWidth + 1
+    }
+    const scrollableY = (el: Element) => {
+      const o = getComputedStyle(el).overflowY
+      return (o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1
+    }
+    const findScrollers = (target: Element | null) => {
+      let x: Element | null = null
+      let y: Element | null = null
+      let el: Element | null = target
+      while (el && el !== doc.body) {
+        if (!x && scrollableX(el)) x = el
+        if (!y && scrollableY(el)) y = el
+        if (x && y) break
+        el = el.parentElement
+      }
+      // Below md the whole dashboard scrolls the document, not an inner box.
+      if (!y) y = doc.scrollingElement ?? doc.documentElement
+      return { x, y }
+    }
+
+    let moved = 0
+
+    // Swallow the click that the browser synthesizes right after a real pan —
+    // without this, panning a clickable row (e.g. the requests table's
+    // <tr onClick>) would ALSO toggle it on release. Capture-phase, one-shot,
+    // with a timeout fallback in case no click follows (released off-target).
+    const squelchClick = (e: MouseEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+    const armSquelch = () => {
+      doc.addEventListener('click', squelchClick, { capture: true, once: true })
+      setTimeout(() => doc.removeEventListener('click', squelchClick, { capture: true } as EventListenerOptions), 150)
+    }
+
+    const onDown = (e: PointerEvent) => {
+      // Mouse only — touch devices keep native momentum scrolling. Ignore drags
+      // that begin on a real control so clicks/taps still land. role="slider"
+      // covers Andromeda's Slider (scrub/volume): it runs its own pointer-drag,
+      // and panning underneath it would fight the scrub.
+      if (e.pointerType !== 'mouse' || e.button !== 0) return
+      const t = e.target as Element | null
+      if (t?.closest('a, button, input, textarea, select, [role="button"], [role="slider"], [contenteditable="true"]')) return
+      const found = findScrollers(t)
+      sx = found.x
+      sy = found.y
+      if (!sx && !sy) return
+      dragging = true
+      moved = 0
+      startX = e.clientX
+      startY = e.clientY
+      baseLeft = sx ? sx.scrollLeft : 0
+      baseTop = sy ? sy.scrollTop : 0
+      doc.documentElement.style.cursor = 'grabbing'
+    }
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return
+      // Button released outside the iframe: without pointer capture we never
+      // get that pointerup, so the first re-entry move with no button held is
+      // the end-of-drag signal (prevents a "stuck" pan).
+      if ((e.buttons & 1) === 0) {
+        onUp()
+        return
+      }
+      moved = Math.max(moved, Math.abs(e.clientX - startX), Math.abs(e.clientY - startY))
+      if (sx) sx.scrollLeft = baseLeft - (e.clientX - startX)
+      if (sy) sy.scrollTop = baseTop - (e.clientY - startY)
+      e.preventDefault()
+    }
+    const onUp = () => {
+      if (dragging && moved > 6) armSquelch()
+      dragging = false
+      sx = null
+      sy = null
+      doc.documentElement.style.cursor = ''
+    }
+
+    doc.addEventListener('pointerdown', onDown)
+    doc.addEventListener('pointermove', onMove)
+    doc.addEventListener('pointerup', onUp)
+    doc.addEventListener('pointercancel', onUp)
+    // Fires when the mouse leaves the iframe's document mid-drag — end the pan
+    // there instead of leaving it half-engaged.
+    doc.addEventListener('pointerleave', onUp)
+    window.addEventListener('blur', onUp)
+    return () => {
+      doc.removeEventListener('pointerdown', onDown)
+      doc.removeEventListener('pointermove', onMove)
+      doc.removeEventListener('pointerup', onUp)
+      doc.removeEventListener('pointercancel', onUp)
+      doc.removeEventListener('pointerleave', onUp)
+      window.removeEventListener('blur', onUp)
+      doc.removeEventListener('click', squelchClick, { capture: true } as EventListenerOptions)
+    }
+  }, [])
+
+  return (
+    <div className="mc-frame-viewport relative h-full w-full">
+      <style>{`
+        /* Overlay-style scrollbars: hide the bar AND drop the reserved 18px
+           gutter for every element, so the frame matches a real phone. */
+        * {
+          scrollbar-width: none !important;
+          scrollbar-gutter: auto !important;
+          -ms-overflow-style: none !important;
+        }
+        *::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        /* Device preview = touch surface: text isn't selectable, so a
+           click-drag pans (see the effect above) instead of highlighting the
+           telemetry numbers. Real form fields stay selectable; real controls
+           keep a pointer cursor; everything else shows the grab affordance. */
+        .mc-frame-viewport, .mc-frame-viewport * { -webkit-user-select: none !important; user-select: none !important; }
+        .mc-frame-viewport input,
+        .mc-frame-viewport textarea,
+        .mc-frame-viewport [contenteditable="true"] { -webkit-user-select: text !important; user-select: text !important; }
+        .mc-frame-viewport { cursor: grab; }
+        .mc-frame-viewport a,
+        .mc-frame-viewport button,
+        .mc-frame-viewport [role="button"] { cursor: pointer; }
+      `}</style>
+      {children}
+    </div>
+  )
+}
+
 function PreviewChrome({
   templateSlug,
   templateName,
@@ -113,8 +275,24 @@ function PreviewChrome({
 }: Omit<TemplatePreviewShellProps, 'children'> & { children: ReactNode }) {
   const pathname = usePathname() ?? ''
   const [device, setDevice] = useState<Device>('desktop')
+  // Replay nonces — bumping one remounts the matching view so the composition's
+  // entrance animation runs from the top again. Desktop and mobile keep
+  // separate nonces so Refresh reloads ONLY the view you're looking at (never
+  // the hidden one) and never changes the device.
+  const [desktopNonce, setDesktopNonce] = useState(0)
+  const [frameNonce, setFrameNonce] = useState(0)
+  const reload = () =>
+    device === 'desktop'
+      ? setDesktopNonce((n) => n + 1)
+      : setFrameNonce((n) => n + 1)
 
   return (
+    // CONTRACT: template compositions must FILL the preview region and scroll
+    // internally (height:100% + an inner overflow-y:auto). The root here is
+    // h-full, so a composition that instead GROWS past the region would (a)
+    // get clipped by the Andromeda column's md:overflow-y-hidden and (b)
+    // escape the sticky header's range. All four Andromeda templates follow
+    // the pinned pattern; keep new ones on it too.
     <div className="flex h-full min-h-full w-full flex-col">
       <TopBar
         templateSlug={templateSlug}
@@ -124,23 +302,46 @@ function PreviewChrome({
         description={description}
         device={device}
         onDevice={setDevice}
+        onReload={reload}
       />
 
       {/* Preview region */}
       <div className="relative min-h-0 flex-1">
-        {/* Desktop: native, full-bleed. */}
-        <div className={device === 'desktop' ? 'h-full w-full' : 'hidden'}>{children}</div>
+        {/* Desktop: native, full-bleed. Keyed by desktopNonce so Refresh
+            remounts the composition and replays its entrance animation. */}
+        <div key={desktopNonce} className={device === 'desktop' ? 'h-full w-full' : 'hidden'}>{children}</div>
 
-        {/* Tablet / phone: real viewport via iframe on a device backdrop. Kept
-            mounted across the two so switching just resizes (media queries
-            re-fire on resize) instead of reloading. */}
+        {/* Mobile: real viewport via iframe on a device backdrop. Keyed by
+            frameNonce so Refresh reloads the iframe (fresh animation) without
+            leaving the mobile view. */}
         {device !== 'desktop' && (
-          <div className="absolute inset-0 flex items-stretch justify-center overflow-auto bg-sand-950 p-4 md:p-6">
+          <div className="absolute inset-0 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6">
+            {/* Dotted-grid backdrop (the dot-grid standalone) behind the device
+                frame. pointer-events off so it never steals a click/drag from
+                the frame; it tracks the cursor at the window level regardless,
+                so dots in the margin still light up as you move the mouse. */}
+            <div className="pointer-events-none absolute inset-0">
+              {/* Themed to match the page: seamless sand-950 backdrop, faint
+                  sand-neutral dots that light up to the olive accent near the
+                  cursor. Raw rgb values (a canvas can't read Tailwind tokens);
+                  the token each value maps to is noted inline below. */}
+              <InteractiveDotGrid
+                showLabel={false}
+                colors={{
+                  background: '#0E0E0F', // sand-950 — matches bg-sand-950 backdrop
+                  dot: '123,123,125', //     sand-500 — faint neutral grid
+                  highlight: '218,228,160', // olive-400 — accent, lit near the cursor
+                  baseAlpha: 0.22,
+                  peakAlpha: 0.95,
+                }}
+              />
+            </div>
             <iframe
+              key={frameNonce}
               title={`${templateName} responsive preview`}
               src={`${pathname}?frame=1`}
               style={{ width: DEVICES[device].width }}
-              className="h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl transition-[width] duration-300 ease-out"
+              className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl"
             />
           </div>
         )}
@@ -159,23 +360,37 @@ function TopBar({
   description,
   device,
   onDevice,
+  onReload,
 }: Omit<TemplatePreviewShellProps, 'children'> & {
   device: Device
   onDevice: (d: Device) => void
+  onReload: () => void
 }) {
   return (
-    <header className="sticky top-0 z-50 grid h-14 shrink-0 grid-cols-[auto_1fr] items-center gap-2 border-b border-sand-300 bg-sand-200/90 px-3 backdrop-blur md:grid-cols-[1fr_auto_1fr] dark:border-sand-800 dark:bg-sand-950/90">
-      {/* Left — logo + breadcrumb */}
-      <div className="flex min-w-0 items-center gap-3">
+    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-sand-300 bg-sand-200/90 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+      {/* Logo block — mirrors the site Sidebar rail exactly (w-60, px-4, gap-2,
+          wordmark always shown) and carries the SAME full-height border-r the
+          sidebar draws. Keeps the logo in the identical spot and makes the
+          divider read as one continuous line with the rest of the site. */}
+      <div className="flex h-full w-auto shrink-0 items-center border-r border-sand-300 px-4 md:w-60 dark:border-sand-800">
         <Link
           href="/"
           aria-label="AI Canvas home"
-          className="flex shrink-0 items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
+          className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50"
         >
           <img src="/ai-canvas-icon.svg" alt="" width={20} height={17} className="shrink-0" />
-          <span className="hidden lg:inline">AI Canvas</span>
+          {/* Icon-only below md so the narrow bar leaves room for the breadcrumb
+              (otherwise the template name truncates to "An…"); wordmark returns
+              at md, matching the site sidebar rail. */}
+          <span className="hidden md:inline">AI Canvas</span>
         </Link>
-        <span className="h-5 w-px shrink-0 bg-sand-300 dark:bg-sand-800" aria-hidden />
+      </div>
+
+      {/* Content region — breadcrumb · device toggles (centered) · CTA cluster.
+          On mobile it's [breadcrumb 1fr | CTA auto] so the breadcrumb takes all
+          the leftover width; from md it becomes [1fr_auto_1fr] + px-6, mirroring
+          the site's content top bar (HomeClient) with the toggles centered. */}
+      <div className="grid min-w-0 flex-1 grid-cols-[1fr_auto] items-center gap-4 px-4 md:grid-cols-[1fr_auto_1fr] md:px-6">
         <nav aria-label="Breadcrumb" className="min-w-0 truncate text-sm font-semibold">
           <Link
             href={systemHref}
@@ -186,49 +401,50 @@ function TopBar({
           <span className="mx-1 text-sand-400 dark:text-sand-600">/</span>
           <span className="text-olive-500">{templateName}</span>
         </nav>
-      </div>
 
-      {/* Middle — device toggles + reset (desktop only; on a phone you already
-          see the responsive layout). */}
-      <div className="hidden items-center gap-1 justify-self-center rounded-lg border border-sand-300 bg-sand-100 p-1 md:flex dark:border-sand-800 dark:bg-sand-900">
-        {DEVICE_ORDER.map(({ key, label, icon: Icon }) => {
-          const active = device === key
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onDevice(key)}
-              aria-label={`${label} preview`}
-              aria-pressed={active}
-              className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${
-                active
-                  ? 'bg-sand-50 text-sand-900 shadow-sm dark:bg-sand-800 dark:text-sand-50'
-                  : 'text-sand-500 hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100'
-              }`}
-            >
-              <Icon weight="regular" size={18} />
-            </button>
-          )
-        })}
-        <span className="mx-0.5 h-5 w-px bg-sand-300 dark:bg-sand-700" aria-hidden />
-        <button
-          type="button"
-          onClick={() => onDevice('desktop')}
-          aria-label="Reset to desktop"
-          disabled={device === 'desktop'}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-sand-500 transition-colors hover:text-sand-800 disabled:opacity-40 disabled:hover:text-sand-500 dark:text-sand-400 dark:hover:text-sand-100 dark:disabled:hover:text-sand-400"
-        >
-          <ArrowClockwise weight="regular" size={17} />
-        </button>
-      </div>
+        {/* Device toggles (Desktop / Mobile) + Replay — sized to match the
+            right-side buttons (~32px). Shown from md up; the cluster hides on a
+            real phone, where you already see the responsive layout. */}
+        <div className="hidden items-center gap-0.5 justify-self-center rounded-lg border border-sand-300 bg-sand-100 p-0.5 md:flex dark:border-sand-800 dark:bg-sand-900">
+          {DEVICE_ORDER.map(({ key, label, icon: Icon }) => {
+            const active = device === key
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onDevice(key)}
+                aria-label={`${label} preview`}
+                aria-pressed={active}
+                className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+                  active
+                    ? 'bg-sand-50 text-sand-900 shadow-sm dark:bg-sand-800 dark:text-sand-50'
+                    : 'text-sand-500 hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100'
+                }`}
+              >
+                <Icon weight="regular" size={16} />
+              </button>
+            )
+          })}
+          <span className="mx-0.5 h-4 w-px bg-sand-300 dark:bg-sand-700" aria-hidden />
+          <button
+            type="button"
+            onClick={onReload}
+            aria-label="Replay animation"
+            title="Replay animation"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-sand-500 transition-colors hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100"
+          >
+            <ArrowClockwise weight="regular" size={15} />
+          </button>
+        </div>
 
-      {/* Right — entitlement CTA + auth */}
-      <div className="flex items-center justify-end gap-2">
-        <RightCluster
-          templateSlug={templateSlug}
-          systemName={systemName}
-          description={description}
-        />
+        {/* Right — entitlement CTA + auth */}
+        <div className="flex items-center justify-end gap-2">
+          <RightCluster
+            templateSlug={templateSlug}
+            systemName={systemName}
+            description={description}
+          />
+        </div>
       </div>
     </header>
   )
@@ -245,12 +461,11 @@ function RightCluster({
   systemName: string
   description?: string[]
 }) {
-  const { user } = useSession()
-  const { open: openAuthModal } = useAuthModal()
   const status = usePremiumStatus()
-  // Install shows for premium AND the in-flight 'unknown' window — only a
-  // RESOLVED free/anon tier sees the Unlock pitch (never flash an upgrade at a
-  // paying customer mid-load). Anon derives to 'not-premium' synchronously.
+  // premium / in-flight 'unknown' → Install; resolved free/anon → the small
+  // "Unlock with Premium" CTA. Keeping Install up during 'unknown' avoids
+  // flashing an upgrade at a paying customer mid-load; anon derives to
+  // 'not-premium' synchronously.
   const canInstall = status !== 'not-premium'
 
   return (
@@ -258,27 +473,19 @@ function RightCluster({
       {canInstall ? (
         <InstallButton templateSlug={templateSlug} systemName={systemName} description={description} />
       ) : (
-        <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'sm' })}>
-          <Lightning weight="regular" size={14} />
+        <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'xs' })}>
+          <Lightning weight="regular" size={13} />
           <span className="hidden sm:inline">Unlock with Premium</span>
           <span className="sm:hidden">Unlock</span>
         </Link>
       )}
 
-      {user ? (
-        <Link
-          href="/account"
-          aria-label="Account"
-          className={buttonClasses({ variant: 'outline', size: 'xs', iconOnly: true })}
-        >
-          <EmailAvatar email={user.email ?? 'Account'} className="h-4 w-4" />
-        </Link>
-      ) : (
-        <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
-          <SignIn size={13} weight="regular" />
-          <span className="hidden sm:inline">Sign in</span>
-        </Button>
-      )}
+      {/* The site-wide auth control (HeaderSocials → TopAuthPill): the
+          avatar-with-chevron dropdown, or "Sign in" when signed out — identical
+          to every other page header. The Lightning status pill is suppressed
+          here (showStatusPill={false}); this bar carries its own Install /
+          Unlock CTA, so the pill would only duplicate the upgrade path. */}
+      <TopAuthPill showStatusPill={false} />
     </>
   )
 }
@@ -377,8 +584,8 @@ function InstallButton({
 
   return (
     <div className="relative" ref={ref}>
-      <Button variant="primary" size="sm" onClick={handleInstall}>
-        <Terminal weight="regular" size={14} />
+      <Button variant="primary" size="xs" onClick={handleInstall}>
+        <Terminal weight="regular" size={13} />
         Install
       </Button>
 
@@ -387,33 +594,31 @@ function InstallButton({
           <div className="space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                {copied ? (
-                  <span className="text-xs font-semibold uppercase tracking-wider text-olive-500 dark:text-olive-400">
-                    Install command copied
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
-                      CLI install
-                    </span>
-                    <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
-                      One command
-                    </span>
-                  </>
-                )}
+                <span className="text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+                  CLI install
+                </span>
+                <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
+                  One command
+                </span>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="xs"
                 onClick={handleCopy}
                 aria-label="Copy CLI command"
-                className="rounded-md p-1.5 text-sand-500 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
               >
                 {copied ? (
-                  <Check weight="regular" size={14} className="text-olive-500 dark:text-olive-400" />
+                  <>
+                    <Check weight="regular" size={13} className="text-olive-500 dark:text-olive-400" />
+                    Copied
+                  </>
                 ) : (
-                  <Copy weight="regular" size={14} />
+                  <>
+                    <Copy weight="regular" size={13} />
+                    Copy CLI
+                  </>
                 )}
-              </button>
+              </Button>
             </div>
             <div className="rounded-lg bg-sand-950 px-4 py-3">
               <code className="block break-all font-mono text-xs text-sand-300">{cliCommandMasked}</code>
