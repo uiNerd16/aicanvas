@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ComponentCard } from './ComponentCard'
 import { HeaderSocials } from './HeaderSocials'
+import { Breadcrumbs } from './Breadcrumbs'
 import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
@@ -163,18 +164,15 @@ export function HomeClient({
     <div className="flex min-h-full flex-col bg-sand-200 dark:bg-sand-950">
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
-        <Link href="/components" className="shrink-0 text-sm font-semibold text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">
-          Components
-        </Link>
-
-        <span className="text-sm font-semibold text-olive-500">
-          {category ? `/${category}` : ''}
-        </span>
-
-        <div className="flex justify-end">
-          <HeaderSocials />
-        </div>
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+        <Breadcrumbs
+          crumbs={
+            category
+              ? [{ label: 'Components', href: '/components' }, { label: category }]
+              : [{ label: 'Components', href: '/components' }]
+          }
+        />
+        <HeaderSocials />
       </div>
 
       {/* ── Grid ── */}

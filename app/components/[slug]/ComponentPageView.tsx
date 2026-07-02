@@ -27,6 +27,7 @@ import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
 import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
 import { HeaderSocials } from '../HeaderSocials'
+import { Breadcrumbs } from '../Breadcrumbs'
 import { SiteFooter } from '../SiteFooter'
 import { Step } from '../Step'
 import type { ComponentMeta } from '../../lib/component-registry'
@@ -451,20 +452,9 @@ export default function ComponentPageView({
   return (
     <>
       {/* Top stripe — sticky (desktop only; mobile uses MobileNav) */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm font-semibold text-sand-700 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-200"
-        >
-          <ArrowLeft weight="regular" size={15} />
-          Back
-        </button>
-
-        <span className="text-sm font-semibold text-olive-500">/{name}</span>
-
-        <div className="flex justify-end">
-          <HeaderSocials />
-        </div>
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+        <Breadcrumbs crumbs={[{ label: 'Components', href: '/components' }, { label: name }]} />
+        <HeaderSocials />
       </div>
 
       <main className="bg-sand-200 dark:bg-sand-950">
