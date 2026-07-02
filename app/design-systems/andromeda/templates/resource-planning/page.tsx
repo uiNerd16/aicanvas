@@ -1,6 +1,4 @@
 // @ts-nocheck — consumes Andromeda tokens which are not type-checked yet.
-'use client'
-
 import ResourcePlanning from '../../../../../design-systems/andromeda/examples/resource-planning'
 import { tokens } from '../../../../../design-systems/andromeda/tokens'
 import { TemplatePreviewShell } from '../../../../_components/TemplatePreviewShell'
@@ -11,10 +9,22 @@ import { TemplatePreviewShell } from '../../../../_components/TemplatePreviewShe
 // Template breadcrumb, desktop/mobile responsive toggles + replay, and the
 // Install / Unlock-with-Premium CTA + auth), and renders the dashboard either
 // full-bleed (desktop) or inside a real device-viewport iframe (mobile).
+//
+// Server component: `?frame=1` is resolved from searchParams HERE (request time)
+// and handed to the shell as a `frame` flag, so the mobile-preview iframe's HTML
+// is the bare payload from its first paint — no client useSearchParams, no
+// Suspense-fallback flash of the top bar. The composition is a client component
+// and renders fine as a server-passed child.
 
-export default function ResourcePlanningTemplate() {
+export default async function ResourcePlanningTemplate({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const frame = (await searchParams).frame === '1'
   return (
     <TemplatePreviewShell
+      frame={frame}
       templateSlug="andromeda-resource-planning"
       templateName="Resource Planning"
       systemName="Andromeda"

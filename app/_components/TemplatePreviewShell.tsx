@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import {
   ArrowClockwise,
   Check,
@@ -38,7 +38,13 @@ const InteractiveDotGrid = dynamic(() => import('../../components-workspace/dot-
 // device).
 //
 // The iframe payload is this same route with `?frame=1`, which makes the shell
-// render ONLY the children (no recursive chrome).
+// render ONLY the children (no recursive chrome). Crucially, the `frame` flag is
+// read from `searchParams` on the SERVER by each template page and passed in as a
+// prop — NOT via client-only useSearchParams under a Suspense boundary. That was
+// the old approach, and its fallback rendered the full chrome, so the mobile
+// iframe's prerendered HTML briefly showed the top bar before hydration swapped
+// it to the bare payload (a visible flash). Resolving `frame` server-side means
+// the iframe's very first HTML is already the bare payload — no flash.
 // ────────────────────────────────────────────────────────────────────────────
 
 type Device = 'desktop' | 'phone'
@@ -62,51 +68,25 @@ interface TemplatePreviewShellProps {
   templateName: string // e.g. 'Mission Control'
   systemName: string // e.g. 'Andromeda'
   systemHref: string // where the system-name crumb links, e.g. the showcase
+  frame?: boolean // true when this render is the iframe payload (?frame=1); resolved from searchParams on the server by the page and passed in, so the framed HTML is bare from the very first paint (no chrome flash)
   description?: string[] // overrides the install-popover bullet copy
   children: ReactNode // the template composition
 }
 
-export function TemplatePreviewShell(props: TemplatePreviewShellProps) {
-  // useSearchParams() must sit under a Suspense boundary. Fallback = the
-  // full-chrome shell (frame flag defaults false), so there's no flash.
-  return (
-    <Suspense fallback={<ShellInner {...props} forceFrame={false} />}>
-      <ShellInner {...props} />
-    </Suspense>
-  )
-}
-
-function ShellInner({
-  templateSlug,
-  templateName,
-  systemName,
-  systemHref,
-  description,
+export function TemplatePreviewShell({
+  frame = false,
   children,
-  forceFrame,
-}: TemplatePreviewShellProps & { forceFrame?: boolean }) {
-  const searchParams = useSearchParams()
-  const isFramePayload = forceFrame ?? searchParams.get('frame') === '1'
-
-  // Inside the iframe: render the composition bare, no chrome, no recursion —
-  // wrapped in FramePayload, which makes the framed view behave like a real
-  // touch device (hidden overlay-style scrollbars, no reserved gutter, and
+  ...chrome
+}: TemplatePreviewShellProps) {
+  // Inside the iframe (frame): render the composition bare, no chrome, no
+  // recursion — wrapped in FramePayload, which makes the framed view behave like
+  // a real touch device (hidden overlay-style scrollbars, no reserved gutter, and
   // click-drag panning instead of text selection). See FramePayload below.
-  if (isFramePayload) {
+  if (frame) {
     return <FramePayload>{children}</FramePayload>
   }
 
-  return (
-    <PreviewChrome
-      templateSlug={templateSlug}
-      templateName={templateName}
-      systemName={systemName}
-      systemHref={systemHref}
-      description={description}
-    >
-      {children}
-    </PreviewChrome>
-  )
+  return <PreviewChrome {...chrome}>{children}</PreviewChrome>
 }
 
 // ── Frame payload (renders INSIDE the preview iframe) ────────────────────────
