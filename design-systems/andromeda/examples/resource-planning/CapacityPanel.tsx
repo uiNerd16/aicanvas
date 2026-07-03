@@ -182,7 +182,10 @@ function ThresholdBar({ value }) {
 function Sparkline({ data }) {
   return (
     <div style={{ height: `${VIZ_HEIGHT}px`, width: '100%' }}>
-      <ResponsiveContainer width="100%" height="100%">
+      {/* Fixed height (not "100%"): the wrapper is exactly VIZ_HEIGHT anyway,
+          and a known height stops recharts warning "width(-1) and height(-1)"
+          on its first pre-measure render — same pattern as RadarChart. */}
+      <ResponsiveContainer width="100%" height={VIZ_HEIGHT}>
         <AreaChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 2 }}>
           <defs>
             <linearGradient id="rp-spark-fill" x1="0" y1="0" x2="0" y2="1">

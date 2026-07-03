@@ -78,7 +78,9 @@ export function VelocityChart() {
       }
     >
       <div style={{ height: '224px' }}>
-        <ResponsiveContainer width="100%" height="100%">
+        {/* Fixed height (matches the wrapper): a known height stops recharts
+            warning "width(-1) and height(-1)" on its first pre-measure render. */}
+        <ResponsiveContainer width="100%" height={224}>
           <AreaChart
             data={velocityData}
             margin={{ top: tokens.radius.px.xl, right: tokens.radius.px.xl, left: -20, bottom: 0 }}

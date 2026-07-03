@@ -390,7 +390,13 @@ export const TrendChart = forwardRef(function TrendChart(
           </span>
         ) : null}
         <motion.div style={{ width: '100%', height: plotHeight }} {...revealProps}>
-          <ResponsiveContainer width="100%" height="100%">
+          {/* initialDimension: recharts' size detector measures -1×-1 on its
+              first render (before its ResizeObserver reports) and logs a
+              "width(-1) and height(-1)" console warning — in production too.
+              A positive initial size silences it; the real measure replaces
+              it on mount, and the pre-measure frame is invisible anyway
+              behind the clip reveal above. */}
+          <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 480, height: 240 }}>
             {chart}
           </ResponsiveContainer>
         </motion.div>
