@@ -82,7 +82,10 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
           maxWidth: '220px',
           // Compact + non-interactive: the readout must never swallow the plot
           // on small charts, and must not eat the pointer. Position is pinned to
-          // the top of the plot below (so the line + crosshair stay visible).
+          // the top of the plot below (so the line + crosshair stay visible) and
+          // clamped INSIDE the plot horizontally (allowEscapeViewBox x:false
+          // flips it to the cursor's left near the right edge) — on a phone-wide
+          // plot an escaping tooltip gets clipped by the panel.
           pointerEvents: 'none',
         }}
       >
@@ -278,7 +281,7 @@ export const TrendChart = forwardRef(function TrendChart(
           content={<ChartTooltip />}
           cursor={{ fill: tokens.color.surface.hover }}
           position={{ y: 0 }}
-          allowEscapeViewBox={{ x: true, y: true }}
+          allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
           wrapperStyle={{ zIndex: 40 }}
         />
@@ -304,7 +307,7 @@ export const TrendChart = forwardRef(function TrendChart(
           content={<ChartTooltip />}
           cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }}
           position={{ y: 0 }}
-          allowEscapeViewBox={{ x: true, y: true }}
+          allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
           wrapperStyle={{ zIndex: 40 }}
         />
@@ -364,6 +367,12 @@ export const TrendChart = forwardRef(function TrendChart(
 
       {/* Plot */}
       <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+        {/* No z-index here: the plot wrapper below is a stacking context (its
+            clip-path reveal), so a raised label would paint OVER the tooltip
+            pinned to the plot top — the label text bleeding through the
+            readout. The label stays visible anyway (the chart's top margin
+            keeps the SVG transparent up here), and the tooltip now covers it
+            cleanly while hovering. */}
         {yLabel ? (
           <span
             style={{
@@ -375,7 +384,6 @@ export const TrendChart = forwardRef(function TrendChart(
               color: tokens.color.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
-              zIndex: 1,
             }}
           >
             {yLabel}

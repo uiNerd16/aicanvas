@@ -72,6 +72,22 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Mobile-preview iframe payload (?frame=1) — [data-frame] is set pre-paint by
+   the root layout's <head> script. The framed template routes are dynamic +
+   streamed, so FramePayload's own forced-dark <style> (which travels in the
+   late page chunk) can miss the first paint; without this rule the body shows
+   var(--background) (#1A1712, warm brown) inside the phone frame until the
+   template streams in. Pin the framed document to the preview surface
+   (sand-950) from the very first paint. */
+html[data-frame] {
+  color-scheme: dark;
+}
+html[data-frame],
+html[data-frame] body {
+  background: #0e0e0f !important;
+  transition: none !important;
+}
+
 /* ── Custom scrollbar ── */
 /* Webkit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {

@@ -16,6 +16,7 @@ import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { rowContainer, rowItem } from '../../components/lib/motion';
+import { mq } from '../../components/lib/responsive';
 import { requestRows, filterTabs } from './data';
 
 function InsetDivider({ side = 'bottom' }) {
@@ -187,6 +188,7 @@ export function RequestsTable() {
 
       {/* Filter row */}
       <div
+        className="rp-filterbar"
         style={{
           position: 'relative',
           display: 'flex',
@@ -211,6 +213,7 @@ export function RequestsTable() {
           </LayoutGroup>
         </div>
         <label
+          className="rp-filtersearch"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -245,6 +248,22 @@ export function RequestsTable() {
           />
         </label>
       </div>
+      {/* Below `sm` the single row can't hold both the tab strip and the search
+          field — the active-tab fill slides under the search box ("RECENT"
+          behind SEARCH). Faithful stack: tabs keep their own row on top, the
+          search drops below them full-width (the DateRangePicker precedent —
+          for a wide control, full-width beats squeezing). !important because
+          the base styles are inline (same rule as the hover <style> blocks). */}
+      <style>{`
+        ${mq.sm} {
+          .rp-filterbar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: ${tokens.spacing[2]} !important;
+          }
+          .rp-filtersearch input { flex: 1 !important; width: auto !important; }
+        }
+      `}</style>
 
       {/* Table — auto layout so columns size to content; cells nowrap so the
           horizontal rhythm is consistent regardless of content length. The

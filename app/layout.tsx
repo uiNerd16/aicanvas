@@ -143,7 +143,18 @@ export default async function RootLayout({
             mutate the class before hydration. Re-asserting `dark` in the
             head script keeps the live DOM correct even if something else
             stripped it. */}
-        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark')` }} />
+        {/* The frame=1 check tags mobile-preview iframe documents pre-paint.
+            The framed template routes are dynamic + streamed, so the forced-dark
+            <style> inside FramePayload (TemplatePreviewShell) arrives with the
+            LATE page chunk — the browser's first paint of the streamed shell
+            happens before it, showing body's var(--background) (#1A1712, a warm
+            brown) as a visible flash filling the phone frame for the whole
+            server-render window. globals.css keys on [data-frame] so html/body
+            are pinned to the preview surface from the very first paint. A data
+            attribute, not a class: React reconciles the html className during
+            hydration (which strips classes the JSX doesn't know), but leaves
+            other attributes alone. */}
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark');if(/[?&]frame=1(?:&|$)/.test(location.search))document.documentElement.setAttribute('data-frame','')` }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
