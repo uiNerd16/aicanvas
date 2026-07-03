@@ -23,9 +23,11 @@
 
 'use client';
 
+import { motion } from 'framer-motion';
 import { List, UserCircle, Gear, Keyboard, SignOut } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
+import { useCascadeProps } from '../../components/lib/motion';
 import { IconButton } from '../../components/IconButton';
 import { Drawer, DrawerBody } from '../../components/Drawer';
 import { UserCard } from '../../components/UserCard';
@@ -78,9 +80,21 @@ function Brand({ templateName, iconSize }) {
 
 // Mobile top bar: brand left, hamburger right. `display:none` on desktop,
 // shown (`flex`) below `mq.md` via the scoped <style> below.
+//
+// The bar joins the entrance cascade at index 0 — every template's desktop
+// chrome is cascade-gated, so the pre-hydration first paint is uniformly
+// dark and the page then composes itself. A bar exempt from the cascade
+// pops in ALONE on that dark first paint (blurry while the preview iframe
+// is still scale-animating) and hangs over an empty screen until hydration
+// starts the cascade — the awkward top-of-frame glitch on the Mobile
+// toggle. Index 0 is always right: the bar is the topmost mobile element,
+// and the desktop index-0 siblings (sidebars) are display:none below md,
+// so the two never share a visible cascade slot.
 export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }) {
+  const cascade = useCascadeProps(0);
   return (
-    <div
+    <motion.div
+      {...cascade}
       className="amc-topbar"
       style={{
         position: 'relative',
@@ -114,7 +128,7 @@ export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }) {
       <style>{`
         ${mq.md} { .amc-topbar { display: flex !important; } }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
 
