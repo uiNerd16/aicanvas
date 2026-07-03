@@ -236,6 +236,19 @@ function FramePayload({ children }: { children: ReactNode }) {
           background: #0E0E0F !important;
           transition: none !important;
         }
+        /* html/body alone is NOT enough: the root layout also paints theme
+           backgrounds on inner wrapper divs (body's flex column, the content
+           column's bg-sand-200 dark:bg-sand-950). The SSR HTML ships with the
+           'dark' class, but for a LIGHT-theme visitor ThemeProvider strips it
+           after hydration — those wrappers flip to light sand while the
+           composition's entrance animation is still fading in, which reads as
+           a cream/yellow flash filling the phone screen. Force every ancestor
+           of the frame viewport to the dark surface too; :has() matches
+           ancestors only, so the composition's own surfaces are untouched. */
+        body *:has(.mc-frame-viewport) {
+          background: #0E0E0F !important;
+          transition: none !important;
+        }
         /* Overlay-style scrollbars: hide the bar AND drop the reserved 18px
            gutter for every element, so the frame matches a real phone. */
         * {
@@ -309,10 +322,20 @@ function PreviewChrome({
       <div className="relative min-h-0 flex-1">
         {/* Desktop: native, full-bleed. Kept mounted AND visible so the mobile
             overlay crossfades over/off it on the device toggle (below); once the
-            mobile frame is fully in, its opaque backdrop covers this. Keyed by
-            desktopNonce so Refresh remounts the composition and replays its
-            entrance animation; aria-hidden while the mobile frame is on top. */}
-        <div key={desktopNonce} aria-hidden={device !== 'desktop'} className="h-full w-full">
+            mobile frame is fully in, its opaque backdrop covers this. `isolate`
+            flattens the composition into ONE stacking context, so template
+            elements that carry their own z-index (SegmentedControl tabs and
+            chart labels use zIndex:1, panel menus 1000) can never paint over
+            the mobile overlay — without it they float on top of the phone
+            frame. Keyed by desktopNonce so Refresh remounts the composition and
+            replays its entrance animation; aria-hidden + inert while the mobile
+            frame is on top (inert also blocks tabbing into the covered view). */}
+        <div
+          key={desktopNonce}
+          aria-hidden={device !== 'desktop'}
+          inert={device !== 'desktop'}
+          className="isolate h-full w-full"
+        >
           {children}
         </div>
 
@@ -320,12 +343,14 @@ function PreviewChrome({
             gives the device toggle a small motion — the backdrop crossfades and
             the phone frame scales in (and back out) instead of snapping. Keyed by
             frameNonce so Refresh reloads the iframe (fresh animation) without
-            leaving the mobile view. */}
+            leaving the mobile view. z-10 pairs with the desktop layer's
+            `isolate` above: the overlay always paints on top of the
+            composition, whatever z-indexes it uses internally. */}
         <AnimatePresence>
           {device !== 'desktop' && (
             <motion.div
               key="mobile-frame"
-              className="absolute inset-0 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6"
+              className="absolute inset-0 z-10 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -358,8 +383,11 @@ function PreviewChrome({
                 // Only the phone frame exists, so its width is constant. Read
                 // DEVICES.phone directly (not DEVICES[device]) — the exit render
                 // still runs while `device` is already 'desktop', which would
-                // otherwise index DEVICES with a non-frame key.
-                style={{ width: DEVICES.phone.width }}
+                // otherwise index DEVICES with a non-frame key. colorScheme
+                // keeps the browser's own pre-load iframe canvas dark, so the
+                // network round-trip can't blink white before the document
+                // paints.
+                style={{ width: DEVICES.phone.width, colorScheme: 'dark' }}
                 className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl"
                 initial={{ scale: reduce ? 1 : 0.985 }}
                 animate={{ scale: 1 }}
