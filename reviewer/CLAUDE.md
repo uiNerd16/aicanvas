@@ -1,80 +1,56 @@
-# Reviewer Agent
+# Reviewer — the component review checklist
 
-You check finished components before the user previews them. You never modify any file — only read and report.
+Independent review of every built or modified component before the user previews it. The reviewer never modifies files — read, check, report. In the maintainer's environment this runs as a dedicated read-only subagent; the checklist below is the contract either way.
 
 ## Read before reviewing
 
 - `supervisor/mistakes.md` — known recurring issues, check every item
-- `skills/component-anatomy.md` — the required structure every component must follow
-- `skills/design-tokens.md` — correct colors, icon weights, typography
-- `skills/tailwind-v4.md` — v4 patterns, catch v3 mistakes
-- `skills/typescript-patterns.md` — correct types, no any, strict mode rules
-
-## Extended skills (`.claude/skills/`)
-
-- **`.claude/skills/creative-3d-components/SKILL.md`** — For 3D/canvas components, verify against the anti-patterns list (flat lighting, missing cleanup, hardcoded sizes, random particle velocity, etc.)
-- **`.claude/skills/design-motion-principles/SKILL.md`** — For animation quality audits. Check if motion follows the appropriate designer's principles for this component type.
+- `components-workspace/CLAUDE.md` — the builder contract this checklist enforces
+- For 3D/canvas work: the creative-3d anti-patterns; for animation quality: the motion-principles audit
 
 ## Checklist
 
-Run every check in order. One FAIL stops the component from proceeding.
-
 ### 1. TypeScript
-- [ ] Run `npx tsc --noEmit` — any errors = FAIL, report the exact error message
+- [ ] `npx tsc --noEmit` passes — any error = FAIL with the exact message
 
 ### 2. File structure
-- [ ] `components-workspace/<name>/index.tsx` exists
-- [ ] `components-workspace/<name>/prompts.ts` exists
-- [ ] `components-workspace/<name>/spec.md` exists
+- [ ] `components-workspace/<slug>/index.tsx`, `prompts.ts`, `spec.md` all exist
 
 ### 3. index.tsx — structure
 - [ ] `'use client'` is the very first line
-- [ ] Exports a single named function in PascalCase matching the folder name (e.g. `glowing-button` → `GlowingButton`)
-- [ ] Root element className contains `h-full`, `w-full`, and `bg-sand-950`
-- [ ] No `bg-zinc-950` anywhere (known mistake #001)
+- [ ] Exports a single **default** function (the copy-paste contract)
+- [ ] Root element className contains `min-h-screen`, `w-full`, and the dual-theme background `bg-sand-100 dark:bg-sand-950`
+- [ ] No `bg-zinc-950` anywhere (mistake #001)
+- [ ] Top-of-file `// npm install ...` comment lists every non-React dependency
 
-### 4. index.tsx — animations
-- [ ] At least one `motion.` usage from `framer-motion`
-- [ ] No `useState` used for animation values — use MotionValues instead
-- [ ] All `useEffect` hooks have a cleanup function (cancel RAF, stop animations, unsubscribe)
+### 4. Animations
+- [ ] Animation uses `framer-motion` (`motion.` present for animated components)
+- [ ] No `useState` for animation values — MotionValues instead
+- [ ] Every `useEffect` cleans up (cancel RAF, stop animations, unsubscribe)
 
-### 5. index.tsx — styling
-- [ ] No hardcoded pixel dimensions (`w-[Xpx]`, `h-[Xpx]`) except for small decorative elements
-- [ ] No inline `style={{ width: Xpx }}` or `style={{ height: Xpx }}` for layout elements
+### 5. Styling + type scale
+- [ ] Inside the component: raw values, not site tokens (sand-*/olive-* belong to site chrome; the root container chrome is the one exception)
+- [ ] Font sizes on the fixed scale (10/12/14/16/20/24/28); spacing on the 4px grid
+- [ ] No hardcoded pixel dimensions on layout containers — fluid sizing
 
-### 5b. Mobile responsiveness
-- [ ] No fixed pixel widths/heights on layout containers — fluid sizing only
-- [ ] If the primary interaction is hover-based, a tap/click equivalent exists that works on touch screens
-- [ ] Canvas/WebGL components derive size from the container (ResizeObserver or ref), never hardcoded
-- [ ] Text is at minimum 14px (text-sm) for any readable content
+### 5b. Mobile
+- [ ] Works at 320px; hover-only interactions have a touch equivalent
+- [ ] Canvas/WebGL sizes from the container (ResizeObserver/ref), never hardcoded
+- [ ] Readable text is at least 14px
 
 ### 6. Icons
-- [ ] If Phosphor icons are used: import is from `@phosphor-icons/react`
-- [ ] All icon instances use `weight="regular"` — not duotone, not fill (known mistake #002)
+- [ ] Phosphor imports from `@phosphor-icons/react`, every instance `weight="regular"` (mistake #002)
 
 ### 7. prompts.ts
-- [ ] Exports `prompts` typed as `Partial<Record<Platform, string>>`
-- [ ] `Platform = 'Claude Code' | 'Lovable' | 'V0'` (imported from `../../app/components/ComponentCard`)
-- [ ] Platforms specified by the brief are present; absent lanes are intentional (not accidentally empty)
-- [ ] No platform has an empty string or a placeholder like `TODO`
-- [ ] Each prompt is self-contained (can recreate the component without seeing the code)
+- [ ] Exports `prompts` typed `Partial<Record<Platform, string>>`; `Platform` imported from `../../app/components/ComponentCard` (verify the union against that file, not docs)
+- [ ] No empty strings or TODO placeholders; each prompt is self-contained
 
 ### 8. Spec compliance
-- [ ] Read `spec.md` — confirm the built component matches what was specified
-- [ ] Any deviations from spec are noted (not auto-failed, but flagged for user awareness)
+- [ ] Built component matches `spec.md`; deviations flagged (not auto-failed)
 
 ## Output format
 
-Always respond with either:
+**PASS** — one sentence, plus any spec deviations listed after.
+**FAIL** — numbered issues referencing checklist items, with file:line. One FAIL stops the pipeline.
 
-**PASS**
-> One sentence describing what was built and confirmed.
-
-**FAIL**
-> Numbered list of specific issues, each referencing the checklist item number.
-> Example: "3.2 — exported function is `GlowButton` but folder is `glowing-button` (expected `GlowingButton`)"
-
-## Rules
-- Never modify any file
-- Never guess — if you cannot verify something (e.g. TypeScript won't run), flag it as "unable to verify: [reason]"
-- A PASS with spec deviations is still a PASS — list deviations separately after the PASS line
+Never guess: anything unverifiable is reported as "unable to verify: [reason]".
