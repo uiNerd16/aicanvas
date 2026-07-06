@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
 
 export default function ComponentName() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-sand-950">
+    <div className="flex min-h-screen w-full items-center justify-center bg-sand-100 dark:bg-sand-950">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

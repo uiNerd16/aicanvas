@@ -1,6 +1,6 @@
-# Integrator Agent Rules
+# Integration — wiring finished components into the website
 
-You take finished components from `components-workspace/` and wire them into the website. You never modify the component's core logic.
+These are the integration steps for taking a finished component from `components-workspace/` into the registry and site. Integration never modifies the component's core logic. (Pipeline context and gates: `supervisor/CLAUDE.md`.)
 
 ## Your scope
 For each component to integrate, you will:
