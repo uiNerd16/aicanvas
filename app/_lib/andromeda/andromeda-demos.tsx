@@ -68,6 +68,10 @@ import { Planet } from '../../../design-systems/andromeda/components/Planet'
 import {
   Table, TableHead, TableBody, TableRow, TableHeader, TableCell, TableStyles,
 } from '../../../design-systems/andromeda/components/Table'
+// v2 components come from the build-time-injected shim (real re-exports when
+// injected, placeholder panels on degraded builds) — never import them from
+// design-systems/ directly. See scripts/inject-premium.mjs.
+import { MetricChart, Gauge } from '../../lib/andromeda-v2.generated'
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 
@@ -411,6 +415,31 @@ function HeatGridDemo() {
         <HeatGrid value={25} cellSize={16} gap={2} label="Low" />
         <HeatGrid value={85} cellSize={16} gap={2} label="High" />
       </div>
+    </div>
+  )
+}
+
+function MetricChartDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <MetricChart label="/// Station" title="Orbital Altitude" unit="km" />
+    </div>
+  )
+}
+
+function GaugeDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="Sizes">
+        <Gauge size="sm" />
+        <Gauge size="md" />
+        <Gauge size="lg" />
+      </Row>
+      <Row label="Variants">
+        <Gauge variant="accent" value={82} label="CPU" />
+        <Gauge variant="warning" value={64} label="FUEL" />
+        <Gauge variant="fault" value={12} label="O2" />
+      </Row>
     </div>
   )
 }
@@ -955,9 +984,11 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
   'empty-state': EmptyStateDemo,
+  gauge: GaugeDemo,
   'heat-grid': HeatGridDemo,
   'icon-button': IconButtonDemo,
   input: InputDemo,
+  'metric-chart': MetricChartDemo,
   'nav-item': NavItemDemo,
   'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,

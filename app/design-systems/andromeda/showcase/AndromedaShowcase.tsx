@@ -102,6 +102,10 @@ import {
   DrawerBody,
   DrawerFooter,
 } from '../../../../design-systems/andromeda/components/Drawer'
+// v2 components come from the build-time-injected shim (real re-exports when
+// injected, placeholder panels on degraded builds) — never import them from
+// design-systems/ directly. See scripts/inject-premium.mjs.
+import { MetricChart, Gauge } from '../../../lib/andromeda-v2.generated'
 import { TemplateChrome } from '../../../_components/TemplateChrome'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
@@ -1547,6 +1551,45 @@ export default function AndromedaShowcase({
               tooltipLabelFormatter={(l) => `DAY ${String(l).padStart(2, '0')}`}
             />
           </div>
+        </Section>
+
+        {/* ── Metric Chart ───────────────────────────────────────────────── */}
+        <Section
+          title="Metric Chart"
+          slug="metric-chart"
+          kicker="Component · Charts"
+          description="The framed single-series telemetry panel. TrendChart auto-domains from zero; MetricChart is the domain-aware counterpart, fitting the y-domain to the data so percentage and non-zero-floor measurements fill the plot. The variant colors the status badge only; chart ink stays neutral."
+        >
+          <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[5] }}>
+            <MetricChart />
+            <MetricChart
+              label="/// Station"
+              title="Orbital Altitude"
+              description="Reboost burn at 14:00"
+              unit="km"
+              variant="warning"
+              badgeText="Drift"
+            />
+          </div>
+        </Section>
+
+        {/* ── Gauge ──────────────────────────────────────────────────────── */}
+        <Section
+          title="Gauge"
+          slug="gauge"
+          kicker="Component · Charts"
+          description="Radial percentage gauge. The arc IS the measurement, so it takes the semantic color (accent live, orange warning, red fault) over a neutral track; the readout counts up in sync with the sweep. A bare primitive that composes into Cards and panels."
+        >
+          <Row label="Sizes">
+            <Gauge size="sm" />
+            <Gauge size="md" />
+            <Gauge size="lg" />
+          </Row>
+          <Row label="Variants">
+            <Gauge variant="accent" value={82} label="CPU" />
+            <Gauge variant="warning" value={64} label="FUEL" />
+            <Gauge variant="fault" value={12} label="O2" />
+          </Row>
         </Section>
 
         {/* ── Planet · Next Destination ──────────────────────────────────── */}

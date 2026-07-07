@@ -87,6 +87,12 @@ app/lib/premium-registry.generated.tsx
 app/lib/premium-build-info.generated.ts
 app/lib/component-copy.premium.generated.ts
 
+# Free v2 design-system components are ALSO build-time injected (vault-authored,
+# never tracked here). The injected files under design-systems/*/components/ are
+# excluded via a git info/exclude block managed by scripts/inject-premium.mjs;
+# only the generated shim has a stable path to ignore:
+app/lib/andromeda-v2.generated.tsx
+
 # Private thoughts: planning, strategy, monetization, legal/tax reasoning, notes.
 # NEVER commit these — the repo is public. Local only. (See also /business-strategy/.)
 /_private/

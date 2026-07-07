@@ -33,6 +33,14 @@
  * @property {string[]} systemEntries Component files. Shipped as the `<slug>` system
  *                                    item, which depends on `<slug>-tokens` so the
  *                                    foundation isn't duplicated. Walked transitively.
+ * @property {string[]} [optionalSystemEntries] Component files flagged OPTIONAL:
+ *                                    v2 components injected at build time by
+ *                                    scripts/inject-premium.mjs (vault manifest key
+ *                                    `freeSystemComponents`). When present they are
+ *                                    emitted exactly like systemEntries; when absent
+ *                                    (degraded build / older premium pin) the
+ *                                    generator skips them with a warning instead of
+ *                                    failing.
  * @property {DesignSystemTemplate[]} templates
  */
 
@@ -81,6 +89,16 @@ export const DESIGN_SYSTEMS = [
       'components/TrendChart.tsx',
       'components/UserCard.tsx',
       'components/UserMenu.tsx',
+    ],
+    // v2 components — authored in the private vault (aicanvas-premium) and
+    // injected into design-systems/andromeda/components/ at build time by
+    // scripts/inject-premium.mjs. FREE single-component installs exactly like
+    // the v1 entries above (same registry:ui type → classified free by
+    // lib/registry/content-type.ts). Optional: absent files (degraded build,
+    // older premium pin) are skipped with a warning, never a build failure.
+    optionalSystemEntries: [
+      'components/MetricChart.tsx',
+      'components/Gauge.tsx',
     ],
     // Per-file slug overrides. Button.tsx's natural slug (andromeda-button) is
     // owned by the standalone in components-workspace/andromeda-button/, so the
