@@ -39,19 +39,19 @@ function hasStack(c: ComponentMeta, label: string): boolean {
 export const COLLECTIONS: readonly Collection[] = [
   {
     slug: 'framer-motion-components',
-    title: 'Framer Motion Components for React: Free + Tailwind',
+    title: 'Framer Motion Components for React: Animated + Tailwind',
     description:
-      'Free animated React components built with Motion (Framer Motion) and Tailwind CSS. Copy-paste ready, installable via the shadcn CLI.',
+      'Animated React components built with Motion (Framer Motion) and Tailwind CSS. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Framer Motion Components for React',
     intro:
-      'Every component in this collection animates with Motion, the library formerly known as Framer Motion. Copy the source, install it with the shadcn CLI, or remix it with AI. Open source and free to start.',
+      'Every component in this collection animates with Motion, the library formerly known as Framer Motion. Copy the source, install it with the shadcn CLI, or remix it with AI.',
     match: (c) => hasStack(c, 'Motion'),
   },
   {
     slug: 'canvas-animation-components',
-    title: 'Canvas Animation Components for React: Free + Performant',
+    title: 'Canvas Animation Components for React: Performant + Copy-Paste',
     description:
-      'Free React components that render animations on HTML canvas: particle fields, noise backgrounds, generative grids. Installable via the shadcn CLI.',
+      'React components that render animations on HTML canvas: particle fields, noise backgrounds, generative grids. Installable via the shadcn CLI.',
     h1: 'Canvas Animation Components for React',
     intro:
       'These components draw straight to an HTML canvas for smooth, GPU-friendly animation at any size: particle fields, noise backgrounds, and generative grids. Each one is self-contained React and TypeScript, ready to copy or install with the shadcn CLI.',
@@ -59,9 +59,9 @@ export const COLLECTIONS: readonly Collection[] = [
   },
   {
     slug: 'react-particle-effect-components',
-    title: 'React Particle Effect Components: Free + Copy-Paste',
+    title: 'React Particle Effect Components: Canvas + Motion',
     description:
-      'Free React particle effect components: constellations, magnetic dots, particle spheres, and bursts. Copy-paste ready, installable via the shadcn CLI.',
+      'React particle effect components: constellations, magnetic dots, particle spheres, and bursts. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'React Particle Effect Components',
     intro:
       'Particle systems for React, from ambient background constellations to celebratory bursts. Built with canvas and Motion for smooth performance, and ready to copy, install, or remix with AI.',
@@ -77,9 +77,9 @@ export const COLLECTIONS: readonly Collection[] = [
   },
   {
     slug: 'react-widgets-for-saas-dashboards',
-    title: 'React Widgets for SaaS Dashboards: Free + Animated',
+    title: 'React Widgets for SaaS Dashboards: Animated + Compact',
     description:
-      'Free animated React widgets for SaaS dashboards: progress, calendars, task cards, notifications, and user menus. Installable via the shadcn CLI.',
+      'Animated React widgets for SaaS dashboards: progress, calendars, task cards, notifications, and user menus. Installable via the shadcn CLI.',
     h1: 'React Widgets for SaaS Dashboards',
     intro:
       'Compact, animated widgets that slot into a product dashboard: progress and charging indicators, calendars, task cards, notifications, and user menus. Each one is copy-paste ready and installable with the shadcn CLI.',
@@ -100,7 +100,7 @@ export const COLLECTIONS: readonly Collection[] = [
     slug: 'react-components-for-ai-apps',
     title: 'React Components for AI Apps: Chat, Compose, Voice',
     description:
-      'Free React components for AI products: chat composers, voice pills, AI job cards, and playful assistants. Installable via the shadcn CLI.',
+      'React components for AI products: chat composers, voice pills, AI job cards, and playful assistants. Installable via the shadcn CLI.',
     h1: 'React Components for AI Apps',
     intro:
       'Interface pieces for AI products: a glassmorphism chat composer, a voice chat pill, AI job cards, and a curious 3D assistant. Copy the source, install with the shadcn CLI, or remix with AI.',
@@ -108,9 +108,9 @@ export const COLLECTIONS: readonly Collection[] = [
   },
   {
     slug: 'react-loading-and-progress-components',
-    title: 'React Loading and Progress Components: Free + Animated',
+    title: 'React Loading and Progress Components: Animated + Copy-Paste',
     description:
-      'Free animated React loading and progress components: upload progress, steppers, loaders, and charging indicators. Installable via the shadcn CLI.',
+      'Animated React loading and progress components: upload progress, steppers, loaders, and charging indicators. Installable via the shadcn CLI.',
     h1: 'React Loading and Progress Components',
     intro:
       'Loaders, steppers, and progress indicators that make waiting feel intentional. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
@@ -126,7 +126,7 @@ export const COLLECTIONS: readonly Collection[] = [
     slug: 'react-date-and-time-components',
     title: 'React Date and Time Components: Calendars + Clocks',
     description:
-      'Free animated React date and time components: flip calendars, neon clocks, and scheduling cards. Installable via the shadcn CLI.',
+      'Animated React date and time components: flip calendars, neon clocks, and scheduling cards. Installable via the shadcn CLI.',
     h1: 'React Date and Time Components',
     intro:
       'Calendars, clocks, and scheduling cards with personality. Each component is self-contained React and TypeScript, ready to copy or install with the shadcn CLI.',
@@ -136,7 +136,7 @@ export const COLLECTIONS: readonly Collection[] = [
     slug: 'react-components-for-ecommerce',
     title: 'React Components for Ecommerce: Product Cards + Checkout',
     description:
-      'Free animated React components for online stores: product card decks, cover-flow carousels, and swap widgets. Installable via the shadcn CLI.',
+      'Animated React components for online stores: product card decks, cover-flow carousels, and swap widgets. Installable via the shadcn CLI.',
     h1: 'React Components for Ecommerce',
     intro:
       'Product showcases and checkout-adjacent widgets for online stores: card decks, cover-flow and cube carousels, and a swap widget. Copy the source, install with the shadcn CLI, or remix with AI.',

@@ -12,9 +12,6 @@ import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
 import type { ComponentMeta } from '../lib/component-registry'
-import { LAST_DEPLOY } from '../lib/config'
-
-const NEW_BADGE_ACTIVE = Date.now() - new Date(LAST_DEPLOY).getTime() < 96 * 60 * 60 * 1000
 
 // ─── Fuzzy "Did you mean?" helpers ───────────────────────────────────────────
 
@@ -212,7 +209,10 @@ export function HomeClient({
                     description={entry.description}
                     tags={entry.tags}
                     image={entry.image}
-                    badge={entry.badge === 'Premium' || NEW_BADGE_ACTIVE ? entry.badge : undefined}
+                    // Every standalone is labeled: Premium keeps its badge,
+                    // everything else is explicitly Free (the listing copy
+                    // makes no free/paid claims - the badge does).
+                    badge={entry.badge === 'Premium' ? 'Premium' : 'Free'}
                     href={`/components/${entry.slug}`}
                     slug={entry.slug}
                     position={i}

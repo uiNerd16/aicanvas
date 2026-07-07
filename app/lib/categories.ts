@@ -22,7 +22,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React cards and modal dialogs. Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Cards and Modals',
     intro:
-      'Free animated card and modal dialog components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
+      'Animated card and modal dialog components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
   },
   {
     label: 'Widgets',
@@ -32,7 +32,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React widgets and UI elements. Built with Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Widgets',
     intro:
-      'Free animated widgets and small UI elements for React. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
+      'Animated widgets and small UI elements for React. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
   },
   {
     label: 'Backgrounds',
@@ -42,7 +42,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React backgrounds built with Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Backgrounds',
     intro:
-      'Free animated background components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install with the shadcn CLI.',
+      'Animated background components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install with the shadcn CLI.',
   },
   {
     label: 'Buttons & Toggles',
@@ -52,7 +52,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React buttons and toggles built with Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Buttons and Toggles',
     intro:
-      'Free animated buttons and toggle switches for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
+      'Animated buttons and toggle switches for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
   },
   {
     label: 'Navigation',
@@ -62,7 +62,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free React navigation components: navbars, sidebars, tab bars, and docks. Tailwind CSS and Motion, installable via the shadcn CLI.',
     h1: 'React Navigation Components',
     intro:
-      'Free navigation components for React: navbars, sidebars, tab bars, and docks. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
+      'Navigation components for React: navbars, sidebars, tab bars, and docks. Built with Tailwind CSS and Motion, copy-paste ready or installable via the shadcn CLI.',
   },
   {
     label: 'Inputs & Controls',
@@ -72,7 +72,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React input and control components. Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Inputs and Controls',
     intro:
-      'Free animated input and control components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
+      'Animated input and control components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
   },
   {
     label: 'Notifications',
@@ -82,7 +82,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React notification and toast components. Tailwind CSS and Motion. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Animated React Notifications and Toasts',
     intro:
-      'Free animated notification and toast components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
+      'Animated notification and toast components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install via the shadcn CLI.',
   },
   {
     label: 'Typography',
@@ -92,7 +92,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free animated React typography components: scramble text, blur reveal, ripple text, and more. Tailwind CSS and Motion.',
     h1: 'Animated React Typography Components',
     intro:
-      'Free animated typography components for React: scramble text, blur reveal, ripple text, and more. Built with Tailwind CSS and Motion.',
+      'Animated typography components for React: scramble text, blur reveal, ripple text, and more. Built with Tailwind CSS and Motion.',
   },
   {
     label: 'Glass',
@@ -102,7 +102,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free glassmorphism React components: navbars, cards, modals, sliders, toggles, and more. Tailwind CSS and Motion.',
     h1: 'Glassmorphism React Components',
     intro:
-      'Free glassmorphism components for React: navbars, cards, modals, sliders, toggles, and more. Built with Tailwind CSS and Motion, ready to copy and paste.',
+      'Glassmorphism components for React: navbars, cards, modals, sliders, toggles, and more. Built with Tailwind CSS and Motion, ready to copy and paste.',
   },
   {
     label: '3D & Shaders',
@@ -112,7 +112,7 @@ export const CATEGORIES: readonly Category[] = [
       'Free 3D and shader React components built with Three.js and WebGL. Copy-paste ready, installable via the shadcn CLI.',
     h1: '3D and Shader React Components',
     intro:
-      'Free 3D and shader components for React. Built with Three.js and WebGL, ready to copy and paste or install via the shadcn CLI.',
+      '3D and shader components for React. Built with Three.js and WebGL, ready to copy and paste or install via the shadcn CLI.',
   },
 ] as const
 
