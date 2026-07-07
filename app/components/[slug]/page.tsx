@@ -151,9 +151,11 @@ function buildFaq(
     },
   ]
   if (entry.useCases && entry.useCases.length > 0) {
+    // Chips are kept verbatim (not lowercased) so acronyms like SaaS, AI, UI,
+    // and 3D survive intact in both the visible copy and the FAQPage JSON-LD.
     faq.push({
       q: `Where would I use ${entry.name}?`,
-      a: `Common uses include ${entry.useCases.join(', ').toLowerCase()}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
+      a: `Common uses include ${entry.useCases.join(', ')}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
     })
   }
   const promptLanes = Object.keys(entry.prompts)

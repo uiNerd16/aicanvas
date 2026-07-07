@@ -55,10 +55,13 @@ AI agents can browse and install AI Canvas components through the official MCP s
     }) => {
       const templates = (s.templates ?? []).map((t) => {
         const pageSlug = t.slug.replace(new RegExp(`^${s.slug}-`), '')
-        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): ${t.domain ?? 'Template'} template built entirely from ${s.name} components. Install: \`npx shadcn@latest add ${SITE_URL}/r/${t.slug}.json\``
+        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): Premium ${t.domain ?? ''} template built entirely from ${s.name} components. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${t.slug}.json\``
       })
+      // The full-system aggregate and the templates are Premium (the individual
+      // component pages are free); label them so an assistant never presents
+      // these installs as free.
       return [
-        `- [${s.name}](${SITE_URL}/design-systems/${s.slug}): Complete design system (tokens + components). Showcase: ${SITE_URL}/design-systems/${s.slug}/showcase. Install: \`npx shadcn@latest add ${SITE_URL}/r/${s.slug}.json\``,
+        `- [${s.name}](${SITE_URL}/design-systems/${s.slug}): Complete Premium design system (tokens + components). Showcase (free to browse): ${SITE_URL}/design-systems/${s.slug}/showcase. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${s.slug}.json\``,
         ...templates,
       ].join('\n')
     },

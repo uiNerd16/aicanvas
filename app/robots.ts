@@ -9,12 +9,17 @@ const DISALLOW = ['/ideation', '/ideation/']
 // distribution channel for an open component registry, so the site opts IN to
 // AI training and retrieval crawlers rather than relying on the implicit `*`.
 const AI_CRAWLERS = [
+  // OpenAI
   'GPTBot',
   'OAI-SearchBot',
   'ChatGPT-User',
+  // Anthropic — current agents plus the legacy tokens (harmless if unused).
   'ClaudeBot',
+  'Claude-User',
+  'Claude-SearchBot',
   'Claude-Web',
   'anthropic-ai',
+  // Others
   'PerplexityBot',
   'Google-Extended',
   'CCBot',
