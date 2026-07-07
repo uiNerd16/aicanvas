@@ -1,5 +1,5 @@
 import { COMPONENTS } from '../lib/component-registry'
-import { COLLECTIONS } from '../lib/collections'
+import { COLLECTIONS, collectionMembers } from '../lib/collections'
 import { SITE_URL } from '../lib/config'
 import { DESIGN_SYSTEMS } from '../../scripts/lib/design-systems.config.mjs'
 
@@ -55,7 +55,8 @@ AI agents can browse and install AI Canvas components through the official MCP s
     }) => {
       const templates = (s.templates ?? []).map((t) => {
         const pageSlug = t.slug.replace(new RegExp(`^${s.slug}-`), '')
-        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): Premium ${t.domain ?? ''} template built entirely from ${s.name} components. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${t.slug}.json\``
+        const kind = t.domain ? `${t.domain} template` : 'template'
+        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): Premium ${kind} built entirely from ${s.name} components. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${t.slug}.json\``
       })
       // The full-system aggregate and the templates are Premium (the individual
       // component pages are free); label them so an assistant never presents
@@ -67,10 +68,16 @@ AI agents can browse and install AI Canvas components through the official MCP s
     },
   ).join('\n')
 
-  const collections = COLLECTIONS.map(
-    (c) =>
-      `- [${c.h1}](${SITE_URL}/components/collection/${c.slug}): ${c.description}`,
-  ).join('\n')
+  // Only advertise collections that actually render (the page 404s below 3
+  // members); keeps llms.txt in lockstep with the route's own gate.
+  const collections = COLLECTIONS.filter(
+    (c) => collectionMembers(c, COMPONENTS).length >= 3,
+  )
+    .map(
+      (c) =>
+        `- [${c.h1}](${SITE_URL}/components/collection/${c.slug}): ${c.description}`,
+    )
+    .join('\n')
 
   const body = `${intro}\n## Design systems and templates\n${systems}\n\n## Collections\n${collections}\n\n## Components\n\n${sections.join('\n\n')}\n`
 

@@ -118,6 +118,14 @@ export async function generateMetadata({
   }
 }
 
+// Natural-language list join: "A", "A and B", "A, B, and C" (serial comma).
+// Keeps the generated FAQ copy from reading "A and B and C".
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? ''
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
+}
+
 // Programmatic per-component FAQ, rendered on the page AND emitted as
 // FAQPage JSON-LD. Every answer is derived from registry data so it stays
 // true automatically; only questions we can answer accurately are included.
@@ -143,7 +151,7 @@ function buildFaq(
       q: `What is ${entry.name} built with?`,
       a:
         `${entry.name} is built with React and TypeScript` +
-        (stacks.length > 0 ? `, using ${stacks.join(' and ')}.` : '.') +
+        (stacks.length > 0 ? `, using ${joinList(stacks)}.` : '.') +
         (entry.dualTheme ? ' It ships with both light and dark styling.' : ''),
     },
   ]
@@ -152,14 +160,14 @@ function buildFaq(
     // and 3D survive intact in both the visible copy and the FAQPage JSON-LD.
     faq.push({
       q: `Where would I use ${entry.name}?`,
-      a: `Common uses include ${entry.useCases.join(', ')}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
+      a: `Common uses include ${joinList(entry.useCases)}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
     })
   }
   const promptLanes = Object.keys(entry.prompts)
   if (promptLanes.length > 0) {
     faq.push({
       q: `Can I remix ${entry.name} with AI?`,
-      a: `Yes. ${entry.name} ships with expert prompts for ${promptLanes.join(', ')}, so you can recreate and customize it in your AI builder of choice.`,
+      a: `Yes. ${entry.name} ships with expert prompts for ${joinList(promptLanes)}, so you can recreate and customize it in your AI builder of choice.`,
     })
   }
   return faq
