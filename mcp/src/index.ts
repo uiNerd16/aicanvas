@@ -157,9 +157,24 @@ async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
     const j = (await res.json().catch(() => ({}))) as { message?: string }
     throw new Error(
       j.message ??
-        'This requires AI Canvas Premium, or you have hit the daily free limit. ' +
-        'Upgrade at https://aicanvas.me/pricing. Set AICANVAS_TOKEN to use your account, ' +
+        'This is premium AI Canvas content. Upgrade at https://aicanvas.me/pricing, ' +
+        'then use the AI Canvas MCP config from your account (your token is included) ' +
         'and update with: npx @aicanvas/mcp@latest',
+    )
+  }
+  // Free component pulled without an account: the registry returns a 200
+  // placeholder (not a 402), tagged with this header. Surface a warm sign-up
+  // CTA instead of handing the placeholder back as if it were real source.
+  if (res.headers.get('x-aicanvas-content-type') === 'free-account-required') {
+    const j = (await res.json().catch(() => ({}))) as { title?: string }
+    const name =
+      typeof j.title === 'string'
+        ? j.title.replace(/\s*\(free account required\)\s*$/i, '')
+        : slug
+    throw new Error(
+      `Almost there — "${name}" is free with an AI Canvas account (free, unlimited installs). ` +
+        `Sign up at https://aicanvas.me/account/sign-up, then use the AI Canvas MCP config from ` +
+        `your account (your token is included) and ask again.`,
     )
   }
   if (!res.ok) {

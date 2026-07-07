@@ -242,9 +242,9 @@ function freeAccountStub(realBody: string, slug: string): NextResponse {
     /* defaults below */
   }
   const msg =
-    `"${title}" installs free with an AI Canvas account. ` +
-    `Create one (free, unlimited installs) at https://aicanvas.me/account/sign-up, ` +
-    `then re-run this command.`
+    `Almost there — "${title}" is free with an AI Canvas account (free, unlimited installs). ` +
+    `Sign up at https://aicanvas.me/account/sign-up, then copy your personal install command ` +
+    `from the component page.`
   const stub =
     `const ACCOUNT_NOTICE =\n` +
     `  ${JSON.stringify(msg)}\n\n` +
@@ -265,6 +265,10 @@ function freeAccountStub(realBody: string, slug: string): NextResponse {
     title: `${title} (free account required)`,
     description:
       'Create a free AI Canvas account for unlimited one-command installs: https://aicanvas.me/account/sign-up',
+    // `docs` is printed by the shadcn CLI in the terminal after `add`, so the
+    // warm sign-up CTA is visible even though the install mechanically writes a
+    // placeholder file. (Verified: the CLI prints this field.)
+    docs: msg,
     dependencies: [],
     registryDependencies: [],
     files,

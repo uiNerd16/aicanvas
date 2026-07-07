@@ -360,25 +360,22 @@ try {
   // Pick a slug we know exists (from earlier list)
   const realSlug = lcAllSc?.components?.[0]?.slug
   const gc = await callTool(client, 'get_component', { slug: realSlug })
-  const gcSc = getStructured(gc)
+  // Anonymous (no AICANVAS_TOKEN) pulls of a free component are account-gated in
+  // prod: the registry returns a create-a-free-account placeholder (200 + the
+  // X-AICanvas-Content-Type: free-account-required header), and the MCP now
+  // surfaces a warm sign-up CTA instead of handing the placeholder back as source.
+  // (With a token set, this same call returns the real source — not covered here,
+  // since the smoke test must not embed a real account token.)
+  const gcText = gc?.result?.content?.[0]?.text ?? ''
   record(
-    `get_component("${realSlug}") returns slug + name`,
-    gcSc?.slug === realSlug && typeof gcSc?.name === 'string',
-    `got ${JSON.stringify({ slug: gcSc?.slug, name: gcSc?.name })}`,
+    `get_component("${realSlug}") is account-gated when anonymous (isError)`,
+    gc?.result?.isError === true,
+    `got ${JSON.stringify(gc?.result)?.slice(0, 140)}`,
   )
   record(
-    'returns non-empty source code starting with "use client" or import',
-    typeof gcSc?.code === 'string' &&
-      gcSc.code.length > 100 &&
-      (gcSc.code.includes("'use client'") ||
-        gcSc.code.includes('"use client"') ||
-        gcSc.code.startsWith('import')),
-    `code length ${gcSc?.code?.length}, starts: ${gcSc?.code?.slice(0, 60)}`,
-  )
-  record(
-    'returns filePath like components/aicanvas/<slug>.tsx',
-    gcSc?.filePath === `components/aicanvas/${realSlug}.tsx`,
-    `got ${gcSc?.filePath}`,
+    'gated get_component returns a warm sign-up CTA (not a raw placeholder)',
+    /free with an AI Canvas account/i.test(gcText) && /sign-up/i.test(gcText),
+    `got: ${gcText.slice(0, 140)}`,
   )
 
   const gcBad = await callTool(client, 'get_component', {
