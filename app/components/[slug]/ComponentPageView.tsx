@@ -102,6 +102,12 @@ interface ComponentPageViewProps {
   // (which merges them in from app/lib/component-copy.ts).
   about?: string                                    // ~70-110 word paragraph below the install section
   useCases?: string[]                               // up to 3 chips shown next to the category in the header
+  // Programmatic FAQ built server-side from registry data (page.tsx also
+  // emits it as FAQPage JSON-LD); rendered above the related section.
+  faq?: { q: string; a: string }[]
+  // Collections this component belongs to — cross-links to
+  // /components/collection/<slug> pages.
+  collections?: { slug: string; title: string }[]
 }
 
 const RELATED_PAGE_SIZE = 3
@@ -125,6 +131,8 @@ export default function ComponentPageView({
   children,
   about,
   useCases,
+  faq,
+  collections,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
   // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub returns a fixed
@@ -1383,6 +1391,50 @@ export default function ComponentPageView({
                 )
               })()}
             </>
+          )}
+
+          {/* ── FAQ — programmatic Q&A mirrored as FAQPage JSON-LD by the
+              server page. Plain stacked list (no accordion) so every answer
+              is visible text in the crawled HTML. ── */}
+          {faq && faq.length > 0 && (
+            <section className="mt-16">
+              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                Frequently asked questions
+              </h2>
+              <dl className="mt-4 space-y-5">
+                {faq.map((item) => (
+                  <div key={item.q}>
+                    <dt className="text-sm font-semibold text-sand-900 dark:text-sand-50 sm:text-base">
+                      {item.q}
+                    </dt>
+                    <dd className="mt-1 text-sm leading-relaxed text-sand-600 dark:text-sand-400 sm:text-base">
+                      {item.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {/* ── Collections — cross-links to the curated collection pages
+              this component appears in. ── */}
+          {collections && collections.length > 0 && (
+            <section className="mt-8">
+              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                Featured in collections
+              </h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {collections.map((col) => (
+                  <Link
+                    key={col.slug}
+                    href={`/components/collection/${col.slug}`}
+                    className="rounded-full border border-sand-300 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
+                  >
+                    {col.title}
+                  </Link>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* ── Related components ─────────────────────────────────────────── */}

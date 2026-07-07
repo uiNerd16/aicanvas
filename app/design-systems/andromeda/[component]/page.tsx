@@ -18,10 +18,33 @@ export async function generateMetadata({
   const { component } = await params
   const entry = getAndromedaComponent(component)
   if (!entry) return {}
+  const title = `${entry.name} · Andromeda Design System`
   return {
-    title: `${entry.name} · Andromeda Design System`,
+    title,
     description: entry.description,
     alternates: { canonical: `/design-systems/andromeda/${entry.slug}` },
+    // Per-component screenshot as the social image (previously these pages
+    // inherited the generic site-wide OG image).
+    ...(entry.image
+      ? {
+          openGraph: {
+            title,
+            description: entry.description,
+            images: [
+              {
+                url: entry.image,
+                alt: `${entry.name} — Andromeda design system component`,
+              },
+            ],
+          },
+          twitter: {
+            card: 'summary_large_image' as const,
+            title,
+            description: entry.description,
+            images: [entry.image],
+          },
+        }
+      : {}),
   }
 }
 
