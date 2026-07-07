@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { COMPONENTS } from './lib/component-registry'
 import { CATEGORIES } from './lib/categories'
+import { COLLECTIONS } from './lib/collections'
 import { SITE_URL } from './lib/config'
 import { ANDROMEDA_COMPONENT_META } from './_lib/andromeda/andromeda-meta'
 import { DESIGN_SYSTEMS } from '../scripts/lib/design-systems.config.mjs'
@@ -18,6 +19,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.85,
+  }))
+
+  const collectionPages: MetadataRoute.Sitemap = COLLECTIONS.map((c) => ({
+    url: `${SITE_URL}/components/collection/${c.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.8,
   }))
 
   // Design systems. Each system's canonical landing is its bare root
@@ -91,8 +99,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    {
+      url: `${SITE_URL}/mcp`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/lab`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
     ...designSystemPages,
     ...categoryPages,
+    ...collectionPages,
     ...componentPages,
     ...andromedaComponentPages,
   ]
