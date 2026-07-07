@@ -96,27 +96,24 @@ export async function generateMetadata({
       description,
       url,
       type: 'article',
-      // Real screenshot when we have one; otherwise the generated /og card
-      // (never shipping a component page without a social image).
-      images: [
-        entry.image
-          ? {
-              url: entry.image,
-              alt: `${entry.name} — ${firstSentenceOf(entry.description)}`,
-            }
-          : {
-              url: `${SITE_URL}/og/component/${slug}`,
-              width: 1200,
-              height: 630,
-              alt: `${entry.name} — ${category} React component`,
-            },
-      ],
+      // Real screenshot when we have one; otherwise inherit the site-wide
+      // default OG image from the root layout.
+      ...(entry.image
+        ? {
+            images: [
+              {
+                url: entry.image,
+                alt: `${entry.name} — ${firstSentenceOf(entry.description)}`,
+              },
+            ],
+          }
+        : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [entry.image ?? `${SITE_URL}/og/component/${slug}`],
+      ...(entry.image ? { images: [entry.image] } : {}),
     },
   }
 }

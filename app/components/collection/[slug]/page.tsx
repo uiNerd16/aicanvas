@@ -26,7 +26,6 @@ export async function generateMetadata({
   if (!collection) return {}
 
   const url = `${SITE_URL}/components/collection/${collection.slug}`
-  const ogImage = `${SITE_URL}/og/collection/${collection.slug}`
 
   return {
     title: { absolute: collection.title },
@@ -39,7 +38,7 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: ogImage,
+          url: '/AIcanvas-OG-v2.png',
           width: 1200,
           height: 630,
           alt: `AI Canvas: ${collection.h1}`,
@@ -50,7 +49,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: collection.title,
       description: collection.description,
-      images: [ogImage],
+      images: ['/AIcanvas-OG-v2.png'],
     },
   }
 }
