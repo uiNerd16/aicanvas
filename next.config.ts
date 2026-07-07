@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
     "/r/[file]": ["./registry-data/*.json"],
     "/api/component-code": ["./registry-data/*.json"],
     "/api/me/install-check": ["./registry-data/*.json"],
+    // The gated brain page reads registry-data/_andromeda-brain.json with fs at
+    // request time (underscore-prefixed, so /r can never serve it).
+    "/design-systems/andromeda/brain": ["./registry-data/*.json"],
   },
   async redirects() {
     return [

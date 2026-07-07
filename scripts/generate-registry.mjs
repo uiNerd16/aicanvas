@@ -257,6 +257,15 @@ expectedNames.add('aicanvas-mcp') // MCP metadata file
 for (const slug of premiumSlugDirs) expectedNames.add(slug) // keep gated premium JSON
 expectedNames.add('_premium') // gate input (written by inject-premium) — must survive cleanup
 expectedNames.add('_manifest') // gate manifest
+// Brain bundles (written by inject-premium as _<slug>-brain.json — underscore-
+// prefixed so /r can never serve them). Preserve the ones the current injection
+// declared; a degraded run writes no brains key, so stale bundles get cleaned.
+try {
+  const premiumEarly = JSON.parse(readFileSync(join(outDir, '_premium.json'), 'utf-8'))
+  for (const b of Array.isArray(premiumEarly.brains) ? premiumEarly.brains : []) {
+    expectedNames.add(`_${b}-brain`)
+  }
+} catch { /* no _premium.json — no brain bundles to preserve */ }
 // Reserve filenames for design systems (tokens + per-component + system +
 // templates) so they survive the stale-file cleanup pass.
 function componentSlug(systemSlug, fileBaseName) {
