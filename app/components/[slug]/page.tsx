@@ -136,8 +136,8 @@ function buildFaq(
     {
       q: `How do I install ${entry.name}?`,
       a: isPremium
-        ? `Install it with the shadcn CLI from the AI Canvas registry using your AI Canvas token, or recreate your own take on it with the included AI prompts.`
-        : `Run npx shadcn@latest add ${SITE_URL}/r/${entry.slug}.json in your project, or copy the source straight from the Code tab. It works in any React project with Tailwind CSS.`,
+        ? `Premium unlocks one-command installs: run the shadcn CLI with your AI Canvas token, or connect the AI Canvas MCP server and ask your AI editor to install it for you. You can also recreate your own take on it with the included AI prompts.`
+        : `One command: npx shadcn@latest add ${SITE_URL}/r/${entry.slug}.json. Or connect the AI Canvas MCP server and simply ask your AI editor to install ${entry.name}, and it pulls the component straight from the registry. You can also copy the source from the Code tab. It works in any React project with Tailwind CSS.`,
     },
     {
       q: `What is ${entry.name} built with?`,
