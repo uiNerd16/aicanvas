@@ -82,11 +82,16 @@ function findSuggestions(query: string, vocab: string[], max = 3): string[] {
 export function HomeClient({
   components,
   categoryLabel,
+  heading,
 }: {
   components: ComponentMeta[]
   /** Category name shown in the breadcrumb. Passed by /components/category/[slug];
    *  the legacy /components?category=X URL falls back to the query param. */
   categoryLabel?: string
+  /** Optional H1 + intro rendered above the grid. Passed by the category and
+   *  collection pages so each listing page carries crawlable on-page copy;
+   *  the plain /components index omits it. */
+  heading?: { h1: string; intro: string }
 }) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
@@ -182,6 +187,16 @@ export function HomeClient({
           <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
           {category && <span className="text-olive-500">/{category}</span>}
         </p>
+        {heading && (
+          <header className="mx-auto mb-6 w-full max-w-[1800px]">
+            <h1 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-3xl">
+              {heading.h1}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sand-600 dark:text-sand-400 sm:text-base">
+              {heading.intro}
+            </p>
+          </header>
+        )}
         {filtered.length > 0 ? (
           <>
             <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
