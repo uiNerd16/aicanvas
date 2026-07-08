@@ -2,14 +2,16 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 
-// Andromeda tokens inlined — avoids importing from @ts-nocheck design-systems/
+// AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
 const C = {
-  surface: { base: '#0E0E0F', raised: '#141415', hover: '#1C1C1D', active: '#232325' },
-  text: { primary: '#F5F5F5', secondary: '#A3A3A3', muted: '#9A9A9A', faint: '#6E6E6E' },
-  accent: { 100: '#BAF8EC', 300: '#0FCFB2', 400: '#109380', 500: '#126059' },
-  border: { subtle: '#212122', base: '#3E3E3F' },
+  surface: { base: '#0E0E0F', raised: '#1B1B1C', hover: '#232325', active: '#2D2D2E' },
+  text: { primary: '#F4F4FA', secondary: '#9B9B9E', muted: '#9B9B9E', faint: '#7B7B7D' },
+  accent: { 100: '#EAF0C8', 300: '#DAE4A0', 400: '#A8B94D', 500: '#869631' },
+  border: { subtle: '#2D2D2E', base: '#373738' },
 }
-const FONT = "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', monospace"
+const SANS = "var(--font-sans), 'Manrope', system-ui, sans-serif"
+const MONO = "var(--font-mono, var(--font-jetbrains-mono)), 'Geist Mono', monospace"
+const FONT = SANS
 
 export interface BrainFile {
   path: string
@@ -77,7 +79,7 @@ function inlineFmt(raw: string): string {
       return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:${C.accent[300]};text-decoration:underline;text-decoration-color:${C.accent[500]}">${text}</a>`
     })
     .replace(/\*\*([^*]+)\*\*/g, (_, t) => `<strong style="color:${C.text.primary};font-weight:600">${t}</strong>`)
-    .replace(/`([^`]+)`/g, (_, t) => `<code style="font-family:inherit;color:${C.accent[300]};background:${C.surface.active};padding:1px 6px;font-size:0.875em">${t}</code>`)
+    .replace(/`([^`]+)`/g, (_, t) => `<code style="font-family:${MONO};color:${C.text.secondary};background:${C.surface.raised};padding:1px 6px;border-radius:4px;font-size:0.875em">${t}</code>`)
 }
 
 function stripFrontmatter(md: string): string {
@@ -94,7 +96,7 @@ function renderMd(raw: string): string {
   let text = md.replace(/```[\w]*\n([\s\S]*?)```/gm, (_, code) => {
     const i = blocks.length
     blocks.push(
-      `<pre style="background:${C.surface.raised};border:1px solid ${C.border.subtle};padding:14px 18px;overflow-x:auto;font-size:11px;line-height:1.75;margin:14px 0;font-family:inherit"><code>${esc(code).trimEnd()}</code></pre>`,
+      `<pre style="background:${C.surface.raised};border:1px solid ${C.border.subtle};padding:14px 18px;overflow-x:auto;font-size:12px;line-height:1.75;margin:14px 0;font-family:${MONO}"><code>${esc(code).trimEnd()}</code></pre>`,
     )
     return `\x00B${i}\x00`
   })
@@ -133,9 +135,9 @@ function renderMd(raw: string): string {
       flushParagraph()
       closeList()
       const lvl = hm[1].length
-      const sizes = ['20px', '15px', '12px', '11px']
+      const sizes = ['20px', '16px', '14px', '12px']
       const sz = sizes[lvl - 1]
-      const tracking = lvl >= 3 ? `letter-spacing:0.16em;text-transform:uppercase` : ''
+      const tracking = ''
       const color = lvl === 1 ? C.text.primary : lvl === 2 ? C.text.secondary : C.text.muted
       const mt = lvl === 1 ? '0' : lvl === 2 ? '28px' : '20px'
       out.push(
@@ -188,7 +190,7 @@ function renderMd(raw: string): string {
         inUl = true
       }
       out.push(
-        `<li style="display:flex;gap:10px;padding-bottom:7px;color:${C.text.secondary};line-height:1.65"><span style="color:${C.accent[400]};flex-shrink:0;font-size:11px;min-width:14px">${olm[1]}.</span><span>${inlineFmt(olm[2])}</span></li>`,
+        `<li style="display:flex;gap:10px;padding-bottom:7px;color:${C.text.secondary};line-height:1.65"><span style="color:${C.accent[400]};flex-shrink:0;font-size:12px;min-width:14px">${olm[1]}.</span><span>${inlineFmt(olm[2])}</span></li>`,
       )
       continue
     }
@@ -280,7 +282,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
             {/* Section label */}
             <div
               style={{
-                fontSize: 8,
+                fontSize: 10,
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 color: C.text.faint,
@@ -293,7 +295,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
             >
               <span>{section.label}</span>
               {section.count && (
-                <span style={{ color: C.accent[400], fontSize: 8 }}>{section.count}</span>
+                <span style={{ color: C.accent[400], fontSize: 10 }}>{section.count}</span>
               )}
             </div>
 
@@ -311,7 +313,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
                     width: '100%',
                     textAlign: 'left',
                     padding: '6px 16px',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontFamily: FONT,
                     cursor: 'pointer',
                     border: 'none',
@@ -357,7 +359,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           {activeSection && (
             <span
               style={{
-                fontSize: 8,
+                fontSize: 10,
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 color: C.accent[400],
