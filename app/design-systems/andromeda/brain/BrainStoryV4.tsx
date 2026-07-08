@@ -19,6 +19,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
+import { ArrowRight } from '@phosphor-icons/react'
+import { buttonClasses } from '@/app/components/buttonClasses'
 import { BRAIN_TEASER } from '@/app/lib/andromeda-brain-teaser.generated'
 
 // AI Canvas site palette: sand neutrals + olive accent, Manrope + mono fonts.
@@ -394,10 +396,21 @@ export function BrainStoryV4() {
         <p style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}>
           A new design system, built from the ground up on the Andromeda components. A new way to design and build modern UIs.
         </p>
+        {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
+            branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+          <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'lg' })}>
+            Get the Brain with Premium
+            <ArrowRight weight="regular" size={14} />
+          </Link>
+          <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
+            Explore Andromeda
+          </Link>
+        </div>
       </div>
 
-      {/* ── Editorial sections (left-aligned, framed panels) ── */}
-      <div style={{ width: '100%', maxWidth: 880, margin: '0 auto', padding: '56px 24px 8px', fontFamily: SANS }}>
+      {/* ── Editorial sections (left-aligned, framed panels). max-w-4xl (896) + sm:px-6, matches the homepage content column. ── */}
+      <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '56px 24px 8px', fontFamily: SANS }}>
 
         {/* What it is */}
         <section>
@@ -454,11 +467,6 @@ export function BrainStoryV4() {
               </span>
             ))}
           </div>
-          {/* one CTA. Premium users are routed to the brain viewer ("Open the Brain")
-              by the gate when this story becomes the real page. */}
-          <Link href="/pricing" style={{ marginTop: 24, background: C.accentBtn, color: C.base, fontSize: 14, fontWeight: 600, padding: '14px 24px', borderRadius: 8, textDecoration: 'none', fontFamily: SANS }}>
-            Get the Brain with Premium
-          </Link>
         </section>
       </div>
     </div>
