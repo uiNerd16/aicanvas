@@ -96,14 +96,15 @@ const FREE_DS_INJECTED = injectedFreeDsPaths()
 // The design-system brain lives ONLY in the vault. Its content reaches this
 // repo solely as the gitignored registry-data/_<slug>-brain.json bundle:
 //   - a brain JSON bundle must never be tracked (any *-brain.json)
-//   - design-systems/*/foundations/ exists only in the vault — any file there
-//     is vault material
+//   - design-systems/*/foundations/ and design-systems/*/_skills/ exist only in
+//     the vault — any file there is vault material
 //   - NEW rules.md / *.rules.md files under design-systems/ are vault material.
 //     Checked in --staged mode against ADDED files only: the public repo
 //     legitimately tracks a handful of frozen v1 rule files, which can only
 //     ever show up as modifications, never additions.
 const BRAIN_JSON = /(^|\/)registry-data\/[^/]*-brain\.json$/
 const BRAIN_FOUNDATIONS = /(^|\/)design-systems\/[^/]+\/foundations\//
+const BRAIN_SKILLS = /(^|\/)design-systems\/[^/]+\/_skills\//
 const BRAIN_RULES_MD = /(^|\/)design-systems\/.+(\/rules\.md|\.rules\.md)$/
 let stagedAdded = new Set()
 if (staged) {
@@ -128,6 +129,7 @@ for (const f of files) {
   }
   if (BRAIN_JSON.test(f)) violations.push(`brain content bundle: ${f} (generated premium content — never tracked)`)
   if (BRAIN_FOUNDATIONS.test(f)) violations.push(`brain foundations file: ${f} (vault-only premium content)`)
+  if (BRAIN_SKILLS.test(f)) violations.push(`brain skill file: ${f} (vault-only premium content)`)
   if (staged && stagedAdded.has(f) && BRAIN_RULES_MD.test(f)) {
     violations.push(`NEW brain rules file: ${f} (vault-only premium content — rules are never added in the public repo)`)
   }

@@ -225,7 +225,7 @@ function writeV2Shim(injectedNames, manifest) {
 // structure. UPDATE when the brain grows (mirror of the vault's
 // design-systems/andromeda/ brain folder), same contract as V2_FALLBACK_NAMES.
 const BRAIN_TEASER_FALLBACK = {
-  totalFiles: 48,
+  totalFiles: 50,
   sections: [
     {
       id: 'foundations',
@@ -248,6 +248,11 @@ const BRAIN_TEASER_FALLBACK = {
         'StatTile', 'Table', 'Tag', 'Textarea', 'Toggle', 'Tooltip',
         'TrendChart', 'UserCard', 'UserMenu',
       ],
+    },
+    {
+      id: 'skills',
+      label: 'Skills',
+      files: ['building-with-andromeda', 'reviewing-against-andromeda'],
     },
   ],
 }
@@ -290,6 +295,17 @@ function collectBrain(source, slug) {
   }
   const foundations = listMd('foundations', '.md')
   const componentRules = listMd('components', '.rules.md')
+  // Skills are folders under _skills/, each with a SKILL.md (Claude Code shape).
+  const skills = (() => {
+    try {
+      return readdirSync(join(sysDir, '_skills'), { withFileTypes: true })
+        .filter((d) => d.isDirectory() && existsSync(join(sysDir, '_skills', d.name, 'SKILL.md')))
+        .map((d) => d.name)
+        .sort()
+    } catch {
+      return []
+    }
+  })()
   if (foundations.length === 0 && componentRules.length === 0) {
     console.error(`[inject-premium] brain "${slug}" has no foundations/*.md and no components/*.rules.md — refusing to ship an empty brain`)
     process.exit(1)
@@ -307,12 +323,18 @@ function collectBrain(source, slug) {
       content: read(join('components', f)),
       type: 'component-rule',
     })),
+    ...skills.map((name) => ({
+      path: `design-systems/${slug}/_skills/${name}/SKILL.md`,
+      content: read(join('_skills', name, 'SKILL.md')),
+      type: 'skill',
+    })),
   ]
   const teaser = {
     totalFiles: files.length,
     sections: [
       { id: 'foundations', label: 'Foundations', files: foundations.map((f) => f.replace(/\.md$/, '')) },
       { id: 'component-rules', label: 'Component Rules', files: componentRules.map((f) => f.replace(/\.rules\.md$/, '')) },
+      { id: 'skills', label: 'Skills', files: skills },
     ],
   }
   return { files, teaser }
