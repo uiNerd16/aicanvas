@@ -19,8 +19,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight } from '@phosphor-icons/react'
+import { ArrowRight, Palette, Code, Sparkle } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
+import { HeaderSocials } from '@/app/components/HeaderSocials'
+import { SiteFooter } from '@/app/components/SiteFooter'
 import { BRAIN_TEASER } from '@/app/lib/andromeda-brain-teaser.generated'
 
 // AI Canvas site palette: sand neutrals + olive accent, Manrope + mono fonts.
@@ -80,10 +82,22 @@ const STRUCTURE = [
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
 const ROLES = [
-  { role: 'Designers', gets: 'A vocabulary that holds across every screen.' },
-  { role: 'Developers', gets: 'A foundation they never rebuild.' },
-  { role: 'Agents', gets: 'The context to stop guessing and stay consistent.' },
+  { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'A vocabulary that holds across every screen.' },
+  { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'A foundation they never rebuild.' },
+  { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'The context to stop guessing and stay consistent.' },
 ]
+
+// Section separator: the AI Canvas wire mark, three across, like the homepage divider.
+function WireDivider() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: 64, margin: '48px 0' }} aria-hidden>
+      {[0, 1, 2].map((i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={i} src="/ai-canvas-wire.svg" alt="" width={28} height={24} />
+      ))}
+    </div>
+  )
+}
 
 export function BrainStoryV4() {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -335,6 +349,17 @@ export function BrainStoryV4() {
 
   return (
     <div style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
+      {/* top tab, consistent with the content pages (About / Terms / Credits) */}
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
+        <div />
+        <Link href="/design-systems/andromeda" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
+          /Andromeda Brain
+        </Link>
+        <div className="flex items-center justify-end">
+          <HeaderSocials />
+        </div>
+      </header>
+
       {/* 3D hero — centered, top */}
       <div style={{ position: 'relative', height: '64vh', minHeight: 420 }}>
         <div
@@ -409,8 +434,11 @@ export function BrainStoryV4() {
         </div>
       </div>
 
+      {/* 3-icon wire divider directly below the hero */}
+      <WireDivider />
+
       {/* ── Editorial sections (left-aligned, framed panels). max-w-4xl (896) + sm:px-6, matches the homepage content column. ── */}
-      <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '56px 24px 8px', fontFamily: SANS }}>
+      <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '8px 24px 8px', fontFamily: SANS }}>
 
         {/* What it is */}
         <section>
@@ -418,7 +446,7 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             More than tokens and components
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0', maxWidth: 680 }}>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
             A design system is more than <Chip>tokens</Chip> and <Chip>components</Chip>. It&apos;s the{' '}
             <strong style={{ color: C.bright, fontWeight: 600 }}>reasoning that ties them together</strong>: when a color carries meaning, how motion should behave, what every state owes the user. The Brain captures that reasoning in a form{' '}
             <strong style={{ color: C.bright, fontWeight: 600 }}>an agent can actually read</strong>, so your tools understand Andromeda instead of guessing at it, and every screen comes out consistent.
@@ -448,15 +476,20 @@ export function BrainStoryV4() {
           </h2>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {ROLES.map((r) => (
-              <div key={r.role} style={{ ...PANEL, background: '#1B1B1C', padding: '20px 24px' }}>
-                <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.accent, marginBottom: 12 }}>{r.role}</div>
-                <div style={{ fontSize: 16, color: C.reason, lineHeight: 1.55 }}>{r.gets}</div>
+              <div key={r.role} style={{ display: 'flex', flexDirection: 'column', background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
+                    {r.icon}
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{r.role}</span>
+                </div>
+                <p style={{ flex: 1, fontSize: 16, color: C.node, lineHeight: 1.625, margin: 0 }}>{r.gets}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Closing: live numbers + single CTA */}
+        {/* Closing: by the numbers */}
         <section style={{ marginTop: 64, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
             {STATS.map((s, i) => (
@@ -467,7 +500,16 @@ export function BrainStoryV4() {
               </span>
             ))}
           </div>
+          <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'lg' })} style={{ marginTop: 24 }}>
+            Get the Brain with Premium
+            <ArrowRight weight="regular" size={14} />
+          </Link>
         </section>
+      </div>
+
+      {/* footer, consistent with the content pages */}
+      <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '0 24px 24px', fontFamily: SANS }}>
+        <SiteFooter />
       </div>
     </div>
   )
