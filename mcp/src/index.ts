@@ -178,21 +178,14 @@ async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
         `your account (your token is included) and ask again.`,
     )
   }
-  // Premium standalone pulled without entitlement: also a 200 placeholder
-  // (header 'premium-standalone'), zero real source. Surface the upgrade path
-  // instead of handing the placeholder back as if it were the component.
-  if (res.headers.get('x-aicanvas-content-type') === 'premium-standalone') {
-    const j = (await res.json().catch(() => ({}))) as { title?: string }
-    const name =
-      typeof j.title === 'string'
-        ? j.title.replace(/\s*\(Premium[^)]*\)\s*$/i, '')
-        : slug
-    throw new Error(
-      `"${name}" is a Premium AI Canvas component. Unlock it with AI Canvas Premium at ` +
-        `https://aicanvas.me/pricing, then use the AI Canvas MCP config from your account ` +
-        `(your token is included) and ask again.`,
-    )
-  }
+  // NOTE: premium standalones ALSO return a 200 placeholder (header
+  // 'premium-standalone'), but that header value is NOT unique to the
+  // placeholder — an entitled subscriber's REAL source carries it too (the
+  // success path stamps the contentType). Keying the MCP on it would strip a
+  // paying subscriber's real component. So premium is deliberately NOT
+  // intercepted here. Closing that footgun safely needs premiumStub to emit a
+  // distinct header (like freeAccountStub's 'free-account-required'); tracked
+  // as a separate, billing-reviewed follow-up.
   if (!res.ok) {
     throw new Error(
       `Failed to fetch source for "${slug}" from ${url}: ${res.status} ${res.statusText}`,
