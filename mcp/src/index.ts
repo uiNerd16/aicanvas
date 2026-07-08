@@ -24,11 +24,12 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.2.0'
+const MCP_VERSION = '0.2.1'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 // Optional per-user token (the website bakes it into the copied MCP config).
-// Identifies the account so pulls count against the right quota and unlock
-// premium content. Absent = anonymous (subject to the daily free limit).
+// Identifies the account so free-component source pulls are authorized and any
+// premium content you own unlocks. Absent = anonymous: metadata browsing still
+// works, but source pulls of free components need a free account.
 const USER_TOKEN = process.env.AICANVAS_TOKEN ?? ''
 
 function registryHeaders(): Record<string, string> {
@@ -172,9 +173,24 @@ async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
         ? j.title.replace(/\s*\(free account required\)\s*$/i, '')
         : slug
     throw new Error(
-      `Almost there — "${name}" is free with an AI Canvas account (free, unlimited installs). ` +
+      `Almost there! "${name}" is free with an AI Canvas account (free, unlimited installs). ` +
         `Sign up at https://aicanvas.me/account/sign-up, then use the AI Canvas MCP config from ` +
         `your account (your token is included) and ask again.`,
+    )
+  }
+  // Premium standalone pulled without entitlement: also a 200 placeholder
+  // (header 'premium-standalone'), zero real source. Surface the upgrade path
+  // instead of handing the placeholder back as if it were the component.
+  if (res.headers.get('x-aicanvas-content-type') === 'premium-standalone') {
+    const j = (await res.json().catch(() => ({}))) as { title?: string }
+    const name =
+      typeof j.title === 'string'
+        ? j.title.replace(/\s*\(Premium[^)]*\)\s*$/i, '')
+        : slug
+    throw new Error(
+      `"${name}" is a Premium AI Canvas component. Unlock it with AI Canvas Premium at ` +
+        `https://aicanvas.me/pricing, then use the AI Canvas MCP config from your account ` +
+        `(your token is included) and ask again.`,
     )
   }
   if (!res.ok) {
@@ -294,7 +310,7 @@ server.registerTool(
     try {
       const meta = await fetchMeta()
       const lines = [
-        `AI Canvas — ${meta.componentCount} components across ${meta.categories.length} categories.`,
+        `AI Canvas: ${meta.componentCount} components across ${meta.categories.length} categories.`,
         '',
         ...meta.categories.map(
           (c) => `  ${c.label.padEnd(24)}  ${String(c.count).padStart(3)} components`,
@@ -586,7 +602,7 @@ server.registerTool(
               '',
               `  ${component.installCommand}`,
               '',
-              `Dependencies: ${component.dependencies.join(', ') || '(none — React only)'}`,
+              `Dependencies: ${component.dependencies.join(', ') || '(none, React only)'}`,
               `Source: ${component.sourceUrl}`,
               `Preview: ${component.homepageUrl}`,
             ].join('\n'),

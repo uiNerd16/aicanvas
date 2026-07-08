@@ -193,7 +193,7 @@ function premiumStub(realBody: string, slug: string): NextResponse {
   // path when the placeholder is used.
   const msg =
     `"${title}" is a premium AI Canvas component. ` +
-    `This is a placeholder — unlock the real source with an AI Canvas Premium ` +
+    `This is a placeholder. Unlock the real source with an AI Canvas Premium ` +
     `account at https://aicanvas.me/pricing`
   const stub =
     `const PREMIUM_NOTICE =\n` +
@@ -212,7 +212,7 @@ function premiumStub(realBody: string, slug: string): NextResponse {
     $schema: 'https://ui.shadcn.com/schema/registry-item.json',
     name: slug,
     type: 'registry:ui',
-    title: `${title} (Premium — locked)`,
+    title: `${title} (Premium, locked)`,
     description: 'Premium AI Canvas component. Upgrade to install the real source: https://aicanvas.me/pricing',
     dependencies: [],
     registryDependencies: [],
@@ -242,7 +242,7 @@ function freeAccountStub(realBody: string, slug: string): NextResponse {
     /* defaults below */
   }
   const msg =
-    `Almost there — "${title}" is free with an AI Canvas account (free, unlimited installs). ` +
+    `Almost there! "${title}" is free with an AI Canvas account (free, unlimited installs). ` +
     `Sign up at https://aicanvas.me/account/sign-up, then copy your personal install command ` +
     `from the component page.`
   const stub =
