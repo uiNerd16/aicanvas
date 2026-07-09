@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { DownloadSimple } from '@phosphor-icons/react'
+import { zipSync, strToU8 } from 'fflate'
 
 // AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
 const C = {
@@ -245,13 +247,38 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   )
 
   const html = renderMd(activeFile.content)
-  const activeName = getDisplayName(activeFile)
-  const activeSection = sections.find((s) => s.files.some((f) => f.path === activeFile.path))
+  const isIndex = getSectionKey(activeFile) === 'index'
+
+  // Honest, self-updating counts for the intro copy: total files + rounded KB of
+  // brain content (not the zip, which compresses smaller).
+  const { fileCount, sizeKb } = useMemo(() => {
+    const enc = new TextEncoder()
+    const bytes = files.reduce((n, f) => n + enc.encode(f.content).length, 0)
+    return { fileCount: files.length, sizeKb: Math.round(bytes / 1024 / 10) * 10 }
+  }, [files])
+
+  // Zip every brain file (paths preserved) in the browser and download it. The
+  // viewer only renders for entitled users, so this is already access-gated.
+  const downloadBrain = useCallback(() => {
+    const entries: Record<string, Uint8Array> = {}
+    for (const f of files) entries[f.path] = strToU8(f.content)
+    const zipped = zipSync(entries, { level: 6 })
+    const blob = new Blob([zipped], { type: 'application/zip' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'andromeda-brain.zip'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }, [files])
 
   return (
     <div
       style={{
         display: 'flex',
+        flexDirection: 'row-reverse',
         flex: 1,
         minHeight: 0,
         overflow: 'hidden',
@@ -264,15 +291,18 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
         .brain-nav-item.active { background: ${C.surface.raised} !important; color: ${C.text.primary} !important; }
         .brain-content a[data-brain-file]:hover { color: ${C.accent[100]} !important; }
         .brain-content a[href]:hover { color: ${C.accent[100]} !important; }
+        .brain-dl { transition: background 0.12s; }
+        .brain-dl:hover { background: ${C.accent[300]} !important; }
       `}</style>
 
-      {/* Left nav */}
+      {/* Nav (file index) — rendered on the RIGHT via row-reverse on the root,
+          so it doesn't sit beside the global app sidebar on the left. */}
       <nav
         aria-label="Brain sections"
         style={{
           width: 220,
           flexShrink: 0,
-          borderRight: `1px solid ${C.border.subtle}`,
+          borderLeft: `1px solid ${C.border.subtle}`,
           overflowY: 'auto',
           padding: '20px 0',
         }}
@@ -342,38 +372,50 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           flexDirection: 'column',
         }}
       >
-        {/* File header */}
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-            borderBottom: `1px solid ${C.border.subtle}`,
-            background: C.surface.base,
-            padding: '10px 32px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          {activeSection && (
-            <span
+        {/* Human-only intro — only on the index landing, kept small so it never
+            competes with Index / Foundations / Components. */}
+        {isIndex && (
+          <div style={{ padding: '28px 40px 0', maxWidth: 780 }}>
+            <div
               style={{
-                fontSize: 10,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                color: C.accent[400],
-                padding: '2px 6px',
-                background: C.surface.active,
+                border: `1px solid ${C.border.subtle}`,
+                borderRadius: 12,
+                background: C.surface.raised,
+                padding: '16px 18px',
               }}
             >
-              {activeSection.label}
-            </span>
-          )}
-          <span style={{ fontSize: 12, color: C.text.primary, fontWeight: 600 }}>
-            {activeName}
-          </span>
-        </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 6 }}>
+                Get the brain
+              </div>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 14px' }}>
+                Easy to work with. Download the brain as a zip ({fileCount} files, ~{sizeKb} KB) and
+                drop it into your project. Your AI reads it from there.
+              </p>
+              <button
+                type="button"
+                className="brain-dl"
+                onClick={downloadBrain}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: C.accent[400],
+                  color: C.surface.base,
+                  fontWeight: 600,
+                  fontSize: 13,
+                  fontFamily: FONT,
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <DownloadSimple weight="regular" size={16} />
+                Download the brain
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Markdown content */}
         <div
@@ -382,7 +424,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           style={{
             padding: '28px 40px 64px',
             maxWidth: 780,
-            fontSize: 12,
+            fontSize: 14,
             lineHeight: 1.75,
           }}
           dangerouslySetInnerHTML={{ __html: html }}
