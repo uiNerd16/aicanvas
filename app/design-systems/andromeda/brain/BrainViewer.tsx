@@ -253,12 +253,14 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   const html = renderMd(activeFile.content)
   const isIndex = getSectionKey(activeFile) === 'index'
 
-  // Honest, self-updating counts for the install popover: total files + rounded
-  // KB of brain content (not the zip, which compresses smaller).
-  const { fileCount, sizeKb } = useMemo(() => {
-    const enc = new TextEncoder()
-    const bytes = files.reduce((n, f) => n + enc.encode(f.content).length, 0)
-    return { fileCount: files.length, sizeKb: Math.round(bytes / 1024 / 10) * 10 }
+  // Zip the brain ONCE (paths preserved): the exact size shown to the user IS
+  // the file they download — no guessing, and it self-updates as the brain
+  // grows. The bytes are reused by downloadBrain below (no re-zip on click).
+  const { fileCount, sizeKb, zipBytes } = useMemo(() => {
+    const entries: Record<string, Uint8Array> = {}
+    for (const f of files) entries[f.path] = strToU8(f.content)
+    const zipped = zipSync(entries, { level: 6 })
+    return { fileCount: files.length, sizeKb: Math.round(zipped.length / 1024), zipBytes: zipped }
   }, [files])
 
   // The Install button lives in the sticky top bar (template-page pattern) but
@@ -271,14 +273,11 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
     setInstallSlot(document.getElementById('brain-install-slot'))
   }, [])
 
-  // Zip every brain file (paths preserved) in the browser and download it —
-  // the secondary path for anyone who prefers a file over a command. The
-  // viewer only renders for entitled users, so this is already access-gated.
+  // Download the pre-zipped bytes — the secondary path for anyone who prefers a
+  // file over a command. The viewer only renders for entitled users, so this is
+  // already access-gated.
   const downloadBrain = useCallback(() => {
-    const entries: Record<string, Uint8Array> = {}
-    for (const f of files) entries[f.path] = strToU8(f.content)
-    const zipped = zipSync(entries, { level: 6 })
-    const blob = new Blob([zipped], { type: 'application/zip' })
+    const blob = new Blob([zipBytes], { type: 'application/zip' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -287,7 +286,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
     a.click()
     a.remove()
     URL.revokeObjectURL(url)
-  }, [files])
+  }, [zipBytes])
 
   return (
     // Natural height on purpose: the Andromeda content column is the ONE
