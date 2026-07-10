@@ -66,14 +66,9 @@ export function DesignSystemsPole({
 }) {
   const pathname = usePathname() ?? ''
 
-  // Active leaves inside the Design Systems pole. Match either URL space:
-  // ideation playground (overview/showcase/examples) or clean live paths
-  // (per-component pages).
-  const activeSystem = SYSTEMS.find(
-    (s) =>
-      pathname.startsWith(`/ideation/design-systems/${s.slug}`) ||
-      pathname.startsWith(`/design-systems/${s.slug}`),
-  )
+  // Active leaves inside the Design Systems pole: the overview, showcase,
+  // examples, and per-component pages all live under /design-systems/<slug>.
+  const activeSystem = SYSTEMS.find((s) => pathname.startsWith(`/design-systems/${s.slug}`))
   const activeAndromedaComponent = activeSystem
     ? ANDROMEDA_COMPONENT_META.find(
         (c) => pathname === `/design-systems/${activeSystem.slug}/${c.slug}`,
@@ -104,13 +99,11 @@ export function DesignSystemsPole({
       {!collapsed && (
         <ul className="space-y-0.5">
           {SYSTEMS.map((system) => {
-            // "System root" URLs — the showcase (clean), the bare overview
-            // (clean), and the legacy ideation wrapper. All three highlight
-            // the system row as active.
+            // "System root" URLs — the showcase and the bare overview both
+            // highlight the system row as active.
             const systemActive =
               pathname === `/design-systems/${system.slug}/showcase` ||
-              pathname === `/design-systems/${system.slug}` ||
-              pathname === `/ideation/design-systems/${system.slug}`
+              pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
             return (
               <li key={system.slug}>

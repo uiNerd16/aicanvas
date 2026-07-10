@@ -53,6 +53,14 @@ const nextConfig: NextConfig = {
         destination: "/design-systems/andromeda",
         permanent: true,
       },
+      // The ideation Andromeda page duplicated the public showcase 1:1; retired
+      // in favor of the canonical route. Permanent so any stray link/bookmark
+      // lands on the live page.
+      {
+        source: "/ideation/design-systems/andromeda",
+        destination: "/design-systems/andromeda/showcase",
+        permanent: true,
+      },
     ];
   },
 };

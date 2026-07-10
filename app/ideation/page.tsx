@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 
 // /ideation lands you directly on the Andromeda showcase — that's the only
-// design system shipped today, and the systems overview page was retired.
-// Add a chooser back here when a second system goes live.
+// design system shipped today. The ideation-local wrapper page was retired as
+// a duplicate (see next.config.ts), so this points straight at the canonical
+// public route. Add a chooser back here when a second system goes live.
 export default function IdeationRoot() {
-  redirect('/ideation/design-systems/andromeda')
+  redirect('/design-systems/andromeda/showcase')
 }

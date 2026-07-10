@@ -78,13 +78,9 @@ export function Sidebar({
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
 
   // ── Pole collapse state ───────────────────────────────────────────────────
-  // Are we inside a design-system path? Per-component pages live at
-  // `/design-systems/<slug>/<component>`; the showcase + examples wrapper still
-  // lives under /ideation/. Either path counts as being inside the DS pole.
-  const onDesignSystems =
-    pathname?.startsWith('/ideation/design-systems') ||
-    pathname?.startsWith('/design-systems') ||
-    false
+  // Are we inside a design-system path? The overview, showcase, examples, and
+  // per-component pages all live under `/design-systems/<slug>/...`.
+  const onDesignSystems = pathname?.startsWith('/design-systems') || false
   // The DS pole opens by default everywhere, so Andromeda + Meridian are
   // visible without a click (it was already open on design-system paths; this
   // also opens it on the home / components pages). The user can still collapse

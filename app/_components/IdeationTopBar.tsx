@@ -57,7 +57,7 @@ function buildCrumbs(pathname: string): Crumb[] | null {
     return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'Showcase' }]
   }
   // Overview → Design Systems · Andromeda (Andromeda is the current page)
-  if (pathname === ANDROMEDA_OVERVIEW || pathname === '/ideation/design-systems/andromeda') {
+  if (pathname === ANDROMEDA_OVERVIEW) {
     return [DESIGN_SYSTEMS, { label: 'Andromeda' }]
   }
   // Fallback — a generic breadcrumb from the path segments (legacy /ideation/*).
