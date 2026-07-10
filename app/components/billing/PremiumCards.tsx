@@ -218,10 +218,14 @@ export function PremiumCards({
           )}
         </div>
         <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
-            EVERYTHING IN FREE, PLUS
-          </p>
-          <ul className="mt-4 space-y-3">
+          {/* The comparison label only makes sense next to the Free card;
+              the premium-only modal renders the list without it. */}
+          {showFree && (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+              EVERYTHING IN FREE, PLUS
+            </p>
+          )}
+          <ul className={showFree ? 'mt-4 space-y-3' : 'space-y-3'}>
             {PREMIUM_FEATURES.map((feature) => (
               <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
                 <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
