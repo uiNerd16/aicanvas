@@ -189,6 +189,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
 const PRICING_FAQ: FaqItem[] = [
   {
     q: 'How are payments handled, and what is Paddle?',
+    qLink: { label: 'Paddle', href: 'https://www.paddle.com/' },
     a: 'Payments run through Paddle, a trusted billing company that acts as the seller of record, meaning it sells Premium and processes the payment on our behalf. Checkout happens in a secure Paddle popup right on the page, so it stays simple and quick.',
   },
   {
