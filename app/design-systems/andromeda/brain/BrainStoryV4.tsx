@@ -116,7 +116,7 @@ export function BrainStoryV4() {
   // TemplateChrome/TopAuthPill. Anon/free derive to 'not-premium' synchronously,
   // and /explore is server-gated, so this never grants a free user access.
   const canOpen = usePremiumStatus() !== 'not-premium'
-  const ctaLabel = canOpen ? 'Open the Brain' : 'Get the Brain with Premium'
+  const ctaLabel = canOpen ? 'Read the Brain' : 'Get the Brain with Premium'
   const ctaHref = canOpen ? '/design-systems/andromeda/brain/explore' : '/pricing'
   const matIndexRef = useRef(DEFAULT_MATERIAL)
   const applyRef = useRef<(i: number) => void>(() => {})
