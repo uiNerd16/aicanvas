@@ -20,7 +20,14 @@ export function PaymentMethods({ className }: { className?: string }) {
           <img src={m.src} alt={m.alt} className="h-4 w-auto" />
         </span>
       ))}
-      <span className="ml-1 text-xs text-sand-500 dark:text-sand-400">powered by Paddle</span>
+      <a
+        href="https://www.paddle.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-1 text-xs text-sand-500 underline-offset-2 hover:underline dark:text-sand-400"
+      >
+        powered by Paddle
+      </a>
     </div>
   )
 }

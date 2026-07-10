@@ -68,7 +68,7 @@ function PaywallModalView({
   const subtitle =
     reason === 'upgrade'
       ? null
-      : 'Premium components, design systems and templates. Unlock every one.'
+      : 'Unlock this component with a Premium subscription.'
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
   // (this is a soft upgrade pitch, not a flow you must complete).
