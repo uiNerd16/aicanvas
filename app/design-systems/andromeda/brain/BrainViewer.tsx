@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { Check, Copy, DownloadSimple } from '@phosphor-icons/react'
+import { createPortal } from 'react-dom'
+import { Check, Copy, DownloadSimple, Terminal } from '@phosphor-icons/react'
 import { zipSync, strToU8 } from 'fflate'
+import { Button } from '../../../components/Button'
 
 // AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
 const C = {
@@ -249,57 +251,24 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   )
 
   const html = renderMd(activeFile.content)
-  const isIndex = getSectionKey(activeFile) === 'index'
 
-  // Honest, self-updating counts for the intro copy: total files + rounded KB of
-  // brain content (not the zip, which compresses smaller).
+  // Honest, self-updating counts for the install popover: total files + rounded
+  // KB of brain content (not the zip, which compresses smaller).
   const { fileCount, sizeKb } = useMemo(() => {
     const enc = new TextEncoder()
     const bytes = files.reduce((n, f) => n + enc.encode(f.content).length, 0)
     return { fileCount: files.length, sizeKb: Math.round(bytes / 1024 / 10) * 10 }
   }, [files])
 
-  // Tokenized CLI install (primary delivery): same pattern as the template
-  // InstallButton — the token attributes the pull to the account (the brain is
-  // premium; a bare command would get the locked placeholder). Masked on
-  // screen; copy writes the real token. The viewer only renders for entitled
-  // users, so showing the command here is already access-gated.
-  const [installToken, setInstallToken] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  // The Install button lives in the sticky top bar (template-page pattern) but
+  // is OWNED here, portaled into the bar's slot — the zip needs the loaded
+  // files, which only this component has. The slot div is display:none below
+  // md (the whole bar is), so a portal there would be invisible on mobile; the
+  // inline md:hidden fallback below covers small screens instead.
+  const [installSlot, setInstallSlot] = useState<HTMLElement | null>(null)
   useEffect(() => {
-    let cancelled = false
-    const refresh = () =>
-      fetch('/api/me/token')
-        .then((r) => r.json())
-        .then((d) => {
-          if (!cancelled) setInstallToken(d?.token ?? null)
-        })
-        .catch(() => {})
-    refresh()
-    window.addEventListener('focus', refresh)
-    return () => {
-      cancelled = true
-      window.removeEventListener('focus', refresh)
-    }
+    setInstallSlot(document.getElementById('brain-install-slot'))
   }, [])
-  const installReference = installToken
-    ? `"https://aicanvas.me/r/andromeda-brain.json?token=${installToken}"`
-    : '@aicanvas/andromeda-brain'
-  const installReferenceMasked = installToken
-    ? `"https://aicanvas.me/r/andromeda-brain.json?token=aic_••••••••"`
-    : '@aicanvas/andromeda-brain'
-  // --overwrite makes the SAME command both install and update: a no-op on
-  // first run (no files exist yet), an in-place refresh of every rule file on
-  // re-runs (verified: without it the CLI prompts per existing file).
-  const cliCommand = `npx shadcn@latest add --overwrite ${installReference}`
-  const cliCommandMasked = `npx shadcn@latest add --overwrite ${installReferenceMasked}`
-  const copyCommand = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(cliCommand)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {}
-  }, [cliCommand])
 
   // Zip every brain file (paths preserved) in the browser and download it —
   // the secondary path for anyone who prefers a file over a command. The
@@ -422,99 +391,16 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           flexDirection: 'column',
         }}
       >
-        {/* Human-only intro — only on the index landing, kept small so it never
-            competes with Index / Foundations / Components. */}
-        {isIndex && (
-          <div style={{ padding: '28px 40px 0', maxWidth: 780 }}>
-            <div
-              style={{
-                border: `1px solid ${C.border.subtle}`,
-                borderRadius: 12,
-                background: C.surface.raised,
-                padding: '16px 18px',
-              }}
-            >
-              <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 6 }}>
-                Get the brain
-              </div>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 12px' }}>
-                One command installs all {fileCount} rule files (~{sizeKb} KB) into{' '}
-                <code style={{ fontFamily: MONO, fontSize: 12 }}>design-systems/andromeda/</code> in
-                your project, where your AI agent reads them. Re-run it any time to pull the latest
-                rules.
-              </p>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-                <div
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    background: C.surface.base,
-                    border: `1px solid ${C.border.subtle}`,
-                    borderRadius: 8,
-                    padding: '9px 12px',
-                    overflowX: 'auto',
-                  }}
-                >
-                  <code
-                    style={{
-                      fontFamily: MONO,
-                      fontSize: 12,
-                      color: C.text.secondary,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {cliCommandMasked}
-                  </code>
-                </div>
-                <button
-                  type="button"
-                  className="brain-dl"
-                  onClick={copyCommand}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    flexShrink: 0,
-                    alignSelf: 'center',
-                    background: C.accent[400],
-                    color: C.surface.base,
-                    fontWeight: 600,
-                    fontSize: 12,
-                    fontFamily: FONT,
-                    padding: '7px 12px',
-                    borderRadius: 8,
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {copied ? <Check weight="regular" size={14} /> : <Copy weight="regular" size={14} />}
-                  {copied ? 'Copied' : 'Copy'}
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={downloadBrain}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  background: 'transparent',
-                  color: C.text.secondary,
-                  fontWeight: 600,
-                  fontSize: 12,
-                  fontFamily: FONT,
-                  padding: '7px 12px',
-                  borderRadius: 8,
-                  border: `1px solid ${C.border.base}`,
-                  cursor: 'pointer',
-                }}
-              >
-                <DownloadSimple weight="regular" size={15} />
-                Or download as a zip
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Install lives in the sticky top bar (template pattern) via portal;
+            below md the bar is hidden, so an inline copy takes over. */}
+        {installSlot &&
+          createPortal(
+            <BrainInstallButton fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />,
+            installSlot,
+          )}
+        <div className="md:hidden" style={{ padding: '20px 40px 0', alignSelf: 'flex-start' }}>
+          <BrainInstallButton fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />
+        </div>
 
         {/* Markdown content */}
         <div
@@ -529,6 +415,147 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>
+    </div>
+  )
+}
+
+// Install button + popover, cloned from the template pages' InstallButton
+// (TemplatePreviewShell) so the brain installs exactly like a template: CLI
+// command with masked token, Copy CLI, contents bullets — plus the zip as the
+// in-popover secondary. Rendered only for entitled users (inside BrainViewer).
+function BrainInstallButton({
+  fileCount,
+  sizeKb,
+  onDownloadZip,
+}: {
+  fileCount: number
+  sizeKb: number
+  onDownloadZip: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  // Tokenized command: the brain is premium, so the bare command would get the
+  // locked placeholder. Masked on screen; copy writes the real token.
+  const [token, setToken] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const refresh = () =>
+      fetch('/api/me/token')
+        .then((r) => r.json())
+        .then((d) => {
+          if (!cancelled) setToken(d?.token ?? null)
+        })
+        .catch(() => {})
+    refresh()
+    window.addEventListener('focus', refresh)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', refresh)
+    }
+  }, [])
+  const reference = token
+    ? `"https://aicanvas.me/r/andromeda-brain.json?token=${token}"`
+    : '@aicanvas/andromeda-brain'
+  const referenceMasked = token
+    ? `"https://aicanvas.me/r/andromeda-brain.json?token=aic_••••••••"`
+    : '@aicanvas/andromeda-brain'
+  // --overwrite makes the SAME command both install and update: a no-op on
+  // first run, an in-place refresh of every rule file on re-runs (without it
+  // the CLI prompts per existing file).
+  const cliCommand = `npx shadcn@latest add --overwrite ${reference}`
+  const cliCommandMasked = `npx shadcn@latest add --overwrite ${referenceMasked}`
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(cliCommand)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function onClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const bullets = [
+    `All ${fileCount} rule files (~${sizeKb} KB) into design-systems/andromeda/ in your project.`,
+    'Your AI agent reads them there. Re-run the command to update.',
+  ]
+
+  return (
+    <div className="relative" ref={ref}>
+      <Button
+        variant="primary"
+        size="xs"
+        onClick={() => {
+          setCopied(false)
+          setOpen((o) => !o)
+        }}
+      >
+        <Terminal weight="regular" size={13} />
+        Install
+      </Button>
+
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
+          <div className="space-y-3 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+                  CLI install
+                </span>
+                <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
+                  One command
+                </span>
+              </div>
+              <Button variant="outline" size="xs" onClick={handleCopy} aria-label="Copy CLI command">
+                {copied ? (
+                  <>
+                    <Check weight="regular" size={13} className="text-olive-500 dark:text-olive-400" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy weight="regular" size={13} />
+                    Copy CLI
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="rounded-lg bg-sand-950 px-4 py-3">
+              <code className="block break-all font-mono text-xs text-sand-300">{cliCommandMasked}</code>
+            </div>
+            <div className="space-y-1.5">
+              {bullets.map((line, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Check weight="bold" size={12} className="shrink-0 text-olive-500 dark:text-olive-400" />
+                  <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-400">{line}</p>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-sand-300 pt-2.5 dark:border-sand-800">
+              <Button variant="outline" size="xs" onClick={onDownloadZip}>
+                <DownloadSimple weight="regular" size={13} />
+                Or download as a zip
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

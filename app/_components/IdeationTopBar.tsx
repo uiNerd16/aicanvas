@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Breadcrumbs, type Crumb } from '../components/Breadcrumbs'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
@@ -82,10 +83,22 @@ export function IdeationTopBar() {
   const crumbs = buildCrumbs(pathname)
   if (!crumbs) return null
 
+  // The brain page mirrors the template top bar: an Install button (portaled
+  // into the slot by BrainViewer, which owns the files + zip) next to the auth
+  // pill, replacing the Lightning status pill — same as TemplatePreviewShell.
+  const isBrain = pathname === '/design-systems/andromeda/brain'
+
   return (
     <div className={headerClass}>
       <Breadcrumbs crumbs={crumbs} />
-      <HeaderSocials />
+      {isBrain ? (
+        <div className="flex items-center gap-2">
+          <div id="brain-install-slot" />
+          <TopAuthPill showStatusPill={false} />
+        </div>
+      ) : (
+        <HeaderSocials />
+      )}
     </div>
   )
 }
