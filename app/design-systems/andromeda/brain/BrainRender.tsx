@@ -157,13 +157,13 @@ export function BrainRender({ height = 400 }: { height?: number }) {
           display: 'flex',
           flexDirection: 'column',
           gap: 7,
-          fontFamily: "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
+          fontFamily: "var(--font-sans), 'Manrope', system-ui, sans-serif",
           fontSize: 12,
         }}
       >
         {ZONES.map((z) => (
           <div key={z.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 9, height: 9, borderRadius: 9, background: z.hex, flexShrink: 0 }} />
+            <span style={{ width: 4, height: 4, borderRadius: 4, background: z.hex, flexShrink: 0 }} />
             <span style={{ color: z.hex, letterSpacing: '0.04em' }}>{z.label}</span>
           </div>
         ))}
