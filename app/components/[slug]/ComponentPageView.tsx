@@ -808,8 +808,23 @@ export default function ComponentPageView({
             }
             return (
             <section className="mt-12">
-              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+              <h2 className="flex items-center gap-2.5 text-base font-bold text-sand-900 dark:text-sand-50">
                 Add to your project
+                {premium && (
+                  // Same Aceternity-style pill as the card overview: filled
+                  // bolt at rest, slides open to the label on hover — a
+                  // reminder that the install below is premium-gated.
+                  <span className="group/premium flex items-center rounded-full bg-sand-950/85 p-1.5 text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
+                    <Lightning weight="fill" size={14} className="shrink-0" />
+                    <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover/premium:grid-cols-[1fr]">
+                      <span className="overflow-hidden">
+                        <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">
+                          Premium component
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                )}
               </h2>
               <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
                 One command adds this component to your project.
