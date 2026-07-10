@@ -14,10 +14,10 @@ import { UpgradeButton } from './UpgradeButton'
 // copy never sells free things as premium.
 
 const FREE_FEATURES = [
-  'Browse every component, preview and prompts',
-  'Unlimited one-command installs with a free account',
-  'Remix with AI, always free',
-  'MCP server for Claude Code, Codex, and Cursor',
+  'Full source code of every free component',
+  'Unlimited one-command installs',
+  'Expert prompts for Claude Code, Lovable and V0',
+  'MCP server for Claude Code, Codex and Cursor',
   'Lab access with presets and export',
   'Save your favorite components',
 ]
