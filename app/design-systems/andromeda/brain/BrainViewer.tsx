@@ -518,7 +518,7 @@ function BrainInstallButton({
         }}
       >
         <Terminal weight="regular" size={13} />
-        Install
+        Get the Brain
       </Button>
 
       {open && (
