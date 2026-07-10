@@ -594,6 +594,11 @@ function BrainInstallCard({
     } catch {}
   }, [cliCommand])
 
+  const bullets = [
+    `All ${fileCount} rule files (~${sizeKb} KB) into design-systems/andromeda/ in your project.`,
+    'Your AI agent reads them there. Re-run the command to update.',
+  ]
+
   return (
     <div
       style={{
@@ -603,30 +608,39 @@ function BrainInstallCard({
         padding: '16px 18px',
       }}
     >
-      <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 6 }}>
+      {/* Title */}
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 12 }}>
         Get the brain
       </div>
-      <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 12px' }}>
-        One command installs all {fileCount} rule files (~{sizeKb} KB) into{' '}
-        <code style={{ fontFamily: MONO, fontSize: 12 }}>design-systems/andromeda/</code> in your
-        project, where your AI agent reads them. Re-run it any time to pull the latest rules.
-      </p>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            background: C.surface.base,
-            border: `1px solid ${C.border.subtle}`,
-            borderRadius: 8,
-            padding: '9px 12px',
-            overflowX: 'auto',
-          }}
-        >
-          <code style={{ fontFamily: MONO, fontSize: 12, color: C.text.secondary, whiteSpace: 'nowrap' }}>
-            {cliCommandMasked}
-          </code>
-        </div>
+
+      {/* npx command box (full width) */}
+      <div
+        style={{
+          background: C.surface.base,
+          border: `1px solid ${C.border.subtle}`,
+          borderRadius: 8,
+          padding: '10px 12px',
+          overflowX: 'auto',
+          marginBottom: 12,
+        }}
+      >
+        <code style={{ fontFamily: MONO, fontSize: 12, color: C.text.secondary, whiteSpace: 'nowrap' }}>
+          {cliCommandMasked}
+        </code>
+      </div>
+
+      {/* Contents — two checkmarks */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+        {bullets.map((line, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <Check weight="bold" size={13} color={C.accent[400]} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span style={{ fontSize: 13, lineHeight: 1.5, color: C.text.secondary }}>{line}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* CTAs — Copy CLI (primary) + Download (secondary) */}
+      <div style={{ display: 'flex', gap: 8 }}>
         <button
           type="button"
           className="brain-dl"
@@ -635,43 +649,42 @@ function BrainInstallCard({
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
-            flexShrink: 0,
             background: C.accent[400],
             color: C.surface.base,
             fontWeight: 600,
-            fontSize: 12,
+            fontSize: 13,
             fontFamily: FONT,
-            padding: '7px 12px',
+            padding: '8px 14px',
             borderRadius: 8,
             border: 'none',
             cursor: 'pointer',
           }}
         >
           {copied ? <Check weight="regular" size={14} /> : <Copy weight="regular" size={14} />}
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? 'Copied' : 'Copy CLI'}
+        </button>
+        <button
+          type="button"
+          onClick={onDownloadZip}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'transparent',
+            color: C.text.secondary,
+            fontWeight: 600,
+            fontSize: 13,
+            fontFamily: FONT,
+            padding: '8px 14px',
+            borderRadius: 8,
+            border: `1px solid ${C.border.base}`,
+            cursor: 'pointer',
+          }}
+        >
+          <DownloadSimple weight="regular" size={15} />
+          Download
         </button>
       </div>
-      <button
-        type="button"
-        onClick={onDownloadZip}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          background: 'transparent',
-          color: C.text.secondary,
-          fontWeight: 600,
-          fontSize: 12,
-          fontFamily: FONT,
-          padding: '7px 12px',
-          borderRadius: 8,
-          border: `1px solid ${C.border.base}`,
-          cursor: 'pointer',
-        }}
-      >
-        <DownloadSimple weight="regular" size={15} />
-        Or download as a zip
-      </button>
     </div>
   )
 }
