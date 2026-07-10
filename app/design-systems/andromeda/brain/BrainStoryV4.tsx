@@ -364,12 +364,16 @@ export function BrainStoryV4() {
 
   return (
     <div style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
-      {/* top tab, consistent with the content pages (About / Terms / Credits) */}
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
-        <div />
-        <Link href="/design-systems/andromeda" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
-          /Andromeda Brain
-        </Link>
+      {/* top tab — left-aligned breadcrumb (Andromeda -> overview, current page
+          in olive), consistent with the content pages' breadcrumb pattern. */}
+      <header className="sticky top-0 z-50 hidden h-14 items-center justify-between gap-4 border-b border-sand-800 bg-sand-950 px-6 md:flex">
+        <nav aria-label="Breadcrumb" className="min-w-0 truncate text-sm font-semibold">
+          <Link href="/design-systems/andromeda" className="text-sand-400 transition-colors hover:text-sand-100">
+            Andromeda
+          </Link>
+          <span className="mx-1 text-sand-600">/</span>
+          <span className="text-olive-500">Andromeda Brain</span>
+        </nav>
         <div className="flex items-center justify-end">
           <HeaderSocials />
         </div>
