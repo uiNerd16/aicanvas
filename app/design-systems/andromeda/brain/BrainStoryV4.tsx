@@ -70,6 +70,8 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0xa8b94d, wireframe: true, emissive: new T.Color(C.accent), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
+// Default appearance of the brain on load.
+const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Iridescent'))
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
@@ -105,14 +107,14 @@ export function BrainStoryV4() {
   const labelEls = useRef<(HTMLDivElement | null)[]>([])
   const heroEls = useRef<(HTMLDivElement | null)[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
-  const [matIndex, setMatIndex] = useState(0)
+  const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
   // Premium subscribers already have the brain — re-label the CTA for them
   // (into the viewer) instead of pitching an upgrade.
   const isPremium = usePremiumStatus() === 'premium'
   const ctaLabel = isPremium ? 'Open the Brain' : 'Get the Brain with Premium'
   const ctaHref = isPremium ? '/design-systems/andromeda/brain' : '/pricing'
-  const matIndexRef = useRef(0)
+  const matIndexRef = useRef(DEFAULT_MATERIAL)
   const applyRef = useRef<(i: number) => void>(() => {})
   const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
 
@@ -373,15 +375,30 @@ export function BrainStoryV4() {
           ref={hostRef}
           style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'none' }}
         />
-        {/* material switcher */}
-        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 20, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {/* appearance stepper — vertical ticks on the right, centered with the
+            brain. No labels (the material name shows as a native tooltip on
+            hover); each tick steps the brain's look. */}
+        <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
           {MATERIALS.map((mm, i) => (
             <button
               key={mm.name}
               onClick={() => chooseMat(i)}
-              style={{ padding: '5px 10px', cursor: 'pointer', fontFamily: SANS, fontSize: 12, fontWeight: 600, borderRadius: 6, color: i === matIndex ? C.base : C.node, background: i === matIndex ? C.accentBtn : '#1B1B1C', border: '1px solid #2D2D2E' }}
+              title={mm.name}
+              aria-label={`Appearance: ${mm.name}`}
+              aria-pressed={i === matIndex}
+              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '6px 2px', lineHeight: 0 }}
             >
-              {mm.name}
+              <span
+                style={{
+                  display: 'block',
+                  height: 2,
+                  width: i === matIndex ? 30 : 16,
+                  borderRadius: 2,
+                  background: i === matIndex ? C.accentBtn : C.node,
+                  opacity: i === matIndex ? 1 : 0.5,
+                  transition: 'width .2s ease, background .2s ease, opacity .2s ease',
+                }}
+              />
             </button>
           ))}
         </div>
