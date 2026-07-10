@@ -1281,16 +1281,11 @@ export default function ComponentPageView({
               </Link>
 
               {/* MCP token — so AI-agent / MCP installs authenticate as your
-                  account. Signed in: surface a masked AICANVAS_TOKEN line to
-                  add to the MCP server config (copy writes the real value).
-                  While the token is still fetching, show a matching skeleton so
-                  the slot never blank-flashes between sign-in and token arrival.
-                  Signed out: a small link to create a free account first. */}
-              {/* Signed out: keep the token row visible (no swap). Copy routes
-                  through the soft gate — clicking it opens the auth modal.
-                  Signed in: the real masked token, copy writes the live value.
-                  While the token is still fetching, show a matching skeleton. */}
-              {needsFreeAccount ? (
+                  account. The token exists from signup (DB trigger), so the
+                  row is the same on free and premium pages. Signed out: masked
+                  row, copy opens the auth modal (soft gate). Signed in: copy
+                  writes the real value; skeleton while it fetches. */}
+              {!user ? (
                 <div className="mt-4">
                   <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
                     Add your token to your MCP server config so installs authenticate as your account:
@@ -1300,11 +1295,7 @@ export default function ComponentPageView({
                       AICANVAS_TOKEN=aic_••••••••
                     </code>
                     <button
-                      onClick={() => {
-                        // Soft gate: signed-out + gated → open the auth modal
-                        // instead of copying.
-                        if (needsFreeAccount) { promptFreeAccount(); return }
-                      }}
+                      onClick={promptFreeAccount}
                       className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                       aria-label="Copy MCP token"
                     >
@@ -1312,7 +1303,7 @@ export default function ComponentPageView({
                     </button>
                   </div>
                 </div>
-              ) : user ? (
+              ) : (
                 userToken ? (
                   <div className="mt-4">
                     <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
@@ -1324,9 +1315,6 @@ export default function ComponentPageView({
                       </code>
                       <button
                         onClick={() => {
-                          // Soft gate: signed-out + gated → open the auth modal
-                          // instead of copying.
-                          if (needsFreeAccount) { promptFreeAccount(); return }
                           navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
                           setMcpTokenCopied(true)
                           setTimeout(() => setMcpTokenCopied(false), 2000)
@@ -1351,14 +1339,6 @@ export default function ComponentPageView({
                     </div>
                   </div>
                 )
-              ) : (
-                <button
-                  type="button"
-                  onClick={promptFreeAccount}
-                  className="mt-4 block text-sm font-semibold text-olive-600 transition-colors hover:text-olive-500 dark:text-olive-400 dark:hover:text-olive-400"
-                >
-                  Create a free account to get your MCP token
-                </button>
               )}
             </section>
 
