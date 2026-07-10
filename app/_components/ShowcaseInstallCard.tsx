@@ -74,8 +74,7 @@ export function ShowcaseInstallCard() {
   return (
     <div
       style={{
-        maxWidth: 640,
-        margin: '48px auto 0',
+        margin: '48px 0 0',
         border: `1px solid ${C.border.subtle}`,
         borderRadius: 12,
         background: C.surface.raised,
@@ -88,8 +87,9 @@ export function ShowcaseInstallCard() {
         Get the system
       </div>
 
-      {/* Toggle — the two packages. */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      {/* Tabs — the CLI/Manual pattern: active is bright + underlined, inactive
+          muted; switching changes colour and keeps the underline. */}
+      <div style={{ display: 'flex', borderBottom: `1px solid ${C.border.base}`, marginBottom: 16 }}>
         {PACKAGES.map((p) => {
           const active = p.slug === slug
           return (
@@ -101,21 +101,24 @@ export function ShowcaseInstallCard() {
                 setCopied(false)
               }}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
+                position: 'relative',
+                padding: '9px 14px',
+                fontSize: 13,
                 fontWeight: 600,
                 fontFamily: SANS,
-                padding: '6px 12px',
-                borderRadius: 8,
                 cursor: 'pointer',
-                background: active ? C.accent[400] : 'transparent',
-                color: active ? C.surface.base : C.text.secondary,
-                border: `1px solid ${active ? C.accent[400] : C.border.base}`,
+                background: 'transparent',
+                border: 'none',
+                color: active ? C.text.primary : C.text.faint,
+                transition: 'color .12s',
               }}
             >
               {p.label}
+              {active && (
+                <span
+                  style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: C.text.primary }}
+                />
+              )}
             </button>
           )
         })}
