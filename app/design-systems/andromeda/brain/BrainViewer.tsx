@@ -251,6 +251,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   )
 
   const html = renderMd(activeFile.content)
+  const isIndex = getSectionKey(activeFile) === 'index'
 
   // Honest, self-updating counts for the install popover: total files + rounded
   // KB of brain content (not the zip, which compresses smaller).
@@ -407,37 +408,32 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           className="brain-content"
           onClick={handleContentClick}
           style={{
-            padding: '28px 40px 64px',
+            padding: isIndex ? '28px 40px 24px' : '28px 40px 64px',
             maxWidth: 780,
             fontSize: 14,
             lineHeight: 1.75,
           }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        {/* Closing CTA — the "Get the brain" card, at the BOTTOM of the index. */}
+        {isIndex && (
+          <div style={{ padding: '0 40px 64px', maxWidth: 780 }}>
+            <BrainInstallCard fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-// Install button + popover, cloned from the template pages' InstallButton
-// (TemplatePreviewShell) so the brain installs exactly like a template: CLI
-// command with masked token, Copy CLI, contents bullets — plus the zip as the
-// in-popover secondary. Rendered only for entitled users (inside BrainViewer).
-function BrainInstallButton({
-  fileCount,
-  sizeKb,
-  onDownloadZip,
-}: {
-  fileCount: number
-  sizeKb: number
-  onDownloadZip: () => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Tokenized command: the brain is premium, so the bare command would get the
-  // locked placeholder. Masked on screen; copy writes the real token.
+// Tokenized brain install command, shared by the top-bar button and the
+// bottom card. The brain is premium, so the bare command gets the locked
+// placeholder; the token attributes the pull to the account. Masked form for
+// display, real form for copy. --overwrite makes the SAME command install AND
+// update (a no-op on first run, an in-place refresh on re-runs — without it the
+// CLI prompts per existing file).
+function useBrainInstallCommand() {
   const [token, setToken] = useState<string | null>(null)
   useEffect(() => {
     let cancelled = false
@@ -458,14 +454,30 @@ function BrainInstallButton({
   const reference = token
     ? `"https://aicanvas.me/r/andromeda-brain.json?token=${token}"`
     : '@aicanvas/andromeda-brain'
-  const referenceMasked = token
-    ? `"https://aicanvas.me/r/andromeda-brain.json?token=aic_••••••••"`
-    : '@aicanvas/andromeda-brain'
-  // --overwrite makes the SAME command both install and update: a no-op on
-  // first run, an in-place refresh of every rule file on re-runs (without it
-  // the CLI prompts per existing file).
-  const cliCommand = `npx shadcn@latest add --overwrite ${reference}`
-  const cliCommandMasked = `npx shadcn@latest add --overwrite ${referenceMasked}`
+  const referenceMasked = `"https://aicanvas.me/r/andromeda-brain.json?token=aic_••••••••"`
+  return {
+    cliCommand: `npx shadcn@latest add --overwrite ${reference}`,
+    cliCommandMasked: `npx shadcn@latest add --overwrite ${token ? referenceMasked : '@aicanvas/andromeda-brain'}`,
+  }
+}
+
+// Install button + popover, cloned from the template pages' InstallButton
+// (TemplatePreviewShell) so the brain installs exactly like a template: CLI
+// command with masked token, Copy CLI, contents bullets — plus the zip as the
+// in-popover secondary. Rendered only for entitled users (inside BrainViewer).
+function BrainInstallButton({
+  fileCount,
+  sizeKb,
+  onDownloadZip,
+}: {
+  fileCount: number
+  sizeKb: number
+  onDownloadZip: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const { cliCommand, cliCommandMasked } = useBrainInstallCommand()
 
   async function handleCopy() {
     try {
@@ -556,6 +568,111 @@ function BrainInstallButton({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// The "Get the brain" card — the closing CTA at the BOTTOM of the index page.
+// The top-bar Install button is the primary affordance on every file; this is
+// the same command in its expanded, inline form for someone who has read the
+// index and reached the end. Uses the shared install-command hook.
+function BrainInstallCard({
+  fileCount,
+  sizeKb,
+  onDownloadZip,
+}: {
+  fileCount: number
+  sizeKb: number
+  onDownloadZip: () => void
+}) {
+  const [copied, setCopied] = useState(false)
+  const { cliCommand, cliCommandMasked } = useBrainInstallCommand()
+  const copy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(cliCommand)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }, [cliCommand])
+
+  return (
+    <div
+      style={{
+        border: `1px solid ${C.border.subtle}`,
+        borderRadius: 12,
+        background: C.surface.raised,
+        padding: '16px 18px',
+      }}
+    >
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 6 }}>
+        Get the brain
+      </div>
+      <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 12px' }}>
+        One command installs all {fileCount} rule files (~{sizeKb} KB) into{' '}
+        <code style={{ fontFamily: MONO, fontSize: 12 }}>design-systems/andromeda/</code> in your
+        project, where your AI agent reads them. Re-run it any time to pull the latest rules.
+      </p>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            background: C.surface.base,
+            border: `1px solid ${C.border.subtle}`,
+            borderRadius: 8,
+            padding: '9px 12px',
+            overflowX: 'auto',
+          }}
+        >
+          <code style={{ fontFamily: MONO, fontSize: 12, color: C.text.secondary, whiteSpace: 'nowrap' }}>
+            {cliCommandMasked}
+          </code>
+        </div>
+        <button
+          type="button"
+          className="brain-dl"
+          onClick={copy}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            flexShrink: 0,
+            background: C.accent[400],
+            color: C.surface.base,
+            fontWeight: 600,
+            fontSize: 12,
+            fontFamily: FONT,
+            padding: '7px 12px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          {copied ? <Check weight="regular" size={14} /> : <Copy weight="regular" size={14} />}
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={onDownloadZip}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          background: 'transparent',
+          color: C.text.secondary,
+          fontWeight: 600,
+          fontSize: 12,
+          fontFamily: FONT,
+          padding: '7px 12px',
+          borderRadius: 8,
+          border: `1px solid ${C.border.base}`,
+          cursor: 'pointer',
+        }}
+      >
+        <DownloadSimple weight="regular" size={15} />
+        Or download as a zip
+      </button>
     </div>
   )
 }
