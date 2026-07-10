@@ -107,6 +107,7 @@ import {
 // design-systems/ directly. See scripts/inject-premium.mjs.
 import { MetricChart, Gauge } from '../../../lib/andromeda-v2.generated'
 import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
+import { ShowcaseInstallCard } from '../../../_components/ShowcaseInstallCard'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
 // matches the design system's only font exactly.
@@ -1876,6 +1877,9 @@ export default function AndromedaShowcase({
             );
           })()}
         </Section>
+
+        {/* Bottom install card — the two packages, like the brain's card. */}
+        <ShowcaseInstallCard />
       </div>
       <SiteFooter />
     </div>
