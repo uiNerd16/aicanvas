@@ -16,7 +16,7 @@ import { UpgradeButton } from './UpgradeButton'
 const FREE_FEATURES = [
   'Full source code of every free component',
   'Unlimited one-command installs',
-  'Expert prompts for Claude Code, Lovable and V0',
+  'Remix with AI on every component',
   'MCP server for Claude Code, Codex and Cursor',
   'Lab access with presets and export',
   'Save your favorite components',
