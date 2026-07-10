@@ -49,6 +49,7 @@ import { useEntitlement } from '../billing/useEntitlement'
 import { usePremiumStatus } from '../billing/usePremiumStatus'
 import { PremiumBadge } from '../billing/PremiumBadge'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
+import { usePaywallModal } from '../billing/PaywallModalProvider'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -396,11 +397,12 @@ export default function ComponentPageView({
   const needsFreeAccount = !!freeAccountGate && !user && !premium
 
   // Premium component + confirmed non-premium visitor: the install copy
-  // actions route to /pricing instead of copying. UX only — the real gate is
-  // server-side at /r. 'unknown' (entitlement still loading) does NOT redirect
-  // so a premium subscriber is never bounced to pricing by a fast click.
+  // actions open the paywall modal instead of copying. UX only — the real
+  // gate is server-side at /r. 'unknown' (entitlement still loading) does NOT
+  // gate so a premium subscriber is never blocked by a fast click.
   const premiumStatus = usePremiumStatus()
   const needsPremium = premium && premiumStatus === 'not-premium'
+  const { open: openPaywallModal } = usePaywallModal()
 
   // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
   // returning the visitor here after they create their free account. The install
@@ -415,9 +417,9 @@ export default function ComponentPageView({
   }
 
   async function copyCli() {
-    // Premium gate: non-premium visitors go to pricing instead of copying.
+    // Premium gate: non-premium visitors get the upgrade modal, not a copy.
     if (needsPremium) {
-      router.push('/pricing')
+      openPaywallModal({ reason: 'premium-only' })
       return
     }
     // Soft gate: signed-out + gated → open the auth modal instead of copying.
@@ -896,9 +898,9 @@ export default function ComponentPageView({
                               ))}
                               <button
                                 onClick={() => {
-                                  // Premium gate: non-premium visitors go to
-                                  // pricing instead of copying.
-                                  if (needsPremium) { router.push('/pricing'); return }
+                                  // Premium gate: non-premium visitors get the
+                                  // upgrade modal, not a copy.
+                                  if (needsPremium) { openPaywallModal({ reason: 'premium-only' }); return }
                                   // Soft gate: signed-out + gated → open the auth
                                   // modal instead of copying.
                                   if (needsFreeAccount) { promptFreeAccount(); return }
