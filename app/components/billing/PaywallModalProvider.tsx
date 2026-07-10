@@ -68,7 +68,7 @@ function PaywallModalView({
   const subtitle =
     reason === 'upgrade'
       ? null
-      : 'Design systems and templates are part of Premium. Unlock every one, plus unlimited installs.'
+      : 'Premium components, design systems and templates. Unlock every one.'
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
   // (this is a soft upgrade pitch, not a flow you must complete).

@@ -174,6 +174,13 @@ export function PremiumCards({
           </div>
 
           <div className="mt-4 flex items-baseline gap-2">
+            {/* Yearly anchor: 12 x $8.99 monthly, struck through so the 54%
+                saving reads in money, not just percent. */}
+            {cycle === 'yearly' && (
+              <span className="text-sm font-medium text-sand-400 line-through dark:text-sand-500">
+                $107.88
+              </span>
+            )}
             <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
               {price}
             </span>
