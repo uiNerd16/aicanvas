@@ -14,19 +14,20 @@ import { UpgradeButton } from './UpgradeButton'
 // copy never sells free things as premium.
 
 const FREE_FEATURES = [
-  'Browse every component, preview and prompts',
-  'Unlimited one-command installs with a free account',
-  'Remix with AI, always free',
-  'MCP server for Claude Code, Codex, and Cursor',
+  'Full source code of every free component',
+  'Unlimited one-command installs',
+  'Remix with AI on every component',
+  'MCP server for Claude Code, Codex and Cursor',
   'Lab access with presets and export',
   'Save your favorite components',
 ]
 
 const PREMIUM_FEATURES = [
-  'Premium closed-source components, one command',
-  'Full design systems, one command installs the whole thing',
-  'Premium templates, full access',
-  'Every new design system and template, included',
+  'Every premium component, one command install',
+  'Full design systems, tokens to templates',
+  'All premium templates, source included',
+  'New premium releases included as they ship',
+  'Use in commercial and client projects',
   'Cancel anytime',
 ]
 
@@ -91,7 +92,7 @@ export function PremiumCards({
                 Free
               </h2>
             </div>
-            <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
               Install and remix components, free forever.
             </p>
             {/* Invisible mirror of the Premium card's billing-cycle toggle so the
@@ -143,7 +144,7 @@ export function PremiumCards({
               <Lightning weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>
-          <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
             Design systems, templates and premium components.
           </p>
 
@@ -174,6 +175,13 @@ export function PremiumCards({
           </div>
 
           <div className="mt-4 flex items-baseline gap-2">
+            {/* Yearly anchor: 12 x $8.99 monthly, struck through so the 54%
+                saving reads in money, not just percent. */}
+            {cycle === 'yearly' && (
+              <span className="text-sm font-medium text-sand-400 line-through dark:text-sand-500">
+                $107.88
+              </span>
+            )}
             <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
               {price}
             </span>
@@ -210,10 +218,14 @@ export function PremiumCards({
           )}
         </div>
         <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
-            EVERYTHING IN FREE, PLUS
-          </p>
-          <ul className="mt-4 space-y-3">
+          {/* The comparison label only makes sense next to the Free card;
+              the premium-only modal renders the list without it. */}
+          {showFree && (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+              EVERYTHING IN FREE, PLUS
+            </p>
+          )}
+          <ul className={showFree ? 'mt-4 space-y-3' : 'space-y-3'}>
             {PREMIUM_FEATURES.map((feature) => (
               <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
                 <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
@@ -263,7 +275,14 @@ function TrustStrip() {
             <img src={`/payment/${file}.svg`} alt={label} className="h-4 w-auto" />
           </span>
         ))}
-        <span className="ml-1 text-xs text-sand-500 dark:text-sand-400">powered by Paddle</span>
+        <a
+          href="https://www.paddle.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1 text-xs text-sand-500 underline-offset-2 hover:underline dark:text-sand-400"
+        >
+          powered by Paddle
+        </a>
       </div>
     </div>
   )
