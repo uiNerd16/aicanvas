@@ -124,12 +124,57 @@ function renderMd(raw: string): string {
     }
   }
 
-  for (const line of lines) {
+  // GFM tables: a row line (`| a | b |`) immediately followed by a separator
+  // (`|---|---|`). ponytail: splits on bare `|`, so an escaped `\|` inside a
+  // cell would break — the brain's tables don't use them.
+  const isTableSep = (l?: string) =>
+    !!l && /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)+\|?\s*$/.test(l)
+  const isTableRow = (l?: string) => !!l && l.trim() !== '' && l.includes('|')
+  const cells = (l: string) =>
+    l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim())
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
     // Code block placeholder
     if (line.includes('\x00B')) {
       flushParagraph()
       closeList()
-      out.push(line.replace(/\x00B(\d+)\x00/g, (_, i) => blocks[+i]))
+      out.push(line.replace(/\x00B(\d+)\x00/g, (_, bi) => blocks[+bi]))
+      continue
+    }
+
+    // Table (header row + separator + zero or more body rows)
+    if (isTableRow(line) && isTableSep(lines[i + 1])) {
+      flushParagraph()
+      closeList()
+      const header = cells(line)
+      const rows: string[][] = []
+      let j = i + 2
+      while (j < lines.length && isTableRow(lines[j]) && !isTableSep(lines[j])) {
+        rows.push(cells(lines[j]))
+        j++
+      }
+      const th = header
+        .map(
+          (h) =>
+            `<th style="text-align:left;padding:7px 12px;border-bottom:1px solid ${C.border.base};color:${C.text.primary};font-weight:600;white-space:nowrap">${inlineFmt(h)}</th>`,
+        )
+        .join('')
+      const body = rows
+        .map(
+          (r) =>
+            `<tr>${r
+              .map(
+                (c) =>
+                  `<td style="padding:7px 12px;border-bottom:1px solid ${C.border.subtle};color:${C.text.secondary};vertical-align:top">${inlineFmt(c)}</td>`,
+              )
+              .join('')}</tr>`,
+        )
+        .join('')
+      out.push(
+        `<div style="overflow-x:auto;margin:14px 0"><table style="border-collapse:collapse;width:100%;font-size:13px;line-height:1.6"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`,
+      )
+      i = j - 1
       continue
     }
 
@@ -253,15 +298,21 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   const html = renderMd(activeFile.content)
   const isIndex = getSectionKey(activeFile) === 'index'
 
-  // Zip the brain ONCE (paths preserved): the exact size shown to the user IS
-  // the file they download — no guessing, and it self-updates as the brain
-  // grows. The bytes are reused by downloadBrain below (no re-zip on click).
-  const { fileCount, sizeKb, zipBytes } = useMemo(() => {
+  const fileCount = files.length
+  // Zip the brain lazily on the CLIENT (never during SSR or the render phase):
+  // a ~270 KB deflate in render would block the server response on every
+  // premium request and again on the hydration main thread. This runs once
+  // after mount, so the exact compressed size (what the user downloads) appears
+  // a beat after paint; the bytes are reused by downloadBrain (no re-zip on
+  // click). sizeKb is undefined until then — the copy omits it gracefully.
+  const [zip, setZip] = useState<{ sizeKb: number; bytes: ReturnType<typeof zipSync> } | null>(null)
+  useEffect(() => {
     const entries: Record<string, Uint8Array> = {}
     for (const f of files) entries[f.path] = strToU8(f.content)
     const zipped = zipSync(entries, { level: 6 })
-    return { fileCount: files.length, sizeKb: Math.round(zipped.length / 1024), zipBytes: zipped }
+    setZip({ sizeKb: Math.round(zipped.length / 1024), bytes: zipped })
   }, [files])
+  const sizeKb = zip?.sizeKb
 
   // The Install button lives in the sticky top bar (template-page pattern) but
   // is OWNED here, portaled into the bar's slot — the zip needs the loaded
@@ -277,7 +328,8 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   // file over a command. The viewer only renders for entitled users, so this is
   // already access-gated.
   const downloadBrain = useCallback(() => {
-    const blob = new Blob([zipBytes], { type: 'application/zip' })
+    if (!zip) return // zip still computing (first few ms after mount)
+    const blob = new Blob([zip.bytes], { type: 'application/zip' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -286,7 +338,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
     a.click()
     a.remove()
     URL.revokeObjectURL(url)
-  }, [zipBytes])
+  }, [zip])
 
   return (
     // Natural height on purpose: the Andromeda content column is the ONE
@@ -470,7 +522,7 @@ function BrainInstallButton({
   onDownloadZip,
 }: {
   fileCount: number
-  sizeKb: number
+  sizeKb: number | undefined
   onDownloadZip: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -503,7 +555,7 @@ function BrainInstallButton({
   }, [open])
 
   const bullets = [
-    `All ${fileCount} rule files (~${sizeKb} KB) into design-systems/andromeda/ in your project.`,
+    `All ${fileCount} rule files${sizeKb ? ` (~${sizeKb} KB)` : ''} into design-systems/andromeda/ in your project.`,
     'Your AI agent reads them there. Re-run the command to update.',
   ]
 
@@ -581,7 +633,7 @@ function BrainInstallCard({
   onDownloadZip,
 }: {
   fileCount: number
-  sizeKb: number
+  sizeKb: number | undefined
   onDownloadZip: () => void
 }) {
   const [copied, setCopied] = useState(false)
@@ -595,7 +647,7 @@ function BrainInstallCard({
   }, [cliCommand])
 
   const bullets = [
-    `All ${fileCount} rule files (~${sizeKb} KB) into design-systems/andromeda/ in your project.`,
+    `All ${fileCount} rule files${sizeKb ? ` (~${sizeKb} KB)` : ''} into design-systems/andromeda/ in your project.`,
     'Your AI agent reads them there. Re-run the command to update.',
   ]
 

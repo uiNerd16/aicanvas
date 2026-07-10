@@ -168,10 +168,11 @@ export function BrainPaywall({ tier, error }: Props) {
         ))}
       </div>
 
-      {/* CTA */}
+      {/* CTA — in the error case the viewer is a PREMIUM subscriber hitting a
+          transient bundle failure, so never pitch an upgrade: offer a retry. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <Link
-          href="/pricing"
+          href={error ? '/design-systems/andromeda/brain/explore' : '/pricing'}
           className="brain-cta"
           style={{
             display: 'inline-block',
@@ -187,9 +188,9 @@ export function BrainPaywall({ tier, error }: Props) {
             transition: 'background 0.15s',
           }}
         >
-          Upgrade to Premium
+          {error ? 'Try again' : 'Upgrade to Premium'}
         </Link>
-        {isAnon && (
+        {isAnon && !error && (
           <Link
             href="/account/sign-in"
             className="brain-sign-in"

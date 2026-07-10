@@ -109,11 +109,15 @@ export function BrainStoryV4() {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
-  // Premium subscribers already have the brain — re-label the CTA for them
-  // (into the viewer) instead of pitching an upgrade.
-  const isPremium = usePremiumStatus() === 'premium'
-  const ctaLabel = isPremium ? 'Open the Brain' : 'Get the Brain with Premium'
-  const ctaHref = isPremium ? '/design-systems/andromeda/brain/explore' : '/pricing'
+  // Premium subscribers already have the brain — re-label the CTA into the
+  // viewer instead of pitching an upgrade. Treat the in-flight 'unknown' state
+  // as open (NOT not-premium) so a paying customer is never flashed an upgrade
+  // pitch while entitlement loads or if the API errors — same tri-state rule as
+  // TemplateChrome/TopAuthPill. Anon/free derive to 'not-premium' synchronously,
+  // and /explore is server-gated, so this never grants a free user access.
+  const canOpen = usePremiumStatus() !== 'not-premium'
+  const ctaLabel = canOpen ? 'Open the Brain' : 'Get the Brain with Premium'
+  const ctaHref = canOpen ? '/design-systems/andromeda/brain/explore' : '/pricing'
   const matIndexRef = useRef(DEFAULT_MATERIAL)
   const applyRef = useRef<(i: number) => void>(() => {})
   const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
@@ -344,7 +348,9 @@ export function BrainStoryV4() {
 
     return () => {
       alive = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); cleanupInput()
-      try { pmrem?.dispose(); renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
+      // forceContextLoss releases the actual WebGL context (browsers cap ~16);
+      // dispose() alone leaks it, so repeated mounts of the story would run out.
+      try { pmrem?.dispose(); try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
     }
   }, [dirs])
 
