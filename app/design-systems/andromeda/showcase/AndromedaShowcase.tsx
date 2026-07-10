@@ -354,58 +354,58 @@ export default function AndromedaShowcase({
           }
         `}</style>
 
-        {/* Page header */}
-        <header style={{ marginBottom: tokens.spacing[6] }}>
+        {/* Page header — AI Canvas site style (Manrope), not the Andromeda mono
+            aesthetic of the demos below. Fixed light-on-dark colours because the
+            showcase surface is always the Andromeda void. */}
+        <header style={{ marginBottom: tokens.spacing[6], fontFamily: "var(--font-sans), 'Manrope', system-ui, sans-serif" }}>
           <div
             style={{
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#A8B94D',
               textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.widest,
-              marginBottom: tokens.spacing[2],
+              letterSpacing: '0.12em',
+              marginBottom: 10,
             }}
           >
-            /// Andromeda Design System
+            Andromeda
           </div>
           <h1
             className="as-title"
             style={{
               margin: 0,
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size['3xl'],
-              fontWeight: tokens.typography.weight.medium,
-              color: tokens.color.text.primary,
-              textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.wider,
-              lineHeight: 1.1,
+              fontSize: 'clamp(30px, 4.5vw, 42px)',
+              fontWeight: 800,
+              color: '#F4F4FA',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.05,
             }}
           >
-            Component Showcase
+            System
           </h1>
           <p
             style={{
-              margin: `${tokens.spacing[4]} 0 0 0`,
+              margin: '16px 0 0 0',
               maxWidth: '56ch',
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.sm,
-              lineHeight: tokens.typography.lineHeight.normal,
-              color: tokens.color.text.secondary,
+              fontSize: 16,
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: '#9B9B9E',
             }}
           >
-            Designed for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
+            Built for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
           </p>
           <div
             style={{
-              marginTop: tokens.spacing[3],
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              marginTop: 16,
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#7B7B7D',
               textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.wide,
+              letterSpacing: '0.1em',
             }}
           >
-            {componentCount} components · {templateCount} templates · one-command install
+            {componentCount} components · {templateCount} templates · 1 brain · one-command install
           </div>
         </header>
 
