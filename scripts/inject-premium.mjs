@@ -349,11 +349,15 @@ rmSync(V2_SHIM, { force: true })
 rmSync(BRAIN_TEASER_MODULE, { force: true })
 rmSync(PREMIUM_JSON, { force: true })
 rmSync(BUILD_INFO, { force: true })
-// Stale brain bundles from a previous run (underscore-prefixed, unservable via
-// /r). Removed up front so a degraded run leaves NO brain content behind.
+// Stale brain files from a previous run: the underscore-prefixed page bundle
+// AND the servable <slug>-brain.json CLI item. Removed up front so a degraded
+// run leaves NO brain content behind (bundled or servable). NB: this would
+// also delete a hypothetical free standalone whose slug ends in `-brain` —
+// harmless (generate-registry re-emits it later in the same chain), but avoid
+// naming standalones that way.
 try {
   for (const f of readdirSync(REGISTRY_DATA)) {
-    if (/^_[a-z0-9-]+-brain\.json$/.test(f)) rmSync(join(REGISTRY_DATA, f), { force: true })
+    if (/^_?[a-z0-9-]+-brain\.json$/.test(f)) rmSync(join(REGISTRY_DATA, f), { force: true })
   }
 } catch { /* registry-data not created yet */ }
 mkdirSync(TARGET, { recursive: true })
@@ -571,9 +575,40 @@ for (const slug of brains) {
     join(REGISTRY_DATA, `_${slug}-brain.json`),
     JSON.stringify({ generatedAt: builtSha ?? 'local', files }, null, 2) + '\n',
   )
+  // Servable CLI item: <slug>-brain.json (NO underscore, so /r CAN serve it —
+  // the gate classifies it 'brain' and requires premium entitlement mode-
+  // independently, exactly like premium-standalone; non-premium gets a stub).
+  // Same files as the page bundle, in shadcn registry-item shape with explicit
+  // `~/` targets so `npx shadcn add` lands them at design-systems/<slug>/... in
+  // the consumer's project. Re-running the command refreshes the rules in place.
+  const title = slug.charAt(0).toUpperCase() + slug.slice(1)
+  writeFileSync(
+    join(REGISTRY_DATA, `${slug}-brain.json`),
+    JSON.stringify(
+      {
+        $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+        name: `${slug}-brain`,
+        type: 'registry:item',
+        title: `${title} Brain`,
+        description:
+          `The ${title} design-system brain: every rule, foundation, and skill as markdown ` +
+          `your AI agent reads. Re-run the install command any time to pull the latest rules.`,
+        dependencies: [],
+        registryDependencies: [],
+        files: files.map((f) => ({
+          path: f.path,
+          type: 'registry:file',
+          target: `~/${f.path}`,
+          content: f.content,
+        })),
+      },
+      null,
+      2,
+    ) + '\n',
+  )
   if (slug === 'andromeda') andromedaTeaser = teaser
   brainSlugs.push(slug)
-  log(`bundled brain "${slug}": ${files.length} file(s) → registry-data/_${slug}-brain.json`)
+  log(`bundled brain "${slug}": ${files.length} file(s) → registry-data/_${slug}-brain.json + servable ${slug}-brain.json`)
 }
 writeBrainTeaser(andromedaTeaser)
 

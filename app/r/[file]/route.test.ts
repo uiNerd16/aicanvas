@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { NextRequest } from 'next/server'
 
 // Mock ONLY getEntitlement — everything else (classifyContent + loadContentLookup
@@ -107,5 +109,70 @@ describe('GET /r/<free-standalone>.json — per-tier install gate', () => {
     for (const marker of REAL_SOURCE_MARKERS) {
       expect(body).toContain(marker)
     }
+  })
+})
+
+// The servable brain item only exists on vault-reachable builds (inject-premium
+// writes it from the private source). Skip cleanly on free-only builds — the
+// gate logic itself is still covered by content-type.test.ts.
+const BRAIN_FILE = 'andromeda-brain.json'
+const brainAvailable = existsSync(join(process.cwd(), 'registry-data', BRAIN_FILE))
+
+function callBrain() {
+  const req = new NextRequest(`http://localhost/r/${BRAIN_FILE}`)
+  return GET(req, { params: Promise.resolve({ file: BRAIN_FILE }) })
+}
+
+describe.skipIf(!brainAvailable)('GET /r/andromeda-brain.json — mode-independent premium gate', () => {
+  it('anonymous → 200 locked placeholder, zero rules content', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'anonymous', userId: null })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-AICanvas-Content-Type')).toBe('brain')
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store')
+    // ONE placeholder .md steering to /pricing — never the real corpus.
+    expect(item.files).toHaveLength(1)
+    expect(item.files[0].target).toContain('BRAIN-LOCKED.md')
+    expect(item.files[0].content).toContain('aicanvas.me/pricing')
+  })
+
+  it("signed-in 'free' tier → same locked placeholder", async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'free', userId: 'u1' })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.files).toHaveLength(1)
+    expect(item.files[0].content).toContain('aicanvas.me/pricing')
+  })
+
+  it('premium tier → the REAL brain: every file, registry:file with ~/ targets', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'premium', userId: 'u1' })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.name).toBe('andromeda-brain')
+    expect(item.files.length).toBeGreaterThan(10)
+    const index = item.files.find((f: { path: string }) => f.path === 'design-systems/andromeda/rules.md')
+    expect(index).toBeDefined()
+    expect(index.type).toBe('registry:file')
+    expect(index.target).toBe('~/design-systems/andromeda/rules.md')
+    expect(index.content.length).toBeGreaterThan(100)
+  })
+
+  it('entitlement error → 503, fail CLOSED (never premium bytes)', async () => {
+    mockedGetEntitlement.mockRejectedValue(new Error('db blip'))
+
+    const res = await callBrain()
+
+    expect(res.status).toBe(503)
+    const body = await res.text()
+    expect(body).not.toContain('registry:file')
   })
 })

@@ -4,6 +4,7 @@ export type ContentType =
   | 'design-system-component'
   | 'design-system'
   | 'template'
+  | 'brain'
   | 'meta'
 
 export interface ContentLookup {
@@ -15,6 +16,8 @@ export interface ContentLookup {
   systemSlugs: Set<string>
   /** Slugs of premium-only STANDALONE components (closed-source, born premium). */
   premiumSlugs: Set<string>
+  /** Slugs of gated design-system BRAIN items (e.g. andromeda-brain). */
+  brainSlugs: Set<string>
   /**
    * True when this lookup came from the missing-manifest fallback. The fallback
    * cannot know which standalones are premium, so routes MUST fail closed for
@@ -45,6 +48,10 @@ export function classifyContent(slugOrFile: string, lookup: ContentLookup): Cont
 
   if (META_SLUGS.has(slug)) return 'meta'
   if (lookup.templateSlugs.has(slug)) return 'template'
+
+  // Design-system brains (the .md rules corpus, e.g. andromeda-brain): premium,
+  // gated mode-independently like premium-standalone. Explicit set, exact match.
+  if (lookup.brainSlugs.has(slug)) return 'brain'
 
   // Whole-system aggregates stay premium-only (the "install the entire system"
   // items). Matched EXACTLY (see note above) so a standalone sharing the name

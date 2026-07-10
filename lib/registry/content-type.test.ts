@@ -6,6 +6,7 @@ const lookup: ContentLookup = {
   templateSlugs: new Set(['andromeda-mission-control', 'andromeda-service-order']),
   systemSlugs: new Set(['andromeda']),
   premiumSlugs: new Set(['aurora-pricing-table']),
+  brainSlugs: new Set(['andromeda-brain']),
 }
 
 describe('classifyContent', () => {
@@ -39,6 +40,13 @@ describe('classifyContent', () => {
   it('classifies the whole-system aggregates', () => {
     expect(classifyContent('andromeda', lookup)).toBe('design-system')
     expect(classifyContent('andromeda-all', lookup)).toBe('design-system')
+  })
+
+  it('classifies a brain item as brain (gated), exact match only', () => {
+    expect(classifyContent('andromeda-brain', lookup)).toBe('brain')
+    expect(classifyContent('andromeda-brain.json', lookup)).toBe('brain')
+    // a brain slug for a system without one stays a plain standalone
+    expect(classifyContent('aurora-brain', lookup)).toBe('standalone')
   })
 
   it('classifies catalog/meta files', () => {

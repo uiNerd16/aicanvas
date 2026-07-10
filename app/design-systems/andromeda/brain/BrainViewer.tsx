@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { DownloadSimple } from '@phosphor-icons/react'
+import { Check, Copy, DownloadSimple } from '@phosphor-icons/react'
 import { zipSync, strToU8 } from 'fflate'
 
 // AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
@@ -257,7 +257,50 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
     return { fileCount: files.length, sizeKb: Math.round(bytes / 1024 / 10) * 10 }
   }, [files])
 
-  // Zip every brain file (paths preserved) in the browser and download it. The
+  // Tokenized CLI install (primary delivery): same pattern as the template
+  // InstallButton — the token attributes the pull to the account (the brain is
+  // premium; a bare command would get the locked placeholder). Masked on
+  // screen; copy writes the real token. The viewer only renders for entitled
+  // users, so showing the command here is already access-gated.
+  const [installToken, setInstallToken] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    const refresh = () =>
+      fetch('/api/me/token')
+        .then((r) => r.json())
+        .then((d) => {
+          if (!cancelled) setInstallToken(d?.token ?? null)
+        })
+        .catch(() => {})
+    refresh()
+    window.addEventListener('focus', refresh)
+    return () => {
+      cancelled = true
+      window.removeEventListener('focus', refresh)
+    }
+  }, [])
+  const installReference = installToken
+    ? `"https://aicanvas.me/r/andromeda-brain.json?token=${installToken}"`
+    : '@aicanvas/andromeda-brain'
+  const installReferenceMasked = installToken
+    ? `"https://aicanvas.me/r/andromeda-brain.json?token=aic_••••••••"`
+    : '@aicanvas/andromeda-brain'
+  // --overwrite makes the SAME command both install and update: a no-op on
+  // first run (no files exist yet), an in-place refresh of every rule file on
+  // re-runs (verified: without it the CLI prompts per existing file).
+  const cliCommand = `npx shadcn@latest add --overwrite ${installReference}`
+  const cliCommandMasked = `npx shadcn@latest add --overwrite ${installReferenceMasked}`
+  const copyCommand = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(cliCommand)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }, [cliCommand])
+
+  // Zip every brain file (paths preserved) in the browser and download it —
+  // the secondary path for anyone who prefers a file over a command. The
   // viewer only renders for entitled users, so this is already access-gated.
   const downloadBrain = useCallback(() => {
     const entries: Record<string, Uint8Array> = {}
@@ -387,31 +430,79 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
               <div style={{ fontSize: 14, fontWeight: 600, color: C.text.primary, marginBottom: 6 }}>
                 Get the brain
               </div>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 14px' }}>
-                Easy to work with. Download the brain as a zip ({fileCount} files, ~{sizeKb} KB) and
-                drop it into your project. Your AI reads it from there.
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: C.text.secondary, margin: '0 0 12px' }}>
+                One command installs all {fileCount} rule files (~{sizeKb} KB) into{' '}
+                <code style={{ fontFamily: MONO, fontSize: 12 }}>design-systems/andromeda/</code> in
+                your project, where your AI agent reads them. Re-run it any time to pull the latest
+                rules.
               </p>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'stretch', marginBottom: 12 }}>
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    background: C.surface.base,
+                    border: `1px solid ${C.border.subtle}`,
+                    borderRadius: 8,
+                    padding: '9px 12px',
+                    overflowX: 'auto',
+                  }}
+                >
+                  <code
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: 12,
+                      color: C.text.secondary,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {cliCommandMasked}
+                  </code>
+                </div>
+                <button
+                  type="button"
+                  className="brain-dl"
+                  onClick={copyCommand}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexShrink: 0,
+                    background: C.accent[400],
+                    color: C.surface.base,
+                    fontWeight: 600,
+                    fontSize: 13,
+                    fontFamily: FONT,
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {copied ? <Check weight="regular" size={15} /> : <Copy weight="regular" size={15} />}
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
               <button
                 type="button"
-                className="brain-dl"
                 onClick={downloadBrain}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 8,
-                  background: C.accent[400],
-                  color: C.surface.base,
+                  background: 'transparent',
+                  color: C.text.secondary,
                   fontWeight: 600,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontFamily: FONT,
-                  padding: '8px 14px',
+                  padding: '7px 12px',
                   borderRadius: 8,
-                  border: 'none',
+                  border: `1px solid ${C.border.base}`,
                   cursor: 'pointer',
                 }}
               >
-                <DownloadSimple weight="regular" size={16} />
-                Download the brain
+                <DownloadSimple weight="regular" size={15} />
+                Or download as a zip
               </button>
             </div>
           </div>

@@ -16,6 +16,7 @@ const manifest: GateManifest = {
     'andromeda-signal-room',
   ],
   premiumSlugs: ['aurora-pricing-table'],
+  brainSlugs: ['andromeda-brain'],
 }
 
 describe('buildLookup + classifyContent (manifest-driven gate)', () => {
@@ -43,6 +44,12 @@ describe('buildLookup + classifyContent (manifest-driven gate)', () => {
 
   it('a premium standalone from the manifest gates as premium-standalone', () => {
     expect(classifyContent('aurora-pricing-table', lookup)).toBe('premium-standalone')
+  })
+
+  it('a brain item from the manifest gates as brain; absent key builds and gates nothing', () => {
+    expect(classifyContent('andromeda-brain', lookup)).toBe('brain')
+    const noBrains = buildLookup({ ...manifest, brainSlugs: undefined })
+    expect(classifyContent('andromeda-brain', noBrains)).toBe('standalone')
   })
 
   it('a manifest with no premiumSlugs key still builds (defensive ?? [])', () => {

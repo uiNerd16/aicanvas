@@ -257,15 +257,20 @@ expectedNames.add('aicanvas-mcp') // MCP metadata file
 for (const slug of premiumSlugDirs) expectedNames.add(slug) // keep gated premium JSON
 expectedNames.add('_premium') // gate input (written by inject-premium) — must survive cleanup
 expectedNames.add('_manifest') // gate manifest
-// Brain bundles (written by inject-premium as _<slug>-brain.json — underscore-
-// prefixed so /r can never serve them). Preserve the ones the current injection
-// declared; a degraded run writes no brains key, so stale bundles get cleaned.
+// Brain files (written by inject-premium): the underscore page bundle
+// (_<slug>-brain.json, /r can never serve it) AND the servable CLI item
+// (<slug>-brain.json, gated as 'brain' premium content). Preserve the ones the
+// current injection declared; a degraded run writes no brains key, so stale
+// files get cleaned.
+let premiumBrains = []
 try {
   const premiumEarly = JSON.parse(readFileSync(join(outDir, '_premium.json'), 'utf-8'))
-  for (const b of Array.isArray(premiumEarly.brains) ? premiumEarly.brains : []) {
+  premiumBrains = Array.isArray(premiumEarly.brains) ? [...premiumEarly.brains] : []
+  for (const b of premiumBrains) {
     expectedNames.add(`_${b}-brain`)
+    expectedNames.add(`${b}-brain`)
   }
-} catch { /* no _premium.json — no brain bundles to preserve */ }
+} catch { /* no _premium.json — no brain files to preserve */ }
 // Reserve filenames for design systems (tokens + per-component + system +
 // templates) so they survive the stale-file cleanup pass.
 function componentSlug(systemSlug, fileBaseName) {
@@ -484,7 +489,15 @@ try {
 // Collected from what this generator ACTUALLY emits, so the paywall classifier
 // can never drift from the registry contents. Written as _manifest.json — the
 // /r route's filename regex rejects leading underscores, so it is not servable.
-const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [], premiumSlugs }
+const manifest = {
+  systemSlugs: [],
+  designSystemSlugs: [],
+  templateSlugs: [],
+  premiumSlugs,
+  // Gated brain items (servable <slug>-brain.json written by inject-premium):
+  // classified 'brain' by the gate — premium, mode-independent, fail-closed.
+  brainSlugs: premiumBrains.map((b) => `${b}-brain`).sort(),
+}
 
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)

@@ -36,12 +36,13 @@ export async function GET(
   const contentType = classifyContent(file, lookup)
   const slug = file.replace(/\.json$/, '')
   const mode = effectiveMode()
-  // premium-standalone gates exactly like a design system / template: binary,
-  // fail-closed, never free-metered, never shared-cached.
+  // premium-standalone and brain gate exactly like a design system / template:
+  // binary, fail-closed, never free-metered, never shared-cached.
   const premiumContent =
     contentType === 'design-system' ||
     contentType === 'template' ||
-    contentType === 'premium-standalone'
+    contentType === 'premium-standalone' ||
+    contentType === 'brain'
 
   // Cache policy: meta is truly public; premium content is never shared-cached
   // in ANY mode (a permissive-mode CDN entry must not survive an enforce flip);
@@ -71,21 +72,22 @@ export async function GET(
     console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
     return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
   }
-  if (contentType === 'premium-standalone') {
-    // Closed-source standalone: ALWAYS requires premium entitlement, in any mode.
-    // Fail CLOSED on any entitlement error — never hand out premium bytes.
+  if (contentType === 'premium-standalone' || contentType === 'brain') {
+    // Closed content (premium standalone / brain rules corpus): ALWAYS requires
+    // premium entitlement, in any mode. Fail CLOSED on any entitlement error —
+    // never hand out premium bytes.
     let tier
     try {
       tier = (await getEntitlement(req)).tier
     } catch (err) {
-      console.error('[registry gate] entitlement error on premium standalone — failing closed:', err)
+      console.error('[registry gate] entitlement error on premium content — failing closed:', err)
       return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
     }
     if (tier !== 'premium') {
       // Free / anon: don't 402 (shadcn renders that as a cryptic, misleading
       // error). Serve a 200 PLACEHOLDER item — the install succeeds and drops a
       // single clearly-labelled file pointing to /pricing. ZERO real source.
-      return premiumStub(body, slug)
+      return contentType === 'brain' ? brainStub(body, slug) : premiumStub(body, slug)
     }
   }
 
@@ -221,6 +223,48 @@ function premiumStub(realBody: string, slug: string): NextResponse {
   return NextResponse.json(item, {
     status: 200,
     headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'premium-standalone' },
+  })
+}
+
+/**
+ * Free/anon request for a gated BRAIN item → a 200 PLACEHOLDER with ONE
+ * markdown file pointing to /pricing (mirrors premiumStub — shadcn renders
+ * non-2xx badly). ZERO real rules content.
+ */
+function brainStub(realBody: string, slug: string): NextResponse {
+  let title = slug
+  try {
+    const parsed = JSON.parse(realBody)
+    if (typeof parsed.title === 'string') title = parsed.title
+  } catch {
+    /* default above */
+  }
+  const system = slug.replace(/-brain$/, '')
+  const md = [
+    `# ${title} (Premium, locked)`,
+    '',
+    `This is a placeholder. The ${title} is the full set of design rules your AI agent`,
+    'reads to build on-brand UI. Unlock it with an AI Canvas Premium account, then',
+    're-run the same install command.',
+    '',
+    '- Upgrade: https://aicanvas.me/pricing',
+    `- See what is inside: https://aicanvas.me/design-systems/${system}/brain`,
+    '',
+  ].join('\n')
+  const target = `~/design-systems/${system}/BRAIN-LOCKED.md`
+  const item = {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: slug,
+    type: 'registry:item',
+    title: `${title} (Premium, locked)`,
+    description: 'Premium AI Canvas content. Upgrade to install the real rules: https://aicanvas.me/pricing',
+    dependencies: [],
+    registryDependencies: [],
+    files: [{ path: `design-systems/${system}/BRAIN-LOCKED.md`, type: 'registry:file', target, content: md }],
+  }
+  return NextResponse.json(item, {
+    status: 200,
+    headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'brain' },
   })
 }
 
