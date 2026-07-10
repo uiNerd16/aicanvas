@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
 import { ArrowRight, Palette, Code, Sparkle } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
+import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
 import { SiteFooter } from '@/app/components/SiteFooter'
 import { BRAIN_TEASER } from '@/app/lib/andromeda-brain-teaser.generated'
@@ -105,6 +106,12 @@ export function BrainStoryV4() {
   const heroEls = useRef<(HTMLDivElement | null)[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [matIndex, setMatIndex] = useState(0)
+
+  // Premium subscribers already have the brain — re-label the CTA for them
+  // (into the viewer) instead of pitching an upgrade.
+  const isPremium = usePremiumStatus() === 'premium'
+  const ctaLabel = isPremium ? 'Open the Brain' : 'Get the Brain with Premium'
+  const ctaHref = isPremium ? '/design-systems/andromeda/brain' : '/pricing'
   const matIndexRef = useRef(0)
   const applyRef = useRef<(i: number) => void>(() => {})
   const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
@@ -424,8 +431,8 @@ export function BrainStoryV4() {
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}>
-          <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'lg' })}>
-            Get the Brain with Premium
+          <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })}>
+            {ctaLabel}
             <ArrowRight weight="regular" size={14} />
           </Link>
           <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
@@ -500,8 +507,8 @@ export function BrainStoryV4() {
               </span>
             ))}
           </div>
-          <Link href="/pricing" className={buttonClasses({ variant: 'primary', size: 'lg' })} style={{ marginTop: 24 }}>
-            Get the Brain with Premium
+          <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })} style={{ marginTop: 24 }}>
+            {ctaLabel}
             <ArrowRight weight="regular" size={14} />
           </Link>
         </section>
