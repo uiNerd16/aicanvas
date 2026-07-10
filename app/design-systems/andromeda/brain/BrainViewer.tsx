@@ -362,12 +362,20 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
         .brain-content a[href]:hover { color: ${C.accent[100]} !important; }
         .brain-dl { transition: background 0.12s; }
         .brain-dl:hover { background: ${C.accent[300]} !important; }
+        .brain-mobile-nav { display: none; }
+        @media (max-width: 767px) {
+          .brain-nav-desktop { display: none !important; }
+          .brain-mobile-nav { display: block !important; }
+          .brain-content { padding-left: 20px !important; padding-right: 20px !important; }
+          .brain-pad-x { padding-left: 20px !important; padding-right: 20px !important; }
+        }
       `}</style>
 
       {/* Nav (file index) — rendered on the RIGHT via row-reverse on the root,
           so it doesn't sit beside the global app sidebar on the left. */}
       <nav
         aria-label="Brain sections"
+        className="brain-nav-desktop"
         style={{
           width: 220,
           flexShrink: 0,
@@ -451,13 +459,46 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
             <BrainInstallButton fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />,
             installSlot,
           )}
-        <div className="md:hidden" style={{ padding: '20px 40px 0', alignSelf: 'flex-start' }}>
+        <div className="brain-pad-x md:hidden" style={{ padding: '20px 40px 0', alignSelf: 'flex-start' }}>
           <BrainInstallButton fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />
+        </div>
+
+        {/* Mobile file picker — the right nav is hidden below md, so navigate
+            the brain files from this dropdown instead. */}
+        <div className="brain-mobile-nav brain-pad-x" style={{ padding: '16px 40px 0' }}>
+          <select
+            aria-label="Brain file"
+            value={activeFile.path}
+            onChange={(e) => {
+              const f = files.find((x) => x.path === e.target.value)
+              if (f) setActiveFile(f)
+            }}
+            style={{
+              width: '100%',
+              background: C.surface.raised,
+              color: C.text.primary,
+              border: `1px solid ${C.border.base}`,
+              borderRadius: 8,
+              padding: '10px 12px',
+              fontFamily: FONT,
+              fontSize: 14,
+            }}
+          >
+            {sections.map((section) => (
+              <optgroup key={section.id} label={section.label}>
+                {section.files.map((f) => (
+                  <option key={f.path} value={f.path}>
+                    {getDisplayName(f)}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
 
         {/* Low-poly zone brain — INDEX ONLY, directly above the heading. */}
         {isIndex && (
-          <div style={{ maxWidth: 780, padding: '4px 40px 0' }}>
+          <div className="brain-pad-x" style={{ maxWidth: 780, padding: '4px 40px 0' }}>
             <BrainRender height={400} />
           </div>
         )}
@@ -477,7 +518,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
 
         {/* Closing CTA — the "Get the brain" card, at the BOTTOM of the index. */}
         {isIndex && (
-          <div style={{ padding: '0 40px 64px', maxWidth: 780 }}>
+          <div className="brain-pad-x" style={{ padding: '0 40px 64px', maxWidth: 780 }}>
             <BrainInstallCard fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />
           </div>
         )}

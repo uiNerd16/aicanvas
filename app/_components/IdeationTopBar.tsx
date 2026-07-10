@@ -32,7 +32,7 @@ const ANDROMEDA_OVERVIEW = '/design-systems/andromeda'
 // Per-component pages live at /design-systems/andromeda/<slug>; showcase,
 // templates, examples, and brain are excluded so they resolve to their own crumbs.
 const ANDROMEDA_COMPONENT_RE =
-  /^\/design-systems\/andromeda\/(?!examples|showcase|templates|brain)([^/]+)\/?$/
+  /^\/design-systems\/andromeda\/(?!examples|showcase|system|templates|brain)([^/]+)\/?$/
 
 function prettify(seg: string): string {
   if (SEGMENT_NAMES[seg]) return SEGMENT_NAMES[seg]
@@ -53,9 +53,9 @@ function buildCrumbs(pathname: string): Crumb[] | null {
     const meta = ANDROMEDA_COMPONENT_META.find((c) => c.slug === slug)
     return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: meta?.name ?? prettify(slug) }]
   }
-  // Showcase → Design Systems · Andromeda / Showcase
-  if (pathname === '/design-systems/andromeda/showcase') {
-    return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'Showcase' }]
+  // System → Design Systems · Andromeda / System
+  if (pathname === '/design-systems/andromeda/system') {
+    return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'System' }]
   }
   // Brain reader → Design Systems · Andromeda / Brain (Brain links to the story
   // landing; the reader is the current page).
@@ -102,7 +102,7 @@ export function IdeationTopBar() {
   // Lightning status pill. BrainViewer owns the brain slot; ShowcaseInstall
   // owns the showcase slot.
   const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
-  const isShowcase = pathname === '/design-systems/andromeda/showcase'
+  const isShowcase = pathname === '/design-systems/andromeda/system'
 
   return (
     <div className={headerClass}>

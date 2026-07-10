@@ -363,7 +363,7 @@ export default function AndromedaShowcase({
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: '#A8B94D',
+              color: '#DAE4A0',
               textTransform: 'uppercase',
               letterSpacing: '0.12em',
               marginBottom: 10,
@@ -1839,7 +1839,7 @@ export default function AndromedaShowcase({
                   // below — instead of bleeding into the next section.
                   alignItems: 'flex-start',
                   flexWrap: 'wrap',
-                  minHeight: 220,
+                  minHeight: 360,
                 }}
               >
                 <div style={{ width: 224 }}>

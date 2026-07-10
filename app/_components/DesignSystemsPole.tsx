@@ -134,6 +134,28 @@ export function DesignSystemsPole({
                 </Link>
                 {systemSelected && (
                   <ul className="mt-0.5 space-y-0.5">
+                    {/* ── System (the full component gallery + install) ───── */}
+                    <li className="mt-1">
+                      <Link
+                        href={`/design-systems/${system.slug}/system`}
+                        onClick={onNavigate}
+                        className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
+                          pathname === `/design-systems/${system.slug}/system`
+                            ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                            : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                        }`}
+                      >
+                        <span className="flex-1 truncate">System</span>
+                        {/* Lightning marks premium (install is premium). */}
+                        <Lightning
+                          weight="regular"
+                          size={13}
+                          aria-hidden
+                          className="ml-auto shrink-0 text-sand-500 dark:text-sand-500"
+                        />
+                        <span className="sr-only">Premium</span>
+                      </Link>
+                    </li>
                     {/* ── Brain (premium judgment layer) ─────────── */}
                     {system.brain && (
                       <li className="mt-1">

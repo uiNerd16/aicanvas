@@ -59,7 +59,13 @@ const nextConfig: NextConfig = {
       // lands on the live page.
       {
         source: "/ideation/design-systems/andromeda",
-        destination: "/design-systems/andromeda/showcase",
+        destination: "/design-systems/andromeda/system",
+        permanent: true,
+      },
+      // /showcase was renamed to /system. Permanent so old links/index land on it.
+      {
+        source: "/design-systems/andromeda/showcase",
+        destination: "/design-systems/andromeda/system",
         permanent: true,
       },
     ];

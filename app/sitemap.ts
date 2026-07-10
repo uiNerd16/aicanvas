@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }))
 
   // Design systems. Each system's canonical landing is its bare root
-  // (/design-systems/<slug>), followed by the raw component grid (/showcase)
+  // (/design-systems/<slug>), followed by the raw component grid (/system)
   // and its template routes. Generated from the shared config so new systems
   // and templates land in the sitemap automatically.
   const designSystemPages: MetadataRoute.Sitemap = DESIGN_SYSTEMS.flatMap(
@@ -33,7 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.9,
       },
       {
-        url: `${SITE_URL}/design-systems/${s.slug}/showcase`,
+        url: `${SITE_URL}/design-systems/${s.slug}/system`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.7,

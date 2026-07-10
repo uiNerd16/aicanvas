@@ -8,10 +8,10 @@ import { ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta
 import { DESIGN_SYSTEMS } from '../../../../scripts/lib/design-systems.config.mjs'
 
 export const metadata = {
-  title: 'Component Showcase · Andromeda Design System',
+  title: 'System · Andromeda Design System',
   description:
     'Every Andromeda primitive on one page, live and interactive: buttons, charts, tables, overlays, and more.',
-  alternates: { canonical: '/design-systems/andromeda/showcase' },
+  alternates: { canonical: '/design-systems/andromeda/system' },
 }
 
 export default function ShowcasePage() {
