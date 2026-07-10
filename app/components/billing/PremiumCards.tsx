@@ -23,10 +23,11 @@ const FREE_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  'Premium closed-source components, one command',
-  'Full design systems, one command installs the whole thing',
-  'Premium templates, full access',
-  'Every new design system and template, included',
+  'Every premium component, one command install',
+  'Full design systems, tokens to templates',
+  'All premium templates, source included',
+  'New premium releases included as they ship',
+  'Use in commercial and client projects',
   'Cancel anytime',
 ]
 
