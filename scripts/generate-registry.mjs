@@ -758,7 +758,7 @@ for (const ds of DESIGN_SYSTEMS) {
   {
     const componentCount = presentEntries.length
     installContents[ds.slug] = [
-      `All ${componentCount} ${ds.name} components, tokens, and utilities.`,
+      `Install all ${componentCount} ${ds.name} components, tokens, and utilities.`,
       'No templates, no brain.',
     ]
     for (const template of ds.templates) {
@@ -777,7 +777,7 @@ for (const ds of DESIGN_SYSTEMS) {
         } catch { /* brain JSON absent — count stays 0 */ }
       }
       installContents[`${ds.slug}-all`] = [
-        `Everything: ${componentCount} components, tokens, and ${ds.templates.length} templates.`,
+        `Install everything: ${componentCount} components, tokens, and ${ds.templates.length} templates.`,
         ...(hasBrain && brainFiles > 0
           ? [`Includes the ${ds.name} brain (${brainFiles} rule files your AI reads).`]
           : []),
