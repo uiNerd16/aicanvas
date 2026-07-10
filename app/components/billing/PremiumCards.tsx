@@ -92,7 +92,7 @@ export function PremiumCards({
                 Free
               </h2>
             </div>
-            <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+            <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
               Install and remix components, free forever.
             </p>
             {/* Invisible mirror of the Premium card's billing-cycle toggle so the
@@ -144,7 +144,7 @@ export function PremiumCards({
               <Lightning weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
             </h2>
           </div>
-          <p className="mt-4 min-h-[1.75rem] text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
             Design systems, templates and premium components.
           </p>
 
