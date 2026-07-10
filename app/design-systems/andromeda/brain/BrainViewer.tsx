@@ -458,7 +458,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
         {/* Wireframe brain — INDEX ONLY, directly above the heading. */}
         {isIndex && (
           <div style={{ maxWidth: 780, padding: '20px 40px 0' }}>
-            <BrainWireframe height={200} />
+            <BrainWireframe height={400} />
           </div>
         )}
 
