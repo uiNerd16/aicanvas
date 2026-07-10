@@ -457,7 +457,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
 
         {/* Wireframe brain — INDEX ONLY, directly above the heading. */}
         {isIndex && (
-          <div style={{ maxWidth: 780, padding: '20px 40px 0' }}>
+          <div style={{ maxWidth: 780, padding: '4px 40px 0' }}>
             <BrainWireframe height={400} />
           </div>
         )}
@@ -467,7 +467,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           className="brain-content"
           onClick={handleContentClick}
           style={{
-            padding: isIndex ? '28px 40px 24px' : '28px 40px 64px',
+            padding: isIndex ? '4px 40px 24px' : '28px 40px 64px',
             maxWidth: 780,
             fontSize: 14,
             lineHeight: 1.75,
