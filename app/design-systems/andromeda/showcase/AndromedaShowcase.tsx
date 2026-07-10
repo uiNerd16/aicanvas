@@ -106,7 +106,7 @@ import {
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
 import { MetricChart, Gauge } from '../../../lib/andromeda-v2.generated'
-import { TemplateChrome } from '../../../_components/TemplateChrome'
+import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
 // matches the design system's only font exactly.
@@ -286,12 +286,7 @@ export default function AndromedaShowcase({
 
   return (
     <>
-    <TemplateChrome
-      templateSlug="andromeda-all"
-      templateName="Andromeda"
-      systemName="Design system"
-      fallbackHref="/design-systems/andromeda/showcase"
-      hideBack
+    <ShowcaseInstall
       installs={[
         { slug: 'andromeda', label: 'All components' },
         { slug: 'andromeda-all', label: 'Everything' },
@@ -308,9 +303,7 @@ export default function AndromedaShowcase({
         paddingTop: tokens.spacing[10],
         paddingLeft: tokens.spacing[8],
         paddingRight: tokens.spacing[8],
-        // Extra bottom clearance so the footer sits ABOVE the fixed "Install"
-        // bar (TemplateChrome, bottom-6) instead of behind it.
-        paddingBottom: '7.5rem',
+        paddingBottom: tokens.spacing[10],
       }}
     >
       <div

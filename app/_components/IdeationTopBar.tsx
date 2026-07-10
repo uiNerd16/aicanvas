@@ -97,10 +97,12 @@ export function IdeationTopBar() {
   const crumbs = buildCrumbs(pathname)
   if (!crumbs) return null
 
-  // The Brain READER mirrors the template top bar: an Install button (portaled
-  // into the slot by BrainViewer, which owns the files + zip) next to the auth
-  // pill, replacing the Lightning status pill — same as TemplatePreviewShell.
+  // The Brain READER and the Showcase mirror the template top bar: install
+  // control(s) portaled into a slot next to the auth pill, replacing the
+  // Lightning status pill. BrainViewer owns the brain slot; ShowcaseInstall
+  // owns the showcase slot.
   const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
+  const isShowcase = pathname === '/design-systems/andromeda/showcase'
 
   return (
     <div className={headerClass}>
@@ -108,6 +110,11 @@ export function IdeationTopBar() {
       {isBrainReader ? (
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
+          <TopAuthPill showStatusPill={false} />
+        </div>
+      ) : isShowcase ? (
+        <div className="flex items-center gap-2">
+          <div id="andromeda-install-slot" />
           <TopAuthPill showStatusPill={false} />
         </div>
       ) : (
