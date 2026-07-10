@@ -224,9 +224,11 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   const [activeFile, setActiveFile] = useState<BrainFile>(defaultFile)
   const contentRef = useRef<HTMLDivElement>(null)
 
-  // Scroll content to top whenever the active file changes
+  // Jump back to the top of the content whenever the active file changes.
+  // The content panel is not a scroller itself (the page column scrolls), so
+  // scroll the column via scrollIntoView; scrollMarginTop clears the sticky bar.
   useEffect(() => {
-    contentRef.current?.scrollTo({ top: 0 })
+    contentRef.current?.scrollIntoView({ block: 'start' })
   }, [activeFile])
 
   // Internal brain-link navigation (links with data-brain-file="...")
@@ -318,13 +320,15 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
   }, [files])
 
   return (
+    // Natural height on purpose: the Andromeda content column is the ONE
+    // scroller (single scrollbar, footer flows after the viewer). The file nav
+    // stays reachable by being sticky under the 56px top bar instead of owning
+    // its own full-height scroll region.
     <div
       style={{
         display: 'flex',
         flexDirection: 'row-reverse',
-        flex: 1,
-        minHeight: 0,
-        overflow: 'hidden',
+        alignItems: 'flex-start',
         fontFamily: FONT,
       }}
     >
@@ -346,6 +350,9 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
           width: 220,
           flexShrink: 0,
           borderLeft: `1px solid ${C.border.subtle}`,
+          position: 'sticky',
+          top: 56,
+          maxHeight: 'calc(100vh - 56px)',
           overflowY: 'auto',
           padding: '20px 0',
         }}
@@ -404,13 +411,13 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
         ))}
       </nav>
 
-      {/* Content panel */}
+      {/* Content panel — natural height; the page column is the scroller. */}
       <div
         ref={contentRef}
         style={{
           flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          minWidth: 0,
+          scrollMarginTop: 56,
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -436,7 +443,7 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
                 your project, where your AI agent reads them. Re-run it any time to pull the latest
                 rules.
               </p>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'stretch', marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
                 <div
                   style={{
                     flex: 1,
@@ -468,18 +475,19 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
                     alignItems: 'center',
                     gap: 6,
                     flexShrink: 0,
+                    alignSelf: 'center',
                     background: C.accent[400],
                     color: C.surface.base,
                     fontWeight: 600,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontFamily: FONT,
-                    padding: '8px 14px',
+                    padding: '7px 12px',
                     borderRadius: 8,
                     border: 'none',
                     cursor: 'pointer',
                   }}
                 >
-                  {copied ? <Check weight="regular" size={15} /> : <Copy weight="regular" size={15} />}
+                  {copied ? <Check weight="regular" size={14} /> : <Copy weight="regular" size={14} />}
                   {copied ? 'Copied' : 'Copy'}
                 </button>
               </div>
