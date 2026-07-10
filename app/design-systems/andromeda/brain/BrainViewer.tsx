@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { Check, Copy, DownloadSimple, Terminal } from '@phosphor-icons/react'
 import { zipSync, strToU8 } from 'fflate'
 import { Button } from '../../../components/Button'
+import { BrainWireframe } from './BrainWireframe'
 
 // AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
 const C = {
@@ -453,6 +454,13 @@ export function BrainViewer({ files }: { files: BrainFile[] }) {
         <div className="md:hidden" style={{ padding: '20px 40px 0', alignSelf: 'flex-start' }}>
           <BrainInstallButton fileCount={fileCount} sizeKb={sizeKb} onDownloadZip={downloadBrain} />
         </div>
+
+        {/* Wireframe brain — INDEX ONLY, directly above the heading. */}
+        {isIndex && (
+          <div style={{ maxWidth: 780, padding: '20px 40px 0' }}>
+            <BrainWireframe height={200} />
+          </div>
+        )}
 
         {/* Markdown content */}
         <div
