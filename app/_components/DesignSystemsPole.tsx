@@ -141,7 +141,8 @@ export function DesignSystemsPole({
                           href={`/design-systems/${system.slug}/brain`}
                           onClick={onNavigate}
                           className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
-                            pathname === `/design-systems/${system.slug}/brain`
+                            pathname === `/design-systems/${system.slug}/brain` ||
+                            pathname.startsWith(`/design-systems/${system.slug}/brain/`)
                               ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                               : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                           }`}

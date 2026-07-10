@@ -30,9 +30,9 @@ const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 // "Andromeda" crumb points here from deeper pages.
 const ANDROMEDA_OVERVIEW = '/design-systems/andromeda'
 // Per-component pages live at /design-systems/andromeda/<slug>; showcase,
-// templates, and examples are excluded so they resolve to their own crumbs.
+// templates, examples, and brain are excluded so they resolve to their own crumbs.
 const ANDROMEDA_COMPONENT_RE =
-  /^\/design-systems\/andromeda\/(?!examples|showcase|templates)([^/]+)\/?$/
+  /^\/design-systems\/andromeda\/(?!examples|showcase|templates|brain)([^/]+)\/?$/
 
 function prettify(seg: string): string {
   if (SEGMENT_NAMES[seg]) return SEGMENT_NAMES[seg]
@@ -57,6 +57,16 @@ function buildCrumbs(pathname: string): Crumb[] | null {
   if (pathname === '/design-systems/andromeda/showcase') {
     return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'Showcase' }]
   }
+  // Brain reader → Design Systems · Andromeda / Brain (Brain links to the story
+  // landing; the reader is the current page).
+  if (pathname === '/design-systems/andromeda/brain/explore') {
+    return [
+      DESIGN_SYSTEMS,
+      { label: 'Andromeda', href: ANDROMEDA_OVERVIEW },
+      { label: 'Brain', href: '/design-systems/andromeda/brain' },
+      { label: 'Reader' },
+    ]
+  }
   // Overview → Design Systems · Andromeda (Andromeda is the current page)
   if (pathname === ANDROMEDA_OVERVIEW) {
     return [DESIGN_SYSTEMS, { label: 'Andromeda' }]
@@ -80,18 +90,22 @@ export function IdeationTopBar() {
   // topbar disappears there.
   if (TEMPLATE_LEAF_RE.test(pathname)) return null
 
+  // The Brain LANDING renders its own full-page header (BrainStoryV4) — no app
+  // breadcrumb bar over it.
+  if (pathname === '/design-systems/andromeda/brain') return null
+
   const crumbs = buildCrumbs(pathname)
   if (!crumbs) return null
 
-  // The brain page mirrors the template top bar: an Install button (portaled
+  // The Brain READER mirrors the template top bar: an Install button (portaled
   // into the slot by BrainViewer, which owns the files + zip) next to the auth
   // pill, replacing the Lightning status pill — same as TemplatePreviewShell.
-  const isBrain = pathname === '/design-systems/andromeda/brain'
+  const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
 
   return (
     <div className={headerClass}>
       <Breadcrumbs crumbs={crumbs} />
-      {isBrain ? (
+      {isBrainReader ? (
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
           <TopAuthPill showStatusPill={false} />

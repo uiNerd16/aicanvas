@@ -113,7 +113,7 @@ export function BrainStoryV4() {
   // (into the viewer) instead of pitching an upgrade.
   const isPremium = usePremiumStatus() === 'premium'
   const ctaLabel = isPremium ? 'Open the Brain' : 'Get the Brain with Premium'
-  const ctaHref = isPremium ? '/design-systems/andromeda/brain' : '/pricing'
+  const ctaHref = isPremium ? '/design-systems/andromeda/brain/explore' : '/pricing'
   const matIndexRef = useRef(DEFAULT_MATERIAL)
   const applyRef = useRef<(i: number) => void>(() => {})
   const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
