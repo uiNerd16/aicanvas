@@ -288,13 +288,13 @@ export default function AndromedaShowcase({
     <>
     <TemplateChrome
       templateSlug="andromeda-all"
-      templateName="Full system"
-      systemName="Andromeda"
+      templateName="Andromeda"
+      systemName="Design system"
       fallbackHref="/design-systems/andromeda/showcase"
       hideBack
-      description={[
-        'Installs every Andromeda component, token, and template.',
-        'One command — sign in required.',
+      installs={[
+        { slug: 'andromeda', label: 'All components' },
+        { slug: 'andromeda-all', label: 'Everything' },
       ]}
     />
     <div

@@ -74,6 +74,7 @@ scripts/sync-output/
 /registry-data/*.json
 app/lib/component-nav.generated.ts
 app/lib/component-meta.generated.ts
+app/lib/install-contents.generated.ts
 
 # Premium injection — closed-source material that lives ONLY in the private
 # aicanvas-premium repo and is pulled in at BUILD time. NEVER tracked here.

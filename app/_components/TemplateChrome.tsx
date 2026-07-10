@@ -7,6 +7,13 @@ import { useSession } from '../components/auth/SessionProvider'
 import { usePaywallModal } from '../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../components/billing/usePremiumStatus'
 import { Button, buttonClasses } from '../components/Button'
+import { INSTALL_CONTENTS } from '../lib/install-contents.generated'
+
+interface InstallAction {
+  slug: string                      // registry slug this button installs
+  label: string                     // button label, e.g. 'All components' / 'Everything'
+  description?: string[]           // overrides the popover bullet copy for this slug
+}
 
 interface TemplateChromeProps {
   templateSlug: string              // registry slug, e.g. 'andromeda-mission-control' or 'andromeda-all'
@@ -16,6 +23,7 @@ interface TemplateChromeProps {
   hideBack?: boolean                // showcase bundle pill omits Back; templates keep it
   description?: string[]            // overrides the popover bullet copy
   raisedOnMobile?: boolean          // lift the bar + popover above a template's own bottom bar on mobile (e.g. signal-room's player)
+  installs?: InstallAction[]        // multiple install buttons (showcase: All components / Everything); default = one 'Install' for templateSlug
 }
 
 // Floating widget shared by design-system template pages and the showcase
@@ -31,6 +39,7 @@ export function TemplateChrome({
   hideBack = false,
   description,
   raisedOnMobile = false,
+  installs,
 }: TemplateChromeProps) {
   const { user } = useSession()
   const { open: openPaywall } = usePaywallModal()
@@ -42,9 +51,13 @@ export function TemplateChrome({
   // pitch an upgrade at a paying customer. handleInstall fails open, so
   // defaulting the load window to Install is safe.
   const canInstall = status !== 'not-premium'
-  const [installOpen, setInstallOpen] = useState(false)
+  // One popover shared by all install buttons; openSlug says whose it is.
+  const installActions: InstallAction[] =
+    installs ?? [{ slug: templateSlug, label: 'Install', description }]
+  const [openSlug, setOpenSlug] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
+  const activeInstall = installActions.find((i) => i.slug === openSlug) ?? null
 
   // Tokenized install for signed-in users so the registry attributes the pull
   // to the account. Templates + full-system are premium, so a plain anonymous
@@ -63,36 +76,42 @@ export function TemplateChrome({
   }, [user])
   // Signed-out derives to null at render — no setState in the effect body.
   const userToken = user ? fetchedToken : null
-  const installReference = userToken
-    ? `"https://aicanvas.me/r/${templateSlug}.json?token=${userToken}"`
-    : `@aicanvas/${templateSlug}`
-  const installReferenceMasked = userToken
-    ? `"https://aicanvas.me/r/${templateSlug}.json?token=aic_••••••••"`
-    : `@aicanvas/${templateSlug}`
-  const cliCommand = `npx shadcn@latest add ${installReference}`
-  const cliCommandMasked = `npx shadcn@latest add ${installReferenceMasked}`
+  const commandFor = (slug: string, masked: boolean) => {
+    const ref = userToken
+      ? `"https://aicanvas.me/r/${slug}.json?token=${masked ? 'aic_••••••••' : userToken}"`
+      : `@aicanvas/${slug}`
+    return `npx shadcn@latest add ${ref}`
+  }
+  const cliCommand = activeInstall ? commandFor(activeInstall.slug, false) : ''
+  const cliCommandMasked = activeInstall ? commandFor(activeInstall.slug, true) : ''
 
   // Premium-only content: a non-premium user hitting Install sees the paywall
   // (Premium card) instead of the CLI popover. Premium → open the popover.
   // Templates + full-system always resolve to 'premium-only' (per-install
   // metering is gone, so install-check no longer has a quota state to return).
   // Fails open (opens the popover) so a hiccup never dead-ends the button.
-  async function handleInstall() {
+  async function handleInstall(slug: string) {
     try {
-      const res = await fetch(`/api/me/install-check?slug=${templateSlug}`)
+      const res = await fetch(`/api/me/install-check?slug=${slug}`)
       const d = await res.json().catch(() => null)
       if (d?.blocked) {
         openPaywall({ reason: 'premium-only', limit: d.limit, resetAt: d.resetAt })
         return
       }
     } catch {}
-    setInstallOpen((o) => !o)
+    setCopied(false)
+    setOpenSlug((prev) => (prev === slug ? null : slug))
   }
 
-  const bullets = description ?? [
-    `Installs this template plus the full ${systemName} system.`,
-    `Subsequent templates reuse what's already there.`,
-  ]
+  // Popover copy: explicit override → generated install-contents (what the
+  // command actually delivers, derived from the emitted registry) → generic.
+  const bullets = activeInstall
+    ? (activeInstall.description ??
+        INSTALL_CONTENTS[activeInstall.slug] ?? [
+          `Installs this template plus the full ${systemName} system.`,
+          `Subsequent templates reuse what's already there.`,
+        ])
+    : []
 
   function handleBack() {
     window.close()
@@ -109,25 +128,25 @@ export function TemplateChrome({
 
   // Click outside closes the install popover.
   useEffect(() => {
-    if (!installOpen) return
+    if (openSlug === null) return
     function onClick(e: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setInstallOpen(false)
+        setOpenSlug(null)
       }
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
-  }, [installOpen])
+  }, [openSlug])
 
   // Esc closes the install popover.
   useEffect(() => {
-    if (!installOpen) return
+    if (openSlug === null) return
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setInstallOpen(false)
+      if (e.key === 'Escape') setOpenSlug(null)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [installOpen])
+  }, [openSlug])
 
   return (
     <div
@@ -164,15 +183,23 @@ export function TemplateChrome({
 
         {/* Install — gated by tier. Premium (and the in-flight 'unknown' window)
             opens the CLI popover; a resolved free/anon tier is routed to /pricing
-            to unlock. */}
+            to unlock. With multiple install actions (showcase: All components /
+            Everything) each button opens the shared popover for its own slug. */}
         {canInstall ? (
-          <div className="relative" ref={popoverRef}>
-            <Button variant="primary" size="md" onClick={handleInstall}>
-              <Terminal weight="regular" size={15} />
-              Install
-            </Button>
+          <div className="relative flex items-center gap-1" ref={popoverRef}>
+            {installActions.map((action, i) => (
+              <Button
+                key={action.slug}
+                variant={i === installActions.length - 1 ? 'primary' : 'outline'}
+                size="md"
+                onClick={() => handleInstall(action.slug)}
+              >
+                <Terminal weight="regular" size={15} />
+                {action.label}
+              </Button>
+            ))}
 
-            {installOpen && (
+            {activeInstall && (
               <div className={`fixed left-1/2 z-50 w-[min(480px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-xl border border-sand-800 bg-sand-900 shadow-2xl ${raisedOnMobile ? 'bottom-[200px] md:bottom-[88px]' : 'bottom-[88px]'}`}>
                 <div className="space-y-3 p-3">
                   <div className="flex items-center justify-between gap-2">
@@ -184,7 +211,7 @@ export function TemplateChrome({
                       ) : (
                         <>
                           <span className="text-xs font-semibold uppercase tracking-wider text-sand-400">
-                            CLI install
+                            {activeInstall.label === 'Install' ? 'CLI install' : activeInstall.label}
                           </span>
                           <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-400">
                             One command

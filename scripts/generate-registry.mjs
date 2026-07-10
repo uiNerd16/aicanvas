@@ -499,6 +499,12 @@ const manifest = {
   brainSlugs: premiumBrains.map((b) => `${b}-brain`).sort(),
 }
 
+// Per-bundle popover copy, collected while emitting and written to the
+// always-generated app/lib/install-contents.generated.ts after the loop.
+const installContents = {}
+// template slug → used-component count (null = full-system fallback)
+const templateContents = new Map()
+
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)
   const tokenEntriesAbs = (ds.tokenEntries ?? []).map((p) => resolve(rootDirAbs, p))
@@ -670,21 +676,44 @@ for (const ds of DESIGN_SYSTEMS) {
   }
 
   // ── 3. Templates (compositions) ──────────────────────────────────────────────
-  // Each template ships only its example folder. Components and tokens come
-  // from the system + tokens registry items via `registryDependencies`.
+  // Each template depends on ONLY the system components it actually imports
+  // (plus tokens) — not the whole system. Transitivity rides the per-component
+  // items: each declares its own sibling deps, so the CLI chain completes the
+  // closure. The walk boundary is tokens + individually-published components:
+  // shared helpers that are NOT published on their own (components/lib/motion,
+  // lib/responsive) fall through and get BUNDLED into the template — exactly
+  // like the per-component items bundle them — at the same target path, so
+  // duplicate copies across items are byte-identical and harmless.
   // (Type stays `registry:block` because that's shadcn's CLI vocabulary.)
   for (const template of ds.templates) {
     const templateEntryAbs = resolve(rootDirAbs, template.entryPath)
-    const templateWalk = walkDependencies([templateEntryAbs], rootDirAbs, dsBoundary)
+    const templateBoundary = new Set([...tokensFileSet, ...emittedComponentFiles])
+    const templateWalk = walkDependencies([templateEntryAbs], rootDirAbs, templateBoundary)
     const templateFiles = templateWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+
+    const usedComponentSlugs = new Set()
+    for (const f of templateWalk.files) {
+      for (const spec of extractImportSpecifiers(readFileSync(f, 'utf-8'))) {
+        if (!spec.startsWith('.') && !spec.startsWith('/')) continue
+        const resolved = resolveImport(f, spec)
+        if (!resolved || !emittedComponentFiles.has(resolved)) continue
+        const relPosix = relative(rootDirAbs, resolved).split(sep).join(posix.sep)
+        usedComponentSlugs.add(dsComponentSlug(ds, relPosix, relPosix.split('/').pop()))
+      }
+    }
+    const templateDeps = [`${ds.slug}-tokens`, ...[...usedComponentSlugs].sort()].map(depUrl)
+    templateContents.set(template.slug, usedComponentSlugs.size)
+
     const templateItem = {
       $schema: SCHEMA,
       name: template.slug,
       type: 'registry:block',
       title: `${template.name} (${ds.name})`,
-      description: `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent template installs reuse it.`,
+      description:
+        `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. ` +
+        `Pulls in the ${usedComponentSlugs.size} ${ds.name} components it uses, plus tokens.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [depUrl(ds.slug)],
+      registryDependencies: templateDeps,
       dependencies: templateWalk.npmDeps,
       files: templateFiles,
     }
@@ -696,25 +725,80 @@ for (const ds of DESIGN_SYSTEMS) {
 
   // ── 4. Full-system bundle (everything) ──────────────────────────────────────
   // Single registry item that pulls components + tokens (via the system slug)
-  // plus every template via `registryDependencies`. One CLI command grabs the
-  // entire system. Soft-gated in the website UI; the JSON itself stays public
-  // alongside every other `/r/*.json` per Phase 1.
+  // plus every template — and, when this system ships a brain, the brain item
+  // too — via `registryDependencies`. One CLI command grabs everything. The
+  // brain dep is conditional on the current injection (degraded builds emit
+  // without it, mirroring what is actually servable).
   if (ds.templates.length > 0) {
+    const hasBrain = premiumBrains.includes(ds.slug)
     const allItem = {
       $schema: SCHEMA,
       name: `${ds.slug}-all`,
       type: 'registry:style',
       title: `${ds.name} — full system`,
-      description: `Every ${ds.name} component, token, and template in one install.`,
+      description: hasBrain
+        ? `Every ${ds.name} component, token, and template, plus the ${ds.name} brain, in one install.`
+        : `Every ${ds.name} component, token, and template in one install.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [depUrl(ds.slug), ...ds.templates.map((t) => depUrl(t.slug))],
+      registryDependencies: [
+        depUrl(ds.slug),
+        ...ds.templates.map((t) => depUrl(t.slug)),
+        ...(hasBrain ? [depUrl(`${ds.slug}-brain`)] : []),
+      ],
       files: [],
     }
     writeFileSync(join(outDir, `${ds.slug}-all.json`), JSON.stringify(allItem, null, 2) + '\n')
     registryItems.push(indexEntry(allItem, []))
     dsCount++
   }
+
+  // ── 5. Install-contents copy (consumed by the install popovers) ─────────────
+  // One human line set per installable bundle, derived from what THIS run
+  // actually emitted — so the popover can never drift from the registry.
+  {
+    const componentCount = presentEntries.length
+    installContents[ds.slug] = [
+      `All ${componentCount} ${ds.name} components, tokens, and utilities.`,
+      'No templates, no brain.',
+    ]
+    for (const template of ds.templates) {
+      const used = templateContents.get(template.slug) ?? 0
+      installContents[template.slug] = [
+        `This template plus the ${used} ${ds.name} components it uses.`,
+        'Tokens included. Re-installs reuse what is already there.',
+      ]
+    }
+    if (ds.templates.length > 0) {
+      const hasBrain = premiumBrains.includes(ds.slug)
+      let brainFiles = 0
+      if (hasBrain) {
+        try {
+          brainFiles = JSON.parse(readFileSync(join(outDir, `${ds.slug}-brain.json`), 'utf8')).files.length
+        } catch { /* brain JSON absent — count stays 0 */ }
+      }
+      installContents[`${ds.slug}-all`] = [
+        `Everything: ${componentCount} components, tokens, and ${ds.templates.length} templates.`,
+        ...(hasBrain && brainFiles > 0
+          ? [`Includes the ${ds.name} brain (${brainFiles} rule files your AI reads).`]
+          : []),
+      ]
+    }
+  }
 }
+
+// Install-contents module for the UI popovers (TemplateChrome /
+// TemplatePreviewShell). ALWAYS written — this generator runs in every dev and
+// build chain, including forks — so app imports never dangle. Gitignored.
+writeFileSync(
+  join('app', 'lib', 'install-contents.generated.ts'),
+  [
+    '// AUTO-GENERATED by scripts/generate-registry.mjs — gitignored, never committed.',
+    '// What each install command actually delivers, derived from the emitted',
+    '// registry items so the popover copy can never drift from the registry.',
+    `export const INSTALL_CONTENTS: Record<string, string[]> = ${JSON.stringify(installContents, null, 2)}`,
+    '',
+  ].join('\n'),
+)
 
 // Write the root registry index
 const registry = {

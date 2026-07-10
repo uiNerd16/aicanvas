@@ -18,6 +18,7 @@ import { usePaywallModal } from '../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../components/billing/usePremiumStatus'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Button, buttonClasses } from '../components/Button'
+import { INSTALL_CONTENTS } from '../lib/install-contents.generated'
 import dynamic from 'next/dynamic'
 // The dot-grid standalone, reused as the mobile preview backdrop. Loaded
 // dynamically (client-only) so it never enters the initial page bundle — it
@@ -590,10 +591,13 @@ function InstallButton({
   const cliCommand = `npx shadcn@latest add ${installReference}`
   const cliCommandMasked = `npx shadcn@latest add ${installReferenceMasked}`
 
-  const bullets = description ?? [
-    `Installs this template plus the full ${systemName} system.`,
-    `Subsequent templates reuse what's already there.`,
-  ]
+  // Explicit override → generated install-contents (what the command actually
+  // delivers, derived from the emitted registry) → generic fallback.
+  const bullets = description ??
+    INSTALL_CONTENTS[templateSlug] ?? [
+      `Installs this template plus the full ${systemName} system.`,
+      `Subsequent templates reuse what's already there.`,
+    ]
 
   // Non-premium hitting Install sees the paywall instead of the popover. Fails
   // open (opens the popover) so a hiccup never dead-ends the button.
