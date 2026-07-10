@@ -72,10 +72,13 @@ export async function GET(
     console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
     return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
   }
-  if (contentType === 'premium-standalone' || contentType === 'brain') {
-    // Closed content (premium standalone / brain rules corpus): ALWAYS requires
-    // premium entitlement, in any mode. Fail CLOSED on any entitlement error —
-    // never hand out premium bytes.
+  if (premiumContent) {
+    // ALL premium content (standalone, brain, whole-system aggregate, template)
+    // requires premium entitlement in ANY mode — NEVER hung off
+    // REGISTRY_ENFORCEMENT. A permissive flag (or premium-disabled) must not turn
+    // closed-source templates/systems into a free download; the enforce flag is a
+    // UI/metering switch, not the thing standing between a free user and premium
+    // bytes. Fail CLOSED on any entitlement error.
     let tier
     try {
       tier = (await getEntitlement(req)).tier
@@ -110,28 +113,6 @@ export async function GET(
       tier = 'free' // fail OPEN — free source is public anyway
     }
     if (tier === 'anonymous') return freeAccountStub(body, slug)
-  }
-
-  if (mode === 'enforce' && contentType !== 'meta') {
-    // ── Premium DESIGN SYSTEMS / TEMPLATES: fail CLOSED (enforce-gated) ────
-    // premium-standalone is gated mode-independently above; free standalone /
-    // DS-component installs are account-gated above (flag-driven) and never
-    // metered — so this enforce block now handles ONLY premium DS / templates.
-    if (contentType === 'design-system' || contentType === 'template') {
-      let tier
-      try {
-        tier = (await getEntitlement(req)).tier
-      } catch (err) {
-        console.error('[registry gate] entitlement error on premium content — failing closed:', err)
-        return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
-      }
-      if (tier !== 'premium') {
-        return paymentJson(
-          { error: 'premium-only', message: 'This is a premium component. Upgrade at https://aicanvas.me/pricing' },
-          402,
-        )
-      }
-    }
   }
 
   // Token propagation: the shadcn CLI fetches each registryDependency URL

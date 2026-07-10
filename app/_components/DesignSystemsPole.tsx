@@ -99,10 +99,10 @@ export function DesignSystemsPole({
       {!collapsed && (
         <ul className="space-y-0.5">
           {SYSTEMS.map((system) => {
-            // "System root" URLs — the showcase and the bare overview both
-            // highlight the system row as active.
+            // "System root" URLs — the /system gallery and the bare overview
+            // both highlight the system row as active.
             const systemActive =
-              pathname === `/design-systems/${system.slug}/showcase` ||
+              pathname === `/design-systems/${system.slug}/system` ||
               pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
             return (
