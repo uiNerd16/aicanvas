@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function NavPreviewPage() {
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-0 overflow-hidden">
       <Suspense fallback={null}>
         <Sidebar preview promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
       </Suspense>

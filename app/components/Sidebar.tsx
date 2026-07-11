@@ -266,14 +266,14 @@ export function Sidebar({
               : false
             : (collapsed[section.title] ?? false)
           const isDisabled = section.disabled === true
-          // Promoted landing view shows only the first 3 categories so the
+          // Promoted landing view shows only the first 4 categories so the
           // Design Systems pole rises into view; the rest sit behind Show more.
           const catLabels =
             isComponents && promoteDS && !showAllCats
-              ? section.labels.slice(0, 3)
+              ? section.labels.slice(0, 4)
               : section.labels
           const hasHiddenCats =
-            isComponents && promoteDS && section.labels.length > 3
+            isComponents && promoteDS && section.labels.length > 4
 
           return (
             <div key={section.title} className="mb-3">
@@ -385,7 +385,7 @@ export function Sidebar({
                           className={`shrink-0 transition-transform ${showAllCats ? '' : '-rotate-90'}`}
                         />
                         <span className="flex-1 text-left">
-                          {showAllCats ? 'Show less' : `Show ${section.labels.length - 3} more`}
+                          {showAllCats ? 'Show less' : `Show ${section.labels.length - 4} more`}
                         </span>
                       </button>
                     </li>
