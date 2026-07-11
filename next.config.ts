@@ -38,6 +38,10 @@ const nextConfig: NextConfig = {
     "/r/[file]": ["./registry-data/*.json"],
     "/api/component-code": ["./registry-data/*.json"],
     "/api/me/install-check": ["./registry-data/*.json"],
+    // The gated brain READER reads registry-data/_andromeda-brain.json with fs
+    // at request time (underscore-prefixed, so /r can never serve it). The
+    // parent /brain route is the public story and needs no bundle.
+    "/design-systems/andromeda/brain/explore": ["./registry-data/*.json"],
   },
   async redirects() {
     return [
@@ -48,6 +52,20 @@ const nextConfig: NextConfig = {
       {
         source: "/design-systems/andromeda/overview",
         destination: "/design-systems/andromeda",
+        permanent: true,
+      },
+      // The ideation Andromeda page duplicated the public showcase 1:1; retired
+      // in favor of the canonical route. Permanent so any stray link/bookmark
+      // lands on the live page.
+      {
+        source: "/ideation/design-systems/andromeda",
+        destination: "/design-systems/andromeda/system",
+        permanent: true,
+      },
+      // /showcase was renamed to /system. Permanent so old links/index land on it.
+      {
+        source: "/design-systems/andromeda/showcase",
+        destination: "/design-systems/andromeda/system",
         permanent: true,
       },
     ];

@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { NextRequest } from 'next/server'
 
 // Mock ONLY getEntitlement — everything else (classifyContent + loadContentLookup
@@ -107,5 +109,138 @@ describe('GET /r/<free-standalone>.json — per-tier install gate', () => {
     for (const marker of REAL_SOURCE_MARKERS) {
       expect(body).toContain(marker)
     }
+  })
+})
+
+// The servable brain item only exists on vault-reachable builds (inject-premium
+// writes it from the private source). Skip cleanly on free-only builds — the
+// gate logic itself is still covered by content-type.test.ts.
+const BRAIN_FILE = 'andromeda-brain.json'
+const brainAvailable = existsSync(join(process.cwd(), 'registry-data', BRAIN_FILE))
+
+function callBrain() {
+  const req = new NextRequest(`http://localhost/r/${BRAIN_FILE}`)
+  return GET(req, { params: Promise.resolve({ file: BRAIN_FILE }) })
+}
+
+describe.skipIf(!brainAvailable)('GET /r/andromeda-brain.json — mode-independent premium gate', () => {
+  it('anonymous → 200 locked placeholder, zero rules content', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'anonymous', userId: null })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-AICanvas-Content-Type')).toBe('brain')
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store')
+    // ONE placeholder .md steering to /pricing — never the real corpus.
+    expect(item.files).toHaveLength(1)
+    expect(item.files[0].target).toContain('BRAIN-LOCKED.md')
+    expect(item.files[0].content).toContain('aicanvas.me/pricing')
+  })
+
+  it("signed-in 'free' tier → same locked placeholder", async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'free', userId: 'u1' })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.files).toHaveLength(1)
+    expect(item.files[0].content).toContain('aicanvas.me/pricing')
+  })
+
+  it('premium tier → the REAL brain: every file, registry:file with ~/ targets', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'premium', userId: 'u1' })
+
+    const res = await callBrain()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.name).toBe('andromeda-brain')
+    expect(item.files.length).toBeGreaterThan(10)
+    const index = item.files.find((f: { path: string }) => f.path === 'design-systems/andromeda/rules.md')
+    expect(index).toBeDefined()
+    expect(index.type).toBe('registry:file')
+    expect(index.target).toBe('~/design-systems/andromeda/rules.md')
+    expect(index.content.length).toBeGreaterThan(100)
+  })
+
+  it('entitlement error → 503, fail CLOSED (never premium bytes)', async () => {
+    mockedGetEntitlement.mockRejectedValue(new Error('db blip'))
+
+    const res = await callBrain()
+
+    expect(res.status).toBe(503)
+    const body = await res.text()
+    expect(body).not.toContain('registry:file')
+  })
+})
+
+// Premium DESIGN-SYSTEM / TEMPLATE content must gate MODE-INDEPENDENTLY (never
+// hung off REGISTRY_ENFORCEMENT): a free/anon user gets the friendly stub, never
+// the real template source, regardless of the enforcement flag. mission-control
+// is generated from the committed examples/, so it is always present.
+const TEMPLATE_FILE = 'andromeda-mission-control.json'
+const templateAvailable = existsSync(join(process.cwd(), 'registry-data', TEMPLATE_FILE))
+
+function callTemplate() {
+  const req = new NextRequest(`http://localhost/r/${TEMPLATE_FILE}`)
+  return GET(req, { params: Promise.resolve({ file: TEMPLATE_FILE }) })
+}
+
+describe.skipIf(!templateAvailable)('GET /r/<premium template>.json — mode-independent gate (no enforce flag needed)', () => {
+  afterEach(() => {
+    delete process.env.REGISTRY_ENFORCEMENT
+  })
+
+  it('anon in PERMISSIVE mode → 200 friendly stub, NOT 402, zero real source', async () => {
+    // Permissive is the prod default; the template must STILL gate.
+    delete process.env.REGISTRY_ENFORCEMENT
+    mockedGetEntitlement.mockResolvedValue({ tier: 'anonymous', userId: null })
+
+    const res = await callTemplate()
+    const body = await res.text()
+
+    expect(res.status).toBe(200) // never a cryptic 402
+    expect(body).toContain('aicanvas.me/pricing')
+    // EVERY file's content is the placeholder — zero real component source
+    // (the real file paths remain, but their bodies are all stubbed out).
+    const item = JSON.parse(body)
+    expect(item.files.length).toBeGreaterThan(0)
+    expect(item.files.every((f: { content: string }) => f.content.includes('PremiumLocked'))).toBe(true)
+  })
+
+  it('signed-in free tier → same stub (no real source)', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'free', userId: 'u1' })
+
+    const res = await callTemplate()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.files.every((f: { content: string }) => f.content.includes('PremiumLocked'))).toBe(true)
+  })
+
+  it('premium → the REAL template (registry deps to the components it uses)', async () => {
+    mockedGetEntitlement.mockResolvedValue({ tier: 'premium', userId: 'u1' })
+
+    const res = await callTemplate()
+    const item = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(item.name).toBe('andromeda-mission-control')
+    expect(Array.isArray(item.registryDependencies)).toBe(true)
+    expect(item.registryDependencies.length).toBeGreaterThan(1) // tokens + components it uses
+    expect(JSON.stringify(item)).not.toContain('PremiumLocked') // real, not stubbed
+  })
+
+  it('entitlement error → 503, fail CLOSED', async () => {
+    mockedGetEntitlement.mockRejectedValue(new Error('db blip'))
+
+    const res = await callTemplate()
+
+    expect(res.status).toBe(503)
+    const body = await res.text()
+    expect(body).not.toContain('TelemetryRow')
   })
 })

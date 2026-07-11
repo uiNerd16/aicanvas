@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Breadcrumbs, type Crumb } from '../components/Breadcrumbs'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
@@ -29,9 +30,9 @@ const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 // "Andromeda" crumb points here from deeper pages.
 const ANDROMEDA_OVERVIEW = '/design-systems/andromeda'
 // Per-component pages live at /design-systems/andromeda/<slug>; showcase,
-// templates, and examples are excluded so they resolve to their own crumbs.
+// templates, examples, and brain are excluded so they resolve to their own crumbs.
 const ANDROMEDA_COMPONENT_RE =
-  /^\/design-systems\/andromeda\/(?!examples|showcase|templates)([^/]+)\/?$/
+  /^\/design-systems\/andromeda\/(?!examples|showcase|system|templates|brain)([^/]+)\/?$/
 
 function prettify(seg: string): string {
   if (SEGMENT_NAMES[seg]) return SEGMENT_NAMES[seg]
@@ -52,12 +53,22 @@ function buildCrumbs(pathname: string): Crumb[] | null {
     const meta = ANDROMEDA_COMPONENT_META.find((c) => c.slug === slug)
     return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: meta?.name ?? prettify(slug) }]
   }
-  // Showcase → Design Systems · Andromeda / Showcase
-  if (pathname === '/design-systems/andromeda/showcase') {
-    return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'Showcase' }]
+  // System → Design Systems · Andromeda / System
+  if (pathname === '/design-systems/andromeda/system') {
+    return [DESIGN_SYSTEMS, { label: 'Andromeda', href: ANDROMEDA_OVERVIEW }, { label: 'System' }]
+  }
+  // Brain reader → Design Systems · Andromeda / Brain (Brain links to the story
+  // landing; the reader is the current page).
+  if (pathname === '/design-systems/andromeda/brain/explore') {
+    return [
+      DESIGN_SYSTEMS,
+      { label: 'Andromeda', href: ANDROMEDA_OVERVIEW },
+      { label: 'Brain', href: '/design-systems/andromeda/brain' },
+      { label: 'Reader' },
+    ]
   }
   // Overview → Design Systems · Andromeda (Andromeda is the current page)
-  if (pathname === ANDROMEDA_OVERVIEW || pathname === '/ideation/design-systems/andromeda') {
+  if (pathname === ANDROMEDA_OVERVIEW) {
     return [DESIGN_SYSTEMS, { label: 'Andromeda' }]
   }
   // Fallback — a generic breadcrumb from the path segments (legacy /ideation/*).
@@ -79,13 +90,36 @@ export function IdeationTopBar() {
   // topbar disappears there.
   if (TEMPLATE_LEAF_RE.test(pathname)) return null
 
+  // The Brain LANDING renders its own full-page header (BrainStoryV4) — no app
+  // breadcrumb bar over it.
+  if (pathname === '/design-systems/andromeda/brain') return null
+
   const crumbs = buildCrumbs(pathname)
   if (!crumbs) return null
+
+  // The Brain READER and the Showcase mirror the template top bar: install
+  // control(s) portaled into a slot next to the auth pill, replacing the
+  // Lightning status pill. BrainViewer owns the brain slot; ShowcaseInstall
+  // owns the showcase slot.
+  const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
+  const isShowcase = pathname === '/design-systems/andromeda/system'
 
   return (
     <div className={headerClass}>
       <Breadcrumbs crumbs={crumbs} />
-      <HeaderSocials />
+      {isBrainReader ? (
+        <div className="flex items-center gap-2">
+          <div id="brain-install-slot" />
+          <TopAuthPill showStatusPill={false} />
+        </div>
+      ) : isShowcase ? (
+        <div className="flex items-center gap-2">
+          <div id="andromeda-install-slot" />
+          <TopAuthPill showStatusPill={false} />
+        </div>
+      ) : (
+        <HeaderSocials />
+      )}
     </div>
   )
 }

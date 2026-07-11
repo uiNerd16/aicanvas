@@ -13,14 +13,23 @@
  * STRIPPING the premium marker (served code must be clean), writes
  * registry-data/_premium.json (feeds the gate's premiumSlugs), and generates the
  * gitignored app/lib/premium-registry.generated.tsx registration shim.
+ *
+ * It ALSO injects the FREE v2 design-system components (manifest key
+ * `freeSystemComponents`) into design-systems/<system>/components/ — vault-
+ * authored but free for users, excluded from git via info/exclude — and always
+ * writes the app/lib/andromeda-v2.generated.tsx shim (real re-exports when
+ * injected, placeholder panels on degraded builds).
  */
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync, statSync, cpSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 import { execSync } from 'node:child_process'
 
 const ROOT = process.cwd()
 const TARGET = join(ROOT, 'components-workspace-premium')
 const SHIM = join(ROOT, 'app/lib/premium-registry.generated.tsx')
+const V2_SHIM = join(ROOT, 'app/lib/andromeda-v2.generated.tsx')
+const BRAIN_TEASER_MODULE = join(ROOT, 'app/lib/andromeda-brain-teaser.generated.ts')
+const REGISTRY_DATA = join(ROOT, 'registry-data')
 const PREMIUM_JSON = join(ROOT, 'registry-data/_premium.json')
 const PREMIUM_LOCK = join(ROOT, 'premium.lock.json')
 const BUILD_INFO = join(ROOT, 'app/lib/premium-build-info.generated.ts')
@@ -71,13 +80,286 @@ function writeStubShim() {
   )
 }
 
+// ── Free v2 design-system components (manifest key `freeSystemComponents`) ──
+// v2 DS components are authored in the vault but FREE for users: injected into
+// design-systems/<system>/components/ so the public harness (showcase, demos,
+// per-component pages, registry) treats them exactly like committed v1 files —
+// but they are never committed to public git (git info/exclude below; the
+// check-no-premium-leak guard is the backstop).
+
+// Fallback export list for the generated Andromeda v2 shim. App client code
+// (AndromedaShowcase, andromeda-demos) statically imports these names from the
+// shim, so the shim MUST export them on EVERY run — including degraded builds
+// where no vault (or an older pinned vault without `freeSystemComponents`) is
+// reachable and nothing gets injected. In that case each fallback name becomes
+// a placeholder component instead of a real re-export. UPDATE this list when a
+// new v2 component ships (it mirrors the vault manifest's
+// freeSystemComponents.andromeda).
+const V2_FALLBACK_NAMES = ['MetricChart', 'Gauge']
+
+// Managed block markers in `git info/exclude` — doubles as the state that
+// remembers which files a previous run injected (for stale-file cleanup).
+const EXCLUDE_BEGIN = '# BEGIN inject-premium free-ds'
+const EXCLUDE_END = '# END inject-premium free-ds'
+
+function gitExcludeFile() {
+  try {
+    const p = execSync('git rev-parse --git-path info/exclude', { stdio: 'pipe' }).toString().trim()
+    return resolve(ROOT, p)
+  } catch {
+    return null // no git (e.g. Vercel build container) — exclusion is moot there
+  }
+}
+
+// Paths the PREVIOUS run injected, read back from the managed exclude block.
+function readExcludedFreeDs() {
+  const file = gitExcludeFile()
+  if (!file || !existsSync(file)) return []
+  try {
+    const lines = readFileSync(file, 'utf8').split('\n')
+    const start = lines.indexOf(EXCLUDE_BEGIN)
+    const end = lines.indexOf(EXCLUDE_END)
+    if (start === -1 || end === -1 || end < start) return []
+    return lines.slice(start + 1, end).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
+  } catch {
+    return []
+  }
+}
+
+// Rewrite the managed block so `git status` never shows the injected files.
+// Best-effort by design: skip silently when git is unavailable.
+function syncGitExclude(paths) {
+  const file = gitExcludeFile()
+  if (!file) return
+  try {
+    let lines = []
+    try { lines = readFileSync(file, 'utf8').split('\n') } catch { /* fresh file */ }
+    const start = lines.indexOf(EXCLUDE_BEGIN)
+    const end = lines.indexOf(EXCLUDE_END)
+    if (start !== -1 && end !== -1 && end >= start) lines.splice(start, end - start + 1)
+    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop()
+    if (paths.length > 0) lines.push('', EXCLUDE_BEGIN, ...paths, EXCLUDE_END)
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, lines.join('\n') + '\n')
+  } catch { /* git hygiene is best-effort — never fail the build over it */ }
+}
+
+// Delete previously injected files that are no longer in the manifest (or any
+// previously injected file at all on a no-vault run). The path-shape check
+// means a corrupted exclude file can never delete anything outside
+// design-systems/<system>/components/.
+function cleanupFreeDs(currentPaths) {
+  const current = new Set(currentPaths)
+  for (const prev of readExcludedFreeDs()) {
+    if (current.has(prev)) continue
+    if (!/^design-systems\/[a-z0-9-]+\/components\/[A-Za-z][A-Za-z0-9]*\.tsx$/.test(prev)) continue
+    rmSync(join(ROOT, prev), { force: true })
+  }
+}
+
+// ALWAYS written (every run, including degraded/no-vault): injected names
+// re-export the real injected source; expected-but-not-injected names (fork,
+// missing PAT, older premium pin) become placeholder panels so the showcase
+// renders instead of crashing. Expected names come from the manifest when
+// reachable, else from V2_FALLBACK_NAMES. NOTE: this shim is Andromeda-specific;
+// a future second system with free components needs its own generated shim.
+function writeV2Shim(injectedNames, manifest) {
+  const listed = manifest?.freeSystemComponents?.andromeda
+  const expected = [...new Set([
+    ...(Array.isArray(listed) ? listed : []),
+    ...V2_FALLBACK_NAMES,
+    ...injectedNames,
+  ])]
+  const injectedSet = new Set(injectedNames)
+  const out = [
+    '// AUTO-GENERATED by scripts/inject-premium.mjs — gitignored, never committed.',
+    '// Re-exports the FREE Andromeda v2 components injected from the private vault',
+    '// (manifest key `freeSystemComponents`). Components expected but not injected',
+    '// (degraded build) render a placeholder panel instead of crashing the showcase.',
+    '// @ts-nocheck — re-exports untyped design-system sources.',
+    '',
+  ]
+  for (const name of expected) {
+    if (injectedSet.has(name)) {
+      out.push(`export { ${name} } from '../../design-systems/andromeda/components/${name}'`)
+    } else {
+      out.push(
+        `export function ${name}(props) {`,
+        '  return (',
+        '    <div',
+        '      {...props}',
+        '      style={{',
+        "        background: '#141415',",
+        "        border: '1px solid #3E3E3F',",
+        "        color: '#9A9A9A',",
+        `        fontFamily: "'JetBrains Mono', monospace",`,
+        '        fontSize: 12,',
+        "        letterSpacing: '0.05em',",
+        '        padding: 20,',
+        '        ...props.style,',
+        '      }}',
+        '    >',
+        `      ${name} — available on the live site`,
+        '    </div>',
+        '  )',
+        '}',
+      )
+    }
+  }
+  out.push('', `export const V2_COMPONENT_NAMES = ${JSON.stringify(injectedNames)}`, '')
+  writeFileSync(V2_SHIM, out.join('\n'))
+}
+
+// ── Brains (manifest key `brains`) ──────────────────────────────────────────
+// The design-system brain (rules.md + foundations/*.md + components/*.rules.md)
+// is PREMIUM content. It never touches the public working tree as .md — it is
+// bundled into registry-data/_<slug>-brain.json, which the gated brain page
+// reads server-side. The leading underscore matters: the /r/[file] route's
+// filename regex rejects underscores (same convention as _manifest.json /
+// _premium.json), so the brain JSON is structurally unservable — no gate
+// change needed, no leak possible via /r.
+
+// Fallback teaser for the brain paywall — NAMES AND COUNTS ONLY, never content.
+// The paywall imports the generated teaser module on every build, so a
+// degraded build (fork, missing PAT, older premium pin) still renders real
+// structure. UPDATE when the brain grows (mirror of the vault's
+// design-systems/andromeda/ brain folder), same contract as V2_FALLBACK_NAMES.
+const BRAIN_TEASER_FALLBACK = {
+  totalFiles: 50,
+  sections: [
+    {
+      id: 'foundations',
+      label: 'Foundations',
+      files: [
+        'anti-patterns', 'build-workflow', 'charts', 'color-philosophy',
+        'composition-recipes', 'defaults', 'interaction-states', 'layout',
+        'motion', 'responsive', 'spacing', 'voice-and-copy',
+      ],
+    },
+    {
+      id: 'component-rules',
+      label: 'Component Rules',
+      files: [
+        'Alert', 'Avatar', 'Badge', 'Button', 'Card', 'Checkbox',
+        'CornerMarkers', 'DateRangePicker', 'Drawer', 'EmptyState', 'Gauge',
+        'HeatGrid', 'IconButton', 'Input', 'MetricChart', 'NavItem',
+        'PanelHeader', 'PanelMenu', 'Planet', 'ProgressBar', 'RadarChart',
+        'Radio', 'SearchField', 'SegmentedControl', 'Slider', 'Spinner',
+        'StatTile', 'Table', 'Tag', 'Textarea', 'Toggle', 'Tooltip',
+        'TrendChart', 'UserCard', 'UserMenu',
+      ],
+    },
+    {
+      id: 'skills',
+      label: 'Skills',
+      files: ['building-with-andromeda', 'reviewing-against-andromeda'],
+    },
+  ],
+}
+
+// ALWAYS written (every run, including degraded/no-vault): the brain paywall
+// statically imports BRAIN_TEASER, so the module must exist on every build.
+// Structure only (file names + counts) — never brain content.
+function writeBrainTeaser(teaser) {
+  const data = teaser ?? BRAIN_TEASER_FALLBACK
+  writeFileSync(
+    BRAIN_TEASER_MODULE,
+    [
+      '// AUTO-GENERATED by scripts/inject-premium.mjs — gitignored, never committed.',
+      '// Structure-only teaser for the Andromeda Brain paywall: section labels, file',
+      '// NAMES and counts — never brain content. Derived from the real vault brain',
+      '// when reachable; a committed fallback snapshot on degraded builds.',
+      '// @ts-nocheck',
+      `export const BRAIN_TEASER = ${JSON.stringify(data, null, 2)} as const`,
+      '',
+    ].join('\n'),
+  )
+}
+
+// Collect a brain's files from the vault source. Returns { files, teaser } or
+// exits loudly — a manifest-listed brain with a missing/empty source folder is
+// a broken publish, never a silent skip (when the vault IS reachable).
+function collectBrain(source, slug) {
+  const sysDir = join(source, 'design-systems', slug)
+  const rulesPath = join(sysDir, 'rules.md')
+  if (!existsSync(rulesPath)) {
+    console.error(`[inject-premium] manifest brains lists "${slug}" but design-systems/${slug}/rules.md is missing from the premium source`)
+    process.exit(1)
+  }
+  const listMd = (dir, suffix) => {
+    try {
+      return readdirSync(join(sysDir, dir)).filter((f) => f.endsWith(suffix)).sort()
+    } catch {
+      return []
+    }
+  }
+  const foundations = listMd('foundations', '.md')
+  const componentRules = listMd('components', '.rules.md')
+  // Skills are folders under _skills/, each with a SKILL.md (Claude Code shape).
+  const skills = (() => {
+    try {
+      return readdirSync(join(sysDir, '_skills'), { withFileTypes: true })
+        .filter((d) => d.isDirectory() && existsSync(join(sysDir, '_skills', d.name, 'SKILL.md')))
+        .map((d) => d.name)
+        .sort()
+    } catch {
+      return []
+    }
+  })()
+  if (foundations.length === 0 && componentRules.length === 0) {
+    console.error(`[inject-premium] brain "${slug}" has no foundations/*.md and no components/*.rules.md — refusing to ship an empty brain`)
+    process.exit(1)
+  }
+  const read = (rel) => readFileSync(join(sysDir, rel), 'utf8')
+  const files = [
+    { path: `design-systems/${slug}/rules.md`, content: read('rules.md'), type: 'index' },
+    ...foundations.map((f) => ({
+      path: `design-systems/${slug}/foundations/${f}`,
+      content: read(join('foundations', f)),
+      type: 'foundation',
+    })),
+    ...componentRules.map((f) => ({
+      path: `design-systems/${slug}/components/${f}`,
+      content: read(join('components', f)),
+      type: 'component-rule',
+    })),
+    ...skills.map((name) => ({
+      path: `design-systems/${slug}/_skills/${name}/SKILL.md`,
+      content: read(join('_skills', name, 'SKILL.md')),
+      type: 'skill',
+    })),
+  ]
+  const teaser = {
+    totalFiles: files.length,
+    sections: [
+      { id: 'foundations', label: 'Foundations', files: foundations.map((f) => f.replace(/\.md$/, '')) },
+      { id: 'component-rules', label: 'Component Rules', files: componentRules.map((f) => f.replace(/\.rules\.md$/, '')) },
+      { id: 'skills', label: 'Skills', files: skills },
+    ],
+  }
+  return { files, teaser }
+}
+
 // Always start from a clean slate so a removed slug actually disappears. Recreate
 // the (possibly empty) target dir so the Tailwind `@source` for it always resolves,
 // even on free-only builds.
 rmSync(TARGET, { recursive: true, force: true })
 rmSync(SHIM, { force: true })
+rmSync(V2_SHIM, { force: true })
+rmSync(BRAIN_TEASER_MODULE, { force: true })
 rmSync(PREMIUM_JSON, { force: true })
 rmSync(BUILD_INFO, { force: true })
+// Stale brain files from a previous run: the underscore-prefixed page bundle
+// AND the servable <slug>-brain.json CLI item. Removed up front so a degraded
+// run leaves NO brain content behind (bundled or servable). NB: this would
+// also delete a hypothetical free standalone whose slug ends in `-brain` —
+// harmless (generate-registry re-emits it later in the same chain), but avoid
+// naming standalones that way.
+try {
+  for (const f of readdirSync(REGISTRY_DATA)) {
+    if (/^_?[a-z0-9-]+-brain\.json$/.test(f)) rmSync(join(REGISTRY_DATA, f), { force: true })
+  }
+} catch { /* registry-data not created yet */ }
 mkdirSync(TARGET, { recursive: true })
 
 // ── 1. Resolve the source ──────────────────────────────────────────────────
@@ -135,6 +417,15 @@ if (!source && process.env.GITHUB_PAT_PREMIUM) {
 if (!source) {
   writeStubShim()
   writeBuildInfo(null)
+  // Free v2 DS components: no vault reachable — remove any previously injected
+  // copies (mirrors the standalone clean-slate above), empty the exclude block,
+  // and write the placeholder shim so the showcase still compiles + renders.
+  cleanupFreeDs([])
+  syncGitExclude([])
+  writeV2Shim([], null)
+  // Brain: no bundle (the page fail-closes to the paywall), but the paywall's
+  // teaser module must still exist — write it from the committed fallback.
+  writeBrainTeaser(null)
   log('no PREMIUM_LOCAL_PATH and no GITHUB_PAT_PREMIUM — free-only build (skip).')
   process.exit(0)
 }
@@ -159,13 +450,10 @@ try {
   console.error('[inject-premium] cannot read premium-manifest.json at ' + source + ': ' + e.message)
   process.exit(1)
 }
+// NB: no early exit on 0 standalones — the free-DS phase below must still run.
+// With an empty list the copy loop + bijection are no-ops and the registration
+// shim comes out empty (equivalent to the stub).
 const standalones = Array.isArray(manifest.standalones) ? [...manifest.standalones] : []
-if (standalones.length === 0) {
-  writeStubShim()
-  writeBuildInfo(builtSha)
-  log('manifest lists 0 standalones — free-only build.')
-  process.exit(0)
-}
 
 mkdirSync(TARGET, { recursive: true })
 mkdirSync(join(ROOT, 'registry-data'), { recursive: true })
@@ -220,8 +508,122 @@ if (JSON.stringify(folderSlugs) !== JSON.stringify(manifestSlugs)) {
   process.exit(1)
 }
 
+// ── 4b. Free design-system components (v2) ──────────────────────────────────
+// manifest.freeSystemComponents: { <system>: [<ComponentName>, ...] }.
+// Copied into the public design-systems tree (marker-stripped, like the
+// standalones) so relative imports ('../tokens', './lib/utils', './Badge')
+// resolve against the committed v1 files. Absent/empty key → no-op, so a
+// production pin on an older vault sha (pre-dating the key) still builds green.
+const freeMap =
+  manifest.freeSystemComponents && typeof manifest.freeSystemComponents === 'object'
+    ? manifest.freeSystemComponents
+    : {}
+const freeInjected = {} // system → [ComponentName]
+const freePaths = []    // repo-relative injected file paths
+for (const [system, names] of Object.entries(freeMap)) {
+  if (!/^[a-z0-9-]+$/.test(system)) {
+    console.error('[inject-premium] invalid system slug in freeSystemComponents: ' + JSON.stringify(system))
+    process.exit(1)
+  }
+  for (const name of Array.isArray(names) ? names : []) {
+    if (!/^[A-Za-z][A-Za-z0-9]*$/.test(name)) {
+      console.error('[inject-premium] invalid component name in freeSystemComponents: ' + JSON.stringify(name))
+      process.exit(1)
+    }
+    const rel = `design-systems/${system}/components/${name}.tsx`
+    const src = join(source, rel)
+    // Mirror of the standalone bijection check: a manifest-listed file missing
+    // from the vault source is a broken publish — fail loud, never ship a
+    // showcase that imports a component that does not exist.
+    if (!existsSync(src)) {
+      console.error(`[inject-premium] freeSystemComponents lists "${system}/${name}" but ${rel} is missing from the premium source`)
+      process.exit(1)
+    }
+    const outFile = join(ROOT, rel)
+    mkdirSync(dirname(outFile), { recursive: true })
+    const strippedSrc = readFileSync(src, 'utf8').split('\n').filter((l) => !l.includes(MARKER)).join('\n')
+    writeFileSync(outFile, strippedSrc)
+    ;(freeInjected[system] ??= []).push(name)
+    freePaths.push(rel)
+  }
+}
+cleanupFreeDs(freePaths)  // previously injected, no longer in the manifest
+syncGitExclude(freePaths) // keep `git status` clean (skips silently without git)
+writeV2Shim(freeInjected['andromeda'] ?? [], manifest)
+if (freePaths.length > 0) {
+  log(
+    `injected ${freePaths.length} free design-system component(s): ` +
+      Object.entries(freeInjected).map(([s, ns]) => ns.map((n) => `${s}/${n}`).join(', ')).join(', '),
+  )
+}
+
+// ── 4c. Brains ──────────────────────────────────────────────────────────────
+// manifest.brains: [<system slug>]. Bundle each brain's .md files (index +
+// foundations + component rules) into registry-data/_<slug>-brain.json for the
+// gated brain page, and write the paywall teaser module (names/counts only).
+// Absent/empty key → no bundle, fallback teaser (older pins stay green).
+const brains = Array.isArray(manifest.brains) ? [...manifest.brains] : []
+const brainSlugs = []
+let andromedaTeaser = null
+for (const slug of brains) {
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    console.error('[inject-premium] invalid brain slug in manifest: ' + JSON.stringify(slug))
+    process.exit(1)
+  }
+  const { files, teaser } = collectBrain(source, slug)
+  writeFileSync(
+    join(REGISTRY_DATA, `_${slug}-brain.json`),
+    JSON.stringify({ generatedAt: builtSha ?? 'local', files }, null, 2) + '\n',
+  )
+  // Servable CLI item: <slug>-brain.json (NO underscore, so /r CAN serve it —
+  // the gate classifies it 'brain' and requires premium entitlement mode-
+  // independently, exactly like premium-standalone; non-premium gets a stub).
+  // Same files as the page bundle, in shadcn registry-item shape with explicit
+  // `~/` targets so `npx shadcn add` lands them at design-systems/<slug>/... in
+  // the consumer's project. Re-running the command refreshes the rules in place.
+  const title = slug.charAt(0).toUpperCase() + slug.slice(1)
+  writeFileSync(
+    join(REGISTRY_DATA, `${slug}-brain.json`),
+    JSON.stringify(
+      {
+        $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+        name: `${slug}-brain`,
+        type: 'registry:item',
+        title: `${title} Brain`,
+        description:
+          `The ${title} design-system brain: every rule, foundation, and skill as markdown ` +
+          `your AI agent reads. Re-run the install command any time to pull the latest rules.`,
+        dependencies: [],
+        registryDependencies: [],
+        files: files.map((f) => ({
+          path: f.path,
+          type: 'registry:file',
+          target: `~/${f.path}`,
+          content: f.content,
+        })),
+      },
+      null,
+      2,
+    ) + '\n',
+  )
+  if (slug === 'andromeda') andromedaTeaser = teaser
+  brainSlugs.push(slug)
+  log(`bundled brain "${slug}": ${files.length} file(s) → registry-data/_${slug}-brain.json + servable ${slug}-brain.json`)
+}
+writeBrainTeaser(andromedaTeaser)
+
 // ── 5. _premium.json — feeds the /r gate's premiumSlugs ────────────────────
-writeFileSync(PREMIUM_JSON, JSON.stringify({ standalones: manifestSlugs }, null, 2) + '\n')
+// `standalones` feeds premiumSlugs exactly as before; `freeSystemComponents`
+// lists the injected FREE v2 file paths and `brains` the bundled brain slugs so
+// downstream scripts (leak guard, health checks) can see what was injected.
+writeFileSync(
+  PREMIUM_JSON,
+  JSON.stringify(
+    { standalones: manifestSlugs, freeSystemComponents: freePaths, brains: brainSlugs },
+    null,
+    2,
+  ) + '\n',
+)
 
 // ── 6. Registration shim (gitignored) ──────────────────────────────────────
 const ident = (s) => 'C_' + s.replace(/[^a-z0-9]/gi, '_')

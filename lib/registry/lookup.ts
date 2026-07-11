@@ -38,6 +38,7 @@ export function loadContentLookup(): ContentLookup {
         'andromeda-signal-room',
       ],
       premiumSlugs: [],
+      brainSlugs: [],
     })
     cached.degraded = true
   }

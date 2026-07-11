@@ -61,11 +61,78 @@ const PREMIUM_GENERATED =
 const MARKER = new RegExp(['AICANVAS', 'PREMIUM', 'DO', 'NOT', 'COMMIT'].join('-'))
 const PAT = /\bghp_[A-Za-z0-9]{36}\b|\bgithub_pat_[A-Za-z0-9_]{20,}\b/
 
+// ── Injected FREE design-system components (v2) ──────────────────────────────
+// scripts/inject-premium.mjs copies vault-authored FREE components into
+// design-systems/<system>/components/ at build time (manifest key
+// `freeSystemComponents`). Free for users, but the VAULT is their source of
+// record — the injected copies must never be committed here. The injected set
+// is read from registry-data/_premium.json (written by inject) and, as a
+// fallback, recomputed from the managed block in git info/exclude. Both may be
+// absent (fork, never injected) → empty set, guard fully inert.
+function injectedFreeDsPaths() {
+  const paths = new Set()
+  try {
+    const premium = JSON.parse(readFileSync('registry-data/_premium.json', 'utf8'))
+    const list = Array.isArray(premium.freeSystemComponents) ? premium.freeSystemComponents : []
+    for (const p of list) if (typeof p === 'string') paths.add(p)
+  } catch { /* not injected / no manifest */ }
+  try {
+    const excludeFile = execSync('git rev-parse --git-path info/exclude', { encoding: 'utf8' }).trim()
+    const lines = readFileSync(excludeFile, 'utf8').split('\n')
+    const start = lines.indexOf('# BEGIN inject-premium free-ds')
+    const end = lines.indexOf('# END inject-premium free-ds')
+    if (start !== -1 && end > start) {
+      for (const l of lines.slice(start + 1, end)) {
+        const t = l.trim()
+        if (t && !t.startsWith('#')) paths.add(t)
+      }
+    }
+  } catch { /* no git / no exclude file */ }
+  return paths
+}
+const FREE_DS_INJECTED = injectedFreeDsPaths()
+
+// ── Brain content (premium .md + generated bundles) ──────────────────────────
+// The design-system brain lives ONLY in the vault. Its content reaches this
+// repo solely as the gitignored registry-data/_<slug>-brain.json bundle:
+//   - a brain JSON bundle must never be tracked (any *-brain.json)
+//   - design-systems/*/foundations/ and design-systems/*/_skills/ exist only in
+//     the vault — any file there is vault material
+//   - NEW rules.md / *.rules.md files under design-systems/ are vault material.
+//     Checked in --staged mode against ADDED files only: the public repo
+//     legitimately tracks a handful of frozen v1 rule files, which can only
+//     ever show up as modifications, never additions.
+const BRAIN_JSON = /(^|\/)registry-data\/[^/]*-brain\.json$/
+const BRAIN_FOUNDATIONS = /(^|\/)design-systems\/[^/]+\/foundations\//
+const BRAIN_SKILLS = /(^|\/)design-systems\/[^/]+\/_skills\//
+const BRAIN_RULES_MD = /(^|\/)design-systems\/.+(\/rules\.md|\.rules\.md)$/
+let stagedAdded = new Set()
+if (staged) {
+  try {
+    stagedAdded = new Set(
+      execSync('git diff --cached --name-only --diff-filter=A', { encoding: 'utf8' })
+        .split('\n').map((s) => s.trim()).filter(Boolean),
+    )
+  } catch { /* listing failed — the ACM path/content scans still apply */ }
+}
+
 const violations = []
 
 for (const f of files) {
   if (PREMIUM_PATH.test(f)) violations.push(`tracked premium working folder: ${f}`)
   if (PREMIUM_GENERATED.test(f)) violations.push(`tracked premium generated shim: ${f}`)
+  if (FREE_DS_INJECTED.has(f)) {
+    violations.push(
+      `build-time-injected free design-system component: ${f} ` +
+        '(vault-authored, injected by inject-premium.mjs — never commit the injected copy)',
+    )
+  }
+  if (BRAIN_JSON.test(f)) violations.push(`brain content bundle: ${f} (generated premium content — never tracked)`)
+  if (BRAIN_FOUNDATIONS.test(f)) violations.push(`brain foundations file: ${f} (vault-only premium content)`)
+  if (BRAIN_SKILLS.test(f)) violations.push(`brain skill file: ${f} (vault-only premium content)`)
+  if (staged && stagedAdded.has(f) && BRAIN_RULES_MD.test(f)) {
+    violations.push(`NEW brain rules file: ${f} (vault-only premium content — rules are never added in the public repo)`)
+  }
 }
 
 for (const f of files) {

@@ -3,7 +3,7 @@
 // Andromeda OVERVIEW — the product landing for the system: hero → featured
 // component showcase → templates grid → components grid. This IS the system
 // root: page.tsx at /design-systems/andromeda renders it. The raw component
-// grid lives at /design-systems/andromeda/showcase; the old preview URL
+// grid lives at /design-systems/andromeda/system; the old preview URL
 // /design-systems/andromeda/overview 308-redirects (permanent) here (see next.config.ts).
 //
 // IDENTITY: pure AI Canvas — sand/olive tokens (Tailwind), Manrope (the site
@@ -368,7 +368,7 @@ export function AndromedaOverview() {
       {/* ── Featured: component showcase ────────────────────────────────── */}
       <motion.section className="mt-14" {...reveal}>
         <Link
-          href="/design-systems/andromeda/showcase"
+          href="/design-systems/andromeda/system"
           className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
         >
           <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">

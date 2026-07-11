@@ -36,12 +36,13 @@ export async function GET(
   const contentType = classifyContent(file, lookup)
   const slug = file.replace(/\.json$/, '')
   const mode = effectiveMode()
-  // premium-standalone gates exactly like a design system / template: binary,
-  // fail-closed, never free-metered, never shared-cached.
+  // premium-standalone and brain gate exactly like a design system / template:
+  // binary, fail-closed, never free-metered, never shared-cached.
   const premiumContent =
     contentType === 'design-system' ||
     contentType === 'template' ||
-    contentType === 'premium-standalone'
+    contentType === 'premium-standalone' ||
+    contentType === 'brain'
 
   // Cache policy: meta is truly public; premium content is never shared-cached
   // in ANY mode (a permissive-mode CDN entry must not survive an enforce flip);
@@ -71,21 +72,25 @@ export async function GET(
     console.error('[registry gate] degraded lookup (manifest missing) — failing closed on', slug)
     return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
   }
-  if (contentType === 'premium-standalone') {
-    // Closed-source standalone: ALWAYS requires premium entitlement, in any mode.
-    // Fail CLOSED on any entitlement error — never hand out premium bytes.
+  if (premiumContent) {
+    // ALL premium content (standalone, brain, whole-system aggregate, template)
+    // requires premium entitlement in ANY mode — NEVER hung off
+    // REGISTRY_ENFORCEMENT. A permissive flag (or premium-disabled) must not turn
+    // closed-source templates/systems into a free download; the enforce flag is a
+    // UI/metering switch, not the thing standing between a free user and premium
+    // bytes. Fail CLOSED on any entitlement error.
     let tier
     try {
       tier = (await getEntitlement(req)).tier
     } catch (err) {
-      console.error('[registry gate] entitlement error on premium standalone — failing closed:', err)
+      console.error('[registry gate] entitlement error on premium content — failing closed:', err)
       return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
     }
     if (tier !== 'premium') {
       // Free / anon: don't 402 (shadcn renders that as a cryptic, misleading
       // error). Serve a 200 PLACEHOLDER item — the install succeeds and drops a
       // single clearly-labelled file pointing to /pricing. ZERO real source.
-      return premiumStub(body, slug)
+      return contentType === 'brain' ? brainStub(body, slug) : premiumStub(body, slug)
     }
   }
 
@@ -108,28 +113,6 @@ export async function GET(
       tier = 'free' // fail OPEN — free source is public anyway
     }
     if (tier === 'anonymous') return freeAccountStub(body, slug)
-  }
-
-  if (mode === 'enforce' && contentType !== 'meta') {
-    // ── Premium DESIGN SYSTEMS / TEMPLATES: fail CLOSED (enforce-gated) ────
-    // premium-standalone is gated mode-independently above; free standalone /
-    // DS-component installs are account-gated above (flag-driven) and never
-    // metered — so this enforce block now handles ONLY premium DS / templates.
-    if (contentType === 'design-system' || contentType === 'template') {
-      let tier
-      try {
-        tier = (await getEntitlement(req)).tier
-      } catch (err) {
-        console.error('[registry gate] entitlement error on premium content — failing closed:', err)
-        return paymentJson({ error: 'temporarily-unavailable', message: 'Please retry shortly.' }, 503)
-      }
-      if (tier !== 'premium') {
-        return paymentJson(
-          { error: 'premium-only', message: 'This is a premium component. Upgrade at https://aicanvas.me/pricing' },
-          402,
-        )
-      }
-    }
   }
 
   // Token propagation: the shadcn CLI fetches each registryDependency URL
@@ -221,6 +204,48 @@ function premiumStub(realBody: string, slug: string): NextResponse {
   return NextResponse.json(item, {
     status: 200,
     headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'premium-standalone' },
+  })
+}
+
+/**
+ * Free/anon request for a gated BRAIN item → a 200 PLACEHOLDER with ONE
+ * markdown file pointing to /pricing (mirrors premiumStub — shadcn renders
+ * non-2xx badly). ZERO real rules content.
+ */
+function brainStub(realBody: string, slug: string): NextResponse {
+  let title = slug
+  try {
+    const parsed = JSON.parse(realBody)
+    if (typeof parsed.title === 'string') title = parsed.title
+  } catch {
+    /* default above */
+  }
+  const system = slug.replace(/-brain$/, '')
+  const md = [
+    `# ${title} (Premium, locked)`,
+    '',
+    `This is a placeholder. The ${title} is the full set of design rules your AI agent`,
+    'reads to build on-brand UI. Unlock it with an AI Canvas Premium account, then',
+    're-run the same install command.',
+    '',
+    '- Upgrade: https://aicanvas.me/pricing',
+    `- See what is inside: https://aicanvas.me/design-systems/${system}/brain`,
+    '',
+  ].join('\n')
+  const target = `~/design-systems/${system}/BRAIN-LOCKED.md`
+  const item = {
+    $schema: 'https://ui.shadcn.com/schema/registry-item.json',
+    name: slug,
+    type: 'registry:item',
+    title: `${title} (Premium, locked)`,
+    description: 'Premium AI Canvas content. Upgrade to install the real rules: https://aicanvas.me/pricing',
+    dependencies: [],
+    registryDependencies: [],
+    files: [{ path: `design-systems/${system}/BRAIN-LOCKED.md`, type: 'registry:file', target, content: md }],
+  }
+  return NextResponse.json(item, {
+    status: 200,
+    headers: { 'Cache-Control': 'private, no-store', 'X-AICanvas-Content-Type': 'brain' },
   })
 }
 

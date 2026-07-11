@@ -102,7 +102,12 @@ import {
   DrawerBody,
   DrawerFooter,
 } from '../../../../design-systems/andromeda/components/Drawer'
-import { TemplateChrome } from '../../../_components/TemplateChrome'
+// v2 components come from the build-time-injected shim (real re-exports when
+// injected, placeholder panels on degraded builds) — never import them from
+// design-systems/ directly. See scripts/inject-premium.mjs.
+import { MetricChart, Gauge } from '../../../lib/andromeda-v2.generated'
+import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
+import { ShowcaseInstallCard } from '../../../_components/ShowcaseInstallCard'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
 // matches the design system's only font exactly.
@@ -282,15 +287,10 @@ export default function AndromedaShowcase({
 
   return (
     <>
-    <TemplateChrome
-      templateSlug="andromeda-all"
-      templateName="Full system"
-      systemName="Andromeda"
-      fallbackHref="/design-systems/andromeda/showcase"
-      hideBack
-      description={[
-        'Installs every Andromeda component, token, and template.',
-        'One command — sign in required.',
+    <ShowcaseInstall
+      installs={[
+        { slug: 'andromeda', label: 'All components' },
+        { slug: 'andromeda-all', label: 'Everything' },
       ]}
     />
     <div
@@ -304,9 +304,7 @@ export default function AndromedaShowcase({
         paddingTop: tokens.spacing[10],
         paddingLeft: tokens.spacing[8],
         paddingRight: tokens.spacing[8],
-        // Extra bottom clearance so the footer sits ABOVE the fixed "Install"
-        // bar (TemplateChrome, bottom-6) instead of behind it.
-        paddingBottom: '7.5rem',
+        paddingBottom: tokens.spacing[10],
       }}
     >
       <div
@@ -357,58 +355,58 @@ export default function AndromedaShowcase({
           }
         `}</style>
 
-        {/* Page header */}
-        <header style={{ marginBottom: tokens.spacing[6] }}>
+        {/* Page header — AI Canvas site style (Manrope), not the Andromeda mono
+            aesthetic of the demos below. Fixed light-on-dark colours because the
+            showcase surface is always the Andromeda void. */}
+        <header style={{ marginBottom: tokens.spacing[6], fontFamily: "var(--font-sans), 'Manrope', system-ui, sans-serif" }}>
           <div
             style={{
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#DAE4A0',
               textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.widest,
-              marginBottom: tokens.spacing[2],
+              letterSpacing: '0.12em',
+              marginBottom: 10,
             }}
           >
-            /// Andromeda Design System
+            Andromeda
           </div>
           <h1
             className="as-title"
             style={{
               margin: 0,
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size['3xl'],
-              fontWeight: tokens.typography.weight.medium,
-              color: tokens.color.text.primary,
-              textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.wider,
-              lineHeight: 1.1,
+              fontSize: 'clamp(30px, 4.5vw, 42px)',
+              fontWeight: 800,
+              color: '#F4F4FA',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.05,
             }}
           >
-            Component Showcase
+            System
           </h1>
           <p
             style={{
-              margin: `${tokens.spacing[4]} 0 0 0`,
+              margin: '16px 0 0 0',
               maxWidth: '56ch',
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.sm,
-              lineHeight: tokens.typography.lineHeight.normal,
-              color: tokens.color.text.secondary,
+              fontSize: 16,
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: '#9B9B9E',
             }}
           >
-            Designed for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
+            Built for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
           </p>
           <div
             style={{
-              marginTop: tokens.spacing[3],
-              fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              marginTop: 16,
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#7B7B7D',
               textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.wide,
+              letterSpacing: '0.1em',
             }}
           >
-            {componentCount} components · {templateCount} templates · one-command install
+            {componentCount} components · {templateCount} templates · 1 brain · one-command install
           </div>
         </header>
 
@@ -1549,6 +1547,45 @@ export default function AndromedaShowcase({
           </div>
         </Section>
 
+        {/* ── Metric Chart ───────────────────────────────────────────────── */}
+        <Section
+          title="Metric Chart"
+          slug="metric-chart"
+          kicker="Component · Charts"
+          description="The framed single-series telemetry panel. TrendChart auto-domains from zero; MetricChart is the domain-aware counterpart, fitting the y-domain to the data so percentage and non-zero-floor measurements fill the plot. The variant colors the status badge only; chart ink stays neutral."
+        >
+          <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[5] }}>
+            <MetricChart />
+            <MetricChart
+              label="/// Station"
+              title="Orbital Altitude"
+              description="Reboost burn at 14:00"
+              unit="km"
+              variant="warning"
+              badgeText="Drift"
+            />
+          </div>
+        </Section>
+
+        {/* ── Gauge ──────────────────────────────────────────────────────── */}
+        <Section
+          title="Gauge"
+          slug="gauge"
+          kicker="Component · Charts"
+          description="Radial percentage gauge. The arc IS the measurement, so it takes the semantic color (accent live, orange warning, red fault) over a neutral track; the readout counts up in sync with the sweep. A bare primitive that composes into Cards and panels."
+        >
+          <Row label="Sizes">
+            <Gauge size="sm" />
+            <Gauge size="md" />
+            <Gauge size="lg" />
+          </Row>
+          <Row label="Variants">
+            <Gauge variant="accent" value={82} label="CPU" />
+            <Gauge variant="warning" value={64} label="FUEL" />
+            <Gauge variant="fault" value={12} label="O2" />
+          </Row>
+        </Section>
+
         {/* ── Planet · Next Destination ──────────────────────────────────── */}
         <Section
           title="Planet"
@@ -1802,7 +1839,7 @@ export default function AndromedaShowcase({
                   // below — instead of bleeding into the next section.
                   alignItems: 'flex-start',
                   flexWrap: 'wrap',
-                  minHeight: 220,
+                  minHeight: 360,
                 }}
               >
                 <div style={{ width: 224 }}>
@@ -1840,6 +1877,9 @@ export default function AndromedaShowcase({
             );
           })()}
         </Section>
+
+        {/* Bottom install card — the two packages, like the brain's card. */}
+        <ShowcaseInstallCard />
       </div>
       <SiteFooter />
     </div>

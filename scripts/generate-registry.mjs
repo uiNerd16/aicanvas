@@ -8,7 +8,7 @@
  * Usage: node scripts/generate-registry.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs'
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSync, existsSync } from 'fs'
 import { join, dirname, resolve, relative, sep, posix } from 'path'
 import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
@@ -257,6 +257,20 @@ expectedNames.add('aicanvas-mcp') // MCP metadata file
 for (const slug of premiumSlugDirs) expectedNames.add(slug) // keep gated premium JSON
 expectedNames.add('_premium') // gate input (written by inject-premium) — must survive cleanup
 expectedNames.add('_manifest') // gate manifest
+// Brain files (written by inject-premium): the underscore page bundle
+// (_<slug>-brain.json, /r can never serve it) AND the servable CLI item
+// (<slug>-brain.json, gated as 'brain' premium content). Preserve the ones the
+// current injection declared; a degraded run writes no brains key, so stale
+// files get cleaned.
+let premiumBrains = []
+try {
+  const premiumEarly = JSON.parse(readFileSync(join(outDir, '_premium.json'), 'utf-8'))
+  premiumBrains = Array.isArray(premiumEarly.brains) ? [...premiumEarly.brains] : []
+  for (const b of premiumBrains) {
+    expectedNames.add(`_${b}-brain`)
+    expectedNames.add(`${b}-brain`)
+  }
+} catch { /* no _premium.json — no brain files to preserve */ }
 // Reserve filenames for design systems (tokens + per-component + system +
 // templates) so they survive the stale-file cleanup pass.
 function componentSlug(systemSlug, fileBaseName) {
@@ -276,10 +290,24 @@ function componentSlug(systemSlug, fileBaseName) {
 function dsComponentSlug(ds, entryRelPosix, baseName) {
   return ds.slugOverrides?.[entryRelPosix] ?? componentSlug(ds.slug, baseName)
 }
+// A system's component entries with their optionality. `optionalSystemEntries`
+// are build-time-injected v2 files (see scripts/inject-premium.mjs) that may
+// legitimately be absent (degraded build / older premium pin) — consumers skip
+// those with a warning instead of failing the walk.
+function dsAllEntries(ds) {
+  return [
+    ...ds.systemEntries.map((path) => ({ path, optional: false })),
+    ...(ds.optionalSystemEntries ?? []).map((path) => ({ path, optional: true })),
+  ]
+}
 for (const ds of DESIGN_SYSTEMS) {
   expectedNames.add(`${ds.slug}-tokens`)
   expectedNames.add(ds.slug)
-  for (const entry of ds.systemEntries) {
+  for (const { path: entry, optional } of dsAllEntries(ds)) {
+    // Optional entries only reserve their name while the file is actually
+    // present — a degraded run must let the stale-cleanup pass below delete
+    // the previous run's JSON so /r and the gate manifest stay in sync.
+    if (optional && !existsSync(resolve(ds.rootDir, entry))) continue
     const baseName = entry.split('/').pop()
     expectedNames.add(dsComponentSlug(ds, entry, baseName))
   }
@@ -461,12 +489,40 @@ try {
 // Collected from what this generator ACTUALLY emits, so the paywall classifier
 // can never drift from the registry contents. Written as _manifest.json — the
 // /r route's filename regex rejects leading underscores, so it is not servable.
-const manifest = { systemSlugs: [], designSystemSlugs: [], templateSlugs: [], premiumSlugs }
+const manifest = {
+  systemSlugs: [],
+  designSystemSlugs: [],
+  templateSlugs: [],
+  premiumSlugs,
+  // Gated brain items (servable <slug>-brain.json written by inject-premium):
+  // classified 'brain' by the gate — premium, mode-independent, fail-closed.
+  brainSlugs: premiumBrains.map((b) => `${b}-brain`).sort(),
+}
+
+// Per-bundle popover copy, collected while emitting and written to the
+// always-generated app/lib/install-contents.generated.ts after the loop.
+const installContents = {}
+// template slug → used-component count (null = full-system fallback)
+const templateContents = new Map()
 
 for (const ds of DESIGN_SYSTEMS) {
   const rootDirAbs = resolve(ds.rootDir)
   const tokenEntriesAbs = (ds.tokenEntries ?? []).map((p) => resolve(rootDirAbs, p))
-  const systemEntriesAbs = ds.systemEntries.map((p) => resolve(rootDirAbs, p))
+  // Optional (build-time-injected v2) entries join the system exactly like the
+  // committed ones when their file exists; when absent the build stays green —
+  // the entry is skipped with a warning and the gate-manifest count drops.
+  const presentEntries = []
+  for (const e of dsAllEntries(ds)) {
+    if (e.optional && !existsSync(resolve(rootDirAbs, e.path))) {
+      console.warn(
+        `generate-registry: WARNING — optional ${ds.slug} entry "${e.path}" is absent ` +
+          '(not injected — degraded build or older premium pin); skipping its registry item.',
+      )
+      continue
+    }
+    presentEntries.push(e)
+  }
+  const systemEntriesAbs = presentEntries.map((e) => resolve(rootDirAbs, e.path))
   manifest.systemSlugs.push(ds.slug)
 
   // ── 1. Tokens ────────────────────────────────────────────────────────────────
@@ -548,7 +604,7 @@ for (const ds of DESIGN_SYSTEMS) {
   // must be BUNDLED into each component that imports it, or the installed file
   // would carry an unresolved relative import (`./lib/motion`) and fail to build.
   const emittedComponentFiles = new Set()
-  for (const entry of ds.systemEntries) {
+  for (const { path: entry } of presentEntries) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue
     const slug = dsComponentSlug(ds, entry, entry.split('/').pop())
@@ -556,7 +612,7 @@ for (const ds of DESIGN_SYSTEMS) {
     emittedComponentFiles.add(fileAbs)
   }
 
-  for (const entry of ds.systemEntries) {
+  for (const { path: entry } of presentEntries) {
     const fileAbs = resolve(rootDirAbs, entry)
     if (!systemFileSet.has(fileAbs)) continue   // not part of system walk (skipped)
     const baseName = entry.split('/').pop()
@@ -620,21 +676,44 @@ for (const ds of DESIGN_SYSTEMS) {
   }
 
   // ── 3. Templates (compositions) ──────────────────────────────────────────────
-  // Each template ships only its example folder. Components and tokens come
-  // from the system + tokens registry items via `registryDependencies`.
+  // Each template depends on ONLY the system components it actually imports
+  // (plus tokens) — not the whole system. Transitivity rides the per-component
+  // items: each declares its own sibling deps, so the CLI chain completes the
+  // closure. The walk boundary is tokens + individually-published components:
+  // shared helpers that are NOT published on their own (components/lib/motion,
+  // lib/responsive) fall through and get BUNDLED into the template — exactly
+  // like the per-component items bundle them — at the same target path, so
+  // duplicate copies across items are byte-identical and harmless.
   // (Type stays `registry:block` because that's shadcn's CLI vocabulary.)
   for (const template of ds.templates) {
     const templateEntryAbs = resolve(rootDirAbs, template.entryPath)
-    const templateWalk = walkDependencies([templateEntryAbs], rootDirAbs, dsBoundary)
+    const templateBoundary = new Set([...tokensFileSet, ...emittedComponentFiles])
+    const templateWalk = walkDependencies([templateEntryAbs], rootDirAbs, templateBoundary)
     const templateFiles = templateWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
+
+    const usedComponentSlugs = new Set()
+    for (const f of templateWalk.files) {
+      for (const spec of extractImportSpecifiers(readFileSync(f, 'utf-8'))) {
+        if (!spec.startsWith('.') && !spec.startsWith('/')) continue
+        const resolved = resolveImport(f, spec)
+        if (!resolved || !emittedComponentFiles.has(resolved)) continue
+        const relPosix = relative(rootDirAbs, resolved).split(sep).join(posix.sep)
+        usedComponentSlugs.add(dsComponentSlug(ds, relPosix, relPosix.split('/').pop()))
+      }
+    }
+    const templateDeps = [`${ds.slug}-tokens`, ...[...usedComponentSlugs].sort()].map(depUrl)
+    templateContents.set(template.slug, usedComponentSlugs.size)
+
     const templateItem = {
       $schema: SCHEMA,
       name: template.slug,
       type: 'registry:block',
       title: `${template.name} (${ds.name})`,
-      description: `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. Pulls in the full ${ds.name} system on first install; subsequent template installs reuse it.`,
+      description:
+        `${template.name} composition from ${ds.name}${template.domain ? ` — ${template.domain.toLowerCase()} dashboard` : ''}. ` +
+        `Pulls in the ${usedComponentSlugs.size} ${ds.name} components it uses, plus tokens.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [depUrl(ds.slug)],
+      registryDependencies: templateDeps,
       dependencies: templateWalk.npmDeps,
       files: templateFiles,
     }
@@ -646,25 +725,80 @@ for (const ds of DESIGN_SYSTEMS) {
 
   // ── 4. Full-system bundle (everything) ──────────────────────────────────────
   // Single registry item that pulls components + tokens (via the system slug)
-  // plus every template via `registryDependencies`. One CLI command grabs the
-  // entire system. Soft-gated in the website UI; the JSON itself stays public
-  // alongside every other `/r/*.json` per Phase 1.
+  // plus every template — and, when this system ships a brain, the brain item
+  // too — via `registryDependencies`. One CLI command grabs everything. The
+  // brain dep is conditional on the current injection (degraded builds emit
+  // without it, mirroring what is actually servable).
   if (ds.templates.length > 0) {
+    const hasBrain = premiumBrains.includes(ds.slug)
     const allItem = {
       $schema: SCHEMA,
       name: `${ds.slug}-all`,
       type: 'registry:style',
       title: `${ds.name} — full system`,
-      description: `Every ${ds.name} component, token, and template in one install.`,
+      description: hasBrain
+        ? `Every ${ds.name} component, token, and template, plus the ${ds.name} brain, in one install.`
+        : `Every ${ds.name} component, token, and template in one install.`,
       author: 'aicanvas <https://aicanvas.me>',
-      registryDependencies: [depUrl(ds.slug), ...ds.templates.map((t) => depUrl(t.slug))],
+      registryDependencies: [
+        depUrl(ds.slug),
+        ...ds.templates.map((t) => depUrl(t.slug)),
+        ...(hasBrain ? [depUrl(`${ds.slug}-brain`)] : []),
+      ],
       files: [],
     }
     writeFileSync(join(outDir, `${ds.slug}-all.json`), JSON.stringify(allItem, null, 2) + '\n')
     registryItems.push(indexEntry(allItem, []))
     dsCount++
   }
+
+  // ── 5. Install-contents copy (consumed by the install popovers) ─────────────
+  // One human line set per installable bundle, derived from what THIS run
+  // actually emitted — so the popover can never drift from the registry.
+  {
+    const componentCount = presentEntries.length
+    installContents[ds.slug] = [
+      `Install all ${componentCount} ${ds.name} components, tokens, and utilities.`,
+      'No templates, no brain.',
+    ]
+    for (const template of ds.templates) {
+      const used = templateContents.get(template.slug) ?? 0
+      installContents[template.slug] = [
+        `This template plus the ${used} ${ds.name} components it uses.`,
+        'Tokens included. Re-installs reuse what is already there.',
+      ]
+    }
+    if (ds.templates.length > 0) {
+      const hasBrain = premiumBrains.includes(ds.slug)
+      let brainFiles = 0
+      if (hasBrain) {
+        try {
+          brainFiles = JSON.parse(readFileSync(join(outDir, `${ds.slug}-brain.json`), 'utf8')).files.length
+        } catch { /* brain JSON absent — count stays 0 */ }
+      }
+      installContents[`${ds.slug}-all`] = [
+        `Install everything: ${componentCount} components, tokens, and ${ds.templates.length} templates.`,
+        ...(hasBrain && brainFiles > 0
+          ? [`Includes the ${ds.name} brain (${brainFiles} rule files your AI reads).`]
+          : []),
+      ]
+    }
+  }
 }
+
+// Install-contents module for the UI popovers (TemplateChrome /
+// TemplatePreviewShell). ALWAYS written — this generator runs in every dev and
+// build chain, including forks — so app imports never dangle. Gitignored.
+writeFileSync(
+  join('app', 'lib', 'install-contents.generated.ts'),
+  [
+    '// AUTO-GENERATED by scripts/generate-registry.mjs — gitignored, never committed.',
+    '// What each install command actually delivers, derived from the emitted',
+    '// registry items so the popover copy can never drift from the registry.',
+    `export const INSTALL_CONTENTS: Record<string, string[]> = ${JSON.stringify(installContents, null, 2)}`,
+    '',
+  ].join('\n'),
+)
 
 // Write the root registry index
 const registry = {
@@ -796,7 +930,9 @@ for (const ds of DESIGN_SYSTEMS) {
   // get_install_command / search_components can still resolve every DS slug.
   const metaSlugs = loadSystemMetaSlugs(ds.slug)
   const systemComponentSlugs = []
-  for (const entry of ds.systemEntries) {
+  // dsAllEntries: optional (injected v2) entries included — an absent one never
+  // produced a per-slug JSON above, so the compItem check below skips it.
+  for (const { path: entry } of dsAllEntries(ds)) {
     const baseName = entry.split('/').pop()
     const slug = dsComponentSlug(ds, entry, baseName)
     // Skip files that were emitted as a standalone instead of an individual DS

@@ -1,7 +1,7 @@
 // /design-systems/andromeda is the Andromeda system landing — the page the
 // sidebar's "Andromeda" link points at. It renders the overview (hero →
 // featured showcase → templates → components). The raw component grid lives at
-// /design-systems/andromeda/showcase; the former /overview preview URL
+// /design-systems/andromeda/system; the former /overview preview URL
 // 308-redirects (permanent) here (next.config.ts).
 import { AndromedaOverview } from './AndromedaOverview'
 

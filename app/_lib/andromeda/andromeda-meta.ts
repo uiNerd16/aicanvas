@@ -93,6 +93,14 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/empty-state.png?v=3',
   },
   {
+    slug: 'gauge',
+    name: 'Gauge',
+    description:
+      'Radial percentage gauge. A single measurement arc over a subtle track with a centered mono readout, in 3 sizes and 3 semantic color variants; the arc sweeps in and the value counts up in sync on first view.',
+    sourceFile: 'Gauge.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/gauge.png?v=1',
+  },
+  {
     slug: 'heat-grid',
     name: 'Heat Grid',
     description:
@@ -115,6 +123,14 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
       'Optional uppercase mono label, optional left icon, default + error states. Border transitions on focus.',
     sourceFile: 'Input.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/input.png?v=4',
+  },
+  {
+    slug: 'metric-chart',
+    name: 'Metric Chart',
+    description:
+      'Self-framed single-series telemetry panel: corner brackets, kicker and title header, and a status badge around one fitted-domain area chart. The fitted y-domain keeps non-zero-floor readings like altitude or latency filling the plot instead of flattening into a sliver.',
+    sourceFile: 'MetricChart.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/metric-chart.png?v=1',
   },
   {
     slug: 'nav-item',

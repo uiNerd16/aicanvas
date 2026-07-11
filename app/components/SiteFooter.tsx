@@ -54,6 +54,9 @@ export function SiteFooter() {
         <Link href="/impressum" className={linkCls}>
           Impressum
         </Link>
+        <Link href="/credits" className={linkCls}>
+          Credits
+        </Link>
         <a
           href="https://ui.shadcn.com/docs/directory"
           target="_blank"
