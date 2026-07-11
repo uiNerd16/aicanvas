@@ -69,7 +69,7 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
     <div style={{
       // Solid raised surface so text is always legible against any chart color
       background: tokens.color.surface.raised,
-      border: `1px solid ${tokens.color.border.base}`,
+      border: `var(--andromeda-border-width, 1px) solid ${tokens.color.border.base}`,
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',

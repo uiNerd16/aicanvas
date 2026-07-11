@@ -230,6 +230,7 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         boxSizing: 'border-box',
         background: tokens.color.surface.raised,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        borderRadius: tokens.radius.frame,
         padding: tokens.spacing[1],
         zIndex: 1000,
         boxShadow: `0 8px 32px ${tokens.color.surface.base}`,

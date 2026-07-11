@@ -114,9 +114,15 @@ export function andromedaVars() {
     '--andromeda-10': t.spacing[10],
     '--andromeda-12': t.spacing[12],
     // Radius
-    '--andromeda-radius-none': t.radius.none,
-    '--andromeda-radius-sm':   t.radius.sm,
-    '--andromeda-radius-md':   t.radius.md,
+    '--andromeda-radius-none':  t.radius.none,
+    '--andromeda-radius-sm':    t.radius.sm,
+    '--andromeda-radius-md':    t.radius.md,
+    // Raw default, NOT t.radius.frame — that string embeds var(--andromeda-
+    // radius-frame,…) and would self-reference. Keep in sync with tokens.ts.
+    '--andromeda-radius-frame': '0px',
+    // Border + marker stroke widths (1px hairline identity, theme-tunable)
+    '--andromeda-border-width': t.border.width,
+    '--andromeda-marker-width': `${t.marker.borderWidth}px`,
     // Opacity — disabled-control constant (unitless; used via opacity-[var(--andromeda-opacity-disabled)])
     '--andromeda-opacity-disabled': String(t.opacity.disabled),
     // Breakpoints — exposed for clamp()/calc() expressions that want the

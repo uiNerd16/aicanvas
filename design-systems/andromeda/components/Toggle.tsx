@@ -38,8 +38,8 @@ const trackVariants = cva(
   [
     'relative inline-flex items-center shrink-0',
     'w-[34px] h-[18px]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
@@ -74,7 +74,7 @@ const thumbVariants = cva(
   [
     'absolute top-[2px]',
     'w-[12px] h-[12px]',
-    'rounded-[var(--andromeda-radius-none)]',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[left,background-color,transform] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
   ],
   {

@@ -64,8 +64,8 @@ const buttonVariants = cva(
     // structural
     'relative inline-flex items-center justify-center select-none whitespace-nowrap',
     'gap-[var(--andromeda-2)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     // typography (all token-driven via CSS vars)
     '[font-family:var(--andromeda-font-mono)]',
     'font-[number:var(--andromeda-weight-medium)]',

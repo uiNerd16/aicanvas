@@ -59,8 +59,8 @@ const iconButtonVariants = cva(
   [
     // structural — perfectly square, icon dead-center
     'relative inline-flex items-center justify-center select-none flex-shrink-0',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'p-0',
     // motion — colours/border/shadow tween via CSS at duration.normal so the
     // focus ring fades in. Lift + press are framer-motion gesture props on

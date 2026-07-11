@@ -64,7 +64,7 @@ export const EmptyStateIcon = forwardRef(function EmptyStateIcon(
       className={cn(
         'inline-flex items-center justify-center',
         'w-[44px] h-[44px] mb-[var(--andromeda-2)]',
-        'border border-solid',
+        'border-[length:var(--andromeda-border-width,1px)] border-solid',
         'border-[color:var(--andromeda-border-base)]',
         'bg-[color:var(--andromeda-surface-overlay)]',
         '[&>svg]:w-[22px] [&>svg]:h-[22px]',

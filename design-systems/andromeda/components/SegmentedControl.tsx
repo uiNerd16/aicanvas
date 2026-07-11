@@ -115,6 +115,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
         ...andromedaVars(),
         height: `${cellSize}px`,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        borderRadius: tokens.radius.frame,
         background: tokens.color.surface.raised,
         ...style,
       }}

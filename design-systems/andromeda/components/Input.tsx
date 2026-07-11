@@ -16,8 +16,8 @@ import { cn, andromedaVars } from './lib/utils';
 const inputVariants = cva(
   [
     'block w-full box-border',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-sans)]',
     'text-[length:var(--andromeda-text-md)]',
     'text-[color:var(--andromeda-text-primary)]',

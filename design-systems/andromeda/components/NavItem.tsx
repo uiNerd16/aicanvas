@@ -45,7 +45,7 @@ const navItemVariants = cva(
     'relative flex items-center w-full text-left box-border',
     'gap-[var(--andromeda-3)]',
     'pl-[var(--andromeda-5)] pr-[var(--andromeda-4)] py-[var(--andromeda-3)]',
-    'border-0 rounded-[var(--andromeda-radius-none)]',
+    'border-0 rounded-[var(--andromeda-radius-frame,0px)]',
     'cursor-pointer select-none',
     'font-[number:var(--andromeda-weight-medium)]',
     'text-[length:var(--andromeda-text-sm)]',

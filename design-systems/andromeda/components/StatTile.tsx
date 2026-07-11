@@ -326,7 +326,7 @@ export const StatTile = forwardRef(function StatTile(
             className={cn(
               'flex items-center gap-[var(--andromeda-2)]',
               'pt-[var(--andromeda-2)]',
-              'border-t border-solid border-[color:var(--andromeda-border-subtle)]',
+              'border-t-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
             )}
           >
             {hasDelta ? (

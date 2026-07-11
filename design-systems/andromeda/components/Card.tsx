@@ -17,7 +17,7 @@ import { CornerMarkers } from './CornerMarkers';
 const cardVariants = cva(
   [
     'relative block',
-    'rounded-[var(--andromeda-radius-none)]',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
   ],
   {
@@ -27,7 +27,7 @@ const cardVariants = cva(
         glow:    ['bg-[image:var(--andromeda-gradient-accent-sweep)]'],
       },
       bordered: {
-        true:  ['border', 'border-solid'],
+        true:  ['border-[length:var(--andromeda-border-width,1px)]', 'border-solid'],
         false: [],
       },
     },

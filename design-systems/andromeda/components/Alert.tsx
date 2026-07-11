@@ -24,8 +24,8 @@ const alertVariants = cva(
   [
     'relative flex items-start gap-[var(--andromeda-3)]',
     'p-[var(--andromeda-3)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
   ],
   {

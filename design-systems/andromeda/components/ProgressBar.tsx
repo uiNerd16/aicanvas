@@ -144,7 +144,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     background: active
                       ? cfg.activeColor
                       : 'var(--andromeda-surface-overlay)',
-                    border: `1px solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
+                    border: `var(--andromeda-border-width, 1px) solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
                     boxShadow: 'none',
                     transition: 'background var(--andromeda-duration-cascade) var(--andromeda-easing-out), box-shadow var(--andromeda-duration-cascade) var(--andromeda-easing-out), border-color var(--andromeda-duration-cascade) var(--andromeda-easing-out)',
                     transitionDelay: `calc(${Math.floor(barIndex / 3)} * var(--andromeda-stagger-progressbar))`,

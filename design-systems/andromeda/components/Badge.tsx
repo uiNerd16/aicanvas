@@ -57,7 +57,7 @@ const badgeVariants = cva(
     // span truncates instead (see render below).
     'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
     'max-w-full min-w-0',
-    'rounded-[var(--andromeda-radius-none)]',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'px-[var(--andromeda-2)] py-[2px]',
     '[font-family:var(--andromeda-font-mono)]',
     'text-[length:var(--andromeda-text-xs)]',
@@ -90,7 +90,7 @@ const badgeVariants = cva(
         ],
         outline: [
           'bg-transparent',
-          'border border-solid border-[color:var(--andromeda-border-bright)]',
+          'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-bright)]',
           'text-[color:var(--andromeda-text-primary)]',
         ],
       },

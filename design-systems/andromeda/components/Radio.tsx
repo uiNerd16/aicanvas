@@ -52,8 +52,8 @@ const boxVariants = cva(
   [
     'relative inline-flex items-center justify-center shrink-0',
     'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',

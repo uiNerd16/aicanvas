@@ -241,7 +241,7 @@ export const Drawer = forwardRef(function Drawer(
                 'flex flex-col',
                 'bg-[color:var(--andromeda-surface-raised)]',
                 '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
-                'rounded-[var(--andromeda-radius-none)]',
+                'rounded-[var(--andromeda-radius-frame,0px)]',
                 'shadow-[0_0_60px_var(--andromeda-surface-base)]',
                 'outline-none',
                 className,
@@ -274,7 +274,7 @@ export const DrawerHeader = forwardRef(function DrawerHeader(
       className={cn(
         'flex flex-col gap-[2px]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-b border-solid border-[color:var(--andromeda-border-subtle)]',
+        'border-b-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}
@@ -363,7 +363,7 @@ export const DrawerFooter = forwardRef(function DrawerFooter(
       className={cn(
         'flex items-center justify-end gap-[var(--andromeda-3)]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-t border-solid border-[color:var(--andromeda-border-subtle)]',
+        'border-t-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}

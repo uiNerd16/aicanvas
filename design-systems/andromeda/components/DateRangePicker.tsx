@@ -327,7 +327,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
           background: tokens.color.surface.active,
           border: `${tokens.border.thin} ${tokens.color.border.base}`,
-          borderRadius: tokens.radius.none,
+          borderRadius: tokens.radius.frame,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
           color: tokens.color.text.secondary,
@@ -393,7 +393,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 border: 'none',
                 color: tokens.color.text.muted,
                 cursor: 'pointer',
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
               }}
             >
               <CaretLeft weight="bold" size={12} />
@@ -427,7 +427,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 border: 'none',
                 color: tokens.color.text.muted,
                 cursor: 'pointer',
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
               }}
             >
               <CaretRight weight="bold" size={12} />
@@ -496,7 +496,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                     : isToday
                       ? `${tokens.border.thin} ${tokens.color.border.bright}`
                       : `${tokens.border.thin} transparent`,
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
                 color: selected
                   ? tokens.color.accent[100]
                   : inMonth

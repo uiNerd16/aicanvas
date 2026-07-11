@@ -147,6 +147,13 @@ export const tokens = {
     none: '0',
     sm:   '2px',
     md:   '3px',
+    // The one radius every framed surface consumes (cards, buttons, inputs,
+    // menus, tiles). 0 = the square identity. Same var-with-fallback pattern
+    // as border.thin below, so INLINE styles consuming tokens.radius.frame
+    // are theme-tunable too; andromedaVars() emits the raw 0px default for
+    // --andromeda-radius-frame (it must not self-reference this string).
+    // `none` stays a true constant zero for explicit square declarations.
+    frame: 'var(--andromeda-radius-frame, 0px)',
   },
   opacity: {
     // Disabled controls. One system-wide constant so every primitive and
@@ -154,13 +161,18 @@ export const tokens = {
     disabled: 0.4,
   },
   border: {
-    thin: '1px solid',
+    // System hairline width. 1px IS the identity; the var indirection (same
+    // pattern as fontSans above) lets a theme widen every border at once.
+    // The inner fallback keeps installed projects correct without any var.
+    width: '1px',
+    thin: 'var(--andromeda-border-width, 1px) solid',
   },
   marker: {
     // Corner marker geometry — L-shaped brackets that hug each corner.
     size:        12,    // px square the bracket lives inside
     offset:      0,     // px inset from the corner (0 = flush)
-    borderWidth: 1,     // px stroke thickness of the L
+    borderWidth: 1,     // px stroke thickness of the L; rendered through
+                        // --andromeda-marker-width so themes can thicken it
   },
   layout: {
     sidebarWidth: '224px',
