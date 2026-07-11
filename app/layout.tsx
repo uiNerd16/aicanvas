@@ -174,12 +174,12 @@ export default async function RootLayout({
               {/* Desktop sidebar — hidden on mobile */}
               <Suspense fallback={null}>
                 <div className="hidden md:flex">
-                  <Sidebar counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+                  <Sidebar promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
                 </div>
               </Suspense>
               {/* Mobile nav — visible only below md */}
               <Suspense fallback={null}>
-                <MobileNav counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+                <MobileNav promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
               </Suspense>
               {/* Content area scrolls independently of the sidebar.
                   scrollbar-gutter:stable reserves space for the vertical

@@ -34,15 +34,11 @@ const SECTIONS: Section[] = [
 
 export function Sidebar({
   embedded = false,
-  preview = false,
   promoteDS = false,
   counts,
   total,
 }: {
   embedded?: boolean
-  // preview: force-render on the isolated /nav-preview test route (bypasses the
-  // route-based hide), so the promoted rail can be viewed before it ships.
-  preview?: boolean
   // promoteDS: the "promote the design system" landing behavior — caps the
   // Components pole to its first 3 categories (rest behind a Show more toggle)
   // and auto-expands Andromeda's System/Brain/Templates. Off by default; flip it
@@ -79,11 +75,9 @@ export function Sidebar({
   // ideation layout, so it must bypass this hide check and actually render.
   const hideSidebar =
     !embedded &&
-    !preview &&
     (pathname?.startsWith('/design-systems/') ||
       pathname?.startsWith('/ideation') ||
-      pathname?.startsWith('/lab') ||
-      pathname?.startsWith('/nav-preview'))
+      pathname?.startsWith('/lab'))
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   // promoteDS caps Components to its first 3 categories; this reveals the rest.
   const [showAllCats, setShowAllCats] = useState(false)

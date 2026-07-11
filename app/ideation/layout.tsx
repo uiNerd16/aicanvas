@@ -32,7 +32,7 @@ export default function IdeationLayout({ children }: { children: ReactNode }) {
           the global MobileNav drawer takes over on mobile. */}
       <Suspense fallback={null}>
         <div className="hidden md:flex">
-          <Sidebar embedded counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+          <Sidebar embedded promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
         </div>
       </Suspense>
       <div className="flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">

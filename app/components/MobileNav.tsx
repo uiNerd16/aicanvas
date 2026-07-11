@@ -53,11 +53,15 @@ const SECTIONS: Section[] = [
 export function MobileNav({
   counts,
   total,
+  promoteDS = false,
 }: {
   // Server-computed nav counts (passed by the layout) so this client component
   // never imports the heavy COMPONENTS registry.
   counts: Record<string, number>
   total: number
+  // promoteDS: mirror the desktop Sidebar — cap Components to its first 4 (rest
+  // behind Show more) and auto-expand Andromeda's System/Brain/Templates.
+  promoteDS?: boolean
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -74,6 +78,8 @@ export function MobileNav({
 
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  // promoteDS caps Components to its first 4 categories; this reveals the rest.
+  const [showAllCats, setShowAllCats] = useState(false)
   // Design Systems pole opens by default so Andromeda is one tap away (mirrors
   // the desktop rail, where the DS pole is expanded out of the box).
   const [collapsedDS, setCollapsedDS] = useState(false)
@@ -145,7 +151,6 @@ export function MobileNav({
   // ships its own top bar).
   const hideMobileNav =
     pathname?.startsWith('/lab') ||
-    pathname?.startsWith('/nav-preview') ||
     TEMPLATE_LEAF_RE.test(pathname ?? '')
   if (hideMobileNav) return null
 
@@ -248,6 +253,14 @@ export function MobileNav({
                 {SECTIONS.map((section) => {
                   const isCollapsed = collapsed[section.title] ?? false
                   const isDisabled = section.disabled === true
+                  const isComponents = section.title === 'Components'
+                  // Promoted view shows the first 4 categories; rest behind Show more.
+                  const catLabels =
+                    isComponents && promoteDS && !showAllCats
+                      ? section.labels.slice(0, 4)
+                      : section.labels
+                  const hasHiddenCats =
+                    isComponents && promoteDS && section.labels.length > 4
 
                   return (
                     <div key={section.title} className="mb-3">
@@ -287,7 +300,7 @@ export function MobileNav({
 
                       {!isCollapsed && !isDisabled && (
                         <ul className="space-y-0.5">
-                          {section.labels.map((label) => {
+                          {catLabels.map((label) => {
                             const isActive = label === activeCategory
                             const cat = getCategoryByLabel(label)
                             const href = cat
@@ -314,6 +327,24 @@ export function MobileNav({
                               </li>
                             )
                           })}
+                          {hasHiddenCats && (
+                            <li>
+                              <button
+                                type="button"
+                                onClick={() => setShowAllCats((v) => !v)}
+                                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-sand-500 transition-colors hover:bg-sand-300/50 hover:text-sand-700 dark:text-sand-500 dark:hover:bg-sand-800/60 dark:hover:text-sand-300"
+                              >
+                                <CaretDown
+                                  size={12}
+                                  weight="regular"
+                                  className={`shrink-0 transition-transform ${showAllCats ? '' : '-rotate-90'}`}
+                                />
+                                <span className="flex-1 text-left">
+                                  {showAllCats ? 'Show less' : `Show ${section.labels.length - 4} more`}
+                                </span>
+                              </button>
+                            </li>
+                          )}
                         </ul>
                       )}
                     </div>
@@ -325,6 +356,7 @@ export function MobileNav({
                   collapsed={collapsedDS}
                   onToggle={() => setCollapsedDS((prev) => !prev)}
                   onNavigate={() => setOpen(false)}
+                  promoteDS={promoteDS}
                 />
 
                 {/* Lab, Get MCP, Pricing, About — follows same pattern as section headers */}
