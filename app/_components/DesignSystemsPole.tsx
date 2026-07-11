@@ -54,9 +54,16 @@ export function DesignSystemsPole({
   collapsed,
   onToggle,
   onNavigate,
+  promoteDS = false,
 }: {
   collapsed: boolean
   onToggle: () => void
+  // promoteDS: auto-expand each system's headline children (System / Brain /
+  // Templates) on every page, not only when you're inside the system — so the
+  // design system reads as first-class in the rail. The per-component list stays
+  // gated to an active visit so the promoted view stays compact.
+  // ponytail: expands every SYSTEMS entry; only Andromeda exists today.
+  promoteDS?: boolean
   // Fired when any leaf link is tapped. The mobile drawer passes setOpen(false)
   // so it closes immediately on tap. Templates now navigate in the SAME tab
   // (the TemplatePreviewShell top bar carries you back), so a route change also
@@ -105,6 +112,9 @@ export function DesignSystemsPole({
               pathname === `/design-systems/${system.slug}/system` ||
               pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
+            // Expanded shows System/Brain/Templates; the per-component list
+            // below stays gated to systemSelected so the promoted rail is short.
+            const expanded = systemSelected || promoteDS
             return (
               <li key={system.slug}>
                 <Link
@@ -132,7 +142,7 @@ export function DesignSystemsPole({
                   )}
                   <span className="flex-1 font-semibold">{system.name}</span>
                 </Link>
-                {systemSelected && (
+                {expanded && (
                   <ul className="mt-0.5 space-y-0.5">
                     {/* ── System (the full component gallery + install) ───── */}
                     <li className="mt-1">
@@ -223,6 +233,9 @@ export function DesignSystemsPole({
                     </li>
 
                     {/* ── Components (label + flat list) ──────── */}
+                    {/* Only when actually inside the system — keeps the promoted
+                        landing rail to System / Brain / Templates. */}
+                    {systemSelected && (
                     <li className="mt-1">
                       <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
                         Components
@@ -248,6 +261,7 @@ export function DesignSystemsPole({
                         })}
                       </ul>
                     </li>
+                    )}
                   </ul>
                 )}
               </li>

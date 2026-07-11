@@ -145,6 +145,7 @@ export function MobileNav({
   // ships its own top bar).
   const hideMobileNav =
     pathname?.startsWith('/lab') ||
+    pathname?.startsWith('/nav-preview') ||
     TEMPLATE_LEAF_RE.test(pathname ?? '')
   if (hideMobileNav) return null
 
