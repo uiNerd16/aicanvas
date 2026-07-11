@@ -676,7 +676,7 @@ const ANDROMEDA_LIVE: boolean = false
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
-    a: 'AI Canvas is an open-source registry of animated React components, design systems, and templates you can install straight into your project. Every component ships with its full source code, so you use it as is or rebuild it your way.',
+    a: 'AI Canvas is a registry of animated React components, design systems, and templates you can install straight into your project. Open source and free to start: every free component ships with its full source code, so you use it as is or rebuild it your way. Premium adds more components, complete design systems, and templates.',
   },
   {
     q: 'Do I need to know how to code?',

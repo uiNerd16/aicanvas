@@ -120,11 +120,11 @@ This opens a browser UI where you can call each tool by hand.
 | Env var | Default | What it does |
 |---|---|---|
 | `AICANVAS_REGISTRY_BASE` | `https://aicanvas.me/r` | Registry root URL. Override only for local development against a self-hosted mirror. |
-| `AICANVAS_TOKEN` | _(none)_ | Optional per-account token. The website bakes it into the MCP config it gives you. It identifies your account so pulls count against the right quota and unlock premium content. Sent as a `Bearer` token on every registry request. Absent means anonymous, which is subject to the daily free limit. |
+| `AICANVAS_TOKEN` | _(none)_ | Optional per-account token. The website bakes it into the MCP config it gives you. It identifies your AI Canvas account so source pulls are authorized and any premium content you own unlocks. Sent as a `Bearer` token on every registry request. Without it you are anonymous: metadata browsing still works, but pulling a component's source returns a short "create a free account" notice instead of the code. |
 
-### Daily limits and premium content
+### Accounts and premium content
 
-Anonymous use is capped by a daily free limit, and some content (such as full design systems) is premium. When you hit the limit or request gated content without entitlement, a source fetch returns HTTP 402 and the tool reports a clear message: upgrade at [aicanvas.me/pricing](https://aicanvas.me/pricing), set `AICANVAS_TOKEN` to use your account, and update with `npx @aicanvas/mcp@latest`. Metadata browsing (`list_categories`, `list_components`, `search_components`, `list_systems`) is not gated. The 402 only affects source fetches (`get_component`, `get_system`, `get_template`).
+Browsing metadata (`list_categories`, `list_components`, `search_components`, `list_systems`, `get_install_command`) is free and needs no account. Pulling actual source (`get_component`, `get_system`, `get_template`) runs against a free AI Canvas account: set `AICANVAS_TOKEN` from your account and the website gives you the ready-made config. Without a token, a free-component source pull returns a short "create a free account" notice instead of the code, and premium content (full design systems and templates) returns HTTP 402 with an upgrade link at [aicanvas.me/pricing](https://aicanvas.me/pricing). Update anytime with `npx @aicanvas/mcp@latest`.
 
 ## How the registry stays fresh
 

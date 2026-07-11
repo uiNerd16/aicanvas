@@ -24,11 +24,12 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.2.0'
+const MCP_VERSION = '0.2.1'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 // Optional per-user token (the website bakes it into the copied MCP config).
-// Identifies the account so pulls count against the right quota and unlock
-// premium content. Absent = anonymous (subject to the daily free limit).
+// Identifies the account so free-component source pulls are authorized and any
+// premium content you own unlocks. Absent = anonymous: metadata browsing still
+// works, but source pulls of free components need a free account.
 const USER_TOKEN = process.env.AICANVAS_TOKEN ?? ''
 
 function registryHeaders(): Record<string, string> {
@@ -157,11 +158,34 @@ async function fetchComponentSource(slug: string): Promise<ShadcnRegistryItem> {
     const j = (await res.json().catch(() => ({}))) as { message?: string }
     throw new Error(
       j.message ??
-        'This requires AI Canvas Premium, or you have hit the daily free limit. ' +
-        'Upgrade at https://aicanvas.me/pricing. Set AICANVAS_TOKEN to use your account, ' +
+        'This is premium AI Canvas content. Upgrade at https://aicanvas.me/pricing, ' +
+        'then use the AI Canvas MCP config from your account (your token is included) ' +
         'and update with: npx @aicanvas/mcp@latest',
     )
   }
+  // Free component pulled without an account: the registry returns a 200
+  // placeholder (not a 402), tagged with this header. Surface a warm sign-up
+  // CTA instead of handing the placeholder back as if it were real source.
+  if (res.headers.get('x-aicanvas-content-type') === 'free-account-required') {
+    const j = (await res.json().catch(() => ({}))) as { title?: string }
+    const name =
+      typeof j.title === 'string'
+        ? j.title.replace(/\s*\(free account required\)\s*$/i, '')
+        : slug
+    throw new Error(
+      `Almost there! "${name}" is free with an AI Canvas account (free, unlimited installs). ` +
+        `Sign up at https://aicanvas.me/account/sign-up, then use the AI Canvas MCP config from ` +
+        `your account (your token is included) and ask again.`,
+    )
+  }
+  // NOTE: premium standalones ALSO return a 200 placeholder (header
+  // 'premium-standalone'), but that header value is NOT unique to the
+  // placeholder — an entitled subscriber's REAL source carries it too (the
+  // success path stamps the contentType). Keying the MCP on it would strip a
+  // paying subscriber's real component. So premium is deliberately NOT
+  // intercepted here. Closing that footgun safely needs premiumStub to emit a
+  // distinct header (like freeAccountStub's 'free-account-required'); tracked
+  // as a separate, billing-reviewed follow-up.
   if (!res.ok) {
     throw new Error(
       `Failed to fetch source for "${slug}" from ${url}: ${res.status} ${res.statusText}`,
@@ -279,7 +303,7 @@ server.registerTool(
     try {
       const meta = await fetchMeta()
       const lines = [
-        `AI Canvas — ${meta.componentCount} components across ${meta.categories.length} categories.`,
+        `AI Canvas: ${meta.componentCount} components across ${meta.categories.length} categories.`,
         '',
         ...meta.categories.map(
           (c) => `  ${c.label.padEnd(24)}  ${String(c.count).padStart(3)} components`,
@@ -571,7 +595,7 @@ server.registerTool(
               '',
               `  ${component.installCommand}`,
               '',
-              `Dependencies: ${component.dependencies.join(', ') || '(none — React only)'}`,
+              `Dependencies: ${component.dependencies.join(', ') || '(none, React only)'}`,
               `Source: ${component.sourceUrl}`,
               `Preview: ${component.homepageUrl}`,
             ].join('\n'),

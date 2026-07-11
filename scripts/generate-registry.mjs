@@ -398,8 +398,8 @@ for (const dir of dirs) {
 // once while keeping the build assertions balanced. The gated JSON below is
 // STILL written, so a hidden component stays installable via the CLI/MCP. Keep
 // in sync with HIDDEN_SLUGS in app/lib/component-registry.tsx, which hides it
-// from the runtime surfaces (detail page + sitemap). Remove a slug to unhide.
-const HIDDEN_SLUGS = new Set(['3d-product-card'])
+// from the runtime surfaces (detail page + sitemap). Add a slug to hide it.
+const HIDDEN_SLUGS = new Set([])
 let premiumCount = 0
 const premiumMetas = []
 for (const slug of premiumSlugDirs) {

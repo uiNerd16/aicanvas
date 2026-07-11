@@ -46,8 +46,10 @@ import { SaveButton } from '../SaveButton'
 import { HighlightedCodeView } from '../HighlightedCodeView'
 import { premiumEnabled } from '../../../lib/flags'
 import { useEntitlement } from '../billing/useEntitlement'
+import { usePremiumStatus } from '../billing/usePremiumStatus'
 import { PremiumBadge } from '../billing/PremiumBadge'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
+import { usePaywallModal } from '../billing/PaywallModalProvider'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -102,6 +104,12 @@ interface ComponentPageViewProps {
   // (which merges them in from app/lib/component-copy.ts).
   about?: string                                    // ~70-110 word paragraph below the install section
   useCases?: string[]                               // up to 3 chips shown next to the category in the header
+  // Programmatic FAQ built server-side from registry data (page.tsx also
+  // emits it as FAQPage JSON-LD); rendered above the related section.
+  faq?: { q: string; a: string }[]
+  // Collections this component belongs to — cross-links to
+  // /components/collection/<slug> pages.
+  collections?: { slug: string; title: string }[]
 }
 
 const RELATED_PAGE_SIZE = 3
@@ -125,6 +133,8 @@ export default function ComponentPageView({
   children,
   about,
   useCases,
+  faq,
+  collections,
 }: ComponentPageViewProps) {
   const systemMeta = designSystem ? getDesignSystemMeta(designSystem) : undefined
   // Plan 0 stub paywall — DEV-ONLY preview tooling. The stub returns a fixed
@@ -386,6 +396,14 @@ export default function ComponentPageView({
   // CTA on first paint). Premium content keeps its own (unchanged) gating.
   const needsFreeAccount = !!freeAccountGate && !user && !premium
 
+  // Premium component + confirmed non-premium visitor: the install copy
+  // actions open the paywall modal instead of copying. UX only — the real
+  // gate is server-side at /r. 'unknown' (entitlement still loading) does NOT
+  // gate so a premium subscriber is never blocked by a fast click.
+  const premiumStatus = usePremiumStatus()
+  const needsPremium = premium && premiumStatus === 'not-premium'
+  const { open: openPaywallModal } = usePaywallModal()
+
   // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
   // returning the visitor here after they create their free account. The install
   // UI stays fully visible; only the COPY actions route here when signed out.
@@ -399,6 +417,11 @@ export default function ComponentPageView({
   }
 
   async function copyCli() {
+    // Premium gate: non-premium visitors get the upgrade modal, not a copy.
+    if (needsPremium) {
+      openPaywallModal({ reason: 'premium-only' })
+      return
+    }
     // Soft gate: signed-out + gated → open the auth modal instead of copying.
     if (needsFreeAccount) {
       promptFreeAccount()
@@ -787,8 +810,23 @@ export default function ComponentPageView({
             }
             return (
             <section className="mt-12">
-              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+              <h2 className="flex items-center gap-2.5 text-base font-bold text-sand-900 dark:text-sand-50">
                 Add to your project
+                {premium && (
+                  // Same Aceternity-style pill as the card overview: filled
+                  // bolt at rest, slides open to the label on hover — a
+                  // reminder that the install below is premium-gated.
+                  <span className="group/premium flex items-center rounded-full bg-sand-950/85 p-1.5 text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
+                    <Lightning weight="fill" size={14} className="shrink-0" />
+                    <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover/premium:grid-cols-[1fr]">
+                      <span className="overflow-hidden">
+                        <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">
+                          Premium component
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                )}
               </h2>
               <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
                 One command adds this component to your project.
@@ -860,6 +898,9 @@ export default function ComponentPageView({
                               ))}
                               <button
                                 onClick={() => {
+                                  // Premium gate: non-premium visitors get the
+                                  // upgrade modal, not a copy.
+                                  if (needsPremium) { openPaywallModal({ reason: 'premium-only' }); return }
                                   // Soft gate: signed-out + gated → open the auth
                                   // modal instead of copying.
                                   if (needsFreeAccount) { promptFreeAccount(); return }
@@ -1240,16 +1281,11 @@ export default function ComponentPageView({
               </Link>
 
               {/* MCP token — so AI-agent / MCP installs authenticate as your
-                  account. Signed in: surface a masked AICANVAS_TOKEN line to
-                  add to the MCP server config (copy writes the real value).
-                  While the token is still fetching, show a matching skeleton so
-                  the slot never blank-flashes between sign-in and token arrival.
-                  Signed out: a small link to create a free account first. */}
-              {/* Signed out: keep the token row visible (no swap). Copy routes
-                  through the soft gate — clicking it opens the auth modal.
-                  Signed in: the real masked token, copy writes the live value.
-                  While the token is still fetching, show a matching skeleton. */}
-              {needsFreeAccount ? (
+                  account. The token exists from signup (DB trigger), so the
+                  row is the same on free and premium pages. Signed out: masked
+                  row, copy opens the auth modal (soft gate). Signed in: copy
+                  writes the real value; skeleton while it fetches. */}
+              {!user ? (
                 <div className="mt-4">
                   <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
                     Add your token to your MCP server config so installs authenticate as your account:
@@ -1259,11 +1295,7 @@ export default function ComponentPageView({
                       AICANVAS_TOKEN=aic_••••••••
                     </code>
                     <button
-                      onClick={() => {
-                        // Soft gate: signed-out + gated → open the auth modal
-                        // instead of copying.
-                        if (needsFreeAccount) { promptFreeAccount(); return }
-                      }}
+                      onClick={promptFreeAccount}
                       className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                       aria-label="Copy MCP token"
                     >
@@ -1271,7 +1303,7 @@ export default function ComponentPageView({
                     </button>
                   </div>
                 </div>
-              ) : user ? (
+              ) : (
                 userToken ? (
                   <div className="mt-4">
                     <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
@@ -1283,9 +1315,6 @@ export default function ComponentPageView({
                       </code>
                       <button
                         onClick={() => {
-                          // Soft gate: signed-out + gated → open the auth modal
-                          // instead of copying.
-                          if (needsFreeAccount) { promptFreeAccount(); return }
                           navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
                           setMcpTokenCopied(true)
                           setTimeout(() => setMcpTokenCopied(false), 2000)
@@ -1310,14 +1339,6 @@ export default function ComponentPageView({
                     </div>
                   </div>
                 )
-              ) : (
-                <button
-                  type="button"
-                  onClick={promptFreeAccount}
-                  className="mt-4 block text-sm font-semibold text-olive-600 transition-colors hover:text-olive-500 dark:text-olive-400 dark:hover:text-olive-400"
-                >
-                  Create a free account to get your MCP token
-                </button>
               )}
             </section>
 
@@ -1383,6 +1404,50 @@ export default function ComponentPageView({
                 )
               })()}
             </>
+          )}
+
+          {/* ── FAQ — programmatic Q&A mirrored as FAQPage JSON-LD by the
+              server page. Plain stacked list (no accordion) so every answer
+              is visible text in the crawled HTML. ── */}
+          {faq && faq.length > 0 && (
+            <section className="mt-16">
+              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                Frequently asked questions
+              </h2>
+              <dl className="mt-4 space-y-5">
+                {faq.map((item) => (
+                  <div key={item.q}>
+                    <dt className="text-sm font-semibold text-sand-900 dark:text-sand-50 sm:text-base">
+                      {item.q}
+                    </dt>
+                    <dd className="mt-1 text-sm leading-relaxed text-sand-600 dark:text-sand-400 sm:text-base">
+                      {item.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {/* ── Collections — cross-links to the curated collection pages
+              this component appears in. ── */}
+          {collections && collections.length > 0 && (
+            <section className="mt-8">
+              <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+                Featured in collections
+              </h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {collections.map((col) => (
+                  <Link
+                    key={col.slug}
+                    href={`/components/collection/${col.slug}`}
+                    className="rounded-full border border-sand-300 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
+                  >
+                    {col.title}
+                  </Link>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* ── Related components ─────────────────────────────────────────── */}

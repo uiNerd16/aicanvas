@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { LockSimple } from '@phosphor-icons/react'
-import { usePaywallModal, type PaywallReason } from './PaywallModalProvider'
+import type { PaywallReason } from './PaywallModalProvider'
 
 export type { PaywallReason }
 
@@ -24,13 +25,10 @@ export function Component({ value, onChange }: Props) {
 
 /**
  * Inline locked state rendered in the Code tab when source is withheld. Shows
- * a blurred teaser; clicking "See plans" opens the global full-screen upgrade
- * modal (the actual pricing cards). The modal lives in PaywallModalProvider so
- * it overlays the whole viewport.
+ * a blurred teaser; "See plans" goes to the pricing page. Props are kept for
+ * the call sites even though the lock no longer varies by reason.
  */
-export function Paywall({ reason, limit }: { reason: PaywallReason; limit?: number }) {
-  const { open } = usePaywallModal()
-
+export function Paywall(_props: { reason: PaywallReason; limit?: number }) {
   // Metering is gone — the inline lock only ever covers premium content now.
   const title = 'Premium component'
 
@@ -47,13 +45,12 @@ export function Paywall({ reason, limit }: { reason: PaywallReason; limit?: numb
           <LockSimple weight="regular" size={20} className="text-olive-400" />
         </div>
         <h3 className="text-base font-bold text-sand-50">{title}</h3>
-        <button
-          type="button"
-          onClick={() => open({ reason, limit })}
+        <Link
+          href="/pricing"
           className="rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
         >
           See plans
-        </button>
+        </Link>
       </div>
     </div>
   )

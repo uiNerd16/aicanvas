@@ -1386,8 +1386,8 @@ function withCopyAndStack(entry: ComponentEntry): ComponentEntry {
 // filtering them out of COMPONENTS. The gated CLI/MCP install path is governed
 // separately by the premium injection, so a hidden component stays installable.
 // Keep in sync with HIDDEN_SLUGS in scripts/generate-registry.mjs, which hides
-// it from the generated grid/homepage/nav/MCP metadata. Remove a slug to unhide.
-const HIDDEN_SLUGS = new Set<string>(['3d-product-card'])
+// it from the generated grid/homepage/nav/MCP metadata. Add a slug to hide it.
+const HIDDEN_SLUGS = new Set<string>([])
 
 export const COMPONENTS: ComponentEntry[] = [
   ...[...COMPONENTS_RAW].reverse().map(withCopyAndStack),

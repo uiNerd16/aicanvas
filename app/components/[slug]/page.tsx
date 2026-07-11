@@ -4,6 +4,7 @@ import { COMPONENTS, type ComponentEntry, type ComponentMeta } from '../../lib/c
 import ComponentPageView from './ComponentPageView'
 import { HighlightedCode } from '../../components/HighlightedCode'
 import { GITHUB_URL, SITE_URL } from '../../lib/config'
+import { collectionsForComponent } from '../../lib/collections'
 import { classifyContent } from '@/lib/registry/content-type'
 import { loadContentLookup } from '@/lib/registry/lookup'
 
@@ -95,6 +96,8 @@ export async function generateMetadata({
       description,
       url,
       type: 'article',
+      // Real screenshot when we have one; otherwise inherit the site-wide
+      // default OG image from the root layout.
       ...(entry.image
         ? {
             images: [
@@ -113,6 +116,61 @@ export async function generateMetadata({
       ...(entry.image ? { images: [entry.image] } : {}),
     },
   }
+}
+
+// Natural-language list join: "A", "A and B", "A, B, and C" (serial comma).
+// Keeps the generated FAQ copy from reading "A and B and C".
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? ''
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
+}
+
+// Programmatic per-component FAQ, rendered on the page AND emitted as
+// FAQPage JSON-LD. Every answer is derived from registry data so it stays
+// true automatically; only questions we can answer accurately are included.
+function buildFaq(
+  entry: ComponentEntry,
+  isPremium: boolean,
+): { q: string; a: string }[] {
+  const stacks = entry.tags.filter((t) => !t.accent).map((t) => t.label)
+  const faq: { q: string; a: string }[] = [
+    {
+      q: `Is ${entry.name} free to use?`,
+      a: isPremium
+        ? `${entry.name} is a Premium AI Canvas component. Premium unlocks the full source code and one-command installs for every Premium component and template.`
+        : `Yes. ${entry.name} is part of the free AI Canvas library and is open source under the MIT license, so you can use it in personal and commercial projects.`,
+    },
+    {
+      q: `How do I install ${entry.name}?`,
+      a: isPremium
+        ? `Premium unlocks one-command installs: run the shadcn CLI with your AI Canvas token, or connect the AI Canvas MCP server and ask your AI editor to install it for you. You can also recreate your own take on it with the included AI prompts.`
+        : `One command: npx shadcn@latest add ${SITE_URL}/r/${entry.slug}.json, free with a free AI Canvas account. Or connect the AI Canvas MCP server and ask your AI editor to install ${entry.name} for you. You can also copy the source straight from the Code tab, no account needed. It works in any React project with Tailwind CSS.`,
+    },
+    {
+      q: `What is ${entry.name} built with?`,
+      a:
+        `${entry.name} is built with React and TypeScript` +
+        (stacks.length > 0 ? `, using ${joinList(stacks)}.` : '.') +
+        (entry.dualTheme ? ' It ships with both light and dark styling.' : ''),
+    },
+  ]
+  if (entry.useCases && entry.useCases.length > 0) {
+    // Chips are kept verbatim (not lowercased) so acronyms like SaaS, AI, UI,
+    // and 3D survive intact in both the visible copy and the FAQPage JSON-LD.
+    faq.push({
+      q: `Where would I use ${entry.name}?`,
+      a: `Common uses include ${joinList(entry.useCases)}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
+    })
+  }
+  const promptLanes = Object.keys(entry.prompts)
+  if (promptLanes.length > 0) {
+    faq.push({
+      q: `Can I remix ${entry.name} with AI?`,
+      a: `Yes. ${entry.name} ships with expert prompts for ${joinList(promptLanes)}, so you can recreate and customize it in your AI builder of choice.`,
+    })
+  }
+  return faq
 }
 
 // Strip a full ComponentEntry down to a serializable ComponentMeta so it
@@ -192,6 +250,24 @@ export default async function Page({
   const firstSentence = firstSentenceOf(entry.description)
   const headingSubtitle = firstSentence
 
+  const faq = buildFaq(entry, isPremium)
+  // Collections this component belongs to — cross-links that give crawlers
+  // (and people) a path between component pages and the collection pages.
+  const collections = collectionsForComponent(toMeta(entry)).map((c) => ({
+    slug: c.slug,
+    title: c.h1,
+  }))
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
+
   const softwareSchema = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
@@ -231,6 +307,10 @@ export default async function Page({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <ComponentPageView
         slug={slug}
         name={entry.name}
@@ -252,6 +332,8 @@ export default async function Page({
         codeDirectives={codeDirectives}
         useCases={entry.useCases}
         about={entry.about}
+        faq={faq}
+        collections={collections}
       >
         <PreviewComponent />
       </ComponentPageView>

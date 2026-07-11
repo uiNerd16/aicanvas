@@ -28,6 +28,29 @@ function AnswerText({ item }: { item: FaqItem }) {
   )
 }
 
+// Renders a question, turning the first occurrence of qLink.label into an
+// external link (new tab). Clicks on it must not toggle the accordion row.
+function QuestionText({ item }: { item: FaqItem }) {
+  const { q, qLink } = item
+  if (!qLink || !q.includes(qLink.label)) return <>{q}</>
+  const idx = q.indexOf(qLink.label)
+  return (
+    <>
+      {q.slice(0, idx)}
+      <a
+        href={qLink.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="text-olive-600 underline decoration-olive-500/40 underline-offset-2 transition-colors hover:text-olive-500 dark:text-olive-400 dark:hover:text-olive-300"
+      >
+        {qLink.label}
+      </a>
+      {q.slice(idx + qLink.label.length)}
+    </>
+  )
+}
+
 // Reusable numbered FAQ accordion — the same card style as /faq, but theme-
 // adaptive (light + dark) so it fits surfaces like /pricing. Self-contained open
 // state; the first item opens by default. /faq keeps its own multi-category
@@ -65,11 +88,11 @@ export function FaqAccordion({
                 : 'border-sand-300 bg-sand-100/60 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
             }`}
           >
-            <button
-              type="button"
+            {/* Row div toggles (so the question can hold a real anchor);
+                the caret button carries the accessible expand/collapse. */}
+            <div
               onClick={() => toggle(i)}
-              aria-expanded={isOpen}
-              className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+              className="flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left"
             >
               <span
                 className={`w-7 shrink-0 text-sm font-bold tabular-nums ${
@@ -79,16 +102,24 @@ export function FaqAccordion({
                 {String(i + 1).padStart(2, '0')}
               </span>
               <h3 className="flex-1 text-base font-semibold text-sand-900 dark:text-sand-50">
-                {it.q}
+                <QuestionText item={it} />
               </h3>
-              <CaretRight
-                weight="regular"
-                size={16}
-                className={`shrink-0 transition-transform duration-200 ${
-                  isOpen ? 'rotate-90 text-olive-600 dark:text-olive-400' : 'text-sand-400 dark:text-sand-600'
-                }`}
-              />
-            </button>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-label={isOpen ? 'Collapse answer' : 'Expand answer'}
+                onClick={(e) => { e.stopPropagation(); toggle(i) }}
+                className="shrink-0"
+              >
+                <CaretRight
+                  weight="regular"
+                  size={16}
+                  className={`transition-transform duration-200 ${
+                    isOpen ? 'rotate-90 text-olive-600 dark:text-olive-400' : 'text-sand-400 dark:text-sand-600'
+                  }`}
+                />
+              </button>
+            </div>
             {/* Answer stays in the DOM (SEO); grid-rows trick animates the collapse */}
             <div
               className={`grid transition-[grid-template-rows] duration-300 ease-out ${
