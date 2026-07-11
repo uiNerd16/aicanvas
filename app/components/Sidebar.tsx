@@ -34,10 +34,16 @@ const SECTIONS: Section[] = [
 
 export function Sidebar({
   embedded = false,
+  promoteDS = false,
   counts,
   total,
 }: {
   embedded?: boolean
+  // promoteDS: the "promote the design system" landing behavior — caps the
+  // Components pole to its first 3 categories (rest behind a Show more toggle)
+  // and auto-expands Andromeda's System/Brain/Templates. Off by default; flip it
+  // on in the root layout + MobileNav to apply site-wide.
+  promoteDS?: boolean
   // Server-computed nav counts (passed by the layout) so this client component
   // never imports the heavy COMPONENTS registry.
   counts: Record<string, number>
@@ -73,6 +79,8 @@ export function Sidebar({
       pathname?.startsWith('/ideation') ||
       pathname?.startsWith('/lab'))
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  // promoteDS caps Components to its first 3 categories; this reveals the rest.
+  const [showAllCats, setShowAllCats] = useState(false)
 
   const toggle = (title: string) =>
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }))
@@ -252,6 +260,14 @@ export function Sidebar({
               : false
             : (collapsed[section.title] ?? false)
           const isDisabled = section.disabled === true
+          // Promoted landing view shows only the first 4 categories so the
+          // Design Systems pole rises into view; the rest sit behind Show more.
+          const catLabels =
+            isComponents && promoteDS && !showAllCats
+              ? section.labels.slice(0, 4)
+              : section.labels
+          const hasHiddenCats =
+            isComponents && promoteDS && section.labels.length > 4
 
           return (
             <div key={section.title} className="mb-3">
@@ -318,7 +334,7 @@ export function Sidebar({
                       </Link>
                     </li>
                   )}
-                  {section.labels.map((label) => {
+                  {catLabels.map((label) => {
                     const isActive = label === activeCategory
                     const cat = getCategoryByLabel(label)
                     const href = cat
@@ -350,6 +366,24 @@ export function Sidebar({
                       </li>
                     )
                   })}
+                  {hasHiddenCats && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => setShowAllCats((v) => !v)}
+                        className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-sand-500 transition-colors hover:bg-sand-300/50 hover:text-sand-700 dark:text-sand-500 dark:hover:bg-sand-800/60 dark:hover:text-sand-300"
+                      >
+                        <CaretDown
+                          size={12}
+                          weight="regular"
+                          className={`shrink-0 transition-transform ${showAllCats ? '' : '-rotate-90'}`}
+                        />
+                        <span className="flex-1 text-left">
+                          {showAllCats ? 'Show less' : `Show ${section.labels.length - 4} more`}
+                        </span>
+                      </button>
+                    </li>
+                  )}
                 </ul>
               )}
             </div>
@@ -357,7 +391,7 @@ export function Sidebar({
         })}
 
         {/* ── Design Systems pole (shared, identical on every page) ── */}
-        <DesignSystemsPole collapsed={collapsedDS} onToggle={toggleDS} />
+        <DesignSystemsPole collapsed={collapsedDS} onToggle={toggleDS} promoteDS={promoteDS} />
 
         {/* ── Divider ── */}
         <div className="my-2 border-t border-sand-300 dark:border-sand-800" />

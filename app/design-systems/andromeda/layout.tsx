@@ -30,7 +30,7 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
           the global MobileNav drawer takes over on mobile. */}
       <Suspense fallback={null}>
         <div className="hidden md:flex">
-          <Sidebar embedded counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
+          <Sidebar embedded promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
         </div>
       </Suspense>
       <AndromedaContentColumn>{children}</AndromedaContentColumn>

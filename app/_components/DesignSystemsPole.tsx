@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactElement } from 'react'
-import { ArrowElbowDownRight, Cube, Hexagon, Lightning } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, Cube, Lightning } from '@phosphor-icons/react'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 import { AndromedaIcon } from '../../design-systems/andromeda/AndromedaIcon'
 
@@ -19,15 +19,9 @@ import { AndromedaIcon } from '../../design-systems/andromeda/AndromedaIcon'
 // sidebar nav; rendered in mono mode so the icon inherits the row's text color.
 const SYSTEM_ICONS: Record<string, (props: { size?: number }) => ReactElement> = {
   andromeda: ({ size = 14 }) => <AndromedaIcon size={size} mono />,
-  meridian: ({ size = 14 }) => <Hexagon weight="fill" size={size} />,
 }
 
-// Disabled / placeholder systems — shown with a "Soon" chip, not yet linkable.
-// Promoted into SYSTEMS once they have at least one component.
-const PLACEHOLDER_SYSTEMS = [{ slug: 'meridian', name: 'Meridian' }] as const
-
-// Design systems shown under the Design Systems pole. Add Meridian here once it
-// gets the same per-component treatment.
+// Design systems shown under the Design Systems pole.
 const SYSTEMS = [
   {
     slug: 'andromeda',
@@ -54,9 +48,16 @@ export function DesignSystemsPole({
   collapsed,
   onToggle,
   onNavigate,
+  promoteDS = false,
 }: {
   collapsed: boolean
   onToggle: () => void
+  // promoteDS: auto-expand each system's headline children (System / Brain /
+  // Templates) on every page, not only when you're inside the system — so the
+  // design system reads as first-class in the rail. The per-component list stays
+  // gated to an active visit so the promoted view stays compact.
+  // ponytail: expands every SYSTEMS entry; only Andromeda exists today.
+  promoteDS?: boolean
   // Fired when any leaf link is tapped. The mobile drawer passes setOpen(false)
   // so it closes immediately on tap. Templates now navigate in the SAME tab
   // (the TemplatePreviewShell top bar carries you back), so a route change also
@@ -105,6 +106,9 @@ export function DesignSystemsPole({
               pathname === `/design-systems/${system.slug}/system` ||
               pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
+            // Expanded shows System/Brain/Templates; the per-component list
+            // below stays gated to systemSelected so the promoted rail is short.
+            const expanded = systemSelected || promoteDS
             return (
               <li key={system.slug}>
                 <Link
@@ -132,7 +136,7 @@ export function DesignSystemsPole({
                   )}
                   <span className="flex-1 font-semibold">{system.name}</span>
                 </Link>
-                {systemSelected && (
+                {expanded && (
                   <ul className="mt-0.5 space-y-0.5">
                     {/* ── System (the full component gallery + install) ───── */}
                     <li className="mt-1">
@@ -223,6 +227,9 @@ export function DesignSystemsPole({
                     </li>
 
                     {/* ── Components (label + flat list) ──────── */}
+                    {/* Only when actually inside the system — keeps the promoted
+                        landing rail to System / Brain / Templates. */}
+                    {systemSelected && (
                     <li className="mt-1">
                       <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
                         Components
@@ -248,34 +255,12 @@ export function DesignSystemsPole({
                         })}
                       </ul>
                     </li>
+                    )}
                   </ul>
                 )}
               </li>
             )
           })}
-          {PLACEHOLDER_SYSTEMS.map((system) => (
-            <li key={system.slug}>
-              <div
-                aria-disabled="true"
-                className="group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium cursor-not-allowed text-sand-400/60 dark:text-sand-600/60"
-              >
-                <ArrowElbowDownRight
-                  weight="regular"
-                  size={12}
-                  className="shrink-0 text-sand-300 dark:text-sand-700"
-                />
-                {SYSTEM_ICONS[system.slug] && (
-                  <span className="shrink-0 opacity-60">
-                    {SYSTEM_ICONS[system.slug]({ size: 14 })}
-                  </span>
-                )}
-                <span className="flex-1 font-semibold">{system.name}</span>
-                <span className="rounded-md border border-sand-300/40 bg-sand-300/10 px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider text-sand-400 dark:border-sand-700/40 dark:bg-sand-800/40 dark:text-sand-500">
-                  Soon
-                </span>
-              </div>
-            </li>
-          ))}
         </ul>
       )}
     </div>
