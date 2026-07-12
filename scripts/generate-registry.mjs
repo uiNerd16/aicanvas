@@ -658,12 +658,15 @@ for (const ds of DESIGN_SYSTEMS) {
     const compFiles = compWalk.files.map((f) => makeFile(f, rootDirAbs, ds.slug))
 
     const compName = baseName.replace(/\.tsx$/, '')
+    // PascalCase → spaced words for human-facing labels (DateRangePicker →
+    // "Date Range Picker"); the slug stays kebab-case for the install URL.
+    const compLabel = compName.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     const compItem = {
       $schema: SCHEMA,
       name: slug,
       type: 'registry:ui',
-      title: `${compName} (${ds.name})`,
-      description: `${ds.name} ${compName} component. Install just this piece. Tokens and any sibling components are pulled in automatically.`,
+      title: `${compLabel} (${ds.name})`,
+      description: `${ds.name} ${compLabel} component. Install just this piece. Tokens and any sibling components are pulled in automatically.`,
       author: 'aicanvas <https://aicanvas.me>',
       registryDependencies: [...componentRegistryDeps].sort().map(depUrl),
       dependencies: compWalk.npmDeps,

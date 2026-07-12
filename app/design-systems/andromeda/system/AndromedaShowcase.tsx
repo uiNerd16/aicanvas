@@ -727,7 +727,7 @@ export default function AndromedaShowcase({
 
         {/* ── IconButton ─────────────────────────────────────────────────── */}
         <Section
-          title="IconButton"
+          title="Icon Button"
           slug="icon-button"
           description="Square companion to Button. Same variant + size vocabulary so a Button and an IconButton sit on the same baseline in toolbars and headers."
         >
@@ -752,7 +752,7 @@ export default function AndromedaShowcase({
         {/* ── PanelHeader ────────────────────────────────────────────────── */}
         <Section
           allowOverflow
-          title="PanelHeader"
+          title="Panel Header"
           slug="panel-header"
           description="Title row for top-level dashboard panels. Sentence-case mono title on the left, optional actions slot on the right (PanelMenu, IconButton, Button). Inset bottom divider separates the header from the panel body. Distinct from CardHeader, which uses uppercase-widest mono and tighter padding for nested compositions."
         >
@@ -816,7 +816,7 @@ export default function AndromedaShowcase({
         {/* ── PanelMenu ──────────────────────────────────────────────────── */}
         <Section
           allowOverflow
-          title="PanelMenu"
+          title="Panel Menu"
           slug="panel-menu"
           description="Kebab-trigger overflow menu for panel headers. The trigger (IconButton, ghost, sm) flips to a held-pressed look while the menu is open. Items support icons, separators, destructive styling, persistent selection, and a single level of right-flyout submenu. Closes on outside click or Escape."
         >
@@ -999,7 +999,7 @@ export default function AndromedaShowcase({
 
         {/* ── CornerMarkers ──────────────────────────────────────────────── */}
         <Section
-          title="CornerMarkers"
+          title="Corner Markers"
           slug="corner-markers"
           description="The defining motif. Renders 4 L-shaped brackets at the corners of the nearest position:relative ancestor. Geometry comes from tokens.marker."
         >
@@ -1069,7 +1069,7 @@ export default function AndromedaShowcase({
 
         {/* ── SearchField ────────────────────────────────────────────────── */}
         <Section
-          title="SearchField"
+          title="Search Field"
           slug="search-field"
           description="Command-bar-style search input with an optional ⌘-K shortcut chip. Five states — idle, hover, focus, text-inactive (placeholder), text-active (typed)."
         >
@@ -1091,7 +1091,7 @@ export default function AndromedaShowcase({
 
         {/* ── NavItem ────────────────────────────────────────────────────── */}
         <Section
-          title="NavItem"
+          title="Nav Item"
           slug="nav-item"
           description="Sidebar item with icon, active state, right-edge indicator dot. Mono label by default; pass mono={false} for sans."
         >
@@ -1113,7 +1113,7 @@ export default function AndromedaShowcase({
 
         {/* ── ProgressBar ────────────────────────────────────────────────── */}
         <Section
-          title="ProgressBar"
+          title="Progress Bar"
           slug="progress-bar"
           description="3 status variants. 30 skewed segments fill left to right with a scroll-gated staggered cascade."
         >
@@ -1134,7 +1134,7 @@ export default function AndromedaShowcase({
 
         {/* ── HeatGrid ───────────────────────────────────────────────────── */}
         <Section
-          title="HeatGrid"
+          title="Heat Grid"
           slug="heat-grid"
           description="2-D matrix fill gauge — the cousin of ProgressBar. Cells fill from the bottom-centre outward in a widening pyramid as the value rises, dim-to-bright toward the wave front. Scroll-gated fill, optional percentage readout, role=meter."
         >
@@ -1170,7 +1170,7 @@ export default function AndromedaShowcase({
 
         {/* ── StatTile ───────────────────────────────────────────────────── */}
         <Section
-          title="StatTile"
+          title="Stat Tile"
           slug="stat-tile"
           description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop."
         >
@@ -1280,7 +1280,7 @@ export default function AndromedaShowcase({
 
         {/* ── SegmentedControl ───────────────────────────────────────────── */}
         <Section
-          title="SegmentedControl"
+          title="Segmented Control"
           slug="segmented-control"
           description="Row of icon-or-label buttons that share a single border. The active background slides between segments on selection (Framer Motion layout animation). Sized sm/md/lg to align with the Button/IconButton baseline."
         >
@@ -1324,7 +1324,7 @@ export default function AndromedaShowcase({
         {/* ── DateRangePicker ────────────────────────────────────────────── */}
         <Section
           allowOverflow
-          title="DateRangePicker"
+          title="Date Range Picker"
           slug="date-range-picker"
           description="Trigger chip + drop-down calendar panel. Anchor-then-confirm range selection with hover preview, Monday-first 6×7 grid, ESC and click-outside to close. Selected endpoints fill in accent; the in-between band is a 1px accent outline so the eye stays on the picked dates."
         >
@@ -1757,7 +1757,7 @@ export default function AndromedaShowcase({
         {/* ── UserMenu ───────────────────────────────────────────────────── */}
         <Section
           allowOverflow
-          title="UserMenu"
+          title="User Menu"
           slug="user-menu"
           description="Avatar-trigger popover whose menu rows are supplied by the caller via an `items` prop. Designed for top-bar slots where space is tight. Opens downward and right-aligned by default; pairs with UserCard for sidebars that have room to spell out name and role."
         >
@@ -1816,7 +1816,7 @@ export default function AndromedaShowcase({
         {/* ── UserCard ───────────────────────────────────────────────────── */}
         <Section
           allowOverflow
-          title="UserCard"
+          title="User Card"
           slug="user-card"
           description="Wider user trigger that shows avatar, name, and role alongside the chevron, the canonical bottom-of-sidebar identity card. Same popover as UserMenu, with menu rows supplied by the caller via an `items` prop; opens upward by default and stretches to the card width."
         >

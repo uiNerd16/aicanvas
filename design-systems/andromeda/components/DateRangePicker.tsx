@@ -29,6 +29,26 @@ import { tokens } from '../tokens';
 import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
+// Color values used in the calendar's INLINE styles as var-with-fallback, so
+// the panel and day cells follow a live theme override natively — an installed
+// project (or the tuner) can retune --andromeda-* and the picker tracks it. The
+// fallback keeps the default pixel-identical. (Inline styles can't be reached
+// by any runtime rewrite the way component classes can, so wire them as vars.)
+const V = {
+  accent100:     `var(--andromeda-accent-100, ${tokens.color.accent[100]})`,
+  accent400:     `var(--andromeda-accent-400, ${tokens.color.accent[400]})`,
+  accent500:     `var(--andromeda-accent-500, ${tokens.color.accent[500]})`,
+  borderBase:    `var(--andromeda-border-base, ${tokens.color.border.base})`,
+  borderBright:  `var(--andromeda-border-bright, ${tokens.color.border.bright})`,
+  surfaceActive: `var(--andromeda-surface-active, ${tokens.color.surface.active})`,
+  surfaceRaised: `var(--andromeda-surface-raised, ${tokens.color.surface.raised})`,
+  surfaceBase:   `var(--andromeda-surface-base, ${tokens.color.surface.base})`,
+  textPrimary:   `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
+  textSecondary: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
+  textMuted:     `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
+  textFaint:     `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
+};
+
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -322,12 +342,12 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           alignItems: 'center',
           gap: tokens.spacing[2],
           padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-          background: tokens.color.surface.active,
-          border: `${tokens.border.thin} ${tokens.color.border.base}`,
+          background: V.surfaceActive,
+          border: `${tokens.border.thin} ${V.borderBase}`,
           borderRadius: tokens.radius.frame,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.secondary,
+          color: V.textSecondary,
           letterSpacing: tokens.typography.tracking.wide,
           cursor: 'pointer',
         }}
@@ -339,7 +359,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           weight="bold"
           size={10}
           style={{
-            color: tokens.color.text.faint,
+            color: V.textFaint,
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: `transform ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}`,
           }}
@@ -357,10 +377,10 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             left: 0,
             zIndex: 1000,
             boxSizing: 'border-box',
-            background: tokens.color.surface.raised,
-            border: `${tokens.border.thin} ${tokens.color.border.base}`,
+            background: V.surfaceRaised,
+            border: `${tokens.border.thin} ${V.borderBase}`,
             padding: tokens.spacing[3],
-            boxShadow: `0 8px 32px ${tokens.color.surface.base}`,
+            boxShadow: `0 8px 32px ${V.surfaceBase}`,
             display: 'flex',
             flexDirection: 'column',
             gap: tokens.spacing[3],
@@ -388,7 +408,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 justifyContent: 'center',
                 background: 'transparent',
                 border: 'none',
-                color: tokens.color.text.muted,
+                color: V.textMuted,
                 cursor: 'pointer',
                 borderRadius: tokens.radius.frame,
               }}
@@ -401,7 +421,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.sm,
                 fontWeight: tokens.typography.weight.semibold,
-                color: tokens.color.text.primary,
+                color: V.textPrimary,
                 letterSpacing: tokens.typography.tracking.wider,
                 textTransform: 'uppercase',
               }}
@@ -422,7 +442,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 justifyContent: 'center',
                 background: 'transparent',
                 border: 'none',
-                color: tokens.color.text.muted,
+                color: V.textMuted,
                 cursor: 'pointer',
                 borderRadius: tokens.radius.frame,
               }}
@@ -445,7 +465,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 style={{
                   fontFamily: tokens.typography.fontMono,
                   fontSize: tokens.typography.size.xs,
-                  color: tokens.color.text.faint,
+                  color: V.textFaint,
                   textAlign: 'center',
                   padding: `${tokens.spacing[1]} 0`,
                   letterSpacing: tokens.typography.tracking.wider,
@@ -485,20 +505,20 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: selected ? tokens.color.accent[500] : 'transparent',
+                background: selected ? V.accent500 : 'transparent',
                 border: selected
                   ? `${tokens.border.thin} transparent`
                   : inRange
-                    ? `${tokens.border.thin} ${tokens.color.accent[400]}`
+                    ? `${tokens.border.thin} ${V.accent400}`
                     : isToday
-                      ? `${tokens.border.thin} ${tokens.color.border.bright}`
+                      ? `${tokens.border.thin} ${V.borderBright}`
                       : `${tokens.border.thin} transparent`,
                 borderRadius: tokens.radius.frame,
                 color: selected
-                  ? tokens.color.accent[100]
+                  ? V.accent100
                   : inMonth
-                    ? tokens.color.text.secondary
-                    : tokens.color.text.faint,
+                    ? V.textSecondary
+                    : V.textFaint,
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.sm,
                 fontWeight: selected
