@@ -51,12 +51,14 @@ export const SearchField = forwardRef(function SearchField(
   const [isHover, setIsHover] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
 
-  // State cascade: focus (selected) > hover > idle.
+  // State cascade: focus (selected) > hover > idle. Var-with-fallback so a
+  // theme override (e.g. a blue accent) reaches the focus border, matching
+  // the focus ring below — not a baked literal that stays the old accent.
   const borderColor = isFocus
-    ? tokens.color.accent[400]
+    ? 'var(--andromeda-accent-400, #109380)'
     : isHover
-    ? tokens.color.border.bright
-    : tokens.color.border.base;
+    ? 'var(--andromeda-border-bright, #5B5B5C)'
+    : 'var(--andromeda-border-base, #3E3E3F)';
 
   const background = isHover && !isFocus
     ? 'var(--andromeda-surface-hover, #1C1C1D)'
