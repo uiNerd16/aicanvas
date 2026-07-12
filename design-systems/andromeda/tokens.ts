@@ -184,6 +184,22 @@ export const tokens = {
     blurSm: '2px',
     blurLg: '8px',
     glow:   '8px',
+    // Drop-shadow system. Four PRIMITIVES a theme can tune (color, x, y,
+    // blur), then three SIZE TIERS composed from them. The tiers scale the
+    // offset + blur so a large panel casts a deeper shadow than a small chip
+    // — one control set retunes every tier at once. Components pick the tier
+    // that matches their footprint (chips → sm, menus/popovers → md, drawers
+    // / big panels → lg). Default is a soft near-black elevation, close to
+    // the ad-hoc shadows components used before.
+    shadowColor: 'rgba(0, 0, 0, 0.45)',
+    shadowX:     '0px',
+    shadowY:     '10px',
+    shadowBlur:  '24px',
+    // Tier strings reference the primitive vars (with the token defaults as
+    // fallbacks) so tuning any primitive reflows all three tiers live.
+    shadowSm: 'var(--andromeda-shadow-x, 0px) calc(var(--andromeda-shadow-y, 10px) * 0.4) calc(var(--andromeda-shadow-blur, 24px) * 0.4) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
+    shadowMd: 'var(--andromeda-shadow-x, 0px) calc(var(--andromeda-shadow-y, 10px) * 0.8) calc(var(--andromeda-shadow-blur, 24px) * 0.9) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
+    shadowLg: 'var(--andromeda-shadow-x, 0px) var(--andromeda-shadow-y, 10px) var(--andromeda-shadow-blur, 24px) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
   },
   // Chart constants shared by TrendChart / MetricChart / RadarChart / Gauge.
   // lineWidth/dash are recharts sinks (numbers/strings, var-incapable — keep

@@ -154,6 +154,14 @@ export function andromedaVars() {
     '--andromeda-blur-sm': t.effect.blurSm,
     '--andromeda-blur-lg': t.effect.blurLg,
     '--andromeda-glow':    t.effect.glow,
+    // Drop-shadow — primitives (theme-tunable) + composed size tiers
+    '--andromeda-shadow-color': t.effect.shadowColor,
+    '--andromeda-shadow-x':     t.effect.shadowX,
+    '--andromeda-shadow-y':     t.effect.shadowY,
+    '--andromeda-shadow-blur':  t.effect.shadowBlur,
+    '--andromeda-shadow-sm':    t.effect.shadowSm,
+    '--andromeda-shadow-md':    t.effect.shadowMd,
+    '--andromeda-shadow-lg':    t.effect.shadowLg,
     // Chart constants (CSS sinks only; recharts numeric sinks stay RAW)
     '--andromeda-chart-fill-opacity':       String(t.chart.fillOpacity),
     '--andromeda-chart-fill-opacity-faint': String(t.chart.fillOpacityFaint),

@@ -380,7 +380,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             background: V.surfaceRaised,
             border: `${tokens.border.thin} ${V.borderBase}`,
             padding: tokens.spacing[3],
-            boxShadow: `0 8px 32px ${V.surfaceBase}`,
+            boxShadow: 'var(--andromeda-shadow-md, 0 8px 22px rgba(0, 0, 0, 0.45))',
             display: 'flex',
             flexDirection: 'column',
             gap: tokens.spacing[3],
