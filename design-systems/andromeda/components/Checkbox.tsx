@@ -169,8 +169,8 @@ export const Checkbox = forwardRef(function Checkbox(
               size={12}
               weight="light"
               style={{
-                color: 'var(--andromeda-accent-100)',
-                animation: `andromeda-pop-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
+                color: 'var(--andromeda-accent-on, var(--andromeda-accent-100))',
+                animation: `andromeda-pop-in var(--andromeda-duration-normal, ${tokens.motion.duration.normal}) var(--andromeda-easing-out, ${tokens.motion.easing.out})`,
               }}
             />
           ) : null}

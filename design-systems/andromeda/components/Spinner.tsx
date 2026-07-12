@@ -45,10 +45,10 @@ const SIZE_MAP = {
 };
 
 const colorByVariant = {
-  default: tokens.color.text.primary,
-  accent:  tokens.color.accent[300],
-  warning: tokens.color.orange[300],
-  fault:   tokens.color.red[300],
+  default: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
+  accent:  `var(--andromeda-accent-300, ${tokens.color.accent[300]})`,
+  warning: `var(--andromeda-orange-300, ${tokens.color.orange[300]})`,
+  fault:   `var(--andromeda-red-300, ${tokens.color.red[300]})`,
 };
 
 // Clockwise perimeter starting top-left. Center cell (1,1) is intentionally
@@ -82,7 +82,7 @@ export const Spinner = forwardRef(function Spinner(
 
   const sz = SIZE_MAP[size] ?? SIZE_MAP.md;
   const bright = colorByVariant[variant] ?? colorByVariant.default;
-  const dim = tokens.color.text.faint;
+  const dim = `var(--andromeda-text-faint, ${tokens.color.text.faint})`;
 
   const cells = [];
   for (let r = 0; r < 3; r++) {

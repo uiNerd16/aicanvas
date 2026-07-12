@@ -56,6 +56,11 @@ export const tokens = {
       400:   '#109380',
       500:   '#126059',
       alpha: 'rgba(15, 207, 178, 0.25)',
+      // Text/icon ON an accent-filled surface. The one guaranteed-contrast
+      // pairing token — every accent fill takes its foreground from here so
+      // a theme retuning the family keeps labels legible. Defaults to the
+      // 100 stop (documented ≥6:1 on the 500 stop).
+      on:    '#BAF8EC',
     },
     // Red — 5 stops + 1 alpha. Use 100 for body text on 500 (≥7:1).
     red: {
@@ -65,6 +70,7 @@ export const tokens = {
       400:   '#B82424',
       500:   '#5A1818',
       alpha: 'rgba(255, 57, 57, 0.25)',
+      on:    '#FFCFCF',
     },
     // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
     orange: {
@@ -74,6 +80,7 @@ export const tokens = {
       400:   '#B57009',
       500:   '#4D3712',
       alpha: 'rgba(255, 160, 0, 0.25)',
+      on:    '#FFE5B5',
     },
     // Gradients fade to solid colors (no transparent stops).
     gradient: {
@@ -118,9 +125,11 @@ export const tokens = {
       bold:     700,
     },
     lineHeight: {
+      none:    1,
       tight:   1.1,
       snug:    1.25,
       normal:  1.5,
+      relaxed: 1.6,
     },
     tracking: {
       // Wide letter-spacing on monospace labels
@@ -159,6 +168,32 @@ export const tokens = {
     // Disabled controls. One system-wide constant so every primitive and
     // input dims identically. Exposed as --andromeda-opacity-disabled.
     disabled: 0.4,
+  },
+  // Icon glyph sizes (numbers — Phosphor `size` props and SVG boxes need
+  // numerics). One authoritative scale instead of per-component px.
+  iconSize: {
+    xs: 12,
+    sm: 16,
+    md: 18,
+    lg: 20,
+    xl: 22,
+  },
+  // Effects — frosted-glass blur radii and the accent hover/focus glow
+  // radius. Exposed as --andromeda-blur-sm/-lg and --andromeda-glow.
+  effect: {
+    blurSm: '2px',
+    blurLg: '8px',
+    glow:   '8px',
+  },
+  // Chart constants shared by TrendChart / MetricChart / RadarChart / Gauge.
+  // lineWidth/dash are recharts sinks (numbers/strings, var-incapable — keep
+  // RAW); fillOpacity + swatch are CSS sinks, exposed as vars.
+  chart: {
+    fillOpacity:      0.12,
+    fillOpacityFaint: 0.06,
+    lineWidth:        1.5,
+    dash:             '2 4',
+    swatch:           '8px',
   },
   border: {
     // System hairline width. 1px IS the identity; the var indirection (same

@@ -36,7 +36,9 @@ export const CornerMarkers = forwardRef(function CornerMarkers(
   // defines --andromeda-marker-width via andromedaVars(), so the var form
   // would silently swallow a passed prop.
   const bw = borderWidth != null ? `${borderWidth}px` : `var(--andromeda-marker-width, ${tokens.marker.borderWidth}px)`;
-  const c  = color       ?? tokens.color.border.bright;
+  // The defining motif must follow a theme like its own stroke width does;
+  // the explicit color prop still wins (var only when no prop given).
+  const c  = color       ?? `var(--andromeda-border-bright, ${tokens.color.border.bright})`;
 
   // Each marker is an L-shape: only the two borders that meet at its corner.
   const positions = [

@@ -12,7 +12,7 @@
 
 import { forwardRef, useId } from 'react';
 import { motion } from 'framer-motion';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
 
@@ -51,6 +51,13 @@ const SIZE_PX = {
   lg: 40,
 };
 
+// CSS var per size — heights sit on the spacing grid (6=24px, 8=32px, 10=40px).
+const SIZE_VAR = {
+  sm: '--andromeda-6',
+  md: '--andromeda-8',
+  lg: '--andromeda-10',
+};
+
 const ICON_PX = {
   sm: 14,
   md: 16,
@@ -58,12 +65,10 @@ const ICON_PX = {
 };
 
 const ms = (v) => parseInt(v, 10) / 1000;
-// Inline cubic-bezier — framer wants arrays, tokens.motion.easing values are
-// CSS strings. Keep in sync with tokens.motion.easing.standard.
-const STANDARD_EASE = [0.4, 0, 0.2, 1];
+// framer boundary: derived from tokens, cannot follow runtime var overrides
 const INDICATOR_TX = {
   duration: ms(tokens.motion.duration.slow),
-  ease: STANDARD_EASE,
+  ease: easingArray(tokens.motion.easing.standard),
 };
 
 /**
@@ -102,6 +107,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
   const generatedId = useId();
   const indicatorId = layoutGroupId ?? `andromeda-segmented-${generatedId}`;
   const cellSize = SIZE_PX[size] ?? SIZE_PX.md;
+  const cellVar = SIZE_VAR[size] ?? SIZE_VAR.md;
   const iconSize = ICON_PX[size] ?? ICON_PX.md;
 
   return (
@@ -113,7 +119,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       className={cn('andromeda-segmented inline-flex relative select-none', className)}
       style={{
         ...andromedaVars(),
-        height: `${cellSize}px`,
+        height: `var(${cellVar}, ${cellSize}px)`,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
         borderRadius: tokens.radius.frame,
         background: tokens.color.surface.raised,
@@ -141,7 +147,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               alignItems: 'center',
               justifyContent: 'center',
               gap: tokens.spacing[2],
-              minWidth: showLabel ? undefined : `${cellSize}px`,
+              minWidth: showLabel ? undefined : `var(${cellVar}, ${cellSize}px)`,
               height: '100%',
               padding: showLabel ? `0 ${tokens.spacing[3]}` : 0,
               background: 'transparent',
@@ -194,11 +200,11 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
           The :hover psuedo-class can't be expressed with React inline styles. */}
       <style>{`
         .andromeda-segmented-item:hover[data-active="false"] {
-          color: ${tokens.color.text.primary};
+          color: var(--andromeda-text-primary);
         }
         .andromeda-segmented-item:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 1px ${tokens.color.accent[400]};
+          box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
         }
         ${RESPONSIVE_STYLE}
       `}</style>

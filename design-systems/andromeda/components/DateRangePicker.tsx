@@ -33,9 +33,6 @@ const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-const CELL_PX = parseInt(tokens.spacing[8], 10);
-const NAV_PX  = parseInt(tokens.spacing[6], 10);
-
 function startOfDay(d) {
   if (!d) return null;
   const x = new Date(d);
@@ -95,36 +92,36 @@ function formatRangeChip(range) {
 function PickerStyles() {
   return (
     <style>{`
-      .adp-trigger { transition: background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
-      .adp-trigger:hover { border-color: ${tokens.color.border.bright} !important; }
+      .adp-trigger { transition: background var(--andromeda-duration-normal) var(--andromeda-easing-standard), border-color var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
+      .adp-trigger:hover { border-color: var(--andromeda-border-bright) !important; }
       .adp-trigger[data-state="open"] {
-        background: ${tokens.color.surface.hover};
-        border-color: ${tokens.color.border.bright};
+        background: var(--andromeda-surface-hover);
+        border-color: var(--andromeda-border-bright);
       }
       .adp-trigger:focus-visible {
-        border-color: ${tokens.color.accent[400]} !important;
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]}, 0 0 8px ${tokens.color.accent[500]};
+        border-color: var(--andromeda-accent-400) !important;
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400), 0 0 var(--andromeda-glow) var(--andromeda-accent-500);
       }
-      .adp-nav { transition: color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
-      .adp-nav:hover { color: ${tokens.color.text.primary} !important; background: ${tokens.color.surface.hover} !important; }
+      .adp-nav { transition: color var(--andromeda-duration-normal) var(--andromeda-easing-standard), background var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
+      .adp-nav:hover { color: var(--andromeda-text-primary) !important; background: var(--andromeda-surface-hover) !important; }
       .adp-nav:focus-visible {
-        color: ${tokens.color.text.primary};
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
+        color: var(--andromeda-text-primary);
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400);
       }
-      .adp-day { transition: background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}; outline: none; }
+      .adp-day { transition: background var(--andromeda-duration-fast) var(--andromeda-easing-standard), color var(--andromeda-duration-fast) var(--andromeda-easing-standard), border-color var(--andromeda-duration-fast) var(--andromeda-easing-standard); outline: none; }
       .adp-day[data-state="default"]:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.text.primary} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-text-primary) !important;
       }
       .adp-day[data-state="inrange"]:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.text.primary} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-text-primary) !important;
       }
       .adp-day[data-state="selected"]:hover {
-        border-color: ${tokens.color.accent[300]} !important;
+        border-color: var(--andromeda-accent-300) !important;
       }
       .adp-day:focus-visible {
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400);
       }
       /* Phone fit — below sm a trigger-anchored, right-pinned popover still
          overflowed off-screen (the trigger's own width pushed it past the
@@ -384,8 +381,8 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
               aria-label="Previous month"
               style={{
-                width: `${NAV_PX}px`,
-                height: `${NAV_PX}px`,
+                width: `var(--andromeda-6, 24px)`,
+                height: `var(--andromeda-6, 24px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -418,8 +415,8 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
               aria-label="Next month"
               style={{
-                width: `${NAV_PX}px`,
-                height: `${NAV_PX}px`,
+                width: `var(--andromeda-6, 24px)`,
+                height: `var(--andromeda-6, 24px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -438,7 +435,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,
+              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
               gap: tokens.spacing[1],
             }}
           >
@@ -464,7 +461,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,
+              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
               gap: tokens.spacing[1],
             }}
             onMouseLeave={() => { if (anchor) setHover(anchor); }}
@@ -483,8 +480,8 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
 
               const cellStyle = {
                 position: 'relative',
-                width:  `${CELL_PX}px`,
-                height: `${CELL_PX}px`,
+                width:  `var(--andromeda-8, 32px)`,
+                height: `var(--andromeda-8, 32px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',

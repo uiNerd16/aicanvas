@@ -104,7 +104,8 @@ function StackedBar() {
               height: '100%',
               transform: 'skewX(-12deg)',
               background: b.color,
-              border: `1px solid ${b.borderColor}`,
+              border: `${tokens.border.thin} ${b.borderColor}`,
+              borderRadius: tokens.radius.frame,
             }}
           />
         );

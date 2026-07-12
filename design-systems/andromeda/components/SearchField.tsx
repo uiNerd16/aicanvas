@@ -59,17 +59,17 @@ export const SearchField = forwardRef(function SearchField(
     : tokens.color.border.base;
 
   const background = isHover && !isFocus
-    ? tokens.color.surface.hover
-    : tokens.color.surface.raised;
+    ? 'var(--andromeda-surface-hover, #1C1C1D)'
+    : 'var(--andromeda-surface-raised, #141415)';
 
   const boxShadow = isFocus
-    ? `0 0 0 1px ${tokens.color.accent[400]}, 0 0 8px ${tokens.color.accent[500]}`
+    ? '0 0 0 1px var(--andromeda-accent-400, #109380), 0 0 8px var(--andromeda-accent-500, #126059)'
     : 'none';
 
   // Icon brightens when the user engages — focus or typed.
   const iconColor = isFocus || hasText
-    ? tokens.color.text.primary
-    : tokens.color.text.muted;
+    ? 'var(--andromeda-text-primary, #F5F5F5)'
+    : 'var(--andromeda-text-muted, #9A9A9A)';
 
   const handleChange = (e) => {
     const next = e.target.value;
@@ -94,9 +94,10 @@ export const SearchField = forwardRef(function SearchField(
         boxSizing: 'border-box',
         padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
         border: `${tokens.border.thin} ${borderColor}`,
+        borderRadius: tokens.radius.frame,
         background,
         boxShadow,
-        opacity: disabled ? 0.4 : 1,
+        opacity: disabled ? 'var(--andromeda-opacity-disabled, 0.4)' : 1,
         cursor: disabled ? 'not-allowed' : 'text',
         transition: [
           `border-color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
@@ -110,9 +111,10 @@ export const SearchField = forwardRef(function SearchField(
         <Icon
           size={14}
           weight="regular"
-          color={iconColor}
           style={{
             flexShrink: 0,
+            // Phosphor renders fill="currentColor"; CSS color lets the var resolve.
+            color: iconColor,
             transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
           }}
         />
@@ -176,7 +178,7 @@ export const SearchField = forwardRef(function SearchField(
             fontSize: tokens.typography.size.md,
             color: tokens.color.text.primary,
             letterSpacing: tokens.typography.tracking.wide,
-            caretColor: tokens.color.accent[400],
+            caretColor: 'var(--andromeda-accent-400, #109380)',
           }}
         />
       </div>
@@ -191,6 +193,7 @@ export const SearchField = forwardRef(function SearchField(
             color: tokens.color.text.faint,
             padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
             border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+            borderRadius: tokens.radius.frame,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}

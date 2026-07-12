@@ -28,12 +28,14 @@ import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 
-// intensity → fill: 0 = empty, 1 = dim (base), 2 = mid, 3 = bright (frontier)
+// intensity → fill: 0 = empty, 1 = dim (base), 2 = mid, 3 = bright (frontier).
+// Both sinks are inline CSS, so var-with-fallback lets the cells follow a theme
+// natively (no revarnish needed); the fallback keeps the default pixel-exact.
 const INTENSITY_COLOR = {
-  0: { bg: tokens.color.surface.overlay, border: tokens.color.border.subtle },
-  1: { bg: tokens.color.accent[500],     border: tokens.color.accent[400]   },
-  2: { bg: tokens.color.accent[400],     border: tokens.color.accent[300]   },
-  3: { bg: tokens.color.accent[300],     border: tokens.color.accent[200]   },
+  0: { bg: `var(--andromeda-surface-overlay, ${tokens.color.surface.overlay})`, border: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})` },
+  1: { bg: `var(--andromeda-accent-500, ${tokens.color.accent[500]})`,          border: `var(--andromeda-accent-400, ${tokens.color.accent[400]})` },
+  2: { bg: `var(--andromeda-accent-400, ${tokens.color.accent[400]})`,          border: `var(--andromeda-accent-300, ${tokens.color.accent[300]})` },
+  3: { bg: `var(--andromeda-accent-300, ${tokens.color.accent[300]})`,          border: `var(--andromeda-accent-200, ${tokens.color.accent[200]})` },
 };
 
 const msNum = (v) => parseInt(v, 10); // "120ms" → 120
@@ -198,7 +200,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
                   border: `${tokens.border.thin} ${border}`,
                   transition: reducedMotion
                     ? undefined
-                    : `background ${tokens.motion.duration.cascade} ${tokens.motion.easing.out}, border-color ${tokens.motion.duration.cascade} ${tokens.motion.easing.out}`,
+                    : `background var(--andromeda-duration-cascade, ${tokens.motion.duration.cascade}) var(--andromeda-easing-out, ${tokens.motion.easing.out}), border-color var(--andromeda-duration-cascade, ${tokens.motion.duration.cascade}) var(--andromeda-easing-out, ${tokens.motion.easing.out})`,
                   transitionDelay: `${delay}ms`,
                 }}
               />

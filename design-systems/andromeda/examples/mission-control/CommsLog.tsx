@@ -68,6 +68,7 @@ function CommsItem({ entry, isLast }) {
         flexShrink: 0,
         background: cfg.bg,
         border: `${tokens.border.thin} ${cfg.border}`,
+        borderRadius: tokens.radius.frame,
         color: cfg.color,
         display: 'flex',
         alignItems: 'center',

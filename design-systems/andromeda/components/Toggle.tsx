@@ -13,7 +13,6 @@ import { forwardRef, useId, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { mq } from './lib/responsive';
-import { tokens } from '../tokens';
 
 // Touch-target expander — the visible 34x18px track stays its desktop size; on
 // coarse pointers the invisible input (which receives the click, kept on top via
@@ -28,8 +27,8 @@ const TOUCH_TARGET_STYLE = `
       top: 50% !important;
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
-      width: ${tokens.spacing[10]} !important;
-      height: ${tokens.spacing[10]} !important;
+      width: var(--andromeda-10) !important;
+      height: var(--andromeda-10) !important;
     }
   }
 `;
@@ -37,6 +36,7 @@ const TOUCH_TARGET_STYLE = `
 const trackVariants = cva(
   [
     'relative inline-flex items-center shrink-0',
+    // ponytail: identity constant, no token — 34x18 track / 12px thumb / 2px inset geometry is the switch's fixed shape
     'w-[34px] h-[18px]',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',

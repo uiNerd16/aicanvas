@@ -49,6 +49,7 @@ function PeakBar({ value }) {
         width: '60px',
         background: tokens.color.surface.overlay,
         border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        borderRadius: tokens.radius.frame,
         display: 'inline-block',
       }}
     >
@@ -99,7 +100,7 @@ function BodyCell({ children, align = 'left', mono = true, color, width }) {
         color: color ?? tokens.color.text.secondary,
         letterSpacing: mono ? tokens.typography.tracking.wide : 'normal',
         verticalAlign: 'top',
-        lineHeight: 1,
+        lineHeight: 'var(--andromeda-leading-none, 1)',
       }}
     >
       {children}
@@ -147,7 +148,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
                 backgroundImage: `linear-gradient(to right, transparent, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`,
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'bottom left',
-                backgroundSize: '100% 1px',
+                backgroundSize: '100% var(--andromeda-border-width, 1px)',
               }}
             >
               {COLS.map(c => <HeaderCell key={c.key} col={c} />)}
@@ -169,7 +170,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
                     backgroundImage: `linear-gradient(to right, transparent, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'bottom left',
-                    backgroundSize: '100% 1px',
+                    backgroundSize: '100% var(--andromeda-border-width, 1px)',
                   }}
                 >
                   <BodyCell width="48px">
@@ -193,7 +194,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
                           color: tokens.color.text.primary,
                           fontWeight: tokens.typography.weight.medium,
                           letterSpacing: '-0.01em',
-                          lineHeight: 1,
+                          lineHeight: 'var(--andromeda-leading-none, 1)',
                         }}
                       >
                         {r.track}
@@ -201,11 +202,11 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
                       <span
                         style={{
                           fontFamily: tokens.typography.fontMono,
-                          fontSize: '10px',
+                          fontSize: tokens.typography.size.xs,
                           color: tokens.color.text.muted,
                           textTransform: 'uppercase',
                           letterSpacing: tokens.typography.tracking.widest,
-                          lineHeight: 1,
+                          lineHeight: 'var(--andromeda-leading-none, 1)',
                         }}
                       >
                         {r.artist}

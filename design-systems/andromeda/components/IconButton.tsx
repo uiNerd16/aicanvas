@@ -12,7 +12,7 @@
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, easingArray } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
@@ -48,8 +48,9 @@ const TOUCH_TARGET_STYLE = `
 `;
 
 const ms = (v) => parseInt(v, 10) / 1000;
-const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] };
-const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] };
+// framer boundary: derived from tokens, cannot follow runtime var overrides
+const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: easingArray(tokens.motion.easing.out) };
+const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: easingArray(tokens.motion.easing.in) };
 const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
 // IconButton is denser than Button so its press is a touch deeper, matching
 // the original 0.95 active scale that signalled the squeeze on a small target.
@@ -67,10 +68,10 @@ const iconButtonVariants = cva(
     // the motion.button root.
     'cursor-pointer',
     'transition-[background-color,border-color,box-shadow,color] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
-    '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+    '[backdrop-filter:blur(var(--andromeda-blur-sm,2px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-sm,2px))]',
     // focus + disabled — match Button.tsx exactly
     'focus-visible:outline-none',
-    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+    'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-accent-400),0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-500)]',
     'disabled:cursor-not-allowed disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:pointer-events-none',
   ],
   {
@@ -81,7 +82,7 @@ const iconButtonVariants = cva(
           'bg-[color:var(--andromeda-accent-500)]',
           'border-[color:var(--andromeda-accent-400)]',
           'hover:border-[color:var(--andromeda-accent-300)]',
-          'hover:shadow-[0_0_8px_var(--andromeda-accent-500)]',
+          'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-500)]',
           'active:border-[color:var(--andromeda-accent-300)]',
         ],
         outline: [
@@ -107,8 +108,8 @@ const iconButtonVariants = cva(
           'border-[color:var(--andromeda-red-400)]',
           'hover:bg-[color:var(--andromeda-red-400)]',
           'hover:border-[color:var(--andromeda-red-300)]',
-          'hover:shadow-[0_0_8px_var(--andromeda-red-400)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-400),0_0_8px_var(--andromeda-red-400)]',
+          'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-red-400),0_0_var(--andromeda-glow,8px)_var(--andromeda-red-400)]',
           'active:bg-[color:var(--andromeda-red-400)]',
         ],
       },
@@ -127,6 +128,9 @@ const iconButtonVariants = cva(
   },
 );
 
+// ponytail: not tokens.iconSize — that scale (12/16/18/22) doesn't contain 14,
+// and mapping by shifted names (md button -> iconSize.sm) would drift if the
+// icon grid is retuned. Deliberate per-button-size glyph scale.
 const ICON_SIZE = { sm: 14, md: 16, lg: 20 };
 
 /**

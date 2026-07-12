@@ -24,9 +24,10 @@ import { mq } from './lib/responsive';
 // hover lift fires correctly even when rows carry an inline background.
 const TABLE_STYLE_ID = 'andromeda-table-styles';
 const TABLE_STYLES = `
+      /* off-token 100ms ease, deliberate — no matching duration/easing token */
       .andro-tr         { transition: background-color 100ms ease; cursor: default; }
       .andro-tr-hover   { cursor: pointer; }
-      .andro-tr-hover:hover { background-color: ${tokens.color.surface.hover} !important; }
+      .andro-tr-hover:hover { background-color: var(--andromeda-surface-hover) !important; }
       /* Horizontal-scroll wrapper. The wide table scrolls INSIDE this panel
          (faithful stack — never reflow rows into cards), and the panel itself
          never grows past its grid cell, so it can't force horizontal page
@@ -41,7 +42,7 @@ const TABLE_STYLES = `
          visible affordance. A small bottom gutter on coarse pointers keeps
          the final row clear of the overlay scrollbar track. */
       ${mq.coarse} {
-        .andro-scroll { padding-bottom: ${tokens.spacing[1]}; }
+        .andro-scroll { padding-bottom: var(--andromeda-1); }
       }
     `;
 
@@ -64,7 +65,7 @@ export function TableStyles() {
 // Linear-gradient bottom line that insets 12px from each side.
 // Used as a TR background-image so it survives border-collapse:collapse
 // (real TR borders don't render under collapse).
-const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const ROW_INSET_LINE = `linear-gradient(to right, transparent var(--andromeda-3, ${tokens.spacing[3]}), var(--andromeda-border-subtle, ${tokens.color.border.subtle}) var(--andromeda-3, ${tokens.spacing[3]}), var(--andromeda-border-subtle, ${tokens.color.border.subtle}) calc(100% - var(--andromeda-3, ${tokens.spacing[3]})), transparent calc(100% - var(--andromeda-3, ${tokens.spacing[3]})))`;
 
 // ── Table ──────────────────────────────────────────────────────────
 export const Table = forwardRef(function Table(
@@ -129,7 +130,7 @@ export const TableRow = forwardRef(function TableRow(
         backgroundSize: '100% 1px',
         backgroundPosition: 'bottom',
         backgroundRepeat: 'no-repeat',
-        boxShadow: selected ? `inset 2px 0 0 0 ${tokens.color.accent[300]}` : undefined,
+        boxShadow: selected ? `inset 2px 0 0 0 var(--andromeda-accent-300, ${tokens.color.accent[300]})` : undefined,
         ...style,
       }}
       {...props}
@@ -177,7 +178,7 @@ export const TableHeader = forwardRef(function TableHeader(
         color: sorted ? tokens.color.text.primary : tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
-        lineHeight: 1,
+        lineHeight: 'var(--andromeda-leading-none, 1)',
         whiteSpace: 'nowrap',
         ...style,
       }}

@@ -49,7 +49,7 @@ function InsetDivider({ side = 'bottom' }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -62,7 +62,7 @@ function InsetDivider({ side = 'bottom' }) {
 const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
 const rowSeparatorStyle = {
   backgroundImage: ROW_INSET_LINE,
-  backgroundSize: '100% 1px',
+  backgroundSize: '100% var(--andromeda-border-width, 1px)',
   backgroundPosition: 'bottom',
   backgroundRepeat: 'no-repeat',
 };
@@ -71,6 +71,8 @@ const rowSeparatorStyle = {
 function HoverStyles() {
   return (
     <style>{`
+      /* off-token: hover transitions use the 'ease' keyword (no matching
+         Andromeda easing token) and 100ms (no duration token) — left literal. */
       .so-tab        { transition: color 140ms ease; }
       .so-tab:hover  { color: ${tokens.color.text.primary} !important; }
 
@@ -201,7 +203,7 @@ function FilterRow({ chips, onRemoveChip }) {
         className="so-filter-divider"
         aria-hidden
         style={{
-          width: '1px',
+          width: 'var(--andromeda-border-width, 1px)',
           height: tokens.spacing[5],
           background: tokens.color.border.subtle,
           flexShrink: 0,
@@ -271,7 +273,7 @@ function ColHeader({ children, align = 'left', sort }) {
         color: sorted ? tokens.color.text.primary : tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
-        lineHeight: 1,
+        lineHeight: 'var(--andromeda-leading-none, 1)',
         whiteSpace: 'nowrap',
         verticalAlign: 'middle',
       }}
@@ -281,7 +283,7 @@ function ColHeader({ children, align = 'left', sort }) {
           display: 'inline-flex',
           alignItems: 'center',
           gap: tokens.spacing[1],
-          lineHeight: 1,
+          lineHeight: 'var(--andromeda-leading-none, 1)',
           height: '16px',
           color: 'inherit',
         }}
@@ -316,7 +318,7 @@ function Cell({ children, align = 'left', muted = false, mono = true, nowrap = t
         color: muted ? tokens.color.text.secondary : tokens.color.text.primary,
         letterSpacing: tokens.typography.tracking.wide,
         whiteSpace: nowrap ? 'nowrap' : 'normal',
-        lineHeight: 1,
+        lineHeight: 'var(--andromeda-leading-none, 1)',
       }}
     >
       {children}
@@ -384,7 +386,7 @@ export function ItemsPanel() {
                   width: tokens.spacing[8],
                   verticalAlign: 'middle',
                   padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`,
-                  lineHeight: 1,
+                  lineHeight: 'var(--andromeda-leading-none, 1)',
                 }}
               >
                 <Checkbox

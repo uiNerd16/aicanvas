@@ -82,10 +82,17 @@ export function Planet({
     container.appendChild(renderer.domElement);
 
     // ── Andromeda palette → THREE.Color ─────────────────────────────────────
-    const cHi  = new THREE.Color(tokens.color.accent[100]); // lit highlight
-    const cLit = new THREE.Color(tokens.color.accent[200]); // lit body
-    const cMid = new THREE.Color(tokens.color.accent[400]); // terminator
-    const cShd = new THREE.Color(tokens.color.accent[500]); // shadow side
+    // WebGL needs raw hex (var() cannot resolve on the GPU), so read the
+    // RESOLVED CSS vars at mount time — a themed page renders a themed planet.
+    // Mount-time read only; var changes after mount don't re-tint.
+    const cs = getComputedStyle(container);
+    const accent = (stop) =>
+      cs.getPropertyValue(`--andromeda-accent-${stop}`).trim() ||
+      tokens.color.accent[stop];
+    const cHi  = new THREE.Color(accent(100)); // lit highlight
+    const cLit = new THREE.Color(accent(200)); // lit body
+    const cMid = new THREE.Color(accent(400)); // terminator
+    const cShd = new THREE.Color(accent(500)); // shadow side
 
     // Light comes from the front-right, slightly above. Choose a direction
     // that's NOT axis-aligned so the rotating planet shows a moving terminator.

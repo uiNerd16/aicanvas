@@ -30,7 +30,8 @@ const inputVariants = cva(
   {
     variants: {
       hasIcon: {
-        true:  'pl-[32px] pr-[var(--andromeda-3)] py-[9px]',
+        // ponytail: 9px vertical padding is a deliberate off-grid optical value, no token
+        true:  'pl-[var(--andromeda-8,32px)] pr-[var(--andromeda-3)] py-[9px]',
         false: 'px-[var(--andromeda-3)] py-[9px]',
       },
       state: {

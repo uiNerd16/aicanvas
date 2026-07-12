@@ -48,8 +48,8 @@ export const PanelHeader = forwardRef(function PanelHeader(
         // line — panel titles are short by design and a wrapped kebab reads as
         // broken (its menu then opens off the left edge). See <style> for the
         // phone padding step-down.
-        gap: tokens.spacing[3],
-        padding: `${tokens.spacing[4]} ${tokens.spacing[5]}`,
+        gap: 'var(--andromeda-3, 12px)',
+        padding: 'var(--andromeda-4, 16px) var(--andromeda-5, 20px)',
         ...style,
       }}
       {...props}
@@ -64,10 +64,10 @@ export const PanelHeader = forwardRef(function PanelHeader(
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           fontFamily: tokens.typography.fontSans,
-          fontSize: tokens.typography.size.xl,
+          fontSize: 'var(--andromeda-text-xl, 18px)',
           fontWeight: tokens.typography.weight.semibold,
-          color: tokens.color.text.primary,
-          letterSpacing: tokens.typography.tracking.tight,
+          color: 'var(--andromeda-text-primary, #F5F5F5)',
+          letterSpacing: 'var(--andromeda-tracking-tight, 0)',
         }}
       >
         {title}
@@ -88,7 +88,7 @@ export const PanelHeader = forwardRef(function PanelHeader(
           left: tokens.spacing[3],
           right: tokens.spacing[3],
           bottom: 0,
-          height: '1px',
+          height: 'var(--andromeda-border-width, 1px)',
           background: tokens.color.border.subtle,
           pointerEvents: 'none',
         }}

@@ -15,7 +15,7 @@ import { forwardRef } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, easingArray } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
@@ -36,15 +36,15 @@ const TOUCH_TARGET_STYLE = `
       transform: translate(-50%, -50%) !important;
       width: 100% !important;
       height: 100% !important;
-      min-height: ${tokens.spacing[10]} !important;
-      min-width: ${tokens.spacing[10]} !important;
+      min-height: var(--andromeda-10) !important;
+      min-width: var(--andromeda-10) !important;
     }
     /* sm sits below the 40px floor; cap its hit area at spacing[8] (32px) so the
        vertical hit-area seam between stacked sm buttons never overlaps, matching
        IconButton's sm cap. */
     .andromeda-btn-touch[data-size="sm"]::before {
-      min-height: ${tokens.spacing[8]} !important;
-      min-width: ${tokens.spacing[8]} !important;
+      min-height: var(--andromeda-8) !important;
+      min-width: var(--andromeda-8) !important;
     }
   }
 `;
@@ -52,8 +52,9 @@ const TOUCH_TARGET_STYLE = `
 // Token-driven framer transitions. tokens.motion.duration values are
 // strings like "140ms"; framer expects seconds, so parseInt → /1000.
 const ms = (v) => parseInt(v, 10) / 1000;
-const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] };
-const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] };
+// framer boundary: derived from tokens, cannot follow runtime var overrides
+const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: easingArray(tokens.motion.easing.out) };
+const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: easingArray(tokens.motion.easing.in) };
 // whileHover / whileTap targets — transitions inlined inside the variant
 // so hover uses duration.normal and press uses duration.fast independently.
 const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
@@ -81,14 +82,16 @@ const buttonVariants = cva(
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
     // focus & disabled
     'focus-visible:outline-none',
-    'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+    'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-accent-400),0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-500)]',
     'disabled:cursor-not-allowed disabled:opacity-[var(--andromeda-opacity-disabled)] disabled:pointer-events-none',
   ],
   {
     variants: {
       variant: {
         default: [
-          'text-[color:var(--andromeda-text-primary)]',
+          // On-accent foreground: tracks the accent family, NOT the neutral
+          // text ramp, so a theme that darkens text keeps the label legible.
+          'text-[color:var(--andromeda-accent-on)]',
           'bg-[color:var(--andromeda-accent-400)]',
           'border-[color:var(--andromeda-accent-200)]',
           'hover:bg-[color:var(--andromeda-accent-400)]',
@@ -114,7 +117,8 @@ const buttonVariants = cva(
           'active:bg-[color:var(--andromeda-surface-hover)]',
         ],
         destructive: [
-          'text-[color:var(--andromeda-text-primary)]',
+          // On-fault foreground: bound to the red family, not the text ramp.
+          'text-[color:var(--andromeda-red-on)]',
           'bg-[color:var(--andromeda-red-400)]',
           'border-[color:var(--andromeda-red-400)]',
           'hover:bg-[color:var(--andromeda-red-400)]',
@@ -135,9 +139,9 @@ const buttonVariants = cva(
         ],
       },
       size: {
-        sm: 'px-[var(--andromeda-3)] py-[5px] text-[length:var(--andromeda-text-xs)]',
+        sm: 'px-[var(--andromeda-3)] py-[calc(var(--andromeda-1)+1px)] text-[length:var(--andromeda-text-xs)]',
         md: 'px-[var(--andromeda-4)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'px-[var(--andromeda-5)] py-[11px] text-[length:var(--andromeda-text-md)]',
+        lg: 'px-[var(--andromeda-5)] py-[calc(var(--andromeda-3)-1px)] text-[length:var(--andromeda-text-md)]',
       },
     },
     defaultVariants: {
@@ -177,7 +181,7 @@ export const Button = forwardRef(function Button(
   ref,
 ) {
   // Icons render ~1.3× the label size so they read clearly next to the text.
-  const iconSize = size === 'sm' ? 16 : size === 'md' ? 18 : 20;
+  const iconSize = size === 'sm' ? tokens.iconSize.sm : size === 'md' ? tokens.iconSize.md : tokens.iconSize.lg;
   const reducedMotion = useReducedMotion();
   const baseClass = cn(buttonVariants({ variant, size }), 'andromeda-btn-touch', className);
   const baseStyle = { ...andromedaVars(), ...style };

@@ -309,10 +309,10 @@ export const StatTile = forwardRef(function StatTile(
           {code ? <span className={codeClass}>{code}</span> : null}
         </div>
 
-        {/* Value + unit */}
+        {/* Value + unit. ponytail: 0.4s + ease-out are identity constants for the reveal, no token */}
         <div
           className="flex items-baseline gap-[var(--andromeda-2)]"
-          style={{ animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: '80ms' }}
+          style={{ animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: 'var(--andromeda-duration-fast, 80ms)' }}
         >
           {liveRoll
             ? <DigitRoller value={displayValue} className={valueClass} reduced={reducedMotion} />

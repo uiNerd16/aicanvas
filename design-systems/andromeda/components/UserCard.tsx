@@ -26,7 +26,7 @@ import { motion } from 'framer-motion';
 import { CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, easingArray } from './lib/utils';
 import {
   UserMenuPanel,
   UserMenuStyles,
@@ -37,7 +37,8 @@ import {
 // duration + easing referenced to a token while adapting to the shape
 // framer-motion expects (seconds + 4-tuple bezier).
 const toSeconds = (ms) => parseInt(ms, 10) / 1000;
-const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
+// framer boundary: derived from tokens, cannot follow runtime var overrides
+const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 
 /**
  * @typedef {object} UserCardProps
@@ -111,7 +112,7 @@ export const UserCard = forwardRef(function UserCard(
           gap: tokens.spacing[3],
           cursor: 'pointer',
           background: highlight ? tokens.color.surface.hover : 'transparent',
-          transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
+          transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
         <Avatar name={name} src={src} status={status} size={avatarSize} />
@@ -155,7 +156,7 @@ export const UserCard = forwardRef(function UserCard(
           style={{
             display: 'inline-flex',
             color: highlight ? tokens.color.text.secondary : tokens.color.text.faint,
-            transition: `color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
+            transition: `color var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
           }}
         >
           <CaretUpDown size={14} weight="regular" />

@@ -124,8 +124,8 @@ export function Header({ sectionTitle = 'Overview', motionProps }) {
           height: '6px',
           flexShrink: 0,
           background: tokens.color.accent[400],
-          border: `1px solid ${tokens.color.accent[400]}`,
-          boxShadow: `0 0 6px ${tokens.color.accent[500]}`,
+          border: `${tokens.border.thin} ${tokens.color.accent[400]}`,
+          boxShadow: `0 0 6px ${tokens.color.accent[500]}`, // ponytail: 6px glow is a bespoke dot value, not the 8px system glow
         }} />
         <span
           className="mc-status-label"

@@ -17,7 +17,7 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { cn, andromedaVars } from './lib/utils';
+import { cn } from './lib/utils';
 import { Card, CardContent } from './Card';
 
 /**
@@ -37,7 +37,7 @@ export const EmptyState = forwardRef(function EmptyState(
       ref={ref}
       data-slot="empty-state"
       className={cn(className)}
-      style={{ ...andromedaVars(), ...style }}
+      style={style}
       {...props}
     >
       <CardContent
@@ -67,7 +67,7 @@ export const EmptyStateIcon = forwardRef(function EmptyStateIcon(
         'border-[length:var(--andromeda-border-width,1px)] border-solid',
         'border-[color:var(--andromeda-border-base)]',
         'bg-[color:var(--andromeda-surface-overlay)]',
-        '[&>svg]:w-[22px] [&>svg]:h-[22px]',
+        '[&>svg]:w-[var(--andromeda-icon-xl,22px)] [&>svg]:h-[var(--andromeda-icon-xl,22px)]',
         'text-[color:var(--andromeda-text-muted)] [&>svg]:stroke-current',
         className,
       )}

@@ -16,6 +16,7 @@ import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { rowContainer, rowItem } from '../../components/lib/motion';
+import { easingArray } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { requestRows, filterTabs } from './data';
 
@@ -28,7 +29,7 @@ function InsetDivider({ side = 'bottom' }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -39,7 +40,7 @@ function InsetDivider({ side = 'bottom' }) {
 const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
 const rowSeparatorStyle = {
   backgroundImage: ROW_INSET_LINE,
-  backgroundSize: '100% 1px',
+  backgroundSize: '100% var(--andromeda-border-width, 1px)',
   backgroundPosition: 'bottom',
   backgroundRepeat: 'no-repeat',
 };
@@ -52,7 +53,7 @@ const rowSeparatorStyle = {
 const ms = (v) => parseInt(v, 10) / 1000;
 const FILTER_TX = {
   duration: ms(tokens.motion.duration.slow),
-  ease: [0.4, 0, 0.2, 1],
+  ease: easingArray(tokens.motion.easing.standard),
 };
 
 function FilterTab({ label, count, active, onClick }) {
@@ -68,13 +69,14 @@ function FilterTab({ label, count, active, onClick }) {
         padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
         background: 'transparent',
         border: `${tokens.border.thin} transparent`,
+        borderRadius: tokens.radius.frame,
         cursor: 'pointer',
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
         color: active ? tokens.color.text.primary : tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
-        transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
+        transition: `color var(--andromeda-duration-normal) var(--andromeda-easing-out)`,
       }}
     >
       {active ? (
@@ -87,6 +89,7 @@ function FilterTab({ label, count, active, onClick }) {
             inset: 0,
             background: tokens.color.surface.active,
             border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+            borderRadius: tokens.radius.frame,
             zIndex: 0,
             pointerEvents: 'none',
           }}
@@ -125,11 +128,11 @@ function ColHeader({ children, sorted, align = 'left' }) {
         color: sorted ? tokens.color.text.primary : tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
-        lineHeight: 1,
+        lineHeight: 'var(--andromeda-leading-none, 1)',
         whiteSpace: 'nowrap',
       }}
     >
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[1], lineHeight: 1, height: '16px' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[1], lineHeight: 'var(--andromeda-leading-none, 1)', height: '16px' }}>
         {children}
         {sorted ? <CaretUp weight="bold" size={10} /> : null}
       </span>
@@ -223,6 +226,7 @@ export function RequestsTable() {
             padding: `0 ${tokens.spacing[2]}`,
             background: 'transparent',
             border: `${tokens.border.thin} ${tokens.color.border.base}`,
+            borderRadius: tokens.radius.frame,
             color: tokens.color.text.muted,
           }}
         >
@@ -278,7 +282,7 @@ export function RequestsTable() {
                   width: tokens.spacing[8],
                   verticalAlign: 'top',
                   padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`,
-                  lineHeight: 1,
+                  lineHeight: 'var(--andromeda-leading-none, 1)',
                 }}
               >
                 <Checkbox
@@ -310,6 +314,7 @@ export function RequestsTable() {
                   onClick={() => toggleRow(key)}
                   style={{
                     ...rowSeparatorStyle,
+                    // off-token: 100ms + 'ease' have no motion-token equivalent
                     transition: 'background 100ms ease',
                   }}
                   className="rp-row"
@@ -331,7 +336,7 @@ export function RequestsTable() {
                           exit={{ scaleX: 0, opacity: 0 }}
                           transition={{
                             duration: parseInt(tokens.motion.duration.normal, 10) / 1000,
-                            ease: [0, 0, 0.2, 1],
+                            ease: easingArray(tokens.motion.easing.out),
                           }}
                           style={{
                             position: 'absolute',
@@ -366,7 +371,7 @@ export function RequestsTable() {
                           fontSize: tokens.typography.size.sm,
                           color: tokens.color.text.primary,
                           letterSpacing: tokens.typography.tracking.wide,
-                          lineHeight: 1,
+                          lineHeight: 'var(--andromeda-leading-none, 1)',
                           height: '16px',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -380,7 +385,7 @@ export function RequestsTable() {
                           fontSize: tokens.typography.size.xs,
                           color: tokens.color.text.muted,
                           letterSpacing: tokens.typography.tracking.wide,
-                          lineHeight: 1,
+                          lineHeight: 'var(--andromeda-leading-none, 1)',
                         }}
                       >
                         {r.owner}
@@ -396,7 +401,7 @@ export function RequestsTable() {
                       letterSpacing: tokens.typography.tracking.wide,
                       whiteSpace: 'nowrap',
                       verticalAlign: 'top',
-                      lineHeight: 1,
+                      lineHeight: 'var(--andromeda-leading-none, 1)',
                       height: '16px',
                     }}
                   >
@@ -413,7 +418,7 @@ export function RequestsTable() {
                       letterSpacing: tokens.typography.tracking.wide,
                       whiteSpace: 'nowrap',
                       verticalAlign: 'top',
-                      lineHeight: 1,
+                      lineHeight: 'var(--andromeda-leading-none, 1)',
                     }}
                   >
                     {r.amount}

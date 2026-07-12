@@ -149,6 +149,7 @@ function ThresholdBar({ value }) {
           height: '12px',
           background: `linear-gradient(90deg, ${tokens.color.red[400]} 0%, ${tokens.color.orange[300]} 50%, ${tokens.color.accent[300]} 100%)`,
           border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          borderRadius: tokens.radius.frame,
         }}
       >
         {/* Marker — anchored above the bar with a downward arrow */}

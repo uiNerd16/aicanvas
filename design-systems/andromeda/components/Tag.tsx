@@ -21,6 +21,7 @@ const tagVariants = cva(
     'inline-flex items-center select-none whitespace-nowrap',
     'max-w-full min-w-0',
     'gap-[var(--andromeda-2)]',
+    // ponytail: identity constant — 3px vertical pad is off the spacing grid by design
     'px-[var(--andromeda-2)] py-[3px]',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
@@ -42,17 +43,18 @@ const tagVariants = cva(
         ],
         accent: [
           'bg-[color:var(--andromeda-accent-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          // on-fill fix: guaranteed-contrast on-fill foreground (defaults to family 100)
+          'text-[color:var(--andromeda-accent-on)]',
           'border-[color:var(--andromeda-accent-400)]',
         ],
         warning: [
           'bg-[color:var(--andromeda-orange-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          'text-[color:var(--andromeda-orange-on)]',
           'border-[color:var(--andromeda-orange-400)]',
         ],
         fault: [
           'bg-[color:var(--andromeda-red-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          'text-[color:var(--andromeda-red-on)]',
           'border-[color:var(--andromeda-red-400)]',
         ],
       },

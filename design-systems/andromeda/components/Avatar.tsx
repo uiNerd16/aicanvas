@@ -30,9 +30,9 @@ const avatarVariants = cva(
   {
     variants: {
       size: {
-        sm: 'w-[24px] h-[24px] text-[length:var(--andromeda-text-xs)]',
-        md: 'w-[32px] h-[32px] text-[length:var(--andromeda-text-sm)]',
-        lg: 'w-[40px] h-[40px] text-[length:var(--andromeda-text-md)]',
+        sm: 'w-[var(--andromeda-6,24px)] h-[var(--andromeda-6,24px)] text-[length:var(--andromeda-text-xs)]',
+        md: 'w-[var(--andromeda-8,32px)] h-[var(--andromeda-8,32px)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'w-[var(--andromeda-10,40px)] h-[var(--andromeda-10,40px)] text-[length:var(--andromeda-text-md)]',
       },
     },
     defaultVariants: {

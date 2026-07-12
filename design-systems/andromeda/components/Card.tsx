@@ -100,7 +100,7 @@ export const CardHeader = forwardRef(function CardHeader(
         // so the line stops short of the card's vertical edges.
         'after:content-[""] after:absolute after:bottom-0',
         'after:left-[var(--andromeda-3)] after:right-[var(--andromeda-3)]',
-        'after:h-px after:bg-[color:var(--andromeda-border-subtle)]',
+        'after:h-[var(--andromeda-border-width,1px)] after:bg-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}
@@ -144,7 +144,7 @@ export const CardFooter = forwardRef(function CardFooter(
         // so the line stops short of the card's vertical edges.
         'before:content-[""] before:absolute before:top-0',
         'before:left-[var(--andromeda-3)] before:right-[var(--andromeda-3)]',
-        'before:h-px before:bg-[color:var(--andromeda-border-subtle)]',
+        'before:h-[var(--andromeda-border-width,1px)] before:bg-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}

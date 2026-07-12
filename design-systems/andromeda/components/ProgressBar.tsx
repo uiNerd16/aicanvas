@@ -12,12 +12,13 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
 
 const BARS       = 30;  // number of columns
 const SQUARES    = 1;   // squares per column
 const SQUARE_W   = 6;   // width in px
-const SQUARE_H   = 16;  // height in px
-const GAP_INNER  = 2;   // gap between squares within a column
+const SQUARE_H   = parseInt(tokens.spacing[4]);  // height in px (spacing[4] = 16px)
+const GAP_INNER  = 2;   // ponytail: identity constant
 const GAP_COL    = 3;   // gap between columns
 
 const variantConfig = {
@@ -140,6 +141,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     width:  `${SQUARE_W}px`,
                     height: `${SQUARE_H}px`,
                     flexShrink: 0,
+                    // ponytail: identity constant
                     transform: 'skewX(-12deg)',
                     background: active
                       ? cfg.activeColor

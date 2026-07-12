@@ -41,7 +41,7 @@ function InsetDivider({ side = 'bottom' }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -178,6 +178,7 @@ export function SlaPanel() {
             display: 'inline-flex',
             opacity: showCurrent ? 1 : 0,
             transform: showCurrent ? 'translateY(0)' : 'translateY(-4px)',
+            // off-token: 320ms + 'ease' — no matching motion token, left literal
             transition: 'opacity 320ms ease, transform 320ms ease',
           }}
         >
