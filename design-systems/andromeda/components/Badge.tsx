@@ -150,7 +150,7 @@ export const Badge = forwardRef(function Badge(
           flexShrink: 0,
           background: dotColor[variant],
           opacity: dotOpacity,
-          transition: 'opacity var(--andromeda-duration-fast, 80ms) var(--andromeda-easing-out, ease-out)',
+          transition: 'opacity var(--andromeda-duration-fast, 80ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1))',
         }}
       />
       <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">

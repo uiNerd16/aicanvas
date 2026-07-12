@@ -65,7 +65,7 @@ export const SearchField = forwardRef(function SearchField(
     : 'var(--andromeda-surface-raised, #141415)';
 
   const boxShadow = isFocus
-    ? '0 0 0 1px var(--andromeda-accent-400, #109380), 0 0 8px var(--andromeda-accent-500, #126059)'
+    ? '0 0 0 var(--andromeda-border-width, 1px) var(--andromeda-accent-400, #109380), 0 0 var(--andromeda-glow, 8px) var(--andromeda-accent-500, #126059)'
     : 'none';
 
   // Icon brightens when the user engages — focus or typed.

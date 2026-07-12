@@ -121,7 +121,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
   const center = (cols - 1) / 2;
 
   // Cascade base-first, centre-out — token-driven tempo.
-  const rowStaggerMs = msNum(tokens.motion.stagger.progressbar);
+  const rowStaggerMs = msNum(tokens.motion.stagger.progressBar);
   const colStaggerMs = Math.round(rowStaggerMs * 0.18);
 
   // The staggered cascade plays ONCE on entrance. After it finishes the gauge

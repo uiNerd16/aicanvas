@@ -233,7 +233,7 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         borderRadius: tokens.radius.frame,
         padding: tokens.spacing[1],
         zIndex: 1000,
-        boxShadow: 'var(--andromeda-shadow-md, 0 8px 22px rgba(0, 0, 0, 0.45))',
+        boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
       }}
     >
       {items.map((item, i) => (
