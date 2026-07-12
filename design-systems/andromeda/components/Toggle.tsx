@@ -13,7 +13,6 @@ import { forwardRef, useId, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { mq } from './lib/responsive';
-import { tokens } from '../tokens';
 
 // Touch-target expander — the visible 34x18px track stays its desktop size; on
 // coarse pointers the invisible input (which receives the click, kept on top via
@@ -28,8 +27,8 @@ const TOUCH_TARGET_STYLE = `
       top: 50% !important;
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
-      width: ${tokens.spacing[10]} !important;
-      height: ${tokens.spacing[10]} !important;
+      width: var(--andromeda-10) !important;
+      height: var(--andromeda-10) !important;
     }
   }
 `;
@@ -37,9 +36,10 @@ const TOUCH_TARGET_STYLE = `
 const trackVariants = cva(
   [
     'relative inline-flex items-center shrink-0',
+    // ponytail: identity constant, no token — 34x18 track / 12px thumb / 2px inset geometry is the switch's fixed shape
     'w-[34px] h-[18px]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
@@ -74,7 +74,7 @@ const thumbVariants = cva(
   [
     'absolute top-[2px]',
     'w-[12px] h-[12px]',
-    'rounded-[var(--andromeda-radius-none)]',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[left,background-color,transform] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
   ],
   {

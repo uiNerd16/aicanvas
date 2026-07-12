@@ -33,8 +33,8 @@ export function Header({ sectionTitle = 'Library', motionProps }) {
         alignItems: 'center',
         padding: `0 ${tokens.spacing[6]}`,
         gap: tokens.spacing[5],
-        backdropFilter: 'blur(2px)',
-        WebkitBackdropFilter: 'blur(2px)',
+        backdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
+        WebkitBackdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
       }}
     >
       <CornerMarkers />
@@ -86,7 +86,8 @@ export function Header({ sectionTitle = 'Library', motionProps }) {
             height: '6px',
             flexShrink: 0,
             background: tokens.color.accent[400],
-            border: `1px solid ${tokens.color.accent[400]}`,
+            border: `${tokens.border.thin} ${tokens.color.accent[400]}`,
+            // ponytail: bespoke radius (6px, not the 8px glow token) — leave literal
             boxShadow: `0 0 6px ${tokens.color.accent[500]}`,
           }}
         />

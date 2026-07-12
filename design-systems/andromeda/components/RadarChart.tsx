@@ -69,13 +69,16 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
     <div style={{
       // Solid raised surface so text is always legible against any chart color
       background: tokens.color.surface.raised,
-      border: `1px solid ${tokens.color.border.base}`,
+      // tokens.border.thin === 'var(--andromeda-border-width, 1px) solid'; keep
+      // color.border.base to stay pixel-identical (siblings use bright, but
+      // switching here would change default rendering — hard rule 1).
+      border: `${tokens.border.thin} ${tokens.color.border.base}`,
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
       position: 'relative',
       // Slide-in from slightly above, fade in — triggered on every mount
-      animation: `andromeda-tooltip-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out} both`,
+      animation: 'andromeda-tooltip-in var(--andromeda-duration-normal, 140ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1)) both',
       minWidth: 120,
     }}>
       <div style={{
@@ -135,6 +138,7 @@ function SpaceTick({ x, y, payload, cx, cy }) {
       dominantBaseline="central"
       style={{
         fontFamily: tokens.typography.fontMono,
+        // ponytail: identity constant — 9px polar tick is off the text scale
         fontSize: '9px',
         fill: tokens.color.text.muted,
         textTransform: 'uppercase',
@@ -229,7 +233,7 @@ export const RadarChart = forwardRef(function RadarChart(
       className={cn('relative', className)}
       style={{
         ...andromedaVars(),
-        background: tokens.color.surface.raised,
+        background: 'var(--andromeda-surface-raised, #141415)',
         ...style,
       }}
       {...props}
@@ -301,9 +305,10 @@ export const RadarChart = forwardRef(function RadarChart(
         <ResponsiveContainer width="100%" height={280}>
           <ReRadarChart data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
             {/* Grid rings */}
+            {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
             <PolarGrid
               stroke={tokens.color.border.subtle}
-              strokeWidth={1}
+              strokeWidth={parseInt(tokens.border.width)}
               gridType="polygon"
             />
 
@@ -312,7 +317,8 @@ export const RadarChart = forwardRef(function RadarChart(
               dataKey="axis"
               tick={<SpaceTick />}
               tickLine={false}
-              axisLine={{ stroke: tokens.color.border.subtle, strokeWidth: 1 }}
+              // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
+              axisLine={{ stroke: tokens.color.border.subtle, strokeWidth: parseInt(tokens.border.width) }}
             />
 
             {/* isAnimationActive always off — recharts never tweens position.
@@ -326,12 +332,13 @@ export const RadarChart = forwardRef(function RadarChart(
               wrapperStyle={{
                 outline: 'none',
                 transition: shown
-                  ? `transform ${tokens.motion.duration.slow} ${tokens.motion.easing.standard}`
+                  ? 'transform var(--andromeda-duration-slow, 200ms) var(--andromeda-easing-standard, cubic-bezier(0.4, 0, 0.2, 1))'
                   : 'none',
               }}
             />
 
             {/* Series */}
+            {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
             {series.map((s, i) => (
               <Radar
                 key={s.key}
@@ -379,7 +386,7 @@ export const RadarChart = forwardRef(function RadarChart(
               display: 'inline-block',
               width: 8,
               height: 2,
-              background: s.color ?? tokens.color.accent[300],
+              background: s.color ?? 'var(--andromeda-accent-300, #0FCFB2)',
               flexShrink: 0,
             }} />
             <span style={{

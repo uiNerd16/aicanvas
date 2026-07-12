@@ -29,12 +29,29 @@ import { tokens } from '../tokens';
 import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
+// Color values used in the calendar's INLINE styles as var-with-fallback, so
+// the panel and day cells follow a live theme override natively — an installed
+// project (or the tuner) can retune --andromeda-* and the picker tracks it. The
+// fallback keeps the default pixel-identical. (Inline styles can't be reached
+// by any runtime rewrite the way component classes can, so wire them as vars.)
+const V = {
+  accent100:     `var(--andromeda-accent-100, ${tokens.color.accent[100]})`,
+  accent400:     `var(--andromeda-accent-400, ${tokens.color.accent[400]})`,
+  accent500:     `var(--andromeda-accent-500, ${tokens.color.accent[500]})`,
+  borderBase:    `var(--andromeda-border-base, ${tokens.color.border.base})`,
+  borderBright:  `var(--andromeda-border-bright, ${tokens.color.border.bright})`,
+  surfaceActive: `var(--andromeda-surface-active, ${tokens.color.surface.active})`,
+  surfaceRaised: `var(--andromeda-surface-raised, ${tokens.color.surface.raised})`,
+  surfaceBase:   `var(--andromeda-surface-base, ${tokens.color.surface.base})`,
+  textPrimary:   `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
+  textSecondary: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
+  textMuted:     `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
+  textFaint:     `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
+};
+
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-const CELL_PX = parseInt(tokens.spacing[8], 10);
-const NAV_PX  = parseInt(tokens.spacing[6], 10);
 
 function startOfDay(d) {
   if (!d) return null;
@@ -95,36 +112,36 @@ function formatRangeChip(range) {
 function PickerStyles() {
   return (
     <style>{`
-      .adp-trigger { transition: background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
-      .adp-trigger:hover { border-color: ${tokens.color.border.bright} !important; }
+      .adp-trigger { transition: background var(--andromeda-duration-normal) var(--andromeda-easing-standard), border-color var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
+      .adp-trigger:hover { border-color: var(--andromeda-border-bright) !important; }
       .adp-trigger[data-state="open"] {
-        background: ${tokens.color.surface.hover};
-        border-color: ${tokens.color.border.bright};
+        background: var(--andromeda-surface-hover);
+        border-color: var(--andromeda-border-bright);
       }
       .adp-trigger:focus-visible {
-        border-color: ${tokens.color.accent[400]} !important;
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]}, 0 0 8px ${tokens.color.accent[500]};
+        border-color: var(--andromeda-accent-400) !important;
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400), 0 0 var(--andromeda-glow) var(--andromeda-accent-500);
       }
-      .adp-nav { transition: color ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}, background ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}; outline: none; }
-      .adp-nav:hover { color: ${tokens.color.text.primary} !important; background: ${tokens.color.surface.hover} !important; }
+      .adp-nav { transition: color var(--andromeda-duration-normal) var(--andromeda-easing-standard), background var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
+      .adp-nav:hover { color: var(--andromeda-text-primary) !important; background: var(--andromeda-surface-hover) !important; }
       .adp-nav:focus-visible {
-        color: ${tokens.color.text.primary};
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
+        color: var(--andromeda-text-primary);
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400);
       }
-      .adp-day { transition: background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, border-color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}; outline: none; }
+      .adp-day { transition: background var(--andromeda-duration-fast) var(--andromeda-easing-standard), color var(--andromeda-duration-fast) var(--andromeda-easing-standard), border-color var(--andromeda-duration-fast) var(--andromeda-easing-standard); outline: none; }
       .adp-day[data-state="default"]:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.text.primary} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-text-primary) !important;
       }
       .adp-day[data-state="inrange"]:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.text.primary} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-text-primary) !important;
       }
       .adp-day[data-state="selected"]:hover {
-        border-color: ${tokens.color.accent[300]} !important;
+        border-color: var(--andromeda-accent-300) !important;
       }
       .adp-day:focus-visible {
-        box-shadow: 0 0 0 1px ${tokens.color.accent[400]};
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400);
       }
       /* Phone fit — below sm a trigger-anchored, right-pinned popover still
          overflowed off-screen (the trigger's own width pushed it past the
@@ -325,12 +342,12 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           alignItems: 'center',
           gap: tokens.spacing[2],
           padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-          background: tokens.color.surface.active,
-          border: `${tokens.border.thin} ${tokens.color.border.base}`,
-          borderRadius: tokens.radius.none,
+          background: V.surfaceActive,
+          border: `${tokens.border.thin} ${V.borderBase}`,
+          borderRadius: tokens.radius.frame,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.secondary,
+          color: V.textSecondary,
           letterSpacing: tokens.typography.tracking.wide,
           cursor: 'pointer',
         }}
@@ -342,7 +359,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           weight="bold"
           size={10}
           style={{
-            color: tokens.color.text.faint,
+            color: V.textFaint,
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: `transform ${tokens.motion.duration.normal} ${tokens.motion.easing.standard}`,
           }}
@@ -360,10 +377,10 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             left: 0,
             zIndex: 1000,
             boxSizing: 'border-box',
-            background: tokens.color.surface.raised,
-            border: `${tokens.border.thin} ${tokens.color.border.base}`,
+            background: V.surfaceRaised,
+            border: `${tokens.border.thin} ${V.borderBase}`,
             padding: tokens.spacing[3],
-            boxShadow: `0 8px 32px ${tokens.color.surface.base}`,
+            boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
             display: 'flex',
             flexDirection: 'column',
             gap: tokens.spacing[3],
@@ -384,16 +401,16 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
               aria-label="Previous month"
               style={{
-                width: `${NAV_PX}px`,
-                height: `${NAV_PX}px`,
+                width: `var(--andromeda-6, 24px)`,
+                height: `var(--andromeda-6, 24px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'transparent',
                 border: 'none',
-                color: tokens.color.text.muted,
+                color: V.textMuted,
                 cursor: 'pointer',
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
               }}
             >
               <CaretLeft weight="bold" size={12} />
@@ -404,7 +421,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.sm,
                 fontWeight: tokens.typography.weight.semibold,
-                color: tokens.color.text.primary,
+                color: V.textPrimary,
                 letterSpacing: tokens.typography.tracking.wider,
                 textTransform: 'uppercase',
               }}
@@ -418,16 +435,16 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
               aria-label="Next month"
               style={{
-                width: `${NAV_PX}px`,
-                height: `${NAV_PX}px`,
+                width: `var(--andromeda-6, 24px)`,
+                height: `var(--andromeda-6, 24px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'transparent',
                 border: 'none',
-                color: tokens.color.text.muted,
+                color: V.textMuted,
                 cursor: 'pointer',
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
               }}
             >
               <CaretRight weight="bold" size={12} />
@@ -438,7 +455,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,
+              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
               gap: tokens.spacing[1],
             }}
           >
@@ -448,7 +465,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 style={{
                   fontFamily: tokens.typography.fontMono,
                   fontSize: tokens.typography.size.xs,
-                  color: tokens.color.text.faint,
+                  color: V.textFaint,
                   textAlign: 'center',
                   padding: `${tokens.spacing[1]} 0`,
                   letterSpacing: tokens.typography.tracking.wider,
@@ -464,7 +481,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, ${CELL_PX}px)`,
+              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
               gap: tokens.spacing[1],
             }}
             onMouseLeave={() => { if (anchor) setHover(anchor); }}
@@ -483,25 +500,25 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
 
               const cellStyle = {
                 position: 'relative',
-                width:  `${CELL_PX}px`,
-                height: `${CELL_PX}px`,
+                width:  `var(--andromeda-8, 32px)`,
+                height: `var(--andromeda-8, 32px)`,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: selected ? tokens.color.accent[500] : 'transparent',
+                background: selected ? V.accent500 : 'transparent',
                 border: selected
                   ? `${tokens.border.thin} transparent`
                   : inRange
-                    ? `${tokens.border.thin} ${tokens.color.accent[400]}`
+                    ? `${tokens.border.thin} ${V.accent400}`
                     : isToday
-                      ? `${tokens.border.thin} ${tokens.color.border.bright}`
+                      ? `${tokens.border.thin} ${V.borderBright}`
                       : `${tokens.border.thin} transparent`,
-                borderRadius: tokens.radius.none,
+                borderRadius: tokens.radius.frame,
                 color: selected
-                  ? tokens.color.accent[100]
+                  ? V.accent100
                   : inMonth
-                    ? tokens.color.text.secondary
-                    : tokens.color.text.faint,
+                    ? V.textSecondary
+                    : V.textFaint,
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.sm,
                 fontWeight: selected

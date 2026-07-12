@@ -51,6 +51,7 @@ import { order, pageMetrics, navItems } from './data';
 function HoverStyles() {
   return (
     <style>{`
+      /* off-token: 'ease' keyword (no matching Andromeda easing token) — left literal */
       .so-nav        { transition: color 140ms ease; }
       .so-nav:hover  { color: ${tokens.color.text.primary} !important; }
     `}</style>
@@ -172,7 +173,7 @@ function TopBar() {
 
       {/* Brand — Andromeda over the template name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0 }}>
-        <AndromedaIcon size={22} />
+        <AndromedaIcon size={tokens.iconSize.xl} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span
             style={{
@@ -200,7 +201,7 @@ function TopBar() {
         </div>
       </div>
 
-      <span className="so-nav-divider" aria-hidden style={{ width: '1px', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
+      <span className="so-nav-divider" aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
 
       {/* Inline nav — hidden below `mq.md`, where the hamburger + Drawer take over. */}
       <div className="so-inline-nav" style={{ display: 'flex', alignItems: 'center' }}>
@@ -304,7 +305,7 @@ function PageHeaderStrip() {
           </span>
         ))}
 
-        <span aria-hidden style={{ width: '1px', height: tokens.spacing[5], background: tokens.color.border.base }} />
+        <span aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[5], background: tokens.color.border.base }} />
 
         <Tooltip label="Refresh"><IconButton aria-label="Refresh" variant="ghost" size="sm" icon={ArrowsClockwise} /></Tooltip>
         <Tooltip label="Hide"><IconButton aria-label="Hide"    variant="ghost" size="sm" icon={EyeSlash} /></Tooltip>

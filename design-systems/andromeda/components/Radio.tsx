@@ -52,8 +52,8 @@ const boxVariants = cva(
   [
     'relative inline-flex items-center justify-center shrink-0',
     'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
@@ -239,11 +239,13 @@ export const Radio = forwardRef(function Radio(
         >
           {checked ? (
             <span
+              // ponytail: identity constant, no token (6px mark geometry)
               className="block w-[6px] h-[6px]"
               style={{
                 background: 'var(--andromeda-accent-300)',
                 boxShadow: '0 0 6px var(--andromeda-accent-500)',
-                animation: `andromeda-pop-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
+                animation:
+                  'andromeda-pop-in var(--andromeda-duration-normal) var(--andromeda-easing-out)',
               }}
             />
           ) : null}

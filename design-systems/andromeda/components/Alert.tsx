@@ -24,9 +24,9 @@ const alertVariants = cva(
   [
     'relative flex items-start gap-[var(--andromeda-3)]',
     'p-[var(--andromeda-3)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
-    '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
+    '[backdrop-filter:blur(var(--andromeda-blur-sm,2px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-sm,2px))]',
   ],
   {
     variants: {
@@ -110,7 +110,7 @@ export const AlertIcon = forwardRef(function AlertIcon(
       aria-hidden="true"
       className={cn(
         'flex shrink-0 items-center justify-center mt-[1px]',
-        '[&>svg]:w-[16px] [&>svg]:h-[16px]',
+        '[&>svg]:w-[var(--andromeda-icon-sm,16px)] [&>svg]:h-[var(--andromeda-icon-sm,16px)]',
         'text-[color:var(--alert-icon-color)] [&>svg]:stroke-current',
         className,
       )}
@@ -172,7 +172,7 @@ export const AlertDescription = forwardRef(function AlertDescription(
         '[font-family:var(--andromeda-font-sans)]',
         'text-[length:var(--andromeda-text-xs)]',
         'text-[color:var(--alert-description-color)]',
-        'leading-[1.6]',
+        '[line-height:var(--andromeda-leading-relaxed)]',
         className,
       )}
       {...props}

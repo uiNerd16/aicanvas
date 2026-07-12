@@ -24,7 +24,7 @@ function InsetDivider({ side = 'bottom' }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -71,19 +71,22 @@ function FollowUpDropdown({ initial = '24:00 Hours' }) {
           padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
           background: open ? tokens.color.surface.hover : tokens.color.surface.overlay,
           border: `${tokens.border.thin} ${open ? tokens.color.border.bright : tokens.color.border.base}`,
+          borderRadius: tokens.radius.frame,
           cursor: 'pointer',
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
           color: tokens.color.text.primary,
           letterSpacing: tokens.typography.tracking.wide,
           width: '100%',
+          // off-token: 140ms + 'ease' — no matching motion token, left literal
           transition: 'background 140ms ease, border-color 140ms ease',
         }}
       >
         {value}
+        {/* transition below is off-token: 140ms + 'ease' — no matching motion token, left literal */}
         <CaretDown
           weight="regular"
-          size={12}
+          size={tokens.iconSize.xs}
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 140ms ease', flexShrink: 0 }}
         />
       </button>
@@ -119,6 +122,7 @@ function FollowUpDropdown({ initial = '24:00 Hours' }) {
                 color: opt === value ? tokens.color.text.primary : tokens.color.text.secondary,
                 letterSpacing: tokens.typography.tracking.wide,
                 textAlign: 'left',
+                // off-token: 100ms + 'ease' — no matching motion token, left literal
                 transition: 'background 100ms ease, color 100ms ease',
               }}
               onMouseEnter={(e) => { if (opt !== value) { e.currentTarget.style.background = tokens.color.surface.hover; e.currentTarget.style.color = tokens.color.text.primary; }}}
@@ -154,6 +158,7 @@ function FollowUpDropdown({ initial = '24:00 Hours' }) {
                 padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
                 background: tokens.color.surface.overlay,
                 border: `${tokens.border.thin} ${tokens.color.border.base}`,
+                borderRadius: tokens.radius.frame,
                 outline: 'none',
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.sm,
@@ -240,6 +245,7 @@ function HeaderStrip() {
           padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
           background: tokens.color.surface.overlay,
           border: `${tokens.border.thin} ${tokens.color.border.base}`,
+          borderRadius: tokens.radius.frame,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
           color: tokens.color.accent[300],
@@ -287,7 +293,7 @@ function MetaCell({ label, value, type }) {
           color: tokens.color.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
-          lineHeight: 1,
+          lineHeight: 'var(--andromeda-leading-none, 1)',
         }}
       >
         {label}

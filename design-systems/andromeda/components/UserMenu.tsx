@@ -230,9 +230,10 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         boxSizing: 'border-box',
         background: tokens.color.surface.raised,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        borderRadius: tokens.radius.frame,
         padding: tokens.spacing[1],
         zIndex: 1000,
-        boxShadow: `0 8px 32px ${tokens.color.surface.base}`,
+        boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
       }}
     >
       {items.map((item, i) => (
@@ -250,19 +251,19 @@ function UserMenuStyles() {
   return (
     <style>{`
       .andromeda-user-menu-item:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.text.primary} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-text-primary) !important;
       }
       .andromeda-user-menu-item[data-destructive="true"]:hover {
-        background: ${tokens.color.surface.hover} !important;
-        color: ${tokens.color.red[200]} !important;
+        background: var(--andromeda-surface-hover) !important;
+        color: var(--andromeda-red-200) !important;
       }
       .andromeda-user-menu-item:active {
-        background: ${tokens.color.surface.active} !important;
+        background: var(--andromeda-surface-active) !important;
       }
       .andromeda-user-menu-item:focus-visible {
         outline: none;
-        box-shadow: inset 0 0 0 1px ${tokens.color.accent[400]};
+        box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
       }
       /* Phone fit — a start-aligned (left:0) panel anchored to a trigger that
          sits in the right half of a phone would open off the right edge. Below

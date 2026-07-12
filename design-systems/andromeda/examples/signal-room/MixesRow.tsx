@@ -34,6 +34,7 @@ function SignalMeter({ value }) {
           width: '100%',
           background: tokens.color.surface.overlay,
           border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          borderRadius: tokens.radius.frame,
         }}
       >
         <div
@@ -52,7 +53,7 @@ function SignalMeter({ value }) {
           display: 'flex',
           justifyContent: 'space-between',
           fontFamily: tokens.typography.fontMono,
-          fontSize: '10px',
+          fontSize: tokens.typography.size.xs,
           color: tokens.color.text.faint,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,

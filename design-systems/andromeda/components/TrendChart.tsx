@@ -27,12 +27,13 @@ import {
 import { motion, useInView } from 'framer-motion';
 import { ChartLine, ChartBar } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, easingArray } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 import { SegmentedControl } from './SegmentedControl';
 
 const sec = (v) => parseInt(v, 10) / 1000; // "500ms" → 0.5
-const EASE_OUT = [0, 0, 0.2, 1];           // = tokens.motion.easing.out
+// framer boundary: derived from tokens, cannot follow runtime var overrides
+const EASE_OUT = easingArray(tokens.motion.easing.out); // = [0, 0, 0.2, 1]
 
 // Multi-series colour hierarchy (the Andromeda charts rules).
 const ROLE_COLOR = {
@@ -57,7 +58,7 @@ function InsetDivider({ side }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -165,6 +166,8 @@ function LegendChip({ color, label, active, onClick }) {
   );
 }
 
+// ponytail: identity constants — tick letterSpacing (0.05em, off the tracking
+// scale) and the numeric fontSize/swatch sizes stay literal for pixel identity.
 const AXIS_TICK = {
   fontFamily: tokens.typography.fontMono,
   fontSize: parseInt(tokens.typography.size.xs, 10),
@@ -258,9 +261,11 @@ export const TrendChart = forwardRef(function TrendChart(
 
   const ChartTooltip = buildTooltip(series, tooltipLabelFormatter, valueFormatter);
   const shown = series.filter((s) => visible[s.key]);
-  const chartMargin = { top: 32, right: 8, left: 0, bottom: 12 };
+  // RAW: recharts margin sink — numeric px, var() cannot resolve; sourced from spacing tokens (left:0 off-scale)
+  const chartMargin = { top: parseInt(tokens.spacing[8], 10), right: parseInt(tokens.spacing[2], 10), left: 0, bottom: parseInt(tokens.spacing[3], 10) };
 
-  const grid = <CartesianGrid strokeDasharray="2 4" stroke={tokens.color.border.subtle} vertical={false} />;
+  // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
+  const grid = <CartesianGrid strokeDasharray={tokens.chart.dash} stroke={tokens.color.border.subtle} vertical={false} />;
   const xAxis = (
     <XAxis dataKey={xKey} tick={AXIS_TICK} axisLine={{ stroke: tokens.color.border.subtle }} tickLine={false} interval={xInterval} />
   );
@@ -297,7 +302,7 @@ export const TrendChart = forwardRef(function TrendChart(
         <defs>
           {shown.map((s) => (
             <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colorOf(s)} stopOpacity={Filled ? 0.12 : 0} />
+              <stop offset="0%" stopColor={colorOf(s)} style={{ stopOpacity: Filled ? 'var(--andromeda-chart-fill-opacity, 0.12)' : 0 }} />
               <stop offset="100%" stopColor={colorOf(s)} stopOpacity={0} />
             </linearGradient>
           ))}
@@ -305,7 +310,8 @@ export const TrendChart = forwardRef(function TrendChart(
         {grid}{xAxis}{yAxis}
         <RechartsTooltip
           content={<ChartTooltip />}
-          cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: '2 4' }}
+          // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
+          cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: tokens.chart.dash }}
           position={{ y: 0 }}
           allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
@@ -317,7 +323,9 @@ export const TrendChart = forwardRef(function TrendChart(
             type="monotone"
             dataKey={s.key}
             stroke={colorOf(s)}
-            strokeWidth={1.5}
+            // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
+            strokeWidth={tokens.chart.lineWidth}
+            // RAW: recharts attribute sink — '4 4' threshold dash stays literal, var() cannot resolve
             strokeDasharray={isThreshold(s) ? '4 4' : undefined}
             fill={`url(#tc-fill-${s.key})`}
             dot={false}

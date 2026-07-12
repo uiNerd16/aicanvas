@@ -46,7 +46,7 @@ import { andromedaVars } from './lib/utils';
  * @property {React.CSSProperties} [style]
  */
 
-const ITEM_HEIGHT = 26;
+const ITEM_HEIGHT = 26; // ponytail: identity constant, no token
 
 // Layout effect on the client (runs before paint so the flip lands without a
 // flash), plain effect on the server (avoids the useLayoutEffect SSR warning
@@ -59,16 +59,17 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 // scrolls internally instead of spilling off the bottom edge. boxSizing keeps
 // the border inside that cap.
 const MENU_PANEL_STYLE = {
-  minWidth: '160px',
+  minWidth: '160px', // ponytail: identity constant, no token
   maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
   overflowY: 'auto',
   boxSizing: 'border-box',
   background: tokens.color.surface.overlay,
   border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+  borderRadius: tokens.radius.frame,
   padding: tokens.spacing[1],
   zIndex: 1000,
-  boxShadow: `0 12px 28px ${tokens.color.surface.alpha}`,
+  boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
 };
 
 // Roving arrow-key navigation for a `role="menu"` container. Queries the
@@ -277,19 +278,13 @@ function MenuItem({ item, onClose }) {
             handleMenuKeyDown(e);
           }}
           style={{
+            ...MENU_PANEL_STYLE,
             position: 'absolute',
             top: 0,
             ...(flipLeft
               ? { right: '100%', marginRight: tokens.spacing[1] }
               : { left: '100%', marginLeft: tokens.spacing[1] }),
-            minWidth: '160px',
-            maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
-            boxSizing: 'border-box',
-            background: tokens.color.surface.overlay,
-            border: `${tokens.border.thin} ${tokens.color.border.bright}`,
-            padding: tokens.spacing[1],
             zIndex: 1001,
-            boxShadow: `0 12px 28px ${tokens.color.surface.alpha}`,
           }}
         >
           {item.submenu.map((sub, i) => (
@@ -478,20 +473,20 @@ export const PanelMenu = forwardRef(function PanelMenu(
            beat any class rule on hover/active. Same precedence trap as
            DateRangePicker — see the Andromeda interaction-states rules. */
         .andromeda-panel-menu-item:hover {
-          background: ${tokens.color.surface.hover} !important;
-          color: ${tokens.color.text.primary} !important;
+          background: var(--andromeda-surface-hover) !important;
+          color: var(--andromeda-text-primary) !important;
         }
         .andromeda-panel-menu-item:active {
-          background: ${tokens.color.surface.active} !important;
-          color: ${tokens.color.text.primary} !important;
+          background: var(--andromeda-surface-active) !important;
+          color: var(--andromeda-text-primary) !important;
         }
         .andromeda-panel-menu-item[data-selected="true"] {
-          background: ${tokens.color.surface.active} !important;
-          color: ${tokens.color.text.primary} !important;
+          background: var(--andromeda-surface-active) !important;
+          color: var(--andromeda-text-primary) !important;
         }
         .andromeda-panel-menu-item:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 1px ${tokens.color.accent[400]};
+          box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
         }
       `}</style>
     </div>

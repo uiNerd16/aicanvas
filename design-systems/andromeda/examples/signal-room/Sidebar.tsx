@@ -39,7 +39,7 @@ function InsetDivider({ side = 'bottom' }) {
         left: tokens.spacing[3],
         right: tokens.spacing[3],
         [side]: 0,
-        height: '1px',
+        height: 'var(--andromeda-border-width, 1px)',
         background: tokens.color.border.subtle,
         pointerEvents: 'none',
       }}
@@ -73,6 +73,7 @@ function ChannelRow({ ch }) {
           height: '24px',
           flexShrink: 0,
           border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          borderRadius: tokens.radius.frame,
           background: tokens.color.surface.overlay,
           display: 'flex',
           alignItems: 'center',
@@ -80,7 +81,7 @@ function ChannelRow({ ch }) {
         }}
       >
         <WaveSine
-          size={12}
+          size={tokens.iconSize.xs}
           weight="regular"
           color={tokens.color.text.muted}
         />
@@ -102,7 +103,7 @@ function ChannelRow({ ch }) {
         <span
           style={{
             fontFamily: tokens.typography.fontMono,
-            fontSize: '10px',
+            fontSize: tokens.typography.size.xs,
             color: tokens.color.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
@@ -200,8 +201,8 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
         background: tokens.color.surface.raised,
         display: 'flex',
         flexDirection: 'column',
-        backdropFilter: 'blur(2px)',
-        WebkitBackdropFilter: 'blur(2px)',
+        backdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
+        WebkitBackdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
       }}
     >
       <CornerMarkers />

@@ -20,6 +20,11 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
+
+// JS timer boundary: setTimeout cannot read CSS vars; derived from tokens at
+// module load, cannot follow runtime var overrides.
+const BLINK_OFF_MS = parseFloat(tokens.motion.duration.slow); // 200ms
 
 // Blinks once every ~2s: full opacity → 0.12 for 200ms → full opacity.
 // Honours reduced-motion: when the user opts out, the dot holds at full
@@ -40,7 +45,8 @@ function useBlink() {
         setTimeout(() => {
           setOpacity(1);
           schedule();
-        }, 200);
+        }, BLINK_OFF_MS);
+        // ponytail: 1800/800 are bespoke blink-cadence jitter, no token
       }, 1800 + Math.random() * 800);
     }
     schedule();
@@ -55,9 +61,10 @@ const badgeVariants = cva(
     // max-w-full + min-w-0 keep a long label from forcing horizontal scroll
     // when the Badge sits in a stacked (single-column) layout; the label
     // span truncates instead (see render below).
+    // ponytail: 5px gap and 2px pad are identity constants, no token
     'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
     'max-w-full min-w-0',
-    'rounded-[var(--andromeda-radius-none)]',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'px-[var(--andromeda-2)] py-[2px]',
     '[font-family:var(--andromeda-font-mono)]',
     'text-[length:var(--andromeda-text-xs)]',
@@ -74,15 +81,15 @@ const badgeVariants = cva(
         ],
         accent: [
           'bg-[color:var(--andromeda-accent-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          'text-[color:var(--andromeda-accent-on)]',
         ],
         warning: [
           'bg-[color:var(--andromeda-orange-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          'text-[color:var(--andromeda-orange-on)]',
         ],
         fault: [
           'bg-[color:var(--andromeda-red-500)]',
-          'text-[color:var(--andromeda-text-primary)]',
+          'text-[color:var(--andromeda-red-on)]',
         ],
         subtle: [
           'bg-[color:var(--andromeda-surface-overlay)]',
@@ -90,7 +97,7 @@ const badgeVariants = cva(
         ],
         outline: [
           'bg-transparent',
-          'border border-solid border-[color:var(--andromeda-border-bright)]',
+          'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-bright)]',
           'text-[color:var(--andromeda-text-primary)]',
         ],
       },
@@ -138,12 +145,12 @@ export const Badge = forwardRef(function Badge(
         aria-hidden="true"
         style={{
           display: 'inline-block',
-          width: '4px',
-          height: '4px',
+          width: 'var(--andromeda-1, 4px)',
+          height: 'var(--andromeda-1, 4px)',
           flexShrink: 0,
           background: dotColor[variant],
           opacity: dotOpacity,
-          transition: 'opacity 80ms ease-out',
+          transition: 'opacity var(--andromeda-duration-fast, 80ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1))',
         }}
       />
       <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">

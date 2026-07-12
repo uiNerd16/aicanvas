@@ -273,7 +273,7 @@ export function NowTransmitting() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontFamily: tokens.typography.fontMono,
-                fontSize: '10px',
+                fontSize: tokens.typography.size.xs,
                 color: tokens.color.text.faint,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.widest,

@@ -21,6 +21,20 @@ export function cn(...inputs) {
 }
 
 /**
+ * easingArray — parse a tokens.motion.easing cubic-bezier() string into the
+ * 4-number array framer-motion needs. Framer cannot read CSS vars, so JS
+ * animations MUST cross the var boundary — but they should derive from the
+ * token string here, never hand-copy the numbers (copies drift silently).
+ *
+ * @param {string} cssBezier e.g. tokens.motion.easing.out
+ * @returns {[number, number, number, number]}
+ */
+export function easingArray(cssBezier) {
+  const m = String(cssBezier).match(/[\d.]+/g);
+  return m && m.length === 4 ? m.map(Number) : [0.4, 0, 0.2, 1];
+}
+
+/**
  * andromedaVars — emits Andromeda tokens as CSS custom properties.
  *
  * Tailwind v4 cannot reach JS-defined token values directly. By
@@ -53,27 +67,30 @@ export function andromedaVars() {
     '--andromeda-border-bright': t.color.border.bright,
     '--andromeda-border-strong': t.color.border.strong,
     '--andromeda-border-alpha':  t.color.border.alpha,
-    // Accent (turquoise) — 5 stops + 1 alpha
+    // Accent (turquoise) — 5 stops + 1 alpha + on-fill foreground
     '--andromeda-accent-100':   t.color.accent[100],
     '--andromeda-accent-200':   t.color.accent[200],
     '--andromeda-accent-300':   t.color.accent[300],
     '--andromeda-accent-400':   t.color.accent[400],
     '--andromeda-accent-500':   t.color.accent[500],
     '--andromeda-accent-alpha': t.color.accent.alpha,
-    // Red — 5 stops + 1 alpha
+    '--andromeda-accent-on':    t.color.accent.on,
+    // Red — 5 stops + 1 alpha + on-fill foreground
     '--andromeda-red-100':   t.color.red[100],
     '--andromeda-red-200':   t.color.red[200],
     '--andromeda-red-300':   t.color.red[300],
     '--andromeda-red-400':   t.color.red[400],
     '--andromeda-red-500':   t.color.red[500],
     '--andromeda-red-alpha': t.color.red.alpha,
-    // Orange — 5 stops + 1 alpha
+    '--andromeda-red-on':    t.color.red.on,
+    // Orange — 5 stops + 1 alpha + on-fill foreground
     '--andromeda-orange-100':   t.color.orange[100],
     '--andromeda-orange-200':   t.color.orange[200],
     '--andromeda-orange-300':   t.color.orange[300],
     '--andromeda-orange-400':   t.color.orange[400],
     '--andromeda-orange-500':   t.color.orange[500],
     '--andromeda-orange-alpha': t.color.orange.alpha,
+    '--andromeda-orange-on':    t.color.orange.on,
     // Gradients
     '--andromeda-gradient-accent-fade':  t.color.gradient.accentFade,
     '--andromeda-gradient-accent-sweep': t.color.gradient.accentSweep,
@@ -95,9 +112,11 @@ export function andromedaVars() {
     '--andromeda-weight-medium':   String(t.typography.weight.medium),
     '--andromeda-weight-semibold': String(t.typography.weight.semibold),
     '--andromeda-weight-bold':     String(t.typography.weight.bold),
-    '--andromeda-leading-tight':  String(t.typography.lineHeight.tight),
-    '--andromeda-leading-snug':   String(t.typography.lineHeight.snug),
-    '--andromeda-leading-normal': String(t.typography.lineHeight.normal),
+    '--andromeda-leading-none':    String(t.typography.lineHeight.none),
+    '--andromeda-leading-tight':   String(t.typography.lineHeight.tight),
+    '--andromeda-leading-snug':    String(t.typography.lineHeight.snug),
+    '--andromeda-leading-normal':  String(t.typography.lineHeight.normal),
+    '--andromeda-leading-relaxed': String(t.typography.lineHeight.relaxed),
     '--andromeda-tracking-tight':  t.typography.tracking.tight,
     '--andromeda-tracking-normal': t.typography.tracking.normal,
     '--andromeda-tracking-wide':   t.typography.tracking.wide,
@@ -114,11 +133,39 @@ export function andromedaVars() {
     '--andromeda-10': t.spacing[10],
     '--andromeda-12': t.spacing[12],
     // Radius
-    '--andromeda-radius-none': t.radius.none,
-    '--andromeda-radius-sm':   t.radius.sm,
-    '--andromeda-radius-md':   t.radius.md,
+    '--andromeda-radius-none':  t.radius.none,
+    '--andromeda-radius-sm':    t.radius.sm,
+    '--andromeda-radius-md':    t.radius.md,
+    // Raw default, NOT t.radius.frame — that string embeds var(--andromeda-
+    // radius-frame,…) and would self-reference. Keep in sync with tokens.ts.
+    '--andromeda-radius-frame': '0px',
+    // Border + marker stroke widths (1px hairline identity, theme-tunable)
+    '--andromeda-border-width': t.border.width,
+    '--andromeda-marker-width': `${t.marker.borderWidth}px`,
     // Opacity — disabled-control constant (unitless; used via opacity-[var(--andromeda-opacity-disabled)])
     '--andromeda-opacity-disabled': String(t.opacity.disabled),
+    // Icon glyph scale (px units for CSS boxes; Phosphor size props use the numbers)
+    '--andromeda-icon-xs': `${t.iconSize.xs}px`,
+    '--andromeda-icon-sm': `${t.iconSize.sm}px`,
+    '--andromeda-icon-md': `${t.iconSize.md}px`,
+    '--andromeda-icon-lg': `${t.iconSize.lg}px`,
+    '--andromeda-icon-xl': `${t.iconSize.xl}px`,
+    // Effects — glass blur + accent glow radius
+    '--andromeda-blur-sm': t.effect.blurSm,
+    '--andromeda-blur-lg': t.effect.blurLg,
+    '--andromeda-glow':    t.effect.glow,
+    // Drop-shadow — primitives (theme-tunable) + composed size tiers
+    '--andromeda-shadow-color': t.effect.shadowColor,
+    '--andromeda-shadow-x':     t.effect.shadowX,
+    '--andromeda-shadow-y':     t.effect.shadowY,
+    '--andromeda-shadow-blur':  t.effect.shadowBlur,
+    '--andromeda-shadow-sm':    t.effect.shadowSm,
+    '--andromeda-shadow-md':    t.effect.shadowMd,
+    '--andromeda-shadow-lg':    t.effect.shadowLg,
+    // Chart constants (CSS sinks only; recharts numeric sinks stay RAW)
+    '--andromeda-chart-fill-opacity':       String(t.chart.fillOpacity),
+    '--andromeda-chart-fill-opacity-faint': String(t.chart.fillOpacityFaint),
+    '--andromeda-swatch':                   t.chart.swatch,
     // Breakpoints — exposed for clamp()/calc() expressions that want the
     // same thresholds (e.g. fluid type). NOTE: a CSS @media condition
     // CANNOT read var(), so reflow media queries use the `mq` helper

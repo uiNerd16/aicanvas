@@ -56,6 +56,7 @@ import { navItems } from './data';
 function HoverStyles() {
   return (
     <style>{`
+      /* off-token: 'ease' keyword (and .rp-row's 100ms) have no Andromeda motion token — left literal */
       .rp-nav { transition: color 140ms ease; }
       .rp-nav:hover { color: ${tokens.color.text.primary} !important; }
 
@@ -171,7 +172,7 @@ function TopBar() {
 
       {/* Brand — Andromeda over the template name */}
       <div className="rp-brand" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], flexShrink: 0, minWidth: 0 }}>
-        <AndromedaIcon size={22} />
+        <AndromedaIcon size={tokens.iconSize.xl} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
           <span
             style={{
@@ -205,7 +206,7 @@ function TopBar() {
         aria-hidden
         className="rp-nav-divider"
         style={{
-          width: '1px',
+          width: 'var(--andromeda-border-width, 1px)',
           height: tokens.spacing[6],
           background: tokens.color.border.base,
           flexShrink: 0,

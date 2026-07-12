@@ -233,7 +233,7 @@ export const Slider = forwardRef(function Slider(
         <div
           className={cn(
             'absolute left-0 right-0 top-1/2 -translate-y-1/2',
-            'h-[3px] border border-solid',
+            'h-[3px] border-[length:var(--andromeda-border-width,1px)] border-solid',
             'bg-[color:var(--andromeda-surface-overlay)]',
             'border-[color:var(--andromeda-border-subtle)]',
           )}
@@ -254,7 +254,7 @@ export const Slider = forwardRef(function Slider(
             'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
             'w-[8px] h-[16px]',
             'bg-[color:var(--andromeda-accent-300)]',
-            'border border-solid border-[color:var(--andromeda-accent-100)]',
+            'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
             // No resting glow; the focus-visible state sets --slider-thumb-shadow.
             'shadow-[var(--slider-thumb-shadow,none)]',
             'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',

@@ -49,8 +49,8 @@ const boxVariants = cva(
   [
     'relative inline-flex items-center justify-center shrink-0',
     'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
@@ -169,8 +169,8 @@ export const Checkbox = forwardRef(function Checkbox(
               size={12}
               weight="light"
               style={{
-                color: 'var(--andromeda-accent-100)',
-                animation: `andromeda-pop-in ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
+                color: 'var(--andromeda-accent-on, var(--andromeda-accent-100))',
+                animation: `andromeda-pop-in var(--andromeda-duration-normal, ${tokens.motion.duration.normal}) var(--andromeda-easing-out, ${tokens.motion.easing.out})`,
               }}
             />
           ) : null}

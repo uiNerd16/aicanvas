@@ -36,7 +36,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, easingArray } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
 import { tokens } from '../tokens';
 
@@ -50,8 +50,9 @@ const FOCUSABLE_SELECTOR =
 
 const ms = (v) => parseInt(v, 10) / 1000;
 const PANEL_DURATION = ms(tokens.motion.duration.slow);
-const EASE_OUT = [0, 0, 0.2, 1];   // tokens.motion.easing.out
-const EASE_IN  = [0.4, 0, 1, 1];   // tokens.motion.easing.in
+// framer boundary: derived from tokens, cannot follow runtime var overrides
+const EASE_OUT = easingArray(tokens.motion.easing.out);
+const EASE_IN  = easingArray(tokens.motion.easing.in);
 
 const SIDE_MAP = {
   right:  { axis: 'x', sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
@@ -188,8 +189,8 @@ export const Drawer = forwardRef(function Drawer(
   // (24px) leaves the backdrop peeking so the drawer still reads as an overlay.
   const sizeStyle =
     cfg.axis === 'x'
-      ? { width: `min(${sizeValue}, calc(100% - ${tokens.spacing[6]}))` }
-      : { height: `min(${sizeValue}, calc(100% - ${tokens.spacing[6]}))` };
+      ? { width: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` }
+      : { height: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` };
   const panelInitial = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
   const panelAnimate = { [cfg.axis]: 0, opacity: 1 };
   const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
@@ -241,7 +242,7 @@ export const Drawer = forwardRef(function Drawer(
                 'flex flex-col',
                 'bg-[color:var(--andromeda-surface-raised)]',
                 '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
-                'rounded-[var(--andromeda-radius-none)]',
+                'rounded-[var(--andromeda-radius-frame,0px)]',
                 'shadow-[0_0_60px_var(--andromeda-surface-base)]',
                 'outline-none',
                 className,
@@ -274,7 +275,7 @@ export const DrawerHeader = forwardRef(function DrawerHeader(
       className={cn(
         'flex flex-col gap-[2px]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-b border-solid border-[color:var(--andromeda-border-subtle)]',
+        'border-b-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}
@@ -363,7 +364,7 @@ export const DrawerFooter = forwardRef(function DrawerFooter(
       className={cn(
         'flex items-center justify-end gap-[var(--andromeda-3)]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
-        'border-t border-solid border-[color:var(--andromeda-border-subtle)]',
+        'border-t-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
         className,
       )}
       {...props}

@@ -73,7 +73,7 @@ function Cover({ cover, title }) {
       aria-label={title ? `${title} cover` : undefined}
     >
       <CornerMarkers size={4} offset={1} />
-      {cover ? null : <Broadcast size={16} weight="regular" color={tokens.color.text.muted} />}
+      {cover ? null : <Broadcast size={tokens.iconSize.sm} weight="regular" color={tokens.color.text.muted} />}
     </div>
   );
 }
@@ -118,8 +118,8 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
         flexShrink: 0,
         height: '72px',
         background: tokens.color.surface.raised,
-        backdropFilter: 'blur(2px)',
-        WebkitBackdropFilter: 'blur(2px)',
+        backdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
+        WebkitBackdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
         display: 'flex',
         alignItems: 'center',
         padding: `0 ${tokens.spacing[5]}`,
@@ -158,7 +158,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
           <span
             style={{
               fontFamily: tokens.typography.fontMono,
-              fontSize: '10px',
+              fontSize: tokens.typography.size.xs,
               color: tokens.color.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,

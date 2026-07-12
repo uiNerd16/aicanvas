@@ -15,14 +15,14 @@ import { cn, andromedaVars } from './lib/utils';
 const textareaVariants = cva(
   [
     'block w-full box-border resize-y',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-sans)]',
     'text-[length:var(--andromeda-text-md)]',
     'text-[color:var(--andromeda-text-primary)]',
     'bg-[color:var(--andromeda-surface-raised)]',
     'px-[var(--andromeda-3)] py-[var(--andromeda-2)]',
-    'leading-[1.5]',
+    'leading-[var(--andromeda-leading-normal,1.5)]',
     'outline-none',
     'transition-[border-color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'placeholder:text-[color:var(--andromeda-text-muted)]',

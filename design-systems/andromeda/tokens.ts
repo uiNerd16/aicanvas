@@ -56,6 +56,11 @@ export const tokens = {
       400:   '#109380',
       500:   '#126059',
       alpha: 'rgba(15, 207, 178, 0.25)',
+      // Text/icon ON an accent-filled surface. The one guaranteed-contrast
+      // pairing token — every accent fill takes its foreground from here so
+      // a theme retuning the family keeps labels legible. Defaults to the
+      // 100 stop (documented ≥6:1 on the 500 stop).
+      on:    '#BAF8EC',
     },
     // Red — 5 stops + 1 alpha. Use 100 for body text on 500 (≥7:1).
     red: {
@@ -65,6 +70,7 @@ export const tokens = {
       400:   '#B82424',
       500:   '#5A1818',
       alpha: 'rgba(255, 57, 57, 0.25)',
+      on:    '#FFCFCF',
     },
     // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
     orange: {
@@ -74,6 +80,7 @@ export const tokens = {
       400:   '#B57009',
       500:   '#4D3712',
       alpha: 'rgba(255, 160, 0, 0.25)',
+      on:    '#FFE5B5',
     },
     // Gradients fade to solid colors (no transparent stops).
     gradient: {
@@ -118,9 +125,11 @@ export const tokens = {
       bold:     700,
     },
     lineHeight: {
+      none:    1,
       tight:   1.1,
       snug:    1.25,
       normal:  1.5,
+      relaxed: 1.6,
     },
     tracking: {
       // Wide letter-spacing on monospace labels
@@ -147,20 +156,74 @@ export const tokens = {
     none: '0',
     sm:   '2px',
     md:   '3px',
+    // The one radius every framed surface consumes (cards, buttons, inputs,
+    // menus, tiles). 0 = the square identity. Same var-with-fallback pattern
+    // as border.thin below, so INLINE styles consuming tokens.radius.frame
+    // are theme-tunable too; andromedaVars() emits the raw 0px default for
+    // --andromeda-radius-frame (it must not self-reference this string).
+    // `none` stays a true constant zero for explicit square declarations.
+    frame: 'var(--andromeda-radius-frame, 0px)',
   },
   opacity: {
     // Disabled controls. One system-wide constant so every primitive and
     // input dims identically. Exposed as --andromeda-opacity-disabled.
     disabled: 0.4,
   },
+  // Icon glyph sizes (numbers — Phosphor `size` props and SVG boxes need
+  // numerics). One authoritative scale instead of per-component px.
+  iconSize: {
+    xs: 12,
+    sm: 16,
+    md: 18,
+    lg: 20,
+    xl: 22,
+  },
+  // Effects — frosted-glass blur radii and the accent hover/focus glow
+  // radius. Exposed as --andromeda-blur-sm/-lg and --andromeda-glow.
+  effect: {
+    blurSm: '2px',
+    blurLg: '8px',
+    glow:   '8px',
+    // Drop-shadow system. Four PRIMITIVES a theme can tune (color, x, y,
+    // blur), then three SIZE TIERS composed from them. The tiers scale the
+    // offset + blur so a large panel casts a deeper shadow than a small chip
+    // — one control set retunes every tier at once. Components pick the tier
+    // that matches their footprint (chips → sm, menus/popovers → md, drawers
+    // / big panels → lg). Default is a soft near-black elevation, close to
+    // the ad-hoc shadows components used before.
+    shadowColor: 'rgba(0, 0, 0, 0.45)',
+    shadowX:     '0px',
+    shadowY:     '10px',
+    shadowBlur:  '24px',
+    // Tier strings reference the primitive vars (with the token defaults as
+    // fallbacks) so tuning any primitive reflows all three tiers live.
+    shadowSm: 'var(--andromeda-shadow-x, 0px) calc(var(--andromeda-shadow-y, 10px) * 0.4) calc(var(--andromeda-shadow-blur, 24px) * 0.4) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
+    shadowMd: 'var(--andromeda-shadow-x, 0px) calc(var(--andromeda-shadow-y, 10px) * 0.8) calc(var(--andromeda-shadow-blur, 24px) * 0.9) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
+    shadowLg: 'var(--andromeda-shadow-x, 0px) var(--andromeda-shadow-y, 10px) var(--andromeda-shadow-blur, 24px) var(--andromeda-shadow-color, rgba(0, 0, 0, 0.45))',
+  },
+  // Chart constants shared by TrendChart / MetricChart / RadarChart / Gauge.
+  // lineWidth/dash are recharts sinks (numbers/strings, var-incapable — keep
+  // RAW); fillOpacity + swatch are CSS sinks, exposed as vars.
+  chart: {
+    fillOpacity:      0.12,
+    fillOpacityFaint: 0.06,
+    lineWidth:        1.5,
+    dash:             '2 4',
+    swatch:           '8px',
+  },
   border: {
-    thin: '1px solid',
+    // System hairline width. 1px IS the identity; the var indirection (same
+    // pattern as fontSans above) lets a theme widen every border at once.
+    // The inner fallback keeps installed projects correct without any var.
+    width: '1px',
+    thin: 'var(--andromeda-border-width, 1px) solid',
   },
   marker: {
     // Corner marker geometry — L-shaped brackets that hug each corner.
     size:        12,    // px square the bracket lives inside
     offset:      0,     // px inset from the corner (0 = flush)
-    borderWidth: 1,     // px stroke thickness of the L
+    borderWidth: 1,     // px stroke thickness of the L; rendered through
+                        // --andromeda-marker-width so themes can thicken it
   },
   layout: {
     sidebarWidth: '224px',

@@ -16,8 +16,8 @@ import { cn, andromedaVars } from './lib/utils';
 const avatarVariants = cva(
   [
     'inline-flex items-center justify-center select-none shrink-0',
-    'border border-solid',
-    'rounded-[var(--andromeda-radius-none)]',
+    'border-[length:var(--andromeda-border-width,1px)] border-solid',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
     'bg-[color:var(--andromeda-surface-overlay)]',
     'border-[color:var(--andromeda-border-base)]',
     'text-[color:var(--andromeda-text-primary)]',
@@ -30,9 +30,9 @@ const avatarVariants = cva(
   {
     variants: {
       size: {
-        sm: 'w-[24px] h-[24px] text-[length:var(--andromeda-text-xs)]',
-        md: 'w-[32px] h-[32px] text-[length:var(--andromeda-text-sm)]',
-        lg: 'w-[40px] h-[40px] text-[length:var(--andromeda-text-md)]',
+        sm: 'w-[var(--andromeda-6,24px)] h-[var(--andromeda-6,24px)] text-[length:var(--andromeda-text-xs)]',
+        md: 'w-[var(--andromeda-8,32px)] h-[var(--andromeda-8,32px)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'w-[var(--andromeda-10,40px)] h-[var(--andromeda-10,40px)] text-[length:var(--andromeda-text-md)]',
       },
     },
     defaultVariants: {

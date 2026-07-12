@@ -14,7 +14,7 @@ import { forwardRef } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
 
@@ -35,9 +35,10 @@ const TOUCH_TARGET_STYLE = `
 // `layoutId` to animate between sibling NavItems when wrapped in a
 // <LayoutGroup>. See the Andromeda motion rules.
 const ms = (v) => parseInt(v, 10) / 1000;
+// framer boundary: derived from tokens, cannot follow runtime var overrides
 const INDICATOR_TX = {
   duration: ms(tokens.motion.duration.slow),
-  ease: [0.4, 0, 0.2, 1], // tokens.motion.easing.standard
+  ease: easingArray(tokens.motion.easing.standard),
 };
 
 const navItemVariants = cva(
@@ -45,7 +46,7 @@ const navItemVariants = cva(
     'relative flex items-center w-full text-left box-border',
     'gap-[var(--andromeda-3)]',
     'pl-[var(--andromeda-5)] pr-[var(--andromeda-4)] py-[var(--andromeda-3)]',
-    'border-0 rounded-[var(--andromeda-radius-none)]',
+    'border-0 rounded-[var(--andromeda-radius-frame,0px)]',
     'cursor-pointer select-none',
     'font-[number:var(--andromeda-weight-medium)]',
     'text-[length:var(--andromeda-text-sm)]',
@@ -141,13 +142,14 @@ export const NavItem = forwardRef(function NavItem(
             transition={INDICATOR_TX}
             style={{
               position: 'absolute',
-              right: '12px',
+              right: 'var(--andromeda-3, 12px)',
               top: '50%',
               translateY: '-50%',
-              width: '4px',
-              height: '4px',
+              width: 'var(--andromeda-1, 4px)',
+              height: 'var(--andromeda-1, 4px)',
               flexShrink: 0,
               background: 'var(--andromeda-accent-300)',
+              // ponytail: glow offsets are identity constants, no token
               boxShadow: '-2px 0 8px var(--andromeda-accent-500)',
             }}
           />
