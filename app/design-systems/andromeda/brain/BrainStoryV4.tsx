@@ -495,8 +495,8 @@ export function BrainStoryV4() {
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
             Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent can read</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
+            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
           </p>
 
           <div style={{ ...PANEL, marginTop: 28 }}>
