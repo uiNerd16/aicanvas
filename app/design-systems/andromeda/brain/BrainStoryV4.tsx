@@ -474,8 +474,21 @@ export function BrainStoryV4() {
       {/* ── Editorial sections (left-aligned, framed panels). max-w-4xl (896) + sm:px-6, matches the homepage content column. ── */}
       <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '8px 24px 8px', fontFamily: SANS }}>
 
-        {/* What it is */}
+        {/* Why it exists — the system is built to grow */}
         <section>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>Why it exists</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            Built to grow, not to freeze
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+            Most design systems hand you a fixed kit and stop there. The Brain is built the other way. Because the rules are written down, your agent can{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>go past the screens that already exist</strong>: compose new layouts, extend the patterns, explore new components, all still unmistakably Andromeda. The system becomes a place to{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>experiment fast</strong>, try an idea and push it further, and trust that what comes back belongs to the system because it was built against the same rules.
+          </p>
+        </section>
+
+        {/* What it is */}
+        <section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             The taste lives in the system, not the prompt
@@ -517,7 +530,7 @@ export function BrainStoryV4() {
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{r.role}</span>
                 </div>
-                <p style={{ flex: 1, fontSize: 16, color: C.node, lineHeight: 1.625, margin: 0 }}>{r.gets}</p>
+                <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{r.gets}</p>
               </div>
             ))}
           </div>
