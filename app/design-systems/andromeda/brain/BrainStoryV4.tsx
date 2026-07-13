@@ -19,7 +19,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Palette, Code, Sparkle, Check, X as XIcon } from '@phosphor-icons/react'
+import { ArrowRight, Lightning, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -84,10 +84,10 @@ const STRUCTURE = [
   { label: 'Component rules', count: CMP.length, sample: CMP.slice(0, 8) },
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
-const ROLES = [
-  { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'Even the screens you did not build come out on-brand.' },
-  { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'Ship Andromeda UI that already follows the rules, without writing them into every prompt.' },
-  { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'Reads the whole rulebook and builds to it, so it stops guessing.' },
+const BENEFITS = [
+  { label: 'Faster', icon: <Lightning weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
+  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
+  { label: 'Efficient', icon: <Gauge weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
 ]
 
 // Classic workflow pains (left) vs what an AI-native system delivers (right).
@@ -629,22 +629,25 @@ export function BrainStoryV4() {
           </div>
         </section>
 
-        {/* Who it's for */}
+        {/* How it works */}
         <section style={{ marginTop: 60 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>Who it&apos;s for</p>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            Made for the whole team, human and machine
+            One reader. Every benefit is yours.
           </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+            The Brain is written for your AI agent, not for you. What you get is what the agent does with it.
+          </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
-            {ROLES.map((r) => (
-              <div key={r.role} style={{ display: 'flex', flexDirection: 'column', background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+            {BENEFITS.map((benefit) => (
+              <div key={benefit.label} style={{ display: 'flex', flexDirection: 'column', background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                   <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
-                    {r.icon}
+                    {benefit.icon}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{r.role}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{benefit.label}</span>
                 </div>
-                <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{r.gets}</p>
+                <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{benefit.body}</p>
               </div>
             ))}
           </div>
