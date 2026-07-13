@@ -85,9 +85,9 @@ const STRUCTURE = [
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
 const ROLES = [
-  { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'A vocabulary that holds across every screen.' },
-  { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'A foundation they never rebuild.' },
-  { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'The context to stop guessing and stay consistent.' },
+  { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'Even the screens you did not build come out on-brand.' },
+  { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'Ship Andromeda UI that already follows the rules, without writing them into every prompt.' },
+  { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'Reads the whole rulebook and builds to it, so it stops guessing.' },
 ]
 
 // Section separator: the AI Canvas wire mark, three across, like the homepage divider.
@@ -453,7 +453,7 @@ export function BrainStoryV4() {
           The Andromeda <span style={{ color: C.accentBtn }}>Brain</span>
         </h1>
         <p style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}>
-          A new design system, built from the ground up on the Andromeda components. A new way to design and build modern UIs.
+          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so it builds on-brand Andromeda UI on the first prompt instead of guessing.
         </p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
@@ -478,12 +478,12 @@ export function BrainStoryV4() {
         <section>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            More than tokens and components
+            The taste lives in the system, not the prompt
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            A design system is more than <Chip>tokens</Chip> and <Chip>components</Chip>. It&apos;s the{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>reasoning that ties them together</strong>: when a color carries meaning, how motion should behave, what every state owes the user. The Brain captures that reasoning in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent can actually read</strong>, so your tools understand Andromeda instead of guessing at it, and every screen comes out consistent.
+            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent can read</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
           </p>
 
           <div style={{ ...PANEL, marginTop: 28 }}>

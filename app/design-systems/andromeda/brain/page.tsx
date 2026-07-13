@@ -7,7 +7,7 @@ import { BrainStoryV4 } from './BrainStoryV4'
 const jbm = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata = {
-  title: 'The Andromeda Brain — Design Intelligence for AI Agents',
+  title: 'The Andromeda Brain: Design Rules for On-Brand UI',
   description:
     'The judgment layer for Andromeda: foundations, per-component rules, and skills your AI coding agent reads to build on-brand UI. One command installs the whole brain.',
 }
