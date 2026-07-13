@@ -35,6 +35,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'distortion-grid': ['Canvas', 'Tailwind CSS'],
   'dot-grid': ['Canvas', 'Tailwind CSS'],
   'emoji-burst': ['Motion', 'Tailwind CSS'],
+  'expanding-tabs': ['Motion', 'Tailwind CSS'],
   'flip-calendar': ['Motion', 'Tailwind CSS'],
   'glass-ai-compose': ['Motion', 'Tailwind CSS'],
   'glass-card': ['Motion', 'Tailwind CSS'],
@@ -236,6 +237,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['SaaS', 'Dashboard', 'Marketing site'],
     about:
       'Glass User Menu is a frosted-glass avatar button that opens a dropdown with grouped menu items, dividers, and a final Log Out action. The dropdown animates in with a small Motion-driven slide and fade, and the glass surface keeps it visually consistent with the rest of a glassmorphism design system. It slots cleanly into the top-right of any SaaS shell, dashboard chrome, or marketing site that already has an authenticated state.',
+  },
+  'expanding-tabs': {
+    useCases: ['Mail client', 'Dashboard', 'Settings'],
+    about:
+      'Expanding Tabs is a monochrome tab bar where switching sections is one continuous shape change: the active tab expands into a full icon-and-label pill while the previous tab collapses back into a plain icon-only circle. Every icon sits at a fixed left inset so it never needs its own layout animation, which keeps the morph smooth no matter how fast you click between tabs. A soft drop-shadow elevation plus a crisp inset top-highlight on both the pill and the outer rail give the bar a tactile, skeuomorphic finish in light and dark mode alike. It fits a mail client, a dashboard section switcher, or any compact settings tab strip.',
   },
 
   // ─── Widgets ─────────────────────────────────────────────────────────────

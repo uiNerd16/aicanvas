@@ -111,6 +111,7 @@ const ALL_SLUGS = [
   'tilted-coverflow',
   'crypto-swap',
   'mood-tracker',
+  'expanding-tabs',
 ]
 
 const arg   = process.argv[2]
@@ -400,6 +401,14 @@ const INTERACTIONS = {
     }
     await page.mouse.up()
     await page.waitForTimeout(350)
+  },
+
+  // Expanding Tabs — default state is just Inbox active, which reads like a
+  // static pill. Click the Calendar tab so the shot shows the morph feature
+  // itself: an expanded icon+label pill next to a collapsed icon-only circle.
+  'expanding-tabs': async (preview) => {
+    await preview.locator('button').nth(1).click()
+    await preview.page().waitForTimeout(600) // let the spring morph settle
   },
 }
 

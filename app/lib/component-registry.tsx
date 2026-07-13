@@ -152,6 +152,7 @@ import { prompts as cryptoSwapPrompts } from '../../components-workspace/crypto-
 import MoodTracker from '../../components-workspace/mood-tracker'
 import { prompts as moodTrackerPrompts } from '../../components-workspace/mood-tracker/prompts'
 import ExpandingTabs from '../../components-workspace/expanding-tabs'
+import { prompts as expandingTabsPrompts } from '../../components-workspace/expanding-tabs/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1342,18 +1343,18 @@ Requirements:
   },
   {
     slug: 'expanding-tabs',
-    image: '',
+    image: 'https://ik.imagekit.io/aitoolkit/expanding-tabs.png',
     name: 'Expanding Tabs',
-    description: 'A monochrome tab bar where the active tab expands into an icon-and-label pill while the others collapse to icon-only circles. Click a tab and the pill fluidly morphs across the row.',
+    description: 'A monochrome tab bar of icon circles. Click one and it expands into a labeled pill.',
     tags: [
-      { label: 'Buttons & Toggles', accent: true },
+      { label: 'Navigation', accent: true },
       { label: 'Interactive' },
       { label: 'Motion' },
     ],
     dualTheme: true,
     PreviewComponent: ExpandingTabs,
     code: componentCodes['expanding-tabs'],
-    prompts: {},
+    prompts: expandingTabsPrompts,
   },
 ]
 
