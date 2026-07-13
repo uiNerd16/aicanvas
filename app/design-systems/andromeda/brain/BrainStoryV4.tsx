@@ -330,7 +330,7 @@ export function BrainStoryV4() {
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 0.9))
             const proj = wp.clone().project(camera)
             const behind = proj.z > 1
-            const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
+            const sx = Math.max(70, Math.min(W - 70, (proj.x * 0.5 + 0.5) * W)), sy = (-proj.y * 0.5 + 0.5) * H
             const op = behind ? 0 : Math.min(1, 0.12 + 0.88 * near * near + activity * 0.5)
             el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.9 + near * 0.25})`
             el.style.opacity = String(op)
@@ -344,7 +344,7 @@ export function BrainStoryV4() {
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 1.1))
             const proj = wp.clone().project(camera)
             const behind = proj.z > 1
-            const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
+            const sx = Math.max(110, Math.min(W - 110, (proj.x * 0.5 + 0.5) * W)), sy = (-proj.y * 0.5 + 0.5) * H
             const op = behind ? 0 : Math.min(1, 0.42 + 0.58 * near + activity * 0.4)
             el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.96 + near * 0.14})`
             el.style.opacity = String(op)
@@ -393,7 +393,7 @@ export function BrainStoryV4() {
       <div style={{ position: 'relative', height: '64vh', minHeight: 420 }}>
         <div
           ref={hostRef}
-          style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'none' }}
+          style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'pan-y' }}
         />
         {/* appearance stepper — vertical ticks on the right, centered with the
             brain. No labels (the material name shows as a native tooltip on
@@ -406,7 +406,7 @@ export function BrainStoryV4() {
               title={mm.name}
               aria-label={`Appearance: ${mm.name}`}
               aria-pressed={i === matIndex}
-              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '6px 2px', lineHeight: 0 }}
+              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '12px 8px', lineHeight: 0 }}
             >
               <span
                 style={{
@@ -662,9 +662,11 @@ export function BrainStoryV4() {
         <section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
             {STATS.map((s, i) => (
-              <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
-                <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
+              <span key={s.label} style={{ display: 'contents' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
+                  <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
+                </span>
                 {i < STATS.length - 1 && <span style={{ color: C.muted, margin: '0 12px' }}>·</span>}
               </span>
             ))}
