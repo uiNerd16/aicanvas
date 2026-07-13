@@ -47,17 +47,16 @@ export default function ExpandingTabs() {
               whileHover={isActive ? undefined : { scale: 1.045 }}
               whileTap={{ scale: 0.94 }}
               transition={SPRING}
-              className={`relative flex h-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full outline-none focus-visible:ring-2 focus-visible:ring-black/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#E3E3E8] dark:focus-visible:ring-white/80 dark:focus-visible:ring-offset-[#0E0E0F] ${
+              className={`relative flex h-10 shrink-0 cursor-pointer items-center justify-start overflow-hidden rounded-full pl-[0.66rem] outline-none focus-visible:ring-2 focus-visible:ring-black/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#E3E3E8] dark:focus-visible:ring-white/80 dark:focus-visible:ring-offset-[#0E0E0F] ${
                 isActive
-                  ? 'gap-2 bg-[#FCFCFD] px-4 shadow-[0_7px_18px_rgba(32,32,36,0.14),0_1px_2px_rgba(32,32,36,0.08)] dark:bg-[#29292C] dark:shadow-[0_7px_18px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.06)]'
+                  ? 'gap-2 bg-[#FCFCFD] pr-4 shadow-[0_7px_18px_rgba(32,32,36,0.14),0_1px_2px_rgba(32,32,36,0.08)] dark:bg-[#29292C] dark:shadow-[0_7px_18px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.06)]'
                   : 'w-10 bg-[#F8F8FA] shadow-[0_3px_9px_rgba(32,32,36,0.09),0_1px_1px_rgba(32,32,36,0.06)] dark:bg-[#202023] dark:shadow-[0_3px_9px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.035)]'
               }`}
             >
               <motion.span
-                layout
                 animate={{ scale: isActive ? 1.03 : 1, opacity: isActive ? 1 : 0.78 }}
                 transition={SPRING}
-                className="flex items-center justify-center text-[#161618] dark:text-[#F3F3F4]"
+                className="flex shrink-0 items-center justify-center text-[#161618] dark:text-[#F3F3F4]"
               >
                 <Icon size="1.18em" weight="regular" aria-hidden="true" />
               </motion.span>
