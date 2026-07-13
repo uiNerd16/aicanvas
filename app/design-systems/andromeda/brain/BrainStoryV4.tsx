@@ -531,7 +531,7 @@ export function BrainStoryV4() {
             </div>
 
             <div className="why-bento-beyond" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>02 · Go beyond</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>02 · Go beyond</span>
               <h3 style={{ fontSize: 18, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '16px 0 0' }}>Past the screens that already exist</h3>
               <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '10px 0 0' }}>
                 Because the rules are written down, your agent can create new work that is still unmistakably Andromeda.
@@ -544,7 +544,7 @@ export function BrainStoryV4() {
             </div>
 
             <div className="why-bento-experiment" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>03 · Experiment fast</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>03 · Experiment fast</span>
               <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: '22px 0 0' }}>
                 Try an idea.<br />Push it further.
               </p>
