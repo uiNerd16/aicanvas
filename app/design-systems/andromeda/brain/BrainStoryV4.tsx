@@ -17,6 +17,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
 import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
@@ -75,6 +76,9 @@ const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Irid
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
 const PANEL: React.CSSProperties = { background: 'transparent', border: '1px solid #2D2D2E', borderRadius: 16, padding: '24px 28px' }
+// Smaller sibling of PANEL — the solid-surface card treatment reused by the
+// bento side tiles and the "How it works" benefit cards.
+const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
@@ -109,6 +113,49 @@ function WireDivider() {
         <img key={i} src="/ai-canvas-wire.svg" alt="" width={28} height={24} />
       ))}
     </div>
+  )
+}
+
+// Scroll-reveal wrapper — same recipe as the site's Section component on
+// /pricing and /about (fade + rise on first entry, once: true). Kept local
+// since this page styles with inline style objects, not Tailwind className.
+function Section({ children, style, delay = 0 }: { children: React.ReactNode; style?: React.CSSProperties; delay?: number }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
+  return (
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      style={style}
+    >
+      {children}
+    </motion.section>
+  )
+}
+
+// Card-level reveal — smaller offset/duration than Section, matching the
+// site's PlanCard sibling-stagger recipe (explicit delay = base + i * step).
+function BenefitCard({ benefit, delay }: { benefit: (typeof BENEFITS)[number]; delay: number }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.55, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ display: 'flex', flexDirection: 'column', ...PANEL_SOLID }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
+          {benefit.icon}
+        </div>
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{benefit.label}</span>
+      </div>
+      <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{benefit.body}</p>
+    </motion.div>
   )
 }
 
@@ -485,7 +532,7 @@ export function BrainStoryV4() {
       <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '8px 24px 8px', fontFamily: SANS }}>
 
         {/* Why it exists — the system is built to grow */}
-        <section>
+        <Section>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>Why it exists</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Built to grow, not to freeze
@@ -529,7 +576,7 @@ export function BrainStoryV4() {
               </div>
             </div>
 
-            <div className="why-bento-beyond" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+            <div className="why-bento-beyond" style={{ ...PANEL_SOLID }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>02 · Go beyond</span>
               <h3 style={{ fontSize: 18, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '16px 0 0' }}>Past the screens that already exist</h3>
               <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '10px 0 0' }}>
@@ -542,24 +589,24 @@ export function BrainStoryV4() {
               </div>
             </div>
 
-            <div className="why-bento-experiment" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="why-bento-experiment" style={{ ...PANEL_SOLID, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>03 · Experiment fast</span>
               <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: 0 }}>
                 Try an idea.<br />Push it further.
               </p>
             </div>
 
-            <div className="why-bento-trust" style={{ ...PANEL, borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="why-bento-trust" style={{ ...PANEL_SOLID, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>Built on the rules</span>
               <p style={{ fontSize: 14, color: C.reason, lineHeight: 1.625, margin: '24px 0 0' }}>
                 Trust that what comes back belongs to the system because it was built against the same rules.
               </p>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* What it is */}
-        <section style={{ marginTop: 60 }}>
+        <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             The taste lives in the system, not the prompt
@@ -584,10 +631,10 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-        </section>
+        </Section>
 
         {/* Classic vs AI-native — the workflow contrast */}
-        <section style={{ marginTop: 60 }}>
+        <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Where the classic workflow leaks
@@ -632,10 +679,10 @@ export function BrainStoryV4() {
               The agent builds fast and accurate. You stay in the loop, and you decide what ships.
             </span>
           </div>
-        </section>
+        </Section>
 
         {/* How it works */}
-        <section style={{ marginTop: 60 }}>
+        <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             One reader. Every benefit is yours.
@@ -644,22 +691,14 @@ export function BrainStoryV4() {
             The Brain is written for your AI agent, not for you. What you get is what the agent does with it.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
-            {BENEFITS.map((benefit) => (
-              <div key={benefit.label} style={{ display: 'flex', flexDirection: 'column', background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
-                    {benefit.icon}
-                  </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{benefit.label}</span>
-                </div>
-                <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{benefit.body}</p>
-              </div>
+            {BENEFITS.map((benefit, i) => (
+              <BenefitCard key={benefit.label} benefit={benefit} delay={0.1 + i * 0.08} />
             ))}
           </div>
-        </section>
+        </Section>
 
         {/* Closing: by the numbers */}
-        <section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <Section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
             {STATS.map((s, i) => (
               <span key={s.label} style={{ display: 'contents' }}>
@@ -675,7 +714,7 @@ export function BrainStoryV4() {
             {ctaLabel}
             <ArrowRight weight="regular" size={14} />
           </Link>
-        </section>
+        </Section>
       </div>
 
       {/* footer, consistent with the content pages */}
