@@ -76,7 +76,7 @@ export default function DeleteButton() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.94 }}
               transition={pillTransition}
-              className='rounded-full bg-red-600 px-6 py-3 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_0.7rem_1.8rem_rgb(220_38_38_/_0.25)] outline-none hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-400/45 dark:bg-red-500 dark:shadow-[0_0.7rem_1.8rem_rgb(248_113_113_/_0.18)] dark:hover:bg-red-400'
+              className='rounded-full bg-red-600 px-6 py-3 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_0.7rem_1.8rem_rgb(220_38_38_/_0.25),inset_0_2px_0_rgba(255,255,255,0.3)] outline-none hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-400/45 dark:bg-red-500 dark:shadow-[0_0.7rem_1.8rem_rgb(248_113_113_/_0.18),inset_0_2px_0_rgba(255,255,255,0.18)] dark:hover:bg-red-400'
               aria-label='Delete account'
             >
               Delete Account
@@ -91,7 +91,7 @@ export default function DeleteButton() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.94 }}
               transition={pillTransition}
-              className='flex items-center gap-3 rounded-full border border-red-200 bg-red-100 p-1.5 pr-2 text-red-700 shadow-[0_0.8rem_2rem_rgb(239_68_68_/_0.12)] dark:border-red-400/20 dark:bg-red-500/15 dark:text-red-300 dark:shadow-[0_0.8rem_2rem_rgb(248_113_113_/_0.1)]'
+              className='flex items-center gap-3 rounded-full border border-red-200 bg-red-100 p-1.5 pr-2 text-red-700 shadow-[0_0.8rem_2rem_rgb(239_68_68_/_0.12),inset_0_2px_0_rgba(255,255,255,0.65)] dark:border-red-400/20 dark:bg-red-500/15 dark:text-red-300 dark:shadow-[0_0.8rem_2rem_rgb(248_113_113_/_0.1),inset_0_2px_0_rgba(255,255,255,0.15)]'
               role='status'
               aria-live='polite'
               aria-label={`Account deletion will be final in ${countdown} seconds`}
@@ -102,7 +102,7 @@ export default function DeleteButton() {
                 whileHover={{ scale: 1.08, rotate: -5 }}
                 whileTap={{ scale: 0.9 }}
                 transition={pillTransition}
-                className='grid size-10 shrink-0 place-items-center rounded-full bg-red-600 text-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-red-400/45 dark:bg-red-500'
+                className='grid size-10 shrink-0 place-items-center rounded-full bg-red-600 text-white shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.3)] outline-none focus-visible:ring-4 focus-visible:ring-red-400/45 dark:bg-red-500 dark:shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.18)]'
                 aria-label='Undo account deletion'
               >
                 <ArrowUUpLeft size='1.1em' weight='regular' aria-hidden='true' />
@@ -114,7 +114,7 @@ export default function DeleteButton() {
 
               <motion.span
                 layout
-                className='grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-red-600 text-sm font-bold tabular-nums text-white shadow-sm dark:bg-red-500'
+                className='grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-red-600 text-sm font-bold tabular-nums text-white shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.3)] dark:bg-red-500 dark:shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.18)]'
                 aria-hidden='true'
               >
                 <AnimatePresence initial={false} mode='popLayout'>
@@ -140,11 +140,11 @@ export default function DeleteButton() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={pillTransition}
-              className='flex items-center gap-2 rounded-full border border-stone-300 bg-stone-200 px-5 py-3 text-sm font-semibold text-stone-600 shadow-sm dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300'
+              className='flex items-center gap-2 rounded-full border border-stone-300 bg-stone-200 px-5 py-3 text-sm font-semibold text-stone-600 shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.65)] dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:shadow-[0_1px_2px_0_rgb(0_0_0_/_0.05),inset_0_2px_0_rgba(255,255,255,0.15)]'
               role='status'
               aria-live='polite'
             >
-              <span className='grid size-5 place-items-center rounded-full bg-stone-500 text-white dark:bg-stone-600'>
+              <span className='grid size-5 place-items-center rounded-full bg-stone-500 text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)] dark:bg-stone-600 dark:shadow-[inset_0_2px_0_rgba(255,255,255,0.15)]'>
                 <Check size='0.9em' weight='regular' aria-hidden='true' />
               </span>
               Account Deleted
