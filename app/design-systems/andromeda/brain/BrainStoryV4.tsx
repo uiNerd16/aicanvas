@@ -491,11 +491,72 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Built to grow, not to freeze
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            Most design systems hand you a fixed kit and stop there. The Brain is built the other way. Because the rules are written down, your agent can{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>go past the screens that already exist</strong>: compose new layouts, extend the patterns, explore new components, all still unmistakably Andromeda. The system becomes a place to{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>experiment fast</strong>, try an idea and push it further, and trust that what comes back belongs to the system because it was built against the same rules.
-          </p>
+          <style>{`
+            .why-bento {
+              display: grid;
+              grid-template-columns: repeat(12, minmax(0, 1fr));
+              grid-template-areas:
+                "grow grow grow grow grow beyond beyond beyond beyond beyond beyond beyond"
+                "grow grow grow grow grow experiment experiment experiment trust trust trust trust";
+              gap: 14px;
+              margin-top: 24px;
+            }
+            .why-bento-grow { grid-area: grow; }
+            .why-bento-beyond { grid-area: beyond; }
+            .why-bento-experiment { grid-area: experiment; }
+            .why-bento-trust { grid-area: trust; }
+            @media (max-width: 720px) {
+              .why-bento {
+                grid-template-columns: 1fr;
+                grid-template-areas: none;
+              }
+              .why-bento-grow,
+              .why-bento-beyond,
+              .why-bento-experiment,
+              .why-bento-trust { grid-area: auto; }
+            }
+          `}</style>
+
+          <div className="why-bento">
+            <div className="why-bento-grow" style={{ ...PANEL, minHeight: 236, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(168,185,77,0.05)' }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>01 · Built to evolve</span>
+              <div style={{ marginTop: 40 }}>
+                <p style={{ fontSize: 'clamp(24px,3.5vw,34px)', color: C.bright, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.08, margin: 0 }}>
+                  A system that grows with the work.
+                </p>
+                <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '16px 0 0' }}>
+                  Most design systems hand you a fixed kit and stop. The Brain is built the other way: to grow, not freeze.
+                </p>
+              </div>
+            </div>
+
+            <div className="why-bento-beyond" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>02 · Go beyond</span>
+              <h3 style={{ fontSize: 18, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '16px 0 0' }}>Past the screens that already exist</h3>
+              <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '10px 0 0' }}>
+                Because the rules are written down, your agent can create new work that is still unmistakably Andromeda.
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
+                <Chip>Compose layouts</Chip>
+                <Chip>Extend patterns</Chip>
+                <Chip>Explore components</Chip>
+              </div>
+            </div>
+
+            <div className="why-bento-experiment" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>03 · Experiment fast</span>
+              <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: '22px 0 0' }}>
+                Try an idea.<br />Push it further.
+              </p>
+            </div>
+
+            <div className="why-bento-trust" style={{ ...PANEL, borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>Built on the rules</span>
+              <p style={{ fontSize: 14, color: C.reason, lineHeight: 1.625, margin: '24px 0 0' }}>
+                Trust that what comes back belongs to the system because it was built against the same rules.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* What it is */}
