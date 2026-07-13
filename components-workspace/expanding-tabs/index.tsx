@@ -54,7 +54,6 @@ export default function ExpandingTabs() {
               }`}
             >
               <motion.span
-                layout="position"
                 animate={{ scale: isActive ? 1.03 : 1, opacity: isActive ? 1 : 0.78 }}
                 transition={SPRING}
                 className="flex items-center justify-center text-[#161618] dark:text-[#F3F3F4]"
