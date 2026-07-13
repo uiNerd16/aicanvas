@@ -163,7 +163,12 @@ export function BrainStoryV4() {
   const hostRef = useRef<HTMLDivElement>(null)
   const labelEls = useRef<(HTMLDivElement | null)[]>([])
   const heroEls = useRef<(HTMLDivElement | null)[]>([])
+  // smoothed (eased) screen positions, parallel to labelEls/heroEls — lazily
+  // seeded on the first frame each label is seen, see the render loop.
+  const labelSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
+  const heroSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [loadProgress, setLoadProgress] = useState(0)
   const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
   // Premium subscribers already have the brain — re-label the CTA into the
@@ -217,29 +222,31 @@ export function BrainStoryV4() {
     let cleanupInput = () => {}
 
     ;(async () => {
-      const THREE = await import('three')
-      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js')
-      const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js')
+      const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+        import('three'),
+        import('three/examples/jsm/loaders/GLTFLoader.js'),
+        import('three/examples/jsm/environments/RoomEnvironment.js'),
+      ])
       if (!alive) return
 
+      // one-time, mount-only constrained-device/connection check — a lower
+      // static pixel-ratio cap for slow connections or low core counts. Not a
+      // live watchdog: decided once here and never revisited.
+      const conn = (navigator as any).connection
+      const isConstrained = conn?.saveData || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType) || (navigator.hardwareConcurrency ?? 8) <= 4
+
       let W = host.clientWidth || 800, H = host.clientHeight || 600
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
-      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
+      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
       host.appendChild(renderer.domElement)
 
       scene = new THREE.Scene(); scene.background = new THREE.Color(C.base)
-      pmrem = new THREE.PMREMGenerator(renderer)
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-      // @ts-ignore r183 scene intensity
-      scene.environmentIntensity = 0.4
-      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
-      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
-      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
 
-      camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
-      camera.position.set(0, 0.3, 3)
-
+      // kick the GLTF fetch off as early as correctness allows — right after
+      // scene exists (onLoad only needs scene.add(model) + THREE + the state
+      // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
+      // setup that used to run first and delay the fetch for no reason.
       let firefly: any = null, flyLight: any = null, brainRoot: any = null, radius = 1, ready = false
       let zonesActive = false, zoneGroup: any = null
       const brainMeshes: any[] = [], zoneItems: any[] = []
@@ -293,7 +300,23 @@ export function BrainStoryV4() {
         scene.add(zoneGroup)
 
         ready = true; setStatus('ready')
-      }, undefined, () => { if (alive) setStatus('error') })
+        // the render loop only starts once there's something to actually
+        // render — no more compositing an empty scene while the asset streams in.
+        loop()
+      }, (event: ProgressEvent) => {
+        if (alive && event.total) setLoadProgress(Math.round((event.loaded / event.total) * 100))
+      }, () => { if (alive) setStatus('error') })
+
+      pmrem = new THREE.PMREMGenerator(renderer)
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+      // @ts-ignore r183 scene intensity
+      scene.environmentIntensity = 0.4
+      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
+      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
+      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
+
+      camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
+      camera.position.set(0, 0.3, 3)
 
       onResize = () => {
         W = host.clientWidth || W; H = host.clientHeight || H
@@ -327,12 +350,19 @@ export function BrainStoryV4() {
       }
 
       const clock = new THREE.Clock()
-      const flyPos = new THREE.Vector3(), wp = new THREE.Vector3()
+      let runningT = 0
+      const flyPos = new THREE.Vector3(), wp = new THREE.Vector3(), projScratch = new THREE.Vector3()
       const spinEuler = new THREE.Euler(), spinQuat = new THREE.Quaternion()
 
       const loop = () => {
         raf = requestAnimationFrame(loop)
-        const t = clock.getElapsedTime()
+        // cap dt so a CPU stall / backgrounded tab pauses motion instead of
+        // teleporting it; a real clock instead of a frame-count assumption is
+        // what keeps drag inertia and label positions deterministic in time.
+        const dt = Math.min(clock.getDelta(), 1 / 30)
+        runningT += dt
+        const t = runningT
+        const transitionDuration = spin.active ? '0ms' : '90ms, 140ms'
 
         if (ready) {
           const R = radius
@@ -352,8 +382,9 @@ export function BrainStoryV4() {
           camera.position.set(Math.sin(orb) * d, R * 0.35, Math.cos(orb) * d)
           camera.lookAt(0, R * 0.05, 0)
 
-          // drag-to-spin the brain, with release inertia
-          if (!spin.active) { spin.rotY += spin.velY; spin.velY *= 0.94 }
+          // drag-to-spin the brain, with release inertia (decay rate is per
+          // real second via dt * 60, not per frame — same feel at any fps)
+          if (!spin.active) { spin.rotY += spin.velY; spin.velY *= Math.pow(0.94, dt * 60) }
           if (brainRoot) brainRoot.rotation.set(spin.rotX, spin.rotY, 0)
           spinQuat.setFromEuler(spinEuler.set(spin.rotX, spin.rotY, 0))
           const activity = Math.min(1, Math.abs(spin.velY) * 34 + (spin.active ? 0.7 : 0))
@@ -371,17 +402,22 @@ export function BrainStoryV4() {
           }
 
           // labels: rotate WITH the brain (dragging carries them past the firefly), light up near it
+          const ease = 1 - Math.exp(-18 * dt)
           for (let i = 0; i < dirs.length; i++) {
             const el = labelEls.current[i]; if (!el) continue
             wp.set(dirs[i][0], dirs[i][1], dirs[i][2]).multiplyScalar(R).applyQuaternion(spinQuat)
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 0.9))
-            const proj = wp.clone().project(camera)
-            const behind = proj.z > 1
-            const sx = Math.max(70, Math.min(W - 70, (proj.x * 0.5 + 0.5) * W)), sy = (-proj.y * 0.5 + 0.5) * H
+            projScratch.copy(wp).project(camera)
+            const behind = projScratch.z > 1
+            const targetX = Math.max(70, Math.min(W - 70, (projScratch.x * 0.5 + 0.5) * W)), targetY = (-projScratch.y * 0.5 + 0.5) * H
+            let sm = labelSmooth.current[i]
+            if (!sm) { sm = { x: targetX, y: targetY }; labelSmooth.current[i] = sm }
+            sm.x += (targetX - sm.x) * ease; sm.y += (targetY - sm.y) * ease
             const op = behind ? 0 : Math.min(1, 0.12 + 0.88 * near * near + activity * 0.5)
-            el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.9 + near * 0.25})`
+            el.style.transform = `translate(-50%,-50%) translate(${Math.round(sm.x)}px,${Math.round(sm.y)}px) scale(${0.9 + near * 0.25})`
             el.style.opacity = String(op)
             el.style.color = near > 0.55 ? C.accent : C.node
+            el.style.transitionDuration = transitionDuration
           }
 
           // hero labels — bigger, brighter, always fairly present
@@ -389,18 +425,23 @@ export function BrainStoryV4() {
             const el = heroEls.current[i]; if (!el) continue
             wp.set(heroDirs[i][0], heroDirs[i][1], heroDirs[i][2]).multiplyScalar(R).applyQuaternion(spinQuat)
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 1.1))
-            const proj = wp.clone().project(camera)
-            const behind = proj.z > 1
-            const sx = Math.max(110, Math.min(W - 110, (proj.x * 0.5 + 0.5) * W)), sy = (-proj.y * 0.5 + 0.5) * H
+            projScratch.copy(wp).project(camera)
+            const behind = projScratch.z > 1
+            const targetX = Math.max(110, Math.min(W - 110, (projScratch.x * 0.5 + 0.5) * W)), targetY = (-projScratch.y * 0.5 + 0.5) * H
+            let sm = heroSmooth.current[i]
+            if (!sm) { sm = { x: targetX, y: targetY }; heroSmooth.current[i] = sm }
+            sm.x += (targetX - sm.x) * ease; sm.y += (targetY - sm.y) * ease
             const op = behind ? 0 : Math.min(1, 0.42 + 0.58 * near + activity * 0.4)
-            el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.96 + near * 0.14})`
+            el.style.transform = `translate(-50%,-50%) translate(${Math.round(sm.x)}px,${Math.round(sm.y)}px) scale(${0.96 + near * 0.14})`
             el.style.opacity = String(op)
             el.style.color = near > 0.5 ? C.accent : C.bright
+            el.style.transitionDuration = transitionDuration
           }
         }
         renderer.render(scene, camera)
       }
-      loop()
+      // first loop() call now happens inside the GLTF onLoad callback above,
+      // once ready — see the "ready = true" line.
     })().catch(() => { if (alive) setStatus('error') })
 
     return () => {
@@ -475,7 +516,7 @@ export function BrainStoryV4() {
             <div
               key={txt}
               ref={(el) => { labelEls.current[i] = el }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: MONO, fontSize: 12, letterSpacing: '0.02em', color: C.node, whiteSpace: 'nowrap', textShadow: '0 0 8px rgba(0,0,0,0.9)', willChange: 'transform,opacity' }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: MONO, fontSize: 12, letterSpacing: '0.02em', color: C.node, whiteSpace: 'nowrap', textShadow: '0 0 8px rgba(0,0,0,0.9)', willChange: 'transform,opacity', transition: 'transform 90ms linear, opacity 140ms linear' }}
             >
               {txt}
             </div>
@@ -487,7 +528,7 @@ export function BrainStoryV4() {
             <div
               key={txt}
               ref={(el) => { heroEls.current[i] = el }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: SANS, fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', color: C.bright, whiteSpace: 'nowrap', textShadow: '0 0 14px rgba(0,0,0,0.95)', willChange: 'transform,opacity' }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: SANS, fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', color: C.bright, whiteSpace: 'nowrap', textShadow: '0 0 14px rgba(0,0,0,0.95)', willChange: 'transform,opacity', transition: 'transform 90ms linear, opacity 140ms linear' }}
             >
               {txt}
             </div>
@@ -495,7 +536,7 @@ export function BrainStoryV4() {
         </div>
         {status !== 'ready' && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted }}>
-            {status === 'error' ? 'Scene unavailable' : 'Loading the brain…'}
+            {status === 'error' ? 'Scene unavailable' : loadProgress > 0 ? `Loading the brain… ${loadProgress}%` : 'Loading the brain…'}
           </div>
         )}
         {/* drag affordance: a static rotate-3d icon (olive) */}
