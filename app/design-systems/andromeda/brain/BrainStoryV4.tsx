@@ -96,7 +96,7 @@ const ROLES = [
 const COMPARE = [
   { classic: 'Documentation nobody reads, if it exists at all', native: 'Rules written down in a form your agent reads' },
   { classic: 'Designers in Figma, developers in code, intent lost in the handoff', native: 'No handoff: the system is already code and tokens' },
-  { classic: 'Weeks from a mock to a production-ready screen', native: 'On-brand screens from the system on the first prompt' },
+  { classic: 'Weeks from a mock-up to a production-ready screen', native: 'On-brand screens from the system on the first prompt' },
   { classic: 'New screens drift off-brand as the team grows', native: 'New work builds against the same rules, so it holds' },
   { classic: 'Every change is another Figma to code round trip', native: 'Change a token, and everything built on it follows' },
 ]
