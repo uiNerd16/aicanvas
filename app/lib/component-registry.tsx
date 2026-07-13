@@ -153,6 +153,8 @@ import MoodTracker from '../../components-workspace/mood-tracker'
 import { prompts as moodTrackerPrompts } from '../../components-workspace/mood-tracker/prompts'
 import ExpandingTabs from '../../components-workspace/expanding-tabs'
 import { prompts as expandingTabsPrompts } from '../../components-workspace/expanding-tabs/prompts'
+import DeleteButton from '../../components-workspace/delete-button'
+import { prompts as deleteButtonPrompts } from '../../components-workspace/delete-button/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1340,6 +1342,21 @@ Requirements:
     PreviewComponent: MoodTracker,
     code: componentCodes['mood-tracker'],
     prompts: moodTrackerPrompts,
+  },
+  {
+    slug: 'delete-button',
+    image: 'https://ik.imagekit.io/aitoolkit/delete-button.png',
+    name: 'Delete Button',
+    description: 'A red button that starts a five-second delete countdown, with a one-tap undo.',
+    tags: [
+      { label: 'Buttons & Toggles', accent: true },
+      { label: 'Interactive' },
+      { label: 'Motion' },
+    ],
+    dualTheme: true,
+    PreviewComponent: DeleteButton,
+    code: componentCodes['delete-button'],
+    prompts: deleteButtonPrompts,
   },
   {
     slug: 'expanding-tabs',
