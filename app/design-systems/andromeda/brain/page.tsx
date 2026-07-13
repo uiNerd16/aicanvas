@@ -1,3 +1,4 @@
+import { preload } from 'react-dom'
 import { JetBrains_Mono } from 'next/font/google'
 import { BrainStoryV4 } from './BrainStoryV4'
 
@@ -7,12 +8,16 @@ import { BrainStoryV4 } from './BrainStoryV4'
 const jbm = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata = {
-  title: 'The Andromeda Brain — Design Intelligence for AI Agents',
+  title: 'The Andromeda Brain: Design Rules for On-Brand UI',
   description:
     'The judgment layer for Andromeda: foundations, per-component rules, and skills your AI coding agent reads to build on-brand UI. One command installs the whole brain.',
 }
 
 export default function AndromedaBrainLandingPage() {
+  // Kick off the GLB byte-fetch at HTML-parse time, before client JS hydrates
+  // or Three.js even loads — see BrainStoryV4 for the loader that consumes it.
+  preload('/models/brain.glb', { as: 'fetch', crossOrigin: 'anonymous' })
+
   return (
     <div className={jbm.variable}>
       <BrainStoryV4 />

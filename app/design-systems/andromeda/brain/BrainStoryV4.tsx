@@ -17,9 +17,10 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Palette, Code, Sparkle } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -30,7 +31,6 @@ import { BRAIN_TEASER } from '@/app/lib/andromeda-brain-teaser.generated'
 const C = { base: '#0E0E0F', node: '#9B9B9E', reason: '#B7B7BA', bright: '#F4F4FA', accent: '#DAE4A0', accentBtn: '#A8B94D', muted: '#7B7B7D' }
 const SANS = "var(--font-sans), 'Manrope', system-ui, sans-serif"
 const MONO = "var(--font-mono, var(--font-jetbrains-mono)), 'Geist Mono', monospace"
-const FONT = MONO
 const MODEL_URL = '/models/brain.glb'
 
 const FND: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'foundations')?.files ?? []
@@ -67,7 +67,7 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
   { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
   { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0xa8b94d, wireframe: true, emissive: new T.Color(C.accent), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
+  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accent), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
 // Default appearance of the brain on load.
@@ -76,6 +76,9 @@ const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Irid
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
 const PANEL: React.CSSProperties = { background: 'transparent', border: '1px solid #2D2D2E', borderRadius: 16, padding: '24px 28px' }
+// Smaller sibling of PANEL — the solid-surface card treatment reused by the
+// bento side tiles and the "How it works" benefit cards.
+const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
@@ -84,10 +87,21 @@ const STRUCTURE = [
   { label: 'Component rules', count: CMP.length, sample: CMP.slice(0, 8) },
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
-const ROLES = [
-  { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'A vocabulary that holds across every screen.' },
-  { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'A foundation they never rebuild.' },
-  { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'The context to stop guessing and stay consistent.' },
+const BENEFITS = [
+  { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
+  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
+  { label: 'Efficient', icon: <Gauge weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
+]
+
+// Classic workflow pains (left) vs what an AI-native system delivers (right).
+// Right-side claims stay to what Andromeda + the Brain actually ship — code,
+// tokens, and machine-readable rules. No Figma-to-code bridge is implied.
+const COMPARE = [
+  { classic: 'Documentation nobody reads, if it exists at all', native: 'Rules written down in a form your agent reads' },
+  { classic: 'Designers in Figma, developers in code, intent lost in the handoff', native: 'No handoff: the system is already code and tokens' },
+  { classic: 'Weeks from a mock-up to a production-ready screen', native: 'On-brand screens from the system on the first prompt' },
+  { classic: 'New screens drift off-brand as the team grows', native: 'New work builds against the same rules, so it holds' },
+  { classic: 'Every change is another Figma to code round trip', native: 'Change a token, and everything built on it follows' },
 ]
 
 // Section separator: the AI Canvas wire mark, three across, like the homepage divider.
@@ -102,11 +116,59 @@ function WireDivider() {
   )
 }
 
+// Scroll-reveal wrapper — same recipe as the site's Section component on
+// /pricing and /about (fade + rise on first entry, once: true). Kept local
+// since this page styles with inline style objects, not Tailwind className.
+function Section({ children, style, delay = 0 }: { children: React.ReactNode; style?: React.CSSProperties; delay?: number }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
+  return (
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      style={style}
+    >
+      {children}
+    </motion.section>
+  )
+}
+
+// Card-level reveal — smaller offset/duration than Section, matching the
+// site's PlanCard sibling-stagger recipe (explicit delay = base + i * step).
+function BenefitCard({ benefit, delay }: { benefit: (typeof BENEFITS)[number]; delay: number }) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.55, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      style={{ display: 'flex', flexDirection: 'column', ...PANEL_SOLID }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
+          {benefit.icon}
+        </div>
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{benefit.label}</span>
+      </div>
+      <p style={{ flex: 1, fontSize: 14, color: C.node, lineHeight: 1.625, margin: 0 }}>{benefit.body}</p>
+    </motion.div>
+  )
+}
+
 export function BrainStoryV4() {
   const hostRef = useRef<HTMLDivElement>(null)
   const labelEls = useRef<(HTMLDivElement | null)[]>([])
   const heroEls = useRef<(HTMLDivElement | null)[]>([])
+  // smoothed (eased) screen positions, parallel to labelEls/heroEls — lazily
+  // seeded on the first frame each label is seen, see the render loop.
+  const labelSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
+  const heroSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [loadProgress, setLoadProgress] = useState(0)
   const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
   // Premium subscribers already have the brain — re-label the CTA into the
@@ -160,29 +222,31 @@ export function BrainStoryV4() {
     let cleanupInput = () => {}
 
     ;(async () => {
-      const THREE = await import('three')
-      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js')
-      const { RoomEnvironment } = await import('three/examples/jsm/environments/RoomEnvironment.js')
+      const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+        import('three'),
+        import('three/examples/jsm/loaders/GLTFLoader.js'),
+        import('three/examples/jsm/environments/RoomEnvironment.js'),
+      ])
       if (!alive) return
 
+      // one-time, mount-only constrained-device/connection check — a lower
+      // static pixel-ratio cap for slow connections or low core counts. Not a
+      // live watchdog: decided once here and never revisited.
+      const conn = (navigator as any).connection
+      const isConstrained = conn?.saveData || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType) || (navigator.hardwareConcurrency ?? 8) <= 4
+
       let W = host.clientWidth || 800, H = host.clientHeight || 600
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
-      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
+      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
       host.appendChild(renderer.domElement)
 
       scene = new THREE.Scene(); scene.background = new THREE.Color(C.base)
-      pmrem = new THREE.PMREMGenerator(renderer)
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-      // @ts-ignore r183 scene intensity
-      scene.environmentIntensity = 0.4
-      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
-      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
-      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
 
-      camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
-      camera.position.set(0, 0.3, 3)
-
+      // kick the GLTF fetch off as early as correctness allows — right after
+      // scene exists (onLoad only needs scene.add(model) + THREE + the state
+      // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
+      // setup that used to run first and delay the fetch for no reason.
       let firefly: any = null, flyLight: any = null, brainRoot: any = null, radius = 1, ready = false
       let zonesActive = false, zoneGroup: any = null
       const brainMeshes: any[] = [], zoneItems: any[] = []
@@ -236,7 +300,23 @@ export function BrainStoryV4() {
         scene.add(zoneGroup)
 
         ready = true; setStatus('ready')
-      }, undefined, () => { if (alive) setStatus('error') })
+        // the render loop only starts once there's something to actually
+        // render — no more compositing an empty scene while the asset streams in.
+        loop()
+      }, (event: ProgressEvent) => {
+        if (alive && event.total) setLoadProgress(Math.round((event.loaded / event.total) * 100))
+      }, () => { if (alive) setStatus('error') })
+
+      pmrem = new THREE.PMREMGenerator(renderer)
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+      // @ts-ignore r183 scene intensity
+      scene.environmentIntensity = 0.4
+      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
+      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
+      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
+
+      camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
+      camera.position.set(0, 0.3, 3)
 
       onResize = () => {
         W = host.clientWidth || W; H = host.clientHeight || H
@@ -270,12 +350,19 @@ export function BrainStoryV4() {
       }
 
       const clock = new THREE.Clock()
-      const flyPos = new THREE.Vector3(), wp = new THREE.Vector3()
+      let runningT = 0
+      const flyPos = new THREE.Vector3(), wp = new THREE.Vector3(), projScratch = new THREE.Vector3()
       const spinEuler = new THREE.Euler(), spinQuat = new THREE.Quaternion()
 
       const loop = () => {
         raf = requestAnimationFrame(loop)
-        const t = clock.getElapsedTime()
+        // cap dt so a CPU stall / backgrounded tab pauses motion instead of
+        // teleporting it; a real clock instead of a frame-count assumption is
+        // what keeps drag inertia and label positions deterministic in time.
+        const dt = Math.min(clock.getDelta(), 1 / 30)
+        runningT += dt
+        const t = runningT
+        const transitionDuration = spin.active ? '0ms' : '90ms, 140ms'
 
         if (ready) {
           const R = radius
@@ -295,8 +382,9 @@ export function BrainStoryV4() {
           camera.position.set(Math.sin(orb) * d, R * 0.35, Math.cos(orb) * d)
           camera.lookAt(0, R * 0.05, 0)
 
-          // drag-to-spin the brain, with release inertia
-          if (!spin.active) { spin.rotY += spin.velY; spin.velY *= 0.94 }
+          // drag-to-spin the brain, with release inertia (decay rate is per
+          // real second via dt * 60, not per frame — same feel at any fps)
+          if (!spin.active) { spin.rotY += spin.velY; spin.velY *= Math.pow(0.94, dt * 60) }
           if (brainRoot) brainRoot.rotation.set(spin.rotX, spin.rotY, 0)
           spinQuat.setFromEuler(spinEuler.set(spin.rotX, spin.rotY, 0))
           const activity = Math.min(1, Math.abs(spin.velY) * 34 + (spin.active ? 0.7 : 0))
@@ -314,17 +402,22 @@ export function BrainStoryV4() {
           }
 
           // labels: rotate WITH the brain (dragging carries them past the firefly), light up near it
+          const ease = 1 - Math.exp(-18 * dt)
           for (let i = 0; i < dirs.length; i++) {
             const el = labelEls.current[i]; if (!el) continue
             wp.set(dirs[i][0], dirs[i][1], dirs[i][2]).multiplyScalar(R).applyQuaternion(spinQuat)
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 0.9))
-            const proj = wp.clone().project(camera)
-            const behind = proj.z > 1
-            const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
+            projScratch.copy(wp).project(camera)
+            const behind = projScratch.z > 1
+            const targetX = Math.max(70, Math.min(W - 70, (projScratch.x * 0.5 + 0.5) * W)), targetY = (-projScratch.y * 0.5 + 0.5) * H
+            let sm = labelSmooth.current[i]
+            if (!sm) { sm = { x: targetX, y: targetY }; labelSmooth.current[i] = sm }
+            sm.x += (targetX - sm.x) * ease; sm.y += (targetY - sm.y) * ease
             const op = behind ? 0 : Math.min(1, 0.12 + 0.88 * near * near + activity * 0.5)
-            el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.9 + near * 0.25})`
+            el.style.transform = `translate(-50%,-50%) translate(${Math.round(sm.x)}px,${Math.round(sm.y)}px) scale(${0.9 + near * 0.25})`
             el.style.opacity = String(op)
             el.style.color = near > 0.55 ? C.accent : C.node
+            el.style.transitionDuration = transitionDuration
           }
 
           // hero labels — bigger, brighter, always fairly present
@@ -332,18 +425,23 @@ export function BrainStoryV4() {
             const el = heroEls.current[i]; if (!el) continue
             wp.set(heroDirs[i][0], heroDirs[i][1], heroDirs[i][2]).multiplyScalar(R).applyQuaternion(spinQuat)
             const near = 1 - Math.min(1, wp.distanceTo(flyPos) / (R * 1.1))
-            const proj = wp.clone().project(camera)
-            const behind = proj.z > 1
-            const sx = (proj.x * 0.5 + 0.5) * W, sy = (-proj.y * 0.5 + 0.5) * H
+            projScratch.copy(wp).project(camera)
+            const behind = projScratch.z > 1
+            const targetX = Math.max(110, Math.min(W - 110, (projScratch.x * 0.5 + 0.5) * W)), targetY = (-projScratch.y * 0.5 + 0.5) * H
+            let sm = heroSmooth.current[i]
+            if (!sm) { sm = { x: targetX, y: targetY }; heroSmooth.current[i] = sm }
+            sm.x += (targetX - sm.x) * ease; sm.y += (targetY - sm.y) * ease
             const op = behind ? 0 : Math.min(1, 0.42 + 0.58 * near + activity * 0.4)
-            el.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px) scale(${0.96 + near * 0.14})`
+            el.style.transform = `translate(-50%,-50%) translate(${Math.round(sm.x)}px,${Math.round(sm.y)}px) scale(${0.96 + near * 0.14})`
             el.style.opacity = String(op)
             el.style.color = near > 0.5 ? C.accent : C.bright
+            el.style.transitionDuration = transitionDuration
           }
         }
         renderer.render(scene, camera)
       }
-      loop()
+      // first loop() call now happens inside the GLTF onLoad callback above,
+      // once ready — see the "ready = true" line.
     })().catch(() => { if (alive) setStatus('error') })
 
     return () => {
@@ -383,7 +481,7 @@ export function BrainStoryV4() {
       <div style={{ position: 'relative', height: '64vh', minHeight: 420 }}>
         <div
           ref={hostRef}
-          style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'none' }}
+          style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'pan-y' }}
         />
         {/* appearance stepper — vertical ticks on the right, centered with the
             brain. No labels (the material name shows as a native tooltip on
@@ -396,7 +494,7 @@ export function BrainStoryV4() {
               title={mm.name}
               aria-label={`Appearance: ${mm.name}`}
               aria-pressed={i === matIndex}
-              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '6px 2px', lineHeight: 0 }}
+              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '12px 8px', lineHeight: 0 }}
             >
               <span
                 style={{
@@ -418,7 +516,7 @@ export function BrainStoryV4() {
             <div
               key={txt}
               ref={(el) => { labelEls.current[i] = el }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: FONT, fontSize: 12, letterSpacing: '0.02em', color: C.node, whiteSpace: 'nowrap', textShadow: '0 0 8px rgba(0,0,0,0.9)', willChange: 'transform,opacity' }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: MONO, fontSize: 12, letterSpacing: '0.02em', color: C.node, whiteSpace: 'nowrap', textShadow: '0 0 8px rgba(0,0,0,0.9)', willChange: 'transform,opacity', transition: 'transform 90ms linear, opacity 140ms linear' }}
             >
               {txt}
             </div>
@@ -430,15 +528,15 @@ export function BrainStoryV4() {
             <div
               key={txt}
               ref={(el) => { heroEls.current[i] = el }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: SANS, fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', color: C.bright, whiteSpace: 'nowrap', textShadow: '0 0 14px rgba(0,0,0,0.95)', willChange: 'transform,opacity' }}
+              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, fontFamily: SANS, fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', color: C.bright, whiteSpace: 'nowrap', textShadow: '0 0 14px rgba(0,0,0,0.95)', willChange: 'transform,opacity', transition: 'transform 90ms linear, opacity 140ms linear' }}
             >
               {txt}
             </div>
           ))}
         </div>
         {status !== 'ready' && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted }}>
-            {status === 'error' ? 'Scene unavailable' : 'Loading the brain…'}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SANS, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted }}>
+            {status === 'error' ? 'Scene unavailable' : loadProgress > 0 ? `Loading the brain… ${loadProgress}%` : 'Loading the brain…'}
           </div>
         )}
         {/* drag affordance: a static rotate-3d icon (olive) */}
@@ -453,7 +551,7 @@ export function BrainStoryV4() {
           The Andromeda <span style={{ color: C.accentBtn }}>Brain</span>
         </h1>
         <p style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}>
-          A new design system, built from the ground up on the Andromeda components. A new way to design and build modern UIs.
+          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so it builds on-brand Andromeda UI on the first prompt instead of guessing.
         </p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
@@ -474,23 +572,97 @@ export function BrainStoryV4() {
       {/* ── Editorial sections (left-aligned, framed panels). max-w-4xl (896) + sm:px-6, matches the homepage content column. ── */}
       <div style={{ width: '100%', maxWidth: 896, margin: '0 auto', padding: '8px 24px 8px', fontFamily: SANS }}>
 
+        {/* Why it exists — the system is built to grow */}
+        <Section>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>Why it exists</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            Built to grow, not to freeze
+          </h2>
+          <style>{`
+            .why-bento {
+              display: grid;
+              grid-template-columns: repeat(24, minmax(0, 1fr));
+              grid-template-areas:
+                "grow grow grow grow grow grow grow grow grow grow beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond"
+                "grow grow grow grow grow grow grow grow grow grow experiment experiment experiment experiment experiment experiment experiment trust trust trust trust trust trust trust";
+              gap: 14px;
+              margin-top: 24px;
+            }
+            .why-bento-grow { grid-area: grow; }
+            .why-bento-beyond { grid-area: beyond; }
+            .why-bento-experiment { grid-area: experiment; }
+            .why-bento-trust { grid-area: trust; }
+            @media (max-width: 720px) {
+              .why-bento {
+                grid-template-columns: 1fr;
+                grid-template-areas: none;
+              }
+              .why-bento-grow,
+              .why-bento-beyond,
+              .why-bento-experiment,
+              .why-bento-trust { grid-area: auto; }
+            }
+          `}</style>
+
+          <div className="why-bento">
+            <div className="why-bento-grow" style={{ ...PANEL, minHeight: 236, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>01 · Built to evolve</span>
+              <div style={{ marginTop: 40 }}>
+                <p style={{ fontSize: 'clamp(24px,3.5vw,34px)', color: C.bright, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.08, margin: 0 }}>
+                  A system that grows with the work.
+                </p>
+                <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '16px 0 0' }}>
+                  Most design systems hand you a fixed kit and stop. The Brain is built the other way: to grow, not freeze.
+                </p>
+              </div>
+            </div>
+
+            <div className="why-bento-beyond" style={{ ...PANEL_SOLID }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>02 · Go beyond</span>
+              <h3 style={{ fontSize: 18, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '16px 0 0' }}>Past the screens that already exist</h3>
+              <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '10px 0 0' }}>
+                Because the rules are written down, your agent can create new work that is still unmistakably Andromeda.
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
+                <Chip>Compose layouts</Chip>
+                <Chip>Extend patterns</Chip>
+                <Chip>Explore components</Chip>
+              </div>
+            </div>
+
+            <div className="why-bento-experiment" style={{ ...PANEL_SOLID, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>03 · Experiment fast</span>
+              <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: 0 }}>
+                Try an idea.<br />Push it further.
+              </p>
+            </div>
+
+            <div className="why-bento-trust" style={{ ...PANEL_SOLID, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>Built on the rules</span>
+              <p style={{ fontSize: 14, color: C.reason, lineHeight: 1.625, margin: '24px 0 0' }}>
+                Trust that what comes back belongs to the system because it was built against the same rules.
+              </p>
+            </div>
+          </div>
+        </Section>
+
         {/* What it is */}
-        <section>
+        <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            More than tokens and components
+            The taste lives in the system, not the prompt
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            A design system is more than <Chip>tokens</Chip> and <Chip>components</Chip>. It&apos;s the{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>reasoning that ties them together</strong>: when a color carries meaning, how motion should behave, what every state owes the user. The Brain captures that reasoning in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent can actually read</strong>, so your tools understand Andromeda instead of guessing at it, and every screen comes out consistent.
+            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
           </p>
 
           <div style={{ ...PANEL, marginTop: 28 }}>
             {STRUCTURE.map((g, gi) => (
               <div key={g.label} style={{ marginTop: gi === 0 ? 0 : 20, paddingTop: gi === 0 ? 0 : 20, borderTop: gi === 0 ? 'none' : '1px solid #2D2D2E' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted }}>{g.label}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>{g.label}</span>
                   <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{g.count}</span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -500,36 +672,81 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-        </section>
+        </Section>
 
-        {/* Who it's for */}
-        <section style={{ marginTop: 60 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>Who it&apos;s for</p>
+        {/* Classic vs AI-native — the workflow contrast */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            Made for the whole team, human and machine
+            Where the classic workflow leaks
           </h2>
-          <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
-            {ROLES.map((r) => (
-              <div key={r.role} style={{ display: 'flex', flexDirection: 'column', background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <div style={{ display: 'flex', width: 32, height: 32, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: '#2D2D2E', color: C.reason }}>
-                    {r.icon}
-                  </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>{r.role}</span>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 24px' }}>
+            The classic workflow loses time and intent at every step from Figma to production. When the system is already code and tokens, those steps disappear.
+          </p>
+
+          <style>{`
+            .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; }
+            .cmp-cell { padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start; }
+            @media (max-width: 600px) {
+              .cmp-grid { grid-template-columns: 1fr; }
+              .cmp-left { border-right: none !important; }
+            }
+          `}</style>
+          <div style={{ border: '1px solid #2D2D2E', borderRadius: 16, overflow: 'hidden' }}>
+            <div className="cmp-grid">
+              <div className="cmp-cell cmp-left" style={{ borderRight: '1px solid #2D2D2E', borderBottom: '1px solid #2D2D2E', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>
+                Classic design system
+              </div>
+              <div className="cmp-cell" style={{ borderBottom: '1px solid #2D2D2E', background: 'rgba(168,185,77,0.05)', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>
+                AI-native design system
+              </div>
+            </div>
+            {COMPARE.map((row, i) => (
+              <div key={i} className="cmp-grid">
+                <div className="cmp-cell cmp-left" style={{ borderRight: '1px solid #2D2D2E', borderTop: i === 0 ? 'none' : '1px solid #2D2D2E' }}>
+                  <XIcon weight="regular" size={15} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 14, color: C.node, lineHeight: 1.5 }}>{row.classic}</span>
                 </div>
-                <p style={{ flex: 1, fontSize: 16, color: C.node, lineHeight: 1.625, margin: 0 }}>{r.gets}</p>
+                <div className="cmp-cell" style={{ borderTop: i === 0 ? 'none' : '1px solid #2D2D2E', background: 'rgba(168,185,77,0.05)' }}>
+                  <Check weight="regular" size={15} color={C.accentBtn} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 14, color: C.bright, lineHeight: 1.5 }}>{row.native}</span>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(168,185,77,0.05)' }}>
+            <Asterisk weight="regular" size={16} color={C.accentBtn} style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5 }}>
+              The agent builds fast and accurate. You stay in the loop, and you decide what ships.
+            </span>
+          </div>
+        </Section>
+
+        {/* How it works */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            One reader. Every benefit is yours.
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+            The Brain is written for your AI agent, not for you. What you get is what the agent does with it.
+          </p>
+          <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
+            {BENEFITS.map((benefit, i) => (
+              <BenefitCard key={benefit.label} benefit={benefit} delay={0.1 + i * 0.08} />
+            ))}
+          </div>
+        </Section>
 
         {/* Closing: by the numbers */}
-        <section style={{ marginTop: 64, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <Section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
             {STATS.map((s, i) => (
-              <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
-                <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
+              <span key={s.label} style={{ display: 'contents' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
+                  <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
+                </span>
                 {i < STATS.length - 1 && <span style={{ color: C.muted, margin: '0 12px' }}>·</span>}
               </span>
             ))}
@@ -538,7 +755,7 @@ export function BrainStoryV4() {
             {ctaLabel}
             <ArrowRight weight="regular" size={14} />
           </Link>
-        </section>
+        </Section>
       </div>
 
       {/* footer, consistent with the content pages */}
