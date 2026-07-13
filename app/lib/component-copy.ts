@@ -32,6 +32,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'cube-carousel': ['Motion', 'Tailwind CSS'],
   'curious-ai': ['Motion', 'Three.js', 'Tailwind CSS'],
   'danger-stripes': ['Motion', 'Tailwind CSS'],
+  'delete-button': ['Motion', 'Tailwind CSS'],
   'distortion-grid': ['Canvas', 'Tailwind CSS'],
   'dot-grid': ['Canvas', 'Tailwind CSS'],
   'emoji-burst': ['Motion', 'Tailwind CSS'],
@@ -209,6 +210,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Dashboard', 'Admin panel', 'Internal tools'],
     about:
       'Andromeda Button is the canonical button primitive from the Andromeda design system: a sci-fi blueprint aesthetic with five variants (default, outline, ghost, destructive, link), three sizes, optional leading icon, and complete state coverage for hover, focus, active, and disabled. Transparent hairline surfaces sit on a near-black canvas, and the electric-blue accent brightens and glows on interaction so the button always tells you exactly which state it is in. It is the standard control for any dashboard or internal tool built in the Andromeda visual language.',
+  },
+  'delete-button': {
+    useCases: ['Account settings', 'Admin panel', 'Confirmation flow'],
+    about:
+      'Delete Button turns a destructive action into a single morphing pill instead of a confirm dialog. Click it and the red button reshapes into a soft-red "Cancel Deletion" pill with a live five-second countdown badge that rolls down digit by digit, plus an undo arrow. Let it run out and the pill settles into a muted "Account Deleted" state before resetting; tap undo at any point and it springs straight back to default. Framer Motion drives the shape-morph between all three pills with one shared layout transition. It is a calmer alternative to a browser confirm() for account deletion, removing a project, or any other destructive action.',
   },
 
   // ─── Navigation ──────────────────────────────────────────────────────────

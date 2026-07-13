@@ -111,6 +111,7 @@ const ALL_SLUGS = [
   'tilted-coverflow',
   'crypto-swap',
   'mood-tracker',
+  'delete-button',
 ]
 
 const arg   = process.argv[2]
@@ -366,6 +367,15 @@ const INTERACTIONS = {
   'new-project-modal': async (preview, page) => {
     await preview.locator('button').first().click()
     await page.waitForTimeout(700) // let the morph spring settle
+  },
+
+  // Delete Button — click the default pill to morph into the "Cancel
+  // Deletion" countdown pill, then capture quickly (well under the 5s
+  // countdown / 2.8s auto-reset) so the shot shows the undo + countdown
+  // state, not the plain idle red button.
+  'delete-button': async (preview, page) => {
+    await preview.locator('button').first().click()
+    await page.waitForTimeout(500) // let the morph spring settle, still mid-countdown
   },
 
   // Signature Pad — click pill to open modal, then draw a signature on canvas
