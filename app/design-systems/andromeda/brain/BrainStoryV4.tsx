@@ -19,7 +19,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -627,9 +627,12 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-          <p style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, textAlign: 'center', lineHeight: 1.5, margin: '20px 0 0' }}>
-            The agent builds fast and accurate. You stay in the loop, and you decide what ships.
-          </p>
+          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(168,185,77,0.05)' }}>
+            <Asterisk weight="regular" size={16} color={C.accentBtn} style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5 }}>
+              The agent builds fast and accurate. You stay in the loop, and you decide what ships.
+            </span>
+          </div>
         </section>
 
         {/* How it works */}
