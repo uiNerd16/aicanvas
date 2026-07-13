@@ -19,7 +19,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Palette, Code, Sparkle } from '@phosphor-icons/react'
+import { ArrowRight, Palette, Code, Sparkle, Check, X as XIcon } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -88,6 +88,17 @@ const ROLES = [
   { role: 'Designers', icon: <Palette weight="regular" size={18} />, gets: 'Even the screens you did not build come out on-brand.' },
   { role: 'Developers', icon: <Code weight="regular" size={18} />, gets: 'Ship Andromeda UI that already follows the rules, without writing them into every prompt.' },
   { role: 'AI agents', icon: <Sparkle weight="regular" size={18} />, gets: 'Reads the whole rulebook and builds to it, so it stops guessing.' },
+]
+
+// Classic workflow pains (left) vs what an AI-native system delivers (right).
+// Right-side claims stay to what Andromeda + the Brain actually ship — code,
+// tokens, and machine-readable rules. No Figma-to-code bridge is implied.
+const COMPARE = [
+  { classic: 'Documentation nobody reads, if it exists at all', native: 'Rules written down in a form your agent reads' },
+  { classic: 'Designers in Figma, developers in code, intent lost in the handoff', native: 'No handoff: the system is already code and tokens' },
+  { classic: 'Weeks from a mock to a production-ready screen', native: 'On-brand screens from the system on the first prompt' },
+  { classic: 'New screens drift off-brand as the team grows', native: 'New work builds against the same rules, so it holds' },
+  { classic: 'Every change is another Figma to code round trip', native: 'Change a token, and everything built on it follows' },
 ]
 
 // Section separator: the AI Canvas wire mark, three across, like the homepage divider.
@@ -509,6 +520,48 @@ export function BrainStoryV4() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {g.sample.map((name) => <Chip key={name}>{name}</Chip>)}
                   {g.count > g.sample.length && <Chip>+{g.count - g.sample.length} more</Chip>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Classic vs AI-native — the workflow contrast */}
+        <section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            Where the classic workflow leaks
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 24px' }}>
+            The classic workflow loses time and intent at every step from Figma to production. When the system is already code and tokens, those steps disappear.
+          </p>
+
+          <style>{`
+            .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; }
+            .cmp-cell { padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start; }
+            @media (max-width: 600px) {
+              .cmp-grid { grid-template-columns: 1fr; }
+              .cmp-left { border-right: none !important; }
+            }
+          `}</style>
+          <div style={{ border: '1px solid #2D2D2E', borderRadius: 16, overflow: 'hidden' }}>
+            <div className="cmp-grid">
+              <div className="cmp-cell cmp-left" style={{ borderRight: '1px solid #2D2D2E', borderBottom: '1px solid #2D2D2E', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>
+                Classic design system
+              </div>
+              <div className="cmp-cell" style={{ borderBottom: '1px solid #2D2D2E', background: 'rgba(168,185,77,0.05)', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>
+                AI-native design system
+              </div>
+            </div>
+            {COMPARE.map((row, i) => (
+              <div key={i} className="cmp-grid">
+                <div className="cmp-cell cmp-left" style={{ borderRight: '1px solid #2D2D2E', borderTop: i === 0 ? 'none' : '1px solid #2D2D2E' }}>
+                  <XIcon weight="regular" size={15} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 14, color: C.node, lineHeight: 1.5 }}>{row.classic}</span>
+                </div>
+                <div className="cmp-cell" style={{ borderTop: i === 0 ? 'none' : '1px solid #2D2D2E', background: 'rgba(168,185,77,0.05)' }}>
+                  <Check weight="regular" size={15} color={C.accentBtn} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 14, color: C.bright, lineHeight: 1.5 }}>{row.native}</span>
                 </div>
               </div>
             ))}
