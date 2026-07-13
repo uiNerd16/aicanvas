@@ -494,10 +494,10 @@ export function BrainStoryV4() {
           <style>{`
             .why-bento {
               display: grid;
-              grid-template-columns: repeat(12, minmax(0, 1fr));
+              grid-template-columns: repeat(24, minmax(0, 1fr));
               grid-template-areas:
-                "grow grow grow grow grow beyond beyond beyond beyond beyond beyond beyond"
-                "grow grow grow grow grow experiment experiment experiment trust trust trust trust";
+                "grow grow grow grow grow grow grow grow grow grow beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond beyond"
+                "grow grow grow grow grow grow grow grow grow grow experiment experiment experiment experiment experiment experiment experiment trust trust trust trust trust trust trust";
               gap: 14px;
               margin-top: 24px;
             }
@@ -518,7 +518,7 @@ export function BrainStoryV4() {
           `}</style>
 
           <div className="why-bento">
-            <div className="why-bento-grow" style={{ ...PANEL, minHeight: 236, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(168,185,77,0.05)' }}>
+            <div className="why-bento-grow" style={{ ...PANEL, minHeight: 236, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>01 · Built to evolve</span>
               <div style={{ marginTop: 40 }}>
                 <p style={{ fontSize: 'clamp(24px,3.5vw,34px)', color: C.bright, fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.08, margin: 0 }}>
