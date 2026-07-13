@@ -29,7 +29,7 @@ export default function ExpandingTabs() {
         transition={SPRING}
         role="tablist"
         aria-label="Mail navigation"
-        className="flex max-w-[calc(100vw-1.5rem)] items-center gap-2 rounded-full border border-black/[0.035] bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:border-white/[0.055] dark:bg-white/[0.025] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+        className="flex max-w-[calc(100vw-1.5rem)] items-center gap-2 rounded-full border border-black/[0.035] bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.97)] dark:border-white/[0.055] dark:bg-white/[0.025] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.09)]"
       >
         {tabs.map((tab) => {
           const Icon = tab.icon
