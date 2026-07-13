@@ -543,9 +543,9 @@ export function BrainStoryV4() {
               </div>
             </div>
 
-            <div className="why-bento-experiment" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }}>
+            <div className="why-bento-experiment" style={{ background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.accentBtn }}>03 · Experiment fast</span>
-              <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: '22px 0 0' }}>
+              <p style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.25, margin: 0 }}>
                 Try an idea.<br />Push it further.
               </p>
             </div>
