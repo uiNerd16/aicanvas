@@ -54,6 +54,7 @@ export default function ExpandingTabs() {
               }`}
             >
               <motion.span
+                layout
                 animate={{ scale: isActive ? 1.03 : 1, opacity: isActive ? 1 : 0.78 }}
                 transition={SPRING}
                 className="flex items-center justify-center text-[#161618] dark:text-[#F3F3F4]"
@@ -64,6 +65,7 @@ export default function ExpandingTabs() {
               <AnimatePresence initial={false}>
                 {isActive && (
                   <motion.span
+                    layout
                     initial={{ opacity: 0, x: -7 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -7 }}
