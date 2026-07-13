@@ -19,7 +19,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Lightning, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -85,7 +85,7 @@ const STRUCTURE = [
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
 const BENEFITS = [
-  { label: 'Faster', icon: <Lightning weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
+  { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
   { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
   { label: 'Efficient', icon: <Gauge weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
 ]
@@ -627,6 +627,9 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
+          <p style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, textAlign: 'center', lineHeight: 1.5, margin: '20px 0 0' }}>
+            The agent builds fast and accurate. You stay in the loop, and you decide what ships.
+          </p>
         </section>
 
         {/* How it works */}
