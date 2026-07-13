@@ -151,6 +151,7 @@ import CryptoSwap from '../../components-workspace/crypto-swap'
 import { prompts as cryptoSwapPrompts } from '../../components-workspace/crypto-swap/prompts'
 import MoodTracker from '../../components-workspace/mood-tracker'
 import { prompts as moodTrackerPrompts } from '../../components-workspace/mood-tracker/prompts'
+import ExpandingTabs from '../../components-workspace/expanding-tabs'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1338,6 +1339,21 @@ Requirements:
     PreviewComponent: MoodTracker,
     code: componentCodes['mood-tracker'],
     prompts: moodTrackerPrompts,
+  },
+  {
+    slug: 'expanding-tabs',
+    image: '',
+    name: 'Expanding Tabs',
+    description: 'A monochrome tab bar where the active tab expands into an icon-and-label pill while the others collapse to icon-only circles. Click a tab and the pill fluidly morphs across the row.',
+    tags: [
+      { label: 'Buttons & Toggles', accent: true },
+      { label: 'Interactive' },
+      { label: 'Motion' },
+    ],
+    dualTheme: true,
+    PreviewComponent: ExpandingTabs,
+    code: componentCodes['expanding-tabs'],
+    prompts: {},
   },
 ]
 
