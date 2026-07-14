@@ -22,6 +22,8 @@ import {
   Terminal,
   Sparkle,
   Lightning,
+  Info,
+  SignIn,
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { PLATFORMS } from '../ComponentCard'
@@ -222,6 +224,7 @@ export default function ComponentPageView({
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
+  const [showMcpTokenSetup, setShowMcpTokenSetup] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [depsCopied, setDepsCopied] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
@@ -1272,74 +1275,97 @@ export default function ComponentPageView({
                 a few options, then install the one you like. Less typing,
                 lower token cost, modern way to build.
               </p>
-              <Link
-                href="/mcp"
-                className={buttonClasses({ variant: 'outline', size: 'sm' })}
-              >
-                Get MCP
-                <ArrowRight weight="regular" size={13} />
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/mcp"
+                  className={buttonClasses({ variant: 'outline', size: 'sm' })}
+                >
+                  Get MCP
+                  <ArrowRight weight="regular" size={13} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowMcpTokenSetup((v) => !v)}
+                  className="shrink-0 rounded-full p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                  aria-label={showMcpTokenSetup ? 'Hide MCP token setup' : 'Show MCP token setup'}
+                  aria-expanded={showMcpTokenSetup}
+                >
+                  <Info weight="regular" size={16} />
+                </button>
+              </div>
 
               {/* MCP token — so AI-agent / MCP installs authenticate as your
-                  account. The token exists from signup (DB trigger), so the
-                  row is the same on free and premium pages. Signed out: masked
-                  row, copy opens the auth modal (soft gate). Signed in: copy
-                  writes the real value; skeleton while it fetches. */}
-              {!user ? (
-                <div className="mt-4">
-                  <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
-                    Add your token to your MCP server config so installs authenticate as your account:
-                  </p>
-                  <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                    <code className="font-mono text-sm text-sand-300 break-all">
-                      AICANVAS_TOKEN=aic_••••••••
-                    </code>
-                    <button
-                      onClick={promptFreeAccount}
-                      className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                      aria-label="Copy MCP token"
-                    >
-                      <Copy weight="regular" size={14} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                userToken ? (
-                  <div className="mt-4">
-                    <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
-                      Add your token to your MCP server config so installs authenticate as your account:
-                    </p>
-                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                      <code className="font-mono text-sm text-sand-300 break-all">
-                        AICANVAS_TOKEN=aic_••••••••
-                      </code>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
-                          setMcpTokenCopied(true)
-                          setTimeout(() => setMcpTokenCopied(false), 2000)
-                        }}
-                        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                        aria-label="Copy MCP token"
-                      >
-                        {mcpTokenCopied
-                          ? <Check weight="regular" size={14} className="text-olive-500" />
-                          : <Copy weight="regular" size={14} />}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* Token still loading — placeholder mirrors the real layout
-                     (intro line + dark token row) so nothing jumps when it lands. */
-                  <div className="mt-4" aria-hidden>
-                    <div className="mb-2 h-4 w-3/4 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
-                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                      <div className="h-4 w-40 animate-pulse rounded bg-sand-800" />
-                      <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-800" />
-                    </div>
-                  </div>
-                )
-              )}
+                  account. Collapsed by default behind the info toggle above,
+                  since this section repeats on every component page. Signed
+                  out: masked row, Sign in opens the auth modal (soft gate).
+                  Signed in: copy writes the real value; skeleton while it
+                  fetches. */}
+              <AnimatePresence initial={false}>
+                {showMcpTokenSetup && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    {!user ? (
+                      <div className="mt-4">
+                        <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
+                          Add your token to your MCP server config so installs authenticate as your account:
+                        </p>
+                        <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                          <code className="font-mono text-sm text-sand-300 break-all">
+                            AICANVAS_TOKEN=aic_••••••••
+                          </code>
+                          <button
+                            onClick={promptFreeAccount}
+                            className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-sand-300 transition-all hover:text-sand-100 active:scale-95"
+                          >
+                            <SignIn weight="regular" size={14} />
+                            Sign in
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      userToken ? (
+                        <div className="mt-4">
+                          <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
+                            Add your token to your MCP server config so installs authenticate as your account:
+                          </p>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-300 break-all">
+                              AICANVAS_TOKEN=aic_••••••••
+                            </code>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
+                                setMcpTokenCopied(true)
+                                setTimeout(() => setMcpTokenCopied(false), 2000)
+                              }}
+                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              aria-label="Copy MCP token"
+                            >
+                              {mcpTokenCopied
+                                ? <Check weight="regular" size={14} className="text-olive-500" />
+                                : <Copy weight="regular" size={14} />}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Token still loading — placeholder mirrors the real layout
+                           (intro line + dark token row) so nothing jumps when it lands. */
+                        <div className="mt-4" aria-hidden>
+                          <div className="mb-2 h-4 w-3/4 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
+                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                            <div className="h-4 w-40 animate-pulse rounded bg-sand-800" />
+                            <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-800" />
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </section>
 
           {/* About this component — long-form body copy that gives Google a
