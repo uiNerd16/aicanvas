@@ -17,6 +17,9 @@ import {
   CaretRight,
   Terminal,
   Sparkle,
+  Cube,
+  Brain,
+  SquaresFour,
 } from '@phosphor-icons/react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -669,9 +672,8 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 // Rendered in the homepage FAQ section. The FAQPage JSON-LD for rich results
 // lives on the dedicated /faq page, so it is not duplicated here.
 
-// Flip to true when Andromeda is ready to feature on the homepage. Gates the
-// design-systems showcase section below.
-const ANDROMEDA_LIVE: boolean = false
+// On/off switch for the homepage design-systems showcase section below.
+const ANDROMEDA_LIVE: boolean = true
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
@@ -1024,9 +1026,10 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
               Andromeda is a full design system for mission dashboards: token-driven
-              components and production templates that compose into real interfaces.
-              One token file controls every color, spacing, and radius, so the whole
-              system retunes at once.
+              components, a design brain your AI agent reads to stay on-brand, and
+              production templates that compose into real interfaces. One token file
+              controls every color, spacing, and radius, so the whole system retunes
+              at once.
             </p>
           </motion.div>
 
@@ -1105,6 +1108,49 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 </div>
               </div>
             </Link>
+
+            {/* Three pillars — the System, the Brain, the Templates */}
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                {
+                  icon: <Cube weight="regular" size={18} />,
+                  title: 'The System',
+                  href: '/design-systems/andromeda/system',
+                  desc: `${ANDROMEDA_COMPONENT_META.length} live components on one page, from buttons to charts.`,
+                },
+                {
+                  icon: <Brain weight="regular" size={18} />,
+                  title: 'The Brain',
+                  href: '/design-systems/andromeda/brain',
+                  desc: 'The design rules your AI agent reads to build on-brand UI.',
+                },
+                {
+                  icon: <SquaresFour weight="regular" size={18} />,
+                  title: 'Templates',
+                  href: '/design-systems/andromeda/templates/mission-control',
+                  desc: 'Four production dashboards, assembled from the system.',
+                },
+              ].map(({ icon, title, href, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group flex flex-col rounded-xl border border-sand-800 bg-sand-900 p-4 transition-colors hover:border-sand-700"
+                >
+                  <div className="mb-2.5 flex items-center gap-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sand-800 text-olive-500">
+                      {icon}
+                    </span>
+                    <span className="text-sm font-bold text-sand-50">{title}</span>
+                    <ArrowRight
+                      weight="regular"
+                      size={13}
+                      className="ml-auto text-sand-600 transition-transform group-hover:translate-x-0.5 group-hover:text-olive-500"
+                    />
+                  </div>
+                  <p className="text-sm leading-relaxed text-sand-400">{desc}</p>
+                </Link>
+              ))}
+            </div>
 
             {/* Template quick links */}
             <div className="mt-3 flex flex-wrap gap-2">

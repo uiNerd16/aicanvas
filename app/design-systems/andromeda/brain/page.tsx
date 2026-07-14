@@ -10,7 +10,7 @@ const jbm = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mon
 export const metadata = {
   title: 'The Andromeda Brain: Design Rules for On-Brand UI',
   description:
-    'The judgment layer for Andromeda: foundations, per-component rules, and skills your AI coding agent reads to build on-brand UI. One command installs the whole brain.',
+    'Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.',
 }
 
 export default function AndromedaBrainLandingPage() {

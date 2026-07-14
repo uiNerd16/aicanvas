@@ -1,7 +1,7 @@
 // @ts-nocheck — consumes the JSDoc-typed Andromeda config/meta (no TS prop types).
 //
-// Andromeda OVERVIEW — the product landing for the system: hero → featured
-// component showcase → templates grid → components grid. This IS the system
+// Andromeda OVERVIEW — the product landing for the system: hero → system
+// showcase → the brain → templates grid → components grid. This IS the system
 // root: page.tsx at /design-systems/andromeda renders it. The raw component
 // grid lives at /design-systems/andromeda/system; the old preview URL
 // /design-systems/andromeda/overview 308-redirects (permanent) here (see next.config.ts).
@@ -13,7 +13,7 @@
 // repaints the Andromeda void back to the AI Canvas page surface for this route.
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Lightning, Robot, Wrench, CaretDown } from '@phosphor-icons/react'
@@ -236,6 +236,120 @@ function FoundationLoop() {
   )
 }
 
+// ── BrainWireframePreview ────────────────────────────────────────────
+// Decorative auto-rotating 3D preview for the Brain card's right half —
+// the same brain.glb model as the live Brain page (BrainStoryV4.tsx),
+// reduced to just a slow spin: no drag, no firefly, no floating labels.
+// Locked to the site's olive-500 (AI Canvas chrome presenting the system,
+// per the file header — not Andromeda's own turquoise). Fails silent
+// (void background only) if WebGL or the model can't load.
+const BRAIN_MODEL_URL = '/models/brain.glb'
+const BRAIN_OLIVE_500 = '#A8B94D'
+const BRAIN_VOID = '#0E0E0F'
+
+function BrainWireframePreview() {
+  const hostRef = useRef(null)
+  const reduce = useReducedMotion()
+
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host) return
+    let alive = true
+    let raf = 0
+    let renderer
+    let onResize = () => {}
+
+    ;(async () => {
+      const [THREE, { GLTFLoader }] = await Promise.all([
+        import('three'),
+        import('three/examples/jsm/loaders/GLTFLoader.js'),
+      ])
+      if (!alive) return
+
+      let W = host.clientWidth || 400
+      let H = host.clientHeight || 300
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' })
+      renderer.setSize(W, H)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+      host.appendChild(renderer.domElement)
+
+      const scene = new THREE.Scene()
+      scene.background = new THREE.Color(BRAIN_VOID)
+      scene.add(new THREE.AmbientLight(0xffffff, 0.25))
+      const key = new THREE.DirectionalLight(0xeaf2ff, 1)
+      key.position.set(3, 4, 5)
+      scene.add(key)
+
+      const camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
+      camera.position.set(0, 0.2, 3)
+      camera.lookAt(0, 0, 0)
+
+      onResize = () => {
+        W = host.clientWidth || W
+        H = host.clientHeight || H
+        renderer.setSize(W, H)
+        camera.aspect = W / H
+        camera.updateProjectionMatrix()
+      }
+      window.addEventListener('resize', onResize)
+
+      let brainRoot = null
+      new GLTFLoader().load(BRAIN_MODEL_URL, (gltf) => {
+        if (!alive) return
+        const model = gltf.scene
+        // Normalize scale + recenter via bounding sphere — same two-pass
+        // approach as BrainStoryV4 (Poly models ship off-origin, arbitrary scale).
+        model.updateWorldMatrix(true, true)
+        let box = new THREE.Box3().setFromObject(model)
+        let sphere = box.getBoundingSphere(new THREE.Sphere())
+        model.scale.setScalar(1 / (sphere.radius || 1))
+        model.updateWorldMatrix(true, true)
+        box = new THREE.Box3().setFromObject(model)
+        sphere = box.getBoundingSphere(new THREE.Sphere())
+        model.position.sub(sphere.center)
+        model.traverse((o) => {
+          if (o.isMesh) {
+            o.material = new THREE.MeshStandardMaterial({
+              color: new THREE.Color(BRAIN_OLIVE_500),
+              wireframe: true,
+              emissive: new THREE.Color(BRAIN_OLIVE_500),
+              emissiveIntensity: 0.6,
+              metalness: 0,
+              roughness: 1,
+            })
+          }
+        })
+        scene.add(model)
+        brainRoot = model
+      }, undefined, () => {})
+
+      const clock = new THREE.Clock()
+      const loop = () => {
+        raf = requestAnimationFrame(loop)
+        const dt = Math.min(clock.getDelta(), 1 / 30)
+        if (brainRoot && !reduce) brainRoot.rotation.y += dt * 0.25
+        renderer.render(scene, camera)
+      }
+      loop()
+    })()
+
+    return () => {
+      alive = false
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+      try {
+        if (renderer) {
+          renderer.forceContextLoss()
+          renderer.dispose()
+          if (renderer.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement)
+        }
+      } catch {}
+    }
+  }, [reduce])
+
+  return <div ref={hostRef} aria-hidden style={{ position: 'absolute', inset: 0, background: BRAIN_VOID }} />
+}
+
 // One value prop: a pill framed by a soft, marching dashed border (animated SVG
 // stroke). Icon + label + chevron cluster on the LEFT; clicking toggles the
 // description and the dashed frame extends with it (the SVG tracks the container
@@ -339,8 +453,8 @@ export function AndromedaOverview() {
             new screens land already matching the system.
           </ValueItem>
           <ValueItem icon={Wrench} heading="Build by hand" delay={120}>
-            Compose it yourself from a foundation that holds its line. Around 32 components and 4
-            dashboard templates all read from one token set, so change a token and the whole system
+            Compose it yourself from a foundation that holds its line. Around {ANDROMEDA_COMPONENT_META.length} components
+            and {TEMPLATES.length} dashboard templates all read from one token set, so change a token and the whole system
             follows as your product grows.
           </ValueItem>
         </div>
@@ -365,7 +479,7 @@ export function AndromedaOverview() {
         }
       `}</style>
 
-      {/* ── Featured: component showcase ────────────────────────────────── */}
+      {/* ── System showcase ───────────────────────────────────────────────── */}
       <motion.section className="mt-14" {...reveal}>
         <Link
           href="/design-systems/andromeda/system"
@@ -373,10 +487,10 @@ export function AndromedaOverview() {
         >
           <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
             <span className="text-xs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
-              Featured
+              System
             </span>
             <h2 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
-              Component showcase
+              The whole system, live
             </h2>
             <p className="text-sm leading-relaxed text-sand-600 dark:text-sand-400">
               From the foundation up to every component: buttons, cards, tables, and more. All on
@@ -384,13 +498,44 @@ export function AndromedaOverview() {
             </p>
             <div className="mt-1">
               <span className={`${buttonClasses({ variant: 'primary', size: 'md' })} group-hover:bg-olive-400`}>
-                Open showcase
+                View the System
                 <ArrowUpRight weight="bold" size={15} />
               </span>
             </div>
           </div>
           <div className="relative min-h-[280px] overflow-hidden sm:min-h-[360px] sm:w-1/2">
             <FoundationLoop />
+          </div>
+        </Link>
+      </motion.section>
+
+      {/* ── The Brain ──────────────────────────────────────────────────────── */}
+      <motion.section className="mt-14" {...reveal}>
+        <Link
+          href="/design-systems/andromeda/brain"
+          className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
+        >
+          <div className="relative min-h-[280px] overflow-hidden sm:min-h-[360px] sm:w-1/2">
+            <BrainWireframePreview />
+          </div>
+          <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
+            <span className="text-xs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
+              The Brain
+            </span>
+            <h2 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50">
+              The rules your agent reads
+            </h2>
+            <p className="text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+              Tokens and components are the pieces. The Brain is the judgment that assembles them:
+              every rule, foundation, and skill your AI agent reads, so what it builds already
+              matches the system instead of a guess.
+            </p>
+            <div className="mt-1">
+              <span className={`${buttonClasses({ variant: 'primary', size: 'md' })} group-hover:bg-olive-400`}>
+                Explore more
+                <ArrowUpRight weight="bold" size={15} />
+              </span>
+            </div>
           </div>
         </Link>
       </motion.section>
