@@ -26,10 +26,10 @@ export function McpTokenSection({ token }: Props) {
 
   return (
     <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
-      <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">MCP access token</h2>
+      <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">API token</h2>
       <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
-        Add this token to your MCP server config so AI Canvas installs authenticate
-        as your account.
+        Copy this token into your MCP server config or CLI install so AI Canvas
+        authenticates as your account.
       </p>
 
       {token ? (
