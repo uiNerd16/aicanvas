@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Copy } from '@phosphor-icons/react'
 import { Step } from '../components/Step'
@@ -10,30 +11,49 @@ import { Step } from '../components/Step'
 const PACKAGE = '@aicanvas/mcp'
 const SERVER_NAME = 'aicanvas'
 
-// Claude Code supports three install scopes via --scope.
-const CLAUDE_CLI: Record<Scope, string> = {
-  user: `claude mcp add ${SERVER_NAME} --scope user -- npx -y ${PACKAGE}`,
-  project: `claude mcp add ${SERVER_NAME} --scope project -- npx -y ${PACKAGE}`,
-  local: `claude mcp add ${SERVER_NAME} --scope local -- npx -y ${PACKAGE}`,
+// On-screen mask for the account token — copy/deep-link carry the real value.
+const MASKED_TOKEN = 'aic_••••••••'
+
+// The install command / config bakes the account token in as an AICANVAS_TOKEN
+// env var so the MCP authenticates on first run (the README's intended flow).
+// `token` = real value (for copy), the masked form (for display), or '' when
+// signed out (plain command, browse-only). Claude Code has three --scope modes.
+function claudeCommand(scope: Scope, token: string) {
+  const env = token ? ` --env AICANVAS_TOKEN=${token}` : ''
+  return `claude mcp add ${SERVER_NAME} --scope ${scope}${env} -- npx -y ${PACKAGE}`
 }
-
 // Codex has no --scope flag yet — its CLI registers the server globally.
-const CODEX_CLI = `codex mcp add ${SERVER_NAME} -- npx -y ${PACKAGE}`
-
-// Cursor stores MCP servers as JSON, or installs via a one-click deep link.
-// The deep-link config is base64 of the INNER server object only:
-//   {"command":"npx","args":["-y","@aicanvas/mcp"]}
-const CURSOR_CONFIG_B64 =
-  'eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhaWNhbnZhcy9tY3AiXX0='
-const CURSOR_DEEPLINK = `cursor://anysphere.cursor-deeplink/mcp/install?name=${SERVER_NAME}&config=${CURSOR_CONFIG_B64}`
-const CURSOR_JSON = `{
+function codexCommand(token: string) {
+  const env = token ? ` --env AICANVAS_TOKEN=${token}` : ''
+  return `codex mcp add ${SERVER_NAME}${env} -- npx -y ${PACKAGE}`
+}
+// Cursor stores MCP servers as JSON.
+function cursorConfig(token: string) {
+  const env = token ? `,\n      "env": { "AICANVAS_TOKEN": "${token}" }` : ''
+  return `{
   "mcpServers": {
     "${SERVER_NAME}": {
       "command": "npx",
-      "args": ["-y", "${PACKAGE}"]
+      "args": ["-y", "${PACKAGE}"]${env}
     }
   }
 }`
+}
+
+// Cursor one-click deep link — config is base64 of the INNER server object.
+// Without a token we use the prebuilt string; with one we rebuild it so the
+// deep link installs already authenticated. btoa runs client-side only (token
+// arrives after the client fetch), so no SSR base64 concerns.
+const CURSOR_CONFIG_B64 =
+  'eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhaWNhbnZhcy9tY3AiXX0='
+const CURSOR_DEEPLINK_BASE = `cursor://anysphere.cursor-deeplink/mcp/install?name=${SERVER_NAME}&config=${CURSOR_CONFIG_B64}`
+function cursorDeeplink(token: string) {
+  if (!token) return CURSOR_DEEPLINK_BASE
+  const config = btoa(
+    JSON.stringify({ command: 'npx', args: ['-y', PACKAGE], env: { AICANVAS_TOKEN: token } }),
+  )
+  return `cursor://anysphere.cursor-deeplink/mcp/install?name=${SERVER_NAME}&config=${config}`
+}
 
 const TEST_PROMPT = `What's the best navbar component in AI Canvas? Install it for me.`
 
@@ -215,6 +235,22 @@ export function InstallCards() {
   const [scope, setScope] = useState<Scope>('user')
   const [installCopied, setInstallCopied] = useState(false)
   const [testCopied, setTestCopied] = useState(false)
+  const [userToken, setUserToken] = useState<string | null>(null)
+  const [tokenLoaded, setTokenLoaded] = useState(false)
+
+  // Signed-in user's API token, so the install command / config can bake it in
+  // (AICANVAS_TOKEN) and the MCP authenticates on first run. Fetched client-side
+  // so the /mcp page stays static. null = signed out (or no token yet).
+  // tokenLoaded gates the token note so a signed-in user never flashes "Sign in".
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/me/token')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setUserToken(d?.token ?? null) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setTokenLoaded(true) })
+    return () => { cancelled = true }
+  }, [])
 
   function copy(text: string, toast: string, setLocal: (v: boolean) => void) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
@@ -234,10 +270,20 @@ export function InstallCards() {
   const isCodex = tool === 'codex'
   const isCursor = tool === 'cursor'
   const { label: toolLabel, ask: askLabel } = TOOL_META[tool]
-  const installCommand = isCodex ? CODEX_CLI : CLAUDE_CLI[scope]
+  // Masked for display, real value for the copy handler.
+  const displayToken = userToken ? MASKED_TOKEN : ''
+  const installCommandDisplay = isCodex
+    ? codexCommand(displayToken)
+    : claudeCommand(scope, displayToken)
+  const installCommandCopy = isCodex
+    ? codexCommand(userToken ?? '')
+    : claudeCommand(scope, userToken ?? '')
 
   return (
     <section className="mt-2">
+      <h2 className="mb-3 text-lg font-bold text-sand-900 dark:text-sand-50">
+        How to install the MCP
+      </h2>
       {/* Tabbed install widget — matches the per-component "Add to your project" */}
       <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
         {/* Tool toggle — Claude Code / Codex / Cursor */}
@@ -317,7 +363,7 @@ export function InstallCards() {
                   filled in, so you just enable it.
                 </p>
                 <a
-                  href={CURSOR_DEEPLINK}
+                  href={cursorDeeplink(userToken ?? '')}
                   className="inline-flex items-center gap-2 rounded-lg bg-olive-500 px-4 py-2.5 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
                 >
                   <CursorMark />
@@ -335,10 +381,10 @@ export function InstallCards() {
                   (one project):
                 </p>
                 <CodeBlock
-                  command={CURSOR_JSON}
+                  command={cursorConfig(displayToken)}
                   copied={installCopied}
                   onCopy={() =>
-                    copy(CURSOR_JSON, 'Config copied', setInstallCopied)
+                    copy(cursorConfig(userToken ?? ''), 'Config copied', setInstallCopied)
                   }
                   label="Cursor config"
                   multiline
@@ -358,11 +404,11 @@ export function InstallCards() {
                   )}
                 </p>
                 <CodeBlock
-                  command={installCommand}
+                  command={installCommandDisplay}
                   copied={installCopied}
                   onCopy={() =>
                     copy(
-                      installCommand,
+                      installCommandCopy,
                       'Install command copied',
                       setInstallCopied,
                     )
@@ -371,6 +417,31 @@ export function InstallCards() {
                 />
               </>
             )}
+            {tokenLoaded && (userToken ? (
+              <p className="mt-3 text-sm text-sand-500 dark:text-sand-400">
+                Your token is baked into the command above, so installs can pull
+                source. View or rotate it in your{' '}
+                <Link
+                  href="/account/settings"
+                  className="font-medium text-sand-700 underline underline-offset-2 hover:text-sand-900 dark:text-sand-300 dark:hover:text-sand-50"
+                >
+                  account settings
+                </Link>
+                .
+              </p>
+            ) : (
+              <p className="mt-3 text-sm text-sand-500 dark:text-sand-400">
+                <Link
+                  href="/account/settings"
+                  className="font-medium text-sand-700 underline underline-offset-2 hover:text-sand-900 dark:text-sand-300 dark:hover:text-sand-50"
+                >
+                  Sign in
+                </Link>{' '}
+                to bake your token into the command (free or premium account).
+                Without it your agent can browse components but can&rsquo;t pull
+                their source.
+              </p>
+            ))}
           </Step>
 
           <Step number={2}>
