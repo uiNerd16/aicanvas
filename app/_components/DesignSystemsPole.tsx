@@ -137,7 +137,13 @@ export function DesignSystemsPole({
                   <span className="flex-1 font-semibold">{system.name}</span>
                 </Link>
                 {expanded && (
-                  <ul className="mt-0.5 space-y-0.5">
+                  <div className="relative">
+                    {/* Nesting rail — groups System / Brain / Templates / Components under Andromeda */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-1 left-[15px] top-1 w-px bg-sand-300 dark:bg-sand-800"
+                    />
+                    <ul className="mt-0.5 space-y-0.5">
                     {/* ── System (the full component gallery + install) ───── */}
                     <li className="mt-1">
                       <Link
@@ -227,9 +233,9 @@ export function DesignSystemsPole({
                     </li>
 
                     {/* ── Components (label + flat list) ──────── */}
-                    {/* Only when actually inside the system — keeps the promoted
-                        landing rail to System / Brain / Templates. */}
-                    {systemSelected && (
+                    {/* Shown whenever Andromeda is expanded; the list runs long,
+                        so it overflows into the sidebar's own scroll (peeks on
+                        tall screens, scroll for the rest). */}
                     <li className="mt-1">
                       <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
                         Components
@@ -255,8 +261,8 @@ export function DesignSystemsPole({
                         })}
                       </ul>
                     </li>
-                    )}
                   </ul>
+                  </div>
                 )}
               </li>
             )
