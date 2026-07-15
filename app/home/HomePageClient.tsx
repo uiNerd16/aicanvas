@@ -20,6 +20,7 @@ import {
   Cube,
   Brain,
   SquaresFour,
+  PlayCircle,
 } from '@phosphor-icons/react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -859,6 +860,54 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
 
         {/* ── Wire icon divider ── */}
         <WireIcons />
+
+        {/* ── Andromeda spotlight ── */}
+        <section className="mt-16 sm:mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.35 }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Featured</p>
+            <h2 className="mt-1 text-xl font-bold text-sand-50">Andromeda design system.</h2>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-sand-400">
+              A complete design system for dashboards, control panels, and data-dense interfaces.
+              Components, templates, and the rules that keep them all speaking the same visual
+              language.
+            </p>
+            <Link
+              href="/design-systems/andromeda"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400"
+            >
+              Discover more
+              <ArrowRight weight="regular" size={14} />
+            </Link>
+          </motion.div>
+
+          {/* Video placeholder — swap for the real clip once we have its source */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mx-auto mt-8 max-w-3xl"
+          >
+            <div className="relative aspect-video overflow-hidden rounded-2xl border border-sand-800 bg-sand-950">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                }}
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sand-600">
+                <PlayCircle weight="regular" size={32} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Video placeholder</span>
+              </div>
+            </div>
+          </motion.div>
+        </section>
 
         {/* ── Featured carousel ── */}
         <FeaturedCarousel items={carouselItems} />
