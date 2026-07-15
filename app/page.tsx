@@ -5,8 +5,8 @@ import { HomePageClient } from './home/HomePageClient'
 import { COMPONENT_META } from './lib/component-meta.generated'
 import { SITE_URL } from './lib/config'
 
-const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENT_META.length} Animated React Components with AI Reproduction Prompts`
-const HOMEPAGE_DESCRIPTION = `Open-source registry of ${COMPONENT_META.length} animated React components. Free to browse and remix with AI. Install components with one command with a free account, or go Premium for design systems and premium components.`
+const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'
+const HOMEPAGE_DESCRIPTION = 'Install finished React components, blocks, and design systems with one shadcn CLI command. Real, editable code you own, no AI tokens spent.'
 
 export const metadata: Metadata = {
   title: { absolute: HOMEPAGE_TITLE },

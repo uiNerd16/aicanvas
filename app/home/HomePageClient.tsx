@@ -365,15 +365,15 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   return (
     <section className="mt-16 sm:mt-24">
       {/* Header */}
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.35 }}
         >
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Featured</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">A taste of what&apos;s inside.</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
+          <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
         </motion.div>
         <div className="flex items-center gap-2">
           <button
@@ -390,6 +390,19 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
           </button>
         </div>
       </div>
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.35, delay: 0.05 }}
+        className="mb-8 max-w-2xl text-base leading-relaxed text-sand-400"
+      >
+        Copy one CLI command and a finished, animated React piece lands in your project, no
+        tokens spent generating it. A component is one polished element like a button or a
+        toggle; a block is a whole section built from several, like a pricing table or a hero.
+        Both stand on their own, separate from the Andromeda design system, and both arrive as
+        real code you own and reshape with an AI agent.
+      </motion.p>
 
       {/* Track — breaks out of the 720px container.
           The inner row is draggable horizontally so users can swipe through
@@ -525,7 +538,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
-    a: 'AI Canvas is a registry of animated React components, design systems, and templates you can install straight into your project. Open source and free to start: every free component ships with its full source code, so you use it as is or rebuild it your way. Premium adds more components, complete design systems, and templates.',
+    a: 'AI Canvas is a registry of animated React components and design systems you install with one command, no tokens spent generating them. Every install lands real, editable source in your project. Free and premium options both ship the full source.',
   },
   {
     q: 'Do I need to know how to code?',
@@ -537,7 +550,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'How do I get my first component in under a minute?',
-    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a free account unlocks unlimited one-command installs, free forever.',
+    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code.',
   },
   {
     q: 'What is the AI Canvas MCP server?',
@@ -589,7 +602,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.1 }}
             className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
-            Open core
+            One command, zero tokens
           </motion.span>
 
           <motion.h1
@@ -615,12 +628,11 @@ export function HomePageClient({ total, carouselItems }: Props) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.26 }}
-            className="mt-4 max-w-xl text-base leading-relaxed text-sand-400"
+            className="mt-4 max-w-2xl text-base leading-relaxed text-sand-400"
           >
-            If your agent can pull it, you can build it. Claude Code, Codex,
-            and Cursor install finished components, design systems, and
-            templates with the shadcn CLI or the AI Canvas MCP, saving tokens
-            on every build.
+            Copy one shadcn CLI command and a finished component, block, or complete
+            design system lands in your project in seconds. No tokens spent asking an
+            AI to generate it from scratch, just real, editable React you own.
           </motion.p>
 
           <motion.div
@@ -636,14 +648,12 @@ export function HomePageClient({ total, carouselItems }: Props) {
               Browse Components
               <ArrowRight weight="regular" size={14} />
             </Link>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/mcp"
               className="flex items-center gap-1.5 rounded-xl border border-sand-700 px-5 py-2.5 text-sm font-semibold text-sand-300 transition-colors hover:border-sand-600 hover:text-sand-100"
             >
-              View on GitHub
-            </a>
+              Get MCP
+            </Link>
           </motion.div>
         </section>
 
@@ -661,7 +671,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
                   { value: 3,     suffix: '',  label: 'AI Platforms' },
                 ],
                 [
-                  { text: 'MIT',  suffix: '',  label: 'Open core', minWidth: '6rem' },
+                  { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
                   { text: 'MCP',  suffix: '',  label: 'Ready' },
                 ],
               ] as {
@@ -728,7 +738,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
               </span>
               <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
                 <span className="text-xs font-semibold uppercase tracking-wider text-olive-400">Featured</span>
-                <h2 className="text-2xl font-bold tracking-tight text-sand-50">Andromeda design system.</h2>
+                <h2 className="text-2xl font-bold tracking-tight text-sand-50">Andromeda • Design System</h2>
                 <p className="text-sm leading-relaxed text-sand-400">
                   A complete design system for dashboards, control panels, and data-dense
                   interfaces. Components, templates, and the rules that keep them all speaking the
@@ -764,33 +774,33 @@ export function HomePageClient({ total, carouselItems }: Props) {
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Built for everyone</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              For designers. For developers. For your AI agent.
+              For developers. For designers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Most component libraries serve one audience. AI Canvas fits however you build: shape a finished component your way, install it with the shadcn CLI, or let an AI agent do it for you.
+              Most component libraries serve one kind of person. AI Canvas installs the same finished code for everyone who builds, and every install costs zero AI tokens instead of burning them on a from-scratch generation. Drop a component in with the shadcn CLI, reshape it with an AI agent, or let an agent browse and install it for you.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 gap-4">
             {[
               {
-                icon: <Palette weight="regular" size={18} />,
-                audience: 'Designers',
-                description: 'A polished starting point, not a blank canvas. Every component is crafted down to the last state and easing curve, so you begin from something already good and shape it into your own. Reskin it by hand, or remix it with AI in Claude Code, Lovable, or V0.',
-                badges: ['Claude Code', 'Lovable', 'V0'],
-                badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
-              },
-              {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source. No boilerplate, no screenshot to rebuild.',
+                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source you own. No boilerplate, no screenshot to rebuild, and no tokens spent generating code that already works.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
+                icon: <Palette weight="regular" size={18} />,
+                audience: 'Designers',
+                description: 'Every component is crafted down to the last state and easing curve, so you start from something already good instead of a blank file. The real code lands right in your project, then you reshape it with an AI agent in Claude Code, Lovable, or V0: change the colors, the layout, the motion, fast. Because you start from finished code, each change costs a few tokens, not a whole build from nothing.',
+                badges: ['Claude Code', 'Lovable', 'V0'],
+                badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
+              },
+              {
                 icon: <Sparkle weight="regular" size={18} />,
                 audience: 'AI agents',
-                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. The agent does the wiring. You keep control.',
+                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. It pulls finished, working code instead of writing from scratch, so every build spends far fewer tokens. The agent does the wiring. You keep control.',
                 badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
@@ -855,19 +865,19 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 num: '01',
                 icon: <MagnifyingGlass weight="regular" size={16} />,
                 title: 'Browse',
-                desc: 'Search animated components, design systems, and templates. Preview each one live before you choose.',
+                desc: 'Search components, blocks, and design systems, and preview each one live before you choose.',
               },
               {
                 num: '02',
                 icon: <Terminal weight="regular" size={16} />,
-                title: 'Install or remix',
-                desc: 'Run the shadcn CLI command, copy the AI prompt, or let your agent pull it over MCP. The full typed source lands in your project, not a screenshot.',
+                title: 'Install',
+                desc: 'Run the one shadcn CLI command, or point your AI agent at the MCP. The finished, typed source lands in your project, no tokens spent generating it.',
               },
               {
                 num: '03',
                 icon: <RocketLaunch weight="regular" size={16} />,
                 title: 'Ship',
-                desc: 'It arrives as real, open-source code in your codebase. Restyle it, extend it, or ship it as-is. It\'s yours.',
+                desc: 'It arrives as real code you own. Ship it as is, or reshape it with an AI agent in seconds. It is yours.',
               },
             ].map((step, i) => (
               <motion.div
@@ -986,11 +996,12 @@ export function HomePageClient({ total, carouselItems }: Props) {
               Ready to build?
             </p>
             <h2 className="relative mt-2 text-xl font-bold text-sand-50">
-              Your agent already knows the way.
+              One command from your next screen.
             </h2>
             <p className="relative mt-2 text-base text-sand-500">
-              {componentTotal}+ components, design systems, and templates, one command away.
-              Browse them yourself or tell your agent what to build.
+              {componentTotal}+ components and design systems, each one command away. Copy it
+              yourself, or tell your agent to install it. No tokens spent generating what
+              already works.
             </p>
             <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -1000,12 +1011,14 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 Browse Components
                 <ArrowRight weight="regular" size={14} />
               </Link>
-              <Link
-                href="/mcp"
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={buttonClasses({ variant: 'outline', size: 'lg' })}
               >
-                Connect the MCP
-              </Link>
+                View on GitHub
+              </a>
             </div>
           </motion.div>
         </section>
