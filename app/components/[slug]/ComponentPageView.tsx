@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
   Eye,
+  EyeSlash,
   Code,
   Check,
   Copy,
@@ -222,6 +223,7 @@ export default function ComponentPageView({
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
+  const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
   const [depsCopied, setDepsCopied] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
@@ -653,10 +655,14 @@ export default function ComponentPageView({
                 {/* Fullscreen — preview only */}
                 {activeTab === 'preview' && (
                   <div className="group/fullscreen relative">
+                    {/* Soft-olive accent (the active-tag look) so the fullscreen
+                        action stands out from the outline theme/refresh buttons
+                        beside it without shouting like a solid primary. */}
                     <Button
-                      variant="outline"
+                      variant="accent"
                       size="md"
                       iconOnly
+                      aria-label="Full screen"
                       onClick={() => {
                         track('Fullscreen Open', { component: slug })
                         setFullscreen(true)
@@ -1266,73 +1272,63 @@ export default function ComponentPageView({
                 Install with AI Canvas MCP
               </h2>
               <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
-                With AI Canvas MCP, your AI knows every component we ship.
-                Ask for &ldquo;a navigation component from AI Canvas&rdquo;
-                inside Claude Code, Codex, or Cursor and it can suggest you
-                a few options, then install the one you like. Less typing,
-                lower token cost, modern way to build.
+                With AI Canvas MCP, your AI knows every component we ship. Ask
+                for one inside Claude Code, Codex, or Cursor and it installs the
+                component you pick. Works with any AI Canvas account, free or
+                premium.
               </p>
-              <Link
-                href="/mcp"
-                className={buttonClasses({ variant: 'outline', size: 'sm' })}
-              >
-                Get MCP
-                <ArrowRight weight="regular" size={13} />
-              </Link>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/mcp"
+                  className={buttonClasses({ variant: 'outline', size: 'sm' })}
+                >
+                  Get MCP
+                  <ArrowRight weight="regular" size={13} />
+                </Link>
+              </div>
 
               {/* MCP token — so AI-agent / MCP installs authenticate as your
-                  account. The token exists from signup (DB trigger), so the
-                  row is the same on free and premium pages. Signed out: masked
-                  row, copy opens the auth modal (soft gate). Signed in: copy
-                  writes the real value; skeleton while it fetches. */}
-              {!user ? (
-                <div className="mt-4">
-                  <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
-                    Add your token to your MCP server config so installs authenticate as your account:
-                  </p>
-                  <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                    <code className="font-mono text-sm text-sand-300 break-all">
-                      AICANVAS_TOKEN=aic_••••••••
-                    </code>
-                    <button
-                      onClick={promptFreeAccount}
-                      className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                      aria-label="Copy MCP token"
-                    >
-                      <Copy weight="regular" size={14} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
+                  account. Always visible. Signed out: nothing (the token is
+                  account-scoped). Signed in: the real value behind an eye
+                  reveal + copy; a skeleton mirrors the row while it fetches. */}
+              {user && (
                 userToken ? (
                   <div className="mt-4">
-                    <p className="mb-2 text-sm text-sand-600 dark:text-sand-400">
-                      Add your token to your MCP server config so installs authenticate as your account:
-                    </p>
-                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
+                    <div className="flex items-center justify-between gap-2 rounded-lg bg-sand-950 px-4 py-3">
                       <code className="font-mono text-sm text-sand-300 break-all">
-                        AICANVAS_TOKEN=aic_••••••••
+                        AICANVAS_TOKEN={mcpTokenRevealed ? userToken : 'aic_••••••••'}
                       </code>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
-                          setMcpTokenCopied(true)
-                          setTimeout(() => setMcpTokenCopied(false), 2000)
-                        }}
-                        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                        aria-label="Copy MCP token"
-                      >
-                        {mcpTokenCopied
-                          ? <Check weight="regular" size={14} className="text-olive-500" />
-                          : <Copy weight="regular" size={14} />}
-                      </button>
+                      <div className="flex shrink-0 items-center gap-0.5">
+                        <button
+                          onClick={() => setMcpTokenRevealed((v) => !v)}
+                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                          aria-label={mcpTokenRevealed ? 'Hide MCP token' : 'Reveal MCP token'}
+                          aria-pressed={mcpTokenRevealed}
+                        >
+                          {mcpTokenRevealed
+                            ? <EyeSlash weight="regular" size={14} />
+                            : <Eye weight="regular" size={14} />}
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
+                            setMcpTokenCopied(true)
+                            setTimeout(() => setMcpTokenCopied(false), 2000)
+                          }}
+                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                          aria-label="Copy MCP token"
+                        >
+                          {mcpTokenCopied
+                            ? <Check weight="regular" size={14} className="text-olive-500" />
+                            : <Copy weight="regular" size={14} />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  /* Token still loading — placeholder mirrors the real layout
-                     (intro line + dark token row) so nothing jumps when it lands. */
+                  /* Token still loading — placeholder mirrors the token row so
+                     nothing jumps when it lands. */
                   <div className="mt-4" aria-hidden>
-                    <div className="mb-2 h-4 w-3/4 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
                     <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                       <div className="h-4 w-40 animate-pulse rounded bg-sand-800" />
                       <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-800" />

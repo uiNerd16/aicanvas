@@ -2,7 +2,7 @@
 // Kept separate from Button.tsx (which is 'use client') so Server Components
 // can compute classNames for <a>/<Link> elements that look like buttons.
 
-export type ButtonVariant = 'primary' | 'outline' | 'icon' | 'link' | 'destructive'
+export type ButtonVariant = 'primary' | 'accent' | 'outline' | 'icon' | 'link' | 'destructive'
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 export type ButtonOptions = {
@@ -33,6 +33,11 @@ const ICON_SIZES: Record<ButtonSize, string> = {
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
     'bg-olive-500 text-sand-950 hover:bg-olive-400',
+  // Soft olive: the "active tag" look (olive hairline + faint olive fill +
+  // olive text). Emphasized but lighter than solid primary — for a control you
+  // want noticed without shouting.
+  accent:
+    'border border-olive-500/25 bg-olive-500/10 text-olive-600 hover:border-olive-500/40 hover:bg-olive-500/20 dark:text-olive-400',
   outline:
     'border border-sand-300 bg-transparent text-sand-700 hover:border-sand-400 hover:text-sand-900 dark:border-sand-700 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100',
   icon:
