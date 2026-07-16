@@ -191,12 +191,12 @@ function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string }) {
 
 const WIRE_SCALES  = [1.5, 1.2, 1.1]
 const WIRE_Y       = [-8, -4, -2]
-const WIRE_LABELS  = ['For designers', 'For developers', 'For your AI agent']
+const WIRE_LABELS  = ['For developers', 'For designers', 'For makers and founders']
 // Only the first icon carries descriptive alt text; the other two are decorative
 // duplicates and use alt="" so screen readers skip them and crawlers don't see
 // the brand name repeated three times in a row.
 const WIRE_ALTS    = [
-  'AI Canvas component registry — animated React components preview',
+  'AI Canvas component registry: animated React components preview',
   '',
   '',
 ]
@@ -219,11 +219,17 @@ function WireIcons() {
   return (
     <div className="mt-16 flex justify-center gap-16 sm:mt-24">
       {[0, 1, 2].map((idx) => (
-        <div
+        <a
           key={idx}
+          href="#audience"
+          aria-label={WIRE_LABELS[idx]}
           className="relative flex flex-col items-center"
           onMouseEnter={() => setHovered(idx)}
           onMouseLeave={() => setHovered(null)}
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById('audience')?.scrollIntoView({ behavior: 'smooth' })
+          }}
         >
           <AnimatePresence>
             {hovered === idx && (
@@ -246,9 +252,9 @@ function WireIcons() {
             height={24}
             animate={{ scale: scale(idx), y: y(idx) }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-            className="cursor-default"
+            className="cursor-pointer"
           />
-        </div>
+        </a>
       ))}
     </div>
   )
@@ -271,7 +277,7 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
         {entry.image ? (
           <img
             src={entry.image}
-            alt={`${entry.name} — ${entry.description.split('.')[0]}`}
+            alt={`${entry.name}: ${entry.description.split('.')[0]}`}
             loading="lazy"
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
@@ -365,31 +371,16 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   return (
     <section className="mt-16 sm:mt-24">
       {/* Header */}
-      <div className="mb-4 flex items-start justify-between">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.35 }}
-        >
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
-        </motion.div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goPrev}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
-          >
-            <CaretLeft weight="regular" size={14} />
-          </button>
-          <button
-            onClick={goNext}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
-          >
-            <CaretRight weight="regular" size={14} />
-          </button>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.35 }}
+        className="mb-4"
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
+        <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
+      </motion.div>
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -398,10 +389,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
         className="mb-8 max-w-2xl text-base leading-relaxed text-sand-400"
       >
         Copy one CLI command and a finished, animated React piece lands in your project, no
-        tokens spent generating it. A component is one polished element like a button or a
-        toggle; a block is a whole section built from several, like a pricing table or a hero.
-        Both stand on their own, separate from the Andromeda design system, and both arrive as
-        real code you own and reshape with an AI agent.
+        tokens spent generating it.
       </motion.p>
 
       {/* Track — breaks out of the 720px container.
@@ -478,7 +466,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                     {current.image ? (
                       <img
                         src={current.image}
-                        alt={`${current.name} — ${current.description.split('.')[0]}`}
+                        alt={`${current.name}: ${current.description.split('.')[0]}`}
                         loading="lazy"
                         decoding="async"
                         className="absolute inset-0 h-full w-full object-cover"
@@ -527,6 +515,24 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
         </motion.div>
       </div>
+
+      {/* Prev / next — under the cards */}
+      <div className="mt-6 flex items-center justify-center gap-2">
+        <button
+          onClick={goPrev}
+          aria-label="Previous"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+        >
+          <CaretLeft weight="regular" size={14} />
+        </button>
+        <button
+          onClick={goNext}
+          aria-label="Next"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+        >
+          <CaretRight weight="regular" size={14} />
+        </button>
+      </div>
     </section>
   )
 }
@@ -554,7 +560,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'What is the AI Canvas MCP server?',
-    a: 'MCP, short for Model Context Protocol, is a standard way for AI tools to plug into outside services. The AI Canvas MCP is a small server that connects your AI coding agent to AI Canvas, so it can find and install components without you leaving the chat. It is free to use.',
+    a: 'MCP, short for Model Context Protocol, is an open standard for AI tools to plug into outside services, and nearly every AI coding agent now supports it. The AI Canvas MCP is a small server that connects your agent to AI Canvas, so it can find and install components without you leaving the chat, whether you use Claude Code, Cursor, Codex, Copilot, Gemini, or anything else. It is free to use.',
   },
   {
     q: 'Can I use the components in commercial projects?',
@@ -562,7 +568,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'How is AI Canvas different from other component libraries?',
-    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real open-source code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
+    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
   },
   {
     q: 'Who is behind AI Canvas?',
@@ -619,7 +625,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
               aria-hidden
               className="inline-block h-[0.6em] w-auto align-[0.02em]"
             />
-            {' '}Native Components,
+            {' '}Native Components and Blocks,
             <br />
             <span className="mt-2 inline-block text-olive-500">Design Systems and Templates</span>
           </motion.h1>
@@ -668,7 +674,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
               [
                 [
                   { value: componentTotal, suffix: '+', label: 'Components' },
-                  { value: 3,     suffix: '',  label: 'AI Platforms' },
+                  { value: 3,     suffix: '',  label: 'AI prompts' },
                 ],
                 [
                   { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
@@ -764,7 +770,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
 
 
         {/* ── Who it's for ── */}
-        <section className="mt-16 sm:mt-24">
+        <section id="audience" className="mt-16 sm:mt-24 scroll-mt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -774,7 +780,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Built for everyone</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              For developers. For designers. For your AI agent.
+              For developers. For designers. For makers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
               Most component libraries serve one kind of person. AI Canvas installs the same finished code for everyone who builds, and every install costs zero AI tokens instead of burning them on a from-scratch generation. Drop a component in with the shadcn CLI, reshape it with an AI agent, or let an agent browse and install it for you.
@@ -786,21 +792,28 @@ export function HomePageClient({ total, carouselItems }: Props) {
               {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source you own. No boilerplate, no screenshot to rebuild, and no tokens spent generating code that already works.',
+                description: 'Drop finished, typed components into your project with one command. No boilerplate, no screenshot to rebuild, and no tokens spent generating what already works.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
                 icon: <Palette weight="regular" size={18} />,
                 audience: 'Designers',
-                description: 'Every component is crafted down to the last state and easing curve, so you start from something already good instead of a blank file. The real code lands right in your project, then you reshape it with an AI agent in Claude Code, Lovable, or V0: change the colors, the layout, the motion, fast. Because you start from finished code, each change costs a few tokens, not a whole build from nothing.',
-                badges: ['Claude Code', 'Lovable', 'V0'],
+                description: 'Start from something already crafted, then reshape it in your AI agent, Cursor, Claude Code, or Codex, whichever you use: the colors, the layout, the motion, fast, without rebuilding it from scratch.',
+                badges: ['Cursor', 'Claude Code', 'Codex'],
                 badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
+              },
+              {
+                icon: <RocketLaunch weight="regular" size={18} />,
+                audience: 'Makers & Founders',
+                description: 'Building with AI in Lovable, V0, Cursor, or any AI agent? Hand it real, polished components to install so your product ships fast and does not look generated, with no tokens spent regenerating UI from scratch.',
+                badges: ['No-code', 'AI-built', 'Real code'],
+                badgeStyle: 'text-sand-400 ring-sand-700',
               },
               {
                 icon: <Sparkle weight="regular" size={18} />,
                 audience: 'AI agents',
-                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. It pulls finished, working code instead of writing from scratch, so every build spends far fewer tokens. The agent does the wiring. You keep control.',
+                description: 'Point your agent at the AI Canvas MCP and it browses, inspects, and installs finished components for you: fewer tokens, no writing UI from scratch, and you keep control. Works with any MCP client, Claude Code, Cursor, Codex, Copilot, Gemini, and more.',
                 badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },

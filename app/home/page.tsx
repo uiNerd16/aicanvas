@@ -26,38 +26,12 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const total = COMPONENT_META.length
 
-  // Pick up to 6 components with images for the hero showcase cycling card
-  const withImages = COMPONENT_META.filter((c) => c.image).slice(0, 6).map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    description: c.description,
-    tags: c.tags,
-    image: c.image,
-  }))
-
-  // Fallback: if fewer than 4 have images, pad with imageless ones
-  const showcase =
-    withImages.length >= 4
-      ? withImages
-      : [
-          ...withImages,
-          ...COMPONENT_META.filter((c) => !c.image)
-            .slice(0, 6 - withImages.length)
-            .map((c) => ({
-              slug: c.slug,
-              name: c.name,
-              description: c.description,
-              tags: c.tags,
-              image: c.image,
-            })),
-        ]
-
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
-  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const FEATURED_SLUGS = ['tilted-coverflow', 'product-card-deck', 'interactive-card-stack', 'voice-chat-pill', 'sticker-wall']
   const carouselItems = FEATURED_SLUGS
     .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
     .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
 
-  return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
+  return <HomePageClient total={total} carouselItems={carouselItems} />
 }

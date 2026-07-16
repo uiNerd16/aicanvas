@@ -38,7 +38,7 @@ export default function HomePage() {
   const total = COMPONENT_META.length
 
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
-  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const FEATURED_SLUGS = ['tilted-coverflow', 'product-card-deck', 'interactive-card-stack', 'voice-chat-pill', 'sticker-wall']
   const carouselItems = FEATURED_SLUGS
     .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
