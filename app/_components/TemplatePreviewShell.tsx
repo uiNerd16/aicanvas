@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowClockwise,
+  CaretUpDown,
   Check,
   Copy,
   DeviceMobile,
@@ -19,6 +20,7 @@ import { usePremiumStatus } from '../components/billing/usePremiumStatus'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Button, buttonClasses } from '../components/Button'
 import { INSTALL_CONTENTS } from '../lib/install-contents.generated'
+import { getDesignSystemTemplateMeta } from '../lib/design-system-meta'
 import dynamic from 'next/dynamic'
 // The dot-grid standalone, reused as the mobile preview backdrop. Loaded
 // dynamically (client-only) so it never enters the initial page bundle — it
@@ -443,15 +445,15 @@ function TopBar({
           the leftover width; from md it becomes [1fr_auto_1fr] + px-6, mirroring
           the site's content top bar (HomeClient) with the toggles centered. */}
       <div className="grid min-w-0 flex-1 grid-cols-[1fr_auto] items-center gap-4 px-4 md:grid-cols-[1fr_auto_1fr] md:px-6">
-        <nav aria-label="Breadcrumb" className="min-w-0 truncate text-sm font-semibold">
+        <nav aria-label="Breadcrumb" className="flex min-w-0 items-center text-sm font-semibold">
           <Link
             href={systemHref}
-            className="text-sand-600 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
+            className="shrink-0 text-sand-600 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
           >
             {systemName}
           </Link>
-          <span className="mx-1 text-sand-400 dark:text-sand-600">/</span>
-          <span className="text-olive-500">{templateName}</span>
+          <span className="mx-1 shrink-0 text-sand-400 dark:text-sand-600">/</span>
+          <TemplateSwitcher templateSlug={templateSlug} templateName={templateName} />
         </nav>
 
         {/* Device toggles (Desktop / Mobile) + Replay — sized to match the
@@ -499,6 +501,98 @@ function TopBar({
         </div>
       </div>
     </header>
+  )
+}
+
+// ── Template switcher: the olive template crumb becomes a dropdown that jumps
+// to any sibling template of the same design system (the current one checked).
+// The full list comes from DESIGN_SYSTEM_META — client-safe, no registry pull.
+// Falls back to the plain olive label when the system has no other template.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TemplateSwitcher({
+  templateSlug,
+  templateName,
+}: {
+  templateSlug: string
+  templateName: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const meta = getDesignSystemTemplateMeta(templateSlug)
+  const siblings = meta?.system.templates ?? []
+  const systemSlug = meta?.system.slug
+
+  // Same dismiss wiring as the Install popover: click-away + Escape.
+  useEffect(() => {
+    if (!open) return
+    function onClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onClick)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onClick)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  // Nothing to switch to → keep the original static olive crumb.
+  if (!systemSlug || siblings.length < 2) {
+    return <span className="text-olive-500">{templateName}</span>
+  }
+
+  return (
+    <div className="relative flex min-w-0" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label="Switch template"
+        className="flex min-w-0 items-center gap-1 rounded-md text-olive-500 transition-colors hover:text-olive-600 dark:hover:text-olive-300"
+      >
+        <span className="truncate">{templateName}</span>
+        <CaretUpDown weight="regular" size={14} className="shrink-0 opacity-70" />
+      </button>
+
+      {/* Menu: left-anchored to the trigger, which sits ~150px in on mobile
+          (logo + "Andromeda /"). The width cap subtracts that inset so a
+          phone-width menu never runs off the right edge; desktop viewports keep
+          the full 260px (100vw-170px is >260 there, so min() picks 260). */}
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-2 w-[min(260px,calc(100vw-170px))] overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
+          {siblings.map((t) => {
+            const active = t.slug === templateSlug
+            const folder = t.slug.startsWith(`${systemSlug}-`)
+              ? t.slug.slice(systemSlug.length + 1)
+              : t.slug
+            return (
+              <Link
+                key={t.slug}
+                href={`/design-systems/${systemSlug}/templates/${folder}`}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+                className={`flex items-center justify-between gap-3 px-3 py-2 text-sm transition-colors ${
+                  active
+                    ? 'font-semibold text-olive-600 dark:text-olive-400'
+                    : 'text-sand-700 hover:bg-sand-200/70 dark:text-sand-300 dark:hover:bg-sand-800/70'
+                }`}
+              >
+                <span className="truncate">{t.name}</span>
+                {active && (
+                  <Check weight="bold" size={14} className="shrink-0 text-olive-500 dark:text-olive-400" />
+                )}
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
