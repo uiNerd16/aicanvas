@@ -239,6 +239,14 @@ export function BrainStoryV4() {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
       renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
+      // The render loop only starts once the model lands, and an opaque
+      // (alpha:false) canvas with an uninitialized buffer composites as a
+      // WHITE flash on some GPUs. Clear it to the void immediately, and keep
+      // the canvas transparent until the first real frames fade it in.
+      renderer.setClearColor(new THREE.Color(C.base), 1)
+      renderer.clear()
+      renderer.domElement.style.opacity = '0'
+      renderer.domElement.style.transition = 'opacity 0.6s ease'
       host.appendChild(renderer.domElement)
 
       scene = new THREE.Scene(); scene.background = new THREE.Color(C.base)
@@ -300,6 +308,8 @@ export function BrainStoryV4() {
         scene.add(zoneGroup)
 
         ready = true; setStatus('ready')
+        // fade the canvas in over the first rendered frames
+        requestAnimationFrame(() => { renderer.domElement.style.opacity = '1' })
         // the render loop only starts once there's something to actually
         // render — no more compositing an empty scene while the asset streams in.
         loop()
@@ -547,15 +557,31 @@ export function BrainStoryV4() {
 
       {/* ── Hero caption (centered) — homepage hero sizes: h1 text-2xl sm:text-4xl, sub text-base ── */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', fontFamily: SANS, padding: '28px 24px 0' }}>
-        <h1 style={{ fontSize: 'clamp(24px,4.5vw,36px)', color: C.bright, fontWeight: 800, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1 }}>
+        {/* Slide-in entrance, same rhythm as the homepage hero (fade + rise, staggered) */}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          style={{ fontSize: 'clamp(24px,4.5vw,36px)', color: C.bright, fontWeight: 800, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1 }}
+        >
           The Andromeda <span style={{ color: C.accentBtn }}>Brain</span>
-        </h1>
-        <p style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.18 }}
+          style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}
+        >
           Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
-        </p>
+        </motion.p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.26 }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}
+        >
           <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })}>
             {ctaLabel}
             <ArrowRight weight="regular" size={14} />
@@ -563,7 +589,7 @@ export function BrainStoryV4() {
           <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
             Explore Andromeda
           </Link>
-        </div>
+        </motion.div>
       </div>
 
       {/* 3-icon wire divider directly below the hero */}
