@@ -1588,7 +1588,7 @@ export default function ComponentPageView({
           className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
         >
           {/* Header */}
-          <div className="flex items-start justify-between gap-5 border-b border-sand-300 px-6 py-5 dark:border-sand-800 sm:px-8">
+          <div className="flex items-start justify-between gap-5 px-6 py-5 sm:px-8">
             <div className="pt-0.5">
               <h2
                 id="remix-panel-title"
@@ -1612,6 +1612,9 @@ export default function ComponentPageView({
               <X weight="regular" size={16} />
             </Button>
           </div>
+
+          {/* Divider — inset to match the content padding on both sides */}
+          <div className="mx-6 border-t border-sand-300 dark:border-sand-800 sm:mx-8" />
 
           {/* Body */}
           <div
