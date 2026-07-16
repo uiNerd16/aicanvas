@@ -27,7 +27,7 @@ import { FoundationLoop } from '../../_components/FoundationLoop'
 // Short blurbs for the four shipped templates — keyed by registry slug.
 const TEMPLATE_BLURBS = {
   'andromeda-mission-control':
-    'Spacecraft telemetry — live altitude, vehicle roster, comms log, and a system-status readout in one mission view.',
+    'Spacecraft telemetry: live altitude, vehicle roster, comms log, and a system-status readout in one mission view.',
   'andromeda-service-order':
     'A field-service work order: an SLA gauge, line items, and order metadata.',
   'andromeda-resource-planning':
@@ -387,7 +387,7 @@ export function AndromedaOverview() {
         <div className="mb-5">
           <h2 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50">Templates</h2>
           <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
-            Full dashboards composed from the system — pick a domain to explore.
+            Full dashboards composed from the system. Pick a domain to explore.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

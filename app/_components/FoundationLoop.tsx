@@ -160,7 +160,7 @@ export function FoundationLoop() {
   }, [i, reduce, inView])
 
   return (
-    <div ref={rootRef} style={{ position: 'absolute', inset: 0, background: C.surface.base, overflow: 'hidden', pointerEvents: 'none' }}>
+    <div ref={rootRef} aria-hidden style={{ position: 'absolute', inset: 0, background: C.surface.base, overflow: 'hidden', pointerEvents: 'none' }}>
       <div style={{ position: 'absolute', inset: 0, padding: 'clamp(16px, 6%, 28px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <AnimatePresence mode="wait">
           <motion.div key={i} variants={containerV} initial="hidden" animate="show" exit="exit">

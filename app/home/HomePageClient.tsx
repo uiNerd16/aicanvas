@@ -38,7 +38,6 @@ interface Props {
 // ─── Hello card data ─────────────────────────────────────────────────────────
 
 const HELLO_CARDS = ['Hello', 'こんにちは', 'Bonjour', 'Hola', 'Ciao', 'Hej', 'Hallo', '你好', ':)']
-const LANG_LABELS  = ['EN',    'JA',        'FR',      'ES',   'IT',   'SV',  'DE',   'ZH' ]
 
 // Position 0 = front, 1-5 = visible stack, 6-7 = parked behind stack (zIndex 0).
 // The exiting card uses a dedicated keyframe animation (swing right → arc to back)
@@ -78,6 +77,7 @@ function StackedCards() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      aria-hidden
       className="relative mx-auto mb-10 flex h-28 w-48 cursor-pointer items-end justify-center"
       onClick={handleClick}
     >
@@ -226,6 +226,8 @@ function WireIcons() {
           className="relative flex flex-col items-center"
           onMouseEnter={() => setHovered(idx)}
           onMouseLeave={() => setHovered(null)}
+          onFocus={() => setHovered(idx)}
+          onBlur={() => setHovered(null)}
           onClick={(e) => {
             e.preventDefault()
             document.getElementById('audience')?.scrollIntoView({ behavior: 'smooth' })
@@ -413,6 +415,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Far prev — outermost left, smallest. Tap cycles 2 back. */}
           <motion.div
+            aria-hidden
             className="relative z-[1] -mr-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
             transition={{ duration: 0.2 }}
@@ -424,6 +427,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Prev — behind center, peeking left. Tap cycles back by one. */}
           <motion.div
+            aria-hidden
             className="relative z-[5] -mr-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
             whileHover={{ opacity: 1 }}
@@ -492,6 +496,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Next — behind center, peeking right. Tap advances by one. */}
           <motion.div
+            aria-hidden
             className="relative z-[5] -ml-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
             whileHover={{ opacity: 1 }}
@@ -504,6 +509,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Far next — outermost right, smallest. Tap cycles 2 forward. */}
           <motion.div
+            aria-hidden
             className="relative z-[1] -ml-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
             transition={{ duration: 0.2 }}
@@ -576,10 +582,6 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
 ]
 
-// ─── HomePageClient ────────────────────────────────────────────────────────────
-
-// ─── HomePageClient ────────────────────────────────────────────────────────────
-// (DeckCarousel, SpotlightCarousel, CoverflowCarousel removed)
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 export function HomePageClient({ total, carouselItems }: Props) {
@@ -674,7 +676,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
               [
                 [
                   { value: componentTotal, suffix: '+', label: 'Components' },
-                  { value: 3,     suffix: '',  label: 'AI prompts' },
+                  { value: 3,     suffix: '',  label: 'AI platforms' },
                 ],
                 [
                   { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
@@ -982,7 +984,9 @@ export function HomePageClient({ total, carouselItems }: Props) {
                     <div
                       className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                     >
-                      <div className="overflow-hidden">
+                      {/* visibility rides the same 300ms as the grid collapse, so the
+                          answer leaves the a11y tree when closed without a visual pop */}
+                      <div className={`overflow-hidden transition-[visibility] duration-300 ${open ? 'visible' : 'invisible'}`}>
                         <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-400">{a}</p>
                       </div>
                     </div>
