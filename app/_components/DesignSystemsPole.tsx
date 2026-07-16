@@ -100,11 +100,9 @@ export function DesignSystemsPole({
       {!collapsed && (
         <ul className="space-y-0.5">
           {SYSTEMS.map((system) => {
-            // "System root" URLs — the /system gallery and the bare overview
-            // both highlight the system row as active.
-            const systemActive =
-              pathname === `/design-systems/${system.slug}/system` ||
-              pathname === `/design-systems/${system.slug}`
+            // Only the bare overview highlights the system row; /system has its
+            // own child row below, so highlighting both read as a double-select.
+            const systemActive = pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
             // Expanded shows System/Brain/Templates; the per-component list
             // below stays gated to systemSelected so the promoted rail is short.
