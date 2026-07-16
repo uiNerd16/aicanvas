@@ -20,6 +20,7 @@
 import fs from 'fs'
 import path from 'path'
 import { google } from 'googleapis'
+import { GAXIOS_OPTS, guardedCall } from './gsc-net'
 
 // ─────────────────────────────────────────────────────────────────────
 // .env.local loader (mirrors gsc-audit.ts)
@@ -152,17 +153,24 @@ async function querySearchAnalytics(
   while (all.length < rowLimit) {
     const remaining = rowLimit - all.length
     const thisLimit = Math.min(PAGE_SIZE, remaining)
-    const res = await searchconsole.searchanalytics.query({
-      siteUrl: property,
-      requestBody: {
-        startDate,
-        endDate,
-        dimensions,
-        rowLimit: thisLimit,
-        startRow,
-        dataState: 'final',
-      },
-    })
+    const res = await guardedCall(
+      () =>
+        searchconsole.searchanalytics.query(
+          {
+            siteUrl: property,
+            requestBody: {
+              startDate,
+              endDate,
+              dimensions,
+              rowLimit: thisLimit,
+              startRow,
+              dataState: 'final',
+            },
+          },
+          GAXIOS_OPTS,
+        ),
+      `keywords ${dimensions.join('+')} @${startRow}`,
+    )
     const rows = res.data.rows || []
     all.push(...rows)
     if (rows.length < thisLimit) break

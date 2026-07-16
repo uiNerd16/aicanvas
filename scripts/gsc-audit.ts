@@ -17,6 +17,7 @@ import fs from 'fs'
 import path from 'path'
 import { google } from 'googleapis'
 import { XMLParser } from 'fast-xml-parser'
+import { GAXIOS_OPTS, guardedCall } from './gsc-net'
 
 // ─────────────────────────────────────────────────────────────────────
 // .env.local loader (avoids adding dotenv as a dependency)
@@ -167,9 +168,14 @@ async function inspectAll(urls: string[], property: string): Promise<AuditEntry[
     i++
     process.stdout.write(`  [${String(i).padStart(2, ' ')}/${urls.length}] ${url} ... `)
     try {
-      const res = await searchconsole.urlInspection.index.inspect({
-        requestBody: { inspectionUrl: url, siteUrl: property, languageCode: 'en-US' },
-      })
+      const res = await guardedCall(
+        () =>
+          searchconsole.urlInspection.index.inspect(
+            { requestBody: { inspectionUrl: url, siteUrl: property, languageCode: 'en-US' } },
+            GAXIOS_OPTS,
+          ),
+        url,
+      )
       const idx = res.data.inspectionResult?.indexStatusResult || {}
       const entry: AuditEntry = {
         url,
