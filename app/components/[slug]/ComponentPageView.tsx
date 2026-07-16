@@ -1583,20 +1583,20 @@ export default function ComponentPageView({
           tabIndex={-1}
           inert={!remixOpen}
           initial={false}
-          animate={{ x: remixOpen ? '0%' : '-105%' }}
+          animate={{ x: remixOpen ? '0%' : '105%' }}
           transition={{ type: 'spring', stiffness: 380, damping: 40 }}
-          className="fixed inset-y-0 left-0 z-50 flex w-full max-w-xl flex-col border-r border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
         >
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 border-b border-sand-300 px-5 py-4 dark:border-sand-800 sm:px-6">
-            <div>
+          <div className="flex items-start justify-between gap-5 border-b border-sand-300 px-6 py-5 dark:border-sand-800 sm:px-8">
+            <div className="pt-0.5">
               <h2
                 id="remix-panel-title"
                 className="text-base font-bold text-sand-900 dark:text-sand-50"
               >
                 Remix {name} with AI
               </h2>
-              <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
+              <p className="mt-1.5 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
                 One comprehensive prompt, written against the real source code.
                 Works in Claude, Cursor, ChatGPT, or any AI tool you use.
               </p>
@@ -1607,6 +1607,7 @@ export default function ComponentPageView({
               iconOnly
               onClick={() => setRemixOpen(false)}
               aria-label="Close Remix panel"
+              className="shrink-0"
             >
               <X weight="regular" size={16} />
             </Button>
@@ -1614,7 +1615,7 @@ export default function ComponentPageView({
 
           {/* Body */}
           <div
-            className="flex-1 overflow-y-auto px-5 py-5 sm:px-6"
+            className="flex-1 overflow-y-auto px-6 py-6 sm:px-8"
             style={{ scrollbarWidth: 'thin' }}
           >
             {/* Remix disclaimer */}
@@ -1627,15 +1628,15 @@ export default function ComponentPageView({
             </p>
 
             {/* CLI first — the accurate path */}
-            <div className="mt-4 rounded-xl border border-olive-500/40 bg-olive-500/10 p-4">
+            <div className="mt-5 rounded-xl border border-olive-500/40 bg-olive-500/10 p-5">
               <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
                 Want the exact component?
               </p>
-              <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
+              <p className="mt-1.5 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
                 One command installs it, pixel-perfect. Copy, paste into your
                 project, done.
               </p>
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2.5">
                 <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
@@ -1649,7 +1650,7 @@ export default function ComponentPageView({
             </div>
 
             {/* The prompt */}
-            <div className="mt-6 flex items-center justify-between gap-3">
+            <div className="mt-8 flex items-center justify-between gap-3">
               <h3 className="text-sm font-bold text-sand-900 dark:text-sand-50">
                 AI prompt for {name}
               </h3>
@@ -1660,7 +1661,7 @@ export default function ComponentPageView({
                 {remixCopied ? 'Copied!' : 'Copy prompt'}
               </Button>
             </div>
-            <pre className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-4 font-mono text-xs leading-relaxed text-sand-200">
+            <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-5 font-mono text-xs leading-relaxed text-sand-200">
               {remixPrompt}
             </pre>
           </div>
