@@ -1568,7 +1568,7 @@ export default function ComponentPageView({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-sand-950/50"
+            className="fixed inset-0 z-40 bg-sand-950/70 backdrop-blur-[2px]"
             onClick={() => setRemixOpen(false)}
             aria-hidden="true"
           />
@@ -1639,8 +1639,8 @@ export default function ComponentPageView({
                 One command installs it, pixel-perfect. Copy, paste into your
                 project, done.
               </p>
-              <div className="mt-4 flex items-center gap-2.5">
-                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs text-sand-200">
+              <div className="mt-4 flex items-start gap-2.5">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
                 <Button variant="primary" size="sm" onClick={copyCli}>
