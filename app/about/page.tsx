@@ -176,10 +176,10 @@ export default function AboutPage() {
             source too.
           </p>
           <p className="mt-4 text-base leading-relaxed text-sand-400">
-            Reproduction prompts for Claude Code, Lovable, and V0 still ship with
-            every component. They are one lane now, the remix lane, not the
-            headline. However it arrives, it arrives as real, open-source code in
-            your codebase.
+            A comprehensive AI remix prompt still ships with every component,
+            and it works in any AI tool. It is one lane now, the remix lane,
+            not the headline. However it arrives, it arrives as real,
+            open-source code in your codebase.
           </p>
         </Section>
 

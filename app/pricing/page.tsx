@@ -45,7 +45,7 @@ const PLANS: Plan[] = [
     features: [
       'Browse every public component',
       'Copy component source code',
-      'Copy prompts for Claude Code, Lovable, V0',
+      'Copy the AI remix prompt for any component',
       'Access the MCP server',
       'Experiment in the Lab',
     ],
