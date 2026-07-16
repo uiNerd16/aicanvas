@@ -67,11 +67,11 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
   { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
   { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accent), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
+  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accentBtn), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
 // Default appearance of the brain on load.
-const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Iridescent'))
+const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Wireframe'))
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
@@ -729,7 +729,7 @@ export function BrainStoryV4() {
             One reader. Every benefit is yours.
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            The Brain is written for your AI agent, not for you. What you get is what the agent does with it.
+            The Brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {BENEFITS.map((benefit, i) => (
