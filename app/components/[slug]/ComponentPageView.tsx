@@ -19,13 +19,12 @@ import {
   CornersOut,
   CornersIn,
   ArrowClockwise,
-  DotsThreeVertical,
   Terminal,
   Sparkle,
   Lightning,
+  X,
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
-import { PLATFORMS } from '../ComponentCard'
 import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
 import { HeaderSocials } from '../HeaderSocials'
 import { Breadcrumbs } from '../Breadcrumbs'
@@ -36,7 +35,6 @@ import type { ComponentMeta } from '../../lib/component-registry'
 // the heavy registry (which would pull every preview component, incl. three.js,
 // into the bundle).
 import { getDesignSystemMeta, type DesignSystemSlug } from '../../lib/design-system-meta'
-import { AFFILIATE_CONFIG } from '../../lib/affiliate-config'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
 import { useSession } from '../auth/SessionProvider'
@@ -53,24 +51,6 @@ import { Paywall, type PaywallReason } from '../billing/Paywall'
 import { usePaywallModal } from '../billing/PaywallModalProvider'
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
-
-const PLATFORM_ICONS: Record<Platform, React.ReactNode> = {
-  'Claude Code': (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden>
-      <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" />
-    </svg>
-  ),
-  'Lovable': (
-    <svg viewBox="0 0 121 122" width="14" height="14" fill="currentColor" aria-hidden>
-      <path d="M36.07 0C55.99 0 72.14 16.16 72.14 36.08V49.8H84.14C104.06 49.8 120.21 65.95 120.21 85.88C120.21 105.81 104.06 121.96 84.14 121.96H0V36.08C0 16.16 16.15 0 36.07 0Z" />
-    </svg>
-  ),
-  'V0': (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden>
-      <path d="M12 3L22 21H2L12 3Z" />
-    </svg>
-  ),
-}
 
 // ─── ComponentPageView ────────────────────────────────────────────────────────
 
@@ -267,7 +247,6 @@ export default function ComponentPageView({
     ? `import { ${fontPkgClass} } from '${fontPkgPath}'\n\nconst font = ${fontPkgClass}({ variable: '${fontPkgVar}' })\n\n// Add font.variable to your <html> className`
     : null
   const fontPkgSelfContained = fontPkgName && !fontPkgVar // font used via .className, no layout setup needed
-  const [promptCopied, setPromptCopied] = useState<Platform | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
 
   // Extract npm install command from code comment (e.g. "// npm install framer-motion")
@@ -297,18 +276,17 @@ export default function ComponentPageView({
   // children component.
   const [previewKey, setPreviewKey] = useState(0)
 
-  // Prompt dropdown
-  const [promptDropdownOpen, setPromptDropdownOpen] = useState(false)
-  const promptDropdownRef = useRef<HTMLDivElement>(null)
+  // Remix panel — ONE general prompt per component. The Claude Code lane is
+  // the comprehensive one and doubles as the platform-agnostic prompt; other
+  // lanes are legacy data we no longer surface. The panel content is always
+  // mounted (slid off-screen when closed) so the prompt text ships in the
+  // server-rendered HTML for SEO.
+  const [remixOpen, setRemixOpen] = useState(false)
+  const [remixCopied, setRemixCopied] = useState(false)
+  const remixPanelRef = useRef<HTMLDivElement>(null)
   const mainCardRef = useRef<HTMLDivElement>(null)
-  // Sort the user's preferred platform first so the Remix dropdown opens
-  // with their pick at the top. Falls back to the registry order.
-  const availablePlatforms = (() => {
-    const list = PLATFORMS.filter((p) => prompts[p])
-    const pref = preferences.ai_platform
-    if (!pref || !list.includes(pref)) return list
-    return [pref, ...list.filter((p) => p !== pref)]
-  })()
+  const remixPrompt =
+    prompts['Claude Code'] ?? Object.values(prompts).find((p): p is string => !!p)
 
   // Related pagination — sliding window of RELATED_PAGE_SIZE cards advancing
   // ONE card at a time. The exiting card stays in place but drops behind the
@@ -334,30 +312,29 @@ export default function ComponentPageView({
     )
   }
 
-  // Escape key closes fullscreen; click-outside closes prompt dropdown
+  // Escape key closes fullscreen and the Remix panel
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== 'Escape') return
       if (fullscreen) setFullscreen(false)
-      if (promptDropdownOpen) setPromptDropdownOpen(false)
+      if (remixOpen) setRemixOpen(false)
     }
-    if (fullscreen || promptDropdownOpen) {
+    if (fullscreen || remixOpen) {
       document.addEventListener('keydown', onKey)
     }
     return () => document.removeEventListener('keydown', onKey)
-  }, [fullscreen, promptDropdownOpen])
+  }, [fullscreen, remixOpen])
 
+  // Remix panel open: lock body scroll and move focus into the dialog.
   useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (promptDropdownRef.current && !promptDropdownRef.current.contains(e.target as Node)) {
-        setPromptDropdownOpen(false)
-      }
+    if (!remixOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    remixPanelRef.current?.focus()
+    return () => {
+      document.body.style.overflow = prev
     }
-    if (promptDropdownOpen) {
-      document.addEventListener('mousedown', onClickOutside)
-      return () => document.removeEventListener('mousedown', onClickOutside)
-    }
-  }, [promptDropdownOpen])
+  }, [remixOpen])
 
   function refreshPreview() {
     setPreviewKey((k) => k + 1)
@@ -438,39 +415,13 @@ export default function ComponentPageView({
     } catch {}
   }
 
-  async function handlePlatformClick(platform: Platform) {
+  async function copyRemixPrompt() {
+    if (!remixPrompt) return
     try {
-      const text = prompts[platform]
-      if (!text) return
-
-      track('Remix Platform Click', { component: slug, platform })
-
-      // Always copy to clipboard
-      await navigator.clipboard.writeText(text)
-      setPromptCopied(platform)
-      setTimeout(() => setPromptCopied(null), 3000)
-
-      // Deep link for V0
-      if (platform === 'V0') {
-        const { baseUrl, affiliateParam, affiliateId } = AFFILIATE_CONFIG.v0
-        const url = new URL(baseUrl)
-        url.searchParams.set('q', text)
-        if (affiliateId !== 'PLACEHOLDER') {
-          url.searchParams.set(affiliateParam, affiliateId)
-        }
-        window.open(url.toString(), '_blank')
-      }
-
-      // Deep link for Lovable
-      if (platform === 'Lovable') {
-        const { baseUrl, affiliateParam, affiliateId } = AFFILIATE_CONFIG.lovable
-        let url = `${baseUrl}?autosubmit=true`
-        if (affiliateParam && affiliateId !== 'PLACEHOLDER') {
-          url += `&${affiliateParam}=${affiliateId}`
-        }
-        url += `#prompt=${encodeURIComponent(text)}`
-        window.open(url, '_blank')
-      }
+      track('Remix Prompt Copy', { component: slug })
+      await navigator.clipboard.writeText(remixPrompt)
+      setRemixCopied(true)
+      setTimeout(() => setRemixCopied(false), 2500)
     } catch {}
   }
 
@@ -753,42 +704,22 @@ export default function ComponentPageView({
               {/* Save (logged-in only — no-op render otherwise) */}
               <SaveButton slug={slug} system={designSystem ?? null} />
 
-              {/* Remix with AI — secondary action; dropdown with platform
-                  prompts. Hidden entirely when no prompts are available so the
-                  button can never open an empty dropdown. Sits left of the
-                  primary Copy CLI action. */}
-              {availablePlatforms.length > 0 && (
-                <div className="relative" ref={promptDropdownRef}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPromptDropdownOpen((o) => {
-                      if (!o) track('Remix Open', { component: slug })
-                      return !o
-                    })}
-                  >
-                    {promptCopied ? <Check weight="regular" size={15} /> : <Sparkle weight="regular" size={15} />}
-                    {promptCopied ? 'Copied!' : 'Remix with AI'}
-                    {!promptCopied && <DotsThreeVertical weight="bold" size={15} />}
-                  </Button>
-                  {promptDropdownOpen && (
-                    <div className="absolute bottom-full right-0 z-40 mb-2 w-52 overflow-hidden rounded-xl border border-sand-300 bg-sand-100 shadow-xl dark:border-sand-700 dark:bg-sand-900">
-                      {availablePlatforms.map((platform) => (
-                        <button
-                          key={platform}
-                          onClick={() => {
-                            handlePlatformClick(platform)
-                            setPromptDropdownOpen(false)
-                          }}
-                          className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-sand-700 transition-colors first:rounded-t-xl last:rounded-b-xl hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
-                        >
-                          {PLATFORM_ICONS[platform]}
-                          Try in {platform}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              {/* Remix with AI — secondary action; opens the side panel with
+                  the full platform-agnostic prompt. Hidden entirely when the
+                  component has no prompt. Sits left of the primary Copy CLI
+                  action. */}
+              {remixPrompt && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    track('Remix Open', { component: slug })
+                    setRemixOpen(true)
+                  }}
+                >
+                  <Sparkle weight="regular" size={15} />
+                  Remix with AI
+                </Button>
               )}
 
               {/* Copy CLI — primary install action; copies the npx shadcn
@@ -1624,36 +1555,117 @@ export default function ComponentPageView({
         )}
       </AnimatePresence>
 
-      {/* ── Prompt copied toast ─────────────────────────────────────────────── */}
+      {/* ── Remix panel ─────────────────────────────────────────────────────
+          The panel is ALWAYS mounted and merely slides off-canvas when
+          closed, so the full prompt text ships in the server-rendered HTML
+          and gets crawled — the single biggest block of unique text on the
+          page. Backdrop is interaction chrome only, so it mounts on open. */}
       <AnimatePresence>
-        {promptCopied && (
+        {remixOpen && (
           <motion.div
-            key="prompt-toast"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="fixed bottom-16 z-50 -translate-x-1/2"
-            style={{
-              left: mainCardRef.current
-                ? mainCardRef.current.getBoundingClientRect().left + mainCardRef.current.offsetWidth / 2
-                : '50%',
-            }}
-          >
-            <div className="flex items-center gap-3 rounded-xl border border-sand-700 bg-sand-800 px-4 py-3 shadow-lg">
-              <Check weight="regular" size={16} className="shrink-0 text-olive-500" />
-              <div>
-                <p className="text-sm font-semibold text-sand-50">
-                  {promptCopied} prompt copied
-                </p>
-                <p className="mt-0.5 text-xs text-sand-400">
-                  Paste into {promptCopied} to remix this component.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            key="remix-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-sand-950/50"
+            onClick={() => setRemixOpen(false)}
+            aria-hidden="true"
+          />
         )}
       </AnimatePresence>
+      {remixPrompt && (
+        <motion.div
+          ref={remixPanelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remix-panel-title"
+          tabIndex={-1}
+          inert={!remixOpen}
+          initial={false}
+          animate={{ x: remixOpen ? '0%' : '-105%' }}
+          transition={{ type: 'spring', stiffness: 380, damping: 40 }}
+          className="fixed inset-y-0 left-0 z-50 flex w-full max-w-xl flex-col border-r border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 border-b border-sand-300 px-5 py-4 dark:border-sand-800 sm:px-6">
+            <div>
+              <h2
+                id="remix-panel-title"
+                className="text-base font-bold text-sand-900 dark:text-sand-50"
+              >
+                Remix {name} with AI
+              </h2>
+              <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
+                One comprehensive prompt, written against the real source code.
+                Works in Claude, Cursor, ChatGPT, or any AI tool you use.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="md"
+              iconOnly
+              onClick={() => setRemixOpen(false)}
+              aria-label="Close Remix panel"
+            >
+              <X weight="regular" size={16} />
+            </Button>
+          </div>
+
+          {/* Body */}
+          <div
+            className="flex-1 overflow-y-auto px-5 py-5 sm:px-6"
+            style={{ scrollbarWidth: 'thin' }}
+          >
+            {/* Remix disclaimer */}
+            <p className="text-sm leading-relaxed text-sand-600 dark:text-sand-400">
+              <span className="font-semibold text-sand-900 dark:text-sand-50">
+                This prompt is for remixing.
+              </span>{' '}
+              Use it to build your own variation of {name}. Results depend on
+              the model you use, and no prompt is 100% exact.
+            </p>
+
+            {/* CLI first — the accurate path */}
+            <div className="mt-4 rounded-xl border border-olive-500/40 bg-olive-500/10 p-4">
+              <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
+                Want the exact component?
+              </p>
+              <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">
+                One command installs it, pixel-perfect. Copy, paste into your
+                project, done.
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs text-sand-200">
+                  npx shadcn@latest add {installReferenceMasked}
+                </code>
+                <Button variant="primary" size="sm" onClick={copyCli}>
+                  {cliCopied
+                    ? <Check weight="regular" size={15} />
+                    : <Terminal weight="regular" size={15} />}
+                  {cliCopied ? 'Copied!' : 'Copy CLI'}
+                </Button>
+              </div>
+            </div>
+
+            {/* The prompt */}
+            <div className="mt-6 flex items-center justify-between gap-3">
+              <h3 className="text-sm font-bold text-sand-900 dark:text-sand-50">
+                AI prompt for {name}
+              </h3>
+              <Button variant="outline" size="sm" onClick={copyRemixPrompt}>
+                {remixCopied
+                  ? <Check weight="regular" size={15} />
+                  : <Copy weight="regular" size={15} />}
+                {remixCopied ? 'Copied!' : 'Copy prompt'}
+              </Button>
+            </div>
+            <pre className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-4 font-mono text-xs leading-relaxed text-sand-200">
+              {remixPrompt}
+            </pre>
+          </div>
+        </motion.div>
+      )}
     </>
   )
 }

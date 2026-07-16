@@ -4,22 +4,24 @@ import { PasswordSection } from './PasswordSection'
 import { AccountBilling } from './AccountBilling'
 import { McpTokenSection } from './McpTokenSection'
 import { DeleteAccountSection } from './DeleteAccountSection'
-import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
+import type { PackageManager } from '../../../lib/supabase/types'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  // ai_platform is no longer read: the multi-platform prompt drawer is gone
+  // (one general Remix prompt now), so the preference has nothing to drive.
+  // The column stays in Supabase untouched.
   const { data } = await supabase
     .from('user_preferences')
-    .select('package_manager, ai_platform, newsletter_opt_in')
+    .select('package_manager, newsletter_opt_in')
     .eq('user_id', user.id)
     .maybeSingle()
 
   const initial = {
     package_manager: (data?.package_manager ?? null) as PackageManager | null,
-    ai_platform: (data?.ai_platform ?? null) as AiPlatform | null,
     // Default false matches the DB column default (migration 0007) — the
     // newsletter is explicit opt-in, off until the user turns it on here.
     newsletter_opt_in: data?.newsletter_opt_in ?? false,

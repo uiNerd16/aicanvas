@@ -84,6 +84,7 @@ export async function generateMetadata({
       `${entry.name.toLowerCase()} react`,
       `${entry.name.toLowerCase()} framer motion`,
       `${entry.name.toLowerCase()} component`,
+      `${entry.name.toLowerCase()} ai prompt`,
       `${category.toLowerCase()} react component`,
       'animated react component',
       'react component AI prompt',
@@ -163,11 +164,10 @@ function buildFaq(
       a: `Common uses include ${joinList(entry.useCases)}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
     })
   }
-  const promptLanes = Object.keys(entry.prompts)
-  if (promptLanes.length > 0) {
+  if (Object.keys(entry.prompts).length > 0) {
     faq.push({
       q: `Can I remix ${entry.name} with AI?`,
-      a: `Yes. ${entry.name} ships with expert prompts for ${joinList(promptLanes)}, so you can recreate and customize it in your AI builder of choice.`,
+      a: `Yes. ${entry.name} ships with one comprehensive AI prompt written against the real source code. Open "Remix with AI" on this page to read and copy it into Claude, Cursor, ChatGPT, or any AI tool. Prompts are for remixing your own variation; for the exact component, install it with the one-command CLI.`,
     })
   }
   return faq
@@ -212,8 +212,10 @@ export default async function Page({
   const freeAccountGate = process.env.FREE_ACCOUNT_GATE === 'on'
 
   // Premium content (closed source) must NEVER appear in the server-rendered
-  // page payload — not the source, not the highlighted HTML, not the prompts —
-  // REGARDLESS of REGISTRY_ENFORCEMENT (the default is permissive). Classify
+  // page payload — not the source, not the highlighted HTML — REGARDLESS of
+  // REGISTRY_ENFORCEMENT (the default is permissive). Prompts are the one
+  // deliberate exception: Remix is free for every component (see the
+  // prompts={} comment below), so prompt text ships in SSR by design. Classify
   // server-side and withhold for premium; free content keeps today's behaviour
   // (source ships in permissive mode for SEO). A degraded lookup (missing
   // manifest) withholds for everything, to fail closed rather than risk a leak.

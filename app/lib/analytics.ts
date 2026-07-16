@@ -1,12 +1,13 @@
 import { track as vercelTrack } from '@vercel/analytics'
-import type { Platform } from '../components/ComponentCard'
 
 export type CardSource = 'index' | 'homepage-hero' | 'related'
 
 type EventMap = {
   'Component Card Click': { component: string; position: number; source: CardSource }
   'Remix Open': { component: string }
-  'Remix Platform Click': { component: string; platform: Platform }
+  // Replaced 'Remix Platform Click' — the per-platform dropdown is gone;
+  // one general prompt is copied from the Remix panel instead.
+  'Remix Prompt Copy': { component: string }
   'CLI Copy': { component: string }
   'Install Tab Switch': { component: string; tab: 'cli' | 'manual' }
   'Fullscreen Open': { component: string }
