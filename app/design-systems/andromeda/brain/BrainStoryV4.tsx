@@ -67,11 +67,11 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
   { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
   { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accent), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
+  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accentBtn), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
 // Default appearance of the brain on load.
-const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Iridescent'))
+const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Wireframe'))
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
@@ -239,6 +239,14 @@ export function BrainStoryV4() {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
       renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
+      // The render loop only starts once the model lands, and an opaque
+      // (alpha:false) canvas with an uninitialized buffer composites as a
+      // WHITE flash on some GPUs. Clear it to the void immediately, and keep
+      // the canvas transparent until the first real frames fade it in.
+      renderer.setClearColor(new THREE.Color(C.base), 1)
+      renderer.clear()
+      renderer.domElement.style.opacity = '0'
+      renderer.domElement.style.transition = 'opacity 0.6s ease'
       host.appendChild(renderer.domElement)
 
       scene = new THREE.Scene(); scene.background = new THREE.Color(C.base)
@@ -300,6 +308,8 @@ export function BrainStoryV4() {
         scene.add(zoneGroup)
 
         ready = true; setStatus('ready')
+        // fade the canvas in over the first rendered frames
+        requestAnimationFrame(() => { renderer.domElement.style.opacity = '1' })
         // the render loop only starts once there's something to actually
         // render — no more compositing an empty scene while the asset streams in.
         loop()
@@ -547,15 +557,31 @@ export function BrainStoryV4() {
 
       {/* ── Hero caption (centered) — homepage hero sizes: h1 text-2xl sm:text-4xl, sub text-base ── */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', fontFamily: SANS, padding: '28px 24px 0' }}>
-        <h1 style={{ fontSize: 'clamp(24px,4.5vw,36px)', color: C.bright, fontWeight: 800, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1 }}>
+        {/* Slide-in entrance, same rhythm as the homepage hero (fade + rise, staggered) */}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          style={{ fontSize: 'clamp(24px,4.5vw,36px)', color: C.bright, fontWeight: 800, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1 }}
+        >
           The Andromeda <span style={{ color: C.accentBtn }}>Brain</span>
-        </h1>
-        <p style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}>
-          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so it builds on-brand Andromeda UI on the first prompt instead of guessing.
-        </p>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.18 }}
+          style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}
+        >
+          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
+        </motion.p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.26 }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginTop: 24 }}
+        >
           <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })}>
             {ctaLabel}
             <ArrowRight weight="regular" size={14} />
@@ -563,7 +589,7 @@ export function BrainStoryV4() {
           <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
             Explore Andromeda
           </Link>
-        </div>
+        </motion.div>
       </div>
 
       {/* 3-icon wire divider directly below the hero */}
@@ -729,7 +755,7 @@ export function BrainStoryV4() {
             One reader. Every benefit is yours.
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            The Brain is written for your AI agent, not for you. What you get is what the agent does with it.
+            The Brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {BENEFITS.map((benefit, i) => (

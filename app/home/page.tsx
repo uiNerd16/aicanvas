@@ -4,60 +4,46 @@ import { HomePageClient } from './HomePageClient'
 // (three.js etc.); mirrors COMPONENT_META.map(toMeta).
 import { COMPONENT_META } from '../lib/component-meta.generated'
 
+// Mirrors the root homepage metadata (this route renders the same page);
+// canonical points at the root so search engines fold the two together.
+const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'
+const HOMEPAGE_DESCRIPTION = 'Install finished React components, blocks, and design systems with one shadcn CLI command. Real, editable code you own, no AI tokens spent.'
+
 export const metadata: Metadata = {
-  title: { absolute: 'AI Canvas — UI Components and Design Systems with AI Prompts' },
-  description:
-    'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Browse and remix with AI for free. Design systems and templates are Premium.',
+  title: { absolute: HOMEPAGE_TITLE },
+  description: HOMEPAGE_DESCRIPTION,
+  alternates: { canonical: 'https://aicanvas.me' },
   openGraph: {
-    title: 'AI Canvas — UI Components and Design Systems with AI Prompts',
-    description:
-      'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Design systems and templates are Premium.',
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
     url: 'https://aicanvas.me/home',
     type: 'website',
+    images: [
+      {
+        url: '/AIcanvas-OG-v2.png',
+        width: 1200,
+        height: 630,
+        alt: 'AI Canvas: native React components, design systems, and templates',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Canvas — UI Components and Design Systems with AI Prompts',
-    description:
-      'Animated React components with AI prompts built in. For designers, developers, and everyone in between. Design systems and templates are Premium.',
+    title: HOMEPAGE_TITLE,
+    description: HOMEPAGE_DESCRIPTION,
+    images: ['/AIcanvas-OG-v2.png'],
   },
 }
 
 export default function HomePage() {
   const total = COMPONENT_META.length
 
-  // Pick up to 6 components with images for the hero showcase cycling card
-  const withImages = COMPONENT_META.filter((c) => c.image).slice(0, 6).map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    description: c.description,
-    tags: c.tags,
-    image: c.image,
-  }))
-
-  // Fallback: if fewer than 4 have images, pad with imageless ones
-  const showcase =
-    withImages.length >= 4
-      ? withImages
-      : [
-          ...withImages,
-          ...COMPONENT_META.filter((c) => !c.image)
-            .slice(0, 6 - withImages.length)
-            .map((c) => ({
-              slug: c.slug,
-              name: c.name,
-              description: c.description,
-              tags: c.tags,
-              image: c.image,
-            })),
-        ]
-
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
-  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const FEATURED_SLUGS = ['tilted-coverflow', 'product-card-deck', 'interactive-card-stack', 'voice-chat-pill', 'sticker-wall']
   const carouselItems = FEATURED_SLUGS
     .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
-    .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image }))
+    .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image, badge: c!.badge }))
 
-  return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
+  return <HomePageClient total={total} carouselItems={carouselItems} />
 }

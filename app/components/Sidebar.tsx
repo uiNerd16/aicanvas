@@ -278,8 +278,7 @@ export function Sidebar({
                   className="mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
                 >
                   <span>{section.icon}</span>
-                  <span className="flex-1 text-left">{section.title}</span>
-                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
+                  <span className="flex-1 whitespace-nowrap text-left">Components &amp; Blocks</span>
                   <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
                 </button>
               ) : isComponents ? (
@@ -292,8 +291,7 @@ export function Sidebar({
                   }`}
                 >
                   <span>{section.icon}</span>
-                  <span className="flex-1">{section.title}</span>
-                  <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
+                  <span className="flex-1 whitespace-nowrap">Components &amp; Blocks</span>
                 </Link>
               ) : (
                 <button
@@ -340,7 +338,6 @@ export function Sidebar({
                     const href = cat
                       ? `/components/category/${cat.slug}`
                       : `/components?category=${encodeURIComponent(label)}`
-                    const count = counts[label] ?? 0
                     return (
                       <li key={label}>
                         <Link
@@ -353,15 +350,6 @@ export function Sidebar({
                         >
                           <ArrowElbowDownRight weight="regular" size={12} className="shrink-0 text-sand-300 dark:text-sand-700" />
                           <span className="flex-1">{label}</span>
-                          <span
-                            className={`tabular-nums text-xs ${
-                              isActive
-                                ? 'text-sand-600 dark:text-sand-400'
-                                : 'text-sand-400 dark:text-sand-600'
-                            }`}
-                          >
-                            {count}
-                          </span>
                         </Link>
                       </li>
                     )
@@ -393,10 +381,13 @@ export function Sidebar({
         {/* ── Design Systems pole (shared, identical on every page) ── */}
         <DesignSystemsPole collapsed={collapsedDS} onToggle={toggleDS} promoteDS={promoteDS} />
 
-        {/* ── Divider ── */}
-        <div className="my-2 border-t border-sand-300 dark:border-sand-800" />
+      </nav>
 
-        {/* ── Lab, Get MCP, Pricing, About & Contact ── */}
+      {/* ── Pinned secondary nav — stays on screen while the scroll region
+             above scrolls the long Andromeda component list ── */}
+      <div className="shrink-0 px-3 pt-2 pb-1">
+        {/* Inset divider (padded left/right via the container's px-3) */}
+        <div className="mb-2 border-t border-sand-300 dark:border-sand-800" />
         <div className="space-y-0.5">
           <Link
             href="/lab"
@@ -461,7 +452,7 @@ export function Sidebar({
             <span>Contact</span>
           </Link>
         </div>
-      </nav>
+      </div>
 
       {/* ── Social icons ── */}
       {/* GitHub + X moved here from the page header so the top-right can

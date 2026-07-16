@@ -17,10 +17,12 @@ import {
   CaretRight,
   Terminal,
   Sparkle,
+  Fire,
 } from '@phosphor-icons/react'
 import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SiteFooter } from '../components/SiteFooter'
+import { FoundationLoop } from '../_components/FoundationLoop'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL } from '../lib/config'
 import { track } from '../lib/analytics'
@@ -30,18 +32,12 @@ import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 interface Props {
   total: number
-  showcase: ComponentMeta[]
   carouselItems: ComponentMeta[]
 }
-
-// ─── Platform labels ──────────────────────────────────────────────────────────
-
-const PLATFORMS = ['Claude Code', 'Lovable', 'V0'] as const
 
 // ─── Hello card data ─────────────────────────────────────────────────────────
 
 const HELLO_CARDS = ['Hello', 'こんにちは', 'Bonjour', 'Hola', 'Ciao', 'Hej', 'Hallo', '你好', ':)']
-const LANG_LABELS  = ['EN',    'JA',        'FR',      'ES',   'IT',   'SV',  'DE',   'ZH' ]
 
 // Position 0 = front, 1-5 = visible stack, 6-7 = parked behind stack (zIndex 0).
 // The exiting card uses a dedicated keyframe animation (swing right → arc to back)
@@ -81,6 +77,7 @@ function StackedCards() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      aria-hidden
       className="relative mx-auto mb-10 flex h-28 w-48 cursor-pointer items-end justify-center"
       onClick={handleClick}
     >
@@ -190,160 +187,16 @@ function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string }) {
   return <span ref={ref}>{count}{suffix}</span>
 }
 
-// ─── Showcase cycling card ────────────────────────────────────────────────────
-// Cycles through component screenshots. Each card shows the component image,
-// its name, category, and the four AI platforms it ships prompts for.
-
-function ShowcaseCard({ items }: { items: ComponentMeta[] }) {
-  const [idx, setIdx] = useState(0)
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setIdx((i) => (i + 1) % items.length)
-    }, 2800)
-    return () => clearInterval(id)
-  }, [items.length])
-
-  const current = items[idx]
-  if (!current) return null
-  const categoryTag = current.tags.find((t) => t.accent)?.label ?? ''
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl shadow-black/40">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
-      <div className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-olive-500/10 blur-3xl" />
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col"
-        >
-          <div className="relative aspect-video overflow-hidden bg-sand-900">
-            {current.image ? (
-              <img
-                src={current.image}
-                alt={`${current.name} — ${current.description.split('.')[0]}`}
-                // Above-the-fold hero showcase — the likely LCP element.
-                // High fetch priority pulls it off the critical path bottleneck.
-                fetchPriority="high"
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <ImageSquare weight="regular" size={28} className="text-sand-700" />
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-sand-50">{current.name}</p>
-              {categoryTag && <p className="text-xs text-sand-500">{categoryTag}</p>}
-            </div>
-            <div className="flex gap-1">
-              {PLATFORMS.map((p) => (
-                <span
-                  key={p}
-                  className="rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-sand-500 ring-1 ring-sand-800"
-                >
-                  {p}
-                </span>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="flex justify-center gap-1.5 pb-3">
-        {items.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setIdx(i)}
-            className={`h-1 rounded-full transition-all duration-300 ${i === idx ? 'w-4 bg-olive-500' : 'w-1 bg-sand-700'}`}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Typewriter greeting ──────────────────────────────────────────────────────
-
-const GREETINGS = ['designer', 'developer', 'builder', 'vibe coder', 'creator', 'friend']
-
-function CyclingGreeting() {
-  const [displayText, setDisplayText] = useState('')
-  const [wordIndex, setWordIndex] = useState(0)
-  const [erasing, setErasing] = useState(false)
-
-  useEffect(() => {
-    const word = GREETINGS[wordIndex]
-
-    if (!erasing) {
-      if (displayText.length < word.length) {
-        const id = setTimeout(
-          () => setDisplayText(word.slice(0, displayText.length + 1)),
-          80,
-        )
-        return () => clearTimeout(id)
-      } else {
-        // Fully typed — pause, then start erasing
-        const id = setTimeout(() => setErasing(true), 1400)
-        return () => clearTimeout(id)
-      }
-    } else {
-      if (displayText.length > 0) {
-        const id = setTimeout(
-          () => setDisplayText(displayText.slice(0, -1)),
-          45,
-        )
-        return () => clearTimeout(id)
-      } else {
-        // Fully erased — move to next word
-        const id = setTimeout(() => {
-          setWordIndex((i) => (i + 1) % GREETINGS.length)
-          setErasing(false)
-        }, 220)
-        return () => clearTimeout(id)
-      }
-    }
-  }, [displayText, erasing, wordIndex])
-
-  return (
-    <span className="flex items-center gap-1.5 text-sm font-semibold text-sand-50">
-      Hello,
-      <span className="inline-flex items-center" style={{ minWidth: '6.5rem' }}>
-        <span className="text-olive-500">{displayText}</span>
-        <motion.span
-          animate={{ opacity: [1, 1, 0, 0] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: 'linear', times: [0, 0.45, 0.55, 1] }}
-          className="ml-px inline-block h-[13px] w-[1.5px] translate-y-px rounded-full bg-olive-500"
-        />
-      </span>
-    </span>
-  )
-}
-
 // ─── Wire icon row ────────────────────────────────────────────────────────────
 
 const WIRE_SCALES  = [1.5, 1.2, 1.1]
 const WIRE_Y       = [-8, -4, -2]
-const WIRE_LABELS  = ['What?', 'Why?', 'How?']
+const WIRE_LABELS  = ['For developers', 'For designers', 'For makers and founders']
 // Only the first icon carries descriptive alt text; the other two are decorative
 // duplicates and use alt="" so screen readers skip them and crawlers don't see
 // the brand name repeated three times in a row.
 const WIRE_ALTS    = [
-  'AI Canvas component registry — animated React components preview',
+  'AI Canvas component registry: animated React components preview',
   '',
   '',
 ]
@@ -366,11 +219,19 @@ function WireIcons() {
   return (
     <div className="mt-16 flex justify-center gap-16 sm:mt-24">
       {[0, 1, 2].map((idx) => (
-        <div
+        <a
           key={idx}
+          href="#audience"
+          aria-label={WIRE_LABELS[idx]}
           className="relative flex flex-col items-center"
           onMouseEnter={() => setHovered(idx)}
           onMouseLeave={() => setHovered(null)}
+          onFocus={() => setHovered(idx)}
+          onBlur={() => setHovered(null)}
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById('audience')?.scrollIntoView({ behavior: 'smooth' })
+          }}
         >
           <AnimatePresence>
             {hovered === idx && (
@@ -379,7 +240,7 @@ function WireIcons() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.2 }}
-                className="absolute -top-8 text-xs font-semibold text-sand-500"
+                className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sand-500"
               >
                 {WIRE_LABELS[idx]}
               </motion.span>
@@ -393,9 +254,9 @@ function WireIcons() {
             height={24}
             animate={{ scale: scale(idx), y: y(idx) }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-            className="cursor-default"
+            className="cursor-pointer"
           />
-        </div>
+        </a>
       ))}
     </div>
   )
@@ -418,7 +279,7 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
         {entry.image ? (
           <img
             src={entry.image}
-            alt={`${entry.name} — ${entry.description.split('.')[0]}`}
+            alt={`${entry.name}: ${entry.description.split('.')[0]}`}
             loading="lazy"
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
@@ -512,31 +373,26 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   return (
     <section className="mt-16 sm:mt-24">
       {/* Header */}
-      <div className="mb-6 flex items-end justify-between">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.35 }}
-        >
-          <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Featured</p>
-          <h2 className="mt-1 text-xl font-bold text-sand-50">A taste of what&apos;s inside.</h2>
-        </motion.div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goPrev}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
-          >
-            <CaretLeft weight="regular" size={14} />
-          </button>
-          <button
-            onClick={goNext}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
-          >
-            <CaretRight weight="regular" size={14} />
-          </button>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.35 }}
+        className="mb-4"
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
+        <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
+      </motion.div>
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.35, delay: 0.05 }}
+        className="mb-8 max-w-2xl text-base leading-relaxed text-sand-400"
+      >
+        Copy one CLI command and a finished, animated React piece lands in your project, no
+        tokens spent generating it.
+      </motion.p>
 
       {/* Track — breaks out of the 720px container.
           The inner row is draggable horizontally so users can swipe through
@@ -559,6 +415,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Far prev — outermost left, smallest. Tap cycles 2 back. */}
           <motion.div
+            aria-hidden
             className="relative z-[1] -mr-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
             transition={{ duration: 0.2 }}
@@ -570,6 +427,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Prev — behind center, peeking left. Tap cycles back by one. */}
           <motion.div
+            aria-hidden
             className="relative z-[5] -mr-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
             whileHover={{ opacity: 1 }}
@@ -612,7 +470,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                     {current.image ? (
                       <img
                         src={current.image}
-                        alt={`${current.name} — ${current.description.split('.')[0]}`}
+                        alt={`${current.name}: ${current.description.split('.')[0]}`}
                         loading="lazy"
                         decoding="async"
                         className="absolute inset-0 h-full w-full object-cover"
@@ -638,6 +496,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Next — behind center, peeking right. Tap advances by one. */}
           <motion.div
+            aria-hidden
             className="relative z-[5] -ml-[200px] w-[300px] flex-shrink-0 cursor-pointer"
             animate={{ opacity: 0.8, scale: 0.88 }}
             whileHover={{ opacity: 1 }}
@@ -650,6 +509,7 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
           {/* Far next — outermost right, smallest. Tap cycles 2 forward. */}
           <motion.div
+            aria-hidden
             className="relative z-[1] -ml-[140px] hidden w-[240px] flex-shrink-0 cursor-pointer lg:block"
             animate={{ opacity: 0.3, scale: 0.75 }}
             transition={{ duration: 0.2 }}
@@ -661,6 +521,24 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 
         </motion.div>
       </div>
+
+      {/* Prev / next — under the cards */}
+      <div className="mt-6 flex items-center justify-center gap-2">
+        <button
+          onClick={goPrev}
+          aria-label="Previous"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+        >
+          <CaretLeft weight="regular" size={14} />
+        </button>
+        <button
+          onClick={goNext}
+          aria-label="Next"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+        >
+          <CaretRight weight="regular" size={14} />
+        </button>
+      </div>
     </section>
   )
 }
@@ -669,14 +547,10 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 // Rendered in the homepage FAQ section. The FAQPage JSON-LD for rich results
 // lives on the dedicated /faq page, so it is not duplicated here.
 
-// Flip to true when Andromeda is ready to feature on the homepage. Gates the
-// design-systems showcase section below.
-const ANDROMEDA_LIVE: boolean = false
-
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
-    a: 'AI Canvas is a registry of animated React components, design systems, and templates you can install straight into your project. Open source and free to start: every free component ships with its full source code, so you use it as is or rebuild it your way. Premium adds more components, complete design systems, and templates.',
+    a: 'AI Canvas is a registry of animated React components and design systems you install with one command, no tokens spent generating them. Every install lands real, editable source in your project. Free and premium options both ship the full source.',
   },
   {
     q: 'Do I need to know how to code?',
@@ -688,11 +562,11 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'How do I get my first component in under a minute?',
-    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code, and a free account unlocks unlimited one-command installs, free forever.',
+    a: 'Open any component page, click Copy CLI to grab its install command, paste it into your terminal, and run it. The component drops into your project as real, editable code.',
   },
   {
     q: 'What is the AI Canvas MCP server?',
-    a: 'MCP, short for Model Context Protocol, is a standard way for AI tools to plug into outside services. The AI Canvas MCP is a small server that connects your AI coding agent to AI Canvas, so it can find and install components without you leaving the chat. It is free to use.',
+    a: 'MCP, short for Model Context Protocol, is an open standard for AI tools to plug into outside services, and nearly every AI coding agent now supports it. The AI Canvas MCP is a small server that connects your agent to AI Canvas, so it can find and install components without you leaving the chat, whether you use Claude Code, Cursor, Codex, Copilot, Gemini, or anything else. It is free to use.',
   },
   {
     q: 'Can I use the components in commercial projects?',
@@ -700,7 +574,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'How is AI Canvas different from other component libraries?',
-    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real open-source code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
+    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
   },
   {
     q: 'Who is behind AI Canvas?',
@@ -710,11 +584,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
 
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
-// ─── HomePageClient ────────────────────────────────────────────────────────────
-// (DeckCarousel, SpotlightCarousel, CoverflowCarousel removed)
-// ─── HomePageClient ────────────────────────────────────────────────────────────
-
-export function HomePageClient({ total, showcase, carouselItems }: Props) {
+export function HomePageClient({ total, carouselItems }: Props) {
   // Hero stat: standalone components + the Andromeda design-system components
   // (those live in their own registry, so they aren't part of `total`).
   const componentTotal = total + ANDROMEDA_COMPONENT_META.length
@@ -740,7 +610,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             transition={{ duration: 0.35, delay: 0.1 }}
             className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
           >
-            Open core
+            One command, zero tokens
           </motion.span>
 
           <motion.h1
@@ -757,7 +627,7 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               aria-hidden
               className="inline-block h-[0.6em] w-auto align-[0.02em]"
             />
-            {' '}Native Components,
+            {' '}Native Components and Blocks,
             <br />
             <span className="mt-2 inline-block text-olive-500">Design Systems and Templates</span>
           </motion.h1>
@@ -766,12 +636,11 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.26 }}
-            className="mt-4 max-w-xl text-base leading-relaxed text-sand-400"
+            className="mt-4 max-w-2xl text-base leading-relaxed text-sand-400"
           >
-            If your agent can pull it, you can build it. Claude Code, Codex,
-            and Cursor install finished components, design systems, and
-            templates with the shadcn CLI or the AI Canvas MCP, saving tokens
-            on every build.
+            Copy one shadcn CLI command and a finished component, block, or complete
+            design system lands in your project in seconds. No tokens spent asking an
+            AI to generate it from scratch, just real, editable React you own.
           </motion.p>
 
           <motion.div
@@ -787,14 +656,12 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               Browse Components
               <ArrowRight weight="regular" size={14} />
             </Link>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/mcp"
               className="flex items-center gap-1.5 rounded-xl border border-sand-700 px-5 py-2.5 text-sm font-semibold text-sand-300 transition-colors hover:border-sand-600 hover:text-sand-100"
             >
-              View on GitHub
-            </a>
+              Get MCP
+            </Link>
           </motion.div>
         </section>
 
@@ -809,10 +676,10 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               [
                 [
                   { value: componentTotal, suffix: '+', label: 'Components' },
-                  { value: 3,     suffix: '',  label: 'AI Platforms' },
+                  { value: 3,     suffix: '',  label: 'AI platforms' },
                 ],
                 [
-                  { text: 'MIT',  suffix: '',  label: 'Open core', minWidth: '6rem' },
+                  { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
                   { text: 'MCP',  suffix: '',  label: 'Ready' },
                 ],
               ] as {
@@ -858,13 +725,54 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
         {/* ── Wire icon divider ── */}
         <WireIcons />
 
+        {/* ── Andromeda spotlight (foundation loop) — same bordered-card treatment
+             as the Overview page's System card, with the homepage's own copy/CTA ── */}
+        <section className="mt-16 sm:mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.35 }}
+          >
+            <Link
+              href="/design-systems/andromeda"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 transition-all duration-200 hover:border-sand-700 sm:flex-row"
+            >
+              <span
+                aria-hidden
+                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/40 bg-sand-950/85 text-red-500 backdrop-blur-sm"
+              >
+                <Fire weight="fill" size={15} />
+              </span>
+              <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
+                <span className="text-xs font-semibold uppercase tracking-wider text-olive-400">Featured</span>
+                <h2 className="text-2xl font-bold tracking-tight text-sand-50">Andromeda • Design System</h2>
+                <p className="text-sm leading-relaxed text-sand-400">
+                  A complete design system for dashboards, control panels, and data-dense
+                  interfaces. Components, templates, and the rules that keep them all speaking the
+                  same visual language.
+                </p>
+                <div className="mt-1">
+                  <span className={`${buttonClasses({ variant: 'primary', size: 'md' })} group-hover:bg-olive-400`}>
+                    Discover more
+                    <ArrowRight weight="regular" size={14} />
+                  </span>
+                </div>
+              </div>
+              <div className="relative min-h-[280px] overflow-hidden sm:min-h-[360px] sm:w-1/2">
+                <FoundationLoop />
+              </div>
+            </Link>
+          </motion.div>
+        </section>
+
         {/* ── Featured carousel ── */}
         <FeaturedCarousel items={carouselItems} />
 
 
 
         {/* ── Who it's for ── */}
-        <section className="mt-16 sm:mt-24">
+        <section id="audience" className="mt-16 sm:mt-24 scroll-mt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -874,33 +782,40 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           >
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Built for everyone</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
-              For designers. For developers. For your AI agent.
+              For developers. For designers. For makers. For your AI agent.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Most component libraries serve one audience. AI Canvas fits however you build: shape a finished component your way, install it with the shadcn CLI, or let an AI agent do it for you.
+              Most component libraries serve one kind of person. AI Canvas installs the same finished code for everyone who builds, and every install costs zero AI tokens instead of burning them on a from-scratch generation. Drop a component in with the shadcn CLI, reshape it with an AI agent, or let an agent browse and install it for you.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 gap-4">
             {[
               {
-                icon: <Palette weight="regular" size={18} />,
-                audience: 'Designers',
-                description: 'A polished starting point, not a blank canvas. Every component is crafted down to the last state and easing curve, so you begin from something already good and shape it into your own. Reskin it by hand, or remix it with AI in Claude Code, Lovable, or V0.',
-                badges: ['Claude Code', 'Lovable', 'V0'],
-                badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
-              },
-              {
                 icon: <Code weight="regular" size={18} />,
                 audience: 'Developers',
-                description: 'Install any component with one shadcn CLI command: fully typed React with Tailwind CSS and Framer Motion, dropped into your project as real, editable source. No boilerplate, no screenshot to rebuild.',
+                description: 'Drop finished, typed components into your project with one command. No boilerplate, no screenshot to rebuild, and no tokens spent generating what already works.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
                 badgeStyle: 'text-sand-500 ring-sand-800',
               },
               {
+                icon: <Palette weight="regular" size={18} />,
+                audience: 'Designers',
+                description: 'Start from something already crafted, then reshape it in your AI agent, Cursor, Claude Code, or Codex, whichever you use: the colors, the layout, the motion, fast, without rebuilding it from scratch.',
+                badges: ['Cursor', 'Claude Code', 'Codex'],
+                badgeStyle: 'text-olive-500 ring-olive-500/30 bg-olive-500/5',
+              },
+              {
+                icon: <RocketLaunch weight="regular" size={18} />,
+                audience: 'Makers & Founders',
+                description: 'Building with AI in Lovable, V0, Cursor, or any AI agent? Hand it real, polished components to install so your product ships fast and does not look generated, with no tokens spent regenerating UI from scratch.',
+                badges: ['No-code', 'AI-built', 'Real code'],
+                badgeStyle: 'text-sand-400 ring-sand-700',
+              },
+              {
                 icon: <Sparkle weight="regular" size={18} />,
                 audience: 'AI agents',
-                description: 'Point Claude Code, Codex, or Cursor at the AI Canvas MCP and it browses, inspects, and installs components for you. The agent does the wiring. You keep control.',
+                description: 'Point your agent at the AI Canvas MCP and it browses, inspects, and installs finished components for you: fewer tokens, no writing UI from scratch, and you keep control. Works with any MCP client, Claude Code, Cursor, Codex, Copilot, Gemini, and more.',
                 badges: ['MCP', 'Agent-ready', 'No copy-paste'],
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
@@ -951,33 +866,33 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           <div className="relative flex flex-col gap-0">
             {/* Connecting dotted line */}
             <div
-              className="absolute left-[19px] top-6 bottom-16 w-px overflow-hidden"
+              className="dot-flow absolute left-[19px] top-6 bottom-16 w-px overflow-hidden"
               style={{
                 backgroundImage: 'radial-gradient(circle, rgba(79,79,76,0.5) 1px, transparent 1px)',
                 backgroundSize: '1px 8px',
                 animation: 'dotFlow 1.5s linear infinite',
               }}
             />
-            <style>{`@keyframes dotFlow { from { background-position-y: 0; } to { background-position-y: 8px; } }`}</style>
+            <style>{`@keyframes dotFlow { from { background-position-y: 0; } to { background-position-y: 8px; } } @media (prefers-reduced-motion: reduce) { .dot-flow { animation: none !important; } }`}</style>
 
             {[
               {
                 num: '01',
                 icon: <MagnifyingGlass weight="regular" size={16} />,
                 title: 'Browse',
-                desc: 'Search animated components, design systems, and templates. Preview each one live before you choose.',
+                desc: 'Search components, blocks, and design systems, and preview each one live before you choose.',
               },
               {
                 num: '02',
                 icon: <Terminal weight="regular" size={16} />,
-                title: 'Install or remix',
-                desc: 'Run the shadcn CLI command, copy the AI prompt, or let your agent pull it over MCP. The full typed source lands in your project, not a screenshot.',
+                title: 'Install',
+                desc: 'Run the one shadcn CLI command, or point your AI agent at the MCP. The finished, typed source lands in your project, no tokens spent generating it.',
               },
               {
                 num: '03',
                 icon: <RocketLaunch weight="regular" size={16} />,
                 title: 'Ship',
-                desc: 'It arrives as real, open-source code in your codebase. Restyle it, extend it, or ship it as-is. It\'s yours.',
+                desc: 'It arrives as real code you own. Ship it as is, or reshape it with an AI agent in seconds. It is yours.',
               },
             ].map((step, i) => (
               <motion.div
@@ -1005,127 +920,6 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
           </div>
         </section>
 
-
-        {/* ── Design systems & templates showcase (hidden until ANDROMEDA_LIVE) ── */}
-        {ANDROMEDA_LIVE && (
-        <section className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.35 }}
-            className="mb-6"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">
-              Design systems and templates
-            </p>
-            <h2 className="mt-1 text-xl font-bold text-sand-50">
-              More than components. Complete systems.
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-sand-400">
-              Andromeda is a full design system for mission dashboards: token-driven
-              components and production templates that compose into real interfaces.
-              One token file controls every color, spacing, and radius, so the whole
-              system retunes at once.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.4 }}
-          >
-            <Link
-              href="/design-systems/andromeda"
-              className="group relative block overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 transition-colors hover:border-sand-700 sm:p-8"
-            >
-              {/* Andromeda signature corner brackets */}
-              <span aria-hidden className="absolute left-3 top-3 h-3 w-3 border-l border-t border-olive-500/50" />
-              <span aria-hidden className="absolute right-3 top-3 h-3 w-3 border-r border-t border-olive-500/50" />
-              <span aria-hidden className="absolute bottom-3 left-3 h-3 w-3 border-b border-l border-olive-500/50" />
-              <span aria-hidden className="absolute bottom-3 right-3 h-3 w-3 border-b border-r border-olive-500/50" />
-
-              <div className="flex flex-col gap-8 sm:flex-row sm:items-center">
-                {/* Mini dashboard mock, pure CSS */}
-                <div aria-hidden className="pointer-events-none w-full select-none rounded-xl border border-sand-800 bg-sand-950 p-4 sm:w-1/2">
-                  <div className="flex items-center justify-between border-b border-sand-800 pb-3">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-olive-500">Mission Control</span>
-                    <span className="flex gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-olive-500/80" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-sand-700" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-sand-700" />
-                    </span>
-                  </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {[
-                      ['72%', 'Fuel'],
-                      ['114', 'Crew'],
-                      ['OK', 'Hull'],
-                    ].map(([v, l]) => (
-                      <div key={l} className="rounded-md border border-sand-800 px-2 py-1.5">
-                        <p className="text-sm font-bold tabular-nums text-sand-50">{v}</p>
-                        <p className="text-[9px] uppercase tracking-wider text-sand-500">{l}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-800">
-                      <div className="h-full w-2/3 rounded-full bg-olive-500/70" />
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-800">
-                      <div className="h-full w-1/3 rounded-full bg-sand-600" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Copy + stats */}
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-sand-50">Andromeda</h3>
-                  <p className="mt-1.5 text-base leading-relaxed text-sand-400">
-                    A sci-fi blueprint system. Every panel, table, and chart speaks
-                    the same visual language, ready to assemble into full dashboards.
-                  </p>
-                  <div className="mt-4 flex gap-6">
-                    {[
-                      [`${ANDROMEDA_COMPONENT_META.length}`, 'Components'],
-                      ['4', 'Templates'],
-                      ['1', 'Token file'],
-                    ].map(([v, l]) => (
-                      <div key={l}>
-                        <p className="text-xl font-bold tabular-nums text-sand-50">{v}</p>
-                        <p className="text-xs text-sand-500">{l}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-olive-500 transition-colors group-hover:text-olive-400">
-                    Explore Andromeda
-                    <ArrowRight weight="regular" size={14} className="transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Template quick links */}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {[
-                ['Mission Control', '/design-systems/andromeda/templates/mission-control'],
-                ['Resource Planning', '/design-systems/andromeda/templates/resource-planning'],
-                ['Service Order', '/design-systems/andromeda/templates/service-order'],
-                ['Signal Room', '/design-systems/andromeda/templates/signal-room'],
-              ].map(([name, href]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="rounded-full border border-sand-800 px-3 py-1.5 text-xs font-medium text-sand-400 transition-colors hover:border-sand-700 hover:text-sand-200"
-                >
-                  {name}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-        )}
 
         {/* ── FAQ ── */}
         <section className="mt-16 sm:mt-24">
@@ -1190,7 +984,9 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                     <div
                       className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                     >
-                      <div className="overflow-hidden">
+                      {/* visibility rides the same 300ms as the grid collapse, so the
+                          answer leaves the a11y tree when closed without a visual pop */}
+                      <div className={`overflow-hidden transition-[visibility] duration-300 ${open ? 'visible' : 'invisible'}`}>
                         <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-400">{a}</p>
                       </div>
                     </div>
@@ -1217,11 +1013,12 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
               Ready to build?
             </p>
             <h2 className="relative mt-2 text-xl font-bold text-sand-50">
-              Your agent already knows the way.
+              One command from your next screen.
             </h2>
             <p className="relative mt-2 text-base text-sand-500">
-              {componentTotal}+ components, design systems, and templates, one command away.
-              Browse them yourself or tell your agent what to build.
+              {componentTotal}+ components and design systems, each one command away. Copy it
+              yourself, or tell your agent to install it. No tokens spent generating what
+              already works.
             </p>
             <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -1231,12 +1028,14 @@ export function HomePageClient({ total, showcase, carouselItems }: Props) {
                 Browse Components
                 <ArrowRight weight="regular" size={14} />
               </Link>
-              <Link
-                href="/mcp"
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={buttonClasses({ variant: 'outline', size: 'lg' })}
               >
-                Connect the MCP
-              </Link>
+                View on GitHub
+              </a>
             </div>
           </motion.div>
         </section>

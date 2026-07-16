@@ -5,8 +5,8 @@ import { HomePageClient } from './home/HomePageClient'
 import { COMPONENT_META } from './lib/component-meta.generated'
 import { SITE_URL } from './lib/config'
 
-const HOMEPAGE_TITLE = `AI Canvas — ${COMPONENT_META.length} Animated React Components with AI Reproduction Prompts`
-const HOMEPAGE_DESCRIPTION = `Open-source registry of ${COMPONENT_META.length} animated React components. Free to browse and remix with AI. Install components with one command with a free account, or go Premium for design systems and premium components.`
+const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'
+const HOMEPAGE_DESCRIPTION = 'Install finished React components, blocks, and design systems with one shadcn CLI command. Real, editable code you own, no AI tokens spent.'
 
 export const metadata: Metadata = {
   title: { absolute: HOMEPAGE_TITLE },
@@ -37,39 +37,12 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const total = COMPONENT_META.length
 
-  // Pick up to 6 components with images for the hero showcase cycling card
-  // (3d-product-card is intentionally kept off all homepage hero placements)
-  const withImages = COMPONENT_META.filter((c) => c.image && c.slug !== '3d-product-card').slice(0, 6).map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    description: c.description,
-    tags: c.tags,
-    image: c.image,
-  }))
-
-  // Fallback: if fewer than 4 have images, pad with imageless ones
-  const showcase =
-    withImages.length >= 4
-      ? withImages
-      : [
-          ...withImages,
-          ...COMPONENT_META.filter((c) => !c.image)
-            .slice(0, 6 - withImages.length)
-            .map((c) => ({
-              slug: c.slug,
-              name: c.name,
-              description: c.description,
-              tags: c.tags,
-              image: c.image,
-            })),
-        ]
-
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
-  const FEATURED_SLUGS = ['ai-job-cards', 'task-cards', 'particle-sphere', 'label-cards', 'traveldeck']
+  const FEATURED_SLUGS = ['tilted-coverflow', 'product-card-deck', 'interactive-card-stack', 'voice-chat-pill', 'sticker-wall']
   const carouselItems = FEATURED_SLUGS
     .map((slug) => COMPONENT_META.find((c) => c.slug === slug))
     .filter(Boolean)
     .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image, badge: c!.badge }))
 
-  return <HomePageClient total={total} showcase={showcase} carouselItems={carouselItems} />
+  return <HomePageClient total={total} carouselItems={carouselItems} />
 }

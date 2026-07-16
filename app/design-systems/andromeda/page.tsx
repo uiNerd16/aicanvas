@@ -4,11 +4,12 @@
 // /design-systems/andromeda/system; the former /overview preview URL
 // 308-redirects (permanent) here (next.config.ts).
 import { AndromedaOverview } from './AndromedaOverview'
+import { ANDROMEDA_COMPONENT_META } from '../../_lib/andromeda/andromeda-meta'
 
 export const metadata = {
   title: 'Andromeda Design System for Dashboards and Control Panels',
   description:
-    'A complete, token-driven design system for dashboards, control panels, and data-dense tools. Around 32 components and 4 templates, all live.',
+    `A complete, token-driven design system for dashboards, control panels, and data-dense tools. Around ${ANDROMEDA_COMPONENT_META.length} components and 4 templates, all live.`,
   alternates: { canonical: '/design-systems/andromeda' },
 }
 

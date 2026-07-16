@@ -100,11 +100,9 @@ export function DesignSystemsPole({
       {!collapsed && (
         <ul className="space-y-0.5">
           {SYSTEMS.map((system) => {
-            // "System root" URLs — the /system gallery and the bare overview
-            // both highlight the system row as active.
-            const systemActive =
-              pathname === `/design-systems/${system.slug}/system` ||
-              pathname === `/design-systems/${system.slug}`
+            // Only the bare overview highlights the system row; /system has its
+            // own child row below, so highlighting both read as a double-select.
+            const systemActive = pathname === `/design-systems/${system.slug}`
             const systemSelected = activeSystem?.slug === system.slug
             // Expanded shows System/Brain/Templates; the per-component list
             // below stays gated to systemSelected so the promoted rail is short.
@@ -137,7 +135,13 @@ export function DesignSystemsPole({
                   <span className="flex-1 font-semibold">{system.name}</span>
                 </Link>
                 {expanded && (
-                  <ul className="mt-0.5 space-y-0.5">
+                  <div className="relative">
+                    {/* Nesting rail — groups System / Brain / Templates / Components under Andromeda */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute bottom-1 left-[15px] top-1 w-px bg-sand-300 dark:bg-sand-800"
+                    />
+                    <ul className="mt-0.5 space-y-0.5">
                     {/* ── System (the full component gallery + install) ───── */}
                     <li className="mt-1">
                       <Link
@@ -227,9 +231,9 @@ export function DesignSystemsPole({
                     </li>
 
                     {/* ── Components (label + flat list) ──────── */}
-                    {/* Only when actually inside the system — keeps the promoted
-                        landing rail to System / Brain / Templates. */}
-                    {systemSelected && (
+                    {/* Shown whenever Andromeda is expanded; the list runs long,
+                        so it overflows into the sidebar's own scroll (peeks on
+                        tall screens, scroll for the rest). */}
                     <li className="mt-1">
                       <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
                         Components
@@ -255,8 +259,8 @@ export function DesignSystemsPole({
                         })}
                       </ul>
                     </li>
-                    )}
                   </ul>
+                  </div>
                 )}
               </li>
             )

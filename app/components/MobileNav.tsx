@@ -275,8 +275,7 @@ export function MobileNav({
                           }`}
                         >
                           <span>{section.icon}</span>
-                          <span className="flex-1">{section.title}</span>
-                          <span className="tabular-nums text-xs text-sand-400 dark:text-sand-600">{total}</span>
+                          <span className="flex-1 whitespace-nowrap">Components &amp; Blocks</span>
                         </Link>
                       ) : (
                         <button
@@ -306,7 +305,6 @@ export function MobileNav({
                             const href = cat
                               ? `/components/category/${cat.slug}`
                               : `/components?category=${encodeURIComponent(label)}`
-                            const count = counts[label] ?? 0
                             return (
                               <li key={label}>
                                 <Link
@@ -320,9 +318,6 @@ export function MobileNav({
                                 >
                                   <ArrowElbowDownRight weight="regular" size={12} className="shrink-0 text-sand-300 dark:text-sand-700" />
                                   <span className="flex-1">{label}</span>
-                                  <span className={`tabular-nums text-xs ${isActive ? 'text-sand-600 dark:text-sand-400' : 'text-sand-400 dark:text-sand-600'}`}>
-                                    {count}
-                                  </span>
                                 </Link>
                               </li>
                             )
