@@ -655,10 +655,14 @@ export default function ComponentPageView({
                 {/* Fullscreen — preview only */}
                 {activeTab === 'preview' && (
                   <div className="group/fullscreen relative">
+                    {/* Soft-olive accent (the active-tag look) so the fullscreen
+                        action stands out from the outline theme/refresh buttons
+                        beside it without shouting like a solid primary. */}
                     <Button
-                      variant="outline"
+                      variant="accent"
                       size="md"
                       iconOnly
+                      aria-label="Full screen"
                       onClick={() => {
                         track('Fullscreen Open', { component: slug })
                         setFullscreen(true)
