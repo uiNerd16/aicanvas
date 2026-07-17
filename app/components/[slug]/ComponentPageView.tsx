@@ -1627,7 +1627,7 @@ export default function ComponentPageView({
                 This prompt is for remixing.
               </span>{' '}
               Use it to build your own variation of {name}. Results depend on
-              the model you use, and no prompt is 100% exact.
+              the model you use, and no prompt in the world is 100% exact.
             </p>
 
             {/* CLI first — the accurate path */}
