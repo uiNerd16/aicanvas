@@ -17,6 +17,7 @@ import {
 import { Step } from '../../../components/Step'
 import { SiteFooter } from '../../../components/SiteFooter'
 import { Button } from '../../../components/Button'
+import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
@@ -95,7 +96,7 @@ export function AndromedaComponentView({
   // (e.g. `andromeda-checkbox`).
   type CodeState =
     | { status: 'idle' | 'loading' }
-    | { status: 'ready'; code: string }
+    | { status: 'ready'; code: string; highlighted?: string }
     | { status: 'locked'; reason: PaywallReason; limit?: number }
   const [codeState, setCodeState] = useState<CodeState>({ status: 'idle' })
   const openCode = useCallback(async () => {
@@ -111,8 +112,11 @@ export function AndromedaComponentView({
         setCodeState({ status: 'locked', reason: 'premium-only' })
         return
       }
-      const { code } = await res.json()
-      setCodeState({ status: 'ready', code: code ?? '' })
+      // The endpoint highlights server-side and returns both; keep `highlighted`
+      // so the Code tab matches the standalone pages. Falls back to plain source
+      // when Shiki hiccups (the endpoint serves raw code in that case).
+      const { code, highlighted } = await res.json()
+      setCodeState({ status: 'ready', code: code ?? '', highlighted })
     } catch {
       setCodeState({ status: 'locked', reason: 'premium-only' })
     }
@@ -174,12 +178,16 @@ export function AndromedaComponentView({
     codeState.status === 'locked' ? (
       <Paywall reason={codeState.reason} limit={codeState.limit} />
     ) : codeState.status === 'ready' ? (
-      <pre
-        className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed"
-        style={{ color: tokens.color.text.secondary }}
-      >
-        {codeState.code}
-      </pre>
+      codeState.highlighted ? (
+        <HighlightedCodeView html={codeState.highlighted} />
+      ) : (
+        <pre
+          className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed"
+          style={{ color: tokens.color.text.secondary }}
+        >
+          {codeState.code}
+        </pre>
+      )
     ) : (
       <div
         className="flex min-h-[200px] items-center justify-center text-sm"
