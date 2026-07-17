@@ -6,11 +6,12 @@ export const runtime = 'nodejs'
 
 // Guarded require — NOT a static import — so a fork/typecheck with no injected
 // build-info still compiles. inject-premium always writes at least a null stub.
-let PREMIUM_BUILD: { sha: string | null; pinnedSha: string | null } = { sha: null, pinnedSha: null }
+type BuildInfo = { sha: string | null; pinnedSha: string | null; appSha: string | null }
+let PREMIUM_BUILD: BuildInfo = { sha: null, pinnedSha: null, appSha: null }
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   PREMIUM_BUILD = (require('@/app/lib/premium-build-info.generated') as {
-    PREMIUM_BUILD: { sha: string | null; pinnedSha: string | null }
+    PREMIUM_BUILD: BuildInfo
   }).PREMIUM_BUILD
 } catch {
   /* no premium injected — free-only build */
@@ -31,6 +32,10 @@ try {
  * build is still BUILDING, or after one FAILED, so polling them alone reports
  * success on a deploy that never landed. verify-live.sh compares this to the
  * pushed HEAD. Safe to expose: this repo is public, so the sha is public already.
+ * It is stamped into the generated build-info at BUILD time by inject-premium.mjs
+ * (NOT read from process.env here) — a runtime read would depend on Vercel's
+ * "expose System Environment Variables" project setting, and would go silently
+ * null if that were off.
  */
 export async function GET() {
   const lookup = loadContentLookup()
@@ -45,8 +50,7 @@ export async function GET() {
       degraded: lookup.degraded === true,
       premiumSha: PREMIUM_BUILD.sha,
       pinnedSha: PREMIUM_BUILD.pinnedSha,
-      // Vercel injects this at build time; null on a local / non-Vercel build.
-      deployedSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
+      deployedSha: PREMIUM_BUILD.appSha,
     },
     { headers: { 'Cache-Control': 'private, no-store' } },
   )
