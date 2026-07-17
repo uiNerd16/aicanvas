@@ -33,6 +33,7 @@
 import fs from 'fs'
 import path from 'path'
 import { google } from 'googleapis'
+import { GAXIOS_OPTS, guardedCall } from './gsc-net'
 
 // ─────────────────────────────────────────────────────────────────────
 // .env.local loader (mirrors gsc-audit.ts to avoid a dotenv dependency)
@@ -156,9 +157,10 @@ async function submitSingleUrl(url: string, dryRun: boolean) {
 
   process.stdout.write(`Submitting ... `)
   try {
-    const res = await indexing.urlNotifications.publish({
-      requestBody: { url, type: 'URL_UPDATED' },
-    })
+    const res = await guardedCall(
+      () => indexing.urlNotifications.publish({ requestBody: { url, type: 'URL_UPDATED' } }, GAXIOS_OPTS),
+      url,
+    )
     entry.notifyTime = res.data.urlNotificationMetadata?.latestUpdate?.notifyTime ?? null
     process.stdout.write(`OK\n`)
   } catch (err: any) {
@@ -266,9 +268,10 @@ async function main() {
     i++
     process.stdout.write(`  [${String(i).padStart(3, ' ')}/${toSubmit.length}] ${e.url} ... `)
     try {
-      const res = await indexing.urlNotifications.publish({
-        requestBody: { url: e.url, type: 'URL_UPDATED' },
-      })
+      const res = await guardedCall(
+        () => indexing.urlNotifications.publish({ requestBody: { url: e.url, type: 'URL_UPDATED' } }, GAXIOS_OPTS),
+        e.url,
+      )
       const notifyTime = res.data.urlNotificationMetadata?.latestUpdate?.notifyTime ?? null
       log.push({
         url: e.url,
