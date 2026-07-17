@@ -12,7 +12,7 @@ export function GET() {
 
   const intro = `# AI Canvas
 
-> AI Canvas is an open-core, shadcn-compatible registry of ${total} animated React components, design systems, and templates built with Tailwind CSS and Motion. The free library is MIT, and Premium components, design systems, and templates are proprietary. Many components ship with reproduction prompts for Claude Code, Lovable, and v0, so developers can install the code directly or recreate it in any AI builder.
+> AI Canvas is an open-core, shadcn-compatible registry of ${total} animated React components, design systems, and templates built with Tailwind CSS and Motion. The free library is MIT, and Premium components, design systems, and templates are proprietary. Many components ship with a comprehensive AI remix prompt, so developers can install the code directly or recreate their own variation in any AI builder.
 
 ## Overview
 - [Homepage](${SITE_URL}): Browse all components.

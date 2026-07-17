@@ -13,12 +13,12 @@ AI Canvas ships `generateMetadata` in `app/components/[slug]/page.tsx` — it au
 ## How `generateMetadata` builds the meta description
 
 ```
-[entry.description] Free copy-paste React code with AI prompts for Claude Code, Lovable, and V0.
+[entry.description, truncated at 150 chars] | Install via shadcn CLI. Free and open source.
 ```
 
-The suffix is always appended. Your description must **read naturally when followed by that sentence**.
+(Premium content gets `| Install via shadcn CLI. Premium AI Canvas component.` instead — the meta must never claim open source on premium.) Verify the exact tail against `computeMetaDescription` in `app/components/[slug]/page.tsx`, not this doc.
 
-The suffix is 76 characters. Google shows ~155 characters. So the description should be **75–90 characters** for the best fit — enough to describe the component visually, short enough that the suffix is fully visible in search results.
+The suffix is ~49 characters. Google shows ~155 characters. So the description should be **75–100 characters** for the best fit — enough to describe the component visually, short enough that the suffix is fully visible in search results.
 
 ---
 
@@ -100,7 +100,7 @@ The Glass category deserves special attention: **every Glass component descripti
 
 ## Prompts are already doing SEO work — do not touch them
 
-Every `prompts.ts` file mentions Claude Code, Lovable, and V0 by name. These appear on the component page as visible text, which adds keyword density naturally. Do not modify prompts for SEO purposes — they are optimised for developer utility, not search engines.
+Each component's general AI prompt (the `'Claude Code'` lane) is server-rendered as visible text inside the Remix side panel, under an "AI prompt for {name}" heading — the largest block of unique crawlable text on the page. Do not modify prompts for SEO purposes — they are optimised for developer utility, not search engines; the SEO value is a side effect of rendering them.
 
 ---
 

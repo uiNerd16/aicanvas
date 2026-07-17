@@ -4,34 +4,29 @@ import { useState } from 'react'
 import { Check } from '@phosphor-icons/react'
 import { useSession } from '../../../components/auth/SessionProvider'
 import { Toggle } from '../../../components/Toggle'
-import type { AiPlatform, PackageManager } from '../../../lib/supabase/types'
+import type { PackageManager } from '../../../lib/supabase/types'
 
 const PACKAGE_MANAGERS: PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun']
-const AI_PLATFORMS: AiPlatform[] = ['Claude Code', 'Lovable', 'V0']
 
+// The ai_platform preference (and its Supabase column) still exists in the
+// backend but is no longer collected: components ship ONE platform-agnostic
+// Remix prompt, so there is no multi-platform drawer left to sort.
 type Initial = {
   package_manager: PackageManager | null
-  ai_platform: AiPlatform | null
   newsletter_opt_in: boolean
 }
 
-// Three preferences with autosave-on-click. The visible state of the control
+// Two preferences with autosave-on-click. The visible state of the control
 // (active pill, on/off switch) is its own confirmation; no separate "Saved"
 // tick is rendered.
 export function SettingsForm({ initial }: { initial: Initial }) {
   const { updatePreferences } = useSession()
   const [pkg, setPkg] = useState<PackageManager | null>(initial.package_manager)
-  const [platform, setPlatform] = useState<AiPlatform | null>(initial.ai_platform)
   const [newsletter, setNewsletter] = useState<boolean>(initial.newsletter_opt_in)
 
   async function selectPkg(value: PackageManager | null) {
     setPkg(value)
     await updatePreferences({ package_manager: value })
-  }
-
-  async function selectPlatform(value: AiPlatform | null) {
-    setPlatform(value)
-    await updatePreferences({ ai_platform: value })
   }
 
   async function selectNewsletter(value: boolean) {
@@ -47,14 +42,6 @@ export function SettingsForm({ initial }: { initial: Initial }) {
         value={pkg}
         options={PACKAGE_MANAGERS}
         onSelect={selectPkg}
-      />
-
-      <Field
-        label="Preferred AI platform"
-        description="Used when a prompt drawer offers multiple platforms."
-        value={platform}
-        options={AI_PLATFORMS}
-        onSelect={selectPlatform}
       />
 
       <BooleanField

@@ -5,7 +5,7 @@
 ## What this project is
 AI Canvas (aicanvas.me) is an open component marketplace where every component ships with:
 - Its full source code
-- Expert-crafted prompts for 3 AI coding platforms: Claude Code, Lovable, V0
+- One expert-crafted, comprehensive AI remix prompt (platform-agnostic; works in any AI coding tool)
 
 ## How work is organized
 
@@ -57,7 +57,7 @@ Semantic quick reference:
 - Olive buttons use `text-sand-950`, never white (contrast). Component preview backgrounds are always `bg-sand-950` regardless of theme. Typography weights: 800 hero h1, 700 section headings, 600 UI labels/buttons, 400 body.
 
 ## Prompt file contract
-Every `prompts.ts` exports a `prompts` object typed `Partial<Record<Platform, string>>`. The `Platform` union is defined in `app/components/ComponentCard.tsx` — verify against that file, not docs. Lanes can be legitimately absent; the drawer UI filters to the platforms a component provides.
+Every `prompts.ts` exports a `prompts` object typed `Partial<Record<Platform, string>>`. The `Platform` union is defined in `app/components/ComponentCard.tsx` — verify against that file, not docs. The UI surfaces ONE general prompt per component: the `'Claude Code'` lane (the comprehensive, platform-agnostic one), shown in the Remix side panel and server-rendered for SEO. Legacy `'Lovable'`/`'V0'` lanes remain valid data on older components but are never surfaced and no longer authored. Write new components with the `'Claude Code'` lane only.
 
 ```ts
 import type { Platform } from '../../app/components/ComponentCard'
