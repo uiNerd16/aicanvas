@@ -45,8 +45,31 @@ try {
   pinnedSha = ''
 }
 
+// The PUBLIC app commit this build is built FROM — a different axis from the
+// premium sha/pinnedSha above (those track the vault pin). Captured HERE, at
+// BUILD time, deliberately: Vercel always sets VERCEL_GIT_COMMIT_SHA in the build
+// environment, whereas reading it at RUNTIME in the health route would depend on
+// the project's "expose System Environment Variables" setting. If that setting is
+// off, the field would be null forever and the deploy check would silently never
+// run — worse than no check, because it looks like one. git rev-parse is the
+// fallback (Vercel builds from a real clone); null when neither is available.
+let appSha = String(process.env.VERCEL_GIT_COMMIT_SHA || '').trim()
+if (!appSha) {
+  try {
+    appSha = execSync('git rev-parse HEAD', {
+      cwd: ROOT,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim()
+  } catch {
+    appSha = ''
+  }
+}
+
 // Stamp what actually got injected into a gitignored const the /api/premium/health
-// route imports — so prod can PROVE it is serving the intended premium commit.
+// route imports — so prod can PROVE it is serving the intended premium commit,
+// and (via appSha) the intended APP commit.
 function writeBuildInfo(sha) {
   writeFileSync(
     BUILD_INFO,
@@ -55,6 +78,7 @@ function writeBuildInfo(sha) {
       'export const PREMIUM_BUILD = {',
       `  sha: ${JSON.stringify(sha || null)},`,
       `  pinnedSha: ${JSON.stringify(pinnedSha || null)},`,
+      `  appSha: ${JSON.stringify(appSha || null)},`,
       '} as const',
       '',
     ].join('\n'),
