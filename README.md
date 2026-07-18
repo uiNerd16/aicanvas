@@ -22,7 +22,7 @@
   <b><a href="https://aicanvas.me">Browse the live catalog at aicanvas.me</a></b>
 </p>
 
-A growing collection of animated React components, plus a token-driven design system and ready-made templates. Every component arrives as real source code in your project, and many include reproduction prompts for Claude Code, Lovable, and V0. Open core: the free library is MIT, and Premium is proprietary.
+A growing collection of animated React components, plus a token-driven design system and ready-made templates. Every component arrives as real source code in your project, with an AI remix prompt that works in any AI coding tool. Open core: the free library is MIT, and Premium is proprietary.
 
 ## Install
 
@@ -45,15 +45,15 @@ npx shadcn@latest add @aicanvas/task-cards
 | --- | --- | --- |
 | **shadcn CLI** | `npx shadcn@latest add @aicanvas/<slug>` | Dropping finished, open-source code straight into your repo |
 | **AI Canvas MCP** | `npx -y @aicanvas/mcp` | Letting your AI editor search and install components for you |
-| **Remix with AI** | Copy a prompt from any component page | Rebuilding a component your way in Claude Code, Lovable, or V0 |
+| **Remix with AI** | Copy a prompt from any component page | Rebuilding a component your way in any AI coding tool |
 
 Browse the full catalog and copy the exact command for any component at [aicanvas.me](https://aicanvas.me). `pnpm dlx`, `yarn dlx`, and `bunx` work too.
 
 ## Why AI Canvas
 
 - **Open core, free to start.** The free library is MIT licensed, so you can use it in personal and commercial projects, modify it freely, and ship it without attribution. Premium components, design systems, and templates are proprietary.
-- **Full source, no lock-in.** Every component arrives as real React and TypeScript code in your codebase, not a black-box dependency. Restyle it, extend it, or ship it as is. It is yours.
-- **Built for AI workflows.** Install with the shadcn CLI, connect the MCP so your agent installs for you, or hand it a reproduction prompt for Claude Code, Lovable, or V0.
+- **Full source, yours to keep.** Every component arrives as real React and TypeScript code in your codebase, not a black-box dependency. Restyle it, extend it, or ship it as is. It is yours.
+- **Built for AI workflows.** Install with the shadcn CLI, connect the MCP so your agent installs for you, or hand it a remix prompt that works in any AI coding tool.
 - **Animated by default.** Built with Framer Motion and Tailwind CSS, ready for the Next.js App Router or any modern React setup. 3D pieces use Three.js.
 
 AI Canvas is free to start. Premium unlocks design systems, templates, and closed-source components.
@@ -130,7 +130,7 @@ Or add it to your MCP config:
 }
 ```
 
-Works with Claude Code, Codex, Cursor, and other MCP-compatible editors. The server is read-only and fetches the live registry at runtime, so new components reach your agent shortly after they ship. It returns published component source and reproduction prompts.
+Works with Claude Code, Codex, Cursor, and other MCP-compatible editors. The server is read-only and fetches the live registry at runtime, so new components reach your agent shortly after they ship. It returns published component source and remix prompts.
 
 ## Design systems and templates
 
