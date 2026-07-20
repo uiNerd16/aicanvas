@@ -1,11 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Lightning, Key, ShieldCheck } from '@phosphor-icons/react'
 import { premiumEnabled } from '../../../../lib/flags'
 import { buttonClasses } from '../../../components/buttonClasses'
 import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../../../components/billing/usePremiumStatus'
+
+/** Display fields from /api/me/subscription (live Paddle read, never ids). */
+type SubDetails = {
+  plan: 'monthly' | 'annual' | null
+  periodEnd: string | null
+  scheduledChange: 'cancel' | 'pause' | null
+  startedAt: string | null
+}
+
+function fmtDate(iso: string): string {
+  const d = new Date(iso)
+  return isNaN(d.getTime())
+    ? ''
+    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
 
 /**
  * Account billing + token controls. Flag-gated (premium UI). Premium users get
@@ -19,8 +34,29 @@ export function AccountBilling() {
   const [portalLoading, setPortalLoading] = useState(false)
   const [noPortal, setNoPortal] = useState(false)
   const [rotateState, setRotateState] = useState<'idle' | 'rotating' | 'done' | 'error'>('idle')
+  const [sub, setSub] = useState<SubDetails | null>(null)
+
+  // Live subscription details, premium users only. Any failure leaves `sub`
+  // null and the panel falls back to the plain status line — never a guess.
+  useEffect(() => {
+    if (status !== 'premium') return
+    let cancelled = false
+    fetch('/api/me/subscription')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!cancelled && j?.subscription) setSub(j.subscription)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [status])
 
   if (!premiumEnabled()) return null
+
+  const planLabel = sub?.plan === 'annual' ? 'Annual' : sub?.plan === 'monthly' ? 'Monthly' : 'Premium'
+  const endDate = sub?.periodEnd ? fmtDate(sub.periodEnd) : ''
+  const startDate = sub?.startedAt ? fmtDate(sub.startedAt) : ''
 
   async function manageSubscription() {
     setPortalLoading(true)
@@ -70,6 +106,30 @@ export function AccountBilling() {
               ? "You're on the Free plan."
               : 'Checking your plan…'}
         </p>
+
+        {status === 'premium' && sub && (
+          <div className="mt-3 space-y-1">
+            <p className="text-sm font-semibold text-sand-700 dark:text-sand-300">
+              {planLabel} subscription
+              {endDate && (
+                <>
+                  {' · '}
+                  <span className="font-normal">
+                    {sub.scheduledChange === 'cancel'
+                      ? 'ends'
+                      : sub.scheduledChange === 'pause'
+                        ? 'pauses'
+                        : 'renews'}{' '}
+                    {endDate}
+                  </span>
+                </>
+              )}
+            </p>
+            {startDate && (
+              <p className="text-xs text-sand-500 dark:text-sand-400">Member since {startDate}</p>
+            )}
+          </div>
+        )}
 
         <div className="mt-4">
           {status === 'premium' ? (
