@@ -701,7 +701,7 @@ export default function ComponentPageView({
             {/* Action bar */}
             <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
-              {/* Save (logged-in only — no-op render otherwise) */}
+              {/* Save — signed out, opens the same soft-gate modal as Copy CLI. */}
               <SaveButton slug={slug} system={designSystem ?? null} />
 
               {/* Remix with AI — secondary action; opens the side panel with

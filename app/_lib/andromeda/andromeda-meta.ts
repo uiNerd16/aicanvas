@@ -294,6 +294,28 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
   },
 ]
 
+// Per-file registry-slug overrides. Button's natural slug (andromeda-button)
+// is owned by the free standalone in components-workspace/andromeda-button/,
+// so the design-system Button gets its own slug. Source of truth:
+// scripts/lib/design-systems.config.mjs `slugOverrides` — mirrored here (typed,
+// Node-free) for use by the component page (forward) and the Saved list
+// (reverse, to resolve a saved registry slug back to its page + display name).
+const ANDROMEDA_REGISTRY_SLUG_OVERRIDES: Record<string, string> = { button: 'andromeda-button-system' }
+
+export function andromedaRegistrySlug(pageSlug: string): string {
+  return ANDROMEDA_REGISTRY_SLUG_OVERRIDES[pageSlug] ?? `andromeda-${pageSlug}`
+}
+
+export function andromedaPageSlug(registrySlug: string): string {
+  const override = Object.entries(ANDROMEDA_REGISTRY_SLUG_OVERRIDES).find(([, v]) => v === registrySlug)
+  return override ? override[0] : registrySlug.replace(/^andromeda-/, '')
+}
+
+export function getAndromedaComponentMeta(registrySlug: string): AndromedaComponentMeta | undefined {
+  const pageSlug = andromedaPageSlug(registrySlug)
+  return ANDROMEDA_COMPONENT_META.find((c) => c.slug === pageSlug)
+}
+
 export type AndromedaTemplateMeta = {
   /** Route folder under /design-systems/andromeda/templates/ */
   folder: string

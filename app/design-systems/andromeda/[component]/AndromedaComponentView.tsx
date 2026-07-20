@@ -17,8 +17,10 @@ import {
 import { Step } from '../../../components/Step'
 import { SiteFooter } from '../../../components/SiteFooter'
 import { Button } from '../../../components/Button'
+import { SaveButton } from '../../../components/SaveButton'
 import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
+import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
@@ -39,14 +41,6 @@ interface Props {
   freeAccountGate?: boolean
 }
 
-// The registry slug is normally `andromeda-<metaSlug>`. The lone exception is the
-// slugOverride (scripts/lib/design-systems.config.mjs): Button.tsx ships as the
-// registry item `andromeda-button-system` because the free standalone owns
-// `andromeda-button`. Map the page's meta slug back to the REGISTRY slug so the
-// Code tab, install command, and analytics all target the right item —
-// otherwise the Button page silently serves the standalone.
-const REGISTRY_SLUG_OVERRIDES: Record<string, string> = { button: 'andromeda-button-system' }
-
 export function AndromedaComponentView({
   slug,
   name,
@@ -56,7 +50,13 @@ export function AndromedaComponentView({
 }: Props) {
   const { preferences, user } = useSession()
   const { open: openAuthModal } = useAuthModal()
-  const registrySlug = REGISTRY_SLUG_OVERRIDES[slug] ?? `andromeda-${slug}`
+  // The registry slug is normally `andromeda-<metaSlug>`. The lone exception is the
+  // slugOverride (scripts/lib/design-systems.config.mjs): Button.tsx ships as the
+  // registry item `andromeda-button-system` because the free standalone owns
+  // `andromeda-button`. Map the page's meta slug back to the REGISTRY slug so the
+  // Code tab, install command, analytics, and Save all target the right item —
+  // otherwise the Button page silently serves the standalone.
+  const registrySlug = andromedaRegistrySlug(slug)
 
   // Personalized install: when signed in, the copied command carries the
   // user's API token so the registry attributes the pull to the account.
@@ -329,6 +329,12 @@ export function AndromedaComponentView({
             component breaks the system contract. Users compose AT the
             system level, not per-component. */}
         <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+          {/* Save — signed out, opens the same soft-gate modal as Copy CLI.
+              Keyed on the REGISTRY slug (not the page slug) so the Button
+              override (andromeda-button-system) can't collide with the free
+              standalone's own save entry (andromeda-button). */}
+          <SaveButton slug={registrySlug} system="andromeda" />
+
           {/* Copy CLI — the button and command stay visible at all times; when
               the install is account-gated and the visitor is signed out,
               copyCli() opens the auth modal instead of copying. */}

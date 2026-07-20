@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '../../../lib/supabase/server'
 import type { InstallHistoryRow } from '../../../lib/supabase/types'
 import { COMPONENTS } from '../../../lib/component-registry'
+import { andromedaPageSlug, getAndromedaComponentMeta } from '../../../_lib/andromeda/andromeda-meta'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
 
 // ─── Activity page ──────────────────────────────────────────────────────────
@@ -12,7 +13,7 @@ import { optimizeImageKitUrl } from '../../../lib/imagekit'
 
 function hrefFor(row: InstallHistoryRow): string {
   return row.system === 'andromeda'
-    ? `/design-systems/andromeda/${row.slug.replace(/^andromeda-/, '')}`
+    ? `/design-systems/andromeda/${andromedaPageSlug(row.slug)}`
     : `/components/${row.slug}`
 }
 
@@ -67,8 +68,10 @@ export default async function HistoryPage() {
     )
   }
 
-  // Enrich each row with the registry's name + thumbnail (same pattern as
-  // saved/page.tsx). Andromeda templates aren't in COMPONENTS so they fall
+  // Enrich each row with a name + thumbnail (same pattern as saved/page.tsx).
+  // Andromeda system components aren't in COMPONENTS (only the free
+  // `andromeda-button` standalone is) — those resolve via the Andromeda
+  // metadata instead. Design-system templates are in neither and fall
   // through to the bare slug + neutral placeholder thumbnail.
   const bySlug = new Map(COMPONENTS.map((c) => [c.slug, c]))
 
@@ -92,8 +95,13 @@ export default async function HistoryPage() {
       <ul className="space-y-2">
         {rows.map((row) => {
           const entry = bySlug.get(row.slug)
-          const name = entry?.name ?? row.slug
-          const image = entry?.image ? optimizeImageKitUrl(entry.image, 'thumb') : null
+          const andromedaEntry = !entry && row.system === 'andromeda' ? getAndromedaComponentMeta(row.slug) : undefined
+          const name = entry?.name ?? andromedaEntry?.name ?? row.slug
+          const image = entry?.image
+            ? optimizeImageKitUrl(entry.image, 'thumb')
+            : andromedaEntry?.image
+              ? optimizeImageKitUrl(andromedaEntry.image, 'thumb')
+              : null
           return (
             <li key={row.id}>
               <Link

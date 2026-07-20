@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { CaretDown, Check, Plus, PushPinSlash, X } from '@phosphor-icons/react'
 import { Button, buttonClasses } from '../../../components/Button'
+import { andromedaPageSlug } from '../../../_lib/andromeda/andromeda-meta'
 
 export type SavedRow = {
   slug: string
@@ -20,7 +21,7 @@ export type SavedRow = {
 
 function hrefFor(row: SavedRow) {
   return row.system === 'andromeda'
-    ? `/design-systems/andromeda/${row.slug.replace(/^andromeda-/, '')}`
+    ? `/design-systems/andromeda/${andromedaPageSlug(row.slug)}`
     : `/components/${row.slug}`
 }
 
