@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '../../../lib/supabase/server'
 import type { SavedComponent } from '../../../lib/supabase/types'
 import { COMPONENTS } from '../../../lib/component-registry'
+import { getAndromedaComponentMeta } from '../../../_lib/andromeda/andromeda-meta'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
 import { buttonClasses } from '../../../components/buttonClasses'
 import { SavedList, type SavedRow } from './SavedList'
@@ -45,16 +46,23 @@ export default async function SavedPage() {
     )
   }
 
-  // Enrich each row with the registry's name + thumbnail so SavedList can
-  // render the card without doing a second client-side lookup. Andromeda
-  // templates aren't in COMPONENTS — they fall through to the bare slug.
+  // Enrich each row with a name + thumbnail so SavedList can render the card
+  // without a second client-side lookup. Andromeda system components aren't
+  // in COMPONENTS (only the free `andromeda-button` standalone is) — those
+  // are looked up in the Andromeda metadata instead. Design-system templates
+  // are in neither and fall through to the bare slug.
   const bySlug = new Map(COMPONENTS.map((c) => [c.slug, c]))
   const rows: SavedRow[] = raw.map((r) => {
     const entry = bySlug.get(r.slug)
+    const andromedaEntry = !entry && r.system === 'andromeda' ? getAndromedaComponentMeta(r.slug) : undefined
     return {
       ...r,
-      name: entry?.name ?? r.slug,
-      image: entry?.image ? optimizeImageKitUrl(entry.image, 'thumb') : null,
+      name: entry?.name ?? andromedaEntry?.name ?? r.slug,
+      image: entry?.image
+        ? optimizeImageKitUrl(entry.image, 'thumb')
+        : andromedaEntry?.image
+          ? optimizeImageKitUrl(andromedaEntry.image, 'thumb')
+          : null,
     }
   })
 
