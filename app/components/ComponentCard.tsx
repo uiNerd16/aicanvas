@@ -26,11 +26,14 @@ export interface ComponentCardProps {
   slug: string
   position: number
   source: CardSource
+  /** CTA label. Defaults to "View Component"; pass e.g. "View template" for
+   *  non-component cards reusing this shell. */
+  cta?: string
 }
 
 // ─── ComponentCard ─────────────────────────────────────────────────────────────
 
-export function ComponentCard({ name, description, href, image, badge, slug, position, source }: ComponentCardProps) {
+export function ComponentCard({ name, description, href, image, badge, slug, position, source, cta = 'View Component' }: ComponentCardProps) {
   return (
     <Link
       href={href}
@@ -100,7 +103,7 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
             up with the same shift as a real outline button's :hover. */}
         <div className="mt-auto pt-1">
           <span className={`${buttonClasses({ variant: 'outline', size: 'md', fullWidth: true })} text-xs group-hover:border-sand-400 group-hover:text-sand-900 dark:group-hover:border-sand-600 dark:group-hover:text-sand-100`}>
-            View Component
+            {cta}
             <ArrowRight weight="regular" size={14} className="transition-transform group-hover:translate-x-0.5" />
           </span>
         </div>
