@@ -13,6 +13,7 @@ import { join, dirname, resolve, relative, sep, posix } from 'path'
 import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
 import { DESIGN_SYSTEMS } from './lib/design-systems.config.mjs'
+import { reconcileLedger } from './lib/order-ledger.mjs'
 
 const wsDir = 'components-workspace'
 const outDir = 'registry-data'
@@ -1114,15 +1115,34 @@ console.log(`Generated app/lib/component-nav.generated.ts (${Object.keys(categor
       if (m.badge) entry.badge = m.badge
       return entry
     })
-  // Premium components are first-class listings — prepended (they're the newest)
-  // so they appear in the grid, search and category like any free component.
-  // component-meta is metadata only; the premium SOURCE is never here.
+  // Premium components are first-class listings — woven into the grid, search
+  // and category like any free component. component-meta is metadata only; the
+  // premium SOURCE is never here.
   const premiumMetaList = premiumMetas.map((m) => {
     const entry = { slug: m.slug, name: m.name, description: m.description, tags: transformTags(m), badge: 'Premium' }
     if (m.image) entry.image = m.image
     return entry
   })
-  const metaList = [...premiumMetaList, ...freeMetaList]
+
+  // Grid order = the committed order ledger (component-order.json), reversed to
+  // newest-first so the newest push (free OR premium) sits on top. See
+  // scripts/lib/order-ledger.mjs for why it's committed and only ever appended,
+  // never recomputed from git at build time. A newly-added component lands on
+  // top automatically with no dates to maintain.
+  const metaBySlug = new Map()
+  for (const m of freeMetaList) metaBySlug.set(m.slug, m)
+  for (const m of premiumMetaList) metaBySlug.set(m.slug, m)
+
+  const ORDER_LEDGER = 'component-order.json'
+  let ledger = []
+  try { ledger = JSON.parse(readFileSync(ORDER_LEDGER, 'utf8')) } catch { /* first run / missing */ }
+  // Deterministic append order for never-seen slugs (free oldest-first, then
+  // premium) so a dev build and a shallow prod build that both meet the same new
+  // slug agree on where it lands.
+  const appendOrder = [...[...freeMetaList].reverse().map((m) => m.slug), ...premiumMetaList.map((m) => m.slug)]
+  const reconciled = reconcileLedger(ledger, appendOrder, new Set(metaBySlug.keys()))
+  if (reconciled.grew) writeFileSync(ORDER_LEDGER, JSON.stringify(reconciled.ledger, null, 2) + '\n')
+  const metaList = reconciled.gridSlugs.map((slug) => metaBySlug.get(slug))
 
   if (metaList.length !== mcpComponents.length) {
     throw new Error(
