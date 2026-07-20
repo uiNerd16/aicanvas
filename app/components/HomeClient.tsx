@@ -12,6 +12,7 @@ import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
 import type { ComponentMeta } from '../lib/component-registry'
+import { ANDROMEDA_COMPONENT_META, ANDROMEDA_TEMPLATE_META } from '../_lib/andromeda/andromeda-meta'
 
 // ─── Fuzzy "Did you mean?" helpers ───────────────────────────────────────────
 
@@ -105,6 +106,53 @@ export function HomeClient({
       )
     : components
 
+  // ── Beyond the standalone catalog ──────────────────────────────────────────
+  // The grid dataset (COMPONENT_META) deliberately excludes Andromeda components
+  // and templates so the catalog/categories stay clean. Search still reaches
+  // them: on the plain /components search (not a scoped category/collection), an
+  // active query also scans those two meta sources and they render as their own
+  // group below the grid, reusing ComponentCard so the aesthetic matches. They
+  // link out to their own pages. Andromeda components are Free; templates Premium.
+  // Category keywords folded into each group's searchable text, so the type
+  // words themselves match: "template(s)"/"dashboard(s)" surface every template,
+  // "andromeda"/"component(s)"/"design system(s)" surface the components. Not
+  // shown anywhere — matching only.
+  const COMPONENT_KW = 'andromeda components design systems'
+  const TEMPLATE_KW = 'andromeda templates dashboards design systems'
+  const extras =
+    q && !category
+      ? [
+          ...ANDROMEDA_COMPONENT_META.filter((c) =>
+            `${c.name} ${c.description} ${COMPONENT_KW}`.toLowerCase().includes(q),
+          ).map((c) => ({
+            key: `andromeda-${c.slug}`,
+            name: c.name,
+            description: c.description,
+            image: c.image,
+            href: `/design-systems/andromeda/${c.slug}`,
+            badge: 'Free',
+            cta: 'View Component',
+          })),
+          ...ANDROMEDA_TEMPLATE_META.filter((t) =>
+            `${t.name} ${t.description} ${TEMPLATE_KW}`.toLowerCase().includes(q),
+          ).map((t) => ({
+            key: `template-${t.folder}`,
+            name: t.name,
+            description: t.description,
+            image: t.image,
+            href: `/design-systems/andromeda/templates/${t.folder}`,
+            badge: 'Premium template',
+            cta: 'View template',
+          })),
+        ]
+      : []
+
+  // Empty state only when BOTH the grid and the extra group have nothing, so an
+  // Andromeda-only match isn't shown as "no results".
+  const showEmpty = filtered.length === 0 && extras.length === 0
+  // Total across both groups — drives the "N results" header during a search.
+  const totalResults = filtered.length + extras.length
+
   // ── Load more ──────────────────────────────────────────────────────────────
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
   const visible = filtered.slice(0, visibleCount)
@@ -132,9 +180,9 @@ export function HomeClient({
   // per components set; suggestions re-run per query. Both are cheap.
   const vocabulary = useMemo(() => buildVocabulary(components), [components])
   const suggestions = useMemo(() => {
-    if (!q || filtered.length > 0) return []
+    if (!q || !showEmpty) return []
     return findSuggestions(q, vocabulary, 3)
-  }, [q, filtered.length, vocabulary])
+  }, [q, showEmpty, vocabulary])
 
   const applySuggestion = (word: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -152,13 +200,13 @@ export function HomeClient({
   ]
   const [emptyIdx, setEmptyIdx] = useState(0)
   useEffect(() => {
-    if (filtered.length > 0) return
+    if (!showEmpty) return
     const id = setInterval(() => {
       setEmptyIdx((i) => (i + 1) % EMPTY_BEATS.length)
     }, 1500)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered.length])
+  }, [showEmpty])
   const EmptyIcon = EMPTY_BEATS[emptyIdx].Icon
   const emptyPhrase = EMPTY_BEATS[emptyIdx].phrase
 
@@ -167,13 +215,21 @@ export function HomeClient({
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
       <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
-        <Breadcrumbs
-          crumbs={
-            category
-              ? [{ label: 'Components', href: '/components' }, { label: category }]
-              : [{ label: 'Components', href: '/components' }]
-          }
-        />
+        {q && !category ? (
+          <p className="min-w-0 truncate text-sm font-semibold text-sand-600 dark:text-sand-400">
+            {totalResults} {totalResults === 1 ? 'result' : 'results'}
+            <span className="text-sand-400 dark:text-sand-500"> for </span>
+            <span className="text-sand-900 dark:text-sand-50">&ldquo;{query}&rdquo;</span>
+          </p>
+        ) : (
+          <Breadcrumbs
+            crumbs={
+              category
+                ? [{ label: 'Components', href: '/components' }, { label: category }]
+                : [{ label: 'Components', href: '/components' }]
+            }
+          />
+        )}
         <HeaderSocials />
       </div>
 
@@ -181,8 +237,17 @@ export function HomeClient({
       <div className="flex flex-1 flex-col bg-sand-200 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
         {/* Mobile breadcrumb — shown above cards on small screens */}
         <p className="mb-4 text-sm font-semibold md:hidden">
-          <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
-          {category && <span className="text-olive-500">/{category}</span>}
+          {q && !category ? (
+            <span className="text-sand-600 dark:text-sand-400">
+              {totalResults} {totalResults === 1 ? 'result' : 'results'} for{' '}
+              <span className="text-sand-900 dark:text-sand-50">&ldquo;{query}&rdquo;</span>
+            </span>
+          ) : (
+            <>
+              <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
+              {category && <span className="text-olive-500">/{category}</span>}
+            </>
+          )}
         </p>
         {heading && (
           <header className="mx-auto mb-6 w-full max-w-[1800px]">
@@ -194,8 +259,16 @@ export function HomeClient({
             </p>
           </header>
         )}
-        {filtered.length > 0 ? (
+        {filtered.length > 0 && (
           <>
+            {/* Group title — only during a search, so the two result groups
+                ("Components & blocks" + "Design systems & templates") read as a
+                consistent pair. Browsing shows no title (the top bar names it). */}
+            {q && !category && (
+              <h2 className="mx-auto mb-4 w-full max-w-[1800px] text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+                Components &amp; blocks
+              </h2>
+            )}
             <div className="mx-auto grid max-w-[1800px] grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {visible.map((entry, i) => (
                 <motion.div
@@ -227,7 +300,43 @@ export function HomeClient({
               onLoadMore={handleLoadMore}
             />
           </>
-        ) : (
+        )}
+
+        {/* ── Design systems & templates — search matches beyond the standalone
+            catalog. Same ComponentCard shell as the grid; links out to each
+            item's own page. ── */}
+        {extras.length > 0 && (
+          <div className="mx-auto mt-10 w-full max-w-[1800px]">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+              Design systems &amp; templates
+            </h2>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {extras.map((e, i) => (
+                <motion.div
+                  key={e.key}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: (i % LOAD_MORE_SIZE) * 0.03 }}
+                >
+                  <ComponentCard
+                    name={e.name}
+                    description={e.description}
+                    tags={[]}
+                    image={e.image}
+                    badge={e.badge}
+                    cta={e.cta}
+                    href={e.href}
+                    slug={e.key}
+                    position={i}
+                    source="index"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showEmpty && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}

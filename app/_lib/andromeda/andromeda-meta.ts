@@ -294,6 +294,63 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
   },
 ]
 
+export type AndromedaTemplateMeta = {
+  /** Route folder under /design-systems/andromeda/templates/ */
+  folder: string
+  name: string
+  description: string
+  /** ImageKit card art (base URL; consumers add their own tr= transform). */
+  image: string
+}
+
+// ImageKit template art — filenames kept exactly as uploaded (capitalized, with
+// spaces), so they're URL-encoded when building the src. Mirror of the same map
+// in AndromedaOverview.tsx.
+const TEMPLATE_ART: Record<string, string> = {
+  'mission-control': 'Mission control.png',
+  'service-order': 'Service order.png',
+  'resource-planning': 'Resource planning.png',
+  'signal-room': 'Signal Room.png',
+}
+const templateArt = (folder: string) =>
+  `https://ik.imagekit.io/aitoolkit/andromeda/templates/${encodeURIComponent(TEMPLATE_ART[folder] ?? '')}`
+
+// ponytail: static 4-entry mirror of the andromeda `templates` in
+// scripts/lib/design-systems.config.mjs (folder = registry slug minus the
+// "andromeda-" prefix, matching the route dirs). Kept here rather than derived
+// from the .mjs config so this stays a typed, Node-free, client-safe module.
+// Blurbs are the same copy AndromedaOverview.tsx shows on its template cards —
+// keep the two in sync (fixed set, changes rarely).
+export const ANDROMEDA_TEMPLATE_META: AndromedaTemplateMeta[] = [
+  {
+    folder: 'mission-control',
+    name: 'Mission Control',
+    description:
+      'Spacecraft telemetry: live altitude, vehicle roster, comms log, and a system-status readout in one mission view.',
+    image: templateArt('mission-control'),
+  },
+  {
+    folder: 'service-order',
+    name: 'Service Order',
+    description: 'A field-service work order: an SLA gauge, line items, and order metadata.',
+    image: templateArt('service-order'),
+  },
+  {
+    folder: 'resource-planning',
+    name: 'Resource Planning',
+    description:
+      'Capacity, allocation trend, and request triage across teams on one planning board.',
+    image: templateArt('resource-planning'),
+  },
+  {
+    folder: 'signal-room',
+    name: 'Signal Room',
+    description:
+      'A broadcast control room: now-transmitting, channel levels, mixes, and a transport bar.',
+    image: templateArt('signal-room'),
+  },
+]
+
 export const ANDROMEDA_META = {
   name: 'Andromeda',
   tagline: 'Sci-fi blueprint design system',
