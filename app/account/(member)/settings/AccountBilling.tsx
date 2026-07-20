@@ -11,7 +11,7 @@ import { usePremiumStatus } from '../../../components/billing/usePremiumStatus'
 type SubDetails = {
   plan: 'monthly' | 'annual' | null
   periodEnd: string | null
-  cancelScheduled: boolean
+  scheduledChange: 'cancel' | 'pause' | null
   startedAt: string | null
 }
 
@@ -115,7 +115,12 @@ export function AccountBilling() {
                 <>
                   {' · '}
                   <span className="font-normal">
-                    {sub.cancelScheduled ? 'ends' : 'renews'} {endDate}
+                    {sub.scheduledChange === 'cancel'
+                      ? 'ends'
+                      : sub.scheduledChange === 'pause'
+                        ? 'pauses'
+                        : 'renews'}{' '}
+                    {endDate}
                   </span>
                 </>
               )}

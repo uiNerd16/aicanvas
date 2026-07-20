@@ -50,12 +50,15 @@ export async function GET() {
     const mapped = mapSubscriptionFields(data)
     const rawStart = data?.started_at ?? data?.first_billed_at
     const startedAt = typeof rawStart === 'string' && rawStart ? rawStart : null
+    // A scheduled cancel OR pause means "renews <date>" would be false.
+    const action = data?.scheduled_change?.action
+    const scheduledChange = action === 'cancel' || action === 'pause' ? action : null
 
     return NextResponse.json({
       subscription: {
         plan: mapped.plan ?? null,
         periodEnd: mapped.current_period_end ?? null,
-        cancelScheduled: data?.scheduled_change?.action === 'cancel',
+        scheduledChange,
         startedAt,
       },
     })
