@@ -1,26 +1,50 @@
-'use client'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
-// ─── Sand color scale ────────────────────────────────────────────────────────
+// ─── Color scales, read from the live token source ──────────────────────────
+// Hex values come from app/globals.css (@theme) at build time, so this internal
+// reference can never drift from what the site actually renders. Only the usage
+// notes below are editorial. This is why the page is a server component.
 
-const SAND_SCALE = [
-  { token: 'sand-50',  hex: '#FAF7F2', usage: 'Elevated surfaces, hover fills' },
-  { token: 'sand-100', hex: '#F5F1EA', usage: 'Card bg (light), input fills' },
-  { token: 'sand-200', hex: '#EDEAE5', usage: 'Page bg (light)' },
-  { token: 'sand-300', hex: '#DDD8CE', usage: 'Borders (light), dividers' },
-  { token: 'sand-400', hex: '#C8C2B8', usage: 'Muted borders, placeholder icons' },
-  { token: 'sand-500', hex: '#9E9890', usage: 'Secondary text (light)' },
-  { token: 'sand-600', hex: '#736D65', usage: 'Body text (light)' },
-  { token: 'sand-700', hex: '#4A453F', usage: 'UI labels, buttons (light)' },
-  { token: 'sand-800', hex: '#2E2A24', usage: 'Card bg (dark)' },
-  { token: 'sand-900', hex: '#1C1916', usage: 'Page bg (dark)' },
-  { token: 'sand-950', hex: '#110F0C', usage: 'Deepest dark, preview bg' },
-]
+type Swatch = { token: string; hex: string; usage: string }
 
-const OLIVE_SCALE = [
-  { token: 'olive-400', hex: '#96A452', usage: 'Hover accent, gradient end' },
-  { token: 'olive-500', hex: '#7D8D41', usage: 'Primary accent — buttons, badges, logo' },
-  { token: 'olive-600', hex: '#697535', usage: 'Pressed / darker accent state' },
-]
+function readScale(prefix: string): { token: string; hex: string }[] {
+  const css = readFileSync(join(process.cwd(), 'app', 'globals.css'), 'utf8')
+  const re = new RegExp(`--color-${prefix}-(\\d+):\\s*(#[0-9A-Fa-f]{3,8})`, 'g')
+  const out: { token: string; hex: string }[] = []
+  for (let m = re.exec(css); m; m = re.exec(css)) {
+    out.push({ token: `${prefix}-${m[1]}`, hex: m[2].toUpperCase() })
+  }
+  return out.sort((a, b) => Number(a.token.split('-')[1]) - Number(b.token.split('-')[1]))
+}
+
+const SAND_USAGE: Record<string, string> = {
+  'sand-50': 'Elevated surfaces, hover fills',
+  'sand-100': 'Card background (light), input fills',
+  'sand-200': 'Page background (light)',
+  'sand-300': 'Borders (light), dividers',
+  'sand-400': 'Muted borders, placeholder icons',
+  'sand-500': 'Secondary text (light)',
+  'sand-600': 'Body text (light)',
+  'sand-700': 'UI labels, buttons (light)',
+  'sand-800': 'Card background (dark)',
+  'sand-900': 'Page background (dark)',
+  'sand-950': 'Deepest dark, preview background',
+}
+
+const OLIVE_USAGE: Record<string, string> = {
+  'olive-400': 'Hover accent, gradient end',
+  'olive-500': 'Primary accent: buttons, badges, logo',
+  'olive-600': 'Pressed or darker accent state',
+}
+
+const withUsage = (
+  scale: { token: string; hex: string }[],
+  usage: Record<string, string>,
+): Swatch[] => scale.map((c) => ({ ...c, usage: usage[c.token] ?? '' }))
+
+const SAND_SCALE = withUsage(readScale('sand'), SAND_USAGE)
+const OLIVE_SCALE = withUsage(readScale('olive'), OLIVE_USAGE)
 
 // ─── Typography ──────────────────────────────────────────────────────────────
 
@@ -78,7 +102,7 @@ function SubTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-function ColorSwatch({ hex, token, usage }: { hex: string; token: string; usage: string }) {
+function ColorSwatch({ hex, token, usage }: Swatch) {
   return (
     <div className="flex items-center gap-4">
       <div
@@ -105,7 +129,7 @@ export default function DesignSystemPage() {
           Design System
         </h1>
         <p className="max-w-2xl text-lg text-sand-600 dark:text-sand-400">
-          AI Canvas global design tokens — colors, typography, spacing, and semantic mappings used across the entire website.
+          AI Canvas global design tokens: colors, typography, spacing, and semantic mappings used across the entire website. Hex values are read live from <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-sm dark:bg-sand-800">app/globals.css</code>, so they always match the site.
         </p>
       </div>
 
@@ -113,14 +137,14 @@ export default function DesignSystemPage() {
       <section className="mb-16">
         <SectionTitle>Colors</SectionTitle>
 
-        <SubTitle>Sand Scale — Warm Neutral</SubTitle>
+        <SubTitle>Sand scale (neutral cool gray)</SubTitle>
         <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SAND_SCALE.map((c) => (
             <ColorSwatch key={c.token} {...c} />
           ))}
         </div>
 
-        <SubTitle>Olive Scale — Muted Green Accent</SubTitle>
+        <SubTitle>Olive scale (muted green accent)</SubTitle>
         <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {OLIVE_SCALE.map((c) => (
             <ColorSwatch key={c.token} {...c} />
@@ -128,14 +152,14 @@ export default function DesignSystemPage() {
         </div>
 
         {/* Full palette strip */}
-        <SubTitle>Full Palette</SubTitle>
+        <SubTitle>Full palette</SubTitle>
         <div className="flex overflow-hidden rounded-2xl">
           {SAND_SCALE.map((c) => (
             <div
               key={c.token}
               className="h-16 flex-1"
               style={{ background: c.hex }}
-              title={`${c.token} — ${c.hex}`}
+              title={`${c.token} ${c.hex}`}
             />
           ))}
           {OLIVE_SCALE.map((c) => (
@@ -143,7 +167,7 @@ export default function DesignSystemPage() {
               key={c.token}
               className="h-16 flex-1"
               style={{ background: c.hex }}
-              title={`${c.token} — ${c.hex}`}
+              title={`${c.token} ${c.hex}`}
             />
           ))}
         </div>
@@ -181,7 +205,7 @@ export default function DesignSystemPage() {
       <section className="mb-16">
         <SectionTitle>Typography</SectionTitle>
         <p className="mb-6 text-sm text-sand-500 dark:text-sand-400">
-          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span> — loaded via next/font/google, registered as <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
+          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
         </p>
         <div className="flex flex-col gap-6">
           {TYPOGRAPHY.map((t) => (
@@ -192,7 +216,7 @@ export default function DesignSystemPage() {
               <div className="mb-2 flex items-baseline gap-3">
                 <span className="font-mono text-xs text-olive-500">{t.weight}</span>
                 <span className="text-sm font-semibold text-sand-700 dark:text-sand-300">{t.name}</span>
-                <span className="text-xs text-sand-500">— {t.usage}</span>
+                <span className="text-xs text-sand-500">{t.usage}</span>
               </div>
               <p
                 className="text-sand-900 dark:text-sand-50"
@@ -238,43 +262,49 @@ export default function DesignSystemPage() {
         </div>
       </section>
 
-      {/* ── Glass Effect ── */}
+      {/* ── Brand Assets ── */}
       <section className="mb-16">
-        <SectionTitle>Glass Effect</SectionTitle>
+        <SectionTitle>Brand Assets</SectionTitle>
         <p className="mb-6 text-sm text-sand-500 dark:text-sand-400">
-          Used across all glass-family components. The blur layer is always on a separate non-animating div for performance.
+          Download the AI Canvas logo and icon. SVG scales cleanly for any size; PNG is ready to drop in. Please keep the proportions and do not recolor the mark.
         </p>
-        <div className="relative flex h-64 items-center justify-center overflow-hidden rounded-2xl bg-sand-950">
-          <img
-            src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133"
-            alt=""
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
-          />
-          <div className="relative isolate rounded-3xl px-10 py-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {[
+            { name: 'Logo', svg: '/ai-canvas-logo.svg', png: '/ai-canvas-logo.png', height: 'h-10' },
+            { name: 'Icon', svg: '/ai-canvas-icon.svg', png: '/ai-canvas-icon.png', height: 'h-16' },
+          ].map((asset) => (
             <div
-              className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
-              style={{
-                backdropFilter: 'blur(24px) saturate(1.8)',
-                WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-              }}
-            />
-            <div
-              className="absolute inset-0 rounded-3xl"
-              style={{
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
-              }}
-            />
-            <div className="relative z-10">
-              <p className="mb-1 text-sm font-semibold text-white/90">Glass Panel</p>
-              <p className="font-mono text-[10px] leading-relaxed text-white/40">
-                blur(24px) saturate(1.8)<br />
-                bg: rgba(255, 255, 255, 0.06)<br />
-                border: 1px solid rgba(255, 255, 255, 0.1)
-              </p>
+              key={asset.name}
+              className="overflow-hidden rounded-2xl border border-sand-300 dark:border-sand-800"
+            >
+              <div className="flex h-44 items-center justify-center bg-sand-50 dark:bg-sand-100">
+                <img
+                  src={asset.svg}
+                  alt={`AI Canvas ${asset.name}`}
+                  className={`${asset.height} w-auto`}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-sand-300 px-5 py-4 dark:border-sand-800">
+                <span className="text-sm font-semibold text-sand-900 dark:text-sand-100">{asset.name}</span>
+                <div className="flex gap-2">
+                  <a
+                    href={asset.svg}
+                    download
+                    className="rounded-lg bg-olive-500 px-3.5 py-1.5 text-xs font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+                  >
+                    SVG
+                  </a>
+                  <a
+                    href={asset.png}
+                    download
+                    className="rounded-lg border border-sand-300 px-3.5 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
+                  >
+                    PNG
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
