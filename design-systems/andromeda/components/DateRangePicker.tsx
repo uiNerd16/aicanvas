@@ -174,6 +174,16 @@ function PickerStyles() {
   );
 }
 
+/**
+ * @typedef {object} DateRangePickerProps
+ * @property {{ start: Date, end: Date }} [value] Selected date range; controlled.
+ * @property {(range: { start: Date, end: Date }) => void} [onChange] Called with the new range once both endpoints are chosen.
+ * @property {string} [presetLabel] Label for the active preset shown in the trigger (for example "Last month").
+ * @property {boolean} [defaultOpen=false] Whether the calendar panel starts open (uncontrolled).
+ * @property {boolean} [staticOpen=false] Pins the panel open and disables the dismissers; for showcases and docs.
+ * @property {string} [className] Additional CSS classes applied to the root element.
+ * @property {React.CSSProperties} [style] Inline styles applied to the root element.
+ */
 export const DateRangePicker = forwardRef(function DateRangePicker(
   { value, onChange, presetLabel, defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,

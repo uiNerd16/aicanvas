@@ -99,14 +99,14 @@ const labelClass = cn(
 
 /**
  * @typedef {object} ToggleProps
- * @property {boolean} [checked]
- * @property {boolean} [defaultChecked=false]
- * @property {(next: boolean) => void} [onCheckedChange]
- * @property {string}  [label]
- * @property {boolean} [disabled]
- * @property {string}  [className]
- * @property {React.CSSProperties} [style]
- * @property {string}  [id]
+ * @property {boolean} [checked] Controlled checked state; supplying it puts the switch in controlled mode.
+ * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled.
+ * @property {(next: boolean) => void} [onCheckedChange] Handler called with the next checked state whenever the switch toggles.
+ * @property {string}  [label] Optional text rendered beside the switch and linked to it via htmlFor.
+ * @property {boolean} [disabled=false] Disables interaction and dims the switch.
+ * @property {string}  [className] Extra classes merged onto the visual track.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
+ * @property {string}  [id] Id for the input; falls back to a generated id and links the label.
  */
 
 /** @type {React.ForwardRefExoticComponent<ToggleProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'|'type'>>} */

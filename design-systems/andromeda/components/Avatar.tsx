@@ -79,7 +79,7 @@ function deriveInitials(name) {
  * @property {string} [src] Optional image URL. When provided, renders an img instead of initials.
  * @property {'sm'|'md'|'lg'} [size='md']
  * @property {'online'|'caution'|'fault'|'offline'} [status] When set, renders a status dot.
- * @property {string} [className]
+ * @property {string} [className] Additional CSS classes merged onto the inner avatar box (the outer wrapper receives style and ...props).
  * @property {React.CSSProperties} [style]
  */
 

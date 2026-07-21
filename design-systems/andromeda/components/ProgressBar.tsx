@@ -53,11 +53,11 @@ const valueClass = cn(
 
 /**
  * @typedef {object} ProgressBarProps
- * @property {string} [label]
+ * @property {string} [label] Caption shown above the bar and used as the accessible label.
  * @property {number} value 0–100; clamped internally.
- * @property {'default'|'warning'|'fault'} [variant='default']
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {'default'|'warning'|'fault'} [variant='default'] Color of the filled segments.
+ * @property {string} [className] Extra classes merged onto the root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
 /** @type {React.ForwardRefExoticComponent<ProgressBarProps & React.HTMLAttributes<HTMLDivElement>>} */

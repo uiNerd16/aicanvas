@@ -113,8 +113,8 @@ export const TableBody = forwardRef(function TableBody({ children, ...props }, r
 // ── TableRow ───────────────────────────────────────────────────────
 /**
  * @typedef {object} TableRowProps
- * @property {boolean} [selected]  Applies surface.active bg + accent-300 left edge.
- * @property {boolean} [hoverable] Adds the hover-lift class (default true).
+ * @property {boolean} [selected=false]  Applies surface.active bg + accent-300 left edge.
+ * @property {boolean} [hoverable=true] Adds the hover-lift class (default true).
  */
 export const TableRow = forwardRef(function TableRow(
   { selected = false, hoverable = true, className = '', style, children, ...props },
@@ -143,8 +143,8 @@ export const TableRow = forwardRef(function TableRow(
 // ── TableHeader (sortable <th>) ────────────────────────────────────
 /**
  * @typedef {object} TableHeaderProps
- * @property {'asc'|'desc'|'sortable'|undefined} [sort]
- * @property {'left'|'right'|'center'} [align='left']
+ * @property {'asc'|'desc'|'sortable'|undefined} [sort]  Column sort state; picks the matching caret and sets aria-sort.
+ * @property {'left'|'right'|'center'} [align='left']  Horizontal text alignment of the header cell.
  */
 export const TableHeader = forwardRef(function TableHeader(
   { sort, align = 'left', children, style, ...props },
@@ -199,9 +199,9 @@ export const TableHeader = forwardRef(function TableHeader(
 // ── TableCell ──────────────────────────────────────────────────────
 /**
  * @typedef {object} TableCellProps
- * @property {'left'|'right'|'center'} [align='left']
+ * @property {'left'|'right'|'center'} [align='left']  Horizontal text alignment of the cell content.
  * @property {boolean} [muted=false]  Uses text.secondary instead of text.primary.
- * @property {boolean} [nowrap=true]
+ * @property {boolean} [nowrap=true]  Keeps the cell content on a single line when true.
  */
 export const TableCell = forwardRef(function TableCell(
   { align = 'left', muted = false, nowrap = true, children, style, ...props },

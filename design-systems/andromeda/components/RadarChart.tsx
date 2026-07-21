@@ -153,18 +153,18 @@ function SpaceTick({ x, y, payload, cx, cy }) {
 // ── Component ─────────────────────────────────────────────────────────────────
 /**
  * @typedef {object} RadarSeries
- * @property {string} key
- * @property {string} label
- * @property {string} [color]
+ * @property {string} key Key in each data row whose numeric value this series plots.
+ * @property {string} label Series name shown in the legend and tooltip.
+ * @property {string} [color] Stroke and fill color for this series, defaults to the accent color.
  *
  * @typedef {object} RadarChartProps
- * @property {object[]} [data]
- * @property {RadarSeries[]} [series]
- * @property {string} [label]
- * @property {string} [title]
- * @property {string} [description]
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {object[]} [data] Array of data rows, each an axis label plus one numeric value per series.
+ * @property {RadarSeries[]} [series] Series descriptors defining which data keys to plot and how.
+ * @property {string} [label='/// Diagnostics'] Kicker text shown above the title in the card header.
+ * @property {string} [title='Systems Radar'] Main heading shown in the card header.
+ * @property {string} [description] Optional line of text shown beneath the title.
+ * @property {string} [className] Additional CSS classes for the root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
 // After the tooltip first becomes active, we enable CSS transition on the

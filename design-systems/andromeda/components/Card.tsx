@@ -47,7 +47,7 @@ const cardVariants = cva(
 /**
  * @typedef {object} CardProps
  * @property {'default'|'glow'} [variant='default']
- * @property {boolean} [bordered=false] Toggle a continuous 1px border. Off by default — Andromeda cards rely on corner brackets, not perimeter strokes.
+ * @property {boolean} [bordered=false] Toggle a continuous 1px border. Off by default. Andromeda cards rely on corner brackets, not perimeter strokes.
  * @property {boolean} [markers=true] Toggle the corner markers motif.
  * @property {import('./CornerMarkers').CornerMarkersProps} [markerProps] Pass-through overrides for the inner CornerMarkers.
  * @property {React.ReactNode} [children]

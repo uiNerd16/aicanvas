@@ -177,33 +177,33 @@ const AXIS_TICK = {
 
 /**
  * @typedef {object} TrendSeries
- * @property {string} key
- * @property {string} label
- * @property {'baseline'|'live'|'context'|'threshold'} [role]
+ * @property {string} key   Field in each data row holding this series' y-value.
+ * @property {string} label   Display name shown in the tooltip and legend chip.
+ * @property {'baseline'|'live'|'context'|'threshold'} [role]   Colour role in the Andromeda charts hierarchy; threshold also renders dashed.
  * @property {string} [color]   Explicit override; prefer `role`.
  */
 
 /**
  * @typedef {object} TrendChartProps
- * @property {object[]} data
- * @property {TrendSeries[]} series
- * @property {string} [xKey='t']
+ * @property {object[]} data   Rows of chart data, one object per x-axis point.
+ * @property {TrendSeries[]} series   Series to plot, each bound to a data-row field by key.
+ * @property {string} [xKey='t']   Field in each data row plotted along the x-axis.
  * @property {Array<'line'|'area'|'bar'>} [modes=['area','bar']]  Toggle appears when >1.
- * @property {'line'|'area'|'bar'} [defaultMode]
- * @property {string} [title]
+ * @property {'line'|'area'|'bar'} [defaultMode]   Render mode selected on mount; defaults to the first entry in modes.
+ * @property {string} [title]   Heading shown at the top-left of the header.
  * @property {string} [yLabel]            Uppercase mono axis caption, top-left.
- * @property {(label:any)=>string} [tooltipLabelFormatter]
- * @property {(value:any)=>string} [valueFormatter]
- * @property {number} [xInterval=4]
- * @property {boolean} [showLegend=true]
+ * @property {(label:any)=>string} [tooltipLabelFormatter]   Formats the x value shown as the tooltip heading.
+ * @property {(value:any)=>string} [valueFormatter]   Formats each series value shown in the tooltip.
+ * @property {number} [xInterval=4]   Number of x-axis ticks skipped between rendered labels.
+ * @property {boolean} [showLegend=true]   Render the toggleable legend row in the footer.
  * @property {boolean} [showYAxis=true]   Reserve the left Y-axis tick gutter.
  *   Set false on compact cards where an external headline already states the
- *   magnitude — the plot then fills its card content box edge-to-edge with no
+ *   magnitude, and the plot then fills its card content box edge-to-edge with no
  *   stray left inset (the Andromeda spacing rules).
  * @property {React.ReactNode} [footerSlot]   Right side of the footer (custom controls).
- * @property {number} [height=240]
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {number|'fill'} [height=240]   Plot height in px, or 'fill' to grow into a flex parent.
+ * @property {string} [className]   Class applied to the root container element.
+ * @property {React.CSSProperties} [style]   Inline styles merged onto the root container element.
  */
 
 /** @type {React.ForwardRefExoticComponent<TrendChartProps & React.HTMLAttributes<HTMLDivElement>>} */
@@ -273,8 +273,25 @@ export const TrendChart = forwardRef(function TrendChart(
   // gutter is dropped so the plot fills its card edge-to-edge with no stray
   // left inset (the Andromeda spacing rules). width=0 keeps
   // the scale (so bars/areas still compute) while reserving no horizontal band.
+  // Y tick labels are LEFT-aligned flush with the yLabel kicker at the plot's
+  // top-left, not right-aligned inside a reserved gutter, so the numbers share
+  // the same left edge as the unit caption above them (no stray left inset).
+  const yTick = ({ x, y, payload }) => (
+    <text
+      x={parseInt(tokens.spacing[1], 10)}
+      y={y}
+      dy="0.32em"
+      textAnchor="start"
+      fontFamily={tokens.typography.fontMono}
+      fontSize={parseInt(tokens.typography.size.xs, 10)}
+      fill={tokens.color.text.muted}
+      letterSpacing="0.05em"
+    >
+      {payload.value}
+    </text>
+  );
   const yAxis = (
-    <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={showYAxis ? 48 : 0} hide={!showYAxis} />
+    <YAxis tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
   );
 
   let chart;

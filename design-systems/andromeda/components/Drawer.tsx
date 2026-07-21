@@ -63,13 +63,13 @@ const SIDE_MAP = {
 
 /**
  * @typedef {object} DrawerProps
- * @property {boolean} open
- * @property {(next: boolean) => void} [onOpenChange]
- * @property {'left'|'right'|'top'|'bottom'} [side='right']
+ * @property {boolean} open Whether the drawer is open.
+ * @property {(next: boolean) => void} [onOpenChange] Handler called with the next open state when the drawer requests to close (ESC or backdrop click).
+ * @property {'left'|'right'|'top'|'bottom'} [side='right'] Screen edge the panel slides in from.
  * @property {number|string} [size=420] Width (left/right) or height (top/bottom). Number → px, string passed through.
- * @property {React.ReactNode} [children]
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {React.ReactNode} [children] Panel content, typically the Drawer compound parts (Header, Body, Footer).
+ * @property {string} [className] Extra classes merged onto the panel element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the panel element.
  */
 
 /** @type {React.ForwardRefExoticComponent<DrawerProps & React.HTMLAttributes<HTMLDivElement>>} */

@@ -41,8 +41,17 @@ function makeSprite(): THREE.CanvasTexture {
   return tex;
 }
 
+/**
+ * @typedef {object} PlanetProps
+ * @property {number} [particleCount=6000] Number of surface particles; 6000 reads dense at 320 to 480px.
+ * @property {number} [particleSize=0.028] Per-particle point size in world units.
+ * @property {number} [rotationSpeed=0.0035] Auto-rotation speed in radians per frame (assumes about 60fps).
+ * @property {boolean} [paused=false] When true, the planet does not auto-rotate.
+ * @property {string} [className] Additional CSS classes applied to the root element.
+ * @property {React.CSSProperties} [style] Inline styles applied to the root element.
+ */
 export function Planet({
-  /** Number of surface particles. 6000 reads dense at 320–480px. */
+  /** Number of surface particles. 6000 reads dense at 320 to 480px. */
   particleCount = 6000,
   /** Per-particle point size in world units. */
   particleSize = 0.028,

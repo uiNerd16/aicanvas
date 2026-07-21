@@ -143,6 +143,7 @@ const ICON_SIZE = { sm: 14, md: 16, lg: 20 };
  * @property {string} [aria-label]  Required for accessibility (no visible text).
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
+ * @property {'button'|'submit'|'reset'} [type='button'] HTML button type; defaults to 'button' so the control does not submit an enclosing form.
  * @property {boolean} [disabled]
  * @property {(e: React.MouseEvent<HTMLButtonElement>) => void} [onClick]
  */
