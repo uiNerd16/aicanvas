@@ -40,7 +40,7 @@ This repository is public. A leaked secret is exposed the moment it is committed
 
 ## Design system (site chrome)
 
-- **Default theme**: dark. Light/dark toggle persists to `localStorage` via `ThemeProvider`; dark mode is class-based (`.dark` on `<html>`, Tailwind v4 `@variant dark`). Aesthetic: Phosphor-inspired — warm neutral surfaces, editorial typography, olive accent.
+- **Default theme**: dark. Light/dark toggle persists to `localStorage` via `ThemeProvider`; dark mode is class-based (`.dark` on `<html>`, Tailwind v4 `@variant dark`). Aesthetic: Phosphor-inspired — neutral cool-gray surfaces, editorial typography, olive accent.
 - **Full token reference** (sand + olive scales, hex values, typography table, spacing grid): `supervisor/skills/site-design-tokens.md` — the single source of truth for site-chrome styling.
 
 Semantic quick reference:
