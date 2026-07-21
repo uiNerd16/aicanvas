@@ -113,14 +113,48 @@ const files = readdirSync(REGISTRY_DIR)
 let totalIssues = 0
 const failures = []
 
+// ── JSON validity gate ────────────────────────────────────────────────────────
+// A registry file must strict-parse everywhere. The directory reviewer reported
+// "literal control characters inside strings, so strict parsers reject them."
+// Node's JSON.parse IS strict (it rejects unescaped U+0000–U+001F in strings), so
+// a successful parse already rules out his exact bug — but the two index files
+// (registry.json, aicanvas-mcp.json) were skipped entirely below, and
+// U+2028/U+2029/BOM are legal in JSON yet break some JS-based consumers. Scan
+// EVERY .json here (including the skipped index files) so bad bytes can never ship
+// silently. Runs in the build (generate-registry invokes this) — fails loud.
+const RISKY = [
+  { re: /\u2028/, label: 'U+2028 LINE SEPARATOR' },
+  { re: /\u2029/, label: 'U+2029 PARAGRAPH SEPARATOR' },
+  { re: /^\uFEFF/, label: 'leading U+FEFF BOM' },
+]
+for (const file of readdirSync(REGISTRY_DIR).filter(f => f.endsWith('.json')).sort()) {
+  const slug = file.replace(/\.json$/, '')
+  const issues = []
+  let raw
+  try {
+    raw = readFileSync(join(REGISTRY_DIR, file), 'utf-8')
+    JSON.parse(raw) // strict — throws on literal control chars inside strings
+  } catch (e) {
+    issues.push(`strict JSON parse failed: ${e.message}`)
+  }
+  if (raw) {
+    for (const { re, label } of RISKY) {
+      if (re.test(raw)) issues.push(`contains ${label} — legal JSON but breaks some strict/JS parsers`)
+    }
+  }
+  if (issues.length > 0) {
+    failures.push({ slug, issues })
+    totalIssues += issues.length
+  }
+}
+
 for (const file of files) {
   const slug = file.replace(/\.json$/, '')
   let json
   try {
     json = JSON.parse(readFileSync(join(REGISTRY_DIR, file), 'utf-8'))
-  } catch (e) {
-    failures.push({ slug, issues: [`failed to parse JSON: ${e.message}`] })
-    totalIssues++
+  } catch {
+    // Already reported as a strict-parse failure in the validity gate above.
     continue
   }
 

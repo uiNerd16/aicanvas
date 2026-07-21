@@ -138,6 +138,19 @@ Beyond standalone components, AI Canvas ships **Andromeda**, a token-driven sci-
 
 See it at [aicanvas.me/design-systems/andromeda](https://aicanvas.me/design-systems/andromeda).
 
+## Repository layout
+
+This repo holds the full AI Canvas source: the website **and** every free component. The component source lives here, not just the site.
+
+| Path | What's there |
+| --- | --- |
+| [`components-workspace/<slug>/`](./components-workspace) | Each free component: `index.tsx` source, `prompts.ts` remix prompt, `spec.md` |
+| [`design-systems/andromeda/`](./design-systems/andromeda) | The free Andromeda design system source: tokens, components, utilities |
+| [`app/`](./app) | The aicanvas.me website (Next.js App Router) |
+| [`scripts/generate-registry.mjs`](./scripts/generate-registry.mjs) | Builds the shadcn registry JSON from the sources above |
+
+The `@aicanvas` registry files served at `/r/*.json` are **generated at build time** from `components-workspace/` and `design-systems/`, so there is no checked-in `registry/` folder. Run `node scripts/generate-registry.mjs` to produce them locally.
+
 ## Tech stack
 
 React and TypeScript, Tailwind CSS, and Framer Motion. Built for the Next.js App Router and works in any modern React setup. 3D components use Three.js.

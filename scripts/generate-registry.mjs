@@ -804,6 +804,45 @@ writeFileSync(
   ].join('\n'),
 )
 
+// ── Declare per-item gating in the index ──────────────────────────────────────
+// The directory reviewer's #1 ask: the index must tell installers, BEFORE they
+// run `add`, whether an item resolves to real code anonymously. So append a
+// one-line gating note to every index description. Free items install with a
+// free account (source is public to read); design systems and templates are
+// premium. The token foundation installs anonymously (classified 'meta'), so it
+// carries no note. Classification MIRRORS classifyContent() in
+// lib/registry/content-type.ts, reusing the gate manifest built above, so the
+// note can never drift from what app/r/[file]/route.ts actually serves. The note
+// goes on the INDEX only — per-slug item files already self-declare at fetch time
+// (an anonymous fetch returns the sign-up/upgrade stub).
+const FREE_GATE_NOTE = 'Free account required to install; source is free to read.'
+const PREMIUM_GATE_NOTE = 'Requires AI Canvas Premium to install.'
+const gate = {
+  systems: new Set(manifest.systemSlugs),
+  dsComponents: new Set(manifest.designSystemSlugs),
+  templates: new Set(manifest.templateSlugs),
+  premiumStandalones: new Set(manifest.premiumSlugs),
+  brains: new Set(manifest.brainSlugs),
+}
+function gateNoteFor(name) {
+  if (name === 'registry' || name === 'aicanvas-mcp') return null // meta
+  if (gate.templates.has(name)) return PREMIUM_GATE_NOTE
+  if (gate.brains.has(name)) return PREMIUM_GATE_NOTE
+  for (const system of gate.systems) {
+    if (name === `${system}-tokens`) return null // meta: free, anonymous install
+    if (name === system || name === `${system}-all`) return PREMIUM_GATE_NOTE
+  }
+  if (gate.dsComponents.has(name)) return FREE_GATE_NOTE
+  if (gate.premiumStandalones.has(name)) return PREMIUM_GATE_NOTE
+  return FREE_GATE_NOTE // standalone
+}
+for (const item of registryItems) {
+  const note = gateNoteFor(item.name)
+  if (!note) continue
+  const base = (item.description || '').trim()
+  item.description = base ? `${base} ${note}` : note
+}
+
 // Write the root registry index
 const registry = {
   $schema: REGISTRY_SCHEMA,
