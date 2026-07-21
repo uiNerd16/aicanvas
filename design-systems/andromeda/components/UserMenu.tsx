@@ -67,12 +67,12 @@ function handleMenuKeyDown(e) {
 
 /**
  * @typedef {object} UserMenuItem
- * @property {string}   [id]
- * @property {string}   [label]
- * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
- * @property {() => void} [onSelect]
- * @property {boolean}  [destructive]
- * @property {'separator'} [type]
+ * @property {string}   [id]           Stable key for the row, falling back to its array index.
+ * @property {string}   [label]        Text shown on the menu item, rendered uppercase.
+ * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon] Icon component rendered before the label.
+ * @property {() => void} [onSelect]   Handler called when the item is chosen; the menu closes after.
+ * @property {boolean}  [destructive]  Renders the item in the destructive red color.
+ * @property {'separator'} [type]      Set to 'separator' to render a divider instead of an item.
  */
 
 /**
@@ -289,16 +289,16 @@ export { UserMenuStyles };
  * @typedef {object} UserMenuProps
  * @property {string} name             Display name; passed to Avatar for the initial fallback.
  * @property {string} [src]            Avatar image URL.
- * @property {'online'|'busy'|'away'|'offline'} [status]
- * @property {'sm'|'md'|'lg'} [avatarSize='md']
- * @property {UserMenuItem[]} items
- * @property {'top'|'bottom'} [placement='bottom']
- * @property {'start'|'end'} [align='end']
+ * @property {'online'|'busy'|'away'|'offline'} [status] Presence state; passed to Avatar for the status dot.
+ * @property {'sm'|'md'|'lg'} [avatarSize='md'] Size of the trigger avatar.
+ * @property {UserMenuItem[]} items The menu rows to render, including separators.
+ * @property {'top'|'bottom'} [placement='bottom'] Whether the panel opens below or above the trigger.
+ * @property {'start'|'end'} [align='end'] Which trigger edge the panel aligns to horizontally.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened (showcases / docs). Outside-click and Escape still dismiss it.
- * @property {boolean} [staticOpen=false] Render pre-opened AND pinned — outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
- * @property {string} [ariaLabel='User menu']
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {boolean} [staticOpen=false] Render pre-opened AND pinned; outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
+ * @property {string} [ariaLabel='User menu'] Accessible label for the trigger button and menu panel.
+ * @property {string} [className] Class name applied to the wrapper element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
  */
 
 /** @type {React.ForwardRefExoticComponent<UserMenuProps>} */

@@ -160,6 +160,7 @@ const buttonVariants = cva(
  * @property {React.ReactNode} [children]
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
+ * @property {'button'|'submit'|'reset'} [type='button'] Native button type; defaults to 'button', so it does not submit an enclosing form unless set to 'submit'.
  * @property {boolean} [disabled]
  * @property {(e: React.MouseEvent<HTMLButtonElement>) => void} [onClick]
  */

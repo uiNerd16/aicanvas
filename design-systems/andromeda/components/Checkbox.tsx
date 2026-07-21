@@ -96,12 +96,12 @@ const labelClass = cn(
  * @typedef {object} CheckboxProps
  * @property {boolean} [checked]               Controlled checked state.
  * @property {boolean} [defaultChecked=false]  Uncontrolled initial state.
- * @property {(next: boolean) => void} [onCheckedChange]
+ * @property {(next: boolean) => void} [onCheckedChange]  Handler called with the next checked state when toggled.
  * @property {string}  [label]                 Optional inline label.
- * @property {boolean} [disabled]
- * @property {string}  [className]
- * @property {React.CSSProperties} [style]
- * @property {string}  [id]
+ * @property {boolean} [disabled=false]        Disables the checkbox and blocks interaction.
+ * @property {string}  [className]             Extra classes merged onto the visual box.
+ * @property {React.CSSProperties} [style]     Inline styles applied to the outer wrapper.
+ * @property {string}  [id]                    Id applied to the input and inline label, auto-generated if omitted.
  */
 
 /** @type {React.ForwardRefExoticComponent<CheckboxProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'|'type'>>} */

@@ -52,6 +52,7 @@ const textareaVariants = cva(
  * @typedef {object} TextareaProps
  * @property {string} [label]            Uppercase mono label rendered above the field.
  * @property {string} [error]            When set, switches the field into the error state.
+ * @property {number} [rows=4]           Number of visible text lines; sets the field's initial and minimum height.
  * @property {string} [className]        Forwarded to the <textarea>.
  * @property {string} [wrapperClassName] Forwarded to the outer wrapper.
  */

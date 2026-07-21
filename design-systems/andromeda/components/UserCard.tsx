@@ -42,19 +42,19 @@ const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 
 /**
  * @typedef {object} UserCardProps
- * @property {string} name
+ * @property {string} name Shown as the card's primary label and used for the avatar initials.
  * @property {string} [role]           Subtitle under the name (e.g. "Flight Director").
- * @property {string} [src]
- * @property {'online'|'busy'|'away'|'offline'} [status]
- * @property {'sm'|'md'|'lg'} [avatarSize='md']
- * @property {UserMenuItem[]} items
- * @property {'top'|'bottom'} [placement='top']
- * @property {'start'|'end'|'stretch'} [align='stretch']
+ * @property {string} [src] Optional avatar image URL; falls back to initials when absent.
+ * @property {'online'|'busy'|'away'|'offline'} [status] Presence status shown as a dot on the avatar.
+ * @property {'sm'|'md'|'lg'} [avatarSize='md'] Size of the avatar shown in the card.
+ * @property {UserMenuItem[]} items Entries rendered in the popover menu.
+ * @property {'top'|'bottom'} [placement='top'] Which side of the card the menu opens toward.
+ * @property {'start'|'end'|'stretch'} [align='stretch'] How the panel aligns to the card; stretch matches its width.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened (showcases / docs). Outside-click and Escape still dismiss it.
- * @property {boolean} [staticOpen=false] Render pre-opened AND pinned — outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
- * @property {string} [ariaLabel='User menu']
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {boolean} [staticOpen=false] Render pre-opened AND pinned; outside-click / Escape do not dismiss it. For showcases / docs where several popovers are shown open at once and one must not close the others.
+ * @property {string} [ariaLabel='User menu'] Accessible label for the trigger button and menu.
+ * @property {string} [className] Extra class names for the card's root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the card's root element.
  */
 
 /** @type {React.ForwardRefExoticComponent<UserCardProps>} */

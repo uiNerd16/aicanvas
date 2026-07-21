@@ -73,26 +73,26 @@ const INDICATOR_TX = {
 
 /**
  * @typedef {object} SegmentOption
- * @property {string} value
- * @property {string} [label]
- * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
- * @property {string} [ariaLabel]
+ * @property {string} value Unique value that identifies this segment.
+ * @property {string} [label] Text shown on the segment.
+ * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon] Icon component rendered in the segment, optionally alongside its label.
+ * @property {string} [ariaLabel] Accessible name for the segment, falling back to label when omitted.
  */
 
 /**
  * @typedef {object} SegmentedControlProps
- * @property {string} value
- * @property {(next: string) => void} onChange
- * @property {SegmentOption[]} options
- * @property {'sm'|'md'|'lg'} [size='md']
+ * @property {string} value Value of the currently selected segment.
+ * @property {(next: string) => void} onChange Handler called with the value of the newly selected segment.
+ * @property {SegmentOption[]} options Segments to render, in display order.
+ * @property {'sm'|'md'|'lg'} [size='md'] Height and icon-size preset for the control.
  * @property {string} [layoutGroupId]
  *   Override the auto-generated per-instance id only when you explicitly want
  *   two SegmentedControls to share their indicator (animating across both as
  *   one unit). The default `useId()` value scopes the indicator to a single
- *   control, which is what you want 99% of the time — without it, switching
+ *   control, which is what you want 99% of the time, without it, switching
  *   selections in one control makes the indicator fly between controls.
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {string} [className] Extra classes merged onto the root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
 /** @type {React.ForwardRefExoticComponent<SegmentedControlProps & React.HTMLAttributes<HTMLDivElement>>} */

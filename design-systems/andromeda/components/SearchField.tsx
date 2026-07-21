@@ -15,15 +15,16 @@ import { tokens } from '../tokens';
 
 /**
  * @typedef {object} SearchFieldProps
- * @property {string} [placeholder] Text shown when empty. Defaults to "Search anything".
- * @property {string|null} [shortcut] Keyboard shortcut chip. Pass null to hide. Defaults to "⌘ K".
- * @property {React.ComponentType<{ size?: number, weight?: string, color?: string, style?: React.CSSProperties }>} [icon] Phosphor-style leading icon. Defaults to MagnifyingGlass. Pass null to hide.
+ * @property {string} [placeholder='Search anything'] Text shown when empty. Defaults to "Search anything".
+ * @property {string|null} [shortcut='⌘ K'] Keyboard shortcut chip. Pass null to hide. Defaults to "⌘ K".
+ * @property {React.ComponentType<{ size?: number, weight?: string, color?: string, style?: React.CSSProperties }>} [icon=MagnifyingGlass] Phosphor-style leading icon. Defaults to MagnifyingGlass. Pass null to hide.
  * @property {string} [value] Controlled value.
  * @property {string} [defaultValue] Uncontrolled initial value.
  * @property {(next: string) => void} [onValueChange] Called when typed value changes.
  * @property {string} [ariaLabel] Accessible label for the input. Defaults to placeholder.
  * @property {string} [className] Class name forwarded to the outer wrapper.
  * @property {React.CSSProperties} [style] Style merged into the outer wrapper (lets the parent set width).
+ * @property {boolean} [disabled] Disables the field: dims it to the disabled opacity, shows a not-allowed cursor, and disables the underlying input.
  */
 
 /** @type {React.ForwardRefExoticComponent<SearchFieldProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange'>>} */

@@ -37,17 +37,17 @@ function snap(n, step) {
  * @typedef {object} SliderProps
  * @property {number} [value]                  Controlled value.
  * @property {number} [defaultValue]           Uncontrolled initial value.
- * @property {number} [min=0]
- * @property {number} [max=100]
- * @property {number} [step=1]
- * @property {(next: number) => void} [onValueChange]
+ * @property {number} [min=0]                Minimum value of the range.
+ * @property {number} [max=100]              Maximum value of the range.
+ * @property {number} [step=1]               Increment the value snaps to.
+ * @property {(next: number) => void} [onValueChange]  Handler called with the new value on drag or keyboard change.
  * @property {string} [label]                  Optional uppercase mono label.
  * @property {boolean} [showValue=true]        Render the numeric readout next to the label.
  * @property {string} [unit]                   Optional unit suffix (e.g. "%", "KM").
- * @property {boolean} [disabled]
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
- * @property {string} [id]
+ * @property {boolean} [disabled=false]      Disables interaction and dims the slider.
+ * @property {string} [className]            Additional classes for the root wrapper.
+ * @property {React.CSSProperties} [style]   Inline styles merged onto the root wrapper.
+ * @property {string} [id]                   Id for the slider track; auto-generated when omitted.
  */
 
 /** @type {React.ForwardRefExoticComponent<SliderProps & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>>} */

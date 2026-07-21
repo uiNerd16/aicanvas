@@ -27,6 +27,7 @@ import { useSession } from '../../../components/auth/SessionProvider'
 import { useAuthModal } from '../../../components/auth/AuthModalProvider'
 import { optimizeImageKitUrl } from '../../../lib/imagekit'
 import { Paywall, type PaywallReason } from '../../../components/billing/Paywall'
+import type { AndromedaPropTable } from '../../../lib/andromeda-props.generated'
 
 type RelatedItem = { slug: string; name: string; image?: string }
 
@@ -35,6 +36,9 @@ interface Props {
   name: string
   description: string
   related: RelatedItem[]
+  // Prop tables parsed from the component's @typedef JSDoc at build time.
+  // Empty for the few components without a @typedef block — section is hidden.
+  propTables?: AndromedaPropTable[]
   // Account-gated install: when on, a signed-out visitor of this FREE
   // design-system component sees a "create a free account to install" CTA in
   // place of the runnable command. Reading the source (Code tab) stays public.
@@ -46,6 +50,7 @@ export function AndromedaComponentView({
   name,
   description,
   related,
+  propTables = [],
   freeAccountGate = false,
 }: Props) {
   const { preferences, user } = useSession()
@@ -529,6 +534,82 @@ export function AndromedaComponentView({
           </div>
         </div>
       </section>
+
+      {/* ── Props ──────────────────────────────────────────────────────── */}
+      {propTables.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
+            Props
+          </h2>
+          <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+            Every prop this component accepts. Any other prop is forwarded to the
+            underlying element.
+          </p>
+          <div className="space-y-8">
+            {propTables.map((t) => (
+              <div key={t.table}>
+                {propTables.length > 1 && (
+                  <h3 className="mb-2 font-mono text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+                    {t.table}
+                  </h3>
+                )}
+                <div className="overflow-x-auto rounded-xl border border-sand-300 dark:border-sand-800">
+                  {/* table-fixed + shared colgroup: every table on the page uses
+                      identical column widths, so stacked tables (compound
+                      components) line up and the Description column stays bounded
+                      instead of stretching to its own content. */}
+                  <table className="w-full min-w-[36rem] table-fixed border-collapse text-left text-sm">
+                    <colgroup>
+                      <col className="w-[22%]" />
+                      <col className="w-[28%]" />
+                      <col className="w-[18%]" />
+                      <col className="w-[32%]" />
+                    </colgroup>
+                    <thead>
+                      <tr className="border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+                        <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Prop</th>
+                        <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Type</th>
+                        <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Default</th>
+                        <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {t.props.map((p) => (
+                        <tr
+                          key={p.name}
+                          className="border-b border-sand-200 last:border-0 dark:border-sand-800/60"
+                        >
+                          <td className="px-4 py-3 align-top">
+                            <span className="break-words font-mono text-[13px] font-semibold text-sand-900 dark:text-sand-100">
+                              {p.name}
+                            </span>
+                            {!p.optional && (
+                              <span className="ml-1.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-olive-500 dark:text-olive-400">
+                                req
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 align-top">
+                            <code className="whitespace-pre-wrap break-words font-mono text-xs text-sand-600 dark:text-sand-400">
+                              {p.type}
+                            </code>
+                          </td>
+                          <td className="break-words px-4 py-3 align-top font-mono text-xs text-sand-500 dark:text-sand-400">
+                            {p.default || '-'}
+                          </td>
+                          <td className="px-4 py-3 align-top text-sm text-sand-600 dark:text-sand-400">
+                            {p.description || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── More Andromeda components ──────────────────────────────────── */}
       {related.length > 0 && (

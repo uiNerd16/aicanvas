@@ -4,6 +4,7 @@ import {
   ANDROMEDA_COMPONENTS,
   getAndromedaComponent,
 } from '../../../_lib/andromeda/andromeda-registry'
+import { ANDROMEDA_PROPS } from '../../../lib/andromeda-props.generated'
 import { AndromedaComponentView } from './AndromedaComponentView'
 
 export function generateStaticParams() {
@@ -38,6 +39,11 @@ export default async function AndromedaComponentPage({
     (c) => ({ slug: c.slug, name: c.name, image: c.image }),
   )
 
+  // Prop tables parsed from the component's @typedef JSDoc at build time, keyed
+  // by source-file basename (Button.tsx → "Button"). Empty when the component
+  // ships no @typedef block (2 of 33 today) — the view hides the section.
+  const propTables = ANDROMEDA_PROPS[entry.sourceFile.replace(/\.tsx?$/, '')] ?? []
+
   // Account-gated install: when on, a signed-out visitor of this FREE
   // design-system component sees a "create a free account to install" CTA
   // instead of the runnable command. Reading the source (Code tab) stays
@@ -53,6 +59,7 @@ export default async function AndromedaComponentPage({
       name={entry.name}
       description={entry.description}
       related={related}
+      propTables={propTables}
       freeAccountGate={freeAccountGate}
     />
   )

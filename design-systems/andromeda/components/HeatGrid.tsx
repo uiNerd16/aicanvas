@@ -81,16 +81,16 @@ function buildFillMap(value, cols, rows) {
 
 /**
  * @typedef {object} HeatGridProps
- * @property {number}  value              0–100 fill level (clamped).
- * @property {number}  [cols=7]
- * @property {number}  [rows=5]
+ * @property {number}  [value=0]          0–100 fill level (clamped).
+ * @property {number}  [cols=7]           Number of columns in the cell matrix.
+ * @property {number}  [rows=5]           Number of rows in the cell matrix.
  * @property {number}  [cellSize=22]      px per cell side.
  * @property {number}  [gap=3]            px between cells.
  * @property {boolean} [showValue=true]   Render the accent percentage readout beside the grid.
- * @property {string}  [unit='%']
+ * @property {string}  [unit='%']         Suffix appended to the value readout.
  * @property {string}  [label]            Accessible name for the meter.
- * @property {string}  [className]
- * @property {React.CSSProperties} [style]
+ * @property {string}  [className]        Extra class names for the root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
 /** @type {React.ForwardRefExoticComponent<HeatGridProps & React.HTMLAttributes<HTMLDivElement>>} */

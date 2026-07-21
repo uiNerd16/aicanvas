@@ -242,24 +242,24 @@ const deltaBaseClass = cn(
 // ── Component ─────────────────────────────────────────────────────────────────
 /**
  * @typedef {object} StatTileProps
- * @property {string} label
- * @property {string|number} value
- * @property {string} [unit]
+ * @property {string} label Metric name shown in the top-left mono caption.
+ * @property {string|number} value Primary figure rendered as the large number, counted up from zero on reveal.
+ * @property {string} [unit] Short unit rendered beside the value.
  * @property {number} [delta] Positive → accent, negative → fault.
- * @property {string} [deltaLabel]
+ * @property {string} [deltaLabel] Caption shown beside the delta in the trend row.
  * @property {string} [code] Optional small mono identifier in the top-right.
- * @property {boolean} [live] When true, the count-up animation runs only on
+ * @property {boolean} [live=false] When true, the count-up animation runs only on
  *   first mount; subsequent value changes snap (no re-animation). Use for
  *   telemetry rows whose values update on a recurring interval. Without this,
  *   each refresh runs a fresh 1.8s count-up from zero, which is unreadable.
- * @property {boolean} [liveRoll] When true, the value is rendered as a row of
+ * @property {boolean} [liveRoll=false] When true, the value is rendered as a row of
  *   fixed-width digit slots; on update, only the slots whose character changed
  *   "roll" (previous translates up + fades, new enters from below). Use for
  *   high-frequency telemetry where the eye should track which digits moved
  *   (price ticks, latency counters, throughput rates). Overrides `live`.
  *   Initial render fades in without rolling.
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {string} [className] Extra classes merged onto the root Card.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root Card.
  */
 
 /** @type {React.ForwardRefExoticComponent<StatTileProps & React.HTMLAttributes<HTMLDivElement>>} */

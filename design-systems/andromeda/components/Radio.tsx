@@ -99,14 +99,14 @@ const RadioGroupContext = createContext(/** @type {null | { name: string, value:
 
 /**
  * @typedef {object} RadioGroupProps
- * @property {string} [name]
- * @property {string} [value]
- * @property {string} [defaultValue]
- * @property {(next: string) => void} [onValueChange]
- * @property {boolean} [disabled]
- * @property {React.ReactNode} [children]
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {string} [name] Shared group name for the radios' native inputs; auto-generated when omitted.
+ * @property {string} [value] Selected value in controlled mode; the matching radio is checked.
+ * @property {string} [defaultValue] Initially selected value when uncontrolled.
+ * @property {(next: string) => void} [onValueChange] Handler called with the newly selected value.
+ * @property {boolean} [disabled=false] Disables every radio in the group.
+ * @property {React.ReactNode} [children] Radio elements belonging to the group.
+ * @property {string} [className] Extra classes for the group wrapper.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the group wrapper.
  */
 
 export function RadioGroup({
@@ -151,14 +151,14 @@ export function RadioGroup({
  * @typedef {object} RadioProps
  * @property {string}  [value]               Required when used inside RadioGroup.
  * @property {boolean} [checked]             Standalone controlled state.
- * @property {boolean} [defaultChecked=false]
- * @property {(next: boolean) => void} [onCheckedChange]
- * @property {string}  [label]
- * @property {boolean} [disabled]
- * @property {string}  [className]
- * @property {React.CSSProperties} [style]
- * @property {string}  [id]
- * @property {string}  [name]
+ * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled and standalone.
+ * @property {(next: boolean) => void} [onCheckedChange] Handler called with the new checked state when toggled.
+ * @property {string}  [label]               Text label rendered beside the box.
+ * @property {boolean} [disabled]            Disables the radio and blocks interaction.
+ * @property {string}  [className]           Extra classes merged onto the visual box.
+ * @property {React.CSSProperties} [style]   Inline styles merged onto the wrapper.
+ * @property {string}  [id]                  Id for the input; links the label via htmlFor, auto-generated when omitted.
+ * @property {string}  [name]                Native input name that groups radios; falls back to the group's name.
  */
 
 /** @type {React.ForwardRefExoticComponent<RadioProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'|'type'>>} */

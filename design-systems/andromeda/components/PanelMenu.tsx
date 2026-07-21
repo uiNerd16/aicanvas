@@ -20,20 +20,20 @@ import { andromedaVars } from './lib/utils';
 
 /**
  * @typedef {object} MenuItem
- * @property {string}   [label]
- * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
- * @property {() => void} [onSelect]
- * @property {MenuItem[]} [submenu]
- * @property {boolean}  [selected]
- * @property {boolean}  [destructive]
- * @property {'separator'} [type]
+ * @property {string}   [label] Text shown for the menu item.
+ * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon] Icon rendered to the left of the label.
+ * @property {() => void} [onSelect] Handler called when the item is chosen (ignored on items with a submenu).
+ * @property {MenuItem[]} [submenu] Nested items opened as a flyout submenu.
+ * @property {boolean}  [selected] Marks the item as the active choice, styling it accordingly.
+ * @property {boolean}  [destructive] Renders the item label in the destructive red color.
+ * @property {'separator'} [type] Set to 'separator' to render a divider rule instead of a clickable item.
  */
 
 /**
  * @typedef {object} PanelMenuProps
- * @property {MenuItem[]} items
- * @property {'left'|'right'} [align='right']
- * @property {string} [ariaLabel='Panel options']
+ * @property {MenuItem[]} items Entries rendered in the menu, in order.
+ * @property {'left'|'right'} [align='right'] Edge of the trigger the menu aligns to.
+ * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
  *   showcases / docs so the consumer can see the menu contents without first
  *   having to click the trigger. Click-outside and Escape still dismiss it.
@@ -41,9 +41,9 @@ import { andromedaVars } from './lib/utils';
  *   open: the click-outside and Escape dismissers are not attached. For
  *   showcases / docs where the menu must remain visible as the reader scrolls
  *   past, so the component reads as a menu without any interaction. The trigger
- *   can still toggle it. Not for product UI — a real overflow menu must dismiss.
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ *   can still toggle it. Not for product UI; a real overflow menu must dismiss.
+ * @property {string} [className] Extra class applied to the wrapper element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
  */
 
 const ITEM_HEIGHT = 26; // ponytail: identity constant, no token

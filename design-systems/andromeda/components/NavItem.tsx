@@ -91,17 +91,19 @@ const navItemVariants = cva(
 
 /**
  * @typedef {object} NavItemProps
- * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon]
- * @property {React.ReactNode} label
- * @property {boolean} [active=false]
- * @property {boolean} [mono=true]
- * @property {boolean} [asChild=false]
+ * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
+ *   Optional icon component rendered at 20px before the label.
+ * @property {React.ReactNode} label Visible content of the nav row.
+ * @property {boolean} [active=false] Marks the row as the current selection, applying accent text and the indicator dot.
+ * @property {boolean} [mono=true] Renders the label in uppercase mono type; set false for sans.
+ * @property {boolean} [asChild=false] Renders via Radix Slot, merging props onto the child instead of a native button.
+ * @property {'button'|'submit'|'reset'} [type='button'] HTML button type; defaults to 'button' to avoid accidental form submits, and is omitted when asChild is set.
  * @property {string} [layoutGroupId='andromeda-navitem-indicator']
  *   Override only when two distinct nav lists share a viewport and you don't
  *   want the active dot to animate between them. To get the slide between
  *   sibling NavItems, wrap the list in framer's <LayoutGroup>.
- * @property {string} [className]
- * @property {React.CSSProperties} [style]
+ * @property {string} [className] Extra classes merged onto the root element.
+ * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
 /** @type {React.ForwardRefExoticComponent<NavItemProps & React.ButtonHTMLAttributes<HTMLButtonElement>>} */
