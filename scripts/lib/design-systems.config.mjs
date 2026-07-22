@@ -99,6 +99,10 @@ export const DESIGN_SYSTEMS = [
     optionalSystemEntries: [
       'components/MetricChart.tsx',
       'components/Gauge.tsx',
+      'components/Waveform.tsx',
+      'components/MediaCard.tsx',
+      'components/DataTable.tsx',
+      'components/MusicPlayer.tsx',
     ],
     // Per-file slug overrides. Button.tsx's natural slug (andromeda-button) is
     // owned by the standalone in components-workspace/andromeda-button/, so the
