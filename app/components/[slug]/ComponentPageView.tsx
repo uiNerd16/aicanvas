@@ -29,6 +29,7 @@ import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '
 import { HeaderSocials } from '../HeaderSocials'
 import { Breadcrumbs } from '../Breadcrumbs'
 import { SiteFooter } from '../SiteFooter'
+import { PropsTable, type PropTable } from '../PropsTable'
 import { Step } from '../Step'
 import type { ComponentMeta } from '../../lib/component-registry'
 // Runtime + type from the light module so this client component never imports
@@ -68,6 +69,9 @@ interface ComponentPageViewProps {
   designSystem?: DesignSystemSlug
   /** Premium standalone component — shows a "Premium component" label by the title. */
   premium?: boolean
+  // Prop tables parsed from the component's @typedef JSDoc at build time. Empty
+  // for self-contained (propless) components, in which case the section hides.
+  propTables?: PropTable[]
   related: ComponentMeta[]
   highlightedCode?: ReactNode
   enforcing?: boolean
@@ -97,6 +101,7 @@ const RELATED_PAGE_SIZE = 3
 
 export default function ComponentPageView({
   slug,
+  propTables = [],
   name,
   description,
   headingSubtitle,
@@ -1268,6 +1273,10 @@ export default function ComponentPageView({
                 )
               )}
             </section>
+
+          {/* Props — generated from the component's @typedef JSDoc; hides itself
+              for self-contained (propless) components. */}
+          <PropsTable propTables={propTables} />
 
           {/* About this component — long-form body copy that gives Google a
               substantial chunk of original, on-topic text per component.
