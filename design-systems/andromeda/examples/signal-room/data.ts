@@ -27,12 +27,15 @@ export const navItems = [
 ];
 
 // ---- Sidebar: pinned channels (replaces "Playlists" rail) ----
+// `status` drives the channel's square status-dot colour — a live measurement
+// (nominal = live, caution = hot, fault = offline), NOT decoration, so the
+// coloured dots stay on the "colour is measurement" rule.
 export const channels = [
-  { id: 'chill-vibes',   code: 'CH-04', name: 'Chill Vibes',   tracks: 50,  bitrate: 320 },
-  { id: 'morning-rush',  code: 'CH-07', name: 'Morning Rush',  tracks: 30,  bitrate: 320 },
-  { id: 'deep-focus',    code: 'CH-12', name: 'Deep Focus',    tracks: 100, bitrate: 256 },
-  { id: 'road-trip',     code: 'CH-18', name: 'Road Trip',     tracks: 42,  bitrate: 320 },
-  { id: 'liked-radio',   code: 'CH-21', name: 'Liked Radio',   tracks: 75,  bitrate: 256 },
+  { id: 'chill-vibes',   code: 'CH-04', name: 'Chill Vibes',   tracks: 50,  bitrate: 320, status: 'nominal' },
+  { id: 'morning-rush',  code: 'CH-07', name: 'Morning Rush',  tracks: 30,  bitrate: 320, status: 'caution' },
+  { id: 'deep-focus',    code: 'CH-12', name: 'Deep Focus',    tracks: 100, bitrate: 256, status: 'fault'   },
+  { id: 'road-trip',     code: 'CH-18', name: 'Road Trip',     tracks: 42,  bitrate: 320, status: 'nominal' },
+  { id: 'liked-radio',   code: 'CH-21', name: 'Liked Radio',   tracks: 75,  bitrate: 256, status: 'nominal' },
 ];
 
 // ---- Now Transmitting: hero readouts (replaces "Sound without limits") ----
@@ -44,19 +47,19 @@ export const nowTransmittingStats = [
 ];
 
 // ---- "Made for you" → "Routines" (5 personalised mixes) ----
-// Background images: cool-toned cosmic abstracts (Unsplash). Each card
-// renders the image at low opacity behind a vertical gradient overlay so
-// the signal meter + text stay legible. Photo IDs reused from
-// mission-control where they're already known to load.
+// Background images: cool-toned cosmic abstracts, AI-generated as a matched
+// set, compressed to WebP and hosted on ImageKit (andromeda/signal-room/).
+// Each card renders the image behind a small bottom-anchored scrim so the
+// title/desc stay legible.
 export const mixes = [
   { code: 'MIX-01', name: 'Your Mix',       desc: 'Updates daily', plays: '3.4k', signal: 92,
-    image: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=640&auto=format&fit=crop&q=80' },
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-01.webp' },
   { code: 'MIX-02', name: 'Chill Mix',      desc: 'Updates daily', plays: '1.8k', signal: 84,
-    image: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=640&auto=format&fit=crop&q=80' },
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-02.webp' },
   { code: 'MIX-03', name: 'Focus Mix',      desc: 'Updates daily', plays: '5.1k', signal: 76,
-    image: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?w=640&auto=format&fit=crop&q=80' },
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-03.webp' },
   { code: 'MIX-04', name: 'New Music Mix',  desc: 'Updates daily', plays: '912',  signal: 68,
-    image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=640&auto=format&fit=crop&q=80' },
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-04.webp' },
 ];
 
 // ---- Recent transmissions table (replaces "Jump back in") ----
@@ -107,4 +110,5 @@ export const nowPlaying = {
   elapsed:  87,      // 1:27
   code:     'TX-001',
   bitrate:  320,
+  plays:    '2.1k',
 };

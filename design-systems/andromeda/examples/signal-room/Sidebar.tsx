@@ -21,7 +21,6 @@ import {
   Gear,
   Keyboard,
   SignOut,
-  WaveSine,
 } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
@@ -55,7 +54,17 @@ const userMenuItems = [
   { id: 'signout',     label: 'Sign Out',            icon: SignOut },
 ];
 
+// Channel status → dot colour. The square dot is a live measurement of the
+// channel's signal (accent = live, orange = hot, red = offline), the one place
+// colour is allowed on the rail. Unknown status falls back to a neutral pale dot.
+const STATUS_DOT = {
+  nominal: tokens.color.accent[300],
+  caution: tokens.color.orange[300],
+  fault:   tokens.color.red[300],
+};
+
 function ChannelRow({ ch }) {
+  const dot = STATUS_DOT[ch.status] ?? tokens.color.text.muted;
   return (
     <div
       style={{
@@ -66,7 +75,8 @@ function ChannelRow({ ch }) {
         cursor: 'pointer',
       }}
     >
-      {/* Mono icon square — square corners, hairline border, no fill */}
+      {/* Mono icon square — square corners, hairline border, holds the
+          channel's status dot (its only colour). */}
       <div
         style={{
           width: '24px',
@@ -80,10 +90,14 @@ function ChannelRow({ ch }) {
           justifyContent: 'center',
         }}
       >
-        <WaveSine
-          size={tokens.iconSize.xs}
-          weight="regular"
-          color={tokens.color.text.muted}
+        <span
+          aria-hidden
+          style={{
+            width: '6px',
+            height: '6px',
+            background: dot,
+            borderRadius: tokens.radius.frame,
+          }}
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
@@ -180,7 +194,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
           /// Channels
         </div>
         <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-          {channels.map(ch => (
+          {channels.slice(0, 3).map(ch => (
             <ChannelRow key={ch.id} ch={ch} />
           ))}
         </div>
@@ -255,7 +269,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
         <UserCard
           name="Kerem Alkan"
           role="Engineer · Premium"
-          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           status="online"
           items={userMenuItems}
           placement="top"
