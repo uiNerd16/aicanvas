@@ -105,7 +105,7 @@ import {
 // v2 components come from the build-time-injected shim (real re-exports when
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
-import { MetricChart, Gauge } from '../../../lib/andromeda-v2.generated'
+import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer } from '../../../lib/andromeda-v2.generated'
 import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
 import { ShowcaseInstallCard } from '../../../_components/ShowcaseInstallCard'
 
@@ -1584,6 +1584,59 @@ export default function AndromedaShowcase({
             <Gauge variant="warning" value={64} label="FUEL" />
             <Gauge variant="fault" value={12} label="O2" />
           </Row>
+        </Section>
+
+        {/* ── Waveform ───────────────────────────────────────────────────── */}
+        <Section
+          title="Waveform"
+          slug="waveform"
+          kicker="Component · Charts"
+          description="Live signal waveform. A fluid SVG of a morphing polyline over mirrored level bars and a dashed centreline, animating to signal an active feed and holding a static frame when paused or reduced-motion. Neutral ink by default; colour only when the wave itself is the live measurement."
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5] }}>
+            <Waveform />
+            <Waveform height={80} showBars={false} />
+          </div>
+        </Section>
+
+        {/* ── Media Card ─────────────────────────────────────────────────── */}
+        <Section
+          title="Media Card"
+          slug="media-card"
+          kicker="Component · Surfaces"
+          description="Image-backed content tile. A full-bleed photo under a soft bottom scrim, a mono code tag, title and meta, and one corner action — Play, a CTA arrow, or none. Composes the Card frame with markers off, so the image carries the card identity."
+        >
+          <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[5] }}>
+            <MediaCard code="MIX-01" title="Your Mix" meta="3.4k plays" action="play" />
+            <MediaCard
+              code="CH-04"
+              title="Deep Focus"
+              meta="Ambient · 2h"
+              action="cta"
+              ctaLabel="Open"
+              image="https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-03.webp"
+            />
+          </div>
+        </Section>
+
+        {/* ── Data Table ─────────────────────────────────────────────────── */}
+        <Section
+          title="Data Table"
+          slug="data-table"
+          kicker="Component · Data"
+          description="Configuration-driven data grid. Pass columns and rows to get hairline inset dividers, row hover, a selected-row accent edge, and a mobile column-priority fold that tucks low-priority columns into a per-row info tooltip or the primary column's sub-line instead of a horizontal scrollbar."
+        >
+          <DataTable />
+        </Section>
+
+        {/* ── Music Player ───────────────────────────────────────────────── */}
+        <Section
+          title="Music Player"
+          slug="music-player"
+          kicker="Component · Composites"
+          description="Block-scale transport bar. Track identity, the full transport cluster, a scrub slider with elapsed and remaining readouts, and like, lyrics, and volume controls — assembled from Andromeda primitives, driven by props with a live demo fallback."
+        >
+          <MusicPlayer />
         </Section>
 
         {/* ── Planet · Next Destination ──────────────────────────────────── */}

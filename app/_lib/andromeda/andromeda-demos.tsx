@@ -71,7 +71,7 @@ import {
 // v2 components come from the build-time-injected shim (real re-exports when
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
-import { MetricChart, Gauge } from '../../lib/andromeda-v2.generated'
+import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer } from '../../lib/andromeda-v2.generated'
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 
@@ -440,6 +440,55 @@ function GaugeDemo() {
         <Gauge variant="warning" value={64} label="FUEL" />
         <Gauge variant="fault" value={12} label="O2" />
       </Row>
+    </div>
+  )
+}
+
+function WaveformDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <Waveform />
+      <Waveform height={80} showBars={false} />
+    </div>
+  )
+}
+
+function MediaCardDemo() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 720,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 16,
+      }}
+    >
+      <MediaCard code="MIX-01" title="Your Mix" meta="Updates daily" action="play" />
+      <MediaCard
+        code="CH-04"
+        title="Deep Focus"
+        meta="Ambient · 2h"
+        action="cta"
+        ctaLabel="Open"
+        image="https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-03.webp"
+      />
+    </div>
+  )
+}
+
+function DataTableDemo() {
+  return (
+    <div style={{ width: '100%', maxWidth: 720 }}>
+      <DataTable />
+    </div>
+  )
+}
+
+function MusicPlayerDemo() {
+  return (
+    <div style={{ width: '100%' }}>
+      <MusicPlayer />
     </div>
   )
 }
@@ -989,6 +1038,10 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'icon-button': IconButtonDemo,
   input: InputDemo,
   'metric-chart': MetricChartDemo,
+  waveform: WaveformDemo,
+  'media-card': MediaCardDemo,
+  'data-table': DataTableDemo,
+  'music-player': MusicPlayerDemo,
   'nav-item': NavItemDemo,
   'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,
