@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { COMPONENTS, type ComponentEntry, type ComponentMeta } from '../../lib/component-registry'
+import { STANDALONE_PROPS } from '../../lib/standalone-props.generated'
 import ComponentPageView from './ComponentPageView'
 import { HighlightedCode } from '../../components/HighlightedCode'
 import { GITHUB_URL, SITE_URL } from '../../lib/config'
@@ -315,6 +316,7 @@ export default async function Page({
       />
       <ComponentPageView
         slug={slug}
+        propTables={STANDALONE_PROPS[slug] ?? []}
         name={entry.name}
         description={entry.description}
         headingSubtitle={headingSubtitle}
