@@ -329,6 +329,9 @@ export default async function Page({
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         premium={contentType === 'premium-standalone'}
+        staticPreview={entry.staticPreview}
+        previewImage={entry.image}
+        isBlock={entry.isBlock}
         related={related}
         highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
         enforcing={enforcing || isPremium}

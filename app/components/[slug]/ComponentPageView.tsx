@@ -38,6 +38,7 @@ import type { ComponentMeta } from '../../lib/component-registry'
 import { getDesignSystemMeta, type DesignSystemSlug } from '../../lib/design-system-meta'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
+import { optimizeImageKitUrl } from '../../lib/imagekit'
 import { useSession } from '../auth/SessionProvider'
 import { useAuthModal } from '../auth/AuthModalProvider'
 import { Button } from '../Button'
@@ -69,6 +70,14 @@ interface ComponentPageViewProps {
   designSystem?: DesignSystemSlug
   /** Premium standalone component — shows a "Premium component" label by the title. */
   premium?: boolean
+  // Opt-in for busy/complex previews: show `previewImage` as a static image
+  // instead of live-mounting `children`; clicking it opens the existing
+  // fullscreen overlay, which still renders the real live component.
+  staticPreview?: boolean
+  previewImage?: string
+  // Label-only: "Premium block" instead of "Premium component" by the title
+  // and above the install section. See ComponentEntry.isBlock.
+  isBlock?: boolean
   // Prop tables parsed from the component's @typedef JSDoc at build time. Empty
   // for self-contained (propless) components, in which case the section hides.
   propTables?: PropTable[]
@@ -111,6 +120,9 @@ export default function ComponentPageView({
   dualTheme,
   designSystem,
   premium = false,
+  staticPreview = false,
+  previewImage,
+  isBlock = false,
   related,
   highlightedCode,
   enforcing = false,
@@ -480,7 +492,7 @@ export default function ComponentPageView({
                   {premium && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                       <Lightning weight="regular" size={12} />
-                      Premium component
+                      {isBlock ? 'Premium block' : 'Premium component'}
                     </span>
                   )}
                   {categoryTags.map((tag) => (
@@ -659,9 +671,33 @@ export default function ComponentPageView({
                     fullscreen instance and tanks framerate (especially for
                     canvas / three.js / heavy framer-motion components). */}
                 {!fullscreen && (
-                  <div key={previewKey} className="contents">
-                    {children}
-                  </div>
+                  staticPreview && previewImage ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        track('Fullscreen Open', { component: slug })
+                        setFullscreen(true)
+                      }}
+                      className="group/static absolute inset-0 cursor-pointer"
+                      aria-label={`Expand ${name} preview`}
+                    >
+                      <img
+                        src={optimizeImageKitUrl(previewImage, 'detail')}
+                        alt={name}
+                        className="h-full w-full object-cover object-top"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover/static:bg-black/30">
+                        <span className="flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover/static:opacity-100">
+                          <CornersOut weight="regular" size={14} />
+                          Click to view live
+                        </span>
+                      </span>
+                    </button>
+                  ) : (
+                    <div key={previewKey} className="contents">
+                      {children}
+                    </div>
+                  )
                 )}
               </motion.div>
               <motion.div
@@ -763,7 +799,7 @@ export default function ComponentPageView({
                     <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover/premium:grid-cols-[1fr]">
                       <span className="overflow-hidden">
                         <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">
-                          Premium component
+                          {isBlock ? 'Premium block' : 'Premium component'}
                         </span>
                       </span>
                     </span>
