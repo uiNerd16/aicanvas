@@ -12,9 +12,23 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, unlinkSy
 import { join, dirname, resolve, relative, sep, posix } from 'path'
 import { execSync } from 'child_process'
 import { transformRootHeightClass } from './lib/copy-paste-transform.mjs'
-import { DESIGN_SYSTEMS } from './lib/design-systems.config.mjs'
+import { DESIGN_SYSTEMS, FREE_DS_PLACEHOLDER_SENTINEL } from './lib/design-systems.config.mjs'
 import { reconcileLedger } from './lib/order-ledger.mjs'
 import { parseJsdocProps } from './lib/parse-jsdoc-props.mjs'
+
+// A free-lane design-system component file counts as PRESENT only when it is the
+// real injected source. A degraded/partial build leaves a sentinel-marked
+// placeholder in its place (so direct imports resolve) — that must register as
+// absent, exactly like a missing file, so a placeholder is never registered,
+// props-parsed, or installed. See FREE_DS_PLACEHOLDER_SENTINEL / inject-premium.mjs.
+function isInjectedComponentPresent(abs) {
+  if (!existsSync(abs)) return false
+  try {
+    return !readFileSync(abs, 'utf-8').startsWith(FREE_DS_PLACEHOLDER_SENTINEL)
+  } catch {
+    return false
+  }
+}
 
 const wsDir = 'components-workspace'
 const outDir = 'registry-data'
@@ -309,7 +323,7 @@ for (const ds of DESIGN_SYSTEMS) {
     // Optional entries only reserve their name while the file is actually
     // present — a degraded run must let the stale-cleanup pass below delete
     // the previous run's JSON so /r and the gate manifest stay in sync.
-    if (optional && !existsSync(resolve(ds.rootDir, entry))) continue
+    if (optional && !isInjectedComponentPresent(resolve(ds.rootDir, entry))) continue
     const baseName = entry.split('/').pop()
     expectedNames.add(dsComponentSlug(ds, entry, baseName))
   }
@@ -515,7 +529,7 @@ for (const ds of DESIGN_SYSTEMS) {
   // the entry is skipped with a warning and the gate-manifest count drops.
   const presentEntries = []
   for (const e of dsAllEntries(ds)) {
-    if (e.optional && !existsSync(resolve(rootDirAbs, e.path))) {
+    if (e.optional && !isInjectedComponentPresent(resolve(rootDirAbs, e.path))) {
       console.warn(
         `generate-registry: WARNING — optional ${ds.slug} entry "${e.path}" is absent ` +
           '(not injected — degraded build or older premium pin); skipping its registry item.',
@@ -858,7 +872,7 @@ for (const ds of DESIGN_SYSTEMS) {
   const dsRoot = resolve(ds.rootDir)
   for (const { path: entry } of dsAllEntries(ds)) {
     const abs = resolve(dsRoot, entry)
-    if (!existsSync(abs)) continue // absent optional (injected v2 not present) — skip, don't fail
+    if (!isInjectedComponentPresent(abs)) continue // absent or degraded placeholder — skip, don't fail
     const base = entry.split('/').pop().replace(/\.(tsx|ts)$/, '')
     const tables = parseJsdocProps(readFileSync(abs, 'utf-8'))
     const list = Object.entries(tables).map(([table, props]) => ({

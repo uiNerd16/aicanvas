@@ -52,10 +52,10 @@ const parseDur = (d) => {
   return (m || 0) * 60 + (s || 0);
 };
 const mixToNowPlaying = (mix) => ({
-  title: mix.name, subtitle: mix.desc, code: mix.code, cover: mix.image, duration: 221,
+  title: mix.name, subtitle: mix.desc, code: mix.code, cover: mix.image, duration: 221, plays: mix.plays,
 });
 const recToNowPlaying = (r) => ({
-  title: r.track, subtitle: r.artist, code: r.id, cover: null, duration: parseDur(r.duration),
+  title: r.track, subtitle: r.artist, code: r.id, cover: null, duration: parseDur(r.duration), plays: r.plays,
 });
 
 export default function SignalRoom() {
@@ -73,6 +73,7 @@ export default function SignalRoom() {
     code: nowPlaying.code,
     cover: null,
     duration: nowPlaying.duration,
+    plays: nowPlaying.plays,
   }));
   const [isPlaying, setIsPlaying] = useState(true);
   const togglePlay = () => setIsPlaying((p) => !p);
@@ -200,7 +201,7 @@ export default function SignalRoom() {
         user={{
           name: 'Kerem Alkan',
           role: 'Engineer · Premium',
-          src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
+          src: 'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
           status: 'online',
         }}
       >
@@ -215,10 +216,10 @@ export default function SignalRoom() {
         ${mq.md} {
           /* Stack the shell AND release its desktop 100vh pin: below md the
              page grows to its stacked height and the route column scrolls it as
-             one (no nested inner scroller, no blank strip). The Transport stays
-             pinned near the bottom via position:sticky (see Transport.tsx); the
-             route column drops its bottom padding for this route (see
-             AndromedaContentColumn) so the sticky reaches its 20px pin. */
+             one (no nested inner scroller, no blank strip). The Transport floats
+             at the bottom via position:fixed with a 12px inset on every edge,
+             and renders its own in-flow measured spacer for clearance (see
+             Transport.tsx) — so nothing here needs to reserve bottom room. */
           .sr-shell {
             flex-direction: column !important;
             height: auto !important;
@@ -230,6 +231,11 @@ export default function SignalRoom() {
           /* Desktop sidebar hidden — its content lives in the Drawer. */
           .sr-sidebar { display: none !important; }
           .sr-main-col { overflow: visible !important; gap: ${tokens.spacing[3]} !important; }
+          /* Clearance for the fixed mobile player is NOT reserved here with a
+             guessed padding — the Transport renders its own in-flow spacer
+             sized to the player's real measured height (see Transport.tsx), so
+             the last row scrolls to just above the floating player with no
+             overlap and no oversized gap. */
           .sr-main { flex: 0 0 auto !important; overflow-y: visible !important; padding-right: 0 !important; }
           /* Recent/Levels dual-pane collapses to one column; the levels panel
              releases its fixed 360px column and flows full-width below the

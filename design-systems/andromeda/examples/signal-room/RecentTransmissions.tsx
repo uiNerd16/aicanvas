@@ -1,44 +1,26 @@
 // @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Recent transmissions
-// Replaces the Spotify "Jump back in" row. Tabular layout —
-// dense, one row per track, with mono identifiers and a right-
-// aligned numeric peak meter. Row reveals use the row-stagger
-// pattern from the design-system rules.
+// Replaces the Spotify "Jump back in" row. Renders the shared
+// <DataTable> design-system component (config-driven columns + rows,
+// row hover, selected-row accent edge, click-to-play, and the mobile
+// column-priority + info-tooltip fold). This example consumes the
+// shared component; it no longer hand-rolls the table.
 //
-// Responsive (desktop-first — see rules.md → Responsive): the
-// fixed-layout table keeps all its columns at every width — the
-// faithful-stack strategy is "wide tables scroll horizontally
-// inside their panel", never reflow rows into cards. The table is
-// wrapped in an overflow-x:auto region and given a token-based
-// min-width so the columns stay legible and the scroll lives
-// inside the panel rather than on the page.
+// The play cell, the track title/artist stack, and the peak meter are
+// passed as per-column `render` functions — the bits that are specific
+// to this data, layered on top of the generic grid.
 // ============================================================
 
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
 import { IconButton } from '../../components/IconButton';
-import { rowContainer, rowItem } from '../../components/lib/motion';
+import { DataTable } from '../../components/DataTable';
 import { recentTransmissions } from './data';
-
-// All columns left-align. Right-alignment on numeric columns was
-// cramping the four trailing headers (Duration/Plays/Peak/Last) into
-// each other; a uniform left baseline reads more like a media table
-// than a finance table and lets the eye scan top-to-bottom cleanly.
-const COLS = [
-  { key: 'play',     label: '',         width: '48px'  },
-  { key: 'id',       label: 'ID',       width: '104px' },
-  { key: 'track',    label: 'Track',    width: 'auto'  },
-  { key: 'duration', label: 'Duration', width: '96px'  },
-  { key: 'plays',    label: 'Plays',    width: '88px'  },
-  { key: 'peak',     label: 'Peak',     width: '128px' },
-  { key: 'last',     label: 'Last',     width: '96px'  },
-];
 
 function PeakBar({ value }) {
   return (
@@ -46,7 +28,7 @@ function PeakBar({ value }) {
       style={{
         position: 'relative',
         height: '4px',
-        width: '60px',
+        width: '88px',
         background: tokens.color.surface.overlay,
         border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
         borderRadius: tokens.radius.frame,
@@ -67,48 +49,68 @@ function PeakBar({ value }) {
   );
 }
 
-function HeaderCell({ col }) {
-  return (
-    <th
-      style={{
-        padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
-        textAlign: 'left',
-        width: col.width === 'auto' ? undefined : col.width,
-        fontFamily: tokens.typography.fontMono,
-        fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.muted,
-        textTransform: 'uppercase',
-        letterSpacing: tokens.typography.tracking.widest,
-        fontWeight: tokens.typography.weight.medium,
-        verticalAlign: 'top',
-      }}
-    >
-      {col.label}
-    </th>
-  );
-}
-
-function BodyCell({ children, align = 'left', mono = true, color, width }) {
-  return (
-    <td
-      style={{
-        padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
-        textAlign: align,
-        width,
-        fontFamily: mono ? tokens.typography.fontMono : tokens.typography.fontSans,
-        fontSize: tokens.typography.size.xs,
-        color: color ?? tokens.color.text.secondary,
-        letterSpacing: mono ? tokens.typography.tracking.wide : 'normal',
-        verticalAlign: 'top',
-        lineHeight: 'var(--andromeda-leading-none, 1)',
-      }}
-    >
-      {children}
-    </td>
-  );
-}
-
 export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
+  const columns = [
+    {
+      key: 'play',
+      header: '',
+      width: '48px',
+      render: (r) => (
+        <IconButton
+          variant={r.id === currentCode ? 'default' : 'ghost'}
+          size="sm"
+          icon={r.id === currentCode && isPlaying ? Pause : Play}
+          aria-label={`Play ${r.track}`}
+          onClick={(e) => { e.stopPropagation(); onPlay?.(r); }}
+        />
+      ),
+    },
+    { key: 'id', header: 'ID', width: '96px', hideBelow: 'md', fold: 'none', color: tokens.color.text.faint },
+    {
+      key: 'track',
+      header: 'Track',
+      primary: true,
+      render: (r) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+          <span
+            style={{
+              fontFamily: tokens.typography.fontSans,
+              fontSize: tokens.typography.size.sm,
+              color: tokens.color.text.primary,
+              fontWeight: tokens.typography.weight.medium,
+              letterSpacing: tokens.typography.tracking.tight,
+              lineHeight: 'var(--andromeda-leading-none, 1)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {r.track}
+          </span>
+          <span
+            style={{
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.sm,
+              color: tokens.color.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: tokens.typography.tracking.widest,
+              lineHeight: 'var(--andromeda-leading-none, 1)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {r.artist}
+          </span>
+        </div>
+      ),
+    },
+    { key: 'duration', header: 'Duration', width: '110px', hideBelow: 'md', fold: 'meta', color: tokens.color.text.primary },
+    { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r) => `${r.plays} plays`, color: tokens.color.text.primary },
+    { key: 'peak', header: 'Peak', width: '124px', hideBelow: 'md', infoValue: (r) => `${r.peak}%`, render: (r) => <PeakBar value={r.peak} /> },
+    { key: 'last', header: 'Last', width: '84px', hideBelow: 'md', color: tokens.color.text.faint },
+  ];
+
   return (
     <Card style={{ flex: 1, minWidth: 0 }}>
       <PanelHeader
@@ -117,7 +119,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
           <span
             style={{
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
+              fontSize: tokens.typography.size.sm,
               color: tokens.color.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
@@ -128,109 +130,13 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
           </span>
         }
       />
-      <div style={{ width: '100%', overflowX: 'auto' }}>
-      <table
-          style={{
-            width: '100%',
-            // 6 fixed columns sum to ~560px; the auto Track column needs real
-            // room or its title/artist collide with the Duration column on a
-            // narrow viewport. Size the min-width for fixed + a legible Track,
-            // and the panel's overflow-x:auto wrapper scrolls the rest (the
-            // sanctioned "wide tables scroll inside their panel" behaviour).
-            minWidth: `calc(${tokens.spacing[12]} * 16)`,
-            borderCollapse: 'collapse',
-            tableLayout: 'fixed',
-          }}
-        >
-          <thead>
-            <tr
-              style={{
-                backgroundImage: `linear-gradient(to right, transparent, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'bottom left',
-                backgroundSize: '100% var(--andromeda-border-width, 1px)',
-              }}
-            >
-              {COLS.map(c => <HeaderCell key={c.key} col={c} />)}
-            </tr>
-          </thead>
-          <motion.tbody
-            variants={rowContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            <AnimatePresence initial={false}>
-              {recentTransmissions.map((r) => (
-                <motion.tr
-                  key={r.id}
-                  variants={rowItem}
-                  exit="exit"
-                  style={{
-                    backgroundImage: `linear-gradient(to right, transparent, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'bottom left',
-                    backgroundSize: '100% var(--andromeda-border-width, 1px)',
-                  }}
-                >
-                  <BodyCell width="48px">
-                    <IconButton
-                      variant={r.id === currentCode ? 'default' : 'ghost'}
-                      size="sm"
-                      icon={r.id === currentCode && isPlaying ? Pause : Play}
-                      aria-label={`Play ${r.track}`}
-                      onClick={() => onPlay?.(r)}
-                    />
-                  </BodyCell>
-                  <BodyCell width="104px" color={tokens.color.text.faint}>
-                    {r.id}
-                  </BodyCell>
-                  <BodyCell mono={false}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span
-                        style={{
-                          fontFamily: tokens.typography.fontSans,
-                          fontSize: tokens.typography.size.sm,
-                          color: tokens.color.text.primary,
-                          fontWeight: tokens.typography.weight.medium,
-                          letterSpacing: '-0.01em',
-                          lineHeight: 'var(--andromeda-leading-none, 1)',
-                        }}
-                      >
-                        {r.track}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: tokens.typography.fontMono,
-                          fontSize: tokens.typography.size.xs,
-                          color: tokens.color.text.muted,
-                          textTransform: 'uppercase',
-                          letterSpacing: tokens.typography.tracking.widest,
-                          lineHeight: 'var(--andromeda-leading-none, 1)',
-                        }}
-                      >
-                        {r.artist}
-                      </span>
-                    </div>
-                  </BodyCell>
-                  <BodyCell width="96px" color={tokens.color.text.primary}>
-                    {r.duration}
-                  </BodyCell>
-                  <BodyCell width="88px" color={tokens.color.text.primary}>
-                    {r.plays}
-                  </BodyCell>
-                  <BodyCell width="128px">
-                    <PeakBar value={r.peak} />
-                  </BodyCell>
-                  <BodyCell width="96px" color={tokens.color.text.faint}>
-                    {r.last}
-                  </BodyCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </motion.tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={recentTransmissions}
+        getRowKey={(r) => r.id}
+        onRowClick={(r) => onPlay?.(r)}
+        selectedRowKey={currentCode}
+      />
     </Card>
   );
 }

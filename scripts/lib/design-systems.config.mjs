@@ -12,6 +12,17 @@
  */
 
 /**
+ * First line of a placeholder file that inject-premium writes for a free-lane
+ * design-system component that was EXPECTED but NOT injected (degraded/free-only
+ * build, or a pin predating the component). The file exists only so static
+ * imports (`../../components/<Name>`) resolve without crashing the build; the
+ * registry/props generators treat any file starting with this sentinel as absent
+ * so a placeholder is never registered or installed. inject-premium.mjs writes
+ * it; generate-registry.mjs reads it — they MUST agree, hence one shared source.
+ */
+export const FREE_DS_PLACEHOLDER_SENTINEL = '// @aicanvas-inject-degraded-placeholder'
+
+/**
  * @typedef {Object} DesignSystemTemplate
  * @property {string} slug         Registry slug, e.g. 'andromeda-mission-control'
  * @property {string} name         Human label for the template widget
