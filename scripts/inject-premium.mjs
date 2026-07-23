@@ -728,6 +728,8 @@ for (const { slug, meta, hasPrompts } of injected) {
       `    tags: ${tags},\n` +
       (meta.image ? `    image: ${JSON.stringify(meta.image)},\n` : '') +
       (meta.dualTheme ? '    dualTheme: true,\n' : '') +
+      (meta.staticPreview ? '    staticPreview: true,\n' : '') +
+      (meta.isBlock ? '    isBlock: true,\n' : '') +
       `    badge: 'Premium',\n` +
       `    PreviewComponent: ${v},\n` +
       `    code: componentCodes[${JSON.stringify(slug)}] ?? '',\n` +

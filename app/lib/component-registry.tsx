@@ -167,6 +167,16 @@ export interface ComponentEntry {
   image?: string
   badge?: string
   dualTheme?: boolean
+  // Opt-in for busy/complex previews (e.g. multi-card blocks with heavy
+  // canvas/WebGL scenes): show `image` as a static preview instead of
+  // live-mounting PreviewComponent; click expands to the real live render in
+  // the existing fullscreen overlay. Off by default (live preview as today).
+  staticPreview?: boolean
+  // Label-only: shows "Premium block" instead of "Premium component" on the
+  // detail page. Does not change `badge` (other surfaces key off badge ===
+  // 'Premium' for real classification logic) or the grid/registry treatment —
+  // blocks and components still share one grid (see project_components_blocks_unified).
+  isBlock?: boolean
   // When set, this component is part of a design system. Drives the
   // "Part of <system>" affordance on the per-component page and the
   // tier toggle in the install drawer.

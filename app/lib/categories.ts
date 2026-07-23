@@ -45,6 +45,16 @@ export const CATEGORIES: readonly Category[] = [
       'Animated background components for React. Built with Tailwind CSS and Motion, ready to copy and paste or install with the shadcn CLI.',
   },
   {
+    label: 'Blocks',
+    slug: 'blocks',
+    title: 'React UI Blocks: Composed Page Sections',
+    description:
+      'React UI blocks: composed, multi-component page sections like pricing tables and hero banners. Tailwind CSS and Motion, free and premium.',
+    h1: 'React UI Blocks',
+    intro:
+      'Composed, multi-component page sections for React: pricing tables, hero banners, and more. Built with Tailwind CSS and Motion, some free and some premium.',
+  },
+  {
     label: 'Buttons & Toggles',
     slug: 'buttons-toggles',
     title: 'Animated React Buttons and Toggles: Free + Tailwind',
