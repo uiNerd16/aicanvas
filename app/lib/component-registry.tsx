@@ -459,6 +459,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
       'A swipeable deck of destination cards. Drag the front card down to fling it off-screen and reveal the next. Each card reveals an animated hotels counter as it comes forward.',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Motion' },
       { label: 'Interactive' },
     ],
@@ -913,6 +914,7 @@ Requirements:
     image: 'https://ik.imagekit.io/aitoolkit/meet-the-crew.png',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -927,6 +929,7 @@ Requirements:
     description: 'A swipeable project task card stack where each card has a unique accent colour, status badge, and due date. Drag left or right to cycle through tasks — springs back the dismissed card to the bottom of the deck.',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -941,6 +944,7 @@ Requirements:
     image: 'https://ik.imagekit.io/aitoolkit/slide-deck.png',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Interactive' },
       { label: 'Typography' },
     ],
@@ -970,6 +974,7 @@ Requirements:
     description: 'Three AI job card stacks with swipe-to-cycle. Brand logos, bookmark toggle, springs.',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Interactive' },
     ],
     dualTheme: true,
@@ -1315,6 +1320,7 @@ Requirements:
       'A draggable card deck you flick through one card at a time. The top card leans toward your drag, then spins away with momentum to reveal the next, and the deck loops endlessly. Every card pairs a picture with a title and a pill action button with hover and press states.',
     tags: [
       { label: 'Cards & Modals', accent: true },
+      { label: 'Blocks', accent: true },
       { label: 'Motion' },
       { label: 'Interactive' },
     ],
