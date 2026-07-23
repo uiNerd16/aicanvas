@@ -63,6 +63,12 @@ body {
   --color-ember-400: #FFB574;
   --color-ember-500: #F59E42;
   --color-ember-600: #D97B1A;
+
+  /* ── Cyan accent — complementary, used sparingly for occasional highlights
+     (e.g. the "Updated" nav badge) so they read distinct from the olive. ── */
+  --color-cyan-400: #7DD3FC;
+  --color-cyan-500: #38BDF8;
+  --color-cyan-600: #0284C7;
 }
 
 body {
