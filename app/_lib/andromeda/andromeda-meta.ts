@@ -138,6 +138,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Live signal waveform. A fluid SVG of a morphing polyline over mirrored level bars and a dashed centreline, animating to signal an active feed and holding a static frame when paused or reduced-motion. One primary series ink; colour only when the wave itself is the live measurement.',
     sourceFile: 'Waveform.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/waveform.png?v=1',
   },
   {
     slug: 'media-card',
@@ -145,6 +146,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Image-backed content tile. A full-bleed photo under a soft bottom scrim, a mono code tag, title and meta, and one corner action — Play, a CTA, or none. Composes the Card frame with markers off, so the image carries the card identity.',
     sourceFile: 'MediaCard.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/media-card.png?v=1',
   },
   {
     slug: 'data-table',
@@ -152,6 +154,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Configuration-driven data grid. Pass columns and rows to get hairline inset dividers, row hover, a selected-row accent edge, and a mobile column-priority fold that tucks low-priority columns behind a per-row info tooltip instead of a horizontal scrollbar.',
     sourceFile: 'DataTable.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/data-table.png?v=2',
   },
   {
     slug: 'music-player',
@@ -159,6 +162,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     description:
       'Block-scale transport bar. Track identity, the full transport cluster, a scrub slider with elapsed and remaining readouts, and like, lyrics, and volume controls — assembled from Andromeda primitives, driven by props with a live demo fallback.',
     sourceFile: 'MusicPlayer.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/music-player.png?v=2',
   },
   {
     slug: 'nav-item',
