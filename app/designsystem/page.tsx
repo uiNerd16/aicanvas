@@ -38,6 +38,18 @@ const OLIVE_USAGE: Record<string, string> = {
   'olive-600': 'Pressed or darker accent state',
 }
 
+const EMBER_USAGE: Record<string, string> = {
+  'ember-400': 'Hover / lighter state',
+  'ember-500': 'Secondary accent: attention, rhythm',
+  'ember-600': 'Pressed or darker state',
+}
+
+const CYAN_USAGE: Record<string, string> = {
+  'cyan-400': 'Light stop — dark-mode text',
+  'cyan-500': 'Complementary accent, used sparingly (e.g. the Updated badge)',
+  'cyan-600': 'Dark stop — light-mode text',
+}
+
 const withUsage = (
   scale: { token: string; hex: string }[],
   usage: Record<string, string>,
@@ -45,6 +57,8 @@ const withUsage = (
 
 const SAND_SCALE = withUsage(readScale('sand'), SAND_USAGE)
 const OLIVE_SCALE = withUsage(readScale('olive'), OLIVE_USAGE)
+const EMBER_SCALE = withUsage(readScale('ember'), EMBER_USAGE)
+const CYAN_SCALE = withUsage(readScale('cyan'), CYAN_USAGE)
 
 // ─── Typography ──────────────────────────────────────────────────────────────
 
@@ -66,6 +80,8 @@ const SEMANTIC_ROLES = [
   { role: 'Border default', light: 'border-sand-300', dark: 'border-sand-800' },
   { role: 'Border hover', light: 'border-sand-400', dark: 'border-sand-700' },
   { role: 'Accent', light: 'text-olive-500', dark: 'text-olive-400' },
+  { role: 'Secondary accent', light: 'text-ember-500', dark: 'text-ember-400' },
+  { role: 'Highlight (occasional)', light: 'text-cyan-600', dark: 'text-cyan-400' },
 ]
 
 // ─── Spacing scale ───────────────────────────────────────────────────────────
@@ -151,6 +167,20 @@ export default function DesignSystemPage() {
           ))}
         </div>
 
+        <SubTitle>Ember scale (secondary accent)</SubTitle>
+        <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {EMBER_SCALE.map((c) => (
+            <ColorSwatch key={c.token} {...c} />
+          ))}
+        </div>
+
+        <SubTitle>Cyan scale (complementary accent)</SubTitle>
+        <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CYAN_SCALE.map((c) => (
+            <ColorSwatch key={c.token} {...c} />
+          ))}
+        </div>
+
         {/* Full palette strip */}
         <SubTitle>Full palette</SubTitle>
         <div className="flex overflow-hidden rounded-2xl">
@@ -163,6 +193,22 @@ export default function DesignSystemPage() {
             />
           ))}
           {OLIVE_SCALE.map((c) => (
+            <div
+              key={c.token}
+              className="h-16 flex-1"
+              style={{ background: c.hex }}
+              title={`${c.token} ${c.hex}`}
+            />
+          ))}
+          {EMBER_SCALE.map((c) => (
+            <div
+              key={c.token}
+              className="h-16 flex-1"
+              style={{ background: c.hex }}
+              title={`${c.token} ${c.hex}`}
+            />
+          ))}
+          {CYAN_SCALE.map((c) => (
             <div
               key={c.token}
               className="h-16 flex-1"

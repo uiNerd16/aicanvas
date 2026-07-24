@@ -148,8 +148,10 @@ export function PremiumCards({
             Design systems, templates and premium components.
           </p>
 
+          {/* Billing cycle toggle + struck yearly-anchor price sit side by side. */}
+          <div className="mt-3 flex items-center gap-3">
           {/* Billing cycle toggle — defaults to Yearly; the selected option is highlighted. */}
-          <div className="mt-3 inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
+          <div className="inline-flex rounded-lg border border-sand-300 bg-sand-200/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
             <button
               type="button"
               onClick={() => setCycle('monthly')}
@@ -173,15 +175,15 @@ export function PremiumCards({
               Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 54%</span>
             </button>
           </div>
+          {/* Yearly anchor: 12 x $8.99 monthly, struck through so the saving reads in money. */}
+          {cycle === 'yearly' && (
+            <span className="text-sm font-medium text-sand-400 line-through dark:text-sand-500">
+              $107.88
+            </span>
+          )}
+          </div>
 
           <div className="mt-4 flex items-baseline gap-2">
-            {/* Yearly anchor: 12 x $8.99 monthly, struck through so the 54%
-                saving reads in money, not just percent. */}
-            {cycle === 'yearly' && (
-              <span className="text-sm font-medium text-sand-400 line-through dark:text-sand-500">
-                $107.88
-              </span>
-            )}
             <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
               {price}
             </span>

@@ -31,11 +31,11 @@ const SYSTEMS = [
     brain: true,
     components: ANDROMEDA_COMPONENT_META.map((c) => ({ slug: c.slug, name: c.name })),
     templates: [
+      { slug: 'signal-room', name: 'Signal Room', domain: 'Audio' },
       { slug: 'mission-control', name: 'Mission Control', domain: 'Sci-Fi' },
       { slug: 'service-order', name: 'Service Order', domain: 'Telecom' },
       // exchange-terminal — hidden, source preserved (see design-systems.config.mjs)
       { slug: 'resource-planning', name: 'Resource Planning', domain: 'Operations' },
-      { slug: 'signal-room', name: 'Signal Room', domain: 'Audio' },
     ],
   },
 ] as const
@@ -43,6 +43,23 @@ const SYSTEMS = [
 // Template routes are full-screen — chrome is suppressed to let the composition
 // fill the viewport. Exported so the sidebars can suppress themselves on them.
 export const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
+
+// Small olive pill for per-row nav highlights (New on Brain, Updated on a
+// freshly-reworked template). Same treatment as the old Design Systems header
+// badge, reused per row.
+function NavBadge({ children, tone = 'olive' }: { children: string; tone?: 'olive' | 'cyan' }) {
+  const palette =
+    tone === 'cyan'
+      ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
+      : 'border-olive-500/30 bg-olive-500/10 text-olive-600 dark:text-olive-400'
+  return (
+    <span
+      className={`shrink-0 rounded-md border px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider ${palette}`}
+    >
+      {children}
+    </span>
+  )
+}
 
 export function DesignSystemsPole({
   collapsed,
@@ -93,9 +110,6 @@ export function DesignSystemsPole({
       >
         <Cube weight="regular" size={16} />
         <span className="flex-1 text-left">Design Systems</span>
-        <span className="rounded-md border border-olive-500/30 bg-olive-500/10 px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
-          New
-        </span>
       </button>
       {!collapsed && (
         <ul className="space-y-0.5">
@@ -177,7 +191,8 @@ export function DesignSystemsPole({
                               : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                           }`}
                         >
-                          <span className="flex-1 truncate">Brain</span>
+                          <span className="truncate">Brain</span>
+                          <NavBadge tone="cyan">New</NavBadge>
                           {/* Lightning marks premium, same affordance as the
                               template rows below. */}
                           <Lightning
@@ -210,7 +225,8 @@ export function DesignSystemsPole({
                                     : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                 }`}
                               >
-                                <span className="flex-1 truncate">{t.name}</span>
+                                <span className={t.slug === 'signal-room' ? 'truncate' : 'flex-1 truncate'}>{t.name}</span>
+                                {t.slug === 'signal-room' && <NavBadge>Updated</NavBadge>}
                                 {/* Lightning marks the template as Premium (replaces
                                     the old domain tag). The bolt is decorative; the
                                     sr-only word folds "Premium" into the link's
