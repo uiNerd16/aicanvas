@@ -73,12 +73,10 @@ function StackedCards() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <div
       aria-hidden
-      className="relative mx-auto mb-10 flex h-28 w-48 cursor-pointer items-end justify-center"
+      className="aic-hero-rise relative mx-auto mb-10 flex h-28 w-48 cursor-pointer items-end justify-center"
+      style={{ animationDuration: '0.5s' }}
       onClick={handleClick}
     >
       {HELLO_CARDS.map((text, cardIdx) => {
@@ -155,7 +153,7 @@ function StackedCards() {
           </motion.div>
         )
       })}
-    </motion.div>
+    </div>
   )
 }
 
@@ -604,20 +602,16 @@ export function HomePageClient({ total, carouselItems }: Props) {
         <section className="flex flex-col items-center text-center">
           <StackedCards />
 
-          <motion.span
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.1 }}
-            className="mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
+          <span
+            className="aic-hero-rise mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300"
+            style={{ animationDelay: '0.1s' }}
           >
             One command, zero tokens
-          </motion.span>
+          </span>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.18 }}
-            className="text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
+          <h1
+            className="aic-hero-slide text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl"
+            style={{ animationDelay: '0.18s' }}
           >
             AI
             {' '}
@@ -630,24 +624,20 @@ export function HomePageClient({ total, carouselItems }: Props) {
             {' '}Native Components and Blocks,
             <br />
             <span className="mt-2 inline-block text-olive-500">Design Systems and Templates</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.26 }}
-            className="mt-4 max-w-2xl text-base leading-relaxed text-sand-400"
+          <p
+            className="aic-hero-rise mt-4 max-w-2xl text-base leading-relaxed text-sand-400"
+            style={{ animationDelay: '0.26s' }}
           >
             Copy one shadcn CLI command and a finished component, block, or complete
             design system lands in your project in seconds. No tokens spent asking an
             AI to generate it from scratch, just real, editable React you own.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.34 }}
-            className="mt-7 flex flex-wrap items-center justify-center gap-3"
+          <div
+            className="aic-hero-rise mt-7 flex flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: '0.34s' }}
           >
             <Link
               href="/components"
@@ -662,7 +652,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
             >
               Get MCP
             </Link>
-          </motion.div>
+          </div>
         </section>
 
         {/* ── Stats strip ── */}

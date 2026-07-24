@@ -142,3 +142,28 @@ html[data-frame] body {
   from { background-position-y: 0; }
   to { background-position-y: 8px; }
 }
+
+/* Homepage hero entrance — CSS-driven, NOT framer-motion, so the above-the-fold
+   hero (the LCP heading) paints straight from the SSR HTML instead of waiting
+   for the client bundle to hydrate. Set animation-delay inline to stagger. */
+@keyframes aicHeroRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.aic-hero-rise {
+  animation: aicHeroRise 0.35s ease-out both;
+}
+/* The LCP heading slides only — never opacity-animated — so it always paints
+   fully opaque on the first frame and can't gate LCP even under main-thread
+   contention. */
+@keyframes aicHeroSlide {
+  from { transform: translateY(10px); }
+  to   { transform: translateY(0); }
+}
+.aic-hero-slide {
+  animation: aicHeroSlide 0.35s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aic-hero-rise,
+  .aic-hero-slide { animation: none; }
+}
