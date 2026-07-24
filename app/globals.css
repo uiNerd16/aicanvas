@@ -167,3 +167,19 @@ html[data-frame] body {
   .aic-hero-rise,
   .aic-hero-slide { animation: none; }
 }
+
+/* Scroll-reveal for homepage static sections — see app/home/Reveal.tsx.
+   Starts hidden (matching the prior framer whileInView), transitions in when
+   the observer sets data-shown. opacity+transform are compositor-friendly. */
+[data-reveal] {
+  opacity: 0;
+  transform: translate(var(--reveal-x, 0), var(--reveal-y, 10px));
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+[data-reveal][data-shown] {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}

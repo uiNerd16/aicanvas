@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useInView, useMotionValue, useMotionTemplate, 
 import {
   ArrowRight,
   MagnifyingGlass,
-  CopySimple,
   RocketLaunch,
   ImageSquare,
   Lightning,
@@ -23,6 +22,7 @@ import { buttonClasses } from '../components/Button'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { SiteFooter } from '../components/SiteFooter'
 import { FoundationLoop } from '../_components/FoundationLoop'
+import { Reveal } from './Reveal'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL } from '../lib/config'
 import { track } from '../lib/analytics'
@@ -371,26 +371,16 @@ function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
   return (
     <section className="mt-16 sm:mt-24">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.35 }}
-        className="mb-4"
-      >
+      <Reveal className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
         <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
-      </motion.div>
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.35, delay: 0.05 }}
-        className="mb-8 max-w-2xl text-base leading-relaxed text-sand-400"
-      >
-        Copy one CLI command and a finished, animated React piece lands in your project, no
-        tokens spent generating it.
-      </motion.p>
+      </Reveal>
+      <Reveal delay={0.05} className="mb-8 max-w-2xl">
+        <p className="text-base leading-relaxed text-sand-400">
+          Copy one CLI command and a finished, animated React piece lands in your project, no
+          tokens spent generating it.
+        </p>
+      </Reveal>
 
       {/* Track — breaks out of the 720px container.
           The inner row is draggable horizontally so users can swipe through
@@ -692,18 +682,12 @@ export function HomePageClient({ total, carouselItems }: Props) {
                       {colIdx > 0 && (
                         <div className="h-10 w-px bg-sand-800 mx-6" aria-hidden />
                       )}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.3, delay: i * 0.06 }}
-                        className="flex flex-col items-center text-center"
-                      >
+                      <Reveal delay={i * 0.06} className="flex flex-col items-center text-center">
                         <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
                           {text ? text : <>{prefix}<AnimatedCount to={value ?? 0} suffix={suffix} /></>}
                         </span>
                         <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
-                      </motion.div>
+                      </Reveal>
                     </div>
                   )
                 })}
@@ -718,12 +702,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
         {/* ── Andromeda spotlight (foundation loop) — same bordered-card treatment
              as the Overview page's System card, with the homepage's own copy/CTA ── */}
         <section className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.35 }}
-          >
+          <Reveal>
             <Link
               href="/design-systems/andromeda"
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 transition-all duration-200 hover:border-sand-700 sm:flex-row"
@@ -753,7 +732,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 <FoundationLoop />
               </div>
             </Link>
-          </motion.div>
+          </Reveal>
         </section>
 
         {/* ── Featured carousel ── */}
@@ -763,13 +742,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
 
         {/* ── Who it's for ── */}
         <section id="audience" className="mt-16 sm:mt-24 scroll-mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.35 }}
-            className="mb-8"
-          >
+          <Reveal className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">Built for everyone</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">
               For developers. For designers. For makers. For your AI agent.
@@ -777,7 +750,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
             <p className="mt-3 text-base leading-relaxed text-sand-400">
               Most component libraries serve one kind of person. AI Canvas installs the same finished code for everyone who builds, and every install costs zero AI tokens instead of burning them on a from-scratch generation. Drop a component in with the shadcn CLI, reshape it with an AI agent, or let an agent browse and install it for you.
             </p>
-          </motion.div>
+          </Reveal>
 
           <div className="grid grid-cols-1 gap-4">
             {[
@@ -810,12 +783,10 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 badgeStyle: 'text-sand-400 ring-sand-700',
               },
             ].map(({ icon, audience, description, badges, badgeStyle }, i) => (
-              <motion.div
+              <Reveal
                 key={audience}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.35, delay: i * 0.08 }}
+                y={14}
+                delay={i * 0.08}
                 className="flex flex-col rounded-xl border border-sand-800 bg-sand-900 p-5"
               >
                 <div className="mb-3 flex items-center gap-2.5">
@@ -835,23 +806,17 @@ export function HomePageClient({ total, carouselItems }: Props) {
                     </span>
                   ))}
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </section>
 
         {/* ── How it works — vertical timeline ── */}
         <section id="how-remix" className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.35 }}
-            className="mb-8"
-          >
+          <Reveal className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">How it works</p>
             <h2 className="mt-1 text-xl font-bold text-sand-50">Three steps. Your way.</h2>
-          </motion.div>
+          </Reveal>
 
           <div className="relative flex flex-col gap-0">
             {/* Connecting dotted line */}
@@ -885,12 +850,11 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 desc: 'It arrives as real code you own. Ship it as is, or reshape it with an AI agent in seconds. It is yours.',
               },
             ].map((step, i) => (
-              <motion.div
+              <Reveal
                 key={step.num}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.4, delay: i * 0.12 }}
+                x={-20}
+                y={0}
+                delay={i * 0.12}
                 className="flex items-start gap-5 py-5"
               >
                 {/* Node on the timeline */}
@@ -905,7 +869,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
                   </div>
                   <p className="mt-1.5 text-base leading-relaxed text-sand-500">{step.desc}</p>
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -915,13 +879,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
         <section className="mt-16 sm:mt-24">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-[2fr_3fr] sm:gap-12">
             {/* Intro rail, sticky on desktop */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.35 }}
-              className="self-start sm:sticky sm:top-24"
-            >
+            <Reveal className="self-start sm:sticky sm:top-24">
               <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">FAQ</p>
               <h2 className="mt-1 text-xl font-bold text-sand-50">Questions, answered.</h2>
               <p className="mt-3 text-base leading-relaxed text-sand-400">
@@ -935,19 +893,17 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 See all FAQs
                 <CaretRight weight="regular" size={14} />
               </Link>
-            </motion.div>
+            </Reveal>
 
             {/* Accordion cards */}
             <div className="space-y-2.5">
               {FAQ_ITEMS.map(({ q, a }, i) => {
                 const open = openFaq === i
                 return (
-                  <motion.div
+                  <Reveal
                     key={q}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-30px' }}
-                    transition={{ duration: 0.3, delay: i * 0.04 }}
+                    y={8}
+                    delay={i * 0.04}
                     className={`rounded-xl border transition-colors ${
                       open
                         ? 'border-sand-700 bg-sand-900'
@@ -980,7 +936,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
                         <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-400">{a}</p>
                       </div>
                     </div>
-                  </motion.div>
+                  </Reveal>
                 )
               })}
             </div>
@@ -989,11 +945,8 @@ export function HomePageClient({ total, carouselItems }: Props) {
 
         {/* ── Final CTA ── */}
         <section className="mt-16 sm:mt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.4 }}
+          <Reveal
+            y={12}
             className="relative overflow-hidden rounded-2xl border border-olive-500/20 bg-gradient-to-br from-olive-500/8 via-transparent to-transparent p-8 text-center ring-1 ring-inset ring-olive-500/10"
           >
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -1027,7 +980,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
                 View on GitHub
               </a>
             </div>
-          </motion.div>
+          </Reveal>
         </section>
 
         <SiteFooter />
