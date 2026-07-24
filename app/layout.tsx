@@ -80,8 +80,8 @@ export const metadata: Metadata = {
     images: ['/AIcanvas-OG-v2.png'],
   },
   icons: {
-    icon: '/ai-canvas-icon.svg',
-    shortcut: '/ai-canvas-icon.svg',
+    icon: '/ai-canvas-icon-square.svg',
+    shortcut: '/ai-canvas-icon-square.svg',
   },
   robots: {
     index: true,
@@ -101,7 +101,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'AI Canvas',
   url: SITE_URL,
-  logo: `${SITE_URL}/ai-canvas-icon.svg`,
+  logo: `${SITE_URL}/ai-canvas-icon-square.svg`,
   sameAs: [GITHUB_URL],
 }
 
