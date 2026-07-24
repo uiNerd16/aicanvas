@@ -142,3 +142,44 @@ html[data-frame] body {
   from { background-position-y: 0; }
   to { background-position-y: 8px; }
 }
+
+/* Homepage hero entrance — CSS-driven, NOT framer-motion, so the above-the-fold
+   hero (the LCP heading) paints straight from the SSR HTML instead of waiting
+   for the client bundle to hydrate. Set animation-delay inline to stagger. */
+@keyframes aicHeroRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.aic-hero-rise {
+  animation: aicHeroRise 0.35s ease-out both;
+}
+/* The LCP heading slides only — never opacity-animated — so it always paints
+   fully opaque on the first frame and can't gate LCP even under main-thread
+   contention. */
+@keyframes aicHeroSlide {
+  from { transform: translateY(10px); }
+  to   { transform: translateY(0); }
+}
+.aic-hero-slide {
+  animation: aicHeroSlide 0.35s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aic-hero-rise,
+  .aic-hero-slide { animation: none; }
+}
+
+/* Scroll-reveal for homepage static sections — see app/home/Reveal.tsx.
+   Starts hidden (matching the prior framer whileInView), transitions in when
+   the observer sets data-shown. opacity+transform are compositor-friendly. */
+[data-reveal] {
+  opacity: 0;
+  transform: translate(var(--reveal-x, 0), var(--reveal-y, 10px));
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+[data-reveal][data-shown] {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}

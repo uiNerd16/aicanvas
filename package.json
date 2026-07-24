@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "screenshot": "node scripts/screenshot.mjs",
     "screenshot:andromeda": "node scripts/screenshot-andromeda.mjs",
+    "speed": "npx unlighthouse@latest --site https://aicanvas.me",
     "validate:registry": "npx ts-node scripts/validate-registry-json.ts",
     "gsc:audit": "npx ts-node scripts/gsc-audit.ts",
     "gsc:submit": "npx ts-node scripts/gsc-submit.ts",

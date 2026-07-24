@@ -104,3 +104,6 @@ app/lib/andromeda-brain-teaser.generated.ts
 # Private thoughts: planning, strategy, monetization, legal/tax reasoning, notes.
 # NEVER commit these — the repo is public. Local only. (See also /business-strategy/.)
 /_private/
+
+# unlighthouse scan output (npm run speed)
+.unlighthouse/
