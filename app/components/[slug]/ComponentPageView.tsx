@@ -672,7 +672,7 @@ export default function ComponentPageView({
                 initial={false}
                 animate={{ opacity: activeTab === 'preview' ? 1 : 0 }}
                 transition={{ duration: 0.18 }}
-                className="absolute inset-0 flex items-center justify-center"
+                className="group/preview absolute inset-0 flex items-center justify-center"
                 style={{ pointerEvents: activeTab === 'preview' ? 'auto' : 'none' }}
                 aria-hidden={activeTab !== 'preview'}
               >
@@ -693,7 +693,7 @@ export default function ComponentPageView({
                         aria-hidden={posterLive}
                         className="absolute inset-0 h-full w-full object-cover object-top"
                       />
-                      {posterLive ? (
+                      {posterLive && (
                         // Laid out at a pinned 1200px, not at the box's ~848px:
                         // the box would squeeze a section-scale block to its
                         // min-content width and crop the outer cards at a
@@ -719,7 +719,28 @@ export default function ComponentPageView({
                         >
                           {children}
                         </motion.div>
-                      ) : (
+                      )}
+                      {posterLive && (
+                        // Same centre pill as the poster carries, kept once the
+                        // block is live so the crop still reads as "there is more
+                        // of this, open it". No dim and no full-box hit area this
+                        // time: the block underneath is interactive now, so only
+                        // the pill itself takes the pointer.
+                        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              track('Fullscreen Open', { component: slug })
+                              setFullscreen(true)
+                            }}
+                            className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900"
+                          >
+                            <CornersOut weight="regular" size={14} />
+                            Click for full view
+                          </button>
+                        </div>
+                      )}
+                      {!posterLive && (
                         <button
                           type="button"
                           // Hover is the handover. Touch has no hover, so a tap
