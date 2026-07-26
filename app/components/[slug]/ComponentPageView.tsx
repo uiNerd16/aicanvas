@@ -218,6 +218,11 @@ export default function ComponentPageView({
   // Reset when switching components so the next open re-fetches.
   useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
+  // staticPreview blocks paint their screenshot first, then hand over to the
+  // real component on the first sign the visitor cares: hovering the box, or
+  // pressing the theme toggle, which a one-theme screenshot physically cannot
+  // answer. Nobody who scrolls past pays for the block's WebGL scene.
+  const [posterLive, setPosterLive] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
@@ -568,7 +573,13 @@ export default function ComponentPageView({
                     size="md"
                     iconOnly
                     disabled={!dualTheme}
-                    onClick={() => dualTheme && setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+                    onClick={() => {
+                      if (!dualTheme) return
+                      // A screenshot cannot answer a theme change — this is the
+                      // one press that always earns the live block.
+                      setPosterLive(true)
+                      setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+                    }}
                     className="overflow-hidden"
                   >
                     <AnimatePresence mode="wait" initial={false}>
@@ -650,6 +661,14 @@ export default function ComponentPageView({
             {/* Content area — background controlled by cardTheme, isolated from global theme */}
             <div
               data-card-theme={cardTheme}
+              // overflow-hidden boxes are still programmatically scrollable, so
+              // tabbing into a live block that is deliberately cropped makes the
+              // browser scroll the offscreen control into view and leaves the
+              // composition permanently shifted. Snap it back.
+              onScroll={(e) => {
+                e.currentTarget.scrollLeft = 0
+                e.currentTarget.scrollTop = 0
+              }}
               className={`relative isolate h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
                 cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
               }`}
@@ -661,7 +680,7 @@ export default function ComponentPageView({
                 initial={false}
                 animate={{ opacity: activeTab === 'preview' ? 1 : 0 }}
                 transition={{ duration: 0.18 }}
-                className="absolute inset-0 flex items-center justify-center"
+                className="group/preview absolute inset-0 flex items-center justify-center"
                 style={{ pointerEvents: activeTab === 'preview' ? 'auto' : 'none' }}
                 aria-hidden={activeTab !== 'preview'}
               >
@@ -672,27 +691,92 @@ export default function ComponentPageView({
                     canvas / three.js / heavy framer-motion components). */}
                 {!fullscreen && (
                   staticPreview && previewImage ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        track('Fullscreen Open', { component: slug })
-                        setFullscreen(true)
-                      }}
-                      className="group/static absolute inset-0 cursor-pointer"
-                      aria-label={`Expand ${name} preview`}
-                    >
+                    <>
+                      {/* The poster stays mounted underneath: it is the instant
+                          first paint, and it backs the live block while three.js
+                          loads so the box never flashes empty. */}
                       <img
                         src={optimizeImageKitUrl(previewImage, 'detail')}
                         alt={name}
-                        className="h-full w-full object-cover object-top"
+                        aria-hidden={posterLive}
+                        className="absolute inset-0 h-full w-full object-cover object-top"
                       />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover/static:bg-black/30">
-                        <span className="flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover/static:opacity-100">
-                          <CornersOut weight="regular" size={14} />
-                          Click to view live
-                        </span>
-                      </span>
-                    </button>
+                      {posterLive && (
+                        // Laid out at a pinned 1200px, not at the box's ~848px:
+                        // the box would squeeze a section-scale block to its
+                        // min-content width and crop the outer cards at a
+                        // random-looking point. Pinned width + justify-center
+                        // gives the same symmetric crop every time. 1:1 scale on
+                        // purpose, no zoom: the crystal overlay turns screen px
+                        // into world units off getBoundingClientRect, so a CSS
+                        // scale would keep the gems in place but size them wrong
+                        // against their cards.
+                        // ponytail: one block uses this today. When a second one
+                        // needs a different number this goes to meta.json.
+                        <motion.div
+                          key={previewKey}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.25 }}
+                          // Pinned width only from lg up. Tailwind breakpoints are
+                          // viewport-based, so pinning 1200px on a 700px window
+                          // would lay the block out at its two-column breakpoint
+                          // and then crop that to a sliver. Below lg the block
+                          // just fills the box and picks its own layout.
+                          // relative z-10: the poster is absolutely positioned,
+                          // so without a stacking rung of its own the in-flow
+                          // live block paints UNDER it (CSS painting order puts
+                          // positioned boxes last) and disappears the moment the
+                          // fade ends and opacity:1 stops making a layer.
+                          className="relative z-10 w-full shrink-0 lg:w-[1200px]"
+                        >
+                          {children}
+                        </motion.div>
+                      )}
+                      {posterLive && (
+                        // Same centre pill as the poster carries, kept once the
+                        // block is live so the crop still reads as "there is more
+                        // of this, open it". No dim and no full-box hit area this
+                        // time: the block underneath is interactive now, so only
+                        // the pill itself takes the pointer.
+                        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              track('Fullscreen Open', { component: slug })
+                              setFullscreen(true)
+                            }}
+                            className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900"
+                          >
+                            <CornersOut weight="regular" size={14} />
+                            Click for full view
+                          </button>
+                        </div>
+                      )}
+                      {!posterLive && (
+                        <button
+                          type="button"
+                          // Hover is the handover. Touch has no hover, so a tap
+                          // keeps the old behaviour and opens fullscreen.
+                          onPointerEnter={(e) => {
+                            if (e.pointerType === 'mouse') setPosterLive(true)
+                          }}
+                          onClick={() => {
+                            track('Fullscreen Open', { component: slug })
+                            setFullscreen(true)
+                          }}
+                          className="group/static absolute inset-0 cursor-pointer"
+                          aria-label={`Expand ${name} preview`}
+                        >
+                          <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover/static:bg-black/30">
+                            <span className="flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover/static:opacity-100">
+                              <CornersOut weight="regular" size={14} />
+                              Click to view live
+                            </span>
+                          </span>
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <div key={previewKey} className="contents">
                       {children}
