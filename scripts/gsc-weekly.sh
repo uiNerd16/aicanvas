@@ -30,16 +30,23 @@ cd "$REPO" || { echo "[$TS] FAILED to cd $REPO" >> "$LOG"; exit 1; }
 AUDIT_OK=true
 npm run gsc:audit >> "$LOG" 2>&1 || AUDIT_OK=false
 
-# Pull summary counts from the new audit.json.
-COUNTS=$(node -e '
-  const j = JSON.parse(require("fs").readFileSync("scripts/gsc-output/audit.json","utf8"));
-  const t = j.totalUrls;
-  const i = j.counts["Indexed"] || 0;
-  const u = j.counts["Unknown to Google"] || 0;
-  const d = j.counts["Discovered, awaiting crawl"] || 0;
-  const c = j.counts["Crawled, not indexed"] || 0;
-  console.log(`${i}/${t} indexed; ${u} unknown; ${d} discovered; ${c} crawled-not-indexed`);
-' 2>/dev/null) || COUNTS="audit failed"
+# Pull summary counts from the new audit.json — ONLY if the audit succeeded.
+# On failure audit.json is still the PREVIOUS run's file, so reporting its
+# numbers reads as a fresh result and hides the breakage (that is exactly how
+# the 2026-07-20 run logged "DONE" with week-old counts for a week).
+if $AUDIT_OK; then
+  COUNTS=$(node -e '
+    const j = JSON.parse(require("fs").readFileSync("scripts/gsc-output/audit.json","utf8"));
+    const t = j.totalUrls;
+    const i = j.counts["Indexed"] || 0;
+    const u = j.counts["Unknown to Google"] || 0;
+    const d = j.counts["Discovered, awaiting crawl"] || 0;
+    const c = j.counts["Crawled, not indexed"] || 0;
+    console.log(`${i}/${t} indexed; ${u} unknown; ${d} discovered; ${c} crawled-not-indexed`);
+  ' 2>/dev/null) || COUNTS="audit ran but audit.json is unreadable"
+else
+  COUNTS="audit FAILED, no fresh data"
+fi
 
 # 2. Submit (only if audit succeeded)
 SUBMIT_SUMMARY=""
@@ -61,5 +68,9 @@ fi
 osascript -e "display notification \"$BODY\" with title \"$TITLE\"" 2>>"$LOG" || true
 
 {
-  echo "[$TS] DONE — $COUNTS — ${SUBMIT_SUMMARY:-no submit}"
+  if $AUDIT_OK; then
+    echo "[$TS] DONE — $COUNTS — ${SUBMIT_SUMMARY:-no submit}"
+  else
+    echo "[$TS] FAILED — $COUNTS"
+  fi
 } >> "$LOG"
