@@ -661,6 +661,14 @@ export default function ComponentPageView({
             {/* Content area — background controlled by cardTheme, isolated from global theme */}
             <div
               data-card-theme={cardTheme}
+              // overflow-hidden boxes are still programmatically scrollable, so
+              // tabbing into a live block that is deliberately cropped makes the
+              // browser scroll the offscreen control into view and leaves the
+              // composition permanently shifted. Snap it back.
+              onScroll={(e) => {
+                e.currentTarget.scrollLeft = 0
+                e.currentTarget.scrollTop = 0
+              }}
               className={`relative isolate h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
                 cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
               }`}
@@ -710,12 +718,17 @@ export default function ComponentPageView({
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.25 }}
+                          // Pinned width only from lg up. Tailwind breakpoints are
+                          // viewport-based, so pinning 1200px on a 700px window
+                          // would lay the block out at its two-column breakpoint
+                          // and then crop that to a sliver. Below lg the block
+                          // just fills the box and picks its own layout.
                           // relative z-10: the poster is absolutely positioned,
                           // so without a stacking rung of its own the in-flow
                           // live block paints UNDER it (CSS painting order puts
                           // positioned boxes last) and disappears the moment the
                           // fade ends and opacity:1 stops making a layer.
-                          className="relative z-10 w-[1200px] shrink-0 max-sm:w-full"
+                          className="relative z-10 w-full shrink-0 lg:w-[1200px]"
                         >
                           {children}
                         </motion.div>
