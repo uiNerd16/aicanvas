@@ -202,7 +202,7 @@ async function validateRegistryJSON(slug: string): Promise<ValidationResult> {
 // Main execution
 const slug = process.argv[2]
 if (!slug) {
-  console.error('Usage: ts-node scripts/validate-registry-json.ts <slug>')
+  console.error('Usage: npm run validate:registry -- <slug>')
   process.exit(1)
 }
 

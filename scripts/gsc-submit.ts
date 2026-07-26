@@ -33,7 +33,7 @@
 import fs from 'fs'
 import path from 'path'
 import { google } from 'googleapis'
-import { GAXIOS_OPTS, guardedCall } from './gsc-net'
+import { GAXIOS_OPTS, guardedCall } from './gsc-net.ts'
 
 // ─────────────────────────────────────────────────────────────────────
 // .env.local loader (mirrors gsc-audit.ts to avoid a dotenv dependency)

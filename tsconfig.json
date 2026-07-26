@@ -11,6 +11,10 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // Lets scripts/*.ts import siblings as './x.ts', which is what Node's
+    // native type stripping needs to run them with plain `node` (no ts-node).
+    // Safe here because noEmit is true — nothing is rewritten on build.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
