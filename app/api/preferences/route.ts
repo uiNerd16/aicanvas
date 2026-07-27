@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '../../lib/supabase/server'
+import { syncBrevoContact } from '../../lib/brevo'
 import type { AiPlatform, PackageManager } from '../../lib/supabase/types'
 
 const PKG_VALUES: PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun']
@@ -86,6 +87,9 @@ export async function PUT(request: NextRequest) {
       console.error('[preferences PUT newsletter]', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+    // Mirror to Brevo; best-effort — the DB row above is the truth and a
+    // missed sync self-heals on the next toggle or bulk re-import.
+    await syncBrevoContact(user.email, newsletter)
   }
 
   // Only include fields the client explicitly sent. Without this, a partial
