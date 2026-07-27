@@ -224,9 +224,11 @@ export function HomeClient({
         ) : (
           <Breadcrumbs
             crumbs={
+              // Root crumb names the whole grid: it lists components AND blocks,
+              // matching the sidebar's "Components & Blocks" entry.
               category
-                ? [{ label: 'Components', href: '/components' }, { label: category }]
-                : [{ label: 'Components', href: '/components' }]
+                ? [{ label: 'Components & Blocks', href: '/components' }, { label: category }]
+                : [{ label: 'Components & Blocks', href: '/components' }]
             }
           />
         )}
@@ -244,7 +246,7 @@ export function HomeClient({
             </span>
           ) : (
             <>
-              <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components</Link>
+              <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components &amp; Blocks</Link>
               {category && <span className="text-olive-500">/{category}</span>}
             </>
           )}

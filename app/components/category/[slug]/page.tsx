@@ -70,7 +70,7 @@ export default async function CategoryPage({
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Components',
+        name: 'Components & Blocks',
         item: `${SITE_URL}/components`,
       },
       {
