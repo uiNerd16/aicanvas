@@ -295,7 +295,7 @@ export default async function Page({
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Components', item: `${SITE_URL}/components` },
+      { '@type': 'ListItem', position: 2, name: 'Components & Blocks', item: `${SITE_URL}/components` },
       { '@type': 'ListItem', position: 3, name: entry.name, item: url },
     ],
   }

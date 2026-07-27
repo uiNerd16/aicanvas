@@ -62,12 +62,11 @@ export function ComponentCard({ name, description, href, image, badge, slug, pos
             )}
             <span className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-300 ease-out group-hover:grid-cols-[1fr]">
               <span className="overflow-hidden">
+                {/* Tier only, no type noun: this shell is reused by blocks and
+                    Andromeda templates, so "Premium component" mislabeled them.
+                    The type word lives on the detail page (see isBlock). */}
                 <span className="block whitespace-nowrap pl-1.5 pr-0.5 text-[11px] font-semibold leading-none">
-                  {badge === 'Premium'
-                    ? 'Premium component'
-                    : badge === 'Free'
-                      ? 'Free component'
-                      : badge}
+                  {badge}
                 </span>
               </span>
             </span>

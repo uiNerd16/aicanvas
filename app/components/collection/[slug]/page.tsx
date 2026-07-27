@@ -76,7 +76,7 @@ export default async function CollectionPage({
       {
         '@type': 'ListItem',
         position: 1,
-        name: 'Components',
+        name: 'Components & Blocks',
         item: `${SITE_URL}/components`,
       },
       {
