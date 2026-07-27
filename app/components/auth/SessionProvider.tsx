@@ -11,9 +11,9 @@ type Preferences = {
   newsletter_opt_in: boolean
 }
 
-// newsletter_opt_in defaults to false (migration 0007): the newsletter is
-// explicit opt-in, so a user is only subscribed once they turn the toggle on
-// in /account/settings.
+// newsletter_opt_in mirrors newsletter_subscribers.status === 'subscribed'
+// (migration 0015): explicit opt-in, so it's only true once the user turns
+// the toggle on in /account/settings.
 const EMPTY_PREFS: Preferences = {
   package_manager: null,
   ai_platform: null,

@@ -16,15 +16,22 @@ export default async function SettingsPage() {
   // The column stays in Supabase untouched.
   const { data } = await supabase
     .from('user_preferences')
-    .select('package_manager, newsletter_opt_in')
+    .select('package_manager')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  // Newsletter state lives in newsletter_subscribers (migration 0015) — the
+  // toggle is ON only for an explicit 'subscribed'; 'soft' and 'unsubscribed'
+  // both render as off. user_preferences.newsletter_opt_in is deprecated.
+  const { data: sub } = await supabase
+    .from('newsletter_subscribers')
+    .select('status')
     .eq('user_id', user.id)
     .maybeSingle()
 
   const initial = {
     package_manager: (data?.package_manager ?? null) as PackageManager | null,
-    // Default false matches the DB column default (migration 0007) — the
-    // newsletter is explicit opt-in, off until the user turns it on here.
-    newsletter_opt_in: data?.newsletter_opt_in ?? false,
+    newsletter_opt_in: sub?.status === 'subscribed',
   }
 
   // change vs set mode = whether the account has a usable password. Providers
