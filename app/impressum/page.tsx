@@ -42,8 +42,12 @@ export default function ImpressumPage() {
           Impressum
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Angaben gemäß § 5 DDG. / Information pursuant to § 5 DDG (Digital
-          Services Act, Germany).
+          Angaben gemäß § 5 DDG. / Information pursuant to § 5 DDG (German
+          Digital Services Act).
+        </p>
+        <p className="mt-2 text-sm text-sand-500">
+          Bei Abweichungen ist die deutsche Fassung maßgeblich. / In case of
+          discrepancies, the German version prevails.
         </p>
 
         {/* ── Haftung für Inhalte / Liability for content ────────────────── */}
@@ -113,18 +117,29 @@ export default function ImpressumPage() {
         <section className="mt-10">
           <h2 className="text-lg font-bold text-sand-50">Urheberrecht / Copyright</h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Die im AI Canvas Registry veröffentlichten Komponenten stehen unter
-            der MIT-Lizenz. Sie dürfen sie frei kopieren, ändern und einsetzen.
-            Die Website selbst (Layout, Texte, Branding) ist das Werk des
+            Die kostenlosen Komponenten und Blöcke im AI Canvas Registry stehen
+            unter der MIT-Lizenz. Sie dürfen sie frei kopieren, ändern und
+            einsetzen. Premium-Inhalte (Komponenten, Blöcke, Templates und
+            Design-Systeme) stehen nicht unter der MIT-Lizenz, sondern
+            unterliegen der{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>
+            . Die Website selbst (Layout, Texte, Branding) ist das Werk des
             Betreibers und urheberrechtlich geschützt. Auf dieser Seite
             verwendete Inhalte Dritter (Icons, Schriften, eingebundene
             Bibliotheken) sind als solche gekennzeichnet und bleiben Eigentum des
             jeweiligen Rechteinhabers.
           </p>
           <p className="mt-3 leading-relaxed text-sand-500">
-            Components published in the AI Canvas registry are released under the
-            MIT licence. You are free to copy them, modify them, and ship them.
-            The website itself (page layout, written copy, branding) is the
+            Free components and blocks published in the AI Canvas registry are
+            released under the MIT licence. You are free to copy them, modify
+            them, and ship them. Premium content (components, blocks, templates
+            and design systems) is not MIT licensed and is governed by the{' '}
+            <Link href="/premium-license" className="text-olive-400 hover:underline">
+              AI Canvas Premium License
+            </Link>
+            . The website itself (page layout, written copy, branding) is the
             Creator&apos;s work and copyright. Third-party content used on this
             site (icons, fonts, embedded libraries) is identified as such and
             remains the property of its respective rights holder.
