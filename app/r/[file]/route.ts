@@ -174,8 +174,10 @@ function premiumStub(realBody: string, slug: string): NextResponse {
   // The message must be RENDERABLE, not a comment — shadcn's add transform
   // strips comments. A string const + JSX text both survive and show the upgrade
   // path when the placeholder is used.
+  // No type noun: this path serves premium standalones, blocks and templates
+  // alike, and the stub only has the raw registry JSON (no isBlock) in scope.
   const msg =
-    `"${title}" is a premium AI Canvas component. ` +
+    `"${title}" is premium AI Canvas content. ` +
     `This is a placeholder. Unlock the real source with an AI Canvas Premium ` +
     `account at https://aicanvas.me/pricing`
   const stub =
@@ -196,7 +198,7 @@ function premiumStub(realBody: string, slug: string): NextResponse {
     name: slug,
     type: 'registry:ui',
     title: `${title} (Premium, locked)`,
-    description: 'Premium AI Canvas component. Upgrade to install the real source: https://aicanvas.me/pricing',
+    description: 'Premium AI Canvas content. Upgrade to install the real source: https://aicanvas.me/pricing',
     dependencies: [],
     registryDependencies: [],
     files,

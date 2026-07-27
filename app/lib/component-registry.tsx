@@ -176,6 +176,8 @@ export interface ComponentEntry {
   // detail page. Does not change `badge` (other surfaces key off badge ===
   // 'Premium' for real classification logic) or the grid/registry treatment —
   // blocks and components still share one grid (see project_components_blocks_unified).
+  // Comes from premium meta.json. Free blocks carry only the Blocks category
+  // tag, so read block-ness through isBlockEntry(), never this field directly.
   isBlock?: boolean
   // When set, this component is part of a design system. Drives the
   // "Part of <system>" affordance on the per-component page and the
@@ -188,6 +190,14 @@ export interface ComponentEntry {
   // app/lib/component-copy.ts and is merged in at the bottom of this file.
   useCases?: string[]
   about?: string
+}
+
+// One source of truth for "is this a block", because there are two signals and
+// they don't overlap: premium blocks set isBlock in their meta.json, free blocks
+// only carry the Blocks category tag. Keying labels off isBlock alone left every
+// free block being called a component.
+export function isBlockEntry(entry: { isBlock?: boolean; tags: Tag[] }): boolean {
+  return entry.isBlock === true || entry.tags.some((t) => t.label === 'Blocks')
 }
 
 // Serializable subset of ComponentEntry — pass this across the
