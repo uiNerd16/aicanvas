@@ -33,6 +33,12 @@ export async function syncBrevoContact(
   const h = headers()
   if (!h) return false
   const listId = Number(process.env.BREVO_LIST_ID)
+  // A subscribe without a valid list id would un-blacklist the contact but
+  // never make it campaign-reachable — a silent half-sync. Fail loud instead.
+  if (subscribed && (!Number.isInteger(listId) || listId <= 0)) {
+    console.error('[brevo sync] BREVO_LIST_ID missing/invalid')
+    return false
+  }
   try {
     const res = await fetch(`${BREVO_API}/contacts`, {
       method: 'POST',

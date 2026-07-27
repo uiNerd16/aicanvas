@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '../../lib/supabase/server'
+import { createAdminClient } from '../../lib/supabase/admin'
 import { syncBrevoContact } from '../../lib/brevo'
 import type { AiPlatform, PackageManager } from '../../lib/supabase/types'
 
@@ -66,10 +67,28 @@ export async function PUT(request: NextRequest) {
   // user_preferences. Toggling OFF is an explicit opt-out — status becomes
   // 'unsubscribed' with a timestamp, never back to 'soft', so the choice is
   // recorded and the address is excluded from every future send.
+  //
+  // Admin client, not the RLS client: the row for this email may be orphaned
+  // (user_id null after account deletion + re-signup, or webhook-inserted),
+  // and ON CONFLICT DO UPDATE against a row failing the RLS USING clause
+  // raises 42501 instead of skipping — the toggle would 500 forever. The
+  // write is still self-scoped: both email and id come from the verified
+  // session, never from the request body.
   if (newsletter !== undefined) {
     if (!user.email) return NextResponse.json({ error: 'no email on account' }, { status: 400 })
+    const admin = createAdminClient()
     const now = new Date().toISOString()
-    const { error } = await supabase
+
+    // If this account's row lives under a previous email address, detach it
+    // first so the upsert below can't collide with the partial unique index
+    // on user_id. The old row stays as an address-level suppression record.
+    await admin
+      .from('newsletter_subscribers')
+      .update({ user_id: null, updated_at: now })
+      .eq('user_id', user.id)
+      .neq('email', user.email)
+
+    const { error } = await admin
       .from('newsletter_subscribers')
       .upsert(
         newsletter
@@ -87,8 +106,9 @@ export async function PUT(request: NextRequest) {
       console.error('[preferences PUT newsletter]', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-    // Mirror to Brevo; best-effort — the DB row above is the truth and a
-    // missed sync self-heals on the next toggle or bulk re-import.
+    // Mirror to Brevo. The DB row above is the truth; the campaign runbook
+    // additionally runs scripts/sync-brevo-contacts.mjs before every send,
+    // so a missed mirror here cannot cause a mail to an opted-out address.
     await syncBrevoContact(user.email, newsletter)
   }
 

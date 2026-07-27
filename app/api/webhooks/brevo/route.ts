@@ -38,6 +38,29 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient()
   const now = new Date().toISOString()
+
+  // Out-of-order guard: Brevo retries and late deliveries must not overwrite
+  // a re-subscribe that happened AFTER the event. If the row is currently
+  // 'subscribed' with a subscribed_at newer than the event timestamp, ignore.
+  // Missing/unparsable timestamps fall through to applying the suppression —
+  // losing an opt-out is worse than losing a re-subscribe.
+  const eventTimeRaw = body?.date_event ?? body?.date ?? body?.ts_event
+  const eventTime = eventTimeRaw ? Date.parse(String(eventTimeRaw)) : NaN
+  if (!Number.isNaN(eventTime)) {
+    const { data: existing } = await admin
+      .from('newsletter_subscribers')
+      .select('status, subscribed_at')
+      .eq('email', email)
+      .maybeSingle()
+    if (
+      existing?.status === 'subscribed' &&
+      existing.subscribed_at &&
+      Date.parse(existing.subscribed_at) > eventTime
+    ) {
+      return NextResponse.json({ ok: true, ignored: true, stale: true })
+    }
+  }
+
   const { error } = await admin
     .from('newsletter_subscribers')
     .upsert(
