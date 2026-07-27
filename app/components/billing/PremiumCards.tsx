@@ -23,7 +23,7 @@ const FREE_FEATURES = [
 ]
 
 const PREMIUM_FEATURES = [
-  'Every premium component, one command install',
+  'Every premium component and block, one command install',
   'Full design systems, tokens to templates',
   'All premium templates, source included',
   'New premium releases included as they ship',
@@ -145,7 +145,7 @@ export function PremiumCards({
             </h2>
           </div>
           <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-            Design systems, templates and premium components.
+            Design systems, templates, components and blocks.
           </p>
 
           {/* Billing cycle toggle + struck yearly-anchor price sit side by side. */}
