@@ -152,7 +152,14 @@ export default function ImpressumPage() {
             Diensteanbieter / Service provider
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Daniel Tatu, Strahuberstr. 13, 81479 München, Deutschland
+            Alexandru-Daniel Tatu, Strähuberstr. 13, 81479 München, Deutschland
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Wirtschafts-Identifikationsnummer gemäß § 139c AO: DE463630238
+          </p>
+          <p className="mt-1 leading-relaxed text-sand-500">
+            Business identification number pursuant to § 139c of the German
+            Fiscal Code (AO): DE463630238
           </p>
         </section>
 
@@ -173,12 +180,12 @@ export default function ImpressumPage() {
             Verantwortlich für den Inhalt / Responsible for content
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: Alexandru Daniel
-            Tatu (Anschrift wie oben).
+            Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:
+            Alexandru-Daniel Tatu (Anschrift wie oben).
           </p>
           <p className="mt-3 leading-relaxed text-sand-500">
             Responsible for the editorial content pursuant to § 18 (2) MStV:
-            Alexandru Daniel Tatu (address as above).
+            Alexandru-Daniel Tatu (address as above).
           </p>
         </section>
 
