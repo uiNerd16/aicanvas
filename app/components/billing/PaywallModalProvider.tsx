@@ -64,11 +64,11 @@ function PaywallModalView({
   // Metering is gone, so the modal only ever pitches Premium content now.
   // Both 'premium-only' and 'upgrade' resolve to a single Premium card; the
   // reason just tunes the heading and subtitle.
-  const title = reason === 'upgrade' ? 'Upgrade to Premium' : 'Premium component'
+  const title = reason === 'upgrade' ? 'Upgrade to Premium' : 'Premium content'
   const subtitle =
     reason === 'upgrade'
       ? null
-      : 'Unlock this component with a Premium subscription.'
+      : 'Unlock this with a Premium subscription.'
 
   // Lock body scroll + close on Escape while open. Backdrop clicks also close
   // (this is a soft upgrade pitch, not a flow you must complete).

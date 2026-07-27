@@ -45,9 +45,10 @@ function computeMetaDescription(entry: ComponentEntry, isPremium: boolean): stri
     ? entry.description.slice(0, max).replace(/\s+\S*$/, '').trim() + '…'
     : entry.description
   // Free content keeps the open-source tail; premium content must never claim
-  // MIT / open source, so it gets a premium-accurate tail instead.
+  // MIT / open source, so it gets a premium-accurate tail instead. The noun
+  // follows isBlock so a section-scale block is not called a component.
   const tail = isPremium
-    ? 'Install via shadcn CLI. Premium AI Canvas component.'
+    ? `Install via shadcn CLI. Premium AI Canvas ${entry.isBlock ? 'block' : 'component'}.`
     : 'Install via shadcn CLI. Free and open source.'
   return `${base} | ${tail}`
 }
@@ -136,11 +137,13 @@ function buildFaq(
   isPremium: boolean,
 ): { q: string; a: string }[] {
   const stacks = entry.tags.filter((t) => !t.accent).map((t) => t.label)
+  // Section-scale entries are blocks, not components (see ComponentEntry.isBlock).
+  const noun = entry.isBlock ? 'block' : 'component'
   const faq: { q: string; a: string }[] = [
     {
       q: `Is ${entry.name} free to use?`,
       a: isPremium
-        ? `${entry.name} is a Premium AI Canvas component. Premium unlocks the full source code and one-command installs for every Premium component and template.`
+        ? `${entry.name} is a Premium AI Canvas ${noun}. Premium unlocks the full source code and one-command installs for every Premium component and template.`
         : `Yes. ${entry.name} is part of the free AI Canvas library and is open source under the MIT license, so you can use it in personal and commercial projects.`,
     },
     {
@@ -162,7 +165,7 @@ function buildFaq(
     // and 3D survive intact in both the visible copy and the FAQPage JSON-LD.
     faq.push({
       q: `Where would I use ${entry.name}?`,
-      a: `Common uses include ${joinList(entry.useCases)}. Like every AI Canvas component, it is self-contained and drops into any React project.`,
+      a: `Common uses include ${joinList(entry.useCases)}. Like every AI Canvas ${noun}, it is self-contained and drops into any React project.`,
     })
   }
   if (Object.keys(entry.prompts).length > 0) {

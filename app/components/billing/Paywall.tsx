@@ -30,7 +30,9 @@ export function Component({ value, onChange }: Props) {
  */
 export function Paywall(_props: { reason: PaywallReason; limit?: number }) {
   // Metering is gone — the inline lock only ever covers premium content now.
-  const title = 'Premium component'
+  // No type noun: this lock also covers blocks and templates, and neither this
+  // component nor the modal has the entry (or isBlock) in scope.
+  const title = 'Premium content'
 
   return (
     <div className="relative min-h-[360px] w-full overflow-hidden">
