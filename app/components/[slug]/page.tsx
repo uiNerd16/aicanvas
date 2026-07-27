@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { COMPONENTS, type ComponentEntry, type ComponentMeta } from '../../lib/component-registry'
+import { COMPONENTS, isBlockEntry, type ComponentEntry, type ComponentMeta } from '../../lib/component-registry'
 import { STANDALONE_PROPS } from '../../lib/standalone-props.generated'
 import ComponentPageView from './ComponentPageView'
 import { HighlightedCode } from '../../components/HighlightedCode'
@@ -48,7 +48,7 @@ function computeMetaDescription(entry: ComponentEntry, isPremium: boolean): stri
   // MIT / open source, so it gets a premium-accurate tail instead. The noun
   // follows isBlock so a section-scale block is not called a component.
   const tail = isPremium
-    ? `Install via shadcn CLI. Premium AI Canvas ${entry.isBlock ? 'block' : 'component'}.`
+    ? `Install via shadcn CLI. Premium AI Canvas ${isBlockEntry(entry) ? 'block' : 'component'}.`
     : 'Install via shadcn CLI. Free and open source.'
   return `${base} | ${tail}`
 }
@@ -137,8 +137,8 @@ function buildFaq(
   isPremium: boolean,
 ): { q: string; a: string }[] {
   const stacks = entry.tags.filter((t) => !t.accent).map((t) => t.label)
-  // Section-scale entries are blocks, not components (see ComponentEntry.isBlock).
-  const noun = entry.isBlock ? 'block' : 'component'
+  // Section-scale entries are blocks, not components (see isBlockEntry).
+  const noun = isBlockEntry(entry) ? 'block' : 'component'
   const faq: { q: string; a: string }[] = [
     {
       q: `Is ${entry.name} free to use?`,
@@ -334,7 +334,7 @@ export default async function Page({
         premium={contentType === 'premium-standalone'}
         staticPreview={entry.staticPreview}
         previewImage={entry.image}
-        isBlock={entry.isBlock}
+        isBlock={isBlockEntry(entry)}
         related={related}
         highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
         enforcing={enforcing || isPremium}
