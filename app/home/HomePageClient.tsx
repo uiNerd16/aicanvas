@@ -16,6 +16,9 @@ import {
   Sparkle,
   Fire,
   CaretRight,
+  SquaresFour,
+  Scales,
+  Plugs,
 } from '@phosphor-icons/react/dist/ssr'
 import { buttonClasses } from '../components/buttonClasses'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -25,7 +28,7 @@ import { Reveal } from './Reveal'
 import { StackedCards, AnimatedCount, WireIcons, FeaturedCarousel, FaqAccordion } from './islands'
 import type { ComponentMeta } from '../lib/component-registry'
 import { GITHUB_URL } from '../lib/config'
-import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
+import { ANDROMEDA_COMPONENT_META, ANDROMEDA_TEMPLATE_META } from '../_lib/andromeda/andromeda-meta'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,9 +42,17 @@ interface Props {
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
 export function HomePageClient({ total, pulls, carouselItems }: Props) {
-  // Hero stat: standalone components + the Andromeda design-system components
-  // (those live in their own registry, so they aren't part of `total`).
-  const componentTotal = total + ANDROMEDA_COMPONENT_META.length
+  // Everything installable, counted from source so it can never drift from
+  // reality: standalones (`total`, premium included — the premium injection
+  // runs before the registry is generated, so a production build counts the
+  // gated ones too) + the Andromeda design-system components and templates,
+  // which live in their own registry and are not part of `total`.
+  //
+  // Templates were previously missing from this sum, which undercounted the
+  // catalogue. The label says "components, blocks and templates", so all three
+  // have to be in the number.
+  const componentTotal =
+    total + ANDROMEDA_COMPONENT_META.length + ANDROMEDA_TEMPLATE_META.length
   return (
     <div className="flex min-h-full flex-col overflow-x-hidden bg-sand-950">
 
@@ -110,56 +121,96 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
           </div>
         </section>
 
-        {/* ── Stats strip ── */}
+        {/* ── Live pull counter ──
+             Sits directly under the hero: it is the proof for the claim above
+             it. Same card shell as the Andromeda spotlight below (rounded-2xl /
+             border-sand-800 / bg-sand-900, split sm:flex-row) so it reads as
+             part of the page rather than a bolted-on widget.
+
+             The number is PULLS SERVED, never "installs". Roughly two thirds of
+             it is crawlers indexing the registry, so the headline noun stays
+             "requests served" — that is true of all of them. See
+             app/lib/registry-stats.ts for the source and the fallback. ── */}
+        <section className="mt-12 sm:mt-16">
+          <Reveal>
+            <div className="relative flex flex-col overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 sm:flex-row">
+              {/* Number half */}
+              <div className="flex flex-col justify-center gap-1 p-6 sm:w-[45%] sm:p-8">
+                <span className="mb-1 inline-flex items-center gap-2 self-start rounded-full border border-sand-700 bg-sand-950/60 px-2.5 py-1 text-[11px] font-semibold text-sand-400">
+                  {/* Pulsing dot carries the "alive" feeling; the words stay
+                      accurate. The cache window is 24h, so "Live" alone would
+                      overpromise — see REVALIDATE_SECONDS in registry-stats. */}
+                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-olive-400" />
+                  </span>
+                  Updated daily
+                </span>
+                <span className="text-5xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-6xl">
+                  <AnimatedCount to={pulls} suffix="" />
+                </span>
+                <span className="mt-1 text-sm font-medium text-sand-400">requests served</span>
+              </div>
+              {/* Copy half */}
+              <div className="flex flex-col justify-center border-t border-sand-800 p-6 sm:w-[55%] sm:border-l sm:border-t-0 sm:p-8">
+                <p className="text-sm leading-relaxed text-sand-400">
+                  Every component, block and design system install.
+                  <br className="hidden sm:block" /> Every AI agent fetching source.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* ── Feature row ──
+             Was a 2×2 stats strip of big numbers. Four of these five items have
+             no number in them, so the old `text-4xl` treatment would have
+             rendered "Remix with AI" at headline size. Icon + title + one line
+             is the right shape for value props.
+
+             The count is the only animated item, and it is computed (see
+             componentTotal above) so it can never drift from what actually
+             ships. ── */}
         <section className="mt-16 sm:mt-24">
-          {/* Mobile: 2×2 grid with a vertical divider between each row's two items
-              and no divider between rows. Desktop: single flex row with three
-              dividers — the row-wrappers use `sm:contents` so they disappear from
-              layout and the inner stats become direct children of the flex row. */}
-          <div className="flex flex-col items-center gap-y-8 sm:flex-row sm:justify-center sm:gap-y-0">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
             {(
               [
-                [
-                  // Leads the strip: the biggest, most attention-grabbing number
-                  // we have. Label is "pulls", never "installs" — the count is
-                  // every /r/*.json request served, crawlers included.
-                  { value: pulls, suffix: '+', label: 'Component pulls' },
-                  { value: componentTotal, suffix: '+', label: 'Components' },
-                ],
-                [
-                  { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
-                  { text: 'MCP',  suffix: '',  label: 'Ready' },
-                ],
+                {
+                  Icon: SquaresFour,
+                  // Rendered via AnimatedCount, so it counts up like the card above.
+                  count: componentTotal,
+                  title: '',
+                  body: 'components, blocks and templates',
+                },
+                {
+                  Icon: Scales,
+                  title: 'Free library',
+                  // "Free library" first, THEN MIT: premium content is
+                  // proprietary, so an unqualified "open source" claim here
+                  // would be false. See /terms and /faq for the full wording.
+                  body: 'Open source, MIT',
+                },
+                { Icon: Plugs,    title: 'MCP ready',     body: 'Speeds up your work' },
+                { Icon: Terminal, title: 'One command',   body: 'Copy, paste, done in seconds' },
+                { Icon: Sparkle,  title: 'Remix with AI', body: 'Prompts ready' },
               ] as {
-                value?: number
-                suffix: string
-                label: string
-                prefix?: string
-                minWidth?: string
-                text?: string
-              }[][]
-            ).map((row, rowIdx) => (
-              <div key={rowIdx} className="flex items-center sm:contents">
-                {rowIdx > 0 && (
-                  <div className="hidden h-10 w-px bg-sand-800 mx-6 sm:block" aria-hidden />
-                )}
-                {row.map(({ value, suffix, prefix = '', label, minWidth, text }, colIdx) => {
-                  const i = rowIdx * 2 + colIdx
-                  return (
-                    <div key={label} className="flex items-center sm:contents">
-                      {colIdx > 0 && (
-                        <div className="h-10 w-px bg-sand-800 mx-6" aria-hidden />
-                      )}
-                      <Reveal delay={i * 0.06} className="flex flex-col items-center text-center">
-                        <span className="text-4xl font-bold tabular-nums text-sand-50" style={minWidth ? { minWidth } : undefined}>
-                          {text ? text : <>{prefix}<AnimatedCount to={value ?? 0} suffix={suffix} /></>}
-                        </span>
-                        <span className="mt-1 text-xs font-medium text-sand-500">{label}</span>
-                      </Reveal>
-                    </div>
-                  )
-                })}
-              </div>
+                Icon: typeof Terminal
+                count?: number
+                title: string
+                body: string
+              }[]
+            ).map(({ Icon, count, title, body }, i) => (
+              <Reveal
+                key={title || 'count'}
+                delay={i * 0.06}
+                className="flex flex-col items-center text-center"
+              >
+                <Icon weight="regular" size={20} className="mb-2 text-olive-400" aria-hidden />
+                <span className="text-lg font-bold tabular-nums leading-tight text-sand-50">
+                  {count !== undefined ? <AnimatedCount to={count} suffix="" /> : title}
+                </span>
+                <span className="mt-1 text-xs font-medium leading-snug text-sand-500">{body}</span>
+              </Reveal>
             ))}
           </div>
         </section>
