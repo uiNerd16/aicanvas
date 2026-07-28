@@ -170,7 +170,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is remixing with AI free?',
-        a: 'On every free component and block, yes: the whole prompt is public and needs no account. On premium ones you read the setup, how it works, what to change, and how to check the result for free, and Premium unlocks the rest of the prompt.',
+        a: 'On every free component and block, yes: the whole prompt is public and needs no account. On premium ones you read the setup and the constants, the install line, the imports, the data, the palette and the prop API, and the rest of the prompt is part of Premium.',
       },
       {
         q: 'What does Premium unlock?',
