@@ -1,0 +1,36 @@
+# Deterministic backstop for the prompt lint.
+#
+# The primary gate is the reviewer agent, which is skippable and non-deterministic. This
+# job is the version that always runs. It is SAFE to fail: GitHub Actions cannot block a
+# Vercel deploy, so a red run here never gates production and never touches premium
+# subscriber safety. That is also exactly why the lint is not in the `build` script.
+#
+# What it catches that nothing else does: a prompts.ts whose template literal does not
+# evaluate. Advisory mode deliberately exits 0, so without this an unescaped backtick is
+# invisible until a full production build.
+name: lint-prompts
+
+on:
+  pull_request:
+    paths:
+      - 'components-workspace/**/prompts.ts'
+      - 'scripts/lint-prompts.mjs'
+      - 'scripts/prompts-scaffold-scope.json'
+  push:
+    branches: [main]
+    paths:
+      - 'components-workspace/**/prompts.ts'
+      - 'scripts/lint-prompts.mjs'
+      - 'scripts/prompts-scaffold-scope.json'
+  workflow_dispatch:
+
+jobs:
+  lint-prompts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # No npm install: the lint is dependency-free by design.
+      - run: node scripts/lint-prompts.mjs --ci
