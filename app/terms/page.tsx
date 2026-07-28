@@ -72,7 +72,7 @@ export default function TermsPage() {
             exposes the registry to AI coding tools. Browsing is always free, and
             every free component publishes its full AI remix prompt. Premium
             components and blocks publish part of their prompt; the rest is part
-            of Premium. Installing standalone components is free with a free
+            of Premium. Installing free components is free with a free
             account; the closed-source premium components, blocks, design
             systems and templates are part of Premium.
           </p>

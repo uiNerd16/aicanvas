@@ -174,7 +174,7 @@ function buildFaq(
     faq.push({
       q: `Can I remix ${entry.name} with AI?`,
       a: isPremium
-        ? `Yes. Open "Remix with AI" on this page to read the setup and the constants ${entry.name} is built from: the install line, the imports, the data, the palette and the prop API. The engine, the markup and the notes on how it works are part of Premium. For the exact ${noun}, install it with the one-command CLI.`
+        ? `Yes. Open "Remix with AI" on this page to read the setup and the constants ${entry.name} is built from. The engine, the markup and the notes on how it works are part of Premium. For the exact ${noun}, install it with the one-command CLI.`
         : `Yes. ${entry.name} ships with one comprehensive AI prompt written against the real source code. Open "Remix with AI" on this page to read and copy it into Claude, Cursor, ChatGPT, or any AI tool. Prompts are for remixing your own variation; for the exact component, install it with the one-command CLI.`,
     })
   }
