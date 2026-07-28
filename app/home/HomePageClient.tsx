@@ -118,101 +118,102 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
           </div>
         </section>
 
-        {/* ── Live pull counter ──
-             Sits directly under the hero: it is the proof for the claim above
-             it. Same card shell as the Andromeda spotlight below (rounded-2xl /
-             border-sand-800 / bg-sand-900, split sm:flex-row) so it reads as
-             part of the page rather than a bolted-on widget.
+        {/* ── Proof pair ──
+             Two cards side by side under the hero: the live pull counter on the
+             left, the at-a-glance facts on the right. Both share one shell so
+             they read as a pair (rounded-2xl / border-sand-800 / bg-sand-900,
+             matching the Andromeda spotlight further down).
 
-             The number is PULLS SERVED, never "installs". Roughly two thirds of
-             it is crawlers indexing the registry, so the headline noun stays
-             "requests served" — that is true of all of them. See
-             app/lib/registry-stats.ts for the source and the fallback. ── */}
+             In both cards the big value and its label sit on ONE baseline-
+             aligned row rather than stacked, which is what makes this read as a
+             statement instead of a dashboard tile.
+
+             The left number is PULLS SERVED, never "installs". Roughly two
+             thirds of it is crawlers indexing the registry, so the noun stays
+             "Requests served" — true of every one of them. Source and fallback:
+             app/lib/registry-stats.ts ── */}
         <section className="mt-12 sm:mt-16">
-          <Reveal>
-            <div className="relative flex flex-col overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 sm:flex-row">
-              {/* Number half */}
-              <div className="flex flex-col justify-center gap-1 p-6 sm:w-[45%] sm:p-8">
-                <span className="mb-1 inline-flex items-center gap-2 self-start rounded-full border border-sand-700 bg-sand-950/60 px-2.5 py-1 text-[11px] font-semibold text-sand-400">
-                  {/* Pulsing dot carries the "alive" feeling; the words stay
-                      accurate. The cache window is 24h, so "Live" alone would
-                      overpromise — see REVALIDATE_SECONDS in registry-stats. */}
-                  <span className="relative flex h-1.5 w-1.5" aria-hidden>
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-400 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-olive-400" />
+          <div className="grid gap-4 sm:grid-cols-2">
+
+            {/* Left: the live counter */}
+            <Reveal className="h-full">
+              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 sm:p-8">
+                {/* Soft light from the top-left corner. Neutral white-alpha
+                    rather than a hue, so it reads as a light source and stays
+                    inside the sand/olive palette. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_115%_at_0%_0%,rgba(255,255,255,0.055),transparent_58%)]"
+                />
+                <div className="relative">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-sand-700 bg-sand-950/60 px-2.5 py-1 text-[11px] font-semibold text-sand-300">
+                    {/* The pulsing dot carries the "alive" feeling so the words
+                        do not have to overpromise: the cache window is 24h, so
+                        "Live" would be false. See REVALIDATE_SECONDS. */}
+                    <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-olive-400" />
+                    </span>
+                    Updates daily
                   </span>
-                  Updated daily
-                </span>
-                <span className="text-5xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-6xl">
-                  <AnimatedCount to={pulls} suffix="" />
-                </span>
-                <span className="mt-1 text-sm font-medium text-sand-400">requests served</span>
-              </div>
-              {/* Copy half */}
-              <div className="flex flex-col justify-center border-t border-sand-800 p-6 sm:w-[55%] sm:border-l sm:border-t-0 sm:p-8">
-                <p className="text-sm leading-relaxed text-sand-400">
-                  Every component, block and design system install.
-                  <br className="hidden sm:block" /> Every AI agent fetching source.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </section>
 
-        {/* ── Stats strip ──
-             Six items as 3 columns × 2 rows, keeping the original treatment:
-             one big bold word or number, a small label under it, thin vertical
-             dividers between columns.
-
-             Rendered as two explicit rows rather than one 6-cell grid with
-             nth-child border rules — those need a responsive override to move
-             the "first in row" divider reset from every 2nd to every 3rd child,
-             and two same-specificity rules resolve by Tailwind's own emit order,
-             not by class order. Explicit rows are deterministic. ── */}
-        <section className="mt-16 sm:mt-24">
-          <div className="flex flex-col gap-y-10 sm:gap-y-12">
-            {(
-              [
-                [
-                  // Computed, never hardcoded — see componentTotal above.
-                  { count: componentTotal, label: 'Components, blocks & templates' },
-                  // "Free library", not a bare "Open source": premium content is
-                  // proprietary, so the unqualified claim would be false. Every
-                  // other surface (terms, faq, impressum, about) already scopes it.
-                  { text: 'MIT', label: 'Free library' },
-                  { text: 'MCP', label: 'Ready' },
-                ],
-                [
-                  { text: 'CLI', label: 'One command, seconds' },
-                  { text: 'Any', label: 'AI tool, prompts ready' },
-                  // Real CLI installs (user_agent = shadcn) reached 58 countries
-                  // as of 2026-07-28. Hardcoded: it moves slowly and only goes up,
-                  // so it needs no live query. Bump it when you think of it.
-                  { count: 58, label: 'Countries' },
-                ],
-              ] as { count?: number; text?: string; label: string }[][]
-            ).map((row, rowIdx) => (
-              <div key={rowIdx} className="grid grid-cols-3">
-                {row.map(({ count, text, label }, colIdx) => (
-                  <div
-                    key={label}
-                    className={colIdx > 0 ? 'border-l border-sand-800' : undefined}
-                  >
-                    <Reveal
-                      delay={(rowIdx * 3 + colIdx) * 0.06}
-                      className="flex flex-col items-center px-2 text-center"
-                    >
-                      <span className="text-3xl font-bold tabular-nums leading-none text-sand-50 sm:text-4xl">
-                        {count !== undefined ? <AnimatedCount to={count} suffix="" /> : text}
-                      </span>
-                      <span className="mt-2 text-[11px] font-medium leading-snug text-sand-500 sm:text-xs">
-                        {label}
-                      </span>
-                    </Reveal>
+                  <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="relative text-5xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-6xl">
+                      <AnimatedCount to={pulls} suffix="" />
+                      {/* Accent rule under the number, fading out to the right. */}
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-2 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-olive-400/80 to-olive-400/0"
+                      />
+                    </span>
+                    <span className="text-lg font-semibold text-sand-100 sm:text-xl">
+                      Requests served
+                    </span>
                   </div>
-                ))}
+
+                  <p className="mt-7 text-sm leading-relaxed text-sand-500">
+                    Every component, block &amp; design system install.
+                    <br />
+                    Every AI agent fetching source.
+                  </p>
+                </div>
               </div>
-            ))}
+            </Reveal>
+
+            {/* Right: the facts */}
+            <Reveal delay={0.08} className="h-full">
+              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 sm:p-8">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_115%_at_0%_0%,rgba(255,255,255,0.045),transparent_58%)]"
+                />
+                <dl className="relative flex flex-col gap-y-5 sm:gap-y-6">
+                  {(
+                    [
+                      // Computed, never hardcoded — see componentTotal above.
+                      { count: componentTotal, label: 'Components, blocks & templates' },
+                      // "Free library" first: premium content is proprietary, so
+                      // a bare "Open source" here would be false. Every other
+                      // surface (terms, faq, impressum, about) already scopes it.
+                      { text: 'MIT', label: 'Free library, open source' },
+                      { text: 'CLI', label: 'One command, done in seconds' },
+                    ] as { count?: number; text?: string; label: string }[]
+                  ).map(({ count, text, label }) => (
+                    <div key={label} className="flex items-baseline gap-x-4">
+                      {/* Fixed width so every label starts on the same x, which
+                          is what makes the three rows scan as a column. */}
+                      <dt className="w-[4.25rem] shrink-0 text-3xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-4xl">
+                        {count !== undefined ? <AnimatedCount to={count} suffix="" /> : text}
+                      </dt>
+                      <dd className="text-sm font-medium leading-snug text-sand-300 sm:text-base">
+                        {label}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </Reveal>
+
           </div>
         </section>
 
