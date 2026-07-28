@@ -160,7 +160,11 @@ export function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string
     return () => clearInterval(timer)
   }, [inView, to, initial])
 
-  return <span ref={ref}>{count}{suffix}</span>
+  // Locale pinned to en-US so server and client render byte-identical strings —
+  // a bare toLocaleString() would hydration-mismatch under a non-US locale.
+  // Small counts are unchanged ("132" stays "132"); five-digit ones gain the
+  // separator they need to be legible ("25775" -> "25,775").
+  return <span ref={ref}>{count.toLocaleString('en-US')}{suffix}</span>
 }
 
 // ─── Wire icon row ────────────────────────────────────────────────────────────

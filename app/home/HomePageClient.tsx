@@ -31,12 +31,14 @@ import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 interface Props {
   total: number
+  /** Live registry pulls served, from PostHog. See app/lib/registry-stats.ts. */
+  pulls: number
   carouselItems: ComponentMeta[]
 }
 
 // ─── HomePageClient ────────────────────────────────────────────────────────────
 
-export function HomePageClient({ total, carouselItems }: Props) {
+export function HomePageClient({ total, pulls, carouselItems }: Props) {
   // Hero stat: standalone components + the Andromeda design-system components
   // (those live in their own registry, so they aren't part of `total`).
   const componentTotal = total + ANDROMEDA_COMPONENT_META.length
@@ -118,8 +120,11 @@ export function HomePageClient({ total, carouselItems }: Props) {
             {(
               [
                 [
+                  // Leads the strip: the biggest, most attention-grabbing number
+                  // we have. Label is "pulls", never "installs" — the count is
+                  // every /r/*.json request served, crawlers included.
+                  { value: pulls, suffix: '+', label: 'Component pulls' },
                   { value: componentTotal, suffix: '+', label: 'Components' },
-                  { value: 3,     suffix: '',  label: 'AI platforms' },
                 ],
                 [
                   { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },
