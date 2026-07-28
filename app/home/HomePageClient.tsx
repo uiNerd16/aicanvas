@@ -119,7 +119,7 @@ export function HomePageClient({ total, carouselItems }: Props) {
               [
                 [
                   { value: componentTotal, suffix: '+', label: 'Components' },
-                  { value: 3,     suffix: '',  label: 'AI platforms' },
+                  { text: 'Any',  suffix: '',  label: 'AI tool' },
                 ],
                 [
                   { text: 'MIT',  suffix: '',  label: 'Open source', minWidth: '6rem' },

@@ -45,6 +45,17 @@ export async function getEntitlement(req: Request): Promise<Entitlement> {
   }
 
   // No token: fall back to the website session (cookies).
+  return getSessionEntitlement()
+}
+
+/**
+ * The cookie half of getEntitlement(), callable from a server COMPONENT — a
+ * page render has no Request object, so it cannot call getEntitlement(). Same
+ * resolution and same failure semantics (a failed subscription read throws);
+ * the token path is deliberately absent because a browser page view never
+ * carries one.
+ */
+export async function getSessionEntitlement(): Promise<Entitlement> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { tier: 'anonymous', userId: null }

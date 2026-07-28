@@ -13,7 +13,7 @@ export function welcomeEmail(): { subject: string; html: string } {
   const html = emailShell({
     title: 'Welcome to AI Canvas',
     heading: 'Welcome, hero.',
-    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Your account is live. Grab any component with its full source code and remix it with your AI coding agent. Everything ships ready to paste into your project.</p>`,
+    bodyHtml: `<p ${emailText('secondary', 'margin:0;font-size:15px;line-height:1.6;')}>Your account is live. Grab any free component with its full source code and remix it with your AI coding agent. Everything ships ready to paste into your project.</p>`,
     button: { label: 'Start building', url: 'https://aicanvas.me' },
   })
   return { subject: 'Welcome to AI Canvas', html }

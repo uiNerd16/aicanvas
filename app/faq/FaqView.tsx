@@ -196,9 +196,9 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
               Start free, build now.
             </h2>
             <p className="relative mx-auto mt-2 max-w-xl text-base text-sand-500">
-              Browse the registry, install with one command, and remix with AI
-              for free. Go Premium for full design systems and unlimited installs
-              when you are ready.
+              Browse the registry, install with one command, and remix the free
+              library with AI at no cost. Go Premium for the premium components
+              and blocks, their full prompts, and complete design systems.
             </p>
             <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link

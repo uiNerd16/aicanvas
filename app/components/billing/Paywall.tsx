@@ -6,9 +6,10 @@ import type { PaywallReason } from './PaywallModalProvider'
 
 export type { PaywallReason }
 
-// Decorative, blurred faux-source — for PREMIUM content the REAL source is
-// withheld server-side (the gate 402s before any bytes ship), so there is
-// nothing real to blur. Free component source stays public to read.
+// Decorative, blurred faux-source — for PREMIUM content the REAL bytes are
+// withheld server-side (the source gate serves a placeholder item; the prompt
+// gate never renders blocks 2-4), so there is nothing real to blur. Free
+// source and free prompts stay public to read.
 const FAUX_SOURCE = `import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
 
@@ -24,11 +25,13 @@ export function Component({ value, onChange }: Props) {
 }`
 
 /**
- * Inline locked state rendered in the Code tab when source is withheld. Shows
- * a blurred teaser; "See plans" goes to the pricing page. Props are kept for
- * the call sites even though the lock no longer varies by reason.
+ * Inline locked state rendered where withheld content would be — the Code tab,
+ * and the withheld blocks of a premium prompt. Shows a blurred teaser; "See
+ * plans" goes to the pricing page. Props are kept for the call sites even
+ * though the lock no longer varies by reason. `teaser` overrides the blurred
+ * decoration so it matches whatever was withheld.
  */
-export function Paywall(_props: { reason: PaywallReason; limit?: number }) {
+export function Paywall({ teaser = FAUX_SOURCE }: { reason: PaywallReason; limit?: number; teaser?: string }) {
   // Metering is gone — the inline lock only ever covers premium content now.
   // No type noun: this lock also covers blocks and templates, and neither this
   // component nor the modal has the entry (or isBlock) in scope.
@@ -40,7 +43,7 @@ export function Paywall(_props: { reason: PaywallReason; limit?: number }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-sand-600 opacity-30 blur-[3px]"
       >
-        {FAUX_SOURCE}
+        {teaser}
       </pre>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-sand-950/70 px-4 text-center">
         <div className="flex h-11 w-11 items-center justify-center rounded-full border border-sand-800 bg-sand-900">

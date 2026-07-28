@@ -9,9 +9,12 @@ import { FaqView, type FaqCategory } from './FaqView'
 // on-site upgrade button still renders "Coming soon" (NEXT_PUBLIC_CHECKOUT_COMING_SOON)
 // and the customer portal / cancel flow is not wired yet, so flip the checkout
 // flag and wire cancel before this copy fully matches the live site.
-// Model: browsing + remix-with-AI are free and public; the one-command install
-// needs a free account (unlimited, uncounted); Premium adds the closed-source
-// premium components, design systems, and templates. Prices ($8.99/mo, $49.99/yr)
+// Model: browsing is free and public; FREE entries publish their whole remix
+// prompt; PREMIUM entries publish only the setup, why, remix and check blocks
+// unless the viewer is Premium; the one-command install needs a free account
+// (unlimited, uncounted); Premium adds the closed-source premium components,
+// blocks, design systems, and templates plus their full remix prompts.
+// Prices ($8.99/mo, $49.99/yr)
 // mirror PremiumCards.tsx — update in lockstep.
 const FAQ_CATEGORIES: FaqCategory[] = [
   {
@@ -47,7 +50,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is AI Canvas free to use?',
-        a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
+        a: 'Yes. Browsing, previewing, and copying the full prompt of any free component are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components and blocks with their full remix prompts, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
       },
     ],
   },
@@ -55,7 +58,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     category: 'Installing components',
     slug: 'installing',
     blurb:
-      'Three easy ways to get any component into your project: one CLI command, your AI agent, or a copy and paste of the source. All open source, all React.',
+      'Three easy ways to get a component into your project: one CLI command, your AI agent, or a copy and paste of the source. Free components are open source and copy-paste ready. Premium source and its full remix prompt need a subscription.',
     items: [
       {
         q: 'How do I install a component?',
@@ -67,7 +70,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Can I copy the source code instead of using the CLI?',
-        a: 'Absolutely. Each component page has a Manual tab that lists the packages to install and the full source to paste in. The free library is open source under MIT, and that source is never hidden. Premium is proprietary: a durable licence to use and ship, not to redistribute.',
+        a: 'Yes, for free components: every free component page has a Manual tab that lists the packages to install and the full source to paste in. The free library is open source under MIT, and that source is never hidden. Premium components and blocks show their source once you subscribe. Premium is proprietary: a durable licence to use and ship, not to redistribute.',
       },
       {
         q: 'Which frameworks and stacks do the components work in?',
@@ -83,7 +86,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'How many components can I install for free?',
-        a: 'A free account unlocks unlimited one-command installs, uncounted, and remix with AI is free forever. When you want more, Premium adds the closed-source premium components, full design systems, and templates, the natural next step once AI Canvas is already paying off.',
+        a: 'A free account unlocks unlimited one-command installs, uncounted, and remix with AI on every free component is free forever. When you want more, Premium adds the closed-source premium components and blocks with their full remix prompts, full design systems, and templates, the natural next step once AI Canvas is already paying off.',
       },
     ],
   },
@@ -155,7 +158,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: 'What can I do on AI Canvas for free?',
-        a: 'A lot. Browsing components, previewing them, copying AI prompts, using the MCP, the Lab, and saving favorites are all free. A free account also unlocks unlimited one-command installs, and you can remix with AI for free, forever.',
+        a: 'A lot. Browsing components, previewing them, copying the full AI prompt of any free component, using the MCP, the Lab, and saving favorites are all free. A free account also unlocks unlimited one-command installs. On premium components and blocks you still read part of the prompt for free, and Premium unlocks the rest.',
       },
       {
         q: 'What does install mean here?',
@@ -163,15 +166,15 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Do I need an account to install?',
-        a: 'Yes, a free account. Browsing, previewing, and remixing with AI are public and need no account, but the one-command install runs against your account, which unlocks unlimited installs at no cost. Run the install anonymously and the CLI returns a friendly placeholder asking you to create a free account, not an error.',
+        a: 'Yes, a free account. Browsing, previewing, and remixing free components with AI are public and need no account, but the one-command install runs against your account, which unlocks unlimited installs at no cost. Run the install anonymously and the CLI returns a friendly placeholder asking you to create a free account, not an error.',
       },
       {
         q: 'Is remixing with AI free?',
-        a: 'Yes. Remix with AI is free and public at every tier, with no account required.',
+        a: 'On every free component and block, yes: the whole prompt is public and needs no account. On premium ones you read the setup, how it works, what to change, and how to check the result for free, and Premium unlocks the rest of the prompt.',
       },
       {
         q: 'What does Premium unlock?',
-        a: 'Premium unlocks the closed-source premium components, full design systems you can install as a whole system in one command, and premium templates.',
+        a: 'Premium unlocks the closed-source premium components and blocks, their full remix prompts, full design systems you can install as a whole system in one command, and premium templates.',
       },
       {
         q: 'How much does Premium cost?',
@@ -179,7 +182,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'Is Premium worth it for someone just starting out?',
-        a: 'Start with a free account, since unlimited installs and remix with AI cover most early projects. When you want the closed-source premium components, full design systems, and templates, Premium is the natural next step.',
+        a: 'Start with a free account, since unlimited installs and the free library’s remix prompts cover most early projects. When you want the closed-source premium components, full design systems, and templates, Premium is the natural next step.',
       },
     ],
   },
@@ -219,7 +222,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
     items: [
       {
         q: 'Is AI Canvas open source?',
-        a: 'The free library is open source under MIT, and that source is never hidden. Premium is proprietary: a durable licence to use and ship, not to redistribute. Either way, remix with AI stays free for everyone, and the public repository keeps the free source openly available to read, use, and change.',
+        a: 'The free library is open source under MIT, that source is never hidden, and its remix prompts are public in full. Premium is proprietary: a durable licence to use and ship, not to redistribute, and its full remix prompts are part of the subscription. The public repository keeps the free source openly available to read, use, and change.',
       },
       {
         q: 'What licence are the components under, and can I use them commercially?',
@@ -231,7 +234,7 @@ const FAQ_CATEGORIES: FaqCategory[] = [
       },
       {
         q: 'How is AI Canvas different from other component libraries?',
-        a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real open-source code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
+        a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy a free component’s AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
       },
       {
         q: 'Who is AI Canvas for?',

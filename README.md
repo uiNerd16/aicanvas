@@ -45,7 +45,7 @@ npx shadcn@latest add @aicanvas/task-cards
 | --- | --- | --- |
 | **shadcn CLI** | `npx shadcn@latest add @aicanvas/<slug>` | Dropping finished, open-source code straight into your repo |
 | **AI Canvas MCP** | `npx -y @aicanvas/mcp` | Letting your AI editor search and install components for you |
-| **Remix with AI** | Copy a prompt from any component page | Rebuilding a component your way in any AI coding tool |
+| **Remix with AI** | Copy the full prompt from any free component page | Rebuilding a component your way in any AI coding tool |
 
 Browse the full catalog and copy the exact command for any component at [aicanvas.me](https://aicanvas.me). `pnpm dlx`, `yarn dlx`, and `bunx` work too.
 
@@ -130,7 +130,7 @@ Or add it to your MCP config:
 }
 ```
 
-Works with Claude Code, Codex, Cursor, and other MCP-compatible editors. The server is read-only and fetches the live registry at runtime, so new components reach your agent shortly after they ship. It returns published component source and remix prompts.
+Works with Claude Code, Codex, Cursor, and other MCP-compatible editors. The server is read-only and fetches the live registry at runtime, so new components reach your agent shortly after they ship. It returns published component metadata and source.
 
 ## Design systems and templates
 

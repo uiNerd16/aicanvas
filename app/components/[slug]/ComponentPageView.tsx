@@ -52,6 +52,22 @@ import { PremiumBadge } from '../billing/PremiumBadge'
 import { Paywall, type PaywallReason } from '../billing/Paywall'
 import { usePaywallModal } from '../billing/PaywallModalProvider'
 
+// Blurred behind the prompt paywall. Prompt-shaped, not TSX-shaped, so the
+// blur matches what is actually withheld (the Code tab's default teaser is a
+// fake component and would read as the wrong thing here). Decorative only.
+// It deliberately omits the literal "## 2." / "## 3." / "## 4." headings, so
+// grepping a response for those headings stays a clean leak check.
+const LOCKED_PROMPT_TEASER = `Constants
+- the data, the palette, the config, verbatim
+- the prop typedef
+
+State
+- every hook, handler, effect and disposal
+- the animation loop, frame by frame
+
+Tree
+- the JSX, every className and inline style`
+
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
 // ─── ComponentPageView ────────────────────────────────────────────────────────
@@ -66,6 +82,11 @@ interface ComponentPageViewProps {
   // on demand from the gated endpoint instead of shipped in the HTML).
   code?: string
   prompts: Partial<Record<Platform, string>>
+  // Set ONLY when the prompt is paywalled (premium entry, non-premium viewer).
+  // Then `prompts` holds blocks 1/5/6/7 up to the cut and this holds the rest;
+  // the withheld blocks 2/3/4 were dropped server-side and are not on the
+  // client at all. Undefined = nothing withheld, render the prompt as one pre.
+  promptLockedTail?: string
   dualTheme: boolean
   designSystem?: DesignSystemSlug
   /** Premium standalone component — shows a "Premium component" label by the title. */
@@ -117,6 +138,7 @@ export default function ComponentPageView({
   tags,
   code,
   prompts,
+  promptLockedTail,
   dualTheme,
   designSystem,
   premium = false,
@@ -441,7 +463,11 @@ export default function ComponentPageView({
     if (!remixPrompt) return
     try {
       track('Remix Prompt Copy', { component: slug })
-      await navigator.clipboard.writeText(remixPrompt)
+      // Copies exactly what is on screen. When paywalled that is head + tail;
+      // the withheld blocks are not in this bundle to leak.
+      await navigator.clipboard.writeText(
+        promptLockedTail ? `${remixPrompt}\n\n${promptLockedTail}` : remixPrompt,
+      )
       setRemixCopied(true)
       setTimeout(() => setRemixCopied(false), 2500)
     } catch {}
@@ -1726,8 +1752,8 @@ export default function ComponentPageView({
                 Remix {name} with AI
               </h2>
               <p className="mt-1.5 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-                One comprehensive prompt, written against the real source code.
-                Works in Claude, Cursor, ChatGPT, or any AI tool you use.
+                Written against the real source code. Works in Claude, Cursor,
+                ChatGPT, or any AI tool you use.
               </p>
             </div>
             <Button
@@ -1796,6 +1822,18 @@ export default function ComponentPageView({
             <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-5 font-mono text-xs leading-relaxed text-sand-200">
               {remixPrompt}
             </pre>
+            {/* Paywalled prompt: the lock sits exactly where the withheld
+                blocks would have been, between Setup and Why. */}
+            {promptLockedTail !== undefined && (
+              <>
+                <div className="mt-4 overflow-hidden rounded-xl bg-sand-950">
+                  <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
+                </div>
+                <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-5 font-mono text-xs leading-relaxed text-sand-200">
+                  {promptLockedTail}
+                </pre>
+              </>
+            )}
           </div>
         </motion.div>
       )}

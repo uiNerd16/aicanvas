@@ -10,13 +10,15 @@ import { UpgradeButton } from './UpgradeButton'
 
 // Single source of truth for the Free / Premium cards. Rendered full-size on
 // /pricing and `compact` inside the Code-tab paywall. The Premium card lists
-// ONLY the three real unlocks; every free perk stays on the Free card so the
-// copy never sells free things as premium.
+// only real unlocks; every free perk stays on the Free card so the copy never
+// sells free things as premium. Every free perk is scoped to FREE entries:
+// premium source and the full premium remix prompt are both withheld
+// server-side, so an unqualified "every component" belongs on the Premium card.
 
 const FREE_FEATURES = [
   'Full source code of every free component',
-  'Unlimited one-command installs',
-  'Remix with AI on every component',
+  'Unlimited one-command installs of free components',
+  'Remix with AI on every free component',
   'MCP server for Claude Code, Codex and Cursor',
   'Lab access with presets and export',
   'Save your favorite components',
@@ -24,6 +26,7 @@ const FREE_FEATURES = [
 
 const PREMIUM_FEATURES = [
   'Every premium component and block, one command install',
+  'Remix with AI on every component',
   'Full design systems, tokens to templates',
   'All premium templates, source included',
   'New premium releases included as they ship',
@@ -93,7 +96,7 @@ export function PremiumCards({
               </h2>
             </div>
             <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
-              Install and remix components, free forever.
+              Install and remix every free component, free forever.
             </p>
             {/* Invisible mirror of the Premium card's billing-cycle toggle so the
                 price and CTA align across both cards. */}
