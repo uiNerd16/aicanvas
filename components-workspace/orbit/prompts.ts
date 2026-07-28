@@ -1,7 +1,10 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
 export const prompts: Partial<Record<Platform, string>> = {
-  'Claude Code': `Create a circular typography component where a looping phrase rotates continuously around a wheel, with letters responding to cursor proximity.
+  'Claude Code': `Root element: className="flex min-h-screen w-full items-center justify-center"
+The source ships h-full because AI Canvas renders it inside a sized preview frame. A standalone paste needs min-h-screen, or an ancestor with a real height, or the root collapses and takes its absolute layers with it.
+
+Create a circular typography component where a looping phrase rotates continuously around a wheel, with letters responding to cursor proximity.
 
 ## Requirements
 
