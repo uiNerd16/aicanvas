@@ -45,7 +45,7 @@ export function Paywall({ teaser = FAUX_SOURCE }: { reason: PaywallReason; limit
       >
         {teaser}
       </pre>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-sand-950/70 px-4 text-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-sand-950/0 via-sand-950/85 to-sand-950 px-4 text-center">
         <div className="flex h-11 w-11 items-center justify-center rounded-full border border-sand-800 bg-sand-900">
           <LockSimple weight="regular" size={20} className="text-olive-400" />
         </div>

@@ -23,6 +23,7 @@ import {
   Sparkle,
   Lightning,
   X,
+  LockSimple,
 } from '@phosphor-icons/react'
 import type { Tag, Platform } from '../ComponentCard'
 import { isStackLabel, STACK_ICONS, stackIconWidthForHeight, type Stack } from '../../lib/stack'
@@ -463,8 +464,9 @@ export default function ComponentPageView({
     if (!remixPrompt) return
     try {
       track('Remix Prompt Copy', { component: slug })
-      // Copies exactly what is on screen. When paywalled that is head + tail;
-      // the withheld blocks are not in this bundle to leak.
+      // Copies exactly what is on screen. Only ever reached when the prompt is
+      // NOT paywalled: a locked prompt opens the paywall instead of copying, so
+      // nobody walks away with blocks 1-2 believing they have a working prompt.
       await navigator.clipboard.writeText(
         remixPrompt,
       )
@@ -1745,12 +1747,22 @@ export default function ComponentPageView({
           {/* Header */}
           <div className="flex items-start justify-between gap-5 px-6 py-5 sm:px-8">
             <div className="pt-0.5">
-              <h2
-                id="remix-panel-title"
-                className="text-base font-bold text-sand-900 dark:text-sand-50"
-              >
-                Remix {name} with AI
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="remix-panel-title"
+                  className="text-base font-bold text-sand-900 dark:text-sand-50"
+                >
+                  Remix {name} with AI
+                </h2>
+                {/* Same pill as the tag row on the page behind. Says what the
+                    lock further down is about before the reader reaches it. */}
+                {premium && (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                    <Lightning weight="regular" size={12} />
+                    Premium
+                  </span>
+                )}
+              </div>
               <p className="mt-1.5 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
                 Written against the real source code. Works in Claude, Cursor,
                 ChatGPT, or any AI tool you use.
@@ -1812,12 +1824,26 @@ export default function ComponentPageView({
               <h3 className="text-sm font-bold text-sand-900 dark:text-sand-50">
                 AI prompt for {name}
               </h3>
-              <Button variant="outline" size="sm" onClick={copyRemixPrompt}>
-                {remixCopied
-                  ? <Check weight="regular" size={15} />
-                  : <Copy weight="regular" size={15} />}
-                {remixCopied ? 'Copied!' : 'Copy prompt'}
-              </Button>
+              {promptLocked ? (
+                /* Copying a paywalled prompt used to silently hand over blocks 1-2
+                   and say "Copied!". That is a broken build waiting to happen and
+                   the component gets the blame, so the button sells instead. */
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openPaywallModal({ reason: 'premium-only' })}
+                >
+                  <LockSimple weight="regular" size={15} />
+                  Unlock full prompt
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={copyRemixPrompt}>
+                  {remixCopied
+                    ? <Check weight="regular" size={15} />
+                    : <Copy weight="regular" size={15} />}
+                  {remixCopied ? 'Copied!' : 'Copy prompt'}
+                </Button>
+              )}
             </div>
             {/* ONE panel, always. When blocks 2-4 are withheld the lock is a band
                 INSIDE it, sitting exactly where the cut happened, so the prompt
@@ -1827,15 +1853,17 @@ export default function ComponentPageView({
             <div className="mt-4 overflow-hidden rounded-xl bg-sand-950 font-mono text-xs leading-relaxed text-sand-200">
               <pre
                 className={`whitespace-pre-wrap break-words px-5 pt-5 ${
-                  promptLocked ? 'pb-4' : 'pb-5'
+                  promptLocked
+                    // Fade the last lines out instead of cutting them off. A hard
+                    // edge reads as truncation, a fade reads as "there is more".
+                    ? 'pb-0 [mask-image:linear-gradient(to_bottom,#000_calc(100%-5rem),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%-5rem),transparent)]'
+                    : 'pb-5'
                 }`}
               >
                 {remixPrompt}
               </pre>
               {promptLocked && (
-                <div className="border-t border-sand-800">
-                  <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
-                </div>
+                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
               )}
             </div>
           </div>
