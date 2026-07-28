@@ -57,16 +57,16 @@ import { usePaywallModal } from '../billing/PaywallModalProvider'
 // fake component and would read as the wrong thing here). Decorative only.
 // It deliberately omits the literal "## 2." / "## 3." / "## 4." headings, so
 // grepping a response for those headings stays a clean leak check.
-const LOCKED_PROMPT_TEASER = `Constants
-- the data, the palette, the config, verbatim
-- the prop typedef
-
-State
+const LOCKED_PROMPT_TEASER = `State
 - every hook, handler, effect and disposal
 - the animation loop, frame by frame
 
 Tree
-- the JSX, every className and inline style`
+- the JSX, every className and inline style
+
+Why · Remix · Check
+- the mechanism, the tuning points, the checks
+`
 
 // ─── Platform icons (inlined SVGs — no external dependency) ───────────────────
 
@@ -86,7 +86,7 @@ interface ComponentPageViewProps {
   // Then `prompts` holds blocks 1/5/6/7 up to the cut and this holds the rest;
   // the withheld blocks 2/3/4 were dropped server-side and are not on the
   // client at all. Undefined = nothing withheld, render the prompt as one pre.
-  promptLockedTail?: string
+  promptLocked?: boolean
   dualTheme: boolean
   designSystem?: DesignSystemSlug
   /** Premium standalone component — shows a "Premium component" label by the title. */
@@ -138,7 +138,7 @@ export default function ComponentPageView({
   tags,
   code,
   prompts,
-  promptLockedTail,
+  promptLocked,
   dualTheme,
   designSystem,
   premium = false,
@@ -466,7 +466,7 @@ export default function ComponentPageView({
       // Copies exactly what is on screen. When paywalled that is head + tail;
       // the withheld blocks are not in this bundle to leak.
       await navigator.clipboard.writeText(
-        promptLockedTail ? `${remixPrompt}\n\n${promptLockedTail}` : remixPrompt,
+        remixPrompt,
       )
       setRemixCopied(true)
       setTimeout(() => setRemixCopied(false), 2500)
@@ -1819,21 +1819,25 @@ export default function ComponentPageView({
                 {remixCopied ? 'Copied!' : 'Copy prompt'}
               </Button>
             </div>
-            <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-5 font-mono text-xs leading-relaxed text-sand-200">
-              {remixPrompt}
-            </pre>
-            {/* Paywalled prompt: the lock sits exactly where the withheld
-                blocks would have been, between Setup and Why. */}
-            {promptLockedTail !== undefined && (
-              <>
-                <div className="mt-4 overflow-hidden rounded-xl bg-sand-950">
+            {/* ONE panel, always. When blocks 2-4 are withheld the lock is a band
+                INSIDE it, sitting exactly where the cut happened, so the prompt
+                still reads as a single document. Rendering head, lock and tail as
+                three rounded cards made a paywalled prompt look broken rather
+                than gated. */}
+            <div className="mt-4 overflow-hidden rounded-xl bg-sand-950 font-mono text-xs leading-relaxed text-sand-200">
+              <pre
+                className={`whitespace-pre-wrap break-words px-5 pt-5 ${
+                  promptLocked ? 'pb-4' : 'pb-5'
+                }`}
+              >
+                {remixPrompt}
+              </pre>
+              {promptLocked && (
+                <div className="border-t border-sand-800">
                   <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
                 </div>
-                <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-sand-950 p-5 font-mono text-xs leading-relaxed text-sand-200">
-                  {promptLockedTail}
-                </pre>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </motion.div>
       )}

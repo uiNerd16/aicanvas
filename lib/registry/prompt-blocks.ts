@@ -6,53 +6,64 @@
  *
  *   1. Setup · 2. Constants · 3. State · 4. Tree · 5. Why · 6. Remix · 7. Check
  *
- * WHY THE SPLIT IS AT 2-4: those three blocks ARE the build spec. Block 2 is
- * the data and config verbatim, block 3 is the entire engine (hooks, handlers,
- * RAF loop, disposal — by far the largest block), block 4 is the JSX with every
- * className and inline style verbatim. Together they reproduce the large
- * majority of the paywalled source, so a public premium prompt is a free copy
- * of a paid component. Blocks 1, 5, 6 and 7 describe, explain and sell it
- * without rebuilding it, so they stay public for everyone: they are the SEO
- * text and the pitch.
+ * WHY THE CUT IS AT BLOCK 3: blocks 1 and 2 are the trigger. Setup shows the
+ * install line, the export signature and the imports; Constants shows the real
+ * data, palette, config and prop typedef. That is concrete enough to prove the
+ * component is worth paying for, and it reads as a normal teaser: the prompt
+ * runs, then stops at a wall, with nothing after it.
  *
- * The seam is therefore [start of "## 2. Constants", start of "## 5. Why").
+ * Everything from block 3 on is withheld. Block 3 is the entire engine (hooks,
+ * handlers, RAF loop, disposal, by far the largest block) and block 4 is the JSX
+ * with every className and inline style. Those two rebuild the paid component.
+ * Blocks 5 to 7 are prose and could safely be public, but they sit AFTER the cut
+ * in scaffold order, and content resuming below a paywall reads as broken rather
+ * than gated. Maintainer's call (2026-07-28): one clean wall beats correct block
+ * order. The SEO cost is real and accepted.
+ *
+ * The seam is therefore [start of "## 3. State", end of prompt).
  */
-const LOCKED_HEADINGS = ['## 2. Constants', '## 3. State', '## 4. Tree'] as const
+const LOCKED_HEADINGS = [
+  '## 3. State',
+  '## 4. Tree',
+  '## 5. Why',
+  '## 6. Remix',
+  '## 7. Check',
+] as const
 const LOCK_START = LOCKED_HEADINGS[0]
-const LOCK_END = '## 5. Why'
 
 /**
- * Split a scaffold prompt into the part before the locked blocks and the part
- * after them. Returns null when the prompt is NOT in a recognisable scaffold —
- * callers must then withhold the prompt whole.
+ * Return the public part of a scaffold prompt (blocks 1 and 2). Returns null
+ * when the prompt is NOT in a recognisable scaffold — callers must then withhold
+ * the prompt whole.
  *
  * Failing closed matters: the scaffold is not enforced for premium prompts
- * (scripts/prompts-scaffold-scope.json scopes free slugs only), so "no
- * headings found" means "cannot safely redact", never "nothing to redact".
+ * (scripts/prompts-scaffold-scope.json scopes free slugs only), so "no headings
+ * found" means "cannot safely redact", never "nothing to redact".
  */
-export function splitPromptAtPaywall(
-  prompt: string,
-): { head: string; tail: string } | null {
-  // Headings are matched at LINE START and must be UNIQUE. A plain indexOf would
-  // land on a heading quoted inside block 4's content (JSX, prose) and cut there,
-  // leaking the rest of block 4 heading-less past the assertion below.
-  const at = (h: string): number[] => {
-    const out: number[] = []
-    const re = new RegExp(`^${h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'gm')
-    for (let m = re.exec(prompt); m; m = re.exec(prompt)) out.push(m.index)
-    return out
-  }
-  const starts = at(LOCK_START)
-  const ends = at(LOCK_END)
-  if (starts.length !== 1 || ends.length !== 1) return null
-  const [start] = starts
-  const [end] = ends
-  if (end <= start) return null
+/**
+ * Occurrences of a heading, matched at LINE START only.
+ *
+ * ONE definition of "a heading", used both to place the cut and to assert the
+ * result. A substring match would be wrong in both directions: it would cut early
+ * on a heading quoted inside block 2's constants, and it would reject a perfectly
+ * safe prompt for merely mentioning one in a string, withholding the whole panel.
+ * Block 2 now ships, so its content is arbitrary and quoting is expected.
+ */
+function headingHits(text: string, heading: string): number[] {
+  const out: number[] = []
+  const re = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'gm')
+  for (let m = re.exec(text); m; m = re.exec(text)) out.push(m.index)
+  return out
+}
 
-  const head = prompt.slice(0, start).trimEnd()
-  const tail = prompt.slice(end).trimStart()
-  // Out-of-order or duplicated headings would leave a locked block outside the
-  // cut. Cheap final assertion on the actual output, not on the input's shape.
-  if (LOCKED_HEADINGS.some((h) => head.includes(h) || tail.includes(h))) return null
-  return { head, tail }
+export function splitPromptAtPaywall(prompt: string): { head: string } | null {
+  // Exactly one cut point, or we cannot say which one is real.
+  const starts = headingHits(prompt, LOCK_START)
+  if (starts.length !== 1) return null
+
+  const head = prompt.slice(0, starts[0]).trimEnd()
+  // Final assertion on the actual output, not on the input's shape: no locked
+  // heading may survive as a real heading in what we are about to ship.
+  if (LOCKED_HEADINGS.some((h) => headingHits(head, h).length > 0)) return null
+  return { head }
 }

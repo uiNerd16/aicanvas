@@ -25,15 +25,18 @@ const SCAFFOLD = [
 ].join('\n')
 
 describe('splitPromptAtPaywall', () => {
-  it('drops blocks 2-4 and keeps 1, 5, 6, 7', () => {
-    const split = splitPromptAtPaywall(SCAFFOLD)!
+  it('keeps blocks 1 and 2, withholds everything from block 3 on', () => {
+    const split = splitPromptAtPaywall(SCAFFOLD)
     expect(split).not.toBeNull()
-    const shipped = `${split.head}\n\n${split.tail}`
-    for (const gone of ['## 2. Constants', '## 3. State', '## 4. Tree', 'COLORS', 'rootRef', 'className']) {
-      expect(shipped).not.toContain(gone)
-    }
-    for (const kept of ['## 1. Setup', 'npm install framer-motion', '## 5. Why', '## 6. Remix', '## 7. Check']) {
+    const shipped = split!.head
+    for (const kept of ['## 1. Setup', 'npm install framer-motion', '## 2. Constants', 'COLORS']) {
       expect(shipped).toContain(kept)
+    }
+    for (const gone of [
+      '## 3. State', '## 4. Tree', '## 5. Why', '## 6. Remix', '## 7. Check',
+      'rootRef', 'className', 'RAF loop', 'swap the palette', 'fills its parent',
+    ]) {
+      expect(shipped).not.toContain(gone)
     }
   })
 
@@ -41,41 +44,39 @@ describe('splitPromptAtPaywall', () => {
     expect(splitPromptAtPaywall('Build a card. Use framer-motion.')).toBeNull()
   })
 
-  it('fails closed when a locked heading sits outside the cut', () => {
+  it('fails closed when the cut heading repeats at line start', () => {
+    // Two cuts are ambiguous, so refuse rather than guess which one is real.
     expect(splitPromptAtPaywall(`## 3. State\nleaked\n${SCAFFOLD}`)).toBeNull()
   })
 
-  it('ignores a locked heading quoted mid-line inside block 4', () => {
-    // The dormant leak the adversarial pass found. Anchoring headings to line
-    // starts is what makes this safe: the quoted copy is not at a line start, so
-    // the cut still lands on the real heading and block 4 goes with the secrets.
+  it('fails closed when a later locked heading survives the cut', () => {
+    // Block 2 quoting a real block-5 heading at line start would ship it.
     const prompt = [
       '## 1. Setup', 'x',
-      '## 2. Constants', 'SECRET-CONSTANT',
+      '## 2. Constants',
+      '## 5. Why',
+      'SECRET-AFTER-STRAY-HEADING',
       '## 3. State', 'SECRET-STATE',
-      '## 4. Tree',
-      'div title="## 5. Why (quoted in markup)"',
-      'SECRET-B4-REMAINDER',
-      '## 5. Why', '- public',
+    ].join('\n')
+    expect(splitPromptAtPaywall(prompt)).toBeNull()
+  })
+
+  it('ignores a locked heading quoted mid-line, cutting only at a real one', () => {
+    // Anchoring to line starts is what makes this safe: the quoted copy is not at
+    // a line start, so it neither moves the cut nor trips the survivor assertion.
+    const prompt = [
+      '## 1. Setup', 'x',
+      '## 2. Constants',
+      'const label = "## 3. State (quoted in a string)"',
+      '## 3. State', 'SECRET-STATE',
+      '## 4. Tree', 'SECRET-TREE',
+      '## 5. Why', '- prose',
     ].join('\n')
     const out = splitPromptAtPaywall(prompt)
     expect(out).not.toBeNull()
-    const shipped = `${out!.head}\n${out!.tail}`
-    expect(shipped).not.toContain('SECRET-CONSTANT')
-    expect(shipped).not.toContain('SECRET-STATE')
-    expect(shipped).not.toContain('SECRET-B4-REMAINDER')
-    expect(shipped).toContain('## 5. Why')
-  })
-
-  it('refuses to split when a locked heading genuinely repeats at line start', () => {
-    const prompt = [
-      '## 1. Setup', 'x',
-      '## 2. Constants', 'SECRET-CONSTANT',
-      '## 3. State', 'SECRET-STATE',
-      '## 4. Tree', 'SECRET-TREE',
-      '## 5. Why', '- public',
-      '## 5. Why', '- duplicated heading, ambiguous cut',
-    ].join('\n')
-    expect(splitPromptAtPaywall(prompt)).toBeNull()
+    expect(out!.head).toContain('quoted in a string')
+    expect(out!.head).not.toContain('SECRET-STATE')
+    expect(out!.head).not.toContain('SECRET-TREE')
+    expect(out!.head).not.toContain('- prose')
   })
 })

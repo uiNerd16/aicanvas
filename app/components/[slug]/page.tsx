@@ -246,7 +246,7 @@ export default async function Page({
   // are untouched — their whole prompt stays public, no account needed.
   const fullPrompt =
     entry.prompts['Claude Code'] ?? Object.values(entry.prompts).find((p): p is string => !!p)
-  let promptTail: string | undefined
+  let promptLocked = false
   let prompts = entry.prompts
   if (isPremium && fullPrompt) {
     let viewerIsPremium = false
@@ -263,7 +263,7 @@ export default async function Page({
       // same as harmless. Add a fallback teaser only if a premium prompt ever
       // legitimately ships without the scaffold.
       prompts = split ? { 'Claude Code': split.head } : {}
-      promptTail = split?.tail
+      promptLocked = true
     }
   }
 
@@ -365,7 +365,7 @@ export default async function Page({
         // blocks 2/3/4 were stripped above and are NOT in this payload. Do not
         // "restore" it to entry.prompts: that re-opens the leak this gate closes.
         prompts={prompts}
-        promptLockedTail={promptTail}
+        promptLocked={promptLocked}
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         premium={contentType === 'premium-standalone'}
