@@ -13,6 +13,15 @@
 // Without the key, or on any error, we render FALLBACK_PULLS. The homepage must
 // never break, hang, or show a wrong number because an analytics API had a bad
 // day, so every failure path lands on the fallback.
+//
+// CACHING: via unstable_cache, deliberately NOT route-level `revalidate`. The
+// root layout builds a Supabase server client, which reads cookies and opts
+// every page out of static rendering — so the homepage is server-rendered per
+// request and an `export const revalidate` would be a no-op. unstable_cache is
+// independent of render mode, so PostHog is queried at most once a day no
+// matter how many visitors arrive.
+
+import { unstable_cache } from 'next/cache'
 
 // NOT the same host as proxy.ts. POSTHOG_HOST is the *ingest* endpoint
 // (us.i.posthog.com); the query API lives on the app host (us.posthog.com).
@@ -34,7 +43,7 @@ const REVALIDATE_SECONDS = 86_400
 /** Never let a slow analytics API block a page render for long. */
 const TIMEOUT_MS = 5_000
 
-export async function getRegistryPulls(): Promise<number> {
+async function fetchRegistryPulls(): Promise<number> {
   const key = process.env.POSTHOG_PERSONAL_API_KEY
   if (!key) return FALLBACK_PULLS
 
@@ -51,7 +60,8 @@ export async function getRegistryPulls(): Promise<number> {
           query: "select count() from events where event = 'registry_hit'",
         },
       }),
-      next: { revalidate: REVALIDATE_SECONDS },
+      // No fetch-level cache options: unstable_cache below is the single
+      // caching layer, so there is only one revalidate window to reason about.
       signal: AbortSignal.timeout(TIMEOUT_MS),
     })
     if (!res.ok) throw new Error(`PostHog responded ${res.status}`)
@@ -69,3 +79,15 @@ export async function getRegistryPulls(): Promise<number> {
     return FALLBACK_PULLS
   }
 }
+
+/**
+ * The homepage entry point. Hits PostHog at most once per REVALIDATE_SECONDS
+ * across all visitors and both homepage routes; every other request is served
+ * from Next's cache. Tagged so a future `revalidateTag('registry-pulls')` can
+ * force a refresh without waiting out the window.
+ */
+export const getRegistryPulls = unstable_cache(
+  fetchRegistryPulls,
+  ['registry-pulls'],
+  { revalidate: REVALIDATE_SECONDS, tags: ['registry-pulls'] },
+)

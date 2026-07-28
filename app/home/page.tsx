@@ -5,10 +5,6 @@ import { HomePageClient } from './HomePageClient'
 import { COMPONENT_META } from '../lib/component-meta.generated'
 import { getRegistryPulls } from '../lib/registry-stats'
 
-// Same ISR window as the root homepage — this route renders the same page, so
-// it must not fall out of sync and hit PostHog on a different schedule.
-export const revalidate = 86400
-
 // Mirrors the root homepage metadata (this route renders the same page);
 // canonical points at the root so search engines fold the two together.
 const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'

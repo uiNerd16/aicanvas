@@ -6,11 +6,6 @@ import { COMPONENT_META } from './lib/component-meta.generated'
 import { SITE_URL } from './lib/config'
 import { getRegistryPulls } from './lib/registry-stats'
 
-// ISR: the homepage is statically regenerated at most once a day. This bounds
-// the PostHog call in getRegistryPulls() to one query per day no matter how the
-// fetch-level cache treats a POST, and keeps every visitor on a static page.
-export const revalidate = 86400
-
 const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'
 const HOMEPAGE_DESCRIPTION = 'Install finished React components, blocks, and design systems with one shadcn CLI command. Real, editable code you own, no AI tokens spent.'
 
