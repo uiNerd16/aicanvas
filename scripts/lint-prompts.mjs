@@ -173,6 +173,30 @@ function rootClassName(source) {
 }
 
 /**
+ * Harvest the STATIC class tokens out of a template-literal className.
+ *
+ * Skipping `className={`...`}` wholesale was a real blind spot: only the `${...}` parts are
+ * unmatchable, and the literal text around them is ordinary class names that Tailwind scans
+ * and a prompt must carry. Measured cost of the old behaviour: a live fix adding
+ * `order-[var(--o)] md:order-[var(--o-md)]` inside a template literal passed strict
+ * untouched while the prompt still described the class it had replaced.
+ *
+ * Conservative by construction. Any token TOUCHING an interpolation is dropped, since it may
+ * be a fragment like `text-` from `text-${size}`. If stripping interpolations leaves stray
+ * brace or backtick syntax (nested template literal, object literal), the whole className
+ * degrades to the old skip-it behaviour rather than emitting garbage failures.
+ */
+function staticClassTokens(tpl) {
+  let t = tpl.trim().replace(/^`/, '').replace(/`$/, '')
+  if (!t.includes('${')) return t.split(/\s+/).filter(Boolean)
+  // Sentinel, not a space: replacing with a space would split `text-${size}` into the
+  // fragment `text-`, and rule 3 would then demand that fragment appear in the prompt.
+  t = t.replace(/\$\{[^{}]*\}/g, '\u0000')
+  if (t.includes('${') || t.includes('{') || t.includes('}') || t.includes('`')) return null
+  return t.split(/\s+/).filter(x => x && !x.includes('\u0000') && /^[a-zA-Z]/.test(x))
+}
+
+/**
  * Split every className into static literals (checkable verbatim) and runtime-composed
  * ones (template literals / ternaries / cn() calls), which are reported as skipped
  * rather than failed — their final text does not exist in the source.
@@ -189,9 +213,12 @@ function scanClassNames(source) {
       const end = source.indexOf(ch, i + 1)
       if (end !== -1) statics.push(source.slice(i + 1, end))
     } else if (ch === '{') {
-      const quoted = source.slice(i + 1).match(/^\s*(["'])([^"'`]*)\1\s*\}/)
-      if (quoted) statics.push(quoted[2])
-      else dynamic.push(readBraced(source, i).slice(0, 70).replace(/\s+/g, ' '))
+      const inner = readBraced(source, i)
+      const quoted = inner.match(/^\s*(["'])([^"'`]*)\1\s*$/)
+      if (quoted) { statics.push(quoted[2]); continue }
+      const tokens = inner.trim().startsWith('`') ? staticClassTokens(inner) : null
+      if (tokens) statics.push(...tokens)
+      dynamic.push(inner.slice(0, 70).replace(/\s+/g, ' '))
     }
   }
   return {
@@ -652,6 +679,11 @@ export default function DemoThing() {
   const cn = scanClassNames(src)
   assert(cn.dynamic.length === 1, 'template-literal className detected as runtime-composed, not failed')
   assert(cn.statics.includes('rounded-full'), 'static classNames collected')
+  assert(cn.statics.includes('px-2'), 'static tokens INSIDE a template-literal className are harvested (regression: order-[var(--o)] blind spot)')
+  assert(!staticClassTokens('`text-${size} px-2`').includes('text-'), 'a token touching an interpolation is dropped, never emitted as a fragment')
+  assert(staticClassTokens('`text-${size} px-2`').includes('px-2'), 'the untouched token beside an interpolation still counts')
+  assert(staticClassTokens('`a ${cond ? `x` : `y`} b`').join(' ') === 'a b', 'a nested template literal inside an interpolation is consumed with it; surrounding static tokens still count')
+  assert(staticClassTokens('`a ${xs.map(v => ({ v }))} b`') === null, 'brace syntax surviving the strip degrades to skip, not to garbage')
   const col = scanColors(src)
   assert(col.hexes.includes('#e8e8df') && col.rgbas[0] === 'rgba(255,255,255,0.3)', 'colours normalised (case + whitespace)')
   assert(col.rgbas.length === 1 && col.composed.length === 1, 'runtime-composed rgba() skipped, not failed (the one FP the corpus scan found)')
