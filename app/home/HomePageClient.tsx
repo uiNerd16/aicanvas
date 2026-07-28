@@ -16,9 +16,6 @@ import {
   Sparkle,
   Fire,
   CaretRight,
-  SquaresFour,
-  Scales,
-  Plugs,
 } from '@phosphor-icons/react/dist/ssr'
 import { buttonClasses } from '../components/buttonClasses'
 import { HeaderSocials } from '../components/HeaderSocials'
@@ -162,55 +159,59 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
           </Reveal>
         </section>
 
-        {/* ── Feature row ──
-             Was a 2×2 stats strip of big numbers. Four of these five items have
-             no number in them, so the old `text-4xl` treatment would have
-             rendered "Remix with AI" at headline size. Icon + title + one line
-             is the right shape for value props.
+        {/* ── Stats strip ──
+             Six items as 3 columns × 2 rows, keeping the original treatment:
+             one big bold word or number, a small label under it, thin vertical
+             dividers between columns.
 
-             The count is the only animated item, and it is computed (see
-             componentTotal above) so it can never drift from what actually
-             ships. ── */}
+             Rendered as two explicit rows rather than one 6-cell grid with
+             nth-child border rules — those need a responsive override to move
+             the "first in row" divider reset from every 2nd to every 3rd child,
+             and two same-specificity rules resolve by Tailwind's own emit order,
+             not by class order. Explicit rows are deterministic. ── */}
         <section className="mt-16 sm:mt-24">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="flex flex-col gap-y-10 sm:gap-y-12">
             {(
               [
-                {
-                  Icon: SquaresFour,
-                  // Rendered via AnimatedCount, so it counts up like the card above.
-                  count: componentTotal,
-                  title: '',
-                  body: 'components, blocks and templates',
-                },
-                {
-                  Icon: Scales,
-                  title: 'Free library',
-                  // "Free library" first, THEN MIT: premium content is
-                  // proprietary, so an unqualified "open source" claim here
-                  // would be false. See /terms and /faq for the full wording.
-                  body: 'Open source, MIT',
-                },
-                { Icon: Plugs,    title: 'MCP ready',     body: 'Speeds up your work' },
-                { Icon: Terminal, title: 'One command',   body: 'Copy, paste, done in seconds' },
-                { Icon: Sparkle,  title: 'Remix with AI', body: 'Prompts ready' },
-              ] as {
-                Icon: typeof Terminal
-                count?: number
-                title: string
-                body: string
-              }[]
-            ).map(({ Icon, count, title, body }, i) => (
-              <Reveal
-                key={title || 'count'}
-                delay={i * 0.06}
-                className="flex flex-col items-center text-center"
-              >
-                <Icon weight="regular" size={20} className="mb-2 text-olive-400" aria-hidden />
-                <span className="text-lg font-bold tabular-nums leading-tight text-sand-50">
-                  {count !== undefined ? <AnimatedCount to={count} suffix="" /> : title}
-                </span>
-                <span className="mt-1 text-xs font-medium leading-snug text-sand-500">{body}</span>
-              </Reveal>
+                [
+                  // Computed, never hardcoded — see componentTotal above.
+                  { count: componentTotal, label: 'Components, blocks & templates' },
+                  // "Free library", not a bare "Open source": premium content is
+                  // proprietary, so the unqualified claim would be false. Every
+                  // other surface (terms, faq, impressum, about) already scopes it.
+                  { text: 'MIT', label: 'Free library' },
+                  { text: 'MCP', label: 'Ready' },
+                ],
+                [
+                  { text: 'CLI', label: 'One command, seconds' },
+                  { text: 'Any', label: 'AI tool, prompts ready' },
+                  // Real CLI installs (user_agent = shadcn) reached 58 countries
+                  // as of 2026-07-28. Hardcoded: it moves slowly and only goes up,
+                  // so it needs no live query. Bump it when you think of it.
+                  { count: 58, label: 'Countries' },
+                ],
+              ] as { count?: number; text?: string; label: string }[][]
+            ).map((row, rowIdx) => (
+              <div key={rowIdx} className="grid grid-cols-3">
+                {row.map(({ count, text, label }, colIdx) => (
+                  <div
+                    key={label}
+                    className={colIdx > 0 ? 'border-l border-sand-800' : undefined}
+                  >
+                    <Reveal
+                      delay={(rowIdx * 3 + colIdx) * 0.06}
+                      className="flex flex-col items-center px-2 text-center"
+                    >
+                      <span className="text-3xl font-bold tabular-nums leading-none text-sand-50 sm:text-4xl">
+                        {count !== undefined ? <AnimatedCount to={count} suffix="" /> : text}
+                      </span>
+                      <span className="mt-2 text-[11px] font-medium leading-snug text-sand-500 sm:text-xs">
+                        {label}
+                      </span>
+                    </Reveal>
+                  </div>
+                ))}
+              </div>
             ))}
           </div>
         </section>
