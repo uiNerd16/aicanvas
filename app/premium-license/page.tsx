@@ -244,8 +244,13 @@ export default function PremiumLicensePage() {
             If you cancel, do not renew, or your Subscription otherwise ends,
             your access right under Section 2 ends: you lose access to the
             Premium catalogue, to new components, and to updates and new versions
-            of components you previously installed. You are not obliged to remove
-            anything you already built.
+            of components you previously installed. You also lose access to the
+            full remix prompt of Premium Components and blocks, which is part of
+            the Subscription and not part of the perpetual licence in Section 3;
+            the public part of each prompt remains readable to everyone. Losing
+            prompt access does not affect any Installed Component: nothing is
+            removed from your machine or your repository, and you are not obliged
+            to remove anything you already built.
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
             <strong className="text-sand-200">7.2 What survives.</strong>{' '}

@@ -44,7 +44,7 @@ export const COLLECTIONS: readonly Collection[] = [
       'Animated React components built with Motion (Framer Motion) and Tailwind CSS. Copy-paste ready, installable via the shadcn CLI.',
     h1: 'Framer Motion Components for React',
     intro:
-      'Every component in this collection animates with Motion, the library formerly known as Framer Motion. Copy the source, install it with the shadcn CLI, or remix it with AI.',
+      'Every component in this collection animates with Motion, the library formerly known as Framer Motion. Install it with the shadcn CLI, or remix it with AI.',
     match: (c) => hasStack(c, 'Motion'),
   },
   {
@@ -54,7 +54,7 @@ export const COLLECTIONS: readonly Collection[] = [
       'React components that render animations on HTML canvas: particle fields, noise backgrounds, generative grids. Installable via the shadcn CLI.',
     h1: 'Canvas Animation Components for React',
     intro:
-      'These components draw straight to an HTML canvas for smooth, GPU-friendly animation at any size: particle fields, noise backgrounds, and generative grids. Each one is self-contained React and TypeScript, ready to copy or install with the shadcn CLI.',
+      'These components draw straight to an HTML canvas for smooth, GPU-friendly animation at any size: particle fields, noise backgrounds, and generative grids. Each one is self-contained React and TypeScript, ready to install with the shadcn CLI.',
     match: (c) => hasStack(c, 'Canvas'),
   },
   {

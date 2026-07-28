@@ -37,15 +37,15 @@ const PLANS: Plan[] = [
     name: 'Free',
     Icon: TerminatorCool,
     tagline:
-      'Browse the canvas freely. Copy any component or prompt with no account, no friction.',
+      'Browse the canvas freely. Copy any free component and its prompt with no account, no friction.',
     priceLabel: 'Free',
     priceSuffix: 'Forever',
     cta: { label: 'Browse Components', href: '/components', variant: 'outline' },
     listLabel: 'GET STARTED WITH',
     features: [
       'Browse every public component',
-      'Copy component source code',
-      'Copy the AI remix prompt for any component',
+      'Copy the source of any free component',
+      'Copy the AI remix prompt for any free component',
       'Access the MCP server',
       'Experiment in the Lab',
     ],
@@ -247,8 +247,8 @@ export default function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-sand-600 dark:text-sand-400">
             {premium
-              ? 'A free account unlocks unlimited one-command installs and remix with AI, free forever. Premium adds the closed-source components, blocks, design systems and templates.'
-              : 'AI Canvas is free, forever. Browse anonymously, or sign up to save your work, keep Lab presets, and export to your machine.'}
+              ? 'A free account unlocks unlimited one-command installs and remix with AI on every free component, free forever. Premium adds the closed-source components, blocks, design systems and templates, with their full remix prompts.'
+              : 'The free library is free, forever. Browse anonymously, or sign up to save your work, keep Lab presets, and export to your machine.'}
           </p>
         </Section>
 
