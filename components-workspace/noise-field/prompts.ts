@@ -1,7 +1,10 @@
 import type { Platform } from '../../app/components/ComponentCard'
 
 export const prompts: Partial<Record<Platform, string>> = {
-  'Claude Code': `Before building, verify your project has the following setup:
+  'Claude Code': `Root element: className="relative min-h-screen w-full overflow-hidden"
+The source ships h-full because AI Canvas renders it inside a sized preview frame. A standalone paste needs min-h-screen, or an ancestor with a real height, or the root collapses and takes its absolute layers with it.
+
+Before building, verify your project has the following setup:
 - React / Next.js
 - TypeScript
 - Tailwind CSS v4

@@ -103,7 +103,10 @@ title='', description='', isPrivate=false, titleError=false, color=null.
 \`targetW = Math.min(480, window.innerWidth - 32)\` — card fills screen with 16px side margins on small screens.`
 
 export const prompts: Partial<Record<Platform, string>> = {
-  'Claude Code': `Before building, verify your project has the following setup:
+  'Claude Code': `Root element: className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
+The source ships h-full because AI Canvas renders it inside a sized preview frame. A standalone paste needs min-h-screen, or an ancestor with a real height, or the root collapses and takes its absolute layers with it.
+
+Before building, verify your project has the following setup:
 - React / Next.js with TypeScript
 - Tailwind CSS v4
 - If any are missing, set up via the shadcn CLI: \`npx shadcn@latest init\`

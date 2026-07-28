@@ -11,10 +11,15 @@
  *   node scripts/lint-prompts.mjs --strict <slug> reviewer gate (exit 1 on any violation)
  *   node scripts/lint-prompts.mjs --fix <slug>    inject npm install line + Root note only
  *   node scripts/lint-prompts.mjs --selftest      assert the extractors on fixtures
+ *   node scripts/lint-prompts.mjs --ci            selftest + every prompt evaluates +
+ *                                                 strict on every scoped/new-format prompt
  *
- * STRICT rules fire ONLY on prompts containing the marker "## 4. Tree". Legacy prose
- * prompts get the advisory path and can never hard-fail — an earlier probe proved a
- * blanket className gate is noisy on prose and would fail complete-but-prose prompts.
+ * WHAT MAKES A SLUG STRICT: membership in scripts/prompts-scaffold-scope.json, NOT the
+ * presence of "## 4. Tree" in its own text. Keying it off the text made the gate opt-in by
+ * the party it polices — delete one heading, go green forever. For a scoped slug a missing
+ * heading is itself the failure. Unscoped legacy prose gets the advisory path and can never
+ * hard-fail; an earlier probe proved a blanket className gate is noisy on prose and would
+ * fail complete-but-prose prompts.
  *
  * Exit:  0 = clean / advisory, 1 = strict violations
  */
@@ -56,14 +61,17 @@ const SCOPE = new Set(
 )
 
 /**
- * TIER — premium components get an INVERTED rule set.
+ * TIER — premium runs the SAME verbatim scaffold as free, plus two accident guards.
  *
- * A free component is MIT, so a verbatim prompt is a perfect reconstruction at zero cost.
- * A premium component's prompt TEXT is deliberately public while its SOURCE is paywalled.
- * Measured on the real 3d-product-card: 635 lines / 29,221 chars, of which verbatim blocks
- * 2+3+4 reproduce the large majority. That turns the free prompt into the product. So on
- * premium we invert: never REQUIRE verbatim, and FAIL on source that belongs behind the
- * paywall or on a private asset URL.
+ * Maintainer decision (2026-07-28), made with the numbers in hand: verbatim blocks 2-4 on
+ * the real 3d-product-card (635 lines / 29,221 chars) reproduce the large majority of the
+ * paywalled source, and that is accepted. The tier sells polished source files, CLI, MCP
+ * and support, not secrecy, so the strongest possible prompt is on-strategy on both tiers.
+ *
+ * An earlier draft inverted the rules for premium. That inversion is deliberately gone.
+ * What remains (see premiumGuards) is orthogonal to fidelity: the source marker must never
+ * reach public prompt text, and private asset URLs must not be pasted, because buyers
+ * rebuilding against them bill the maintainer's account.
  */
 // Assembled, never written as a literal: scripts/check-no-premium-leak.mjs content-scans
 // every tracked public file for this exact string and would (correctly) refuse the commit.
@@ -363,38 +371,30 @@ function strictCheck(source, prompt) {
 }
 
 /**
- * PREMIUM rules — the inverse of strict. We never demand verbatim source here; we forbid it.
- * A premium prompt should describe the component, not be the component.
+ * PREMIUM guards — accident guards only, NOT a fidelity policy.
+ *
+ * Maintainer decision (2026-07-28): premium prompts use the SAME verbatim scaffold as free.
+ * The tier sells polished source files, CLI, MCP and support, not secrecy, so a
+ * high-fidelity prompt is on-strategy. An earlier draft inverted the rules for premium and
+ * that inversion is deliberately gone.
+ *
+ * What survives is orthogonal to fidelity and protects against accidents rather than policy:
+ *   P1  the source marker must never appear in prompt text, which ships publicly.
+ *   P2  private asset URLs must not be pasted. This is a bandwidth and account concern, not
+ *       a leak one: buyers rebuilding against ik.imagekit.io hit the maintainer's account.
+ *       Describe the asset and let the buyer supply their own.
  */
-function premiumCheck(source, prompt) {
+function premiumGuards(prompt) {
   const issues = []
 
   if (prompt.includes(PREMIUM_MARKER)) {
-    issues.push(`[P1 marker] the premium marker is inside the prompt TEXT, which ships publicly`)
+    issues.push(`[P1 marker] the source marker is inside the prompt TEXT, which ships publicly`)
   }
 
   for (const re of PRIVATE_ASSET_HOSTS) {
     for (const url of prompt.match(re) ?? []) {
-      issues.push(`[P2 asset] private asset URL in public prompt text: ${url}`)
+      issues.push(`[P2 asset] private asset URL in prompt text: ${url} — describe the asset, let the buyer supply their own`)
     }
-  }
-
-  // Verbatim source leaking into a paywalled component's public prompt. Inline style
-  // objects and long classNames are the highest-fidelity carriers, so they are the tell.
-  const { statics } = scanClassNames(source)
-  const longOnes = statics.filter(cn => cn.length >= 40)
-  const pasted = longOnes.filter(cn => prompt.includes(cn))
-  if (pasted.length >= 3) {
-    issues.push(
-      `[P3 fidelity] ${pasted.length} full className strings pasted verbatim (of ${longOnes.length} long ones) — ` +
-      `on premium, describe the structure instead. First: "${pasted[0].slice(0, 50)}…"`
-    )
-  }
-
-  const styleObjects = [...source.matchAll(/style\s*=\s*\{\{([^}]{40,})\}\}/g)].map(m => squash(m[1]))
-  const pastedStyles = styleObjects.filter(s => squash(prompt).includes(s))
-  if (pastedStyles.length >= 2) {
-    issues.push(`[P3 fidelity] ${pastedStyles.length} inline style objects pasted verbatim — paywalled source in a public prompt`)
   }
 
   return issues
@@ -466,19 +466,7 @@ async function runStrict(slug) {
     process.exit(1)
   }
 
-  // PREMIUM: inverted rules. Never demand verbatim; forbid paywalled source in public text.
-  if (f.premium) {
-    const issues = premiumCheck(f.source, f.prompt)
-    console.log(`premium component — inverted rules (prompt text ships publicly, source does not)\n`)
-    if (issues.length === 0) {
-      console.log('✓ no paywalled source, markers or private asset URLs in the prompt text\n')
-      process.exit(0)
-    }
-    console.log(`✗ ${issues.length} violation(s):\n`)
-    for (const i of issues) console.log(`    → ${i}`)
-    console.log(`\nOn premium the prompt describes the component. It must not BE the component.\n`)
-    process.exit(1)
-  }
+  if (f.premium) console.log(`premium component — same verbatim scaffold as free, plus the marker and asset guards\n`)
 
   if (!f.isNew) {
     // SCOPED but not converted, or converted and then un-converted. This is the branch that
@@ -505,6 +493,7 @@ async function runStrict(slug) {
   }
 
   const { issues, skipped } = strictCheck(f.source, f.prompt)
+  if (f.premium) issues.push(...premiumGuards(f.prompt))
   if (skipped.length) {
     console.log(`${skipped.length} runtime-composed value(s) skipped (no verbatim text to match):`)
     for (const d of skipped) console.log(`    ~ ${d}`)
@@ -712,8 +701,9 @@ export default function DemoThing() {
   assert(strictCheck(src, over).issues.some(i => i.startsWith('[9 caps]')), 'a 9-bullet Check block breaks the 5-8 cap (rule 9)')
   const under = good.replace(/^- (a naked paste|#E8E8DF appears|every animated).*$/gm, '')
   assert(strictCheck(src, under).issues.some(i => i.includes('needs at least 5')), 'a 2-bullet Check block breaks the lower bound (rule 9)')
-  assert(premiumCheck(src, 'see https://ik.imagekit.io/aitoolkit/models/chair.glb').some(i => i.startsWith('[P2 asset]')), 'a private asset URL fails the premium rules')
-  assert(premiumCheck(src, PREMIUM_MARKER).some(i => i.startsWith('[P1 marker]')), 'the premium marker in prompt text fails the premium rules')
+  assert(premiumGuards('see https://ik.imagekit.io/aitoolkit/models/chair.glb').some(i => i.startsWith('[P2 asset]')), 'a private asset URL fails the premium guards')
+  assert(premiumGuards(PREMIUM_MARKER).some(i => i.startsWith('[P1 marker]')), 'the source marker in prompt text fails the premium guards')
+  assert(premiumGuards(good).length === 0, 'a clean verbatim prompt passes the premium guards (fidelity is no longer policed)')
 
   // replaceAll, not replace: the hex appears in both block 4 and block 7, and replacing only
   // the first left rule 4 satisfied by the survivor — the assert passed for the wrong reason.
@@ -761,9 +751,9 @@ if (flag === '--strict') {
       continue
     }
     if (f.premium) {
-      const issues = premiumCheck(f.source, f.prompt)
-      if (issues.length) { console.log(`✗ ${f.slug} (premium): ${issues.length} violation(s)`); failures++ }
-      continue
+      const guards = premiumGuards(f.prompt)
+      if (guards.length) { console.log(`✗ ${f.slug} (premium guards): ${guards.length} violation(s)`); failures++ }
+      // falls through to the same scope + strict checks as a free component
     }
     if (f.scoped && !f.isNew) {
       console.log(`✗ ${f.slug}: in scope but missing "${NEW_FORMAT_MARKER}"`)
