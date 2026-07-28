@@ -137,16 +137,24 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
 
             {/* Left: the live counter */}
             <Reveal className="h-full">
-              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 sm:p-8">
-                {/* Soft light from the top-left corner. Neutral white-alpha
-                    rather than a hue, so it reads as a light source and stays
-                    inside the sand/olive palette. */}
+              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl p-6 sm:p-8">
+                {/* No border, no fill — the soft light IS the card. Two lights:
+                    a cool one from the top-left and a warm one bleeding in from
+                    the bottom-right, so the shape reads without an edge.
+                    Written as inline gradients rather than Tailwind arbitrary
+                    values because multi-stop gradients need commas, which
+                    arbitrary values escape awkwardly. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_115%_at_0%_0%,rgba(255,255,255,0.055),transparent_58%)]"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      'radial-gradient(85% 85% at 8% 0%, rgba(214,226,255,0.075), transparent 58%),' +
+                      'radial-gradient(65% 65% at 100% 100%, rgba(196,150,96,0.055), transparent 60%)',
+                  }}
                 />
                 <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-sand-700 bg-sand-950/60 px-2.5 py-1 text-[11px] font-semibold text-sand-300">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-sand-800/70 px-3 py-1.5 text-[11px] font-semibold text-sand-200">
                     {/* The pulsing dot carries the "alive" feeling so the words
                         do not have to overpromise: the cache window is 24h, so
                         "Live" would be false. See REVALIDATE_SECONDS. */}
@@ -182,10 +190,15 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
 
             {/* Right: the facts */}
             <Reveal delay={0.08} className="h-full">
-              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-sand-800 bg-sand-900 p-6 sm:p-8">
+              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl p-6 sm:p-8">
+                {/* Cooler light, top-left, matching the mockup. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_115%_at_0%_0%,rgba(255,255,255,0.045),transparent_58%)]"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      'radial-gradient(80% 80% at 0% 0%, rgba(186,208,255,0.085), transparent 55%)',
+                  }}
                 />
                 <dl className="relative flex flex-col gap-y-5 sm:gap-y-6">
                   {(
