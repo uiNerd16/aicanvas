@@ -8,7 +8,7 @@ export type { PaywallReason }
 
 // Decorative, blurred faux-source — for PREMIUM content the REAL bytes are
 // withheld server-side (the source gate serves a placeholder item; the prompt
-// gate never renders blocks 2-4), so there is nothing real to blur. Free
+// gate never renders block 3 onward), so there is nothing real to blur. Free
 // source and free prompts stay public to read.
 const FAUX_SOURCE = `import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'

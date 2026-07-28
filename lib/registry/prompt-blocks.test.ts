@@ -79,4 +79,18 @@ describe('splitPromptAtPaywall', () => {
     expect(out!.head).not.toContain('SECRET-TREE')
     expect(out!.head).not.toContain('- prose')
   })
+
+  it('treats a heading with trailing whitespace as a heading', () => {
+    const prompt = [
+      '## 1. Setup', 'x',
+      '## 2. Constants', 'public',
+      '## 3. State   ', 'SECRET-STATE',
+      '## 4. Tree', 'SECRET-TREE',
+    ].join('\n')
+    const out = splitPromptAtPaywall(prompt)
+    expect(out).not.toBeNull()
+    expect(out!.head).not.toContain('SECRET-STATE')
+    expect(out!.head).not.toContain('SECRET-TREE')
+    expect(out!.head).toContain('## 2. Constants')
+  })
 })

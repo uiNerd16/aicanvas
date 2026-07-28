@@ -10,8 +10,8 @@ import { FaqView, type FaqCategory } from './FaqView'
 // and the customer portal / cancel flow is not wired yet, so flip the checkout
 // flag and wire cancel before this copy fully matches the live site.
 // Model: browsing is free and public; FREE entries publish their whole remix
-// prompt; PREMIUM entries publish only the setup, why, remix and check blocks
-// unless the viewer is Premium; the one-command install needs a free account
+// prompt; PREMIUM entries publish only the setup and constants blocks unless
+// the viewer is Premium; the one-command install needs a free account
 // (unlimited, uncounted); Premium adds the closed-source premium components,
 // blocks, design systems, and templates plus their full remix prompts.
 // Prices ($8.99/mo, $49.99/yr)

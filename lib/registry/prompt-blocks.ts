@@ -51,7 +51,9 @@ const LOCK_START = LOCKED_HEADINGS[0]
  */
 function headingHits(text: string, heading: string): number[] {
   const out: number[] = []
-  const re = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'gm')
+  // Trailing whitespace still makes it a heading. Anchoring to a bare `$` would
+  // miss "## 3. State " and let the block under it survive the cut.
+  const re = new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'gm')
   for (let m = re.exec(text); m; m = re.exec(text)) out.push(m.index)
   return out
 }

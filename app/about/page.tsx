@@ -178,8 +178,8 @@ export default function AboutPage() {
           <p className="mt-4 text-base leading-relaxed text-sand-400">
             A comprehensive AI remix prompt still ships with every free
             component, and it works in any AI tool. Premium components and
-            blocks publish the setup, the reasoning and the checks to everyone,
-            and Premium unlocks the full build spec. It is one lane now, the
+            blocks publish the setup and the constants to everyone, and Premium
+            unlocks the rest of the build spec. It is one lane now, the
             remix lane, not the headline. However it arrives, it arrives as
             real code in your codebase.
           </p>

@@ -84,9 +84,8 @@ interface ComponentPageViewProps {
   code?: string
   prompts: Partial<Record<Platform, string>>
   // Set ONLY when the prompt is paywalled (premium entry, non-premium viewer).
-  // Then `prompts` holds blocks 1/5/6/7 up to the cut and this holds the rest;
-  // the withheld blocks 2/3/4 were dropped server-side and are not on the
-  // client at all. Undefined = nothing withheld, render the prompt as one pre.
+  // Then `prompts` holds blocks 1 and 2 only; block 3 onward was dropped
+  // server-side and is not on the client at all. False = nothing withheld.
   promptLocked?: boolean
   dualTheme: boolean
   designSystem?: DesignSystemSlug
@@ -1845,7 +1844,7 @@ export default function ComponentPageView({
                 </Button>
               )}
             </div>
-            {/* ONE panel, always. When blocks 2-4 are withheld the lock is a band
+            {/* ONE panel, always. When block 3 onward is withheld the lock is a band
                 INSIDE it, sitting exactly where the cut happened, so the prompt
                 still reads as a single document. Rendering head, lock and tail as
                 three rounded cards made a paywalled prompt look broken rather

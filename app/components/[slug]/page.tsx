@@ -238,9 +238,10 @@ export default async function Page({
   // ── Prompt gate ──────────────────────────────────────────────────────────
   // Same predicate as the source gate, one seam later. A PREMIUM entry
   // (component OR block — `isPremium` covers both, block-ness is a label only)
-  // ships blocks 1, 5, 6 and 7 of the prompt to everyone and withholds blocks
-  // 2, 3 and 4 (Constants / State / Tree — the verbatim build spec) unless the
-  // viewer's tier is 'premium'. The bytes are dropped HERE, server-side, and
+  // ships blocks 1 Setup and 2 Constants of the prompt to everyone and
+  // withholds EVERYTHING from block 3 State onward (the verbatim build spec
+  // plus the prose that would otherwise sit below the wall) unless the viewer's
+  // tier is 'premium'. The bytes are dropped HERE, server-side, and
   // never reach the client: this page renders per request because the root
   // layout reads cookies, so it can legitimately vary by viewer. FREE entries
   // are untouched — their whole prompt stays public, no account needed.
@@ -361,8 +362,8 @@ export default async function Page({
         tags={entry.tags}
         code={withholdSource ? undefined : entry.code}
         // Prompts: FREE entries ship the whole prompt (Remix is free, SEO). For a
-        // PREMIUM entry and a non-premium viewer this is blocks 1/5/6/7 only —
-        // blocks 2/3/4 were stripped above and are NOT in this payload. Do not
+        // PREMIUM entry and a non-premium viewer this is blocks 1 and 2 only —
+        // block 3 onward was stripped above and is NOT in this payload. Do not
         // "restore" it to entry.prompts: that re-opens the leak this gate closes.
         prompts={prompts}
         promptLocked={promptLocked}
