@@ -54,13 +54,27 @@ export default function PrivacyPage() {
         {/* ── 1. Controller ─────────────────────────────────────────────── */}
         <section className="mt-12">
           <h2 className="text-lg font-bold text-sand-50">1. Controller</h2>
+          {/* Art. 13(1)(a) GDPR requires the controller's IDENTITY here, not a
+              role label, and a link to the Impressum does not substitute for
+              it — the privacy policy must carry the name on its own. */}
           <p className="mt-3 leading-relaxed text-sand-400">
             The controller responsible for the processing of personal data on
-            this site is the Creator, reachable at{' '}
+            this site is:
+          </p>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Alexandru Daniel Tatu
+            <br />
+            c/o flexdienst – #21685
+            <br />
+            Kurt-Schumacher-Straße 76
+            <br />
+            67663 Kaiserslautern
+            <br />
+            Deutschland
+            <br />
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
-            .
           </p>
         </section>
 
