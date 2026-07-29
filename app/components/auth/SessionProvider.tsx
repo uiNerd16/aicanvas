@@ -11,9 +11,9 @@ type Preferences = {
   newsletter_opt_in: boolean
 }
 
-// newsletter_opt_in defaults to false (migration 0007): the newsletter is
-// explicit opt-in, so a user is only subscribed once they turn the toggle on
-// in /account/settings.
+// newsletter_opt_in mirrors newsletter_subscribers.status === 'subscribed'
+// (migration 0015): explicit opt-in, so it's only true once the user turns
+// the toggle on in /account/settings.
 const EMPTY_PREFS: Preferences = {
   package_manager: null,
   ai_platform: null,
@@ -83,11 +83,14 @@ export function SessionProvider({
       // Send only the changed fields so we never clobber values that haven't
       // loaded into local state yet (e.g. a fast click before GET resolves).
       // The server route mirrors this and only writes fields it received.
-      await fetch('/api/preferences', {
+      const res = await fetch('/api/preferences', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(next),
       })
+      // fetch resolves on HTTP 4xx/5xx — roll back the optimistic state on
+      // those too, or the UI shows a change the server rejected.
+      if (!res.ok) setPreferences(prev)
     } catch {
       setPreferences(prev)
     }

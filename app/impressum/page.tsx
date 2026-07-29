@@ -151,8 +151,19 @@ export default function ImpressumPage() {
           <h2 className="text-lg font-bold text-sand-50">
             Diensteanbieter / Service provider
           </h2>
+          {/* Ladungsfähige Anschrift via flexdienst (c/o). Lines 2-5 are fixed
+              by the provider and must be reproduced verbatim, or post is not
+              accepted. Only line 1 (the legal name) is ours to set. */}
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Daniel Tatu, Strähuberstr. 13, 81479 München, Deutschland
+            Alexandru Daniel Tatu
+            <br />
+            c/o flexdienst – #21685
+            <br />
+            Kurt-Schumacher-Straße 76
+            <br />
+            67663 Kaiserslautern
+            <br />
+            Deutschland
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
             Wirtschafts-Identifikationsnummer gemäß § 139c AO: DE463630238
