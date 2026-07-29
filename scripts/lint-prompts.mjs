@@ -411,8 +411,22 @@ function strictCheck(source, prompt) {
  *       a leak one: buyers rebuilding against ik.imagekit.io hit the maintainer's account.
  *       Describe the asset and let the buyer supply their own.
  */
-function premiumGuards(prompt) {
+function premiumGuards(prompt, source = '') {
   const issues = []
+
+  // P3: a @property default renders into the PUBLIC props table on the component page.
+  // For a gated premium component that table is the ONLY anon-visible surface for the URL
+  // (the component itself is never shipped to anonymous visitors, so it is not in any page
+  // chunk). The code default may hold the real URL; the JSDoc default must not. Describe the
+  // asset in the description instead and let the buyer supply their own.
+  for (const line of source.split('\n')) {
+    if (!line.includes('@property')) continue
+    for (const re of PRIVATE_ASSET_HOSTS) {
+      for (const url of line.match(re) ?? []) {
+        issues.push(`[P3 propstable] private asset URL in a @property default, which renders publicly in the props table: ${url}`)
+      }
+    }
+  }
 
   if (prompt.includes(PREMIUM_MARKER)) {
     issues.push(`[P1 marker] the source marker is inside the prompt TEXT, which ships publicly`)
@@ -520,7 +534,7 @@ async function runStrict(slug) {
   }
 
   const { issues, skipped } = strictCheck(f.source, f.prompt)
-  if (f.premium) issues.push(...premiumGuards(f.prompt))
+  if (f.premium) issues.push(...premiumGuards(f.prompt, f.source))
   if (skipped.length) {
     console.log(`${skipped.length} runtime-composed value(s) skipped (no verbatim text to match):`)
     for (const d of skipped) console.log(`    ~ ${d}`)
@@ -736,6 +750,9 @@ export default function DemoThing() {
   assert(premiumGuards('see https://ik.imagekit.io/aitoolkit/models/chair.glb').some(i => i.startsWith('[P2 asset]')), 'a private asset URL fails the premium guards')
   assert(premiumGuards(PREMIUM_MARKER).some(i => i.startsWith('[P1 marker]')), 'the source marker in prompt text fails the premium guards')
   assert(premiumGuards(good).length === 0, 'a clean verbatim prompt passes the premium guards (fidelity is no longer policed)')
+  const jsdocSrc = " * @property {string} [model='https://ik.imagekit.io/aitoolkit/models/chair.glb'] the model"
+  assert(premiumGuards('', jsdocSrc).some(i => i.startsWith('[P3 propstable]')), 'a private asset URL in a @property default is caught (it renders in the public props table)')
+  assert(premiumGuards('', "  model: 'https://ik.imagekit.io/aitoolkit/models/chair.glb',").length === 0, 'the same URL as a CODE default is fine, only the JSDoc one renders publicly')
 
   // replaceAll, not replace: the hex appears in both block 4 and block 7, and replacing only
   // the first left rule 4 satisfied by the survivor — the assert passed for the wrong reason.
@@ -783,7 +800,7 @@ if (flag === '--strict') {
       continue
     }
     if (f.premium) {
-      const guards = premiumGuards(f.prompt)
+      const guards = premiumGuards(f.prompt, f.source)
       if (guards.length) { console.log(`✗ ${f.slug} (premium guards): ${guards.length} violation(s)`); failures++ }
       // falls through to the same scope + strict checks as a free component
     }

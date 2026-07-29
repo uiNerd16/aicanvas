@@ -8,6 +8,8 @@ import { GITHUB_URL, SITE_URL } from '../../lib/config'
 import { collectionsForComponent } from '../../lib/collections'
 import { classifyContent } from '@/lib/registry/content-type'
 import { loadContentLookup } from '@/lib/registry/lookup'
+import { splitPromptAtPaywall } from '@/lib/registry/prompt-blocks'
+import { getSessionEntitlement } from '@/app/lib/entitlement'
 
 export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }))
@@ -143,13 +145,13 @@ function buildFaq(
     {
       q: `Is ${entry.name} free to use?`,
       a: isPremium
-        ? `${entry.name} is a Premium AI Canvas ${noun}. Premium unlocks the full source code and one-command installs for every Premium component and template.`
+        ? `${entry.name} is a Premium AI Canvas ${noun}. Premium unlocks the full source code, the full remix prompt, and one-command installs for every Premium component, block, and template.`
         : `Yes. ${entry.name} is part of the free AI Canvas library and is open source under the MIT license, so you can use it in personal and commercial projects.`,
     },
     {
       q: `How do I install ${entry.name}?`,
       a: isPremium
-        ? `Premium unlocks one-command installs: run the shadcn CLI with your AI Canvas token, or connect the AI Canvas MCP server and ask your AI editor to install it for you. You can also recreate your own take on it with the included AI prompts.`
+        ? `Premium unlocks one-command installs: run the shadcn CLI with your AI Canvas token, or connect the AI Canvas MCP server and ask your AI editor to install it for you. Premium also unlocks the full remix prompt in the Remix panel.`
         : `One command: npx shadcn@latest add ${SITE_URL}/r/${entry.slug}.json, free with a free AI Canvas account. Or connect the AI Canvas MCP server and ask your AI editor to install ${entry.name} for you. You can also copy the source straight from the Code tab, no account needed. It works in any React project with Tailwind CSS.`,
     },
     {
@@ -171,7 +173,9 @@ function buildFaq(
   if (Object.keys(entry.prompts).length > 0) {
     faq.push({
       q: `Can I remix ${entry.name} with AI?`,
-      a: `Yes. ${entry.name} ships with one comprehensive AI prompt written against the real source code. Open "Remix with AI" on this page to read and copy it into Claude, Cursor, ChatGPT, or any AI tool. Prompts are for remixing your own variation; for the exact component, install it with the one-command CLI.`,
+      a: isPremium
+        ? `Yes. Open "Remix with AI" on this page to read the setup and the constants ${entry.name} is built from. The engine, the markup and the notes on how it works are part of Premium. For the exact ${noun}, install it with the one-command CLI.`
+        : `Yes. ${entry.name} ships with one comprehensive AI prompt written against the real source code. Open "Remix with AI" on this page to read and copy it into Claude, Cursor, ChatGPT, or any AI tool. Prompts are for remixing your own variation; for the exact component, install it with the one-command CLI.`,
     })
   }
   return faq
@@ -216,13 +220,12 @@ export default async function Page({
   const freeAccountGate = process.env.FREE_ACCOUNT_GATE === 'on'
 
   // Premium content (closed source) must NEVER appear in the server-rendered
-  // page payload — not the source, not the highlighted HTML — REGARDLESS of
-  // REGISTRY_ENFORCEMENT (the default is permissive). Prompts are the one
-  // deliberate exception: Remix is free for every component (see the
-  // prompts={} comment below), so prompt text ships in SSR by design. Classify
-  // server-side and withhold for premium; free content keeps today's behaviour
-  // (source ships in permissive mode for SEO). A degraded lookup (missing
-  // manifest) withholds for everything, to fail closed rather than risk a leak.
+  // page payload — not the source, not the highlighted HTML, and not the
+  // verbatim build blocks of the prompt — REGARDLESS of REGISTRY_ENFORCEMENT
+  // (the default is permissive). Classify server-side and withhold for
+  // premium; free content keeps today's behaviour (everything ships in
+  // permissive mode for SEO). A degraded lookup (missing manifest) withholds
+  // for everything, to fail closed rather than risk a leak.
   const lookup = loadContentLookup()
   const contentType = classifyContent(slug, lookup)
   const isPremium =
@@ -231,6 +234,39 @@ export default async function Page({
     contentType === 'design-system' ||
     contentType === 'template'
   const withholdSource = isPremium || enforcing
+
+  // ── Prompt gate ──────────────────────────────────────────────────────────
+  // Same predicate as the source gate, one seam later. A PREMIUM entry
+  // (component OR block — `isPremium` covers both, block-ness is a label only)
+  // ships blocks 1 Setup and 2 Constants of the prompt to everyone and
+  // withholds EVERYTHING from block 3 State onward (the verbatim build spec
+  // plus the prose that would otherwise sit below the wall) unless the viewer's
+  // tier is 'premium'. The bytes are dropped HERE, server-side, and
+  // never reach the client: this page renders per request because the root
+  // layout reads cookies, so it can legitimately vary by viewer. FREE entries
+  // are untouched — their whole prompt stays public, no account needed.
+  const fullPrompt =
+    entry.prompts['Claude Code'] ?? Object.values(entry.prompts).find((p): p is string => !!p)
+  let promptLocked = false
+  let prompts = entry.prompts
+  if (isPremium && fullPrompt) {
+    let viewerIsPremium = false
+    try {
+      viewerIsPremium = (await getSessionEntitlement()).tier === 'premium'
+    } catch {
+      // Entitlement read failed — fail CLOSED, exactly like /r does. Worst case
+      // a subscriber sees the public prompt for one render, never the reverse.
+    }
+    if (!viewerIsPremium) {
+      const split = splitPromptAtPaywall(fullPrompt)
+      // ponytail: no recognisable scaffold → withhold the prompt whole, which
+      // hides the Remix panel entirely. Deliberate: unredactable is not the
+      // same as harmless. Add a fallback teaser only if a premium prompt ever
+      // legitimately ships without the scaffold.
+      prompts = split ? { 'Claude Code': split.head } : {}
+      promptLocked = true
+    }
+  }
 
   // Extract only the install-directive comment lines so the deps/font install
   // UI works even when the full source is withheld in enforcing mode.
@@ -325,10 +361,12 @@ export default async function Page({
         headingSubtitle={headingSubtitle}
         tags={entry.tags}
         code={withholdSource ? undefined : entry.code}
-        // Prompts (Remix with AI) ship for ALL components — Remix is free, only the
-        // exact source (Code tab / CLI / MCP) is gated. A premium component enables
-        // its Remix drawer simply by having a prompts.ts in the private vault.
-        prompts={entry.prompts}
+        // Prompts: FREE entries ship the whole prompt (Remix is free, SEO). For a
+        // PREMIUM entry and a non-premium viewer this is blocks 1 and 2 only —
+        // block 3 onward was stripped above and is NOT in this payload. Do not
+        // "restore" it to entry.prompts: that re-opens the leak this gate closes.
+        prompts={prompts}
+        promptLocked={promptLocked}
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         premium={contentType === 'premium-standalone'}

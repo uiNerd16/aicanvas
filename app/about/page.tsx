@@ -176,10 +176,12 @@ export default function AboutPage() {
             source too.
           </p>
           <p className="mt-4 text-base leading-relaxed text-sand-400">
-            A comprehensive AI remix prompt still ships with every component,
-            and it works in any AI tool. It is one lane now, the remix lane,
-            not the headline. However it arrives, it arrives as real,
-            open-source code in your codebase.
+            A comprehensive AI remix prompt still ships with every free
+            component, and it works in any AI tool. Premium components and
+            blocks publish the setup and the constants to everyone, and Premium
+            unlocks the rest of the build spec. It is one lane now, the
+            remix lane, not the headline. However it arrives, it arrives as
+            real code in your codebase.
           </p>
         </Section>
 
@@ -262,7 +264,7 @@ export default function AboutPage() {
             The free library is open source under MIT, and that source is never
             hidden. Premium is our one paid exception: proprietary components,
             design systems, and templates whose sales keep the free library
-            free. Remixing with AI stays free for everyone.
+            free. Remixing the free library with AI stays free for everyone.
           </p>
           <p className="mt-4 text-base leading-relaxed text-sand-400">
             Browsing and previewing are free. Installing is free with a free

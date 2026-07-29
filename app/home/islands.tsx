@@ -530,7 +530,7 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: 'What is AI Canvas?',
-    a: 'AI Canvas is a registry of animated React components and design systems you install with one command, no tokens spent generating them. Every install lands real, editable source in your project. Free and premium options both ship the full source.',
+    a: 'AI Canvas is a registry of animated React components and design systems you install with one command, no tokens spent generating them. Every install lands real, editable source in your project. Free and premium alike install as real source you own, never a black-box package.',
   },
   {
     q: 'Do I need to know how to code?',
@@ -538,7 +538,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'Is AI Canvas free?',
-    a: 'Yes. Browsing, previewing, copying prompts, and remixing with AI are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
+    a: 'Yes. Browsing, previewing, and copying the full prompt of any free component are always free, and a free account unlocks unlimited one-command installs, free forever. Premium adds the closed-source premium components and blocks with their full remix prompts, design systems, and templates at $8.99 per month or $49.99 per year when you want more.',
   },
   {
     q: 'How do I get my first component in under a minute?',
@@ -554,7 +554,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: 'How is AI Canvas different from other component libraries?',
-    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy an AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
+    a: 'Most libraries serve one audience, but AI Canvas fits however you build: copy a free component’s AI prompt, run one command with the shadcn CLI, or hand it to an AI agent. The code lands as real code in your project, not a screenshot to chase, so you can restyle, extend, or ship it as is.',
   },
   {
     q: 'Who is behind AI Canvas?',
