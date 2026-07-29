@@ -183,3 +183,41 @@ html[data-frame] body {
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
+
+/* Homepage proof pair — one beam of light tracing the OUTER edge of both cards
+   as a single rectangle, ignoring the gap between them.
+   See app/home/HomePageClient.tsx.
+
+   An SVG rect with a travelling dash, not a positioned dot. Three reasons:
+   the stroke follows the rounded corners exactly, dashoffset moves at a
+   constant rate along the path so the pace never changes with aspect ratio,
+   and "longer trail" becomes one number (the dash length) instead of extra
+   elements.
+
+   `pathLength="100"` normalises the perimeter to 100 units, so the dash values
+   below are percentages of the lap and stay correct at every breakpoint,
+   including when the grid stacks to one column on mobile.
+
+   Two layers make the comet: a long dim tail and a short bright head. The head
+   is offset by (tail - head) so it sits at the FRONT of the tail rather than
+   sharing its start point. Change 26/7 together with that offset if you retune
+   the trail. */
+@keyframes aicBeamTail {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -100; }
+}
+@keyframes aicBeamHead {
+  from { stroke-dashoffset: -19; }
+  to   { stroke-dashoffset: -119; }
+}
+.aic-beam-tail,
+.aic-beam-head {
+  animation: aicBeamTail 16s linear infinite;
+}
+.aic-beam-head {
+  animation-name: aicBeamHead;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aic-beam-tail,
+  .aic-beam-head { animation: none; opacity: 0; }
+}

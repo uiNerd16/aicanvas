@@ -132,29 +132,79 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
              thirds of it is crawlers indexing the registry, so the noun stays
              "Requests served" — true of every one of them. Source and fallback:
              app/lib/registry-stats.ts ── */}
-        <section className="mt-12 sm:mt-16">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <section className="mt-16 sm:mt-24">
+          <div className="relative grid gap-4 sm:grid-cols-2">
+
+            {/* One beam tracing the OUTER edge of both cards as a single
+                rectangle, so it runs the full width across the top rather than
+                dipping into the gap between them. Lives on the grid, not on
+                either card, which is what makes that possible.
+
+                overflow-visible + a rect at the full box means the stroke is
+                centred ON the boundary, half in and half out, so the light
+                rides the edge instead of sitting inside it. Absolutely
+                positioned, so it is not a grid item and does not affect layout.
+
+                rx matches the cards' rounded-3xl (24px). Animation and the
+                dash-length rationale: .aic-beam-* in globals.css. */}
+            <svg
+              aria-hidden
+              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+              fill="none"
+            >
+              <rect
+                className="aic-beam-tail"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="24"
+                pathLength={100}
+                stroke="#D6E2FF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="26 74"
+                opacity={0.22}
+              />
+              <rect
+                className="aic-beam-head"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="24"
+                pathLength={100}
+                stroke="#D6E2FF"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeDasharray="7 93"
+                opacity={0.9}
+                style={{ filter: 'drop-shadow(0 0 5px rgba(214,226,255,0.65))' }}
+              />
+            </svg>
 
             {/* Left: the live counter */}
             <Reveal className="h-full">
-              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl p-6 sm:p-8">
-                {/* No border, no fill — the soft light IS the card. Two lights:
-                    a cool one from the top-left and a warm one bleeding in from
-                    the bottom-right, so the shape reads without an edge.
-                    Written as inline gradients rather than Tailwind arbitrary
-                    values because multi-stop gradients need commas, which
-                    arbitrary values escape awkwardly. */}
+              <div className="relative flex h-full flex-col justify-center rounded-3xl p-4 sm:p-5">
+                {/* No border, no fill — the soft light IS the card. One light
+                    only: cool blue entering from the TOP-LEFT.
+
+                    The right-hand card is lit from the opposite corner in olive,
+                    so the pair reads as a diagonal rather than two matching
+                    boxes.
+
+                    Inline rather than a Tailwind arbitrary value: gradients need
+                    commas, which arbitrary values escape awkwardly. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0"
+                  className="pointer-events-none absolute inset-0 rounded-3xl"
                   style={{
                     background:
-                      'radial-gradient(85% 85% at 8% 0%, rgba(214,226,255,0.075), transparent 58%),' +
-                      'radial-gradient(65% 65% at 100% 100%, rgba(196,150,96,0.055), transparent 60%)',
+                      'radial-gradient(85% 85% at 8% 0%, rgba(214,226,255,0.075), transparent 58%)',
                   }}
                 />
                 <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-sand-800/70 px-3 py-1.5 text-[11px] font-semibold text-sand-200">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-sand-800/70 px-2.5 py-1 text-[10px] font-semibold text-sand-200">
                     {/* The pulsing dot carries the "alive" feeling so the words
                         do not have to overpromise: the cache window is 24h, so
                         "Live" would be false. See REVALIDATE_SECONDS. */}
@@ -165,21 +215,19 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                     Updates daily
                   </span>
 
-                  <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="relative text-5xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-6xl">
+                  <div className="mt-3">
+                    <span className="block text-3xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-4xl">
                       <AnimatedCount to={pulls} suffix="" />
-                      {/* Accent rule under the number, fading out to the right. */}
-                      <span
-                        aria-hidden
-                        className="absolute -bottom-2 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-olive-400/80 to-olive-400/0"
-                      />
                     </span>
-                    <span className="text-lg font-semibold text-sand-100 sm:text-xl">
+                    <span className="mt-1.5 block text-sm font-semibold text-sand-100 sm:text-base">
                       Requests served
                     </span>
                   </div>
 
-                  <p className="mt-7 text-sm leading-relaxed text-sand-500">
+                  {/* Hairline separating the headline stat from its breakdown.
+                      border-t rather than an <hr>: it is decoration, not a
+                      thematic break, so it stays out of the a11y tree. */}
+                  <p className="mt-3 border-t border-sand-800/70 pt-3 text-[13px] leading-relaxed text-sand-500">
                     Every component, block &amp; design system install.
                     <br />
                     Every AI agent fetching source.
@@ -190,40 +238,80 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
 
             {/* Right: the facts */}
             <Reveal delay={0.08} className="h-full">
-              <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl p-6 sm:p-8">
-                {/* Cooler light, top-left, matching the mockup. */}
+              <div className="relative flex h-full flex-col justify-center rounded-3xl p-4 sm:p-5">
+                {/* One light only, olive, entering from the BOTTOM-RIGHT — the
+                    opposite corner to the left card, so the pair reads as a
+                    diagonal.
+
+                    Olive is the brand accent (--color-olive-400, #DAE4A0), so
+                    this card is on-palette. Its alpha is lower than the blue
+                    card's because olive is a light, high-chroma yellow-green and
+                    reads far stronger at the same value. */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute inset-0"
+                  className="pointer-events-none absolute inset-0 rounded-3xl"
                   style={{
                     background:
-                      'radial-gradient(80% 80% at 0% 0%, rgba(186,208,255,0.085), transparent 55%)',
+                      'radial-gradient(65% 65% at 100% 100%, rgba(218,228,160,0.028), transparent 60%)',
                   }}
                 />
-                <dl className="relative flex flex-col gap-y-5 sm:gap-y-6">
+                {/* Every row links. These four sat in the most valuable space on
+                    the page — directly under the hero — as inert decoration,
+                    while each already had somewhere obvious to point. The
+                    LICENSE link is the only one leaving the site, so it is the
+                    only one carrying target/rel.
+
+                    <ul>, not <dl>: wrapping <dt>/<dd> in an <a> is invalid
+                    inside a definition list, and now that these are navigation
+                    a list of links is the honest markup anyway.
+
+                    Row gap stays looser than the left card's internal spacing:
+                    four short rows run shorter than the counter card, and since
+                    both stretch to the taller one, the slack would show as dead
+                    space here. */}
+                <ul className="relative flex flex-col gap-y-3.5 sm:gap-y-4">
                   {(
                     [
                       // Computed, never hardcoded — see componentTotal above.
-                      { count: componentTotal, label: 'Components, blocks & templates' },
+                      { count: componentTotal, label: 'Components, blocks & templates', href: '/components' },
                       // "Free library" first: premium content is proprietary, so
                       // a bare "Open source" here would be false. Every other
                       // surface (terms, faq, impressum, about) already scopes it.
-                      { text: 'MIT', label: 'Free library, open source' },
-                      { text: 'CLI', label: 'One command, done in seconds' },
-                    ] as { count?: number; text?: string; label: string }[]
-                  ).map(({ count, text, label }) => (
-                    <div key={label} className="flex items-baseline gap-x-4">
-                      {/* Fixed width so every label starts on the same x, which
-                          is what makes the three rows scan as a column. */}
-                      <dt className="w-[4.25rem] shrink-0 text-3xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-4xl">
-                        {count !== undefined ? <AnimatedCount to={count} suffix="" /> : text}
-                      </dt>
-                      <dd className="text-sm font-medium leading-snug text-sand-300 sm:text-base">
-                        {label}
-                      </dd>
-                    </div>
+                      { text: 'MIT', label: 'Free library, open source', href: `${GITHUB_URL}/blob/main/LICENSE`, external: true },
+                      { text: 'CLI', label: 'One command, done in seconds', href: '#how-remix' },
+                      { text: 'MCP', label: 'Ready for your AI editor', href: '/mcp' },
+                    ] as { count?: number; text?: string; label: string; href: string; external?: boolean }[]
+                  ).map(({ count, text, label, href, external }) => (
+                    <li key={label}>
+                      <Link
+                        href={href}
+                        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        className="group flex items-center gap-x-5 rounded-lg"
+                      >
+                        {/* Fixed width so every label starts on the same x, which
+                            is what makes the rows scan as a column. It has to
+                            clear the WIDEST value, not the average: "MCP" at
+                            text-2xl extrabold is ~52px, so a narrower box lets it
+                            overflow and collide with its label while "120" still
+                            looks fine. */}
+                        <span className="w-[3.5rem] shrink-0 text-xl font-extrabold tabular-nums leading-none text-sand-50 sm:text-2xl">
+                          {count !== undefined ? <AnimatedCount to={count} suffix="" /> : text}
+                        </span>
+                        <span className="text-[13px] font-medium leading-snug text-sand-300 transition-colors group-hover:text-sand-100">
+                          {label}
+                        </span>
+                        {/* ml-auto pins the arrow to the right edge regardless of
+                            label length, so all four line up in a column. */}
+                        <CaretRight
+                          weight="regular"
+                          size={13}
+                          aria-hidden
+                          className="ml-auto shrink-0 text-sand-600 transition-all group-hover:translate-x-0.5 group-hover:text-sand-300"
+                        />
+                      </Link>
+                    </li>
                   ))}
-                </dl>
+                </ul>
               </div>
             </Reveal>
 
