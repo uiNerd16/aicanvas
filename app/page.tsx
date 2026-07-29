@@ -4,6 +4,7 @@ import { HomePageClient } from './home/HomePageClient'
 // (three.js etc.); mirrors COMPONENT_META.map(toMeta).
 import { COMPONENT_META } from './lib/component-meta.generated'
 import { SITE_URL } from './lib/config'
+import { getRegistryPulls } from './lib/registry-stats'
 
 const HOMEPAGE_TITLE = 'React Component Registry: Components, Blocks & Design Systems | AI Canvas'
 const HOMEPAGE_DESCRIPTION = 'Install finished React components, blocks, and design systems with one shadcn CLI command. Real, editable code you own, no AI tokens spent.'
@@ -34,8 +35,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const total = COMPONENT_META.length
+  const pulls = await getRegistryPulls()
 
   // Featured carousel — fixed 5 components, order matters (center starts at index 0)
   const FEATURED_SLUGS = ['tilted-coverflow', 'product-card-deck', 'interactive-card-stack', 'voice-chat-pill', 'sticker-wall']
@@ -44,5 +46,5 @@ export default function HomePage() {
     .filter(Boolean)
     .map((c) => ({ slug: c!.slug, name: c!.name, description: c!.description, tags: c!.tags, image: c!.image, badge: c!.badge }))
 
-  return <HomePageClient total={total} carouselItems={carouselItems} />
+  return <HomePageClient total={total} pulls={pulls} carouselItems={carouselItems} />
 }
