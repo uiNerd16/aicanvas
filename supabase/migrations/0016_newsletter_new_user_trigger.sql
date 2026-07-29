@@ -49,3 +49,7 @@ drop trigger if exists on_auth_user_created_newsletter on auth.users;
 create trigger on_auth_user_created_newsletter
   after insert on auth.users
   for each row execute function public.handle_new_user_newsletter();
+
+-- The function runs only as a trigger (as table owner); nobody may call it
+-- through the exposed API. Silences Supabase linter 0028/0029.
+revoke execute on function public.handle_new_user_newsletter() from anon, authenticated, public;
