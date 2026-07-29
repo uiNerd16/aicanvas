@@ -20,6 +20,10 @@
 // request and an `export const revalidate` would be a no-op. unstable_cache is
 // independent of render mode, so PostHog is queried at most once a day no
 // matter how many visitors arrive.
+//
+// FAILURES ARE NEVER CACHED. The cached function throws; the fallback is
+// substituted outside the cache. Getting this backwards is what put a stale
+// 25,000 on production for a full day while curl returned 26,049.
 
 import { unstable_cache } from 'next/cache'
 
@@ -43,51 +47,76 @@ const REVALIDATE_SECONDS = 86_400
 /** Never let a slow analytics API block a page render for long. */
 const TIMEOUT_MS = 5_000
 
+/**
+ * THROWS on every failure. It must never return FALLBACK_PULLS, because this is
+ * the function wrapped in unstable_cache below and a returned number is a
+ * legitimate answer as far as the cache is concerned.
+ *
+ * That distinction is the whole bug this file shipped with on 2026-07-29: the
+ * fallback used to be returned from in here, so ONE failure — a build-time
+ * render, a cold start, any transient blip — was cached as a real value and
+ * served for a full 24h, with no retry and no error log, because by then
+ * nothing was failing any more. Production showed 25,000 while the same query
+ * returned 26,049 from curl, and there was nothing in the logs to explain it.
+ *
+ * A rejected promise is not cached, so now a failure costs one request and the
+ * next one retries.
+ */
 async function fetchRegistryPulls(): Promise<number> {
   const key = process.env.POSTHOG_PERSONAL_API_KEY
-  if (!key) return FALLBACK_PULLS
+  if (!key) throw new Error('POSTHOG_PERSONAL_API_KEY is not set')
 
-  try {
-    const res = await fetch(`${POSTHOG_API_HOST}/api/projects/${POSTHOG_PROJECT_ID}/query/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
+  const res = await fetch(`${POSTHOG_API_HOST}/api/projects/${POSTHOG_PROJECT_ID}/query/`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: "select count() from events where event = 'registry_hit'",
       },
-      body: JSON.stringify({
-        query: {
-          kind: 'HogQLQuery',
-          query: "select count() from events where event = 'registry_hit'",
-        },
-      }),
-      // No fetch-level cache options: unstable_cache below is the single
-      // caching layer, so there is only one revalidate window to reason about.
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    })
-    if (!res.ok) throw new Error(`PostHog responded ${res.status}`)
+    }),
+    // No fetch-level cache options: unstable_cache below is the single
+    // caching layer, so there is only one revalidate window to reason about.
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  })
+  if (!res.ok) throw new Error(`PostHog responded ${res.status}`)
 
-    const json = await res.json()
-    const value = Number(json?.results?.[0]?.[0])
+  const json = await res.json()
+  const value = Number(json?.results?.[0]?.[0])
 
-    // A malformed or partial response must never make the public number shrink:
-    // a homepage stat that goes backwards looks worse than one that is stale.
-    if (!Number.isFinite(value) || value < FALLBACK_PULLS) return FALLBACK_PULLS
+  // A malformed or partial response must never make the public number shrink:
+  // a homepage stat that goes backwards looks worse than one that is stale.
+  // Throwing rather than returning the floor keeps a bad response out of the
+  // cache too, so the next request gets a real attempt.
+  if (!Number.isFinite(value)) throw new Error(`unexpected PostHog shape: ${JSON.stringify(json?.results)?.slice(0, 120)}`)
+  if (value < FALLBACK_PULLS) throw new Error(`PostHog returned ${value}, below the ${FALLBACK_PULLS} floor`)
 
-    return Math.floor(value)
+  return Math.floor(value)
+}
+
+/** Only ever holds a real, successful value — see the throw contract above. */
+const cachedRegistryPulls = unstable_cache(
+  fetchRegistryPulls,
+  ['registry-pulls'],
+  { revalidate: REVALIDATE_SECONDS, tags: ['registry-pulls'] },
+)
+
+/**
+ * The homepage entry point. On success, PostHog is hit at most once per
+ * REVALIDATE_SECONDS across all visitors and both homepage routes.
+ *
+ * The fallback is substituted HERE, outside the cache, so a bad result is never
+ * what gets stored. Tagged so a future `revalidateTag('registry-pulls')` can
+ * force a refresh without waiting out the window.
+ */
+export async function getRegistryPulls(): Promise<number> {
+  try {
+    return await cachedRegistryPulls()
   } catch (err) {
     console.error('[registry-stats] PostHog query failed, using fallback:', err)
     return FALLBACK_PULLS
   }
 }
-
-/**
- * The homepage entry point. Hits PostHog at most once per REVALIDATE_SECONDS
- * across all visitors and both homepage routes; every other request is served
- * from Next's cache. Tagged so a future `revalidateTag('registry-pulls')` can
- * force a refresh without waiting out the window.
- */
-export const getRegistryPulls = unstable_cache(
-  fetchRegistryPulls,
-  ['registry-pulls'],
-  { revalidate: REVALIDATE_SECONDS, tags: ['registry-pulls'] },
-)
