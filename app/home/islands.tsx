@@ -147,13 +147,31 @@ export function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string
   // crawlers, LLM scrapers and no-JS visitors read, and it has to carry the
   // real number: this previously rendered `initial`, so the markup published
   // "22,500" for a stat that was actually 25,000 — 10% low, everywhere, on a
-  // page whose whole job is being credible about that number. The dip to
-  // `initial` now happens in the effect below, which only runs client-side, so
-  // hydration still matches byte for byte.
+  // page whose whole job is being credible about that number. Any dip to
+  // `initial` happens in the effect below, client-side only, so hydration
+  // still matches byte for byte.
   const [count, setCount] = useState(to)
+  // Was this already on screen when the page loaded? null until first measured.
+  const visibleAtMount = useRef<boolean | null>(null)
 
   useEffect(() => {
-    if (!inView) return
+    // Measured ONCE, synchronously, on the first effect run — not from `inView`,
+    // because IntersectionObserver resolves asynchronously and reports false on
+    // that first tick even for an element sitting in the viewport.
+    if (visibleAtMount.current === null) {
+      const box = ref.current?.getBoundingClientRect()
+      visibleAtMount.current =
+        !!box && box.top < window.innerHeight && box.bottom > 0
+    }
+
+    // Already visible when the page loaded → there is nothing to reveal, so the
+    // true number simply stays. Animating here would mean painting the real
+    // figure from the SSR HTML, yanking it 10% DOWN on hydration, then crawling
+    // back up: a correct number visibly going backwards, which reads as a bug
+    // and undermines the one section whose job is being credible about numbers.
+    // The count-up is a scroll reward; it only makes sense if you scrolled.
+    if (!inView || visibleAtMount.current) return
+
     // `start` seeds the ramp at `initial`; the first interval tick 16ms later is
     // what actually drops the rendered value down to begin the count-up. Setting
     // state synchronously here instead would trip react-hooks/set-state-in-effect
