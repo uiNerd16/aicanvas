@@ -21,14 +21,20 @@ export function GET() {
 - [Registry index](${SITE_URL}/r/registry.json): Machine-readable registry index.
 
 ## Install
-Install any component with: \`npx shadcn@latest add ${SITE_URL}/r/<component-name>.json\`
+Install command: \`npx shadcn@latest add @aicanvas/<component-name>\`. One-command installs require a free AI Canvas account: signed out, the command exits 0 but writes a placeholder file titled "(free account required)" instead of the real component. To authenticate, sign in and copy your token from ${SITE_URL}/account/settings, set AICANVAS_TOKEN in .env.local, and add \`{ "registries": { "@aicanvas": { "url": "${SITE_URL}/r/{name}.json", "params": { "token": "\${AICANVAS_TOKEN}" } } } }\` to components.json. Full setup notes: ${SITE_URL}/llms.txt
+
+No account needed to read: every free component's complete source is inlined below and can be copied into a project directly.
 `
 
   const parts: string[] = [intro, '## Components']
 
   for (const c of COMPONENTS) {
     const category = categoryOf(c.tags)
-    const head = `---\n\n## ${c.name}\n\nCategory: ${category}\nSlug: \`${c.slug}\`\nURL: ${SITE_URL}/components/${c.slug}\n\n${c.description}\n\nInstall:\n\n\`\`\`bash\nnpx shadcn@latest add ${SITE_URL}/r/${c.slug}.json\n\`\`\``
+    const installLabel =
+      c.badge === 'Premium'
+        ? 'Install (Premium, requires an AI Canvas token):'
+        : 'Install (free account):'
+    const head = `---\n\n## ${c.name}\n\nCategory: ${category}\nSlug: \`${c.slug}\`\nURL: ${SITE_URL}/components/${c.slug}\n\n${c.description}\n\n${installLabel}\n\n\`\`\`bash\nnpx shadcn@latest add @aicanvas/${c.slug}\n\`\`\``
     // Premium (closed-source) components carry badge:'Premium' (set by the inject
     // shim). This route is PUBLIC + un-authenticated, so it must NEVER emit their
     // source — list them for discovery, but withhold the bytes (the /r gate is the

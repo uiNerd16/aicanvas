@@ -579,10 +579,21 @@ server.registerTool(
             `or \`list_systems\` / \`get_system\` for design-system components.`,
         )
       }
+      // The meta installCommand is the bare `@aicanvas/<slug>` form, which runs
+      // in the USER'S shell — where this server's AICANVAS_TOKEN does not exist.
+      // Unauthenticated, the registry serves a 200 placeholder instead of the
+      // component. With a token, emit the authenticated URL form; without one,
+      // say what the bare command needs so the agent can relay it honestly.
+      const installCommand = USER_TOKEN
+        ? `npx shadcn@latest add "${REGISTRY_BASE}/${component.slug}.json?token=${USER_TOKEN}"`
+        : component.installCommand
+      const authNote = USER_TOKEN
+        ? 'This command contains your personal AI Canvas token. Treat it like a secret: run it, do not commit or share it.'
+        : 'Note: installing requires a free AI Canvas account. Without one this command writes a placeholder file, not the component. Sign up at https://aicanvas.me/account/sign-up, then reinstall this MCP with your token (setup: https://aicanvas.me/mcp).'
       const out = {
         slug: component.slug,
         name: component.name,
-        installCommand: component.installCommand,
+        installCommand,
         sourceUrl: component.sourceUrl,
         homepageUrl: component.homepageUrl,
         dependencies: component.dependencies,
@@ -593,7 +604,9 @@ server.registerTool(
             [
               `Install ${component.name}:`,
               '',
-              `  ${component.installCommand}`,
+              `  ${installCommand}`,
+              '',
+              authNote,
               '',
               `Dependencies: ${component.dependencies.join(', ') || '(none, React only)'}`,
               `Source: ${component.sourceUrl}`,
