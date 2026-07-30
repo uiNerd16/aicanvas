@@ -47,10 +47,10 @@ function record(name, ok, detail) {
 }
 
 class McpClient {
-  constructor(registryBase = BAD_URL) {
+  constructor(registryBase = BAD_URL, extraEnv = {}) {
     this.proc = spawn('node', [SERVER], {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, AICANVAS_REGISTRY_BASE: registryBase },
+      env: { ...process.env, AICANVAS_REGISTRY_BASE: registryBase, ...extraEnv },
     })
     this.buf = ''
     this.pending = new Map()
@@ -147,6 +147,7 @@ function startLocalRegistry() {
 const client = new McpClient()
 let local = null
 let localClient = null
+let tokenClient = null
 
 try {
   console.log(`── Phase A: server pointed at unreachable ${BAD_URL} ─────────`)
@@ -316,6 +317,31 @@ try {
     `got ${gicBSc?.installCommand}`,
   )
 
+  // get_install_command with AICANVAS_TOKEN set → the tokenized URL form (the
+  // bare @aicanvas form would run anonymously in the user's shell and install
+  // a placeholder).
+  const TOKEN = 'aic_' + '0123456789abcdef'.repeat(3)
+  tokenClient = new McpClient(local.base, { AICANVAS_TOKEN: TOKEN })
+  const initT = await tokenClient.request('initialize', {
+    protocolVersion: '2025-03-26',
+    capabilities: {},
+    clientInfo: { name: 'offline-test', version: '0.0.1' },
+  })
+  record('local+token: initialize succeeds', !!initT?.result, JSON.stringify(initT)?.slice(0, 120))
+  tokenClient.notify('notifications/initialized')
+  const gicT = await tokenClient.request('tools/call', {
+    name: 'get_install_command',
+    arguments: { slug: 'andromeda-heat-grid' },
+  })
+  const gicTSc = sc(gicT)
+  record(
+    'local+token: get_install_command returns the tokenized URL form',
+    !gicT?.result?.isError &&
+      gicTSc?.installCommand ===
+        `npx shadcn@latest add "${local.base}/andromeda-heat-grid.json?token=${TOKEN}"`,
+    `got ${gicTSc?.installCommand}`,
+  )
+
   // search_components → a DS component surfaces
   const srB = await call('search_components', { query: 'heat grid', limit: 10 })
   const srBSc = sc(srB)
@@ -346,6 +372,7 @@ try {
 } finally {
   await client.close()
   if (localClient) await localClient.close()
+  if (tokenClient) await tokenClient.close()
   if (local) await new Promise((r) => local.srv.close(r))
 }
 

@@ -585,7 +585,7 @@ server.registerTool(
       // component. With a token, emit the authenticated URL form; without one,
       // say what the bare command needs so the agent can relay it honestly.
       const installCommand = USER_TOKEN
-        ? `npx shadcn@latest add "${REGISTRY_BASE}/${component.slug}.json?token=${USER_TOKEN}"`
+        ? `npx shadcn@latest add "${REGISTRY_BASE}/${encodeURIComponent(component.slug)}.json?token=${encodeURIComponent(USER_TOKEN)}"`
         : component.installCommand
       const authNote = USER_TOKEN
         ? 'This command contains your personal AI Canvas token. Treat it like a secret: run it, do not commit or share it.'
