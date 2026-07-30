@@ -39,6 +39,8 @@ npx shadcn@latest init        # new projects only
 npx shadcn@latest add @aicanvas/task-cards
 ```
 
+One-command installs use a free AI Canvas account: signed out, the CLI writes a small placeholder file instead of the component. [Sign up free](https://aicanvas.me/account/sign-up), then copy your personal install command from any component page. No account needed to read the code: every free component's full MIT source lives right here in this repo.
+
 ### Three ways to use it
 
 | Path | Command or action | Best for |

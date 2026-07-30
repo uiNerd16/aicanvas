@@ -23,7 +23,17 @@ export function GET() {
 - [Registry index](${SITE_URL}/r/registry.json): Machine-readable registry index.
 
 ## Install
-Install any component with: \`npx shadcn@latest add ${SITE_URL}/r/<component-name>.json\`
+Install command: \`npx shadcn@latest add @aicanvas/<component-name>\`. The @aicanvas registry is listed in the official shadcn directory, so the CLI resolves it with no extra setup.
+
+One-command installs require a free AI Canvas account. Signed out, the command still exits 0 but writes a small placeholder file titled "(free account required)" instead of the real component. Check for that title before reporting success. Premium components, design systems, and templates additionally require a Premium subscription.
+
+To authenticate installs: sign in and copy your personal token from ${SITE_URL}/account/settings, set it as AICANVAS_TOKEN in .env.local, and configure the registry once in the project's components.json:
+
+\`\`\`json
+{ "registries": { "@aicanvas": { "url": "${SITE_URL}/r/{name}.json", "params": { "token": "\${AICANVAS_TOKEN}" } } } }
+\`\`\`
+
+After that, every \`npx shadcn@latest add @aicanvas/<component-name>\` is authenticated. Alternatively, each component page shows a ready tokenized install command when signed in.
 
 ## MCP server
 AI agents can browse and install AI Canvas components through the official MCP server, [@aicanvas/mcp on npm](https://www.npmjs.com/package/@aicanvas/mcp). Run it with \`npx -y @aicanvas/mcp\` (stdio transport). It exposes read-only tools: list_categories, list_components, search_components, get_component, get_install_command, list_systems, get_system, get_template. Setup guide: ${SITE_URL}/mcp
@@ -38,9 +48,11 @@ AI agents can browse and install AI Canvas components through the official MCP s
 
   const sections: string[] = []
   for (const [category, items] of grouped) {
+    // Premium standalones must carry the same label the DS/template lines have,
+    // so an assistant never presents a premium install as free.
     const lines = items.map(
       (c) =>
-        `- [${c.name}](${SITE_URL}/components/${c.slug}): ${c.description} Install: \`npx shadcn@latest add ${SITE_URL}/r/${c.slug}.json\`. Registry: ${SITE_URL}/r/${c.slug}.json`,
+        `- [${c.name}](${SITE_URL}/components/${c.slug}): ${c.description} Install${c.badge === 'Premium' ? ' (Premium, requires an AI Canvas token)' : ' (free account)'}: \`npx shadcn@latest add @aicanvas/${c.slug}\`. Registry: ${SITE_URL}/r/${c.slug}.json`,
     )
     sections.push(`## ${category}\n${lines.join('\n')}`)
   }
@@ -56,13 +68,13 @@ AI agents can browse and install AI Canvas components through the official MCP s
       const templates = (s.templates ?? []).map((t) => {
         const pageSlug = t.slug.replace(new RegExp(`^${s.slug}-`), '')
         const kind = t.domain ? `${t.domain} template` : 'template'
-        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): Premium ${kind} built entirely from ${s.name} components. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${t.slug}.json\``
+        return `  - [${t.name}](${SITE_URL}/design-systems/${s.slug}/templates/${pageSlug}): Premium ${kind} built entirely from ${s.name} components. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add @aicanvas/${t.slug}\``
       })
       // The full-system aggregate and the templates are Premium (the individual
       // component pages are free); label them so an assistant never presents
       // these installs as free.
       return [
-        `- [${s.name}](${SITE_URL}/design-systems/${s.slug}): Complete Premium design system (tokens + components). Showcase (free to browse): ${SITE_URL}/design-systems/${s.slug}/showcase. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add ${SITE_URL}/r/${s.slug}.json\``,
+        `- [${s.name}](${SITE_URL}/design-systems/${s.slug}): Complete Premium design system (tokens + components). Showcase (free to browse): ${SITE_URL}/design-systems/${s.slug}/showcase. Install (Premium, requires an AI Canvas token): \`npx shadcn@latest add @aicanvas/${s.slug}\``,
         ...templates,
       ].join('\n')
     },

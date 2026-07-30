@@ -199,6 +199,9 @@ function premiumStub(realBody: string, slug: string): NextResponse {
     type: 'registry:ui',
     title: `${title} (Premium, locked)`,
     description: 'Premium AI Canvas content. Upgrade to install the real source: https://aicanvas.me/pricing',
+    // The shadcn CLI prints `docs` in the terminal after `add` (verified on the
+    // free-account stub) — without it this install ends silently on a placeholder.
+    docs: msg,
     dependencies: [],
     registryDependencies: [],
     files,
@@ -241,6 +244,12 @@ function brainStub(realBody: string, slug: string): NextResponse {
     type: 'registry:item',
     title: `${title} (Premium, locked)`,
     description: 'Premium AI Canvas content. Upgrade to install the real rules: https://aicanvas.me/pricing',
+    // Printed by the CLI after `add` — the terminal must say this wrote a
+    // placeholder, not the real rules.
+    docs:
+      `"${title}" is premium AI Canvas content. This install wrote a locked ` +
+      `placeholder, not the real rules. Unlock it with Premium at ` +
+      `https://aicanvas.me/pricing, then re-run the same command.`,
     dependencies: [],
     registryDependencies: [],
     files: [{ path: `design-systems/${system}/BRAIN-LOCKED.md`, type: 'registry:file', target, content: md }],
