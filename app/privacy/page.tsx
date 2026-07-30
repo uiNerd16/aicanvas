@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             this site is:
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Daniel Tatu
+            AI Canvas, Inhaber Alexandru Daniel Tatu
             <br />
             c/o flexdienst – #21685
             <br />

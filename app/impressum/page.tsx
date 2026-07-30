@@ -155,7 +155,7 @@ export default function ImpressumPage() {
               by the provider and must be reproduced verbatim, or post is not
               accepted. Only line 1 (the legal name) is ours to set. */}
           <p className="mt-3 leading-relaxed text-sand-400">
-            Alexandru Daniel Tatu
+            AI Canvas, Inhaber Alexandru Daniel Tatu
             <br />
             c/o flexdienst – #21685
             <br />
@@ -192,11 +192,11 @@ export default function ImpressumPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-sand-400">
             Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:
-            Alexandru Daniel Tatu (Anschrift wie oben).
+            AI Canvas, Inhaber Alexandru Daniel Tatu (Anschrift wie oben).
           </p>
           <p className="mt-3 leading-relaxed text-sand-500">
             Responsible for the editorial content pursuant to § 18 (2) MStV:
-            Alexandru Daniel Tatu (address as above).
+            AI Canvas, Inhaber Alexandru Daniel Tatu (address as above).
           </p>
         </section>
 
