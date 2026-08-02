@@ -45,7 +45,7 @@ const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
  * @property {string} name Shown as the card's primary label and used for the avatar initials.
  * @property {string} [role]           Subtitle under the name (e.g. "Flight Director").
  * @property {string} [src] Optional avatar image URL; falls back to initials when absent.
- * @property {'online'|'busy'|'away'|'offline'} [status] Presence status shown as a dot on the avatar.
+ * @property {'online'|'caution'|'fault'|'offline'} [status] Presence status shown as a dot on the avatar. Passed verbatim to Avatar, whose enum this is; any other value renders no dot.
  * @property {'sm'|'md'|'lg'} [avatarSize='md'] Size of the avatar shown in the card.
  * @property {UserMenuItem[]} items Entries rendered in the popover menu.
  * @property {'top'|'bottom'} [placement='top'] Which side of the card the menu opens toward.
