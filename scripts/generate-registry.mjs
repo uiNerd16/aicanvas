@@ -1080,6 +1080,7 @@ function loadSystemMetaSlugs(systemSlug) {
 const mcpSystems = []
 const mcpTemplates = []
 const mcpSystemComponents = []
+const mcpBrains = []
 for (const ds of DESIGN_SYSTEMS) {
   const tokensSlug = `${ds.slug}-tokens`
   const tokensJsonPath = join(outDir, `${tokensSlug}.json`)
@@ -1129,11 +1130,29 @@ for (const ds of DESIGN_SYSTEMS) {
     }
 
     systemComponentSlugs.push(slug)
+    // brainSlugs is built earlier in this file from the premium manifest; a
+    // system only advertises a brain when one actually shipped this build.
+    const brainSlug = `${ds.slug}-brain`
+    const hasBrain = premiumBrains.includes(ds.slug)
     mcpSystemComponents.push({
       slug,
       name: compItem.title ?? slug,
       description: compItem.description ?? '',
       system: ds.slug,
+      systemLabel: `${ds.name} design system`,
+      // The one-line signpost. Not the rules — those install as real files.
+      // get_component spreads this record verbatim, so it reaches the agent
+      // with no MCP server change and no npm publish.
+      ...(hasBrain
+        ? {
+            brainSlug,
+            brainNote:
+              `Part of the ${ds.name} design system, which has a Brain: the rules an AI agent reads ` +
+              `to build on-brand ${ds.name} UI (tokens, layout, motion, per-component rules). Premium. ` +
+              `Install once per project with \`npx shadcn@latest add @aicanvas/${brainSlug}\` and the ` +
+              `rules land as files your agent reads directly on every build.`,
+          }
+        : {}),
       dependencies: compItem.dependencies ?? [],
       registryDependencies: compItem.registryDependencies ?? [],
       homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}/${metaSlug}`,
@@ -1142,10 +1161,37 @@ for (const ds of DESIGN_SYSTEMS) {
     })
   }
 
+  // ── Brain bucket ────────────────────────────────────────────────────────────
+  // A design system's Brain is its rules corpus, gated premium and installed as
+  // real .md files in the consumer's project (never served as tool output). It
+  // gets its own bucket because it is not a component, a template, or code —
+  // listing it is how an agent learns the rules exist at all.
+  if (premiumBrains.includes(ds.slug)) {
+    const brainSlug = `${ds.slug}-brain`
+    let brainItem
+    try { brainItem = JSON.parse(readFileSync(join(outDir, `${brainSlug}.json`), 'utf-8')) } catch { brainItem = null }
+    mcpBrains.push({
+      slug: brainSlug,
+      name: `${ds.name} Brain`,
+      system: ds.slug,
+      systemLabel: `${ds.name} design system`,
+      description:
+        `The design rules behind ${ds.name}: system invariants, foundations (colour, spacing, ` +
+        `layout, motion, charts), and per-component rules. Installs as markdown files into the ` +
+        `project so an AI agent reads them directly on every build — not fetched per request.`,
+      premium: true,
+      fileCount: brainItem?.files?.length ?? 0,
+      homepageUrl: `https://aicanvas.me/design-systems/${ds.slug}/brain`,
+      sourceUrl: `https://aicanvas.me/r/${brainSlug}.json`,
+      installCommand: `npx shadcn@latest add @aicanvas/${brainSlug}`,
+    })
+  }
+
   mcpSystems.push({
     slug: ds.slug,
-    name: ds.name,
+    name: `${ds.name} design system`,
     description: sysItem?.description ?? `${ds.name} design system.`,
+    ...(premiumBrains.includes(ds.slug) ? { brainSlug: `${ds.slug}-brain` } : {}),
     componentCount: sysItem?.files?.length ?? 0,
     tokenFileCount: tokensItem?.files?.length ?? 0,
     dependencies: [...new Set([...(tokensItem?.dependencies ?? []), ...(sysItem?.dependencies ?? [])])].sort(),
@@ -1165,8 +1211,9 @@ for (const ds of DESIGN_SYSTEMS) {
     try { templateItem = JSON.parse(readFileSync(templateJsonPath, 'utf-8')) } catch { templateItem = null }
     mcpTemplates.push({
       slug: template.slug,
-      name: template.name,
+      name: `${template.name} (${ds.name} template)`,
       system: ds.slug,
+      systemLabel: `${ds.name} design system`,
       domain: template.domain,
       description: templateItem?.description ?? `${template.name} template from ${ds.name}.`,
       fileCount: templateItem?.files?.length ?? 0,
@@ -1196,6 +1243,8 @@ const mcpMeta = {
   // get_install_command / search_components fall back to this list so every DS
   // slug resolves, while list_components and the categories stay standalone-only.
   systemComponents: mcpSystemComponents,
+  // Design-system Brains (rules corpora, premium, installed as files).
+  brains: mcpBrains,
 }
 
 // ── Integrity guard ──────────────────────────────────────────────────────────
@@ -1219,6 +1268,7 @@ const mcpMeta = {
   for (const s of mcpSystems) claim(s.slug, 'systems')
   for (const t of mcpTemplates) claim(t.slug, 'templates')
   for (const sc of mcpSystemComponents) claim(sc.slug, 'systemComponents')
+  for (const b of mcpBrains) claim(b.slug, 'brains')
 }
 
 writeFileSync(join(outDir, 'aicanvas-mcp.json'), JSON.stringify(mcpMeta, null, 2) + '\n')

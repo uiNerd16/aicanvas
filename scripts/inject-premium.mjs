@@ -360,6 +360,11 @@ function collectBrain(source, slug) {
   }
   const foundations = listMd('foundations', '.md')
   const componentRules = listMd('components', '.rules.md')
+  // Runnable checks the CONSUMER executes against their own code (e.g.
+  // check-colors.mjs, which names the replacement token for every finding).
+  // The rules say what is right; these are what make it verifiable, so they
+  // ship with the rules rather than staying maintainer-side.
+  const tools = listMd('_tools', '.mjs')
   // Skills are folders under _skills/, each with a SKILL.md (Claude Code shape).
   const skills = (() => {
     try {
@@ -376,8 +381,16 @@ function collectBrain(source, slug) {
     process.exit(1)
   }
   const read = (rel) => readFileSync(join(sysDir, rel), 'utf8')
+  // INVENTORY.md is generated vault-side (scripts/generate-inventory.mjs): every
+  // component with its purpose, props, variants and forbids in ONE file. It is
+  // how an agent answers "do we already have this?" without opening 39 rules
+  // files, so it ships when present. Optional — a system may not have one yet.
+  const hasInventory = existsSync(join(sysDir, 'INVENTORY.md'))
   const files = [
     { path: `design-systems/${slug}/rules.md`, content: read('rules.md'), type: 'index' },
+    ...(hasInventory
+      ? [{ path: `design-systems/${slug}/INVENTORY.md`, content: read('INVENTORY.md'), type: 'inventory' }]
+      : []),
     ...foundations.map((f) => ({
       path: `design-systems/${slug}/foundations/${f}`,
       content: read(join('foundations', f)),
@@ -392,6 +405,11 @@ function collectBrain(source, slug) {
       path: `design-systems/${slug}/_skills/${name}/SKILL.md`,
       content: read(join('_skills', name, 'SKILL.md')),
       type: 'skill',
+    })),
+    ...tools.map((f) => ({
+      path: `design-systems/${slug}/_tools/${f}`,
+      content: read(join('_tools', f)),
+      type: 'tool',
     })),
   ]
   const teaser = {
