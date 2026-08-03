@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/app/lib/supabase/server'
 import { createAdminClient } from '@/app/lib/supabase/admin'
 import { deriveTier, type SubStatus } from '@/lib/identity/tier'
 import { BrainViewer } from '../BrainViewer'
-import { BrainPaywall } from '../BrainPaywall'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,11 +49,13 @@ export default async function AndromedaBrainReaderPage() {
       })
     }
   } catch {
-    // Fail closed: entitlement error → show paywall (never serve brain content)
+    // Fail closed: entitlement error → treated as non-premium below (never serve brain content)
   }
 
+  // Non-premium: the pitch lives on the public /brain story page. The old
+  // BrainPaywall pre-split pitch was deleted 2026-08-03; this redirect replaced it.
   if (tier !== 'premium') {
-    return <BrainPaywall tier={tier} />
+    redirect('/design-systems/andromeda/brain')
   }
 
   // Premium: load brain files from the generated bundle. The UNDERSCORE name is
@@ -72,7 +74,18 @@ export default async function AndromedaBrainReaderPage() {
     files = (parsed.files ?? []) as BrainRegistryFile[]
     if (files.length === 0) throw new Error('empty brain bundle')
   } catch {
-    return <BrainPaywall tier="premium" error />
+    // Premium user, unreadable/empty bundle (degraded build). Never redirect a
+    // paying subscriber to the pitch page; tell them plainly instead.
+    return (
+      <div style={{ flex: 1, padding: '40px 48px', maxWidth: 720, color: '#A3A3A3', fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', monospace" }}>
+        <h1 style={{ fontSize: 15, color: '#F5F5F5', marginBottom: 12 }}>Brain temporarily unavailable</h1>
+        <p style={{ fontSize: 13, lineHeight: 1.6 }}>
+          Your Premium access is active, but the Brain files could not be loaded
+          on this deployment. This resolves on the next build. If it persists,
+          write to us and we will fix it.
+        </p>
+      </div>
+    )
   }
 
   return <BrainViewer files={files} />
