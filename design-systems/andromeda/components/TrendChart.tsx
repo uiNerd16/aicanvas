@@ -19,7 +19,7 @@
 
 'use client';
 
-import { forwardRef, useRef, useState } from 'react';
+import { forwardRef, useId, useRef, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -233,6 +233,12 @@ export const TrendChart = forwardRef(function TrendChart(
   const [visible, setVisible] = useState(() =>
     Object.fromEntries(series.map((s) => [s.key, true])),
   );
+  // Stable chart id. Without one, recharts derives its internal clipPath id
+  // from a module-level counter (`uniqueId('recharts')`), which cannot agree
+  // between the server render and hydration — React then reports a mismatch on
+  // every SSR page carrying a chart. useId is SSR-safe; sanitised because its
+  // delimiters (":" / "«»") are not valid inside an SVG id.
+  const chartId = `andromeda-trend-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   const innerRef = useRef(null);
   const reducedMotion = useReducedMotion();
@@ -297,7 +303,7 @@ export const TrendChart = forwardRef(function TrendChart(
   let chart;
   if (mode === 'bar') {
     chart = (
-      <BarChart data={data} margin={chartMargin}>
+      <BarChart id={chartId} data={data} margin={chartMargin}>
         {grid}{xAxis}{yAxis}
         <RechartsTooltip
           content={<ChartTooltip />}
@@ -315,7 +321,7 @@ export const TrendChart = forwardRef(function TrendChart(
   } else {
     const Filled = mode === 'area';
     chart = (
-      <AreaChart data={data} margin={chartMargin}>
+      <AreaChart id={chartId} data={data} margin={chartMargin}>
         <defs>
           {shown.map((s) => (
             <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
