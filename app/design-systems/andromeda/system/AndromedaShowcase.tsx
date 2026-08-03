@@ -1172,7 +1172,7 @@ export default function AndromedaShowcase({
         <Section
           title="Stat Tile"
           slug="stat-tile"
-          description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop."
+          description="Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta whose glyph carries the direction and whose color carries the judgment: set polarity to lower-is-better and a falling response time reads as the improvement it is, or none for a reading with no good/bad sense. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop."
         >
           <div
             style={{
@@ -1189,12 +1189,16 @@ export default function AndromedaShowcase({
               delta={2.4}
               deltaLabel="vs prior period"
             />
+            {/* Latency falling is an improvement, so this ▼ reads accent, not
+                fault. polarity is what separates the direction of a move from
+                the judgment of it. */}
             <StatTile
               label="Latency"
               code="LAT-02"
               value="412"
               unit="ms"
               delta={-1.2}
+              polarity="lower-is-better"
               deltaLabel="vs prior period"
             />
             <StatTile label="Errors" code="ERR-03" value="1.04" unit="%" />
@@ -1552,7 +1556,7 @@ export default function AndromedaShowcase({
           title="Metric Chart"
           slug="metric-chart"
           kicker="Component · Charts"
-          description="The framed single-series telemetry panel. TrendChart auto-domains from zero; MetricChart is the domain-aware counterpart, fitting the y-domain to the data so percentage and non-zero-floor measurements fill the plot. The variant colors the status badge only; chart ink stays neutral."
+          description="The framed single-series telemetry panel. It brings its own corner-marked frame, header and status badge, and fits the y-domain to the data by default so percentage and non-zero-floor measurements fill the plot. TrendChart renders content only, for a panel you compose yourself, and baselines at zero. Both take a domain, so the frame is what decides between them. The variant colors the status badge only; chart ink stays neutral."
         >
           <div className="as-grid-2" style={{ display: 'grid', gap: tokens.spacing[5] }}>
             <MetricChart />

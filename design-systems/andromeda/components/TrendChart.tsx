@@ -19,7 +19,7 @@
 
 'use client';
 
-import { forwardRef, useRef, useState } from 'react';
+import { forwardRef, useId, useRef, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -200,6 +200,13 @@ const AXIS_TICK = {
  *   Set false on compact cards where an external headline already states the
  *   magnitude, and the plot then fills its card content box edge-to-edge with no
  *   stray left inset (the Andromeda spacing rules).
+ * @property {[number|string, number|string]} [domain=[0,'auto']]   Y-axis domain,
+ *   passed through to recharts. The default zero baseline is the honest one for
+ *   most series. Pass `['auto','auto']` (or explicit bounds) when the measurement
+ *   has a floor far from zero — a satisfaction score that only moves between 3.8
+ *   and 4.3 is a flat sliver on a 0-based axis. In `bar` mode the zero floor is
+ *   kept whatever is passed: only the upper bound is honoured, because a bar
+ *   read against a truncated baseline misstates every difference it draws.
  * @property {React.ReactNode} [footerSlot]   Right side of the footer (custom controls).
  * @property {number|'fill'} [height=240]   Plot height in px, or 'fill' to grow into a flex parent.
  * @property {string} [className]   Class applied to the root container element.
@@ -221,6 +228,7 @@ export const TrendChart = forwardRef(function TrendChart(
     xInterval = 4,
     showLegend = true,
     showYAxis = true,
+    domain = [0, 'auto'],
     footerSlot,
     height = 240,
     className,
@@ -233,6 +241,12 @@ export const TrendChart = forwardRef(function TrendChart(
   const [visible, setVisible] = useState(() =>
     Object.fromEntries(series.map((s) => [s.key, true])),
   );
+  // Stable chart id. Without one, recharts derives its internal clipPath id
+  // from a module-level counter (`uniqueId('recharts')`), which cannot agree
+  // between the server render and hydration — React then reports a mismatch on
+  // every SSR page carrying a chart. useId is SSR-safe; sanitised because its
+  // delimiters (":" / "«»") are not valid inside an SVG id.
+  const chartId = `andromeda-trend-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   const innerRef = useRef(null);
   const reducedMotion = useReducedMotion();
@@ -290,14 +304,20 @@ export const TrendChart = forwardRef(function TrendChart(
       {payload.value}
     </text>
   );
+  // Bars always keep their zero floor: a bar's length IS its value, so a
+  // truncated baseline exaggerates every difference on the plot. Only the upper
+  // bound of a caller-supplied domain survives the mode switch — which also
+  // means a card can pass a fitted domain for its area mode without silently
+  // producing a lying bar chart when the user flips the toggle.
+  const yDomain = mode === 'bar' ? [0, Array.isArray(domain) ? domain[1] : 'auto'] : domain;
   const yAxis = (
-    <YAxis tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
+    <YAxis domain={yDomain} tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
   );
 
   let chart;
   if (mode === 'bar') {
     chart = (
-      <BarChart data={data} margin={chartMargin}>
+      <BarChart id={chartId} data={data} margin={chartMargin}>
         {grid}{xAxis}{yAxis}
         <RechartsTooltip
           content={<ChartTooltip />}
@@ -315,7 +335,7 @@ export const TrendChart = forwardRef(function TrendChart(
   } else {
     const Filled = mode === 'area';
     chart = (
-      <AreaChart data={data} margin={chartMargin}>
+      <AreaChart id={chartId} data={data} margin={chartMargin}>
         <defs>
           {shown.map((s) => (
             <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">

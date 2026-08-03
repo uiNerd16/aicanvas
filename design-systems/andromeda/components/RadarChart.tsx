@@ -19,7 +19,7 @@
 
 'use client';
 
-import { forwardRef, useState, useEffect, useRef } from 'react';
+import { forwardRef, useId, useState, useEffect, useRef } from 'react';
 import { useInView, motion } from 'framer-motion';
 import {
   RadarChart as ReRadarChart,
@@ -200,6 +200,11 @@ export const RadarChart = forwardRef(function RadarChart(
 ) {
   const { shown, onFirstActivation } = useTooltipTransition();
 
+  // Stable chart id — see TrendChart. Without one, recharts' internal clipPath
+  // id comes from a module-level counter that desynchronises between the server
+  // render and hydration, producing a React mismatch on every SSR page.
+  const chartId = `andromeda-radar-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
   // Scroll-aware scan reveal. The chart wipes itself in top-to-bottom the
   // first time it enters the viewport — a measurement revealing itself, not
   // decoration. Gated on useInView so a RadarChart below the fold doesn't
@@ -303,7 +308,7 @@ export const RadarChart = forwardRef(function RadarChart(
             by `revealProps` above (static when reduced motion). */}
         <motion.div style={{ width: '100%', height: 280 }} {...revealProps}>
         <ResponsiveContainer width="100%" height={280}>
-          <ReRadarChart data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
+          <ReRadarChart id={chartId} data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
             {/* Grid rings */}
             {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
             <PolarGrid

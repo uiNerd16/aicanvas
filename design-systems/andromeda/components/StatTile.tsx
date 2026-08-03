@@ -7,7 +7,7 @@
 //  ┌── label (mono, text.secondary, tracking.wide) ── code ─┐
 //  │  BIG NUMBER (sans, text.primary, size.4xl)   unit      │
 //  ├────────────────────────────────────────────────────────┤
-//  │  ▲/▼ delta (accent on +, fault on −)   delta label     │
+//  │  ▲/▼ delta (glyph = direction, colour = judgment)      │
 //  └────────────────────────────────────────────────────────┘
 //
 // Animations:
@@ -245,7 +245,15 @@ const deltaBaseClass = cn(
  * @property {string} label Metric name shown in the top-left mono caption.
  * @property {string|number} value Primary figure rendered as the large number, counted up from zero on reveal.
  * @property {string} [unit] Short unit rendered beside the value.
- * @property {number} [delta] Positive → accent, negative → fault.
+ * @property {number} [delta] Signed change. The ▲/▼ glyph always states the
+ *   direction of the move; `polarity` decides whether that move is coloured as
+ *   good (accent) or bad (fault). Exactly 0 is neutral: no glyph, muted.
+ * @property {'higher-is-better'|'lower-is-better'|'none'} [polarity='higher-is-better']
+ *   Which direction is the good one for this metric. `'lower-is-better'` for
+ *   response time, latency, error rate, incident count — a drop there is an
+ *   improvement and must not render red. `'none'` for readings with no good/bad
+ *   sense at all (demand, headcount, temperature): the arrow still states the
+ *   move, the delta stays muted.
  * @property {string} [deltaLabel] Caption shown beside the delta in the trend row.
  * @property {string} [code] Optional small mono identifier in the top-right.
  * @property {boolean} [live=false] When true, the count-up animation runs only on
@@ -264,7 +272,7 @@ const deltaBaseClass = cn(
 
 /** @type {React.ForwardRefExoticComponent<StatTileProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const StatTile = forwardRef(function StatTile(
-  { className, label, value, unit, delta, deltaLabel, code, live = false, liveRoll = false, style, ...props },
+  { className, label, value, unit, delta, polarity = 'higher-is-better', deltaLabel, code, live = false, liveRoll = false, style, ...props },
   outerRef,
 ) {
   useStatTileStyles();
@@ -288,10 +296,18 @@ export const StatTile = forwardRef(function StatTile(
   const countUpDisplay = useCountUp(value, COUNTUP_MS, live, inView);
   const displayValue = liveRoll ? String(value) : countUpDisplay;
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
-  const isPositive = hasDelta && delta >= 0;
-  const trendColorClass = !hasDelta
+  const isFlat = hasDelta && delta === 0;
+  const isPositive = hasDelta && delta > 0;
+  // Two different facts, two different channels: the ▲/▼ glyph states the
+  // DIRECTION of the move, the colour states the JUDGMENT of it. On a
+  // lower-is-better metric they point opposite ways — a response time 0.5 min
+  // faster is ▼ *and* good — so a tile that colours by sign alone paints every
+  // improvement red. `polarity` is what tells the two apart; 'none' means the
+  // reading has no good/bad sense and the colour stays out of it entirely.
+  const isGood = polarity === 'lower-is-better' ? !isPositive : isPositive;
+  const trendColorClass = !hasDelta || isFlat || polarity === 'none'
     ? 'text-[color:var(--andromeda-text-muted)]'
-    : isPositive
+    : isGood
       ? 'text-[color:var(--andromeda-accent-300)]'
       : 'text-[color:var(--andromeda-red-300)]';
 
@@ -332,9 +348,9 @@ export const StatTile = forwardRef(function StatTile(
             {hasDelta ? (
               <span
                 className={cn(deltaBaseClass, trendColorClass)}
-                aria-label={`${isPositive ? 'up' : 'down'} ${Math.abs(delta)}`}
+                aria-label={isFlat ? 'no change' : `${isPositive ? 'up' : 'down'} ${Math.abs(delta)}`}
               >
-                {isPositive ? '▲' : '▼'} {Math.abs(delta)}
+                {isFlat ? Math.abs(delta) : `${isPositive ? '▲' : '▼'} ${Math.abs(delta)}`}
               </span>
             ) : null}
             {deltaLabel ? <span className={deltaLabelClass}>{deltaLabel}</span> : null}

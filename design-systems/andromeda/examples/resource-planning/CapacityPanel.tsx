@@ -54,7 +54,27 @@ function Cell({ label, children, last = false }) {
 }
 
 // ── Headline number ───────────────────────────────────────────────
-function BigValue({ value, suffix, delta }) {
+// The delta speaks StatTile's language: the ▲/▼ glyph is the direction of the
+// move, the colour is the judgment of it, and `polarity` is what separates the
+// two (see color-philosophy → "delta colour is a judgment"). This used to hard-
+// code ▲ and accent, which reads correctly only while every delta happens to be
+// positive — the first negative number would have rendered "▲ -1.4%" in green.
+function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
+  const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
+  // Decide neutral on the number the reader actually sees, not the raw one:
+  // this panel rounds to 1dp, so a delta of 0.04 would otherwise print
+  // "▲ 0.0%" in accent — a judgment colour and a direction glyph on a figure
+  // that reads as no change at all.
+  const shown = hasDelta ? Math.abs(delta).toFixed(1) : null;
+  const flat = hasDelta && Number(shown) === 0;
+  const up = hasDelta && delta > 0;
+  const good = polarity === 'lower-is-better' ? !up : up;
+  const deltaColor = !hasDelta || flat || polarity === 'none'
+    ? tokens.color.text.muted
+    : good
+      ? tokens.color.accent[300]
+      : tokens.color.red[300];
+
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: tokens.spacing[2] }}>
       <span
@@ -82,7 +102,7 @@ function BigValue({ value, suffix, delta }) {
           {suffix}
         </span>
       ) : null}
-      {typeof delta === 'number' ? (
+      {hasDelta ? (
         <span
           style={{
             display: 'inline-flex',
@@ -90,11 +110,12 @@ function BigValue({ value, suffix, delta }) {
             gap: tokens.spacing[1],
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.sm,
-            color: tokens.color.accent[300],
+            color: deltaColor,
             letterSpacing: tokens.typography.tracking.wide,
           }}
+          aria-label={flat ? 'no change' : `${up ? 'up' : 'down'} ${shown} percent`}
         >
-          ▲ {delta.toFixed(1)}%
+          {flat ? `${shown}%` : `${up ? '▲' : '▼'} ${shown}%`}
         </span>
       ) : null}
     </div>

@@ -36,6 +36,7 @@ export function TransmitStats() {
           value={stat.value}
           unit={stat.unit}
           delta={stat.delta}
+          polarity={stat.polarity}
           deltaLabel={stat.deltaLabel}
           live
           style={{ marginLeft: i > 0 ? -1 : 0 }}
