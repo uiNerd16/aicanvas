@@ -185,6 +185,29 @@ export default function PrivacyPage() {
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
+            Feedback form
+          </h3>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            When you send feedback we receive the category you picked, the
+            optional rating, your message, and, for bug reports, the page or
+            component you named. An email address is optional here and we only
+            ask for it so we can reply. It is required only for payment and
+            subscription issues, because we cannot locate your account or correct
+            a charge without it.
+          </p>
+          <p className="mt-2 leading-relaxed text-sand-400">
+            So that bug reports are actually reproducible, we attach three
+            technical details to the message: the page you came from, your
+            browser window size, and your browser&apos;s user-agent string. If you
+            are signed in, the email address on your account is attached as well,
+            so we can tell whether a report comes from a subscriber. Feedback is
+            delivered to our inbox by Resend (see Section 5) and is not written to
+            a database. The legal basis is our legitimate interest in maintaining
+            and improving the service (Art. 6 (1)(f) GDPR), and, for payment
+            issues, performance of our contract with you (Art. 6 (1)(b) GDPR).
+          </p>
+
+          <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
             Technical data (everyone)
           </h3>
           <p className="mt-2 leading-relaxed text-sand-400">

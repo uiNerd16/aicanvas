@@ -33,6 +33,9 @@ export function SiteFooter() {
         <Link href="/contact" className={linkCls}>
           Contact
         </Link>
+        <Link href="/feedback" className={linkCls}>
+          Feedback
+        </Link>
         <Link href="/faq" className={linkCls}>
           FAQ
         </Link>

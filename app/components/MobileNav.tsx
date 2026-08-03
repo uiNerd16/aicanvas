@@ -9,6 +9,7 @@ import {
   X,
   Info,
   EnvelopeSimple,
+  ChatCircleText,
   GithubLogo,
   XLogo,
   ArrowElbowDownRight,
@@ -423,6 +424,14 @@ export function MobileNav({
                   >
                     <span><EnvelopeSimple weight="regular" size={16} /></span>
                     <span className="flex-1">Contact</span>
+                  </Link>
+                  <Link
+                    href="/feedback"
+                    onClick={() => setOpen(false)}
+                    className="mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
+                  >
+                    <span><ChatCircleText weight="regular" size={16} /></span>
+                    <span className="flex-1">Feedback</span>
                   </Link>
                 </div>
               </nav>
