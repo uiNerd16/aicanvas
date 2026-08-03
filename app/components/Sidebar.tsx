@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ArrowElbowDownRight, CaretDown, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, Question, X, XLogo } from '@phosphor-icons/react'
+import { ArrowElbowDownRight, CaretDown, ChatCircleText, DiamondsFour, EnvelopeSimple, Flask, GithubLogo, Info, MagnifyingGlass, PiggyBank, Plug, Question, X, XLogo } from '@phosphor-icons/react'
 import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
@@ -450,6 +450,13 @@ export function Sidebar({
           >
             <EnvelopeSimple weight="regular" size={16} />
             <span>Contact</span>
+          </Link>
+          <Link
+            href="/feedback"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100"
+          >
+            <ChatCircleText weight="regular" size={16} />
+            <span>Feedback</span>
           </Link>
         </div>
       </div>
