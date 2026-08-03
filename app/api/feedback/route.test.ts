@@ -17,6 +17,9 @@ import { POST } from './route'
 // reusing one address would 429 the later cases instead of testing them.
 let ipCounter = 0
 
+// Email is mandatory, so it is defaulted here and every test that is about
+// something else stays about that something else. Override with email: '' to
+// exercise the missing-address path.
 function post(payload: Record<string, unknown>) {
   ipCounter += 1
   return POST(
@@ -27,7 +30,7 @@ function post(payload: Record<string, unknown>) {
         'x-forwarded-for': `10.0.0.${ipCounter}`,
         'user-agent': 'TestAgent/1.0',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ email: 'tester@example.com', ...payload }),
     }),
   )
 }
@@ -53,7 +56,6 @@ describe('POST /api/feedback', () => {
       ['general', '[Feedback]'],
       ['bug', '[Bug]'],
       ['billing', '[Billing]'],
-      ['request', '[Request]'],
       ['other', '[Other]'],
     ] as const
 
@@ -62,28 +64,23 @@ describe('POST /api/feedback', () => {
       const res = await post({
         category,
         message: 'the copy button does nothing',
-        // billing is the one branch that refuses to send without an address
-        email: category === 'billing' ? 'buyer@example.com' : '',
+        email: 'someone@example.com',
       })
       expect(res.status, category).toBe(200)
       expect(sentPayload()?.subject).toBe(`${prefix} the copy button does nothing`)
     }
   })
 
-  it('rejects a billing report with no email — we cannot fix a charge without one', async () => {
-    const res = await post({ category: 'billing', message: 'charged twice' })
-    expect(res.status).toBe(400)
-    expect(global.fetch).not.toHaveBeenCalled()
+  it('rejects any category with no email — the address is mandatory now', async () => {
+    for (const category of ['general', 'bug', 'billing', 'other']) {
+      vi.mocked(global.fetch).mockClear()
+      const res = await post({ category, message: 'something', email: '' })
+      expect(res.status, category).toBe(400)
+      expect(global.fetch, category).not.toHaveBeenCalled()
+    }
   })
 
-  it('accepts every other category with no email at all', async () => {
-    const res = await post({ category: 'general', message: 'love the site' })
-    expect(res.status).toBe(200)
-    // No address means no reply_to: otherwise Gmail's Reply answers ourselves.
-    expect(sentPayload()).not.toHaveProperty('reply_to')
-  })
-
-  it('sets reply_to when an email is left', async () => {
+  it('always sets reply_to, so Gmail answers the sender', async () => {
     const res = await post({
       category: 'general',
       message: 'love the site',
@@ -91,6 +88,26 @@ describe('POST /api/feedback', () => {
     })
     expect(res.status).toBe(200)
     expect(sentPayload()?.reply_to).toBe('someone@example.com')
+  })
+
+  it('includes the 0-10 rating when one was given', async () => {
+    await post({ category: 'general', message: 'good', score: 0 })
+    // 0 is a real rating, not "unrated" — a falsy check here would drop the
+    // single most useful score on the scale.
+    expect(sentPayload()?.text).toContain('Rating: 0 / 10')
+  })
+
+  it('omits the rating entirely when the slider was never touched', async () => {
+    await post({ category: 'general', message: 'good', score: null })
+    expect(sentPayload()?.text).not.toContain('Rating')
+  })
+
+  it('ignores an out-of-range or non-integer rating rather than echoing it', async () => {
+    for (const score of [11, -1, 2.5, '7', {}]) {
+      vi.mocked(global.fetch).mockClear()
+      await post({ category: 'general', message: 'good', score })
+      expect(sentPayload()?.text, String(score)).not.toContain('Rating')
+    }
   })
 
   it('rejects an unknown category so the subject prefix can never be attacker-controlled', async () => {

@@ -14,8 +14,9 @@ export const runtime = 'nodejs'
 //      so Gmail filters do the triage. That prefix IS the whole backlog system.
 //      There is deliberately no database: add one when the inbox stops being
 //      readable, not before.
-//   2. Email is OPTIONAL, except on the billing branch. No email means no
-//      reply_to header, and Gmail's "Reply" correctly does nothing useful.
+//   2. Email is required, so reply_to is always set and Gmail's "Reply" always
+//      answers the sender. Note this is a reply CHANNEL, not a reply promise:
+//      the form deliberately does not tell anyone we will resolve their issue.
 //   3. Request context (page, viewport, browser, signed-in user) is attached
 //      server-side, so a bug report arrives reproducible instead of arriving as
 //      "the button is broken".
@@ -35,7 +36,6 @@ const SUBJECT_PREFIX = {
   general: '[Feedback]',
   bug: '[Bug]',
   billing: '[Billing]',
-  request: '[Request]',
   other: '[Other]',
 } as const
 type Category = keyof typeof SUBJECT_PREFIX
@@ -44,11 +44,8 @@ const CATEGORY_LABEL: Record<Category, string> = {
   general: 'General feedback',
   bug: 'Found a bug',
   billing: 'Payment or subscription',
-  request: 'Component request',
   other: 'Something else',
 }
-
-const SENTIMENTS = ['rough', 'fine', 'great'] as const
 
 // Best-effort, per-instance rate limit (mirrors app/api/contact).
 const WINDOW_MS = 10 * 60 * 1000
@@ -91,7 +88,7 @@ function summarize(message: string): string {
 
 function emailHtml(f: {
   category: Category
-  sentiment: string
+  score: number | null
   message: string
   where: string
   email: string
@@ -105,13 +102,11 @@ function emailHtml(f: {
 
   const parts = [
     row('Category', escapeHtml(CATEGORY_LABEL[f.category])),
-    f.sentiment ? row('Sentiment', escapeHtml(f.sentiment)) : '',
+    f.score !== null ? row('Rating', `${f.score} / 10`) : '',
     f.where ? row('Where', escapeHtml(f.where)) : '',
     row(
       'Reply to',
-      f.email
-        ? `<a href="mailto:${escapeHtml(f.email)}" style="color:#869631;text-decoration:none;">${escapeHtml(f.email)}</a>`
-        : 'No email left — no reply expected',
+      `<a href="mailto:${escapeHtml(f.email)}" style="color:#869631;text-decoration:none;">${escapeHtml(f.email)}</a>`,
     ),
     `<p ${emailText('muted', label)}>Message</p>`,
     `<div ${emailText('primary', 'font-size:15px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:24px;')}>${escapeHtml(f.message)}</div>`,
@@ -123,9 +118,7 @@ function emailHtml(f: {
     title: `${CATEGORY_LABEL[f.category]} via /feedback`,
     heading: CATEGORY_LABEL[f.category],
     bodyHtml: parts.join(''),
-    footerNoteHtml: f.email
-      ? 'Reply straight to this email to answer them.'
-      : 'No reply address was left, so there is nobody to reply to.',
+    footerNoteHtml: 'Reply straight to this email to answer them.',
   })
 }
 
@@ -166,8 +159,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please pick a category.' }, { status: 400 })
   }
 
-  const rawSentiment = field(body.sentiment, 10)
-  const sentiment = (SENTIMENTS as readonly string[]).includes(rawSentiment) ? rawSentiment : ''
+  // Optional 0-10 rating. Anything that is not a whole number in range is
+  // treated as "not rated" rather than rejected: the slider cannot produce a bad
+  // value, so a bad one means a crafted request, and it never reaches output.
+  const raw = body.score
+  const score =
+    typeof raw === 'number' && Number.isInteger(raw) && raw >= 0 && raw <= 10 ? raw : null
 
   const message = field(body.message, 5000)
   if (message.length < 1) {
@@ -177,16 +174,7 @@ export async function POST(req: NextRequest) {
   const where = field(body.where, 200)
   const email = field(body.email, 200)
 
-  // Billing is the one branch where we cannot act without a reply channel.
-  if (category === 'billing' && !email) {
-    return NextResponse.json(
-      { error: 'For payment issues we need the email used at checkout.' },
-      { status: 400 },
-    )
-  }
-  // A typo'd address is worse than none: the sender waits for a reply that can
-  // never arrive. Reject rather than silently dropping it.
-  if (email && !EMAIL_RE.test(email)) {
+  if (!EMAIL_RE.test(email)) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
   }
 
@@ -217,16 +205,14 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       from: CONTACT_FROM,
       to: [CONTACT_INBOX],
-      // Only set reply_to when there is somebody to reply to, otherwise Gmail's
-      // Reply button silently answers ourselves.
-      ...(email ? { reply_to: email } : {}),
+      reply_to: email,
       subject: `${SUBJECT_PREFIX[category]} ${summarize(message)}`,
-      html: emailHtml({ category, sentiment, message, where, email, context }),
+      html: emailHtml({ category, score, message, where, email, context }),
       text: [
         CATEGORY_LABEL[category],
-        sentiment ? `Sentiment: ${sentiment}` : '',
+        score !== null ? `Rating: ${score} / 10` : '',
         where ? `Where: ${where}` : '',
-        `Reply to: ${email || 'no email left'}`,
+        `Reply to: ${email}`,
         '',
         message,
         '',

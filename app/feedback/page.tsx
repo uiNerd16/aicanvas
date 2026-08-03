@@ -8,10 +8,6 @@ import {
   CheckCircle,
   CreditCard,
   DotsThreeCircle,
-  Smiley,
-  SmileyMeh,
-  SmileySad,
-  Sparkle,
 } from '@phosphor-icons/react'
 import { Button } from '../components/Button'
 import { SiteFooter } from '../components/SiteFooter'
@@ -44,21 +40,57 @@ const INPUT_CLASS =
 const LABEL_CLASS =
   'mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-400'
 
-type CategoryId = 'general' | 'bug' | 'billing' | 'request' | 'other'
+type CategoryId = 'general' | 'bug' | 'billing' | 'other'
 
 const CATEGORIES: { id: CategoryId; label: string; icon: React.ReactNode }[] = [
   { id: 'general', label: 'General feedback', icon: <ChatCircleText weight="regular" size={18} /> },
   { id: 'bug', label: 'Found a bug', icon: <Bug weight="regular" size={18} /> },
   { id: 'billing', label: 'Payment or subscription', icon: <CreditCard weight="regular" size={18} /> },
-  { id: 'request', label: 'Component request', icon: <Sparkle weight="regular" size={18} /> },
   { id: 'other', label: 'Something else', icon: <DotsThreeCircle weight="regular" size={18} /> },
 ]
 
-const SENTIMENTS: { id: string; label: string; icon: React.ReactNode }[] = [
-  { id: 'rough', label: 'Rough', icon: <SmileySad weight="regular" size={22} /> },
-  { id: 'fine', label: 'Fine', icon: <SmileyMeh weight="regular" size={22} /> },
-  { id: 'great', label: 'Great', icon: <Smiley weight="regular" size={22} /> },
+// Rating rail, red → amber → olive. Same visual language as the mood-tracker
+// standalone (colored rail, white puck with an accent ring) but built on a
+// native range input, so drag, touch, arrow keys, Home/End and the screen-reader
+// slider semantics all come from the platform instead of pointer handlers.
+const RAIL = 'linear-gradient(90deg, #B4553A 0%, #C08A3E 35%, #C8B44A 65%, #A8B94D 100%)'
+
+// The ring takes the rail's own color at the current stop, so the puck reads as
+// picking up whatever it is sitting on. Eleven fixed samples of RAIL rather than
+// a gradient interpolator: there are exactly eleven positions, so a lookup is
+// both shorter and exact. Regenerate this alongside any change to RAIL.
+const RING = [
+  '#B4553A', '#B7643B', '#BB733C', '#BE823D', '#C19140', '#C49F44',
+  '#C7AD48', '#C3B54A', '#BAB64B', '#B1B84C', '#A8B94D',
 ]
+
+// Dark core + olive ring, so the puck reads as a hole punched in the rail rather
+// than a light dot floating over a dark page. The shadow is two layers: a tight
+// contact shadow that seats it on the rail, plus a wider soft one that lifts it.
+//
+// Every class below must stay a COMPLETE literal string. Tailwind scans source
+// text for finished class names, so composing one with a template literal
+// (shadow-[${VAR}]) silently generates no CSS at all.
+// The ring color arrives as --thumb-ring, set inline on the input: custom
+// properties inherit into pseudo-elements, which is the only way to drive a
+// ::-webkit-slider-thumb from React state.
+const THUMB = [
+  '[&::-webkit-slider-thumb]:h-6',
+  '[&::-webkit-slider-thumb]:w-6',
+  '[&::-webkit-slider-thumb]:appearance-none',
+  '[&::-webkit-slider-thumb]:rounded-full',
+  '[&::-webkit-slider-thumb]:border-4',
+  '[&::-webkit-slider-thumb]:border-[color:var(--thumb-ring)]',
+  '[&::-webkit-slider-thumb]:bg-sand-950',
+  '[&::-webkit-slider-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.9),0_8px_18px_rgba(0,0,0,0.75)]',
+  '[&::-moz-range-thumb]:h-6',
+  '[&::-moz-range-thumb]:w-6',
+  '[&::-moz-range-thumb]:rounded-full',
+  '[&::-moz-range-thumb]:border-4',
+  '[&::-moz-range-thumb]:border-[color:var(--thumb-ring)]',
+  '[&::-moz-range-thumb]:bg-sand-950',
+  '[&::-moz-range-thumb]:shadow-[0_2px_4px_rgba(0,0,0,0.9),0_8px_18px_rgba(0,0,0,0.75)]',
+].join(' ')
 
 // Selectable chip. Wraps a visually hidden native radio so keyboard support,
 // arrow-key roving and form semantics come free instead of being reimplemented
@@ -89,7 +121,11 @@ export default function FeedbackPage() {
   }, [])
 
   const [category, setCategory] = useState<CategoryId>('general')
-  const [sentiment, setSentiment] = useState('')
+  // The rating is optional, but a range input always holds a value. `rated`
+  // tracks whether it was actually touched, so an untouched slider sends
+  // nothing instead of silently reporting a 5.
+  const [score, setScore] = useState(5)
+  const [rated, setRated] = useState(false)
   const [message, setMessage] = useState('')
   const [where, setWhere] = useState('')
   const [email, setEmail] = useState('')
@@ -108,11 +144,8 @@ export default function FeedbackPage() {
     if (from) setWhere(from.slice(0, 200))
   }, [])
 
-  // Billing is support, not feedback: without an address we cannot fix anyone's
-  // charge, so it is the one branch where the reply channel is mandatory.
-  const emailRequired = category === 'billing'
   // "How is it going" is tone-deaf to someone who was charged twice.
-  const showSentiment = category !== 'billing'
+  const showScore = category !== 'billing'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -124,7 +157,7 @@ export default function FeedbackPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category,
-          sentiment: showSentiment ? sentiment : '',
+          score: showScore && rated ? score : null,
           message,
           where,
           email,
@@ -175,9 +208,9 @@ export default function FeedbackPage() {
             Feedback
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-center text-sm leading-relaxed text-sand-400">
-            One thing we should fix, build, or stop doing. Pick a category, say
-            it in a sentence, and leave an email only if you want an answer. This
-            is what decides what we work on next.
+            One thing we should fix, build, or stop doing. Pick a category and
+            say it in a sentence. We read every one, and this is what decides
+            what we work on next.
           </p>
 
           {sent ? (
@@ -187,19 +220,8 @@ export default function FeedbackPage() {
                 <div>
                   <h2 className="text-base font-bold text-sand-50">Got it, thank you</h2>
                   <p className="mt-1 text-sm leading-relaxed text-sand-300">
-                    {email ? (
-                      <>
-                        We read every single one. We&apos;ll reply to{' '}
-                        <strong className="text-sand-100">{email}</strong>, usually
-                        within a day or two.
-                      </>
-                    ) : (
-                      <>
-                        We read every single one. You didn&apos;t leave an email, so
-                        there won&apos;t be a reply, but this still lands on the list
-                        that decides what gets built.
-                      </>
-                    )}
+                    We read every single one. If it needs an answer we&apos;ll
+                    write to <strong className="text-sand-100">{email}</strong>.
                   </p>
                   <Link
                     href="/components"
@@ -249,34 +271,54 @@ export default function FeedbackPage() {
                 </div>
               </fieldset>
 
-              {showSentiment && (
-                <fieldset>
-                  <legend className={LABEL_CLASS}>
-                    How has AI Canvas been so far?{' '}
-                    <span className="font-normal normal-case tracking-normal text-sand-500">
-                      optional
+              {showScore && (
+                <div>
+                  <div className="flex items-baseline justify-between">
+                    <label htmlFor="score" className={LABEL_CLASS}>
+                      How has AI Canvas been so far?
+                    </label>
+                    <span
+                      className={`text-xs font-semibold tabular-nums ${rated ? 'text-olive-400' : 'text-sand-500'}`}
+                    >
+                      {rated ? `${score} / 10` : 'optional'}
                     </span>
-                  </legend>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {SENTIMENTS.map((s) => (
-                      <label
-                        key={s.id}
-                        className={`${CHIP_BASE} flex-col justify-center gap-1 py-3 ${chipTone(sentiment === s.id)}`}
-                      >
-                        <input
-                          type="radio"
-                          name="sentiment"
-                          value={s.id}
-                          checked={sentiment === s.id}
-                          onChange={() => setSentiment(s.id)}
-                          className="sr-only"
-                        />
-                        {s.icon}
-                        <span>{s.label}</span>
-                      </label>
-                    ))}
                   </div>
-                </fieldset>
+
+                  {/* Alignment rule: track height == thumb height == input
+                      height (all h-6), then the input and the rail are each
+                      centred on the box. WebKit aligns the thumb's TOP to the
+                      track's top rather than centring it, so any track taller
+                      than the thumb pushes the puck above the rail. Keeping the
+                      three equal makes top-aligned and centred the same thing,
+                      which is why there is no margin offset here to drift. */}
+                  <div className="relative mt-2 h-9 w-full rounded-full has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-olive-500/40">
+                    <div
+                      aria-hidden="true"
+                      className={`pointer-events-none absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full transition-opacity ${rated ? 'opacity-100' : 'opacity-40'}`}
+                      style={{ background: RAIL }}
+                    />
+                    <input
+                      id="score"
+                      type="range"
+                      min={0}
+                      max={10}
+                      step={1}
+                      value={score}
+                      onChange={(e) => {
+                        setScore(Number(e.target.value))
+                        setRated(true)
+                      }}
+                      aria-valuetext={rated ? `${score} out of 10` : 'not rated'}
+                      style={{ '--thumb-ring': RING[score] } as React.CSSProperties}
+                      className={`absolute inset-x-0 top-1/2 m-0 h-6 w-full -translate-y-1/2 cursor-pointer appearance-none bg-transparent outline-none [&::-webkit-slider-runnable-track]:h-6 [&::-webkit-slider-runnable-track]:bg-transparent [&::-moz-range-track]:h-6 [&::-moz-range-track]:bg-transparent ${THUMB} ${rated ? '' : 'opacity-70'}`}
+                    />
+                  </div>
+
+                  <div className="mt-1 flex justify-between text-xs text-sand-500">
+                    <span>Rough</span>
+                    <span>Great</span>
+                  </div>
+                </div>
               )}
 
               {category === 'bug' && (
@@ -300,11 +342,12 @@ export default function FeedbackPage() {
                 <label htmlFor="message" className={LABEL_CLASS}>
                   {category === 'bug'
                     ? 'What happened, and what did you expect?'
-                    : category === 'request'
-                      ? 'What should we build?'
-                      : category === 'billing'
-                        ? 'What went wrong?'
-                        : 'Your feedback'}
+                    : category === 'billing'
+                      ? 'What went wrong?'
+                      : 'Your feedback'}{' '}
+                  {/* Decorative: the required state itself comes from the input's
+                      `required` attribute, which is what assistive tech reads. */}
+                  <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <textarea
                   id="message"
@@ -326,25 +369,20 @@ export default function FeedbackPage() {
 
               <div>
                 <label htmlFor="email" className={LABEL_CLASS}>
-                  {emailRequired ? 'Email used at checkout' : 'Email'}
+                  {category === 'billing' ? 'Email used at checkout' : 'Email'}{' '}
+                  <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <input
                   id="email"
                   type="email"
-                  required={emailRequired}
+                  required
                   autoComplete="email"
                   maxLength={200}
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={INPUT_CLASS}
-                  aria-describedby="email-hint"
                 />
-                <p id="email-hint" className="mt-1.5 text-xs leading-relaxed text-sand-500">
-                  {emailRequired
-                    ? 'Required for payment issues. We need it to find your account and fix the charge.'
-                    : 'Optional. Only if you want a reply.'}
-                </p>
               </div>
 
               {error && (
@@ -357,15 +395,20 @@ export default function FeedbackPage() {
                 {submitting ? 'Sending…' : 'Send feedback'}
               </Button>
 
-              <p className="text-center text-xs leading-relaxed text-sand-500">
-                We also attach the page you came from, your screen size and your
-                browser, so bug reports are actually fixable. Nothing is stored in
-                a database, it goes straight to our inbox. See the{' '}
-                <Link href="/privacy" className="text-sand-400 underline underline-offset-2 hover:text-sand-200">
-                  privacy policy
-                </Link>
-                .
-              </p>
+              {/* The attached page/screen/browser details are spelled out in the
+                  Feedback form section of /privacy rather than on the form, so
+                  this link is the point-of-collection notice. Keep it. */}
+              <div className="space-y-1.5 text-center">
+                <p className="text-xs leading-relaxed text-sand-400">
+                  Good or bad, we read and appreciate every message. Honest
+                  feedback is what keeps pushing AI Canvas forward.
+                </p>
+                <p className="text-xs text-sand-500">
+                  <Link href="/privacy" className="underline underline-offset-2 hover:text-sand-300">
+                    Privacy policy
+                  </Link>
+                </p>
+              </div>
             </form>
           )}
         </div>

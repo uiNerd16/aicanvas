@@ -189,11 +189,9 @@ export default function PrivacyPage() {
           </h3>
           <p className="mt-2 leading-relaxed text-sand-400">
             When you send feedback we receive the category you picked, the
-            optional rating, your message, and, for bug reports, the page or
-            component you named. An email address is optional here and we only
-            ask for it so we can reply. It is required only for payment and
-            subscription issues, because we cannot locate your account or correct
-            a charge without it.
+            optional rating, your message, your email address, and, for bug
+            reports, the page or component you named. We use them to read your
+            feedback and, where an answer is needed, to reply to you.
           </p>
           <p className="mt-2 leading-relaxed text-sand-400">
             So that bug reports are actually reproducible, we attach three
