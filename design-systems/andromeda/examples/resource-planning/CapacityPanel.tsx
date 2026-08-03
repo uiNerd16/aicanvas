@@ -61,7 +61,12 @@ function Cell({ label, children, last = false }) {
 // positive — the first negative number would have rendered "▲ -1.4%" in green.
 function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
-  const flat = hasDelta && delta === 0;
+  // Decide neutral on the number the reader actually sees, not the raw one:
+  // this panel rounds to 1dp, so a delta of 0.04 would otherwise print
+  // "▲ 0.0%" in accent — a judgment colour and a direction glyph on a figure
+  // that reads as no change at all.
+  const shown = hasDelta ? Math.abs(delta).toFixed(1) : null;
+  const flat = hasDelta && Number(shown) === 0;
   const up = hasDelta && delta > 0;
   const good = polarity === 'lower-is-better' ? !up : up;
   const deltaColor = !hasDelta || flat || polarity === 'none'
@@ -108,9 +113,9 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
             color: deltaColor,
             letterSpacing: tokens.typography.tracking.wide,
           }}
-          aria-label={flat ? 'no change' : `${up ? 'up' : 'down'} ${Math.abs(delta).toFixed(1)} percent`}
+          aria-label={flat ? 'no change' : `${up ? 'up' : 'down'} ${shown} percent`}
         >
-          {flat ? `${Math.abs(delta).toFixed(1)}%` : `${up ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)}%`}
+          {flat ? `${shown}%` : `${up ? '▲' : '▼'} ${shown}%`}
         </span>
       ) : null}
     </div>

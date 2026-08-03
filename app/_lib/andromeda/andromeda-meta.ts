@@ -256,7 +256,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'stat-tile',
     name: 'Stat Tile',
     description:
-      'Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta colored by sign. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop.',
+      'Stat readout built on Card. Big numeric value, optional unit, optional ▲/▼ delta whose glyph carries the direction and whose color carries the judgment: set polarity to lower-is-better and a falling response time reads as the improvement it is, or none for a reading with no good/bad sense. Scroll-aware count-up on first view, a live mode that snaps to new values, a per-digit odometer roll (liveRoll), and a top-right code identifier prop.',
     sourceFile: 'StatTile.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/stat-tile.png?v=3',
   },
