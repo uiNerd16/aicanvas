@@ -2,6 +2,7 @@
   "_readme": "Slugs whose prompts.ts MUST be in the seven-block scaffold. This list is what gives the lint teeth: strictness is keyed off the component, not off the prompt's own content. If it were keyed off the prompt, an agent facing a red lint could delete the '## 4. Tree' heading and flip the gate green forever. For a slug listed here, a missing heading IS the failure. Add a slug the moment its prompt is converted; forgetting is safe (it stays advisory), removing one is a deliberate change that shows in the diff. Premium components are never listed here, they run the inverted rule set.",
   "slugs": [
     "task-cards",
-    "avatar-picker"
+    "avatar-picker",
+    "scroll-wipe-gallery"
   ]
 }

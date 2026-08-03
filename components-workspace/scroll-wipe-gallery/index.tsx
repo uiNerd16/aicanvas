@@ -1,7 +1,7 @@
 'use client'
 // npm install framer-motion @phosphor-icons/react
 
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import {
   cubicBezier,
   motion,
@@ -109,27 +109,42 @@ const ENTER_FROM = {
   left: { axis: 'x', sign: 1 },
 } as const
 
-function findNearestScrollContainer(element: HTMLElement): HTMLElement | null {
+// Two answers from one walk: what actually scrolls, and what merely crops.
+// The scroller drives progress. The cropper matters when nothing scrolls, for
+// example inside a fixed-height preview box or a card: sizing the panel to the
+// window there hangs half the composition below the crop.
+function findScrollContext(element: HTMLElement): {
+  scroller: HTMLElement | null
+  clipper: HTMLElement | null
+} {
   let ancestor = element.parentElement
+  let clipper: HTMLElement | null = null
 
   while (ancestor) {
     const { overflowY } = window.getComputedStyle(ancestor)
 
-    // The overflow check alone is not enough: an element with
-    // `overflow-x: hidden` computes overflowY to `auto` even though it never
-    // scrolls, and `body { overflow-x: hidden }` is on half the pages this
-    // could be pasted into. Requiring real overflow keeps the walk going.
-    if (
-      (overflowY === 'auto' || overflowY === 'scroll') &&
-      ancestor.scrollHeight > ancestor.clientHeight
-    ) {
-      return ancestor
+    if (overflowY !== 'visible') {
+      if (!clipper) clipper = ancestor
+
+      // The overflow check alone is not enough: an element with
+      // `overflow-x: hidden` computes overflowY to `auto` even though it never
+      // scrolls, and `body { overflow-x: hidden }` is on half the pages this
+      // could be pasted into. Requiring real overflow keeps the walk going.
+      if (
+        (overflowY === 'auto' || overflowY === 'scroll') &&
+        ancestor.scrollHeight > ancestor.clientHeight
+      ) {
+        // Keep the nearer clipper if the walk already passed one: a
+        // fixed-height box inside a scrolling shell bounds us, the shell does
+        // not.
+        return { scroller: ancestor, clipper: clipper ?? ancestor }
+      }
     }
 
     ancestor = ancestor.parentElement
   }
 
-  return null
+  return { scroller: null, clipper }
 }
 
 // Progress is measured from the wrapper's own viewport rect rather than through
@@ -138,21 +153,23 @@ function findNearestScrollContainer(element: HTMLElement): HTMLElement | null {
 // shell that scrolls an inner div and on a page that scrolls the window.
 function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
   progress: MotionValue<number>
-  viewportHeight: MotionValue<number>
+  viewportHeight: number | null
 } {
   const progress = useMotionValue(0)
   // The height of whatever actually scrolls. The sticky panel sizes off this
   // instead of 100vh, which is only correct when the scroller IS the viewport:
-  // inside an app shell with a fixed header, or on iOS where 100vh is the large
-  // viewport, a 100vh panel hangs below the visible area and clips its own
-  // bottom chrome. 0 means "not measured yet" and falls back to 100vh.
-  const viewportHeight = useMotionValue(0)
+  // inside an app shell with a fixed header, in a fullscreen overlay panel, or
+  // on iOS where 100vh is the large viewport, a 100vh panel hangs below the
+  // visible area and clips its own bottom chrome. State, not a MotionValue:
+  // this changes on mount and on resize, not per frame, and it has to survive
+  // a re-render. null means not measured yet, and falls back to 100vh.
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null)
 
   useEffect(() => {
     const target = targetRef.current
     if (!target) return
 
-    const scrollContainer = findNearestScrollContainer(target)
+    const { scroller: scrollContainer, clipper } = findScrollContext(target)
     let animationFrame: number | null = null
 
     const updateProgress = () => {
@@ -162,15 +179,34 @@ function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
       const containerTop = scrollContainer
         ? scrollContainer.getBoundingClientRect().top
         : 0
+      // Never taller than what is actually visible. Start from the scroller,
+      // or the window when nothing scrolls, then cap by anything nearer that
+      // crops us: a fixed-height preview box inside a scrolling page bounds
+      // this block even though the page is what scrolls. A page-level clipper
+      // (body with overflow-x hidden) is taller than the window, so the cap is
+      // a no-op there and only real crops shrink the panel.
+      const availableHeight = scrollContainer
+        ? scrollContainer.clientHeight
+        : window.innerHeight
       const nextViewportHeight =
-        scrollContainer?.clientHeight ?? window.innerHeight
+        clipper && clipper !== scrollContainer
+          ? Math.min(availableHeight, clipper.clientHeight)
+          : availableHeight
+      // Cropped and unscrollable: something shorter than the section clips us,
+      // and it is not the thing that scrolls, so that crop moves as one piece
+      // and the viewer can never travel through the sequence inside it. Hold
+      // the first frame rather than let an outer scroll drive a counter and a
+      // set of wipes nobody can control. This is the preview-box case.
+      const cropped =
+        !!clipper &&
+        clipper !== scrollContainer &&
+        clipper.clientHeight < rect.height
       const scrollDistance = Math.max(rect.height - nextViewportHeight, 1)
-      const nextProgress = Math.min(
-        Math.max((containerTop - rect.top) / scrollDistance, 0),
-        1,
-      )
+      const nextProgress = cropped
+        ? 0
+        : Math.min(Math.max((containerTop - rect.top) / scrollDistance, 0), 1)
 
-      viewportHeight.set(nextViewportHeight)
+      setViewportHeight(nextViewportHeight)
       progress.set(nextProgress)
     }
 
@@ -188,16 +224,25 @@ function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
     window.addEventListener('scroll', requestUpdate, { passive: true })
     window.addEventListener('resize', requestUpdate)
 
+    // The scroll container can change size without the window resizing: an
+    // overlay opening, a panel animating, a phone toolbar collapsing.
+    const observer = new ResizeObserver(requestUpdate)
+    // Both when they differ: the scroller drives progress, the clipper caps the
+    // panel height, and either can resize without the other.
+    observer.observe(scrollContainer ?? clipper ?? document.documentElement)
+    if (clipper && clipper !== scrollContainer) observer.observe(clipper)
+
     return () => {
       scrollContainer?.removeEventListener('scroll', requestUpdate)
       window.removeEventListener('scroll', requestUpdate)
       window.removeEventListener('resize', requestUpdate)
+      observer.disconnect()
 
       if (animationFrame !== null) {
         window.cancelAnimationFrame(animationFrame)
       }
     }
-  }, [progress, targetRef, viewportHeight])
+  }, [progress, targetRef])
 
   return { progress, viewportHeight }
 }
@@ -323,7 +368,7 @@ function FrameTitle({
   )
 }
 
-export default function FrameWipe() {
+export default function ScrollWipeGallery() {
   const wrapperRef = useRef<HTMLElement>(null)
   const shouldReduceMotion = useReducedMotion() ?? false
   const { progress: scrollYProgress, viewportHeight } =
@@ -331,9 +376,7 @@ export default function FrameWipe() {
 
   // 100vh until the real scroller has been measured, so the server render and
   // the first client render agree.
-  const panelHeight = useTransform(viewportHeight, (value) =>
-    value > 0 ? `${value}px` : '100vh',
-  )
+  const panelHeight = viewportHeight ? `${viewportHeight}px` : '100vh'
 
   // The scroll cue has done its job the moment the first cut starts moving.
   const cueOpacity = useTransform(scrollYProgress, [0, 0.03], [1, 0])
@@ -351,11 +394,11 @@ export default function FrameWipe() {
   return (
     <section
       ref={wrapperRef}
-      aria-label="Frame Wipe editorial gallery"
+      aria-label="Editorial photo gallery"
       className="relative min-h-screen w-full bg-[#0A0A0A] dark:bg-[#0A0A0A]"
       style={{ height: SECTION_HEIGHT, fontFamily: TYPEFACE }}
     >
-      <motion.div
+      <div
         className="sticky top-0 w-full overflow-hidden bg-[#0A0A0A] dark:bg-[#0A0A0A]"
         style={{ height: panelHeight }}
       >
@@ -404,7 +447,10 @@ export default function FrameWipe() {
             </span>
           </div>
 
-          <div className="absolute right-4 top-4 text-[12px] font-semibold uppercase tracking-[0.18em] md:right-8 md:top-8">
+          {/* Bottom right, not top right. Host pages put their own chrome in
+              the top right corner often enough (a close button, a toolbar)
+              that a counter parked there gets covered. */}
+          <div className="absolute bottom-6 right-4 text-[12px] font-semibold uppercase tracking-[0.18em] md:bottom-8 md:right-8">
             <motion.span>{frameLabel}</motion.span>
             <span className="opacity-70"> / {TOTAL_LABEL}</span>
           </div>
@@ -429,7 +475,7 @@ export default function FrameWipe() {
             </motion.span>
           </motion.div>
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }
