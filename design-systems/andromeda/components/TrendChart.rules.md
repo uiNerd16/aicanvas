@@ -20,6 +20,12 @@ The canonical multi-series time-series chart: one component that renders as line
 - `may` — `footerSlot` takes custom controls (e.g. a "vs previous period" Toggle) on the right of the legend row.
 - `may` — `modes` controls which views the toggle offers (`['area','bar']` default). A single-mode chart omits the toggle.
 
+## Y-axis domain
+
+- `should` — `domain` defaults to `[0, 'auto']`. Leave it there unless the measurement's floor sits far from zero; a zero baseline is the honest default.
+- `should` — Pass `domain={['auto','auto']}` when a 0-based axis would flatten the story: a satisfaction score travelling 3.8 → 4.3, a latency band, a percentage near 100. Against a zero floor that whole signal is a sliver in the top tenth of the plot.
+- `must` — A `domain` never truncates a bar's baseline. A bar's length IS its value, so `bar` mode keeps the zero floor and honours only the upper bound. A chart can therefore carry a fitted domain for its area mode without producing a lying bar chart when the user flips the toggle.
+
 ## Motion
 
 - `must` — The draw is gated on `useInView`: a left-to-right clip reveal (the line materialising across time), token-timed (`duration.cascade`), once. recharts' own series animation is disabled so it doesn't compete. Honour `prefers-reduced-motion` (render fully drawn, no reveal).

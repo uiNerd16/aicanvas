@@ -1189,12 +1189,16 @@ export default function AndromedaShowcase({
               delta={2.4}
               deltaLabel="vs prior period"
             />
+            {/* Latency falling is an improvement, so this ▼ reads accent, not
+                fault. polarity is what separates the direction of a move from
+                the judgment of it. */}
             <StatTile
               label="Latency"
               code="LAT-02"
               value="412"
               unit="ms"
               delta={-1.2}
+              polarity="lower-is-better"
               deltaLabel="vs prior period"
             />
             <StatTile label="Errors" code="ERR-03" value="1.04" unit="%" />

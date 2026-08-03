@@ -54,7 +54,22 @@ function Cell({ label, children, last = false }) {
 }
 
 // ── Headline number ───────────────────────────────────────────────
-function BigValue({ value, suffix, delta }) {
+// The delta speaks StatTile's language: the ▲/▼ glyph is the direction of the
+// move, the colour is the judgment of it, and `polarity` is what separates the
+// two (see color-philosophy → "delta colour is a judgment"). This used to hard-
+// code ▲ and accent, which reads correctly only while every delta happens to be
+// positive — the first negative number would have rendered "▲ -1.4%" in green.
+function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
+  const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
+  const flat = hasDelta && delta === 0;
+  const up = hasDelta && delta > 0;
+  const good = polarity === 'lower-is-better' ? !up : up;
+  const deltaColor = !hasDelta || flat || polarity === 'none'
+    ? tokens.color.text.muted
+    : good
+      ? tokens.color.accent[300]
+      : tokens.color.red[300];
+
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: tokens.spacing[2] }}>
       <span
@@ -82,7 +97,7 @@ function BigValue({ value, suffix, delta }) {
           {suffix}
         </span>
       ) : null}
-      {typeof delta === 'number' ? (
+      {hasDelta ? (
         <span
           style={{
             display: 'inline-flex',
@@ -90,11 +105,12 @@ function BigValue({ value, suffix, delta }) {
             gap: tokens.spacing[1],
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.sm,
-            color: tokens.color.accent[300],
+            color: deltaColor,
             letterSpacing: tokens.typography.tracking.wide,
           }}
+          aria-label={flat ? 'no change' : `${up ? 'up' : 'down'} ${Math.abs(delta).toFixed(1)} percent`}
         >
-          ▲ {delta.toFixed(1)}%
+          {flat ? `${Math.abs(delta).toFixed(1)}%` : `${up ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)}%`}
         </span>
       ) : null}
     </div>

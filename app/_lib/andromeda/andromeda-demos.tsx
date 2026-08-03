@@ -505,7 +505,8 @@ function StatTileDemo() {
   return (
     <div style={{ display: 'flex', gap: tokens.spacing[5], flexWrap: 'wrap' }}>
       <StatTile label="Throughput" code="REQ-01" value="7842" unit="rps" delta={2.4} deltaLabel="vs prior period" />
-      <StatTile label="Latency" code="LAT-02" value="412" unit="ms" delta={-1.2} deltaLabel="vs prior period" />
+      {/* Latency falling is an improvement — polarity keeps the ▼ accent, not fault. */}
+      <StatTile label="Latency" code="LAT-02" value="412" unit="ms" delta={-1.2} polarity="lower-is-better" deltaLabel="vs prior period" />
       <StatTile label="Errors" code="ERR-03" value="1.04" unit="%" />
     </div>
   )

@@ -39,10 +39,15 @@ export const channels = [
 ];
 
 // ---- Now Transmitting: hero readouts (replaces "Sound without limits") ----
+// The ▲/▼ glyph reports the direction of the move; `polarity` says which
+// direction is the good one, so the colour is a judgment rather than a repeat
+// of the sign. Latency is the case that needs it: 1ms faster is a ▼ and an
+// improvement, and colouring it red would teach the eye to distrust the red.
+// The two `delta: 0` readouts are neutral by definition — no glyph, muted.
 export const nowTransmittingStats = [
   { code: 'SIG-01', label: 'Signal',  value: '98',  unit: '%',    delta: 0.4,  deltaLabel: 'lock'    },
   { code: 'SIG-02', label: 'Bitrate', value: '320', unit: 'KBPS', delta: 0,    deltaLabel: 'stable'  },
-  { code: 'SIG-03', label: 'Latency', value: '12',  unit: 'MS',   delta: -1,   deltaLabel: 'last 60s'},
+  { code: 'SIG-03', label: 'Latency', value: '12',  unit: 'MS',   delta: -1,   polarity: 'lower-is-better', deltaLabel: 'last 60s'},
   { code: 'SIG-04', label: 'Channel', value: '04',  unit: 'LIVE', delta: 0,    deltaLabel: 'nominal' },
 ];
 

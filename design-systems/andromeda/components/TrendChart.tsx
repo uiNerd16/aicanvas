@@ -200,6 +200,13 @@ const AXIS_TICK = {
  *   Set false on compact cards where an external headline already states the
  *   magnitude, and the plot then fills its card content box edge-to-edge with no
  *   stray left inset (the Andromeda spacing rules).
+ * @property {[number|string, number|string]} [domain=[0,'auto']]   Y-axis domain,
+ *   passed through to recharts. The default zero baseline is the honest one for
+ *   most series. Pass `['auto','auto']` (or explicit bounds) when the measurement
+ *   has a floor far from zero — a satisfaction score that only moves between 3.8
+ *   and 4.3 is a flat sliver on a 0-based axis. In `bar` mode the zero floor is
+ *   kept whatever is passed: only the upper bound is honoured, because a bar
+ *   read against a truncated baseline misstates every difference it draws.
  * @property {React.ReactNode} [footerSlot]   Right side of the footer (custom controls).
  * @property {number|'fill'} [height=240]   Plot height in px, or 'fill' to grow into a flex parent.
  * @property {string} [className]   Class applied to the root container element.
@@ -221,6 +228,7 @@ export const TrendChart = forwardRef(function TrendChart(
     xInterval = 4,
     showLegend = true,
     showYAxis = true,
+    domain = [0, 'auto'],
     footerSlot,
     height = 240,
     className,
@@ -296,8 +304,14 @@ export const TrendChart = forwardRef(function TrendChart(
       {payload.value}
     </text>
   );
+  // Bars always keep their zero floor: a bar's length IS its value, so a
+  // truncated baseline exaggerates every difference on the plot. Only the upper
+  // bound of a caller-supplied domain survives the mode switch — which also
+  // means a card can pass a fitted domain for its area mode without silently
+  // producing a lying bar chart when the user flips the toggle.
+  const yDomain = mode === 'bar' ? [0, Array.isArray(domain) ? domain[1] : 'auto'] : domain;
   const yAxis = (
-    <YAxis tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
+    <YAxis domain={yDomain} tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
   );
 
   let chart;
