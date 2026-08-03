@@ -313,7 +313,14 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
   }
 
   const grid  = useMemo(() => buildMonthGrid(viewDate), [viewDate]);
-  const today = useMemo(() => startOfDay(new Date()), []);
+  // The clock is read AFTER mount, never during render. `today` drives the
+  // today-marker border on a day cell, so reading it during render would make
+  // the server (deploy-region timezone, typically UTC) and the client (visitor
+  // timezone) disagree about which cell is today for part of every day — a
+  // hydration mismatch on the `style` attribute of two buttons. Null until
+  // mounted means the marker simply appears a frame later, which nobody sees.
+  const [today, setToday] = useState(null);
+  useEffect(() => { setToday(startOfDay(new Date())); }, []);
 
   // While anchor is set, the visible "range" is the in-progress preview.
   // Otherwise it falls back to the committed value.
@@ -503,7 +510,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               const inRange = drawRange.start && drawRange.end
                 && compareDays(day, drawRange.start) > 0
                 && compareDays(day, drawRange.end)   < 0;
-              const isToday  = isSameDay(day, today);
+              const isToday  = today !== null && isSameDay(day, today);
               const selected = isStart || isEnd;
 
               const dataState = selected ? 'selected' : inRange ? 'inrange' : 'default';
