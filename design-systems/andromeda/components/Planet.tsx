@@ -30,9 +30,14 @@ function makeSprite(): THREE.CanvasTexture {
   if (!ctx) return;
   const half = size / 2;
   const grad = ctx.createRadialGradient(half, half, 0, half, half, half);
+  // andromeda-allow: an interpolated alpha ramp for the canvas particle sprite.
+  // A gradient stop is texture math, not palette — no token can express one.
   grad.addColorStop(0.00, 'rgba(255,255,255,1.00)');
+  // andromeda-allow: same ramp.
   grad.addColorStop(0.20, 'rgba(255,255,255,0.78)');
+  // andromeda-allow: same ramp.
   grad.addColorStop(0.55, 'rgba(255,255,255,0.22)');
+  // andromeda-allow: same ramp.
   grad.addColorStop(1.00, 'rgba(255,255,255,0.00)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
