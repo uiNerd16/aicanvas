@@ -403,7 +403,11 @@ export default function FeedbackPage() {
                   Good or bad, we read and appreciate every message. Honest
                   feedback is what keeps pushing AI Canvas forward.
                 </p>
-                <p className="text-xs text-sand-500">
+                {/* Only true while the route uses the address for reply_to and
+                    nothing else: no Brevo call, no list. If the form is ever
+                    wired to the newsletter, this line has to change. */}
+                <p className="text-xs leading-relaxed text-sand-500">
+                  We only use your email to reply.{' '}
                   <Link href="/privacy" className="underline underline-offset-2 hover:text-sand-300">
                     Privacy policy
                   </Link>
