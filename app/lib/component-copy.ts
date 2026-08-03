@@ -84,6 +84,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'ripple-type': ['Motion', 'Tailwind CSS'],
   'runway-loader': ['Motion', 'Tailwind CSS'],
   'scramble-text': ['Motion', 'Tailwind CSS'],
+  'scroll-wipe-gallery': ['Motion', 'Tailwind CSS'],
   'signature-pad': ['Motion', 'Canvas', 'Tailwind CSS'],
   'slice-type': ['Motion', 'Canvas', 'Tailwind CSS'],
   'slide-deck': ['Motion', 'Tailwind CSS'],
@@ -512,5 +513,10 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Wellness app', 'Journaling app', 'Employee check-in'],
     about:
       'Mood Tracker is a "How are you feeling?" check-in card built around six hand-drawn SVG mood characters, each with its own body shape, color, and expression so they read instantly side by side. Drag the segmented slider, tap a face in the legend, or use the arrow keys, and the big focal face springs in while the feeling word crossfades and a soft liquid-gradient panel of drifting blobs retints to the chosen mood. A Save button morphs into a "Recorded" confirmation on click, and every surface tints to follow the mood in both light and dark themes with reduced-motion support. Drop it into a wellness or mood-journaling app, a daily reflection prompt, or a lightweight employee check-in.',
+  },
+  'scroll-wipe-gallery': {
+    useCases: ['Portfolio', 'Agency site', 'Lookbook'],
+    about:
+      "Scroll Wipe Gallery is a full-bleed editorial section built around one long scroll: five photos, each clipped in from its own edge as you pass it, the previous photo always underneath. Every headline slides in along its wipe's direction and tightens its letter spacing as the frame lands, so the title and the reveal read as one gesture. A frame counter, a series label, and a fading scroll cue orient the viewer, set in a difference blend so they stay legible over any photo. Swap in your own photos and titles for a portfolio, an agency case study, or a lookbook intro.",
   },
 }

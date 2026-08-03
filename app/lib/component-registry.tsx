@@ -155,6 +155,8 @@ import ExpandingTabs from '../../components-workspace/expanding-tabs'
 import { prompts as expandingTabsPrompts } from '../../components-workspace/expanding-tabs/prompts'
 import DeleteButton from '../../components-workspace/delete-button'
 import { prompts as deleteButtonPrompts } from '../../components-workspace/delete-button/prompts'
+import ScrollWipeGallery from '../../components-workspace/scroll-wipe-gallery'
+import { prompts as scrollWipeGalleryPrompts } from '../../components-workspace/scroll-wipe-gallery/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1398,6 +1400,22 @@ Requirements:
     PreviewComponent: ExpandingTabs,
     code: componentCodes['expanding-tabs'],
     prompts: expandingTabsPrompts,
+  },
+  {
+    slug: 'scroll-wipe-gallery',
+    name: 'Scroll Wipe Gallery',
+    description: 'A full-bleed, scroll-driven photo gallery. Each photo wipes in from a different edge.',
+    image: 'https://ik.imagekit.io/aitoolkit/scroll-wipe-gallery.png',
+    tags: [
+      { label: 'Blocks', accent: true },
+      { label: 'Motion' },
+      { label: 'Interactive' },
+    ],
+    dualTheme: false,
+    staticPreview: true,
+    PreviewComponent: ScrollWipeGallery,
+    code: componentCodes['scroll-wipe-gallery'],
+    prompts: scrollWipeGalleryPrompts,
   },
 ]
 

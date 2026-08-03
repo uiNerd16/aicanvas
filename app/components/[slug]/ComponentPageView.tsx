@@ -129,6 +129,14 @@ interface ComponentPageViewProps {
 
 const RELATED_PAGE_SIZE = 3
 
+// Live preview width for staticPreview blocks. Multi-card blocks need a pinned
+// width so the box cannot squeeze them to min-content; full-bleed blocks need
+// the box itself, because anything wider crops their own corner chrome off.
+// Filling the box is the default, pinning is opt-in per slug.
+const PINNED_PREVIEW_WIDTH: Record<string, string> = {
+  '3d-gem-pricing-section': 'lg:w-[1200px]',
+}
+
 export default function ComponentPageView({
   slug,
   propTables = [],
@@ -729,17 +737,18 @@ export default function ComponentPageView({
                         className="absolute inset-0 h-full w-full object-cover object-top"
                       />
                       {posterLive && (
-                        // Laid out at a pinned 1200px, not at the box's ~848px:
-                        // the box would squeeze a section-scale block to its
-                        // min-content width and crop the outer cards at a
-                        // random-looking point. Pinned width + justify-center
-                        // gives the same symmetric crop every time. 1:1 scale on
-                        // purpose, no zoom: the crystal overlay turns screen px
-                        // into world units off getBoundingClientRect, so a CSS
-                        // scale would keep the gems in place but size them wrong
-                        // against their cards.
-                        // ponytail: one block uses this today. When a second one
-                        // needs a different number this goes to meta.json.
+                        // Multi-card blocks are laid out at a pinned width, not
+                        // at the box's ~848px: the box would squeeze a
+                        // section-scale block to its min-content width and crop
+                        // the outer cards at a random-looking point. Pinned
+                        // width + justify-center gives the same symmetric crop
+                        // every time. 1:1 scale on purpose, no zoom: the crystal
+                        // overlay turns screen px into world units off
+                        // getBoundingClientRect, so a CSS scale would keep the
+                        // gems in place but size them wrong against their cards.
+                        // Full-bleed blocks want the opposite: pinning them
+                        // wider than the box crops their own corner chrome off,
+                        // so they fill the box instead (the default).
                         <motion.div
                           key={previewKey}
                           initial={{ opacity: 0 }}
@@ -755,7 +764,7 @@ export default function ComponentPageView({
                           // live block paints UNDER it (CSS painting order puts
                           // positioned boxes last) and disappears the moment the
                           // fade ends and opacity:1 stops making a layer.
-                          className="relative z-10 w-full shrink-0 lg:w-[1200px]"
+                          className={`relative z-10 w-full shrink-0 ${PINNED_PREVIEW_WIDTH[slug] ?? ''}`}
                         >
                           {children}
                         </motion.div>
@@ -1640,7 +1649,14 @@ export default function ComponentPageView({
         </div>
       </main>
 
-      {/* ── Fullscreen overlay ─────────────────────────────────────────────── */}
+      {/* ── Fullscreen overlay ───────────────────────────────────────────────
+          The panel scrolls its own overflow: it is fixed, so a component taller
+          than the panel (a scroll-driven block) would otherwise have no
+          scrollable ancestor and sit frozen at its first frame. The page behind
+          is NOT locked (that lock is the Remix panel's), so the panel keeps its
+          scroll to itself with overscroll-contain, and hides the scrollbar it
+          now technically has: every min-h-screen component overflows this
+          panel by the inset, and a visible gutter would shift each one. */}
       <AnimatePresence>
         {fullscreen && (
           <motion.div
@@ -1659,7 +1675,7 @@ export default function ComponentPageView({
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               data-card-theme={cardTheme}
-              className={`absolute inset-0 isolate overflow-hidden transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl ${
+              className={`absolute inset-0 isolate overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl [&::-webkit-scrollbar]:hidden ${
                 cardTheme === 'dark'
                   ? 'dark bg-sand-950 sm:border-sand-800'
                   : 'bg-sand-100 sm:border-sand-300'
@@ -1667,15 +1683,19 @@ export default function ComponentPageView({
               onClick={(e) => e.stopPropagation()}
             >
               {children}
-
-              {/* Close button */}
-              <button
-                onClick={() => setFullscreen(false)}
-                className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-lg border border-sand-700 bg-sand-900/95 text-sand-400 transition-all duration-150 hover:border-sand-500 hover:bg-sand-800 hover:text-sand-100 active:scale-95"
-              >
-                <CornersIn weight="regular" size={17} />
-              </button>
             </motion.div>
+
+            {/* Close button, outside the panel on purpose: the panel scrolls its
+                own overflow, so a button inside it scrolls away with a tall
+                block. Out here on the fixed backdrop it stays put, and the
+                offsets line up with the panel's own top right corner. */}
+            <button
+              onClick={() => setFullscreen(false)}
+              aria-label="Close fullscreen preview"
+              className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg border border-sand-700 bg-sand-900/95 text-sand-400 transition-all duration-150 hover:border-sand-500 hover:bg-sand-800 hover:text-sand-100 active:scale-95 sm:top-14 sm:right-14"
+            >
+              <CornersIn weight="regular" size={17} />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
