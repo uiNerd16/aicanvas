@@ -155,7 +155,7 @@ function CorpusExplorer() {
     <>
       <style>{`
         .corpus-explorer { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
-        .corpus-rail-item { width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 18px; transition: background 0.15s ease, color 0.15s ease; }
+        .corpus-rail-item { width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 18px; border-radius: 0 8px 8px 0; transition: background 0.15s ease, color 0.15s ease; }
         .corpus-rail-item:hover { background: rgba(168,185,77,0.05); }
         .corpus-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; transition: background 0.15s ease; }
         .corpus-file:hover { background: #1B1B1C; }
@@ -165,7 +165,10 @@ function CorpusExplorer() {
         }
       `}</style>
       <div className="corpus-explorer" style={{ marginTop: 32 }}>
-        <div style={{ borderLeft: '1px solid #2D2D2E' }}>
+        {/* alignSelf start, so the rail keeps its own height. Stretching it to
+            the grid row made its rule run on past the last item whenever the
+            pane was the taller of the two. */}
+        <div style={{ borderLeft: '1px solid #2D2D2E', alignSelf: 'start' }}>
           {EXPLORER.map((s, i) => (
             <button
               key={s.id}
