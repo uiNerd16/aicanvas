@@ -26,7 +26,7 @@ import { CornerMarkers } from '@/design-systems/andromeda/components/CornerMarke
 import { FleetScreen } from './FleetScreen'
 
 const T = tokens
-const MONO = T.typography.fontMono
+const MONO = "var(--font-sans), 'Manrope', system-ui, sans-serif" // user call 2026-08-04: all page typography in Manrope
 
 // design-systems/ ships as JSDoc-annotated JSX (see design-systems/CLAUDE.md),
 // so its forwardRef wrappers carry no prop types in a .tsx context. The rest of

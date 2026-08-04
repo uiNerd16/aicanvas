@@ -22,7 +22,7 @@ import { ProgressBar } from '@/design-systems/andromeda/components/ProgressBar'
 import { Badge } from '@/design-systems/andromeda/components/Badge'
 
 const T = tokens
-const MONO = T.typography.fontMono
+const MONO = "var(--font-sans), 'Manrope', system-ui, sans-serif" // user call 2026-08-04: all page typography in Manrope
 
 // design-systems/ ships as JSDoc-annotated JSX (see design-systems/CLAUDE.md),
 // so its forwardRef wrappers expose no TypeScript prop types. The rest of the

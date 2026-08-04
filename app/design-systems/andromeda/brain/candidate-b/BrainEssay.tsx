@@ -20,7 +20,7 @@ import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { BRAIN_TEASER } from '@/app/lib/andromeda-brain-teaser.generated'
 
 const SANS = "var(--font-sans), 'Manrope', system-ui, sans-serif"
-const MONO = "var(--font-jetbrains-mono, 'JetBrains Mono'), ui-monospace, Menlo, monospace"
+const MONO = "var(--font-sans), 'Manrope', system-ui, sans-serif" // user call 2026-08-04: all page typography in Manrope
 
 const C = {
   base: '#0E0E0F',
