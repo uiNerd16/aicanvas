@@ -87,6 +87,24 @@ const STRUCTURE = [
   { label: 'Component rules', count: CMP.length, sample: CMP.slice(0, 8) },
   { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
 ].filter((g) => g.count > 0)
+// The full corpus manifest, derived from the teaser itself rather than a
+// hand-listed three, so a section added to the brain shows up here instead of
+// being counted in the total and rendered nowhere. REMAINDER is the entry
+// layer the sections do not cover (the index the agent opens first, the
+// component inventory, the conformance tool); it self-corrects as the brain
+// grows, and disappears entirely once every file has a section.
+const MANIFEST = BRAIN_TEASER.sections as readonly { id: string; label: string; files: readonly string[] }[]
+const SECTIONED = MANIFEST.reduce((n, s) => n + s.files.length, 0)
+const REMAINDER = BRAIN_TEASER.totalFiles - SECTIONED
+// One line per known section. An unknown id (the list is growing) renders
+// without a gloss rather than with a wrong one.
+const GLOSS: Record<string, string> = {
+  foundations: 'How the system thinks. Color, layout, spacing, motion, states, voice.',
+  'component-rules': 'One file per component, holding the decisions that make it Andromeda instead of generic.',
+  skills: 'Working modes for the agent: build with the system, and review work against it.',
+  index: 'The entry point, and the inventory of what already exists so the agent stops reinventing components.',
+  tools: 'A conformance check the agent can run against its own output.',
+}
 const BENEFITS = [
   { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
   { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
@@ -697,6 +715,51 @@ export function BrainStoryV4() {
                 </div>
               </div>
             ))}
+          </div>
+        </Section>
+
+        {/* What is inside — the whole corpus, section by section */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            What is inside
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+            Here is the whole corpus, section by section, read straight off the current release. An agent starts at the index, which tells it what exists and where. From there it opens only what the task needs: the foundations that apply, then the rule file for every component it plans to use.
+          </p>
+
+          <div style={{ ...PANEL, marginTop: 28 }}>
+            {MANIFEST.map((s, i) => (
+              <div key={s.id} style={{ marginTop: i === 0 ? 0 : 24, paddingTop: i === 0 ? 0 : 24, borderTop: i === 0 ? 'none' : '1px solid #2D2D2E' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>{s.label}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{s.files.length}</span>
+                </div>
+                {GLOSS[s.id] && (
+                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.6, margin: '8px 0 0' }}>{GLOSS[s.id]}</p>
+                )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 14, fontFamily: MONO, fontSize: 11, lineHeight: 1.6, color: C.muted }}>
+                  {s.files.map((f) => <span key={f}>{f}</span>)}
+                </div>
+              </div>
+            ))}
+
+            {REMAINDER > 0 && (
+              <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #2D2D2E' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>Index and tooling</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{REMAINDER}</span>
+                </div>
+                <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.6, margin: '8px 0 0' }}>
+                  The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output.
+                </p>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 24, paddingTop: 20, borderTop: '1px solid #2D2D2E', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>
+              <span>Total</span>
+              <span><span style={{ color: C.accent, fontWeight: 700, fontSize: 14 }}>{BRAIN_TEASER.totalFiles}</span> files</span>
+            </div>
           </div>
         </Section>
 
