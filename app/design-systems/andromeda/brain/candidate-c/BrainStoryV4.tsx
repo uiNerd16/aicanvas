@@ -35,7 +35,6 @@ const MODEL_URL = '/models/brain.glb'
 
 const FND: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'foundations')?.files ?? []
 const CMP: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'component-rules')?.files ?? []
-const SK: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'skills')?.files ?? []
 const take = (arr: readonly string[], n: number) => { const step = Math.max(1, Math.floor(arr.length / n)); const o: string[] = []; for (let i = 0; i < arr.length && o.length < n; i += step) o.push(arr[i]); return o }
 const LABELS: string[] = [
   ...take(FND, 6), ...take(CMP, 12),
@@ -283,7 +282,7 @@ export function BrainStoryV4() {
   // TemplateChrome/TopAuthPill. Anon/free derive to 'not-premium' synchronously,
   // and /explore is server-gated, so this never grants a free user access.
   const canOpen = usePremiumStatus() !== 'not-premium'
-  const ctaLabel = canOpen ? 'Read the Brain' : 'Get the Brain with Premium'
+  const ctaLabel = canOpen ? 'Read the brain' : 'Get the brain with premium'
   const ctaHref = canOpen ? '/design-systems/andromeda/brain/explore' : '/pricing'
   const matIndexRef = useRef(DEFAULT_MATERIAL)
   const applyRef = useRef<(i: number) => void>(() => {})
@@ -566,14 +565,6 @@ export function BrainStoryV4() {
       try { pmrem?.dispose(); try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
     }
   }, [dirs])
-
-  const total = BRAIN_TEASER.totalFiles, foundationsN = FND.length, rulesN = CMP.length, skillsN = SK.length
-  const STATS = [
-    { n: foundationsN, label: 'foundations' },
-    { n: rulesN, label: 'component rules' },
-    { n: skillsN, label: 'skills' },
-    { n: total, label: 'files of design intent' },
-  ].filter((s) => s.n > 0)
 
   return (
     <div style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
@@ -867,23 +858,33 @@ export function BrainStoryV4() {
           </div>
         </Section>
 
-        {/* Closing: by the numbers */}
-        <Section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
-            {STATS.map((s, i) => (
-              <span key={s.label} style={{ display: 'contents' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
-                  <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
-                </span>
-                {i < STATS.length - 1 && <span style={{ color: C.muted, margin: '0 12px' }}>·</span>}
-              </span>
-            ))}
+        {/* Closing CTA — the homepage's final-CTA panel, class for class, so the
+            two pages close the same way. The primary button stays premium-aware:
+            a subscriber gets the reader, everyone else gets pricing. */}
+        <Section style={{ marginTop: 60, marginBottom: 8 }}>
+          <div className="relative overflow-hidden rounded-2xl border border-olive-500/20 bg-gradient-to-br from-olive-500/8 via-transparent to-transparent p-8 text-center ring-1 ring-inset ring-olive-500/10">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="h-40 w-64 rounded-full bg-olive-500/10 blur-3xl" />
+            </div>
+            <p className="relative text-xs font-semibold uppercase tracking-wider text-sand-600">
+              How to get it
+            </p>
+            <h2 className="relative mt-2 text-xl font-bold text-sand-50">
+              Andromeda components are free for everyone.
+            </h2>
+            <p className="relative mt-2 text-base text-sand-500">
+              The brain is the premium layer: one install puts all {BRAIN_TEASER.totalFiles} files in your project, and the web reader keeps every rule a click away while you work.
+            </p>
+            <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })}>
+                {ctaLabel}
+                <ArrowRight weight="regular" size={14} />
+              </Link>
+              <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
+                Explore Andromeda
+              </Link>
+            </div>
           </div>
-          <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })} style={{ marginTop: 24 }}>
-            {ctaLabel}
-            <ArrowRight weight="regular" size={14} />
-          </Link>
         </Section>
       </div>
 
