@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk, Lock } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -129,6 +129,24 @@ function WireDivider() {
   )
 }
 
+// One hue per section, so the rail, its count and its file markers all read as
+// one family. Olive is the site accent; the other three sit at the same
+// brightness on near-black so no section shouts louder than its neighbours.
+const HUE: Record<string, string> = {
+  foundations: '#6BB2FF',
+  'component-rules': '#FFC466',
+  skills: '#DAE4A0',
+  'index-tooling': '#FF8B8B',
+}
+
+// The teaser publishes names for the sectioned files only, so the entry layer
+// (index, inventory, tool) arrives as a count with no names. These are the
+// three at the current pin. The moment inject-premium ships its index and tools
+// sections the names come from the data and this list stops being read.
+// ponytail: hand-listed until then, sliced to REMAINDER so it can never claim
+// more files than the brain actually has.
+const ENTRY_FILES = ['rules.md', 'INVENTORY.md', 'check-colors']
+
 // The explorer's rail: every section, plus the entry layer the sections do not
 // cover yet, so the rail always accounts for all 56 files.
 const EXPLORER = [
@@ -138,7 +156,7 @@ const EXPLORER = [
         id: 'index-tooling',
         label: 'Index and tooling',
         count: REMAINDER,
-        files: [] as readonly string[],
+        files: ENTRY_FILES.slice(0, REMAINDER) as readonly string[],
         gloss: 'The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output.',
       }]
     : []),
@@ -155,8 +173,11 @@ function CorpusExplorer() {
     <>
       <style>{`
         .corpus-explorer { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+        /* Hover and selected match the site's left nav: sand-800 at 60% on
+           hover, solid sand-800 when selected. */
         .corpus-rail-item { width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 18px; border-radius: 0 8px 8px 0; transition: background 0.15s ease, color 0.15s ease; }
-        .corpus-rail-item:hover { background: rgba(168,185,77,0.05); }
+        .corpus-rail-item:hover { background: rgba(45,45,46,0.6); }
+        .corpus-rail-item[aria-current='true'] { background: #2D2D2E; }
         .corpus-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; transition: background 0.15s ease; }
         .corpus-file:hover { background: #1B1B1C; }
         @media (max-width: 760px) {
@@ -177,15 +198,14 @@ function CorpusExplorer() {
               onClick={() => setActive(i)}
               aria-current={i === active}
               style={{
-                borderLeft: `2px solid ${i === active ? C.accentBtn : 'transparent'}`,
+                borderLeft: `2px solid ${i === active ? HUE[s.id] ?? C.accentBtn : 'transparent'}`,
                 marginLeft: -1,
-                background: i === active ? 'rgba(168,185,77,0.06)' : undefined,
               }}
             >
               <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === active ? C.bright : C.muted }}>
                 {s.label}
               </span>
-              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: i === active ? C.accent : C.muted }}>{s.count}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: HUE[s.id] ?? C.accent, opacity: i === active ? 1 : 0.55 }}>{s.count}</span>
             </button>
           ))}
         </div>
@@ -195,7 +215,9 @@ function CorpusExplorer() {
             <div className="corpus-files" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
               {sec.files.map((f) => (
                 <div key={f} className="corpus-file">
-                  <Lock weight="regular" size={14} color={C.muted} style={{ flexShrink: 0 }} />
+                  {/* One marker shape everywhere, coloured by section, so the
+                      pane reads as a set rather than four different treatments. */}
+                  <span aria-hidden style={{ width: 8, height: 8, borderRadius: 2, background: HUE[sec.id] ?? C.accent, flexShrink: 0 }} />
                   <span style={{ fontFamily: MONO, fontSize: 13, color: C.node }}>{f}</span>
                 </div>
               ))}
