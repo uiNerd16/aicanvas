@@ -827,9 +827,16 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(168,185,77,0.05)' }}>
-            <Asterisk weight="regular" size={16} color={C.accentBtn} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5 }}>
+          {/* Same cyan as the NEW pill in the design-systems rail, taken as
+              classes from NavBadge rather than a copied hex, so the two cannot
+              drift apart. Border width and style stay inline; the shorthand
+              would reset border-color to currentColor and beat the class. */}
+          <div
+            className="border-cyan-500/30 bg-cyan-500/10 text-cyan-400"
+            style={{ marginTop: 20, borderWidth: 1, borderStyle: 'solid', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10 }}
+          >
+            <Asterisk weight="regular" size={16} color="currentColor" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>
               The agent builds fast and accurate. You stay in the loop, and you decide what ships.
             </span>
           </div>
