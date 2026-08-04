@@ -101,9 +101,9 @@ const GLOSS: Record<string, string> = {
   tools: 'A conformance check the agent can run against its own output.',
 }
 const BENEFITS = [
-  { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
+  { label: 'Faster', icon: <Gauge weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
   { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
-  { label: 'Efficient', icon: <Gauge weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
+  { label: 'Efficient', icon: <Fire weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
 ]
 
 // Classic workflow pains (left) vs what an AI-native system delivers (right).
