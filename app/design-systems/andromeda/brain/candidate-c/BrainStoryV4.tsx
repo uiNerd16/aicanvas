@@ -129,16 +129,6 @@ function WireDivider() {
   )
 }
 
-// One hue per section, so the rail, its count and its file markers all read as
-// one family. Olive is the site accent; the other three sit at the same
-// brightness on near-black so no section shouts louder than its neighbours.
-const HUE: Record<string, string> = {
-  foundations: '#6BB2FF',
-  'component-rules': '#FFC466',
-  skills: '#DAE4A0',
-  'index-tooling': '#FF8B8B',
-}
-
 // The teaser publishes names for the sectioned files only, so the entry layer
 // (index, inventory, tool) arrives as a count with no names. These are the
 // three at the current pin. The moment inject-premium ships its index and tools
@@ -198,14 +188,14 @@ function CorpusExplorer() {
               onClick={() => setActive(i)}
               aria-current={i === active}
               style={{
-                borderLeft: `2px solid ${i === active ? HUE[s.id] ?? C.accentBtn : 'transparent'}`,
+                borderLeft: `2px solid ${i === active ? C.accentBtn : 'transparent'}`,
                 marginLeft: -1,
               }}
             >
               <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === active ? C.bright : C.muted }}>
                 {s.label}
               </span>
-              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: HUE[s.id] ?? C.accent, opacity: i === active ? 1 : 0.55 }}>{s.count}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: C.accent, opacity: i === active ? 1 : 0.55 }}>{s.count}</span>
             </button>
           ))}
         </div>
@@ -215,9 +205,9 @@ function CorpusExplorer() {
             <div className="corpus-files" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
               {sec.files.map((f) => (
                 <div key={f} className="corpus-file">
-                  {/* One marker shape everywhere, coloured by section, so the
-                      pane reads as a set rather than four different treatments. */}
-                  <span aria-hidden style={{ width: 8, height: 8, borderRadius: 2, background: HUE[sec.id] ?? C.accent, flexShrink: 0 }} />
+                  {/* One marker shape and one colour everywhere, so the pane
+                      reads as a set rather than four different treatments. */}
+                  <span aria-hidden style={{ width: 8, height: 8, borderRadius: 2, background: C.accent, flexShrink: 0 }} />
                   <span style={{ fontFamily: MONO, fontSize: 13, color: C.node }}>{f}</span>
                 </div>
               ))}
@@ -851,10 +841,10 @@ export function BrainStoryV4() {
         {/* Browse the corpus — rail plus locked file names */}
         <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
-          <h2 style={{ fontSize: 30, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '10px 0 0' }}>
-            <span style={{ color: C.accent }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            <span style={{ color: C.accentBtn }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0', maxWidth: 620 }}>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
             Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
           </p>
 
