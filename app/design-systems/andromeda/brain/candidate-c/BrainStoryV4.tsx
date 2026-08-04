@@ -82,11 +82,6 @@ const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px s
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
-const STRUCTURE = [
-  { label: 'Foundations', count: FND.length, sample: FND.slice(0, 6) },
-  { label: 'Component rules', count: CMP.length, sample: CMP.slice(0, 8) },
-  { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
-].filter((g) => g.count > 0)
 // The full corpus manifest, derived from the teaser itself rather than a
 // hand-listed three, so a section added to the brain shows up here instead of
 // being counted in the total and rendered nowhere. REMAINDER is the entry
@@ -701,21 +696,6 @@ export function BrainStoryV4() {
             <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
             <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
           </p>
-
-          <div style={{ ...PANEL, marginTop: 28 }}>
-            {STRUCTURE.map((g, gi) => (
-              <div key={g.label} style={{ marginTop: gi === 0 ? 0 : 20, paddingTop: gi === 0 ? 0 : 20, borderTop: gi === 0 ? 'none' : '1px solid #2D2D2E' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>{g.label}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{g.count}</span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {g.sample.map((name) => <Chip key={name}>{name}</Chip>)}
-                  {g.count > g.sample.length && <Chip>+{g.count - g.sample.length} more</Chip>}
-                </div>
-              </div>
-            ))}
-          </div>
         </Section>
 
         {/* What is inside — the whole corpus, section by section */}
