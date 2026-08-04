@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk, Lock } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -126,6 +126,83 @@ function WireDivider() {
         <img key={i} src="/ai-canvas-wire.svg" alt="" width={28} height={24} />
       ))}
     </div>
+  )
+}
+
+// The explorer's rail: every section, plus the entry layer the sections do not
+// cover yet, so the rail always accounts for all 56 files.
+const EXPLORER = [
+  ...MANIFEST.map((s) => ({ id: s.id, label: s.label, count: s.files.length, files: s.files, gloss: GLOSS[s.id] })),
+  ...(REMAINDER > 0
+    ? [{
+        id: 'index-tooling',
+        label: 'Index and tooling',
+        count: REMAINDER,
+        files: [] as readonly string[],
+        gloss: 'The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output.',
+      }]
+    : []),
+]
+
+// Section rail on the left, that section's file names on the right, every name
+// locked. Two columns, not three, so a 39-name list stays readable at this
+// width. A rail entry the teaser gives no names for (the entry layer, until its
+// section ships) shows its gloss instead of an empty grid.
+function CorpusExplorer() {
+  const [active, setActive] = useState(0)
+  const sec = EXPLORER[active]
+  return (
+    <>
+      <style>{`
+        .corpus-explorer { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+        .corpus-rail-item { width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 18px; transition: background 0.15s ease, color 0.15s ease; }
+        .corpus-rail-item:hover { background: rgba(168,185,77,0.05); }
+        .corpus-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; transition: background 0.15s ease; }
+        .corpus-file:hover { background: #1B1B1C; }
+        @media (max-width: 760px) {
+          .corpus-explorer { grid-template-columns: 1fr; }
+          .corpus-files { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="corpus-explorer" style={{ marginTop: 32 }}>
+        <div style={{ borderLeft: '1px solid #2D2D2E' }}>
+          {EXPLORER.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              className="corpus-rail-item"
+              onClick={() => setActive(i)}
+              aria-current={i === active}
+              style={{
+                borderLeft: `2px solid ${i === active ? C.accentBtn : 'transparent'}`,
+                marginLeft: -1,
+                background: i === active ? 'rgba(168,185,77,0.06)' : undefined,
+              }}
+            >
+              <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === active ? C.bright : C.muted }}>
+                {s.label}
+              </span>
+              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: i === active ? C.accent : C.muted }}>{s.count}</span>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ ...PANEL, padding: 20 }}>
+          {sec.files.length > 0 ? (
+            <div className="corpus-files" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+              {sec.files.map((f) => (
+                <div key={f} className="corpus-file">
+                  <Lock weight="regular" size={14} color={C.muted} style={{ flexShrink: 0 }} />
+                  <span style={{ fontFamily: MONO, fontSize: 13, color: C.node }}>{f}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: C.node, margin: 0, padding: '10px 12px' }}>{sec.gloss}</p>
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -751,6 +828,19 @@ export function BrainStoryV4() {
               <span><span style={{ color: C.accent, fontWeight: 700, fontSize: 15 }}>{BRAIN_TEASER.totalFiles}</span> files</span>
             </div>
           </div>
+        </Section>
+
+        {/* Browse the corpus — rail plus locked file names */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
+          <h2 style={{ fontSize: 30, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '10px 0 0' }}>
+            <span style={{ color: C.accent }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0', maxWidth: 620 }}>
+            Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
+          </p>
+
+          <CorpusExplorer />
         </Section>
 
         {/* Classic vs AI-native — the workflow contrast */}
