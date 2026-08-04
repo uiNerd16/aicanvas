@@ -129,6 +129,27 @@ function WireDivider() {
   )
 }
 
+// One row of the corpus manifest. The number and the count are mono (they are
+// data), the title and gloss are sans (they are prose), and the file names hang
+// under an indent so the eye can skim titles alone.
+function ManifestRow({ n, label, count, gloss, files }: { n: number; label: string; count: number; gloss?: string; files?: readonly string[] }) {
+  return (
+    <div style={{ padding: '26px 0', borderBottom: '1px solid #2D2D2E' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: C.muted }}>{String(n + 1).padStart(2, '0')}</span>
+        <h3 style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', color: C.bright, margin: 0, flex: 1 }}>{label}</h3>
+        <span style={{ fontFamily: MONO, fontSize: 13, color: C.accent, fontWeight: 700 }}>{count}</span>
+      </div>
+      {gloss && <p style={{ fontSize: 15, lineHeight: 1.6, color: C.node, margin: '10px 0 0', paddingLeft: 36 }}>{gloss}</p>}
+      {files && files.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 16, paddingLeft: 36, fontFamily: MONO, fontSize: 11, lineHeight: 1.6, color: C.muted }}>
+          {files.map((f) => <span key={f}>{f}</span>)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Scroll-reveal wrapper — same recipe as the site's Section component on
 // /pricing and /about (fade + rise on first entry, once: true). Kept local
 // since this page styles with inline style objects, not Tailwind className.
@@ -708,37 +729,26 @@ export function BrainStoryV4() {
             Here is the whole corpus, section by section, read straight off the current release. An agent starts at the index, which tells it what exists and where. From there it opens only what the task needs: the foundations that apply, then the rule file for every component it plans to use.
           </p>
 
-          <div style={{ ...PANEL, marginTop: 28 }}>
+          {/* Manifest rows: numbered index, title, count, gloss, then every file
+              name. Hairline rules instead of a boxed panel, so a 39-name list
+              reads as a register rather than a crowded card. */}
+          <div style={{ marginTop: 40, borderTop: '1px solid #3A3A3C' }}>
             {MANIFEST.map((s, i) => (
-              <div key={s.id} style={{ marginTop: i === 0 ? 0 : 24, paddingTop: i === 0 ? 0 : 24, borderTop: i === 0 ? 'none' : '1px solid #2D2D2E' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>{s.label}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{s.files.length}</span>
-                </div>
-                {GLOSS[s.id] && (
-                  <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.6, margin: '8px 0 0' }}>{GLOSS[s.id]}</p>
-                )}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 14, fontFamily: MONO, fontSize: 11, lineHeight: 1.6, color: C.muted }}>
-                  {s.files.map((f) => <span key={f}>{f}</span>)}
-                </div>
-              </div>
+              <ManifestRow key={s.id} n={i} label={s.label} count={s.files.length} gloss={GLOSS[s.id]} files={s.files} />
             ))}
 
             {REMAINDER > 0 && (
-              <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #2D2D2E' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>Index and tooling</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{REMAINDER}</span>
-                </div>
-                <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.6, margin: '8px 0 0' }}>
-                  The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output.
-                </p>
-              </div>
+              <ManifestRow
+                n={MANIFEST.length}
+                label="Index and tooling"
+                count={REMAINDER}
+                gloss="The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output."
+              />
             )}
 
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 24, paddingTop: 20, borderTop: '1px solid #2D2D2E', fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '20px 0 0', fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>
               <span>Total</span>
-              <span><span style={{ color: C.accent, fontWeight: 700, fontSize: 14 }}>{BRAIN_TEASER.totalFiles}</span> files</span>
+              <span><span style={{ color: C.accent, fontWeight: 700, fontSize: 15 }}>{BRAIN_TEASER.totalFiles}</span> files</span>
             </div>
           </div>
         </Section>
