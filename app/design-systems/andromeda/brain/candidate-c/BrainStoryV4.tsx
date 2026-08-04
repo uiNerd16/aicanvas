@@ -787,32 +787,6 @@ export function BrainStoryV4() {
           </div>
         </Section>
 
-        {/* What it is */}
-        <Section style={{ marginTop: 60 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
-          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            The taste lives in the system, not the prompt
-          </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
-          </p>
-        </Section>
-
-        {/* Browse the corpus — rail plus locked file names */}
-        <Section style={{ marginTop: 60 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
-          <h2 style={{ fontSize: 30, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '10px 0 0' }}>
-            <span style={{ color: C.accent }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
-          </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0', maxWidth: 620 }}>
-            Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
-          </p>
-
-          <CorpusExplorer />
-        </Section>
-
         {/* Classic vs AI-native — the workflow contrast */}
         <Section style={{ marginTop: 60 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
@@ -859,6 +833,32 @@ export function BrainStoryV4() {
               The agent builds fast and accurate. You stay in the loop, and you decide what ships.
             </span>
           </div>
+        </Section>
+
+        {/* What it is */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            The taste lives in the system, not the prompt
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
+          </p>
+        </Section>
+
+        {/* Browse the corpus — rail plus locked file names */}
+        <Section style={{ marginTop: 60 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
+          <h2 style={{ fontSize: 30, color: C.bright, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '10px 0 0' }}>
+            <span style={{ color: C.accent }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
+          </h2>
+          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0', maxWidth: 620 }}>
+            Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
+          </p>
+
+          <CorpusExplorer />
         </Section>
 
         {/* How it works */}
