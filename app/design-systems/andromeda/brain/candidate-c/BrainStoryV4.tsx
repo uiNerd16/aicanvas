@@ -66,7 +66,9 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
   { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
   { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accentBtn), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
+  // Unlit on purpose: the vertex colours painted onto the geometry carry the
+  // whole look, and a lit material would wash them toward the light instead.
+  { name: 'Wireframe', make: (T) => new T.MeshBasicMaterial({ wireframe: true, vertexColors: true }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
 // Default appearance of the brain on load.
@@ -624,6 +626,36 @@ export function BrainStoryV4() {
         model.position.sub(msph.center)
         radius = 1
         brainRoot = model
+
+        // Radiant wireframe: a hue swept around the brain's own centre, so the
+        // hero reads like the artwork in the flow card rather than a flat green.
+        // Orange to the front, purple over the top, blue at the back, green
+        // below, which is the arrangement the artwork uses. The colours live on
+        // the geometry, so only a material that opts into vertexColors shows
+        // them and every other preset is untouched.
+        for (const mesh of brainMeshes) {
+          const geo = mesh.geometry
+          if (!geo?.attributes?.position || geo.attributes.color) continue
+          const pos = geo.attributes.position
+          geo.computeBoundingBox()
+          const bb = geo.boundingBox
+          const cx = (bb.min.x + bb.max.x) / 2
+          const cy = (bb.min.y + bb.max.y) / 2
+          const rx = (bb.max.x - bb.min.x) / 2 || 1
+          const ry = (bb.max.y - bb.min.y) / 2 || 1
+          const colors = new Float32Array(pos.count * 3)
+          const c = new THREE.Color()
+          for (let i = 0; i < pos.count; i++) {
+            const nx = (pos.getX(i) - cx) / rx
+            const ny = (pos.getY(i) - cy) / ry
+            const hue = (1.06 - Math.atan2(ny, nx) / (Math.PI * 2)) % 1
+            c.setHSL(hue, 0.55, 0.62)
+            colors[i * 3] = c.r
+            colors[i * 3 + 1] = c.g
+            colors[i * 3 + 2] = c.b
+          }
+          geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+        }
 
         const applyMaterial = (i: number) => {
           const preset = MATERIALS[i] || MATERIALS[0]
