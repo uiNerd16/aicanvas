@@ -151,39 +151,66 @@ const Y_MID = FLOW_H / 2
 const Y_BOT = FLOW_H - ROW_H / 2
 // The connectors get their own fixed-width grid column, so each SVG is drawn at
 // exactly its own size and nothing is stretched. Stretching an SVG to fill a
-// fluid column is what flattened these curves into diagonals before.
+// fluid column is what flattened these curves into diagonals before. Because the
+// SVG is 1:1 with CSS pixels, the same path strings drive the HTML dots on top.
 const LINK_W = 104
 // Control points at 60% of the run give a true S: it leaves the node
 // horizontally and arrives at the brain horizontally.
 const curve = (y1: number, y2: number) =>
   `M0,${y1} C${LINK_W * 0.6},${y1} ${LINK_W * 0.4},${y2} ${LINK_W},${y2}`
 
+// One dot in flight per side at any moment. Each dot owns a slot of the shared
+// cycle: it travels for one step, then waits out the rest. The right side is
+// half a step behind the left, and runs bottom to top, so the two sides read as
+// alternating pulses rather than synchronised pairs.
+const DOT_STEP = 1.6
+const DOT_CYCLE = DOT_STEP * 3
+const LINKS = {
+  in: [
+    { y: 'top', delay: 0 },
+    { y: 'mid', delay: DOT_STEP },
+    { y: 'bot', delay: DOT_STEP * 2 },
+  ],
+  out: [
+    { y: 'bot', delay: DOT_STEP * 0.5 },
+    { y: 'mid', delay: DOT_STEP * 1.5 },
+    { y: 'top', delay: DOT_STEP * 2.5 },
+  ],
+} as const
+const Y_OF = { top: () => Y_TOP, mid: () => Y_MID, bot: () => Y_BOT }
+
 function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
+  const rows = LINKS[mode].map((r) => {
+    const y = Y_OF[r.y]()
+    return { d: mode === 'in' ? curve(y, Y_MID) : curve(Y_MID, y), delay: r.delay }
+  })
   return (
-    <svg
-      className="flow-links"
-      aria-hidden
-      width={LINK_W}
-      height={FLOW_H}
-      viewBox={`0 0 ${LINK_W} ${FLOW_H}`}
-      style={{ display: 'block' }}
-    >
-      <defs>
-        <linearGradient id={`flow-${mode}`} x1="0" x2="1">
-          <stop offset="0%" stopColor={mode === 'in' ? '#2D2D2E' : '#7B7B7D'} />
-          <stop offset="100%" stopColor={mode === 'in' ? '#7B7B7D' : '#2D2D2E'} />
-        </linearGradient>
-      </defs>
-      {[Y_TOP, Y_MID, Y_BOT].map((y) => (
-        <path
-          key={y}
-          d={mode === 'in' ? curve(y, Y_MID) : curve(Y_MID, y)}
-          fill="none"
-          stroke={`url(#flow-${mode})`}
-          strokeWidth={1}
+    <div className="flow-link" style={{ position: 'relative', width: LINK_W, height: FLOW_H }}>
+      <svg aria-hidden width={LINK_W} height={FLOW_H} viewBox={`0 0 ${LINK_W} ${FLOW_H}`} style={{ display: 'block' }}>
+        <defs>
+          {/* userSpaceOnUse, not the default objectBoundingBox: a horizontal
+              connector has a zero-height bounding box, and the spec says a
+              shape with a zero-area box and an objectBoundingBox gradient is
+              not rendered at all. That is what made the two straight lines
+              disappear while the curved ones showed. */}
+          <linearGradient id={`flow-${mode}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={LINK_W} y2="0">
+            <stop offset="0%" stopColor={mode === 'in' ? '#2D2D2E' : '#7B7B7D'} />
+            <stop offset="100%" stopColor={mode === 'in' ? '#7B7B7D' : '#2D2D2E'} />
+          </linearGradient>
+        </defs>
+        {rows.map((r) => (
+          <path key={r.d} d={r.d} fill="none" stroke={`url(#flow-${mode})`} strokeWidth={1} />
+        ))}
+      </svg>
+      {rows.map((r) => (
+        <span
+          key={r.d}
+          aria-hidden
+          className="flow-dot"
+          style={{ offsetPath: `path("${r.d}")`, animationDelay: `${r.delay.toFixed(1)}s` } as React.CSSProperties}
         />
       ))}
-    </svg>
+    </div>
   )
 }
 
@@ -212,10 +239,32 @@ function BrainFlow() {
         .flow-heads, .flow-grid { display: grid; grid-template-columns: 1fr ${LINK_W}px 190px ${LINK_W}px 1fr; }
         .flow-col { display: flex; flex-direction: column; gap: ${ROW_GAP}px; }
         .flow-mid { display: flex; align-items: center; }
+        /* The dot rides the same path string the line is drawn from, so the two
+           can never disagree. offset-anchor centres it on the path by default. */
+        .flow-dot {
+          position: absolute; top: 0; left: 0;
+          width: 5px; height: 5px; border-radius: 50%;
+          background: ${C.accent};
+          box-shadow: 0 0 6px ${C.accentBtn};
+          opacity: 0;
+          animation: flow-dot ${DOT_CYCLE}s linear infinite;
+        }
+        /* Each dot travels during its own slot of the shared cycle and waits out
+           the rest, which is what keeps exactly one in flight per side. */
+        @keyframes flow-dot {
+          0%   { offset-distance: 0%;   opacity: 0; }
+          4%   { opacity: 1; }
+          29%  { offset-distance: 100%; opacity: 1; }
+          33%  { offset-distance: 100%; opacity: 0; }
+          100% { offset-distance: 100%; opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .flow-dot { display: none; }
+        }
         @media (max-width: 760px) {
           .flow-heads { display: none; }
           .flow-grid { grid-template-columns: 1fr; gap: ${ROW_GAP}px; }
-          .flow-links { display: none; }
+          .flow-link { display: none; }
         }
       `}</style>
 
