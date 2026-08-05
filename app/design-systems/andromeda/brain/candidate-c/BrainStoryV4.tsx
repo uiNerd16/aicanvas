@@ -190,11 +190,27 @@ const IN_ROWS = ['top', 'mid', 'bot'] as const
 const OUT_ROWS = ['bot', 'mid', 'top'] as const
 const Y_OF = { top: Y_TOP, mid: Y_MID, bot: Y_BOT }
 
+// Three things keep this from reading as a metronome, and none of them change
+// the cycle length, so one dot per side is still guaranteed:
+//   - the outgoing side sits half a leg off the incoming one, so the two sides
+//     never launch together, which was the robotic part;
+//   - a few tenths of jitter per lane, hand-picked rather than random so server
+//     and client render the same thing;
+//   - a different ease per lane, so they do not all glide at one speed.
+const HALF_LEG = LEG / 2
+const JITTER_IN = [0, 0.22, -0.14]
+const JITTER_OUT = [0.12, -0.2, 0.3]
+const EASES = ['cubic-bezier(.4,.05,.6,.95)', 'linear', 'cubic-bezier(.3,0,.7,1)']
+
 function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
   const rows = (mode === 'in' ? IN_ROWS : OUT_ROWS).map((row, i) => ({
     d: mode === 'in' ? curve(Y_OF[row], CONVERGE_Y) : curve(CONVERGE_Y, Y_OF[row]),
-    // in: leg 0 of journey i. out: leg 2, so two legs later, wrapped.
-    delay: mode === 'in' ? i * LEG : (i * LEG + LEG * 2) % JOURNEY,
+    // in: leg 0 of journey i. out: leg 2, so two legs later, plus the offset.
+    delay:
+      mode === 'in'
+        ? i * LEG + JITTER_IN[i]
+        : (i * LEG + LEG * 2 + HALF_LEG + JITTER_OUT[i]) % JOURNEY,
+    ease: EASES[(mode === 'in' ? i : i + 1) % EASES.length],
   }))
   return (
     <div className="flow-link" style={{ position: 'relative', width: LINK_W, height: FLOW_H }}>
@@ -217,7 +233,7 @@ function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
           key={r.d}
           aria-hidden
           className="flow-dot"
-          style={{ offsetPath: `path("${r.d}")`, animationDelay: `${r.delay.toFixed(1)}s` } as React.CSSProperties}
+          style={{ offsetPath: `path("${r.d}")`, animationDelay: `${r.delay.toFixed(2)}s`, animationTimingFunction: r.ease } as React.CSSProperties}
         />
       ))}
     </div>
@@ -259,15 +275,16 @@ function BrainFlow() {
           opacity: 0;
           animation: flow-dot ${JOURNEY.toFixed(1)}s linear infinite;
         }
-        /* A dot travels its own leg, the first third of the journey, then goes
-           dark at the card edge. Nothing is drawn over the card: the middle leg
-           is the beat where the brain is working, and a dot surfaces again on
-           the far side one leg later. */
+        /* A dot travels its slot, then goes dark at the card edge. Nothing is
+           drawn over the card: the middle leg is the beat where the brain is
+           working, and a dot surfaces again on the far side.
+           29% rather than a full third: the few tenths of slack are what let the
+           per-lane jitter run without two dots ever sharing a side. */
         @keyframes flow-dot {
-          0%      { offset-distance: 0%;   opacity: 1; }
-          33.333% { offset-distance: 100%; opacity: 1; }
-          33.334% { offset-distance: 100%; opacity: 0; }
-          100%    { offset-distance: 100%; opacity: 0; }
+          0%    { offset-distance: 0%;   opacity: 1; }
+          29%   { offset-distance: 100%; opacity: 1; }
+          29.1% { offset-distance: 100%; opacity: 0; }
+          100%  { offset-distance: 100%; opacity: 0; }
         }
         @media (prefers-reduced-motion: reduce) {
           .flow-dot { display: none; }
