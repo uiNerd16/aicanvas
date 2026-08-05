@@ -1,13 +1,12 @@
 'use client'
 
 // ============================================================
-// Andromeda Brain — story page V4 (Three.js firefly · the brain).
-// Same choreography as V3, but the hero is an actual BRAIN. A
-// firefly circles it; hover the scene and the camera chases the
-// firefly; floating labels light up as it passes. The firefly is
-// procedural (this model has no animation) and carries a teal
-// point light, so the brain lights up where it flies. On-brand
-// dark-metal + teal treatment.
+// Andromeda Brain — story page V4 (Three.js · the brain).
+// Same choreography as V3, but the hero is an actual BRAIN, drawn
+// as a wireframe carrying the four section colours (see the paint
+// step in the loader). Floating labels ride the brain's rotation
+// and light up as an invisible focus passes them; the orbiting
+// bulb that used to play that role was removed.
 //
 // Model: low-poly "Brain" by Poly by Google, CC BY 3.0 (via Poly
 // Pizza) — geometry-only, re-materialed here. Asset lives in
@@ -618,7 +617,7 @@ export function BrainStoryV4() {
       // scene exists (onLoad only needs scene.add(model) + THREE + the state
       // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
       // setup that used to run first and delay the fetch for no reason.
-      let firefly: any = null, flyLight: any = null, brainRoot: any = null, radius = 1, ready = false
+      let brainRoot: any = null, radius = 1, ready = false
       let zonesActive = false, zoneGroup: any = null
       const brainMeshes: any[] = [], zoneItems: any[] = []
 
@@ -701,12 +700,10 @@ export function BrainStoryV4() {
         applyMaterial(matIndexRef.current)
         applyRef.current = applyMaterial
 
-        // procedural firefly (the brain model has none) — a teal bulb that carries its own light
-        firefly = new THREE.Group()
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(radius * 0.03, 16, 16), new THREE.MeshBasicMaterial({ color: C.accent }))
-        flyLight = new THREE.PointLight(new THREE.Color(C.accent), 7, radius * 3.2, 2)
-        firefly.add(bulb, flyLight)
-        scene.add(firefly)
+        // The orbiting bulb and its point light are gone. The wireframe is
+        // unlit, so that light lit nothing; all it did was fly a bright dot
+        // across the scene. Its path survives below as an invisible focus, which
+        // is what still walks the glow along the labels.
 
         // activation zones: per-region colored point light ONLY. We see the coloured light
         // reflected on the brain, never a visible spot/source. Rotated to match the brain.
@@ -790,15 +787,15 @@ export function BrainStoryV4() {
 
         if (ready) {
           const R = radius
-          // organic (non-linear) firefly flight around the brain
+          // Invisible focus on an organic (non-linear) orbit. Nothing renders
+          // here any more; the labels below use its position to decide which of
+          // them is currently lit.
           const a1 = t * 0.62, a2 = t * 0.37
           flyPos.set(
             Math.cos(a1) * R * 0.98 + Math.sin(a2 * 1.3) * R * 0.16,
             Math.sin(a1 * 0.8) * R * 0.42 + Math.cos(t * 0.9) * R * 0.12 + R * 0.12,
             Math.sin(a1) * R * 0.98 + Math.cos(a2 * 0.7) * R * 0.16,
           )
-          if (firefly) firefly.position.copy(flyPos)
-          if (flyLight) flyLight.intensity = 6 + Math.sin(t * 6) * 1.5
           for (const mesh of brainMeshes) { const mat = mesh.material; if (mat?.userData?.pulse) mat.emissiveIntensity = 0.1 + 0.05 * Math.sin(t * 1.4) }
 
           // camera: the idle orbit only (the default state — unchanged)
@@ -825,7 +822,7 @@ export function BrainStoryV4() {
             }
           }
 
-          // labels: rotate WITH the brain (dragging carries them past the firefly), light up near it
+          // labels: rotate WITH the brain (dragging carries them past the focus), light up near it
           const ease = 1 - Math.exp(-18 * dt)
           for (let i = 0; i < dirs.length; i++) {
             const el = labelEls.current[i]; if (!el) continue
