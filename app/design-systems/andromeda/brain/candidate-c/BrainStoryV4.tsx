@@ -45,10 +45,6 @@ const HERO_LABELS = ['Foundations', 'Component', 'Rules', 'Design Intent', 'toke
 
 function mulberry32(seed: number) { return function () { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 } }
 
-// Material presets the user can flip through live. `make(T)` builds a fresh
-// material from the (dynamically imported) three module; `pulse` = teal emissive breathing.
-// Activation zones — distinct-colored regions that light up like a functional brain map.
-// Directions are in the normalized brain's unit space (left/right, frontal/occipital, etc.).
 // The four corpus sections and their colours, identical to the premium reader's
 // BrainRender.tsx. Kept in step with that file: if the reader's palette moves,
 // this moves with it, or the hero and the reader stop being the same brain.
@@ -59,34 +55,14 @@ const SECTION_ZONES: { dir: [number, number, number]; hex: string }[] = [
   { dir: [0.0, -0.7, 0.7], hex: '#a3e635' },   // Skills, lime
 ]
 
-const ZONES: { dir: [number, number, number]; color: number }[] = [
-  { dir: [-0.5, 0.25, 0.6], color: 0xff7a2f },   // L frontal — amber
-  { dir: [0.5, 0.25, 0.6], color: 0x35d0ff },    // R frontal — cyan
-  { dir: [-0.78, -0.08, 0.05], color: 0xff4f9a },// L temporal — magenta
-  { dir: [0.78, -0.08, 0.05], color: 0x4f7bff }, // R temporal — blue
-  { dir: [-0.4, 0.66, -0.1], color: 0x8ce04a },  // L parietal — lime
-  { dir: [0.4, 0.66, -0.1], color: 0xffd23f },   // R parietal — gold
-  { dir: [0.0, 0.16, -0.78], color: 0x22d3b8 },  // occipital — teal
-  { dir: [0.0, -0.5, -0.55], color: 0xb06cff },  // cerebellum — violet
-]
 
-const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any) => any }[] = [
-  { name: 'Sand zones', zones: true, make: (T) => new T.MeshStandardMaterial({ color: 0x373738, metalness: 0.15, roughness: 0.6, envMapIntensity: 0.5 }) },
-  { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
-  { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
-  { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  // Unlit on purpose: the vertex colours painted onto the geometry carry the
-  // whole look, and a lit material would wash them toward the light instead.
-  // toneMapped false because this scene renders through ACES filmic at 1.1
-  // exposure, which compresses and desaturates everything it touches. The
-  // premium reader has no tone mapping, so opting this one material out is what
-  // makes the two brains land on the same colours. The other presets keep it,
-  // since glass and chrome want it.
-  { name: 'Wireframe', make: (T) => new T.MeshBasicMaterial({ wireframe: true, vertexColors: true, toneMapped: false }) },
-  { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
-]
-// Default appearance of the brain on load.
-const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Wireframe'))
+// The brain's one and only look. Unlit on purpose: the vertex colours painted
+// onto the geometry carry it, and a lit material would wash them toward the
+// light. toneMapped false because this scene renders through ACES filmic at 1.1
+// exposure, which compresses and desaturates what it touches, while the premium
+// reader has no tone mapping. Opting out is what makes the two brains match.
+const makeBrainMaterial = (T: any) =>
+  new T.MeshBasicMaterial({ wireframe: true, vertexColors: true, toneMapped: false })
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
@@ -531,7 +507,6 @@ export function BrainStoryV4() {
   const heroSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [loadProgress, setLoadProgress] = useState(0)
-  const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
   // Premium subscribers already have the brain — re-label the CTA into the
   // viewer instead of pitching an upgrade. Treat the in-flight 'unknown' state
@@ -542,9 +517,6 @@ export function BrainStoryV4() {
   const canOpen = usePremiumStatus() !== 'not-premium'
   const ctaLabel = canOpen ? 'Read the brain' : 'Get the brain with premium'
   const ctaHref = canOpen ? '/design-systems/andromeda/brain/explore' : '/pricing'
-  const matIndexRef = useRef(DEFAULT_MATERIAL)
-  const applyRef = useRef<(i: number) => void>(() => {})
-  const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
 
   // label positions spread over the WHOLE sphere around the brain (top, bottom, left, right,
   // front, back) via an even golden-angle spiral + a little jitter and varied distance.
@@ -579,15 +551,14 @@ export function BrainStoryV4() {
     const host = hostRef.current
     if (!host) return
     let alive = true, raf = 0
-    let renderer: any, scene: any, camera: any, pmrem: any
+    let renderer: any, scene: any, camera: any
     let onResize = () => {}
     let cleanupInput = () => {}
 
     ;(async () => {
-      const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+      const [THREE, { GLTFLoader }] = await Promise.all([
         import('three'),
         import('three/examples/jsm/loaders/GLTFLoader.js'),
-        import('three/examples/jsm/environments/RoomEnvironment.js'),
       ])
       if (!alive) return
 
@@ -618,8 +589,7 @@ export function BrainStoryV4() {
       // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
       // setup that used to run first and delay the fetch for no reason.
       let brainRoot: any = null, radius = 1, ready = false
-      let zonesActive = false, zoneGroup: any = null
-      const brainMeshes: any[] = [], zoneItems: any[] = []
+      const brainMeshes: any[] = []
 
       const loader = new GLTFLoader()
       loader.load(MODEL_URL, (gltf: any) => {
@@ -692,31 +662,12 @@ export function BrainStoryV4() {
           geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
         }
 
-        const applyMaterial = (i: number) => {
-          const preset = MATERIALS[i] || MATERIALS[0]
-          zonesActive = !!preset.zones
-          for (const mesh of brainMeshes) { const mat = preset.make(THREE); mat.userData.pulse = !!preset.pulse; mesh.material = mat }
-        }
-        applyMaterial(matIndexRef.current)
-        applyRef.current = applyMaterial
+        for (const mesh of brainMeshes) mesh.material = makeBrainMaterial(THREE)
 
         // The orbiting bulb and its point light are gone. The wireframe is
         // unlit, so that light lit nothing; all it did was fly a bright dot
         // across the scene. Its path survives below as an invisible focus, which
         // is what still walks the glow along the labels.
-
-        // activation zones: per-region colored point light ONLY. We see the coloured light
-        // reflected on the brain, never a visible spot/source. Rotated to match the brain.
-        zoneGroup = new THREE.Group()
-        ZONES.forEach((z, k) => {
-          const dir = new THREE.Vector3(z.dir[0], z.dir[1], z.dir[2])
-          const light = new THREE.PointLight(new THREE.Color(z.color), 0, 1.9, 2)
-          light.position.copy(dir).multiplyScalar(1.2)
-          zoneGroup.add(light)
-          zoneItems.push({ light, phase: k * 1.3, freq: 0.45 + (k % 5) * 0.13 })
-        })
-        zoneGroup.visible = false
-        scene.add(zoneGroup)
 
         ready = true; setStatus('ready')
         // fade the canvas in over the first rendered frames
@@ -728,13 +679,9 @@ export function BrainStoryV4() {
         if (alive && event.total) setLoadProgress(Math.round((event.loaded / event.total) * 100))
       }, () => { if (alive) setStatus('error') })
 
-      pmrem = new THREE.PMREMGenerator(renderer)
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-      // @ts-ignore r183 scene intensity
-      scene.environmentIntensity = 0.4
-      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
-      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
-      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
+      // No lights and no environment map. The brain is an unlit wireframe, so
+      // every one of them rendered nothing; generating the PMREM environment
+      // alone was real work on every mount.
 
       camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
       camera.position.set(0, 0.3, 3)
@@ -796,7 +743,6 @@ export function BrainStoryV4() {
             Math.sin(a1 * 0.8) * R * 0.42 + Math.cos(t * 0.9) * R * 0.12 + R * 0.12,
             Math.sin(a1) * R * 0.98 + Math.cos(a2 * 0.7) * R * 0.16,
           )
-          for (const mesh of brainMeshes) { const mat = mesh.material; if (mat?.userData?.pulse) mat.emissiveIntensity = 0.1 + 0.05 * Math.sin(t * 1.4) }
 
           // camera: the idle orbit only (the default state — unchanged)
           const orb = t * 0.12, d = R * 2.6
@@ -809,18 +755,6 @@ export function BrainStoryV4() {
           if (brainRoot) brainRoot.rotation.set(spin.rotX, spin.rotY, 0)
           spinQuat.setFromEuler(spinEuler.set(spin.rotX, spin.rotY, 0))
           const activity = Math.min(1, Math.abs(spin.velY) * 34 + (spin.active ? 0.7 : 0))
-
-          // activation zones: colored spots that pulse on/off across regions, spinning with the brain
-          if (zoneGroup) {
-            zoneGroup.visible = zonesActive
-            if (zonesActive) {
-              zoneGroup.rotation.set(spin.rotX, spin.rotY, 0)
-              for (const zi of zoneItems) {
-                const act = Math.pow(0.5 + 0.5 * Math.sin(t * zi.freq + zi.phase), 2.4)
-                zi.light.intensity = act * 5.5
-              }
-            }
-          }
 
           // labels: rotate WITH the brain (dragging carries them past the focus), light up near it
           const ease = 1 - Math.exp(-18 * dt)
@@ -869,7 +803,7 @@ export function BrainStoryV4() {
       alive = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); cleanupInput()
       // forceContextLoss releases the actual WebGL context (browsers cap ~16);
       // dispose() alone leaks it, so repeated mounts of the story would run out.
-      try { pmrem?.dispose(); try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
+      try { try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
     }
   }, [dirs])
 
@@ -896,33 +830,8 @@ export function BrainStoryV4() {
           ref={hostRef}
           style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'pan-y' }}
         />
-        {/* appearance stepper — vertical ticks on the right, centered with the
-            brain. No labels (the material name shows as a native tooltip on
-            hover); each tick steps the brain's look. */}
-        <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-          {MATERIALS.map((mm, i) => (
-            <button
-              key={mm.name}
-              onClick={() => chooseMat(i)}
-              title={mm.name}
-              aria-label={`Appearance: ${mm.name}`}
-              aria-pressed={i === matIndex}
-              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '12px 8px', lineHeight: 0 }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  height: 2,
-                  width: i === matIndex ? 30 : 16,
-                  borderRadius: 2,
-                  background: i === matIndex ? C.accentBtn : C.node,
-                  opacity: i === matIndex ? 1 : 0.5,
-                  transition: 'width .2s ease, background .2s ease, opacity .2s ease',
-                }}
-              />
-            </button>
-          ))}
-        </div>
+        {/* The appearance stepper is gone: the brain has one look now, the
+            gradient wireframe, so there was nothing left to step through. */}
         {/* floating labels layer */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           {LABELS.map((txt, i) => (
