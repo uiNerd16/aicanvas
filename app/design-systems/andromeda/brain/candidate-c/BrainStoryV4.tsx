@@ -299,7 +299,9 @@ function BrainFlow() {
         }
       `}</style>
 
-      <div className="flow-heads" style={{ marginTop: 28 }}>
+      {/* A touch more air than when a paragraph sat above: the diagram is the
+          section's body now, not a figure under prose. */}
+      <div className="flow-heads" style={{ marginTop: 36 }}>
         <p style={head}>What goes in</p>
         <span />
         <p style={{ ...head, textAlign: 'center' }}>The judgment</p>
@@ -1051,13 +1053,8 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             The taste lives in the system, not the prompt
           </h2>
-          {/* Stops where the diagram takes over. The old second half promised
-              on-brand screens from tools that stop guessing, which is exactly
-              what the picture below says, so reading both said it twice. */}
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The brain adds the judgment usually{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user.
-          </p>
+          {/* Kicker, headline, diagram. No paragraph: the picture is the
+              explanation, and prose above it only said the same thing first. */}
 
           <BrainFlow />
         </Section>
