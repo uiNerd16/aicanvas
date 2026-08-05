@@ -128,6 +128,132 @@ function WireDivider() {
   )
 }
 
+// The flow diagram: what goes in, the judgment in the middle, what comes out.
+// Counts come from the teaser so the picture cannot drift from the corpus.
+const FLOW_IN = [
+  { title: 'Tokens', sub: 'the values' },
+  { title: 'Components', sub: `${MANIFEST.find((s) => s.id === 'component-rules')?.files.length ?? 0} parts` },
+  { title: 'Your prompt', sub: 'what you want built' },
+]
+const FLOW_OUT = [
+  { title: 'On-brand screen', sub: 'first try, not the fifth' },
+  { title: 'Decisions, not guesses', sub: 'color, motion, spacing' },
+  { title: 'Same rules next time', sub: 'no drift as you grow' },
+]
+// Node box and row rhythm are shared with the SVG geometry below: three rows of
+// ROW_H with ROW_GAP between them put the middle row dead centre, which is where
+// the brain sits and where every curve converges.
+const ROW_H = 76
+const ROW_GAP = 20
+const FLOW_H = ROW_H * 3 + ROW_GAP * 2
+
+// Curves are drawn in a 800 x FLOW_H space and stretched to whatever width the
+// column is (preserveAspectRatio none). vector-effect keeps the stroke 1px
+// under that stretch, and the solid node backgrounds cover the ends, so the
+// endpoints never need to match the CSS column widths exactly.
+const Y_TOP = ROW_H / 2
+const Y_MID = FLOW_H / 2
+const Y_BOT = FLOW_H - ROW_H / 2
+const X_IN_A = 232   // leaves the input nodes
+const X_IN_B = 322   // meets the brain
+const X_OUT_A = 478  // leaves the brain
+const X_OUT_B = 568  // meets the result nodes
+const curve = (x1: number, y1: number, x2: number, y2: number) =>
+  `M${x1},${y1} C${x1 + (x2 - x1) * 0.55},${y1} ${x2 - (x2 - x1) * 0.55},${y2} ${x2},${y2}`
+
+function BrainFlow() {
+  const node: React.CSSProperties = {
+    height: ROW_H,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '0 16px',
+    background: '#1B1B1C',
+    border: '1px solid #2D2D2E',
+    borderRadius: 12,
+  }
+  const head: React.CSSProperties = {
+    fontFamily: MONO,
+    fontSize: 11,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    color: C.muted,
+    margin: '0 0 12px',
+  }
+  return (
+    <>
+      <style>{`
+        .flow-heads, .flow-grid { display: grid; grid-template-columns: 1fr 210px 1fr; gap: 0 28px; }
+        .flow-col { display: flex; flex-direction: column; gap: ${ROW_GAP}px; }
+        .flow-mid { display: flex; align-items: center; }
+        @media (max-width: 760px) {
+          .flow-heads { display: none; }
+          .flow-grid { grid-template-columns: 1fr; gap: ${ROW_GAP}px; height: auto !important; }
+          .flow-edges { display: none; }
+        }
+      `}</style>
+
+      <div className="flow-heads" style={{ marginTop: 28 }}>
+        <p style={head}>What goes in</p>
+        <p style={{ ...head, textAlign: 'center' }}>The judgment</p>
+        <p style={head}>What comes out</p>
+      </div>
+
+      <div className="flow-grid" style={{ position: 'relative', height: FLOW_H }}>
+        <svg
+          className="flow-edges"
+          aria-hidden
+          viewBox={`0 0 800 ${FLOW_H}`}
+          preserveAspectRatio="none"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        >
+          <defs>
+            <linearGradient id="flow-in" x1="0" x2="1">
+              <stop offset="0%" stopColor="#373738" />
+              <stop offset="100%" stopColor={C.accentBtn} />
+            </linearGradient>
+            <linearGradient id="flow-out" x1="0" x2="1">
+              <stop offset="0%" stopColor={C.accentBtn} />
+              <stop offset="100%" stopColor="#373738" />
+            </linearGradient>
+          </defs>
+          {[Y_TOP, Y_MID, Y_BOT].map((y) => (
+            <path key={`in-${y}`} d={curve(X_IN_A, y, X_IN_B, Y_MID)} fill="none" stroke="url(#flow-in)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+          ))}
+          {[Y_TOP, Y_MID, Y_BOT].map((y) => (
+            <path key={`out-${y}`} d={curve(X_OUT_A, Y_MID, X_OUT_B, y)} fill="none" stroke="url(#flow-out)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+          ))}
+        </svg>
+
+        <div className="flow-col" style={{ position: 'relative' }}>
+          {FLOW_IN.map((n) => (
+            <div key={n.title} style={node}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{n.sub}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flow-mid" style={{ position: 'relative' }}>
+          <div style={{ ...node, width: '100%', alignItems: 'center', textAlign: 'center', background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>The Brain</span>
+            <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, marginTop: 2 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+          </div>
+        </div>
+
+        <div className="flow-col" style={{ position: 'relative' }}>
+          {FLOW_OUT.map((n) => (
+            <div key={n.title} style={node}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{n.sub}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
 // The teaser publishes names for the sectioned files only, so the entry layer
 // (index, inventory, tool) arrives as a count with no names. These are the
 // three at the current pin. The moment inject-premium ships its index and tools
@@ -827,6 +953,8 @@ export function BrainStoryV4() {
             <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
             <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
           </p>
+
+          <BrainFlow />
         </Section>
 
         {/* Browse the corpus — rail plus locked file names */}
