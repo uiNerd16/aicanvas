@@ -164,8 +164,12 @@ const LINK_W = 104
 // has no visible edge.
 const IMG_W = 78
 const IMG_H = 65
-const CARD_PAD_TOP = 12
-const CARD_H = CARD_PAD_TOP + IMG_H + 4 + 34 + 12
+const CARD_PAD_TOP = 14
+const CARD_PAD_BOTTOM = 16
+const IMG_GAP = 10
+// Text block: the title line plus the count line under it.
+const CARD_TEXT_H = 33
+const CARD_H = CARD_PAD_TOP + IMG_H + IMG_GAP + CARD_TEXT_H + CARD_PAD_BOTTOM
 // Connectors meet the middle of the card. The card is centred on the row, so
 // that is simply the row's own centre line.
 const CONVERGE_Y = Y_MID
@@ -298,7 +302,10 @@ function BrainFlow() {
         <div className="flow-mid">
           {/* The focal card. Painted sand-950, the same colour the image's own
               background is, so the artwork has no visible edge. */}
-          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${CARD_PAD_TOP}px 0 0`, alignItems: 'center', background: C.base, borderColor: C.accentBtn }}>
+          {/* Border stays 1px, as every card here is. Full-strength olive read
+              heavy beside the sand hairlines around it, so it is dialled back to
+              a true hairline that still marks this as the focal card. */}
+          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${CARD_PAD_TOP}px 0 ${CARD_PAD_BOTTOM}px`, alignItems: 'center', justifyContent: 'flex-start', background: C.base, borderColor: 'rgba(168,185,77,0.55)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/andromeda-brain-wire.webp"
@@ -309,8 +316,8 @@ function BrainFlow() {
               decoding="async"
               style={{ display: 'block' }}
             />
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: 4 }}>Andromeda Brain</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: IMG_GAP }}>Andromeda Brain</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 2 }}>{BRAIN_TEASER.totalFiles} files</span>
           </div>
         </div>
 
