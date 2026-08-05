@@ -82,11 +82,17 @@ const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px s
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
-const STRUCTURE = [
-  { label: 'Foundations', count: FND.length, sample: FND.slice(0, 6) },
-  { label: 'Component rules', count: CMP.length, sample: CMP.slice(0, 8) },
-  { label: 'Skills', count: SK.length, sample: SK.slice(0, 2) },
-].filter((g) => g.count > 0)
+// Derived from the teaser's own sections, never a hand-listed three, so a
+// section added to the brain appears here instead of being counted in the total
+// and rendered nowhere. That gap is what let this page claim 56 files while
+// showing 53.
+const STRUCTURE = BRAIN_TEASER.sections
+  .map((s) => ({
+    label: s.label,
+    count: s.files.length,
+    sample: s.files.slice(0, s.id === 'component-rules' ? 8 : 6),
+  }))
+  .filter((g) => g.count > 0)
 const BENEFITS = [
   { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
   { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
