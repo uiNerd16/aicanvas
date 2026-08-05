@@ -134,8 +134,11 @@ export default function ContactPage() {
               </div>
 
               <div>
+                {/* All four fields are required. The asterisk is decorative:
+                    the required state assistive tech announces comes from each
+                    input's `required` attribute. Matches /feedback. */}
                 <label htmlFor="name" className={LABEL_CLASS}>
-                  Name
+                  Name <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <input
                   id="name"
@@ -153,7 +156,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="email" className={LABEL_CLASS}>
-                  Email
+                  Email <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <input
                   id="email"
@@ -170,7 +173,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="subject" className={LABEL_CLASS}>
-                  Subject
+                  Subject <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <input
                   id="subject"
@@ -186,7 +189,7 @@ export default function ContactPage() {
 
               <div>
                 <label htmlFor="message" className={LABEL_CLASS}>
-                  Message
+                  Message <span aria-hidden="true" className="text-olive-400">*</span>
                 </label>
                 <textarea
                   id="message"
@@ -209,6 +212,15 @@ export default function ContactPage() {
               <Button type="submit" variant="primary" size="md" fullWidth disabled={submitting}>
                 {submitting ? 'Sending…' : 'Send message'}
               </Button>
+
+              {/* Matches /feedback. Only true while the route uses the address
+                  for reply_to and nothing else: no Brevo call, no list. */}
+              <p className="text-center text-xs leading-relaxed text-sand-500">
+                We only use your email to reply.{' '}
+                <Link href="/privacy" className="underline underline-offset-2 hover:text-sand-300">
+                  Privacy policy
+                </Link>
+              </p>
             </form>
           )}
         </div>
