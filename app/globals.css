@@ -58,6 +58,9 @@ body {
   --color-olive-400: #DAE4A0;
   --color-olive-500: #A8B94D;
   --color-olive-600: #869631;
+  /* Deep end of the olive ramp. Dark enough to carry sand-50 text at about
+     6:1, which is what the selection highlight needs to stay readable. */
+  --color-olive-700: #56631F;
 
   /* ── Ember accent — secondary (attention, rhythm) ── */
   --color-ember-400: #FFB574;
@@ -92,6 +95,18 @@ html[data-frame],
 html[data-frame] body {
   background: #0e0e0f !important;
   transition: none !important;
+}
+
+/* ── Text selection ── */
+/* Dark olive with light text, in place of the browser's default gray. One rule
+   covers both themes: an inverted highlight reads on the sand page and the dark
+   page alike. ::selection honours only a few properties (colour, background,
+   text-shadow), and the ::-moz-selection prefix is not needed on any browser we
+   support, so it is left out rather than risking one invalid selector
+   invalidating the pair. */
+::selection {
+  background-color: var(--color-olive-700);
+  color: var(--color-sand-50);
 }
 
 /* ── Custom scrollbar ── */
