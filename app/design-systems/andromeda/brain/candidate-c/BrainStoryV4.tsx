@@ -163,7 +163,7 @@ const curve = (y1: number, y2: number) =>
 // cycle: it travels for one step, then waits out the rest. The right side is
 // half a step behind the left, and runs bottom to top, so the two sides read as
 // alternating pulses rather than synchronised pairs.
-const DOT_STEP = 1.6
+const DOT_STEP = 2.8
 const DOT_CYCLE = DOT_STEP * 3
 const LINKS = {
   in: [
@@ -247,7 +247,7 @@ function BrainFlow() {
           background: ${C.accent};
           box-shadow: 0 0 6px ${C.accentBtn};
           opacity: 0;
-          animation: flow-dot ${DOT_CYCLE}s linear infinite;
+          animation: flow-dot ${DOT_CYCLE.toFixed(1)}s linear infinite;
         }
         /* Each dot travels during its own slot of the shared cycle and waits out
            the rest, which is what keeps exactly one in flight per side. */
