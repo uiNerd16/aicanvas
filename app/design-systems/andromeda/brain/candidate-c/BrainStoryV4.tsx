@@ -102,10 +102,13 @@ const GLOSS: Record<string, string> = {
   index: 'The entry point, and the inventory of what already exists so the agent stops reinventing components.',
   tools: 'A conformance check the agent can run against its own output.',
 }
+// These describe how the agent works, not what you end up with. The flow
+// diagram above already names the outcomes, and when these read as outcomes too
+// the page made the same three promises twice within a screen of each other.
 const BENEFITS = [
-  { label: 'Faster', icon: <Gauge weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
-  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
-  { label: 'Efficient', icon: <Fire weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
+  { label: 'Faster', icon: <Gauge weight="regular" size={18} />, body: 'It starts from decisions that are already written down, instead of trying options until one looks right.' },
+  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: 'It reaches for the components that already exist before it invents anything new.' },
+  { label: 'Efficient', icon: <Fire weight="regular" size={18} />, body: 'No tokens burned exploring ground the system already settled.' },
 ]
 
 // Classic workflow pains (left) vs what an AI-native system delivers (right).
@@ -890,7 +893,7 @@ export function BrainStoryV4() {
           transition={{ duration: 0.35, delay: 0.18 }}
           style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}
         >
-          Tokens and components are the pieces. The brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
+          Tokens and components are the pieces. The brain is the judgment that assembles them: every foundation, component rule, skill and tool your AI agent reads, so what it builds already matches the system instead of a guess.
         </motion.p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
@@ -1069,10 +1072,10 @@ export function BrainStoryV4() {
         <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            One reader. Every benefit is yours.
+            Your agent reads it, not you
           </h2>
           <p style={{ ...SECTION_DESC }}>
-            The brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
+            Nobody has to learn the system or keep it in their head. The agent opens the files the task needs, and builds against them.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {BENEFITS.map((benefit, i) => (

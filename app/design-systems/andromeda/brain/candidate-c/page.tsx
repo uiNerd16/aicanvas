@@ -10,7 +10,7 @@ const jbm = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mon
 export const metadata = {
   title: 'The Andromeda Brain: Design Rules for On-Brand UI',
   description:
-    'Tokens and components are the pieces. The brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.',
+    'Tokens and components are the pieces. The brain is the judgment that assembles them: every foundation, component rule, skill and tool your AI agent reads, so what it builds already matches the system instead of a guess.',
   // Dev-only review route, same as the other candidates: never let a duplicate
   // of the real landing page compete with it in search.
   robots: { index: false, follow: false },
