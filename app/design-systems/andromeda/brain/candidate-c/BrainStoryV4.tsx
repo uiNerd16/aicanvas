@@ -570,7 +570,13 @@ export function BrainStoryV4() {
 
       let W = host.clientWidth || 800, H = host.clientHeight || 600
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
-      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
+      // Cap at 2, matching the premium reader. It used to cap at 1.5, so on a
+      // retina screen the canvas rendered below native and the browser upscaled
+      // it: every hairline wire came out thick and soft. A wireframe is nothing
+      // but hairlines, so it pays that cost far harder than a solid mesh would,
+      // and the scene is much cheaper now that the lights and the environment
+      // map are gone. Constrained devices still get less.
+      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1.5 : 2))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
       // The render loop only starts once the model lands, and an opaque
       // (alpha:false) canvas with an uninitialized buffer composites as a
