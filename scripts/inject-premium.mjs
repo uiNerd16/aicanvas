@@ -290,8 +290,13 @@ function writeV2Shim(injectedNames, manifest) {
 // structure. UPDATE when the brain grows (mirror of the vault's
 // design-systems/andromeda/ brain folder), same contract as V2_FALLBACK_NAMES.
 const BRAIN_TEASER_FALLBACK = {
-  totalFiles: 50,
+  totalFiles: 56,
   sections: [
+    {
+      id: 'index',
+      label: 'Index',
+      files: ['rules', 'INVENTORY'],
+    },
     {
       id: 'foundations',
       label: 'Foundations',
@@ -306,12 +311,13 @@ const BRAIN_TEASER_FALLBACK = {
       label: 'Component Rules',
       files: [
         'Alert', 'Avatar', 'Badge', 'Button', 'Card', 'Checkbox',
-        'CornerMarkers', 'DateRangePicker', 'Drawer', 'EmptyState', 'Gauge',
-        'HeatGrid', 'IconButton', 'Input', 'MetricChart', 'NavItem',
-        'PanelHeader', 'PanelMenu', 'Planet', 'ProgressBar', 'RadarChart',
-        'Radio', 'SearchField', 'SegmentedControl', 'Slider', 'Spinner',
-        'StatTile', 'Table', 'Tag', 'Textarea', 'Toggle', 'Tooltip',
-        'TrendChart', 'UserCard', 'UserMenu',
+        'CornerMarkers', 'DataTable', 'DateRangePicker', 'Drawer',
+        'EmptyState', 'Gauge', 'HeatGrid', 'IconButton', 'Input', 'MediaCard',
+        'MetricChart', 'MusicPlayer', 'NavItem', 'PanelHeader', 'PanelMenu',
+        'Planet', 'ProgressBar', 'RadarChart', 'Radio', 'SearchField',
+        'SegmentedControl', 'Slider', 'Spinner', 'StatTile', 'Table', 'Tag',
+        'Textarea', 'Toggle', 'Tooltip', 'TrendChart', 'UserCard', 'UserMenu',
+        'Waveform',
       ],
     },
     {
@@ -319,7 +325,88 @@ const BRAIN_TEASER_FALLBACK = {
       label: 'Skills',
       files: ['building-with-andromeda', 'reviewing-against-andromeda'],
     },
+    {
+      id: 'tools',
+      label: 'Tools',
+      files: ['check-colors'],
+    },
   ],
+}
+
+// Every bundled file TYPE must have a section to appear in. Without this map a
+// new type is silently counted in totalFiles and then rendered nowhere, which
+// is exactly how the brain came to advertise 56 files while both reader pages
+// let you browse 53: `index`, `inventory` and `tool` each had a type and no
+// home. Order here is the order sections render.
+const TEASER_SECTIONS = [
+  { id: 'index', label: 'Index', types: ['index', 'inventory'] },
+  { id: 'foundations', label: 'Foundations', types: ['foundation'] },
+  { id: 'component-rules', label: 'Component Rules', types: ['component-rule'] },
+  { id: 'skills', label: 'Skills', types: ['skill'] },
+  { id: 'tools', label: 'Tools', types: ['tool'] },
+]
+
+/**
+ * Group the bundled files into reader sections, refusing to ship a brain whose
+ * file types do not all have one.
+ *
+ * Three guards, deliberately different in what they tolerate:
+ *   - an unsectioned TYPE is fatal. It is the bug this exists to stop, and it
+ *     can never fire on ordinary growth, since a 40th component rule is still
+ *     type `component-rule`.
+ *   - the fallback missing a SECTION ID is fatal, because a degraded build
+ *     would then advertise a shape the brain no longer has.
+ *   - the fallback's per-section COUNTS lagging is a note, not a failure. They
+ *     change every time the brain grows, so failing there would cry wolf on
+ *     every build and train everyone to ignore the guard that matters.
+ */
+function buildTeaserSections(files, slug) {
+  const homeless = [...new Set(files.map((f) => f.type))].filter(
+    (t) => !TEASER_SECTIONS.some((s) => s.types.includes(t)),
+  )
+  if (homeless.length) {
+    console.error(
+      `[inject-premium] brain "${slug}": file type(s) ${homeless.join(', ')} have no teaser section. ` +
+        'Add them to TEASER_SECTIONS — otherwise the reader counts these files and never shows them.',
+    )
+    process.exit(1)
+  }
+
+  const nameOf = (f) =>
+    f.type === 'skill'
+      // _skills/<name>/SKILL.md — every basename is "SKILL", so use the folder.
+      ? f.path.split('/').at(-2)
+      : f.path.split('/').at(-1).replace(/\.rules\.md$/, '').replace(/\.(md|mjs)$/, '')
+
+  const sections = TEASER_SECTIONS.map((s) => ({
+    id: s.id,
+    label: s.label,
+    files: files.filter((f) => s.types.includes(f.type)).map(nameOf),
+  })).filter((s) => s.files.length)
+
+  const missing = sections
+    .map((s) => s.id)
+    .filter((id) => !BRAIN_TEASER_FALLBACK.sections.some((f) => f.id === id))
+  if (missing.length) {
+    console.error(
+      `[inject-premium] BRAIN_TEASER_FALLBACK is missing section(s): ${missing.join(', ')}. ` +
+        'Degraded builds would advertise a shape the brain no longer has — update the fallback above.',
+    )
+    process.exit(1)
+  }
+
+  const drifted = sections
+    .map((s) => [s, BRAIN_TEASER_FALLBACK.sections.find((x) => x.id === s.id)])
+    .filter(([s, f]) => f && f.files.length !== s.files.length)
+  if (drifted.length) {
+    log(
+      `note: BRAIN_TEASER_FALLBACK counts lag the brain (${drifted
+        .map(([s, f]) => `${s.id} ${f.files.length}->${s.files.length}`)
+        .join(', ')}) — cosmetic, degraded builds only.`,
+    )
+  }
+
+  return sections
 }
 
 // ALWAYS written (every run, including degraded/no-vault): the brain paywall
@@ -412,13 +499,11 @@ function collectBrain(source, slug) {
       type: 'tool',
     })),
   ]
+  // Sections are derived from the bundled files themselves, never listed by
+  // hand here, so totalFiles and the sections can never disagree again.
   const teaser = {
     totalFiles: files.length,
-    sections: [
-      { id: 'foundations', label: 'Foundations', files: foundations.map((f) => f.replace(/\.md$/, '')) },
-      { id: 'component-rules', label: 'Component Rules', files: componentRules.map((f) => f.replace(/\.rules\.md$/, '')) },
-      { id: 'skills', label: 'Skills', files: skills },
-    ],
+    sections: buildTeaserSections(files, slug),
   }
   return { files, teaser }
 }
@@ -689,8 +774,11 @@ for (const slug of brains) {
         type: 'registry:item',
         title: `${title} Brain`,
         description:
-          `The ${title} design-system brain: every rule, foundation, and skill as markdown ` +
-          `your AI agent reads. Re-run the install command any time to pull the latest rules.`,
+          // Names the kinds the corpus actually ships. It used to say "every
+          // rule, foundation, and skill", which counts three while the bundle
+          // carries five: the index and the tools were invisible here too.
+          `The ${title} design-system brain: every foundation, component rule, skill and tool as ` +
+          `markdown your AI agent reads. Re-run the install command any time to pull the latest rules.`,
         dependencies: [],
         registryDependencies: [],
         files: files.map((f) => ({
