@@ -155,24 +155,20 @@ const Y_BOT = FLOW_H - ROW_H / 2
 // SVG is 1:1 with CSS pixels, the same path strings drive the HTML dots on top.
 const LINK_W = 104
 
-// The centre card, and the wireframe brain across the top of it. The source
-// PNG is 732x660 and 400KB; it ships resized to 2x display size as WebP, which
-// is 7.5KB. Its own background is rgb(14,14,15), the sand-950 the card is
-// painted, so the image has no visible edge.
-const CARD_W = 190
-const IMG_W = 104
-const IMG_H = 94
-const CARD_PAD_TOP = 14
-const CARD_H = CARD_PAD_TOP + IMG_H + 8 + 34 + 14
-// Every connector converges on the middle of the image rather than the middle
-// of the card, so a dot arrives, crosses the brain and leaves again without a
-// jump. One constant drives the curves and the card geometry.
-const CONVERGE_Y = Y_MID - CARD_H / 2 + CARD_PAD_TOP + IMG_H / 2
-// The dot's route across the card. Invisible: a raster brain has no path to
-// follow, so this stands in for one, weaving across the image instead of
-// cutting a straight line through it.
-const CROSS_W = CARD_W - 2
-const CROSS_PATH = `M0,${IMG_H / 2} C${CROSS_W * 0.22},${IMG_H / 2 - 16} ${CROSS_W * 0.34},${IMG_H / 2 + 14} ${CROSS_W / 2},${IMG_H / 2} C${CROSS_W * 0.66},${IMG_H / 2 - 14} ${CROSS_W * 0.78},${IMG_H / 2 + 16} ${CROSS_W},${IMG_H / 2}`
+// The centre card, and the wireframe brain across the top of it. The source PNG
+// is 732x660 and 400KB, and nearly a third of that height is empty margin; it
+// ships trimmed to its content box, resized to 2x display size and converted to
+// WebP, which is 7.7KB. Trimming is what closes the gap under the artwork, and
+// the display size is set so the brain itself renders exactly as before. Its
+// background is rgb(14,14,15), the sand-950 the card is painted, so the image
+// has no visible edge.
+const IMG_W = 78
+const IMG_H = 65
+const CARD_PAD_TOP = 12
+const CARD_H = CARD_PAD_TOP + IMG_H + 4 + 34 + 12
+// Connectors meet the middle of the card. The card is centred on the row, so
+// that is simply the row's own centre line.
+const CONVERGE_Y = Y_MID
 
 // Control points at 60% of the run give a true S: it leaves the node
 // horizontally and arrives at the brain horizontally.
@@ -251,36 +247,26 @@ function BrainFlow() {
         .flow-mid { display: flex; align-items: center; }
         /* The dot rides the same path string the line is drawn from, so the two
            can never disagree. offset-anchor centres it on the path by default. */
-        .flow-dot, .brain-dot {
+        .flow-dot {
           position: absolute; top: 0; left: 0;
           width: 5px; height: 5px; border-radius: 50%;
           background: ${C.accent};
           box-shadow: 0 0 6px ${C.accentBtn};
-        }
-        .flow-dot {
           opacity: 0;
           animation: flow-dot ${JOURNEY.toFixed(1)}s linear infinite;
         }
-        /* A connector dot travels its own leg, the first third of the journey,
-           then goes dark. It disappears at the card edge on the exact frame the
-           brain dot appears there, which is what sells the handoff. */
+        /* A dot travels its own leg, the first third of the journey, then goes
+           dark at the card edge. Nothing is drawn over the card: the middle leg
+           is the beat where the brain is working, and a dot surfaces again on
+           the far side one leg later. */
         @keyframes flow-dot {
           0%      { offset-distance: 0%;   opacity: 1; }
           33.333% { offset-distance: 100%; opacity: 1; }
           33.334% { offset-distance: 100%; opacity: 0; }
           100%    { offset-distance: 100%; opacity: 0; }
         }
-        /* The brain dot never idles: one traversal per leg, starting a leg after
-           the journey does, so it always meets an arriving dot. */
-        .brain-dot {
-          animation: brain-dot ${LEG.toFixed(1)}s linear ${LEG.toFixed(1)}s infinite;
-        }
-        @keyframes brain-dot {
-          from { offset-distance: 0%; }
-          to   { offset-distance: 100%; }
-        }
         @media (prefers-reduced-motion: reduce) {
-          .flow-dot, .brain-dot { display: none; }
+          .flow-dot { display: none; }
         }
         @media (max-width: 760px) {
           .flow-heads { display: none; }
@@ -313,20 +299,17 @@ function BrainFlow() {
           {/* The focal card. Painted sand-950, the same colour the image's own
               background is, so the artwork has no visible edge. */}
           <div style={{ ...node, height: CARD_H, width: '100%', padding: `${CARD_PAD_TOP}px 0 0`, alignItems: 'center', background: C.base, borderColor: C.accentBtn }}>
-            <div style={{ position: 'relative', width: '100%', height: IMG_H }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/andromeda-brain-wire.webp"
-                alt=""
-                width={IMG_W}
-                height={IMG_H}
-                loading="lazy"
-                decoding="async"
-                style={{ display: 'block', margin: '0 auto' }}
-              />
-              <span aria-hidden className="brain-dot" style={{ offsetPath: `path("${CROSS_PATH}")` } as React.CSSProperties} />
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: 8 }}>Andromeda Brain</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/andromeda-brain-wire.webp"
+              alt=""
+              width={IMG_W}
+              height={IMG_H}
+              loading="lazy"
+              decoding="async"
+              style={{ display: 'block' }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: 4 }}>Andromeda Brain</span>
             <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
           </div>
         </div>
