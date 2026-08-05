@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -78,6 +78,17 @@ const PANEL: React.CSSProperties = { background: 'transparent', border: '1px sol
 // Smaller sibling of PANEL — the solid-surface card treatment reused by the
 // bento side tiles and the "How it works" benefit cards.
 const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }
+// Section description, matching the homepage: text-base, leading-relaxed,
+// sand-400, mt-3, and the max-w-2xl measure the homepage sets on its own
+// description. 672 of the 896 column keeps a comfortable line length instead of
+// running the full width.
+const SECTION_DESC: React.CSSProperties = {
+  fontSize: 16,
+  color: C.node,
+  lineHeight: 1.625,
+  maxWidth: 672,
+  margin: '12px 0 0',
+}
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
@@ -1005,7 +1016,7 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Where the classic workflow leaks
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 24px' }}>
+          <p style={{ ...SECTION_DESC, margin: '12px 0 24px' }}>
             The classic workflow loses time and intent at every step from Figma to production. When the system is already code and tokens, those steps disappear.
           </p>
 
@@ -1039,11 +1050,13 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(168,185,77,0.05)' }}>
-            <Asterisk weight="regular" size={16} color={C.accentBtn} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5 }}>
+          {/* A typed asterisk rather than a 16px icon: it reads as a footnote
+              marker on the sentence, which is what it is. */}
+          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', background: 'rgba(168,185,77,0.05)' }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5, margin: 0 }}>
+              <span style={{ marginRight: 6 }}>*</span>
               The agent builds fast and accurate. You stay in the loop, and you decide what ships.
-            </span>
+            </p>
           </div>
         </Section>
 
@@ -1065,7 +1078,7 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             <span style={{ color: C.accentBtn }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+          <p style={{ ...SECTION_DESC }}>
             Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
           </p>
 
@@ -1078,7 +1091,7 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             One reader. Every benefit is yours.
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
+          <p style={{ ...SECTION_DESC }}>
             The brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
