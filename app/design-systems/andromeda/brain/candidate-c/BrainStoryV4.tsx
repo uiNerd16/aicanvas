@@ -50,6 +50,16 @@ function mulberry32(seed: number) { return function () { seed |= 0; seed = (seed
 // material from the (dynamically imported) three module; `pulse` = teal emissive breathing.
 // Activation zones — distinct-colored regions that light up like a functional brain map.
 // Directions are in the normalized brain's unit space (left/right, frontal/occipital, etc.).
+// The four corpus sections and their colours, identical to the premium reader's
+// BrainRender.tsx. Kept in step with that file: if the reader's palette moves,
+// this moves with it, or the hero and the reader stop being the same brain.
+const SECTION_ZONES: { dir: [number, number, number]; hex: string }[] = [
+  { dir: [0.2, 0.9, 0.35], hex: '#a78bfa' },   // Index, purple
+  { dir: [-0.9, 0.05, 0.4], hex: '#38bdf8' },  // Foundations, cyan
+  { dir: [0.9, 0.05, 0.4], hex: '#fb923c' },   // Components, orange
+  { dir: [0.0, -0.7, 0.7], hex: '#a3e635' },   // Skills, lime
+]
+
 const ZONES: { dir: [number, number, number]; color: number }[] = [
   { dir: [-0.5, 0.25, 0.6], color: 0xff7a2f },   // L frontal — amber
   { dir: [0.5, 0.25, 0.6], color: 0x35d0ff },    // R frontal — cyan
@@ -627,12 +637,21 @@ export function BrainStoryV4() {
         radius = 1
         brainRoot = model
 
-        // Radiant wireframe: a hue swept around the brain's own centre, so the
-        // hero reads like the artwork in the flow card rather than a flat green.
-        // Orange to the front, purple over the top, blue at the back, green
-        // below, which is the arrangement the artwork uses. The colours live on
-        // the geometry, so only a material that opts into vertexColors shows
-        // them and every other preset is untouched.
+        // Radiant wireframe, painted the same way the premium reader paints its
+        // brain (BrainRender.tsx): the four section colours blended by how
+        // closely each vertex faces each section. Same palette, same weighting,
+        // so the hero and the reader are recognisably the same object, and the
+        // colours mean something rather than being a decorative rainbow.
+        //
+        // new THREE.Color(hex) yields LINEAR channels, which is what a vertex
+        // colour buffer wants. An earlier pass here used setHSL, whose default
+        // colour space is the working one, so sRGB-intended values went in
+        // untranslated and the whole mesh washed out toward white.
+        const zoneCols = SECTION_ZONES.map((z) => {
+          const c = new THREE.Color(z.hex)
+          return [c.r, c.g, c.b] as [number, number, number]
+        })
+        const zoneDirs = SECTION_ZONES.map((z) => new THREE.Vector3(z.dir[0], z.dir[1], z.dir[2]).normalize())
         for (const mesh of brainMeshes) {
           const geo = mesh.geometry
           if (!geo?.attributes?.position || geo.attributes.color) continue
@@ -641,18 +660,30 @@ export function BrainStoryV4() {
           const bb = geo.boundingBox
           const cx = (bb.min.x + bb.max.x) / 2
           const cy = (bb.min.y + bb.max.y) / 2
-          const rx = (bb.max.x - bb.min.x) / 2 || 1
-          const ry = (bb.max.y - bb.min.y) / 2 || 1
+          const cz = (bb.min.z + bb.max.z) / 2
           const colors = new Float32Array(pos.count * 3)
-          const c = new THREE.Color()
+          const d = new THREE.Vector3()
           for (let i = 0; i < pos.count; i++) {
-            const nx = (pos.getX(i) - cx) / rx
-            const ny = (pos.getY(i) - cy) / ry
-            const hue = (1.06 - Math.atan2(ny, nx) / (Math.PI * 2)) % 1
-            c.setHSL(hue, 0.55, 0.62)
-            colors[i * 3] = c.r
-            colors[i * 3 + 1] = c.g
-            colors[i * 3 + 2] = c.b
+            d.set(pos.getX(i) - cx, pos.getY(i) - cy, pos.getZ(i) - cz).normalize()
+            let wsum = 0
+            const w = [0, 0, 0, 0]
+            for (let k = 0; k < 4; k++) {
+              const dot = Math.max(0, d.dot(zoneDirs[k]))
+              // cubed so each section holds its own area, plus an epsilon so no
+              // wire on the far side goes fully black
+              w[k] = dot * dot * dot + 0.04
+              wsum += w[k]
+            }
+            let r = 0, g = 0, b = 0
+            for (let k = 0; k < 4; k++) {
+              const t = w[k] / wsum
+              r += zoneCols[k][0] * t
+              g += zoneCols[k][1] * t
+              b += zoneCols[k][2] * t
+            }
+            colors[i * 3] = r
+            colors[i * 3 + 1] = g
+            colors[i * 3 + 2] = b
           }
           geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
         }
