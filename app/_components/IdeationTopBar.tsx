@@ -91,8 +91,15 @@ export function IdeationTopBar() {
   if (TEMPLATE_LEAF_RE.test(pathname)) return null
 
   // The Brain LANDING renders its own full-page header (BrainStoryV4) — no app
-  // breadcrumb bar over it.
-  if (pathname === '/design-systems/andromeda/brain') return null
+  // breadcrumb bar over it. candidate-c is the redesign of that same landing,
+  // living at a sibling path while it is reviewed, so it needs the same
+  // suppression or the page shows two top bars. Delete that half of the test
+  // together with the candidate route when the redesign takes over /brain.
+  if (
+    pathname === '/design-systems/andromeda/brain' ||
+    pathname === '/design-systems/andromeda/brain/candidate-c'
+  )
+    return null
 
   const crumbs = buildCrumbs(pathname)
   if (!crumbs) return null
