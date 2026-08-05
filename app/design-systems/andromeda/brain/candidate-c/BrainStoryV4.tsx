@@ -132,12 +132,15 @@ function WireDivider() {
 // Counts come from the teaser so the picture cannot drift from the corpus.
 const FLOW_IN = [
   { title: 'Tokens', sub: 'the values' },
-  { title: 'Components', sub: `${MANIFEST.find((s) => s.id === 'component-rules')?.files.length ?? 0} parts` },
+  { title: 'Components', sub: `${MANIFEST.find((s) => s.id === 'component-rules')?.files.length ?? 0} ready to use` },
   { title: 'Your prompt', sub: 'what you want built' },
 ]
+// Three things you get, in widening scope: this screen, the whole surface, and
+// every screen after. The middle used to read "Decisions, not guesses", which
+// described the process rather than naming something you walk away with.
 const FLOW_OUT = [
   { title: 'On-brand screen', sub: 'first try, not the fifth' },
-  { title: 'Decisions, not guesses', sub: 'color, motion, spacing' },
+  { title: 'Consistent everywhere', sub: 'color, motion, spacing' },
   { title: 'Same rules next time', sub: 'no drift as you grow' },
 ]
 // Row rhythm is shared with the connector geometry: three rows of ROW_H with
@@ -894,7 +897,7 @@ export function BrainStoryV4() {
           transition={{ duration: 0.35, delay: 0.18 }}
           style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}
         >
-          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
+          Tokens and components are the pieces. The brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
         </motion.p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
@@ -960,7 +963,7 @@ export function BrainStoryV4() {
                   A system that grows with the work.
                 </p>
                 <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '16px 0 0' }}>
-                  Most design systems hand you a fixed kit and stop. The Brain is built the other way: to grow, not freeze.
+                  Most design systems hand you a fixed kit and stop. The brain is built the other way: to grow, not freeze.
                 </p>
               </div>
             </div>
@@ -1048,10 +1051,12 @@ export function BrainStoryV4() {
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             The taste lives in the system, not the prompt
           </h2>
+          {/* Stops where the diagram takes over. The old second half promised
+              on-brand screens from tools that stop guessing, which is exactly
+              what the picture below says, so reading both said it twice. */}
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
+            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The brain adds the judgment usually{' '}
+            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user.
           </p>
 
           <BrainFlow />
@@ -1077,7 +1082,7 @@ export function BrainStoryV4() {
             One reader. Every benefit is yours.
           </h2>
           <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            The Brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
+            The brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {BENEFITS.map((benefit, i) => (
