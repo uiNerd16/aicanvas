@@ -140,26 +140,52 @@ const FLOW_OUT = [
   { title: 'Decisions, not guesses', sub: 'color, motion, spacing' },
   { title: 'Same rules next time', sub: 'no drift as you grow' },
 ]
-// Node box and row rhythm are shared with the SVG geometry below: three rows of
-// ROW_H with ROW_GAP between them put the middle row dead centre, which is where
-// the brain sits and where every curve converges.
-const ROW_H = 76
-const ROW_GAP = 20
+// Row rhythm is shared with the connector geometry: three rows of ROW_H with
+// ROW_GAP between them put the middle row dead centre, where the brain sits and
+// where every curve converges.
+const ROW_H = 58
+const ROW_GAP = 16
 const FLOW_H = ROW_H * 3 + ROW_GAP * 2
-
-// Curves are drawn in a 800 x FLOW_H space and stretched to whatever width the
-// column is (preserveAspectRatio none). vector-effect keeps the stroke 1px
-// under that stretch, and the solid node backgrounds cover the ends, so the
-// endpoints never need to match the CSS column widths exactly.
 const Y_TOP = ROW_H / 2
 const Y_MID = FLOW_H / 2
 const Y_BOT = FLOW_H - ROW_H / 2
-const X_IN_A = 232   // leaves the input nodes
-const X_IN_B = 322   // meets the brain
-const X_OUT_A = 478  // leaves the brain
-const X_OUT_B = 568  // meets the result nodes
-const curve = (x1: number, y1: number, x2: number, y2: number) =>
-  `M${x1},${y1} C${x1 + (x2 - x1) * 0.55},${y1} ${x2 - (x2 - x1) * 0.55},${y2} ${x2},${y2}`
+// The connectors get their own fixed-width grid column, so each SVG is drawn at
+// exactly its own size and nothing is stretched. Stretching an SVG to fill a
+// fluid column is what flattened these curves into diagonals before.
+const LINK_W = 104
+// Control points at 60% of the run give a true S: it leaves the node
+// horizontally and arrives at the brain horizontally.
+const curve = (y1: number, y2: number) =>
+  `M0,${y1} C${LINK_W * 0.6},${y1} ${LINK_W * 0.4},${y2} ${LINK_W},${y2}`
+
+function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
+  return (
+    <svg
+      className="flow-links"
+      aria-hidden
+      width={LINK_W}
+      height={FLOW_H}
+      viewBox={`0 0 ${LINK_W} ${FLOW_H}`}
+      style={{ display: 'block' }}
+    >
+      <defs>
+        <linearGradient id={`flow-${mode}`} x1="0" x2="1">
+          <stop offset="0%" stopColor={mode === 'in' ? '#2D2D2E' : '#7B7B7D'} />
+          <stop offset="100%" stopColor={mode === 'in' ? '#7B7B7D' : '#2D2D2E'} />
+        </linearGradient>
+      </defs>
+      {[Y_TOP, Y_MID, Y_BOT].map((y) => (
+        <path
+          key={y}
+          d={mode === 'in' ? curve(y, Y_MID) : curve(Y_MID, y)}
+          fill="none"
+          stroke={`url(#flow-${mode})`}
+          strokeWidth={1}
+        />
+      ))}
+    </svg>
+  )
+}
 
 function BrainFlow() {
   const node: React.CSSProperties = {
@@ -167,85 +193,66 @@ function BrainFlow() {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    padding: '0 16px',
+    padding: '0 14px',
     background: '#1B1B1C',
     border: '1px solid #2D2D2E',
-    borderRadius: 12,
+    borderRadius: 10,
   }
   const head: React.CSSProperties = {
     fontFamily: MONO,
-    fontSize: 11,
+    fontSize: 10,
     letterSpacing: '0.14em',
     textTransform: 'uppercase',
     color: C.muted,
-    margin: '0 0 12px',
+    margin: '0 0 10px',
   }
   return (
     <>
       <style>{`
-        .flow-heads, .flow-grid { display: grid; grid-template-columns: 1fr 210px 1fr; gap: 0 28px; }
+        .flow-heads, .flow-grid { display: grid; grid-template-columns: 1fr ${LINK_W}px 190px ${LINK_W}px 1fr; }
         .flow-col { display: flex; flex-direction: column; gap: ${ROW_GAP}px; }
         .flow-mid { display: flex; align-items: center; }
         @media (max-width: 760px) {
           .flow-heads { display: none; }
-          .flow-grid { grid-template-columns: 1fr; gap: ${ROW_GAP}px; height: auto !important; }
-          .flow-edges { display: none; }
+          .flow-grid { grid-template-columns: 1fr; gap: ${ROW_GAP}px; }
+          .flow-links { display: none; }
         }
       `}</style>
 
       <div className="flow-heads" style={{ marginTop: 28 }}>
         <p style={head}>What goes in</p>
+        <span />
         <p style={{ ...head, textAlign: 'center' }}>The judgment</p>
-        <p style={head}>What comes out</p>
+        <span />
+        <p style={{ ...head, textAlign: 'right' }}>What comes out</p>
       </div>
 
-      <div className="flow-grid" style={{ position: 'relative', height: FLOW_H }}>
-        <svg
-          className="flow-edges"
-          aria-hidden
-          viewBox={`0 0 800 ${FLOW_H}`}
-          preserveAspectRatio="none"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-        >
-          <defs>
-            <linearGradient id="flow-in" x1="0" x2="1">
-              <stop offset="0%" stopColor="#373738" />
-              <stop offset="100%" stopColor={C.accentBtn} />
-            </linearGradient>
-            <linearGradient id="flow-out" x1="0" x2="1">
-              <stop offset="0%" stopColor={C.accentBtn} />
-              <stop offset="100%" stopColor="#373738" />
-            </linearGradient>
-          </defs>
-          {[Y_TOP, Y_MID, Y_BOT].map((y) => (
-            <path key={`in-${y}`} d={curve(X_IN_A, y, X_IN_B, Y_MID)} fill="none" stroke="url(#flow-in)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-          ))}
-          {[Y_TOP, Y_MID, Y_BOT].map((y) => (
-            <path key={`out-${y}`} d={curve(X_OUT_A, Y_MID, X_OUT_B, y)} fill="none" stroke="url(#flow-out)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-          ))}
-        </svg>
-
-        <div className="flow-col" style={{ position: 'relative' }}>
+      <div className="flow-grid">
+        <div className="flow-col">
           {FLOW_IN.map((n) => (
             <div key={n.title} style={node}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: C.bright }}>{n.title}</span>
-              <span style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{n.sub}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{n.sub}</span>
             </div>
           ))}
         </div>
 
-        <div className="flow-mid" style={{ position: 'relative' }}>
+        <FlowLinks mode="in" />
+
+        <div className="flow-mid">
           <div style={{ ...node, width: '100%', alignItems: 'center', textAlign: 'center', background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>The Brain</span>
-            <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, marginTop: 2 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright }}>The Brain</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
           </div>
         </div>
 
-        <div className="flow-col" style={{ position: 'relative' }}>
+        <FlowLinks mode="out" />
+
+        <div className="flow-col">
           {FLOW_OUT.map((n) => (
             <div key={n.title} style={node}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: C.bright }}>{n.title}</span>
-              <span style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{n.sub}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{n.sub}</span>
             </div>
           ))}
         </div>
