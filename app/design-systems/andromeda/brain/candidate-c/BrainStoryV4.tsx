@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk, Brain } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -289,9 +289,15 @@ function BrainFlow() {
         <FlowLinks mode="in" />
 
         <div className="flow-mid">
-          <div style={{ ...node, width: '100%', alignItems: 'center', textAlign: 'center', background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright }}>The Brain</span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+          {/* Taller than the side rows on purpose: it is the focal card. It
+              stays centred on the row, which is where every connector meets, so
+              the extra height costs the geometry nothing. */}
+          <div style={{ ...node, height: 76, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
+            <Brain weight="regular" size={26} color={C.accent} style={{ flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: C.bright }}>Andromeda Brain</span>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+            </div>
           </div>
         </div>
 
