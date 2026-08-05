@@ -78,7 +78,12 @@ const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any
   { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
   // Unlit on purpose: the vertex colours painted onto the geometry carry the
   // whole look, and a lit material would wash them toward the light instead.
-  { name: 'Wireframe', make: (T) => new T.MeshBasicMaterial({ wireframe: true, vertexColors: true }) },
+  // toneMapped false because this scene renders through ACES filmic at 1.1
+  // exposure, which compresses and desaturates everything it touches. The
+  // premium reader has no tone mapping, so opting this one material out is what
+  // makes the two brains land on the same colours. The other presets keep it,
+  // since glass and chrome want it.
+  { name: 'Wireframe', make: (T) => new T.MeshBasicMaterial({ wireframe: true, vertexColors: true, toneMapped: false }) },
   { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
 ]
 // Default appearance of the brain on load.
