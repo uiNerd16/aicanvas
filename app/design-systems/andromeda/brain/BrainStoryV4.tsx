@@ -1,13 +1,12 @@
 'use client'
 
 // ============================================================
-// Andromeda Brain — story page V4 (Three.js firefly · the brain).
-// Same choreography as V3, but the hero is an actual BRAIN. A
-// firefly circles it; hover the scene and the camera chases the
-// firefly; floating labels light up as it passes. The firefly is
-// procedural (this model has no animation) and carries a teal
-// point light, so the brain lights up where it flies. On-brand
-// dark-metal + teal treatment.
+// Andromeda Brain — story page V4 (Three.js · the brain).
+// Same choreography as V3, but the hero is an actual BRAIN, drawn
+// as a wireframe carrying the four section colours (see the paint
+// step in the loader). Floating labels ride the brain's rotation
+// and light up as an invisible focus passes them; the orbiting
+// bulb that used to play that role was removed.
 //
 // Model: low-poly "Brain" by Poly by Google, CC BY 3.0 (via Poly
 // Pizza) — geometry-only, re-materialed here. Asset lives in
@@ -20,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -35,7 +34,6 @@ const MODEL_URL = '/models/brain.glb'
 
 const FND: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'foundations')?.files ?? []
 const CMP: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'component-rules')?.files ?? []
-const SK: readonly string[] = BRAIN_TEASER.sections.find((s) => s.id === 'skills')?.files ?? []
 const take = (arr: readonly string[], n: number) => { const step = Math.max(1, Math.floor(arr.length / n)); const o: string[] = []; for (let i = 0; i < arr.length && o.length < n; i += step) o.push(arr[i]); return o }
 const LABELS: string[] = [
   ...take(FND, 6), ...take(CMP, 12),
@@ -47,31 +45,24 @@ const HERO_LABELS = ['Foundations', 'Component', 'Rules', 'Design Intent', 'toke
 
 function mulberry32(seed: number) { return function () { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 } }
 
-// Material presets the user can flip through live. `make(T)` builds a fresh
-// material from the (dynamically imported) three module; `pulse` = teal emissive breathing.
-// Activation zones — distinct-colored regions that light up like a functional brain map.
-// Directions are in the normalized brain's unit space (left/right, frontal/occipital, etc.).
-const ZONES: { dir: [number, number, number]; color: number }[] = [
-  { dir: [-0.5, 0.25, 0.6], color: 0xff7a2f },   // L frontal — amber
-  { dir: [0.5, 0.25, 0.6], color: 0x35d0ff },    // R frontal — cyan
-  { dir: [-0.78, -0.08, 0.05], color: 0xff4f9a },// L temporal — magenta
-  { dir: [0.78, -0.08, 0.05], color: 0x4f7bff }, // R temporal — blue
-  { dir: [-0.4, 0.66, -0.1], color: 0x8ce04a },  // L parietal — lime
-  { dir: [0.4, 0.66, -0.1], color: 0xffd23f },   // R parietal — gold
-  { dir: [0.0, 0.16, -0.78], color: 0x22d3b8 },  // occipital — teal
-  { dir: [0.0, -0.5, -0.55], color: 0xb06cff },  // cerebellum — violet
+// The four corpus sections and their colours, identical to the premium reader's
+// BrainRender.tsx. Kept in step with that file: if the reader's palette moves,
+// this moves with it, or the hero and the reader stop being the same brain.
+const SECTION_ZONES: { dir: [number, number, number]; hex: string }[] = [
+  { dir: [0.2, 0.9, 0.35], hex: '#a78bfa' },   // Index, purple
+  { dir: [-0.9, 0.05, 0.4], hex: '#38bdf8' },  // Foundations, cyan
+  { dir: [0.9, 0.05, 0.4], hex: '#fb923c' },   // Components, orange
+  { dir: [0.0, -0.7, 0.7], hex: '#a3e635' },   // Skills, lime
 ]
 
-const MATERIALS: { name: string; pulse?: boolean; zones?: boolean; make: (T: any) => any }[] = [
-  { name: 'Sand zones', zones: true, make: (T) => new T.MeshStandardMaterial({ color: 0x373738, metalness: 0.15, roughness: 0.6, envMapIntensity: 0.5 }) },
-  { name: 'Gunmetal', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: 0x191d20, metalness: 0.6, roughness: 0.42, emissive: new T.Color(C.accent), emissiveIntensity: 0.12, envMapIntensity: 0.85 }) },
-  { name: 'Glass', make: (T) => new T.MeshPhysicalMaterial({ color: new T.Color(C.accent), transmission: 1, thickness: 0.8, roughness: 0.06, ior: 1.4, metalness: 0, transparent: true, envMapIntensity: 1.2, attenuationColor: new T.Color(C.accent), attenuationDistance: 1.4 }) },
-  { name: 'Chrome', make: (T) => new T.MeshStandardMaterial({ color: 0xdfe6e9, metalness: 1, roughness: 0.14, envMapIntensity: 1.5 }) },
-  { name: 'Wireframe', pulse: true, make: (T) => new T.MeshStandardMaterial({ color: new T.Color(C.accentBtn), wireframe: true, emissive: new T.Color(C.accentBtn), emissiveIntensity: 0.6, metalness: 0, roughness: 1 }) },
-  { name: 'Iridescent', make: (T) => new T.MeshPhysicalMaterial({ color: 0x0b0f12, metalness: 0.9, roughness: 0.3, iridescence: 1, iridescenceIOR: 1.3, envMapIntensity: 1.1 }) },
-]
-// Default appearance of the brain on load.
-const DEFAULT_MATERIAL = Math.max(0, MATERIALS.findIndex((m) => m.name === 'Wireframe'))
+
+// The brain's one and only look. Unlit on purpose: the vertex colours painted
+// onto the geometry carry it, and a lit material would wash them toward the
+// light. toneMapped false because this scene renders through ACES filmic at 1.1
+// exposure, which compresses and desaturates what it touches, while the premium
+// reader has no tone mapping. Opting out is what makes the two brains match.
+const makeBrainMaterial = (T: any) =>
+  new T.MeshBasicMaterial({ wireframe: true, vertexColors: true, toneMapped: false })
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
 // sand tokens: sand-900 #1B1B1C surface, sand-800 #2D2D2E border
@@ -79,24 +70,45 @@ const PANEL: React.CSSProperties = { background: 'transparent', border: '1px sol
 // Smaller sibling of PANEL — the solid-surface card treatment reused by the
 // bento side tiles and the "How it works" benefit cards.
 const PANEL_SOLID: React.CSSProperties = { background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 12, padding: 20 }
+// Section description, matching the homepage: text-base, leading-relaxed,
+// sand-400, mt-3, and the max-w-2xl measure the homepage sets on its own
+// description. 672 of the 896 column keeps a comfortable line length instead of
+// running the full width.
+const SECTION_DESC: React.CSSProperties = {
+  fontSize: 16,
+  color: C.node,
+  lineHeight: 1.625,
+  maxWidth: 672,
+  margin: '12px 0 0',
+}
 function Chip({ children }: { children: React.ReactNode }) {
   return <span style={{ fontFamily: MONO, fontSize: 12, color: C.reason, background: '#1B1B1C', border: '1px solid #2D2D2E', borderRadius: 6, padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block' }}>{children}</span>
 }
-// Derived from the teaser's own sections, never a hand-listed three, so a
-// section added to the brain appears here instead of being counted in the total
-// and rendered nowhere. That gap is what let this page claim 56 files while
-// showing 53.
-const STRUCTURE = BRAIN_TEASER.sections
-  .map((s) => ({
-    label: s.label,
-    count: s.files.length,
-    sample: s.files.slice(0, s.id === 'component-rules' ? 8 : 6),
-  }))
-  .filter((g) => g.count > 0)
+// The full corpus manifest, derived from the teaser itself rather than a
+// hand-listed three, so a section added to the brain shows up here instead of
+// being counted in the total and rendered nowhere. REMAINDER is the entry
+// layer the sections do not cover (the index the agent opens first, the
+// component inventory, the conformance tool); it self-corrects as the brain
+// grows, and disappears entirely once every file has a section.
+const MANIFEST = BRAIN_TEASER.sections as readonly { id: string; label: string; files: readonly string[] }[]
+const SECTIONED = MANIFEST.reduce((n, s) => n + s.files.length, 0)
+const REMAINDER = BRAIN_TEASER.totalFiles - SECTIONED
+// One line per known section. An unknown id (the list is growing) renders
+// without a gloss rather than with a wrong one.
+const GLOSS: Record<string, string> = {
+  foundations: 'How the system thinks. Color, layout, spacing, motion, states, voice.',
+  'component-rules': 'One file per component, holding the decisions that make it Andromeda instead of generic.',
+  skills: 'Working modes for the agent: build with the system, and review work against it.',
+  index: 'The entry point, and the inventory of what already exists so the agent stops reinventing components.',
+  tools: 'A conformance check the agent can run against its own output.',
+}
+// These describe how the agent works, not what you end up with. The flow
+// diagram above already names the outcomes, and when these read as outcomes too
+// the page made the same three promises twice within a screen of each other.
 const BENEFITS = [
-  { label: 'Faster', icon: <Fire weight="regular" size={18} />, body: 'On-brand work from the first prompt, not the fifth attempt.' },
-  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: "Builds on the rules and components that already exist, instead of a random AI's best guess." },
-  { label: 'Efficient', icon: <Gauge weight="regular" size={18} />, body: 'Your agent already knows the rules and the look, so it skips the testing and exploring that would otherwise burn tokens.' },
+  { label: 'Faster', icon: <Gauge weight="regular" size={18} />, body: 'It starts from decisions that are already written down, instead of trying options until one looks right.' },
+  { label: 'Accurate', icon: <Target weight="regular" size={18} />, body: 'It reaches for the components that already exist before it invents anything new.' },
+  { label: 'Efficient', icon: <Fire weight="regular" size={18} />, body: 'No tokens burned exploring ground the system already settled.' },
 ]
 
 // Classic workflow pains (left) vs what an AI-native system delivers (right).
@@ -122,10 +134,332 @@ function WireDivider() {
   )
 }
 
+// The flow diagram: what goes in, the judgment in the middle, what comes out.
+// Counts come from the teaser so the picture cannot drift from the corpus.
+const FLOW_IN = [
+  { title: 'Tokens', sub: 'the values' },
+  { title: 'Components', sub: `${MANIFEST.find((s) => s.id === 'component-rules')?.files.length ?? 0} ready to use` },
+  { title: 'Your prompt', sub: 'what you want built' },
+]
+// Three things you get, in widening scope: this screen, the whole surface, and
+// every screen after. The middle used to read "Decisions, not guesses", which
+// described the process rather than naming something you walk away with.
+const FLOW_OUT = [
+  { title: 'On-brand screen', sub: 'first try, not the fifth' },
+  { title: 'Consistent everywhere', sub: 'color, motion, spacing' },
+  { title: 'Same rules next time', sub: 'no drift as you grow' },
+]
+// Row rhythm is shared with the connector geometry: three rows of ROW_H with
+// ROW_GAP between them put the middle row dead centre, where the brain sits and
+// where every curve converges.
+const ROW_H = 58
+const ROW_GAP = 16
+const FLOW_H = ROW_H * 3 + ROW_GAP * 2
+const Y_TOP = ROW_H / 2
+const Y_MID = FLOW_H / 2
+const Y_BOT = FLOW_H - ROW_H / 2
+// The connectors get their own fixed-width grid column, so each SVG is drawn at
+// exactly its own size and nothing is stretched. Stretching an SVG to fill a
+// fluid column is what flattened these curves into diagonals before. Because the
+// SVG is 1:1 with CSS pixels, the same path strings drive the HTML dots on top.
+const LINK_W = 104
+
+// The centre card, and the wireframe brain across the top of it. The source PNG
+// is 732x660 and 400KB, and nearly a third of that height is empty margin; it
+// ships trimmed to its content box, resized to 2x display size and converted to
+// WebP, which is 7.7KB. Trimming is what closes the gap under the artwork, and
+// the display size is set so the brain itself renders exactly as before. Its
+// background is rgb(14,14,15), the sand-950 the card is painted, so the image
+// has no visible edge.
+const IMG_W = 78
+const IMG_H = 65
+const CARD_PAD_TOP = 14
+const CARD_PAD_BOTTOM = 16
+const IMG_GAP = 10
+// Text block: the title line plus the count line under it.
+const CARD_TEXT_H = 33
+const CARD_H = CARD_PAD_TOP + IMG_H + IMG_GAP + CARD_TEXT_H + CARD_PAD_BOTTOM
+// Connectors meet the middle of the card. The card is centred on the row, so
+// that is simply the row's own centre line.
+const CONVERGE_Y = Y_MID
+
+// Control points at 60% of the run give a true S: it leaves the node
+// horizontally and arrives at the brain horizontally.
+const curve = (y1: number, y2: number) =>
+  `M0,${y1} C${LINK_W * 0.6},${y1} ${LINK_W * 0.4},${y2} ${LINK_W},${y2}`
+
+// A journey is three legs of equal length: in, through the brain, out. Starting
+// one every leg means exactly one dot on a left connector, one inside the brain
+// and one on a right connector at any moment, and each dot hands its position to
+// the next at the card edge. Lane i enters at row i and leaves at row 2 - i, so
+// the paths cross rather than running in parallel.
+const LEG = 2.8
+const JOURNEY = LEG * 3
+const IN_ROWS = ['top', 'mid', 'bot'] as const
+const OUT_ROWS = ['bot', 'mid', 'top'] as const
+const Y_OF = { top: Y_TOP, mid: Y_MID, bot: Y_BOT }
+
+// Three things keep this from reading as a metronome, and none of them change
+// the cycle length, so one dot per side is still guaranteed:
+//   - the outgoing side sits half a leg off the incoming one, so the two sides
+//     never launch together, which was the robotic part;
+//   - a few tenths of jitter per lane, hand-picked rather than random so server
+//     and client render the same thing;
+//   - a different ease per lane, so they do not all glide at one speed.
+const HALF_LEG = LEG / 2
+const JITTER_IN = [0, 0.22, -0.14]
+const JITTER_OUT = [0.12, -0.2, 0.3]
+const EASES = ['cubic-bezier(.4,.05,.6,.95)', 'linear', 'cubic-bezier(.3,0,.7,1)']
+
+function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
+  const rows = (mode === 'in' ? IN_ROWS : OUT_ROWS).map((row, i) => ({
+    d: mode === 'in' ? curve(Y_OF[row], CONVERGE_Y) : curve(CONVERGE_Y, Y_OF[row]),
+    // in: leg 0 of journey i. out: leg 2, so two legs later, plus the offset.
+    delay:
+      mode === 'in'
+        ? i * LEG + JITTER_IN[i]
+        : (i * LEG + LEG * 2 + HALF_LEG + JITTER_OUT[i]) % JOURNEY,
+    ease: EASES[(mode === 'in' ? i : i + 1) % EASES.length],
+  }))
+  return (
+    <div className="flow-link" style={{ position: 'relative', width: LINK_W, height: FLOW_H }}>
+      <svg aria-hidden width={LINK_W} height={FLOW_H} viewBox={`0 0 ${LINK_W} ${FLOW_H}`} style={{ display: 'block' }}>
+        <defs>
+          {/* userSpaceOnUse, not the default objectBoundingBox: a shape with a
+              zero-area bounding box is not rendered at all under the default,
+              which is what made the flat connectors disappear. */}
+          <linearGradient id={`flow-${mode}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={LINK_W} y2="0">
+            <stop offset="0%" stopColor={mode === 'in' ? '#2D2D2E' : '#7B7B7D'} />
+            <stop offset="100%" stopColor={mode === 'in' ? '#7B7B7D' : '#2D2D2E'} />
+          </linearGradient>
+        </defs>
+        {rows.map((r) => (
+          <path key={r.d} d={r.d} fill="none" stroke={`url(#flow-${mode})`} strokeWidth={1} />
+        ))}
+      </svg>
+      {rows.map((r) => (
+        <span
+          key={r.d}
+          aria-hidden
+          className="flow-dot"
+          style={{ offsetPath: `path("${r.d}")`, animationDelay: `${r.delay.toFixed(2)}s`, animationTimingFunction: r.ease } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  )
+}
+
+function BrainFlow() {
+  const node: React.CSSProperties = {
+    height: ROW_H,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '0 14px',
+    background: '#1B1B1C',
+    border: '1px solid #2D2D2E',
+    borderRadius: 10,
+  }
+  const head: React.CSSProperties = {
+    fontFamily: MONO,
+    fontSize: 10,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    color: C.muted,
+    margin: '0 0 10px',
+  }
+  return (
+    <>
+      <style>{`
+        .flow-heads, .flow-grid { display: grid; grid-template-columns: 1fr ${LINK_W}px 190px ${LINK_W}px 1fr; }
+        .flow-col { display: flex; flex-direction: column; gap: ${ROW_GAP}px; }
+        .flow-mid { display: flex; align-items: center; }
+        /* The dot rides the same path string the line is drawn from, so the two
+           can never disagree. offset-anchor centres it on the path by default. */
+        .flow-dot {
+          position: absolute; top: 0; left: 0;
+          width: 5px; height: 5px; border-radius: 50%;
+          background: ${C.accent};
+          box-shadow: 0 0 6px ${C.accentBtn};
+          opacity: 0;
+          animation: flow-dot ${JOURNEY.toFixed(1)}s linear infinite;
+        }
+        /* A dot travels its slot, then goes dark at the card edge. Nothing is
+           drawn over the card: the middle leg is the beat where the brain is
+           working, and a dot surfaces again on the far side.
+           29% rather than a full third: the few tenths of slack are what let the
+           per-lane jitter run without two dots ever sharing a side. */
+        @keyframes flow-dot {
+          0%    { offset-distance: 0%;   opacity: 1; }
+          29%   { offset-distance: 100%; opacity: 1; }
+          29.1% { offset-distance: 100%; opacity: 0; }
+          100%  { offset-distance: 100%; opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .flow-dot { display: none; }
+        }
+        @media (max-width: 760px) {
+          .flow-heads { display: none; }
+          .flow-grid { grid-template-columns: 1fr; gap: ${ROW_GAP}px; }
+          .flow-link { display: none; }
+        }
+      `}</style>
+
+      {/* A touch more air than when a paragraph sat above: the diagram is the
+          section's body now, not a figure under prose. */}
+      <div className="flow-heads" style={{ marginTop: 36 }}>
+        <p style={head}>What goes in</p>
+        <span />
+        <p style={{ ...head, textAlign: 'center' }}>The judgment</p>
+        <span />
+        <p style={{ ...head, textAlign: 'right' }}>What comes out</p>
+      </div>
+
+      <div className="flow-grid">
+        <div className="flow-col">
+          {FLOW_IN.map((n) => (
+            <div key={n.title} style={node}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{n.sub}</span>
+            </div>
+          ))}
+        </div>
+
+        <FlowLinks mode="in" />
+
+        <div className="flow-mid">
+          {/* The focal card. Painted sand-950, the same colour the image's own
+              background is, so the artwork has no visible edge. */}
+          {/* Border stays 1px, as every card here is. Full-strength olive read
+              heavy beside the sand hairlines around it, so it is dialled back to
+              a true hairline that still marks this as the focal card. */}
+          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${CARD_PAD_TOP}px 0 ${CARD_PAD_BOTTOM}px`, alignItems: 'center', justifyContent: 'flex-start', background: C.base, borderColor: 'rgba(168,185,77,0.55)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/andromeda-brain-wire.webp"
+              alt=""
+              width={IMG_W}
+              height={IMG_H}
+              loading="lazy"
+              decoding="async"
+              style={{ display: 'block' }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: IMG_GAP }}>Andromeda Brain</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 2 }}>{BRAIN_TEASER.totalFiles} files</span>
+          </div>
+        </div>
+
+        <FlowLinks mode="out" />
+
+        <div className="flow-col">
+          {FLOW_OUT.map((n) => (
+            <div key={n.title} style={node}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.bright }}>{n.title}</span>
+              <span style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{n.sub}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// The teaser publishes names for the sectioned files only, so the entry layer
+// (index, inventory, tool) arrives as a count with no names. These are the
+// three at the current pin. The moment inject-premium ships its index and tools
+// sections the names come from the data and this list stops being read.
+// ponytail: hand-listed until then, sliced to REMAINDER so it can never claim
+// more files than the brain actually has.
+const ENTRY_FILES = ['rules.md', 'INVENTORY.md', 'check-colors']
+
+// The explorer's rail: every section, plus the entry layer the sections do not
+// cover yet, so the rail always accounts for all 56 files.
+const EXPLORER = [
+  ...MANIFEST.map((s) => ({ id: s.id, label: s.label, count: s.files.length, files: s.files, gloss: GLOSS[s.id] })),
+  ...(REMAINDER > 0
+    ? [{
+        id: 'index-tooling',
+        label: 'Index and tooling',
+        count: REMAINDER,
+        files: ENTRY_FILES.slice(0, REMAINDER) as readonly string[],
+        gloss: 'The entry point the agent opens first, the inventory of what already exists so it stops reinventing components, and a conformance tool it can run against its own output.',
+      }]
+    : []),
+]
+
+// Section rail on the left, that section's file names on the right, every name
+// locked. Two columns, not three, so a 39-name list stays readable at this
+// width. A rail entry the teaser gives no names for (the entry layer, until its
+// section ships) shows its gloss instead of an empty grid.
+function CorpusExplorer() {
+  const [active, setActive] = useState(0)
+  const sec = EXPLORER[active]
+  return (
+    <>
+      <style>{`
+        .corpus-explorer { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+        /* Hover and selected match the site's left nav: sand-800 at 60% on
+           hover, solid sand-800 when selected. */
+        .corpus-rail-item { width: 100%; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 18px; border-radius: 0 8px 8px 0; transition: background 0.15s ease, color 0.15s ease; }
+        .corpus-rail-item:hover { background: rgba(45,45,46,0.6); }
+        .corpus-rail-item[aria-current='true'] { background: #2D2D2E; }
+        .corpus-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; transition: background 0.15s ease; }
+        .corpus-file:hover { background: #1B1B1C; }
+        @media (max-width: 760px) {
+          .corpus-explorer { grid-template-columns: 1fr; }
+          .corpus-files { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="corpus-explorer" style={{ marginTop: 32 }}>
+        {/* alignSelf start, so the rail keeps its own height. Stretching it to
+            the grid row made its rule run on past the last item whenever the
+            pane was the taller of the two. */}
+        <div style={{ borderLeft: '1px solid #2D2D2E', alignSelf: 'start' }}>
+          {EXPLORER.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              className="corpus-rail-item"
+              onClick={() => setActive(i)}
+              aria-current={i === active}
+              style={{
+                borderLeft: `2px solid ${i === active ? C.accentBtn : 'transparent'}`,
+                marginLeft: -1,
+              }}
+            >
+              <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === active ? C.bright : C.muted }}>
+                {s.label}
+              </span>
+              <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: C.accent, opacity: i === active ? 1 : 0.55 }}>{s.count}</span>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ ...PANEL, padding: 20 }}>
+          {sec.files.length > 0 ? (
+            <div className="corpus-files" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+              {sec.files.map((f) => (
+                <div key={f} className="corpus-file">
+                  {/* One marker shape and one colour everywhere, so the pane
+                      reads as a set rather than four different treatments. */}
+                  <span aria-hidden style={{ width: 8, height: 8, borderRadius: 2, background: C.accent, flexShrink: 0 }} />
+                  <span style={{ fontFamily: MONO, fontSize: 13, color: C.node }}>{f}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: C.node, margin: 0, padding: '10px 12px' }}>{sec.gloss}</p>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
 // Scroll-reveal wrapper — same recipe as the site's Section component on
 // /pricing and /about (fade + rise on first entry, once: true). Kept local
 // since this page styles with inline style objects, not Tailwind className.
-function Section({ children, style, delay = 0 }: { children: React.ReactNode; style?: React.CSSProperties; delay?: number }) {
+function Section({ children, className, style, delay = 0 }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; delay?: number }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-80px' })
   return (
@@ -134,6 +468,7 @@ function Section({ children, style, delay = 0 }: { children: React.ReactNode; st
       initial={{ opacity: 0, y: 32 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
       transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      className={className}
       style={style}
     >
       {children}
@@ -175,7 +510,6 @@ export function BrainStoryV4() {
   const heroSmooth = useRef<Array<{ x: number; y: number } | undefined>>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [loadProgress, setLoadProgress] = useState(0)
-  const [matIndex, setMatIndex] = useState(DEFAULT_MATERIAL)
 
   // Premium subscribers already have the brain — re-label the CTA into the
   // viewer instead of pitching an upgrade. Treat the in-flight 'unknown' state
@@ -184,11 +518,8 @@ export function BrainStoryV4() {
   // TemplateChrome/TopAuthPill. Anon/free derive to 'not-premium' synchronously,
   // and /explore is server-gated, so this never grants a free user access.
   const canOpen = usePremiumStatus() !== 'not-premium'
-  const ctaLabel = canOpen ? 'Read the Brain' : 'Get the Brain with Premium'
+  const ctaLabel = canOpen ? 'Read the brain' : 'Get the brain with premium'
   const ctaHref = canOpen ? '/design-systems/andromeda/brain/explore' : '/pricing'
-  const matIndexRef = useRef(DEFAULT_MATERIAL)
-  const applyRef = useRef<(i: number) => void>(() => {})
-  const chooseMat = (i: number) => { matIndexRef.current = i; setMatIndex(i); applyRef.current(i) }
 
   // label positions spread over the WHOLE sphere around the brain (top, bottom, left, right,
   // front, back) via an even golden-angle spiral + a little jitter and varied distance.
@@ -223,15 +554,14 @@ export function BrainStoryV4() {
     const host = hostRef.current
     if (!host) return
     let alive = true, raf = 0
-    let renderer: any, scene: any, camera: any, pmrem: any
+    let renderer: any, scene: any, camera: any
     let onResize = () => {}
     let cleanupInput = () => {}
 
     ;(async () => {
-      const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+      const [THREE, { GLTFLoader }] = await Promise.all([
         import('three'),
         import('three/examples/jsm/loaders/GLTFLoader.js'),
-        import('three/examples/jsm/environments/RoomEnvironment.js'),
       ])
       if (!alive) return
 
@@ -243,7 +573,13 @@ export function BrainStoryV4() {
 
       let W = host.clientWidth || 800, H = host.clientHeight || 600
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
-      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1 : 1.5))
+      // Cap at 2, matching the premium reader. It used to cap at 1.5, so on a
+      // retina screen the canvas rendered below native and the browser upscaled
+      // it: every hairline wire came out thick and soft. A wireframe is nothing
+      // but hairlines, so it pays that cost far harder than a solid mesh would,
+      // and the scene is much cheaper now that the lights and the environment
+      // map are gone. Constrained devices still get less.
+      renderer.setSize(W, H); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isConstrained ? 1.5 : 2))
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
       // The render loop only starts once the model lands, and an opaque
       // (alpha:false) canvas with an uninitialized buffer composites as a
@@ -261,9 +597,8 @@ export function BrainStoryV4() {
       // scene exists (onLoad only needs scene.add(model) + THREE + the state
       // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
       // setup that used to run first and delay the fetch for no reason.
-      let firefly: any = null, flyLight: any = null, brainRoot: any = null, radius = 1, ready = false
-      let zonesActive = false, zoneGroup: any = null
-      const brainMeshes: any[] = [], zoneItems: any[] = []
+      let brainRoot: any = null, radius = 1, ready = false
+      const brainMeshes: any[] = []
 
       const loader = new GLTFLoader()
       loader.load(MODEL_URL, (gltf: any) => {
@@ -285,33 +620,63 @@ export function BrainStoryV4() {
         radius = 1
         brainRoot = model
 
-        const applyMaterial = (i: number) => {
-          const preset = MATERIALS[i] || MATERIALS[0]
-          zonesActive = !!preset.zones
-          for (const mesh of brainMeshes) { const mat = preset.make(THREE); mat.userData.pulse = !!preset.pulse; mesh.material = mat }
-        }
-        applyMaterial(matIndexRef.current)
-        applyRef.current = applyMaterial
-
-        // procedural firefly (the brain model has none) — a teal bulb that carries its own light
-        firefly = new THREE.Group()
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(radius * 0.03, 16, 16), new THREE.MeshBasicMaterial({ color: C.accent }))
-        flyLight = new THREE.PointLight(new THREE.Color(C.accent), 7, radius * 3.2, 2)
-        firefly.add(bulb, flyLight)
-        scene.add(firefly)
-
-        // activation zones: per-region colored point light ONLY. We see the coloured light
-        // reflected on the brain, never a visible spot/source. Rotated to match the brain.
-        zoneGroup = new THREE.Group()
-        ZONES.forEach((z, k) => {
-          const dir = new THREE.Vector3(z.dir[0], z.dir[1], z.dir[2])
-          const light = new THREE.PointLight(new THREE.Color(z.color), 0, 1.9, 2)
-          light.position.copy(dir).multiplyScalar(1.2)
-          zoneGroup.add(light)
-          zoneItems.push({ light, phase: k * 1.3, freq: 0.45 + (k % 5) * 0.13 })
+        // Radiant wireframe, painted the same way the premium reader paints its
+        // brain (BrainRender.tsx): the four section colours blended by how
+        // closely each vertex faces each section. Same palette, same weighting,
+        // so the hero and the reader are recognisably the same object, and the
+        // colours mean something rather than being a decorative rainbow.
+        //
+        // new THREE.Color(hex) yields LINEAR channels, which is what a vertex
+        // colour buffer wants. An earlier pass here used setHSL, whose default
+        // colour space is the working one, so sRGB-intended values went in
+        // untranslated and the whole mesh washed out toward white.
+        const zoneCols = SECTION_ZONES.map((z) => {
+          const c = new THREE.Color(z.hex)
+          return [c.r, c.g, c.b] as [number, number, number]
         })
-        zoneGroup.visible = false
-        scene.add(zoneGroup)
+        const zoneDirs = SECTION_ZONES.map((z) => new THREE.Vector3(z.dir[0], z.dir[1], z.dir[2]).normalize())
+        for (const mesh of brainMeshes) {
+          const geo = mesh.geometry
+          if (!geo?.attributes?.position || geo.attributes.color) continue
+          const pos = geo.attributes.position
+          geo.computeBoundingBox()
+          const bb = geo.boundingBox
+          const cx = (bb.min.x + bb.max.x) / 2
+          const cy = (bb.min.y + bb.max.y) / 2
+          const cz = (bb.min.z + bb.max.z) / 2
+          const colors = new Float32Array(pos.count * 3)
+          const d = new THREE.Vector3()
+          for (let i = 0; i < pos.count; i++) {
+            d.set(pos.getX(i) - cx, pos.getY(i) - cy, pos.getZ(i) - cz).normalize()
+            let wsum = 0
+            const w = [0, 0, 0, 0]
+            for (let k = 0; k < 4; k++) {
+              const dot = Math.max(0, d.dot(zoneDirs[k]))
+              // cubed so each section holds its own area, plus an epsilon so no
+              // wire on the far side goes fully black
+              w[k] = dot * dot * dot + 0.04
+              wsum += w[k]
+            }
+            let r = 0, g = 0, b = 0
+            for (let k = 0; k < 4; k++) {
+              const t = w[k] / wsum
+              r += zoneCols[k][0] * t
+              g += zoneCols[k][1] * t
+              b += zoneCols[k][2] * t
+            }
+            colors[i * 3] = r
+            colors[i * 3 + 1] = g
+            colors[i * 3 + 2] = b
+          }
+          geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+        }
+
+        for (const mesh of brainMeshes) mesh.material = makeBrainMaterial(THREE)
+
+        // The orbiting bulb and its point light are gone. The wireframe is
+        // unlit, so that light lit nothing; all it did was fly a bright dot
+        // across the scene. Its path survives below as an invisible focus, which
+        // is what still walks the glow along the labels.
 
         ready = true; setStatus('ready')
         // fade the canvas in over the first rendered frames
@@ -323,13 +688,9 @@ export function BrainStoryV4() {
         if (alive && event.total) setLoadProgress(Math.round((event.loaded / event.total) * 100))
       }, () => { if (alive) setStatus('error') })
 
-      pmrem = new THREE.PMREMGenerator(renderer)
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-      // @ts-ignore r183 scene intensity
-      scene.environmentIntensity = 0.4
-      scene.add(new THREE.AmbientLight(0xffffff, 0.16))
-      const key = new THREE.DirectionalLight(0xeaf2ff, 1.25); key.position.set(3, 4, 5); scene.add(key)
-      const rim = new THREE.DirectionalLight(new THREE.Color(C.accent), 0.9); rim.position.set(-4, 1, -3); scene.add(rim)
+      // No lights and no environment map. The brain is an unlit wireframe, so
+      // every one of them rendered nothing; generating the PMREM environment
+      // alone was real work on every mount.
 
       camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 100)
       camera.position.set(0, 0.3, 3)
@@ -382,16 +743,15 @@ export function BrainStoryV4() {
 
         if (ready) {
           const R = radius
-          // organic (non-linear) firefly flight around the brain
+          // Invisible focus on an organic (non-linear) orbit. Nothing renders
+          // here any more; the labels below use its position to decide which of
+          // them is currently lit.
           const a1 = t * 0.62, a2 = t * 0.37
           flyPos.set(
             Math.cos(a1) * R * 0.98 + Math.sin(a2 * 1.3) * R * 0.16,
             Math.sin(a1 * 0.8) * R * 0.42 + Math.cos(t * 0.9) * R * 0.12 + R * 0.12,
             Math.sin(a1) * R * 0.98 + Math.cos(a2 * 0.7) * R * 0.16,
           )
-          if (firefly) firefly.position.copy(flyPos)
-          if (flyLight) flyLight.intensity = 6 + Math.sin(t * 6) * 1.5
-          for (const mesh of brainMeshes) { const mat = mesh.material; if (mat?.userData?.pulse) mat.emissiveIntensity = 0.1 + 0.05 * Math.sin(t * 1.4) }
 
           // camera: the idle orbit only (the default state — unchanged)
           const orb = t * 0.12, d = R * 2.6
@@ -405,19 +765,7 @@ export function BrainStoryV4() {
           spinQuat.setFromEuler(spinEuler.set(spin.rotX, spin.rotY, 0))
           const activity = Math.min(1, Math.abs(spin.velY) * 34 + (spin.active ? 0.7 : 0))
 
-          // activation zones: colored spots that pulse on/off across regions, spinning with the brain
-          if (zoneGroup) {
-            zoneGroup.visible = zonesActive
-            if (zonesActive) {
-              zoneGroup.rotation.set(spin.rotX, spin.rotY, 0)
-              for (const zi of zoneItems) {
-                const act = Math.pow(0.5 + 0.5 * Math.sin(t * zi.freq + zi.phase), 2.4)
-                zi.light.intensity = act * 5.5
-              }
-            }
-          }
-
-          // labels: rotate WITH the brain (dragging carries them past the firefly), light up near it
+          // labels: rotate WITH the brain (dragging carries them past the focus), light up near it
           const ease = 1 - Math.exp(-18 * dt)
           for (let i = 0; i < dirs.length; i++) {
             const el = labelEls.current[i]; if (!el) continue
@@ -464,17 +812,9 @@ export function BrainStoryV4() {
       alive = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); cleanupInput()
       // forceContextLoss releases the actual WebGL context (browsers cap ~16);
       // dispose() alone leaks it, so repeated mounts of the story would run out.
-      try { pmrem?.dispose(); try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
+      try { try { renderer?.forceContextLoss() } catch {} renderer?.dispose(); if (renderer?.domElement && host.contains(renderer.domElement)) host.removeChild(renderer.domElement) } catch {}
     }
   }, [dirs])
-
-  const total = BRAIN_TEASER.totalFiles, foundationsN = FND.length, rulesN = CMP.length, skillsN = SK.length
-  const STATS = [
-    { n: foundationsN, label: 'foundations' },
-    { n: rulesN, label: 'component rules' },
-    { n: skillsN, label: 'skills' },
-    { n: total, label: 'files of design intent' },
-  ].filter((s) => s.n > 0)
 
   return (
     <div style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
@@ -499,33 +839,8 @@ export function BrainStoryV4() {
           ref={hostRef}
           style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'pan-y' }}
         />
-        {/* appearance stepper — vertical ticks on the right, centered with the
-            brain. No labels (the material name shows as a native tooltip on
-            hover); each tick steps the brain's look. */}
-        <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-          {MATERIALS.map((mm, i) => (
-            <button
-              key={mm.name}
-              onClick={() => chooseMat(i)}
-              title={mm.name}
-              aria-label={`Appearance: ${mm.name}`}
-              aria-pressed={i === matIndex}
-              style={{ display: 'block', cursor: 'pointer', background: 'transparent', border: 'none', padding: '12px 8px', lineHeight: 0 }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  height: 2,
-                  width: i === matIndex ? 30 : 16,
-                  borderRadius: 2,
-                  background: i === matIndex ? C.accentBtn : C.node,
-                  opacity: i === matIndex ? 1 : 0.5,
-                  transition: 'width .2s ease, background .2s ease, opacity .2s ease',
-                }}
-              />
-            </button>
-          ))}
-        </div>
+        {/* The appearance stepper is gone: the brain has one look now, the
+            gradient wireframe, so there was nothing left to step through. */}
         {/* floating labels layer */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
           {LABELS.map((txt, i) => (
@@ -578,7 +893,7 @@ export function BrainStoryV4() {
           transition={{ duration: 0.35, delay: 0.18 }}
           style={{ fontSize: 16, color: C.node, maxWidth: 576, lineHeight: 1.625, margin: '16px 0 0', fontWeight: 400 }}
         >
-          Tokens and components are the pieces. The Brain is the judgment that assembles them: every rule, foundation, and skill your AI agent reads, so what it builds already matches the system instead of a guess.
+          Tokens and components are the pieces. The brain is the judgment that assembles them: every foundation, component rule, skill and tool your AI agent reads, so what it builds already matches the system instead of a guess.
         </motion.p>
         {/* two CTAs, same hierarchy as the homepage hero (primary olive + outline). Premium
             branch: the gate routes premium users to the brain viewer when this becomes the real page. */}
@@ -644,7 +959,7 @@ export function BrainStoryV4() {
                   A system that grows with the work.
                 </p>
                 <p style={{ fontSize: 14, color: C.node, lineHeight: 1.625, margin: '16px 0 0' }}>
-                  Most design systems hand you a fixed kit and stop. The Brain is built the other way: to grow, not freeze.
+                  Most design systems hand you a fixed kit and stop. The brain is built the other way: to grow, not freeze.
                 </p>
               </div>
             </div>
@@ -678,41 +993,13 @@ export function BrainStoryV4() {
           </div>
         </Section>
 
-        {/* What it is */}
-        <Section style={{ marginTop: 60 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
-          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            The taste lives in the system, not the prompt
-          </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            Andromeda already gives you <Chip>tokens</Chip> and <Chip>components</Chip>. The Brain adds the part usually{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>trapped in a designer&apos;s head, or buried in documentation nobody reads</strong>: when a color carries meaning, how motion should behave, what every state owes the user. It writes that reasoning down in a form{' '}
-            <strong style={{ color: C.bright, fontWeight: 600 }}>an agent actually reads</strong>, so your tools build to it instead of guessing, and the screens come out on-brand the first time.
-          </p>
-
-          <div style={{ ...PANEL, marginTop: 28 }}>
-            {STRUCTURE.map((g, gi) => (
-              <div key={g.label} style={{ marginTop: gi === 0 ? 0 : 20, paddingTop: gi === 0 ? 0 : 20, borderTop: gi === 0 ? 'none' : '1px solid #2D2D2E' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted }}>{g.label}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 12, color: C.accent, fontWeight: 700 }}>{g.count}</span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {g.sample.map((name) => <Chip key={name}>{name}</Chip>)}
-                  {g.count > g.sample.length && <Chip>+{g.count - g.sample.length} more</Chip>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Section>
-
         {/* Classic vs AI-native — the workflow contrast */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Where the classic workflow leaks
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 24px' }}>
+          <p style={{ ...SECTION_DESC, margin: '12px 0 24px' }}>
             The classic workflow loses time and intent at every step from Figma to production. When the system is already code and tokens, those steps disappear.
           </p>
 
@@ -746,22 +1033,49 @@ export function BrainStoryV4() {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(168,185,77,0.05)' }}>
-            <Asterisk weight="regular" size={16} color={C.accentBtn} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5 }}>
+          {/* A typed asterisk rather than a 16px icon: it reads as a footnote
+              marker on the sentence, which is what it is. */}
+          <div style={{ marginTop: 20, border: '1px solid #2D2D2E', borderRadius: 16, padding: '16px 24px', background: 'rgba(168,185,77,0.05)' }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: C.accentBtn, lineHeight: 1.5, margin: 0 }}>
+              <span style={{ marginRight: 6 }}>*</span>
               The agent builds fast and accurate. You stay in the loop, and you decide what ships.
-            </span>
+            </p>
           </div>
         </Section>
 
+        {/* What it is */}
+        <Section className="mt-16 sm:mt-24">
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            The taste lives in the system, not the prompt
+          </h2>
+          {/* Kicker, headline, diagram. No paragraph: the picture is the
+              explanation, and prose above it only said the same thing first. */}
+
+          <BrainFlow />
+        </Section>
+
+        {/* Browse the corpus — rail plus locked file names */}
+        <Section className="mt-16 sm:mt-24">
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
+          <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
+            <span style={{ color: C.accentBtn }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
+          </h2>
+          <p style={{ ...SECTION_DESC }}>
+            Not documentation for you. Rules for the machine: when a color is allowed to carry meaning, how far a panel may breathe, what every state owes the user. The names are open. The judgment inside them ships with Premium.
+          </p>
+
+          <CorpusExplorer />
+        </Section>
+
         {/* How it works */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
-            One reader. Every benefit is yours.
+            Your agent reads it, not you
           </h2>
-          <p style={{ fontSize: 16, color: C.node, lineHeight: 1.7, margin: '16px 0 0' }}>
-            The Brain is written for your AI agent to read. The agent follows the rules, and you get the results: on-brand UI without the guesswork.
+          <p style={{ ...SECTION_DESC }}>
+            Nobody has to learn the system or keep it in their head. The agent opens the files the task needs, and builds against them.
           </p>
           <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>
             {BENEFITS.map((benefit, i) => (
@@ -770,23 +1084,33 @@ export function BrainStoryV4() {
           </div>
         </Section>
 
-        {/* Closing: by the numbers */}
-        <Section style={{ marginTop: 60, marginBottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', fontFamily: MONO, fontSize: 14 }}>
-            {STATS.map((s, i) => (
-              <span key={s.label} style={{ display: 'contents' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <span style={{ color: C.accent, fontWeight: 700 }}>{s.n}</span>
-                  <span style={{ color: C.muted, marginLeft: 6 }}>{s.label}</span>
-                </span>
-                {i < STATS.length - 1 && <span style={{ color: C.muted, margin: '0 12px' }}>·</span>}
-              </span>
-            ))}
+        {/* Closing CTA — the homepage's final-CTA panel, class for class, so the
+            two pages close the same way. The primary button stays premium-aware:
+            a subscriber gets the reader, everyone else gets pricing. */}
+        <Section className="mt-16 sm:mt-24" style={{ marginBottom: 8 }}>
+          <div className="relative overflow-hidden rounded-2xl border border-olive-500/20 bg-gradient-to-br from-olive-500/8 via-transparent to-transparent p-8 text-center ring-1 ring-inset ring-olive-500/10">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="h-40 w-64 rounded-full bg-olive-500/10 blur-3xl" />
+            </div>
+            <p className="relative text-xs font-semibold uppercase tracking-wider text-sand-600">
+              How to get it
+            </p>
+            <h2 className="relative mt-2 text-xl font-bold text-sand-50">
+              Andromeda components are free for everyone.
+            </h2>
+            <p className="relative mt-2 text-base text-sand-500">
+              The brain is the premium layer: one install puts all {BRAIN_TEASER.totalFiles} files in your project, and the web reader keeps every rule a click away while you work.
+            </p>
+            <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })}>
+                {ctaLabel}
+                <ArrowRight weight="regular" size={14} />
+              </Link>
+              <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'outline', size: 'lg' })}>
+                Explore Andromeda
+              </Link>
+            </div>
           </div>
-          <Link href={ctaHref} className={buttonClasses({ variant: 'primary', size: 'lg' })} style={{ marginTop: 24 }}>
-            {ctaLabel}
-            <ArrowRight weight="regular" size={14} />
-          </Link>
         </Section>
       </div>
 
