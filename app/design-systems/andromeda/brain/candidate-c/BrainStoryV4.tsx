@@ -155,36 +155,24 @@ const Y_BOT = FLOW_H - ROW_H / 2
 // SVG is 1:1 with CSS pixels, the same path strings drive the HTML dots on top.
 const LINK_W = 104
 
-// The centre card, and the one-line brain drawn across the top of it.
+// The centre card, and the wireframe brain across the top of it. The source
+// PNG is 732x660 and 400KB; it ships resized to 2x display size as WebP, which
+// is 7.5KB. Its own background is rgb(14,14,15), the sand-950 the card is
+// painted, so the image has no visible edge.
 const CARD_W = 190
-const CARD_H = 112
-const BRAIN_W = CARD_W - 2   // inside the 1px border
-const BRAIN_H = 44
-const BRAIN_PAD_TOP = 12
-// Every connector converges on the brain line's entry height rather than on the
-// middle of the card. That is what lets a dot arrive, pick up the brain path and
-// leave again with no jump: one constant drives the curves and the drawing.
-const CONVERGE_Y = Y_MID - CARD_H / 2 + BRAIN_PAD_TOP + BRAIN_H / 2
-
-// One continuous stroke: it comes in flat from the left, loops a lumpy cortex,
-// waves back through the middle and leaves flat to the right. Abstract on
-// purpose. Real gyri turn to noise at 44px tall, and a single unbroken line is
-// what lets one dot travel the whole thing.
-const BRAIN_PATH = [
-  'M0,22 H52',
-  'C44,14 50,6 62,6',
-  'C74,1 86,5 95,10',
-  'C104,2 121,4 128,12',
-  'C140,17 140,29 130,33',
-  'C121,41 105,41 97,34',
-  'C87,41 71,41 63,34',
-  'C51,32 45,24 52,22',
-  'C62,18 66,27 75,22',
-  'C84,17 88,27 97,22',
-  'C106,17 110,27 119,22',
-  'C126,19 130,22 136,22',
-  `H${BRAIN_W}`,
-].join(' ')
+const IMG_W = 104
+const IMG_H = 94
+const CARD_PAD_TOP = 14
+const CARD_H = CARD_PAD_TOP + IMG_H + 8 + 34 + 14
+// Every connector converges on the middle of the image rather than the middle
+// of the card, so a dot arrives, crosses the brain and leaves again without a
+// jump. One constant drives the curves and the card geometry.
+const CONVERGE_Y = Y_MID - CARD_H / 2 + CARD_PAD_TOP + IMG_H / 2
+// The dot's route across the card. Invisible: a raster brain has no path to
+// follow, so this stands in for one, weaving across the image instead of
+// cutting a straight line through it.
+const CROSS_W = CARD_W - 2
+const CROSS_PATH = `M0,${IMG_H / 2} C${CROSS_W * 0.22},${IMG_H / 2 - 16} ${CROSS_W * 0.34},${IMG_H / 2 + 14} ${CROSS_W / 2},${IMG_H / 2} C${CROSS_W * 0.66},${IMG_H / 2 - 14} ${CROSS_W * 0.78},${IMG_H / 2 + 16} ${CROSS_W},${IMG_H / 2}`
 
 // Control points at 60% of the run give a true S: it leaves the node
 // horizontally and arrives at the brain horizontally.
@@ -322,15 +310,21 @@ function BrainFlow() {
         <FlowLinks mode="in" />
 
         <div className="flow-mid">
-          {/* The focal card: taller than the side rows, and full bleed at the
-              top so the brain line starts exactly on the card edge, which is
-              where the incoming connector ends. */}
-          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${BRAIN_PAD_TOP}px 0 0`, alignItems: 'center', background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
-            <div style={{ position: 'relative', width: '100%', height: BRAIN_H }}>
-              <svg aria-hidden width="100%" height={BRAIN_H} viewBox={`0 0 ${BRAIN_W} ${BRAIN_H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
-                <path d={BRAIN_PATH} fill="none" stroke={C.accentBtn} strokeWidth={1} strokeLinecap="round" />
-              </svg>
-              <span aria-hidden className="brain-dot" style={{ offsetPath: `path("${BRAIN_PATH}")` } as React.CSSProperties} />
+          {/* The focal card. Painted sand-950, the same colour the image's own
+              background is, so the artwork has no visible edge. */}
+          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${CARD_PAD_TOP}px 0 0`, alignItems: 'center', background: C.base, borderColor: C.accentBtn }}>
+            <div style={{ position: 'relative', width: '100%', height: IMG_H }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/andromeda-brain-wire.webp"
+                alt=""
+                width={IMG_W}
+                height={IMG_H}
+                loading="lazy"
+                decoding="async"
+                style={{ display: 'block', margin: '0 auto' }}
+              />
+              <span aria-hidden className="brain-dot" style={{ offsetPath: `path("${CROSS_PATH}")` } as React.CSSProperties} />
             </div>
             <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: 8 }}>Andromeda Brain</span>
             <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
