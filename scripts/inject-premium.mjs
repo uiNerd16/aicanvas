@@ -328,7 +328,7 @@ const BRAIN_TEASER_FALLBACK = {
     {
       id: 'tools',
       label: 'Tools',
-      files: ['check-colors'],
+      files: ['verify-andromeda'],
     },
   ],
 }
@@ -448,7 +448,8 @@ function collectBrain(source, slug) {
   const foundations = listMd('foundations', '.md')
   const componentRules = listMd('components', '.rules.md')
   // Runnable checks the CONSUMER executes against their own code (e.g.
-  // check-colors.mjs, which names the replacement token for every finding).
+  // verify-andromeda.mjs, which names the replacement token for every colour
+  // finding and gates 'done' on the mechanical checks).
   // The rules say what is right; these are what make it verifiable, so they
   // ship with the rules rather than staying maintainer-side.
   const tools = listMd('_tools', '.mjs')
