@@ -405,7 +405,7 @@ function CorpusExplorer() {
 // Scroll-reveal wrapper — same recipe as the site's Section component on
 // /pricing and /about (fade + rise on first entry, once: true). Kept local
 // since this page styles with inline style objects, not Tailwind className.
-function Section({ children, style, delay = 0 }: { children: React.ReactNode; style?: React.CSSProperties; delay?: number }) {
+function Section({ children, className, style, delay = 0 }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; delay?: number }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-80px' })
   return (
@@ -414,6 +414,7 @@ function Section({ children, style, delay = 0 }: { children: React.ReactNode; st
       initial={{ opacity: 0, y: 32 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
       transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      className={className}
       style={style}
     >
       {children}
@@ -951,7 +952,7 @@ export function BrainStoryV4() {
         </Section>
 
         {/* Classic vs AI-native — the workflow contrast */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The difference</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             Where the classic workflow leaks
@@ -999,7 +1000,7 @@ export function BrainStoryV4() {
         </Section>
 
         {/* What it is */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The design brain</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             The taste lives in the system, not the prompt
@@ -1014,7 +1015,7 @@ export function BrainStoryV4() {
         </Section>
 
         {/* Browse the corpus — rail plus locked file names */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>The corpus</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             <span style={{ color: C.accentBtn }}>{BRAIN_TEASER.totalFiles} files</span> the agent reads before it writes a line.
@@ -1027,7 +1028,7 @@ export function BrainStoryV4() {
         </Section>
 
         {/* How it works */}
-        <Section style={{ marginTop: 60 }}>
+        <Section className="mt-16 sm:mt-24">
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, margin: 0 }}>How it works</p>
           <h2 style={{ fontSize: 20, color: C.bright, fontWeight: 700, letterSpacing: '-0.01em', margin: '6px 0 0' }}>
             One reader. Every benefit is yours.
@@ -1045,7 +1046,7 @@ export function BrainStoryV4() {
         {/* Closing CTA — the homepage's final-CTA panel, class for class, so the
             two pages close the same way. The primary button stays premium-aware:
             a subscriber gets the reader, everyone else gets pricing. */}
-        <Section style={{ marginTop: 60, marginBottom: 8 }}>
+        <Section className="mt-16 sm:mt-24" style={{ marginBottom: 8 }}>
           <div className="relative overflow-hidden rounded-2xl border border-olive-500/20 bg-gradient-to-br from-olive-500/8 via-transparent to-transparent p-8 text-center ring-1 ring-inset ring-olive-500/10">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="h-40 w-64 rounded-full bg-olive-500/10 blur-3xl" />
