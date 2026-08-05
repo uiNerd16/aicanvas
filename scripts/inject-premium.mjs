@@ -774,8 +774,11 @@ for (const slug of brains) {
         type: 'registry:item',
         title: `${title} Brain`,
         description:
-          `The ${title} design-system brain: every rule, foundation, and skill as markdown ` +
-          `your AI agent reads. Re-run the install command any time to pull the latest rules.`,
+          // Names the kinds the corpus actually ships. It used to say "every
+          // rule, foundation, and skill", which counts three while the bundle
+          // carries five: the index and the tools were invisible here too.
+          `The ${title} design-system brain: every foundation, component rule, skill and tool as ` +
+          `markdown your AI agent reads. Re-run the install command any time to pull the latest rules.`,
         dependencies: [],
         registryDependencies: [],
         files: files.map((f) => ({
