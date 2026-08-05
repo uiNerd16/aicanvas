@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
-import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk, Brain } from '@phosphor-icons/react'
+import { ArrowRight, Fire, Target, Gauge, Check, X as XIcon, Asterisk } from '@phosphor-icons/react'
 import { buttonClasses } from '@/app/components/buttonClasses'
 import { usePremiumStatus } from '@/app/components/billing/usePremiumStatus'
 import { HeaderSocials } from '@/app/components/HeaderSocials'
@@ -154,45 +154,67 @@ const Y_BOT = FLOW_H - ROW_H / 2
 // fluid column is what flattened these curves into diagonals before. Because the
 // SVG is 1:1 with CSS pixels, the same path strings drive the HTML dots on top.
 const LINK_W = 104
+
+// The centre card, and the one-line brain drawn across the top of it.
+const CARD_W = 190
+const CARD_H = 112
+const BRAIN_W = CARD_W - 2   // inside the 1px border
+const BRAIN_H = 44
+const BRAIN_PAD_TOP = 12
+// Every connector converges on the brain line's entry height rather than on the
+// middle of the card. That is what lets a dot arrive, pick up the brain path and
+// leave again with no jump: one constant drives the curves and the drawing.
+const CONVERGE_Y = Y_MID - CARD_H / 2 + BRAIN_PAD_TOP + BRAIN_H / 2
+
+// One continuous stroke: it comes in flat from the left, loops a lumpy cortex,
+// waves back through the middle and leaves flat to the right. Abstract on
+// purpose. Real gyri turn to noise at 44px tall, and a single unbroken line is
+// what lets one dot travel the whole thing.
+const BRAIN_PATH = [
+  'M0,22 H52',
+  'C44,14 50,6 62,6',
+  'C74,1 86,5 95,10',
+  'C104,2 121,4 128,12',
+  'C140,17 140,29 130,33',
+  'C121,41 105,41 97,34',
+  'C87,41 71,41 63,34',
+  'C51,32 45,24 52,22',
+  'C62,18 66,27 75,22',
+  'C84,17 88,27 97,22',
+  'C106,17 110,27 119,22',
+  'C126,19 130,22 136,22',
+  `H${BRAIN_W}`,
+].join(' ')
+
 // Control points at 60% of the run give a true S: it leaves the node
 // horizontally and arrives at the brain horizontally.
 const curve = (y1: number, y2: number) =>
   `M0,${y1} C${LINK_W * 0.6},${y1} ${LINK_W * 0.4},${y2} ${LINK_W},${y2}`
 
-// One dot in flight per side at any moment. Each dot owns a slot of the shared
-// cycle: it travels for one step, then waits out the rest. The right side is
-// half a step behind the left, and runs bottom to top, so the two sides read as
-// alternating pulses rather than synchronised pairs.
-const DOT_STEP = 2.8
-const DOT_CYCLE = DOT_STEP * 3
-const LINKS = {
-  in: [
-    { y: 'top', delay: 0 },
-    { y: 'mid', delay: DOT_STEP },
-    { y: 'bot', delay: DOT_STEP * 2 },
-  ],
-  out: [
-    { y: 'bot', delay: DOT_STEP * 0.5 },
-    { y: 'mid', delay: DOT_STEP * 1.5 },
-    { y: 'top', delay: DOT_STEP * 2.5 },
-  ],
-} as const
-const Y_OF = { top: () => Y_TOP, mid: () => Y_MID, bot: () => Y_BOT }
+// A journey is three legs of equal length: in, through the brain, out. Starting
+// one every leg means exactly one dot on a left connector, one inside the brain
+// and one on a right connector at any moment, and each dot hands its position to
+// the next at the card edge. Lane i enters at row i and leaves at row 2 - i, so
+// the paths cross rather than running in parallel.
+const LEG = 2.8
+const JOURNEY = LEG * 3
+const IN_ROWS = ['top', 'mid', 'bot'] as const
+const OUT_ROWS = ['bot', 'mid', 'top'] as const
+const Y_OF = { top: Y_TOP, mid: Y_MID, bot: Y_BOT }
 
 function FlowLinks({ mode }: { mode: 'in' | 'out' }) {
-  const rows = LINKS[mode].map((r) => {
-    const y = Y_OF[r.y]()
-    return { d: mode === 'in' ? curve(y, Y_MID) : curve(Y_MID, y), delay: r.delay }
-  })
+  const rows = (mode === 'in' ? IN_ROWS : OUT_ROWS).map((row, i) => ({
+    d: mode === 'in' ? curve(Y_OF[row], CONVERGE_Y) : curve(CONVERGE_Y, Y_OF[row]),
+    // in: leg 0 of journey i. out: leg 2, so two legs later, wrapped.
+    delay: mode === 'in' ? i * LEG : (i * LEG + LEG * 2) % JOURNEY,
+  }))
   return (
     <div className="flow-link" style={{ position: 'relative', width: LINK_W, height: FLOW_H }}>
       <svg aria-hidden width={LINK_W} height={FLOW_H} viewBox={`0 0 ${LINK_W} ${FLOW_H}`} style={{ display: 'block' }}>
         <defs>
-          {/* userSpaceOnUse, not the default objectBoundingBox: a horizontal
-              connector has a zero-height bounding box, and the spec says a
-              shape with a zero-area box and an objectBoundingBox gradient is
-              not rendered at all. That is what made the two straight lines
-              disappear while the curved ones showed. */}
+          {/* userSpaceOnUse, not the default objectBoundingBox: a shape with a
+              zero-area bounding box is not rendered at all under the default,
+              which is what made the flat connectors disappear. */}
           <linearGradient id={`flow-${mode}`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2={LINK_W} y2="0">
             <stop offset="0%" stopColor={mode === 'in' ? '#2D2D2E' : '#7B7B7D'} />
             <stop offset="100%" stopColor={mode === 'in' ? '#7B7B7D' : '#2D2D2E'} />
@@ -241,25 +263,36 @@ function BrainFlow() {
         .flow-mid { display: flex; align-items: center; }
         /* The dot rides the same path string the line is drawn from, so the two
            can never disagree. offset-anchor centres it on the path by default. */
-        .flow-dot {
+        .flow-dot, .brain-dot {
           position: absolute; top: 0; left: 0;
           width: 5px; height: 5px; border-radius: 50%;
           background: ${C.accent};
           box-shadow: 0 0 6px ${C.accentBtn};
-          opacity: 0;
-          animation: flow-dot ${DOT_CYCLE.toFixed(1)}s linear infinite;
         }
-        /* Each dot travels during its own slot of the shared cycle and waits out
-           the rest, which is what keeps exactly one in flight per side. */
+        .flow-dot {
+          opacity: 0;
+          animation: flow-dot ${JOURNEY.toFixed(1)}s linear infinite;
+        }
+        /* A connector dot travels its own leg, the first third of the journey,
+           then goes dark. It disappears at the card edge on the exact frame the
+           brain dot appears there, which is what sells the handoff. */
         @keyframes flow-dot {
-          0%   { offset-distance: 0%;   opacity: 0; }
-          4%   { opacity: 1; }
-          29%  { offset-distance: 100%; opacity: 1; }
-          33%  { offset-distance: 100%; opacity: 0; }
-          100% { offset-distance: 100%; opacity: 0; }
+          0%      { offset-distance: 0%;   opacity: 1; }
+          33.333% { offset-distance: 100%; opacity: 1; }
+          33.334% { offset-distance: 100%; opacity: 0; }
+          100%    { offset-distance: 100%; opacity: 0; }
+        }
+        /* The brain dot never idles: one traversal per leg, starting a leg after
+           the journey does, so it always meets an arriving dot. */
+        .brain-dot {
+          animation: brain-dot ${LEG.toFixed(1)}s linear ${LEG.toFixed(1)}s infinite;
+        }
+        @keyframes brain-dot {
+          from { offset-distance: 0%; }
+          to   { offset-distance: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .flow-dot { display: none; }
+          .flow-dot, .brain-dot { display: none; }
         }
         @media (max-width: 760px) {
           .flow-heads { display: none; }
@@ -289,15 +322,18 @@ function BrainFlow() {
         <FlowLinks mode="in" />
 
         <div className="flow-mid">
-          {/* Taller than the side rows on purpose: it is the focal card. It
-              stays centred on the row, which is where every connector meets, so
-              the extra height costs the geometry nothing. */}
-          <div style={{ ...node, height: 76, width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
-            <Brain weight="regular" size={26} color={C.accent} style={{ flexShrink: 0 }} />
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: C.bright }}>Andromeda Brain</span>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
+          {/* The focal card: taller than the side rows, and full bleed at the
+              top so the brain line starts exactly on the card edge, which is
+              where the incoming connector ends. */}
+          <div style={{ ...node, height: CARD_H, width: '100%', padding: `${BRAIN_PAD_TOP}px 0 0`, alignItems: 'center', background: 'rgba(168,185,77,0.06)', borderColor: C.accentBtn }}>
+            <div style={{ position: 'relative', width: '100%', height: BRAIN_H }}>
+              <svg aria-hidden width="100%" height={BRAIN_H} viewBox={`0 0 ${BRAIN_W} ${BRAIN_H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+                <path d={BRAIN_PATH} fill="none" stroke={C.accentBtn} strokeWidth={1} strokeLinecap="round" />
+              </svg>
+              <span aria-hidden className="brain-dot" style={{ offsetPath: `path("${BRAIN_PATH}")` } as React.CSSProperties} />
             </div>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.bright, marginTop: 8 }}>Andromeda Brain</span>
+            <span style={{ fontFamily: MONO, fontSize: 11, color: C.accent, marginTop: 1 }}>{BRAIN_TEASER.totalFiles} files of judgment</span>
           </div>
         </div>
 
