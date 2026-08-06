@@ -91,7 +91,7 @@ export default async function CategoryPage({
       <HomeClient
         components={filtered}
         categoryLabel={category.label}
-        heading={{ h1: category.h1, intro: category.intro, body: category.body }}
+        heading={{ h1: category.h1, intro: category.intro }}
       />
     </>
   )
