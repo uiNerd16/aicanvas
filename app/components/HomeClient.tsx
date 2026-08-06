@@ -89,7 +89,13 @@ export function HomeClient({
   /** Optional H1 + intro rendered above the grid. Passed by the category and
    *  collection pages so each listing page carries crawlable on-page copy;
    *  the plain /components index omits it. */
-  heading?: { h1: string; intro: string }
+  heading?: {
+    h1: string
+    intro: string
+    /** Long-form copy rendered BELOW the grid. Category pages with real search
+     *  demand carry it; the rest pass nothing and render exactly as before. */
+    body?: readonly { h2: string; p: readonly string[] }[]
+  }
 }) {
   const router        = useRouter()
   const searchParams  = useSearchParams()
@@ -418,6 +424,31 @@ export function HomeClient({
               </button>
             )}
           </motion.div>
+        )}
+
+        {/* ── Category long-form copy. Below the grid on purpose: the cards are
+            what people came for, this is what tells a search engine (and a
+            skimming developer) what the category actually covers. ── */}
+        {heading?.body && !q && (
+          <section className="mx-auto mt-16 w-full max-w-[1800px] border-t border-sand-300 pt-10 dark:border-sand-800">
+            <div className="max-w-3xl">
+              {heading.body.map((section) => (
+                <div key={section.h2} className="mb-8 last:mb-0">
+                  <h2 className="text-base font-bold tracking-tight text-sand-900 dark:text-sand-50 sm:text-lg">
+                    {section.h2}
+                  </h2>
+                  {section.p.map((text, i) => (
+                    <p
+                      key={i}
+                      className="mt-3 text-sm leading-relaxed text-sand-600 dark:text-sand-400"
+                    >
+                      {text}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </div>
 
