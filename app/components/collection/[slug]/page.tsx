@@ -9,6 +9,7 @@ import {
   getCollectionBySlug,
 } from '../../../lib/collections'
 import { SITE_URL } from '../../../lib/config'
+import { buildItemListJsonLd } from '../../../lib/jsonld'
 
 export function generateStaticParams() {
   return COLLECTIONS.map((c) => ({ slug: c.slug }))
@@ -88,19 +89,11 @@ export default async function CollectionPage({
     ],
   }
 
-  const itemListJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
+  const itemListJsonLd = buildItemListJsonLd({
     name: collection.h1,
-    description: collection.description,
-    numberOfItems: members.length,
-    itemListElement: members.map((m, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: m.name,
-      url: `${SITE_URL}/components/${m.slug}`,
-    })),
-  }
+    description: collection.intro,
+    items: members,
+  })
 
   return (
     <>
