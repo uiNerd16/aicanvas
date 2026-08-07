@@ -313,7 +313,7 @@ export const RadarChart = forwardRef(function RadarChart(
             {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
             <PolarGrid
               stroke={tokens.color.border.subtle}
-              strokeWidth={parseInt(tokens.border.width)}
+              strokeWidth={parseInt(tokens.border.width[1], 10)}
               gridType="polygon"
             />
 
@@ -323,7 +323,7 @@ export const RadarChart = forwardRef(function RadarChart(
               tick={<SpaceTick />}
               tickLine={false}
               // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
-              axisLine={{ stroke: tokens.color.border.subtle, strokeWidth: parseInt(tokens.border.width) }}
+              axisLine={{ stroke: tokens.color.border.subtle, strokeWidth: parseInt(tokens.border.width[1], 10) }}
             />
 
             {/* isAnimationActive always off — recharts never tweens position.

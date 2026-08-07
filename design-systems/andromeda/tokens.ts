@@ -212,10 +212,20 @@ export const tokens = {
     swatch:           '8px',
   },
   border: {
-    // System hairline width. 1px IS the identity; the var indirection (same
-    // pattern as fontSans above) lets a theme widen every border at once.
-    // The inner fallback keeps installed projects correct without any var.
-    width: '1px',
+    // Border-width SCALE, same contract as spacing: strings with units, keys
+    // track the px value, change a step here and every consumer follows.
+    // Step 1 is THE system hairline — the identity — and feeds the
+    // --andromeda-border-width var (andromedaVars), so a theme can widen
+    // every border at once. Like spacing, only the steps the system actually
+    // uses exist (today: 1 = every hairline, 4 = FunnelChart band edges); a
+    // new step is a deliberate addition when a component earns it, not an
+    // escape hatch. SVG consumers derive numbers via parseInt — the root
+    // stays a string. Chart series ink is NOT a border: that is
+    // chart.lineWidth, a separate family on purpose.
+    width: {
+      1: '1px',
+      4: '4px',
+    },
     thin: 'var(--andromeda-border-width, 1px) solid',
   },
   marker: {
