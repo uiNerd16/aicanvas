@@ -188,7 +188,10 @@ function UserMenuItemRow({ item, onClose }) {
         transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
       }}
     >
-      {Icon ? <Icon size={14} weight="regular" /> : <span style={{ width: '14px' }} />}
+      {/* Row icons ride tokens.iconSize.sm, same scale as PanelMenu. */}
+      {Icon
+        ? <Icon size={tokens.iconSize.sm} weight="regular" />
+        : <span style={{ width: `${tokens.iconSize.sm}px` }} />}
       <span style={{ flex: 1 }}>{item.label}</span>
     </button>
   );

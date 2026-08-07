@@ -33,6 +33,10 @@ import { andromedaVars } from './lib/utils';
  * @typedef {object} PanelMenuProps
  * @property {MenuItem[]} items Entries rendered in the menu, in order.
  * @property {'left'|'right'} [align='right'] Edge of the trigger the menu aligns to.
+ * @property {'sm'|'md'|'lg'} [size='md'] Trigger size, forwarded straight to
+ *   IconButton. `md` is the panel-header default. Drop to `sm` when the menu is
+ *   a per-row overflow inside a dense table, where a 32px square would set the
+ *   row height. The menu panel itself never changes size.
  * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
  *   showcases / docs so the consumer can see the menu contents without first
@@ -262,7 +266,10 @@ function MenuItem({ item, onClose }) {
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >
-        {Icon ? <Icon size={14} weight="regular" /> : <span style={{ width: '14px' }} />}
+        {/* Row icons ride tokens.iconSize.sm. The old 14 was off-scale (12/16/18/20/22). */}
+        {Icon
+          ? <Icon size={tokens.iconSize.sm} weight="regular" />
+          : <span style={{ width: `${tokens.iconSize.sm}px` }} />}
         <span style={{ flex: 1 }}>{item.label}</span>
         {hasSub ? <CaretRight size={10} weight="bold" /> : null}
       </button>
@@ -298,7 +305,7 @@ function MenuItem({ item, onClose }) {
 
 /** @type {React.ForwardRefExoticComponent<PanelMenuProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const PanelMenu = forwardRef(function PanelMenu(
-  { items, align = 'right', ariaLabel = 'Panel options', defaultOpen = false, staticOpen = false, className, style, ...props },
+  { items, align = 'right', size = 'md', ariaLabel = 'Panel options', defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
   const [open, setOpen] = useState(defaultOpen || staticOpen);
@@ -410,7 +417,12 @@ export const PanelMenu = forwardRef(function PanelMenu(
         aria-haspopup="menu"
         aria-expanded={open}
         variant="ghost"
-        size="sm"
+        // Defaults to md (32px box / 16px glyph). The sm glyph was never
+        // under-scaled (14/24 = 58%, vs 50% at md and lg) — the 24px BOX was
+        // what read undersized beside a panel title. Sizing the box up fixes it
+        // without touching ICON_SIZE.sm, which 11 other call sites share.
+        // Dense table rows pass size="sm" to get the old square back.
+        size={size}
         icon={DotsThreeVertical}
         onClick={(e) => {
           // Capture the trigger as the focus-return target before opening.

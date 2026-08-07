@@ -459,6 +459,9 @@ export function ItemsPanel() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <PanelMenu
+                      // Per-row overflow: keep the 24px square so the trigger
+                      // never sets the table row height.
+                      size="sm"
                       ariaLabel={`Actions for ${r.id}`}
                       items={[
                         { label: 'Edit',      icon: Pencil, onSelect: () => {} },
