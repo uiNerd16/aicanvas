@@ -16,7 +16,10 @@ import { CornerMarkers } from './CornerMarkers';
 
 const cardVariants = cva(
   [
-    'relative block',
+    // Column flex, not block: a Card stretched by a grid/flex row (equal-height
+    // siblings) must send the slack to CardContent, not dump it below the
+    // footer. Unstretched cards are unaffected — the column is still auto-height.
+    'relative flex flex-col',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
   ],
@@ -119,7 +122,9 @@ export const CardContent = forwardRef(function CardContent(
     <div
       ref={ref}
       data-slot="card-content"
-      className={cn('p-[var(--andromeda-3)]', className)}
+      // grow: absorbs the slack when the card is stretched, so the footer and
+      // its divider stay pinned to the bottom edge instead of floating.
+      className={cn('grow p-[var(--andromeda-3)]', className)}
       {...props}
     >
       {children}

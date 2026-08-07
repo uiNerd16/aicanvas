@@ -202,7 +202,9 @@ function CardDemo() {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        // auto-fit, not '1fr 1fr': the pair stacks to one column rather than
+        // crushing both when the preview gets narrow.
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: tokens.spacing[5],
         width: '100%',
         maxWidth: 720,
