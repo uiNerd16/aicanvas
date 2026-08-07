@@ -817,7 +817,7 @@ export default function AndromedaShowcase({
           allowOverflow
           title="Panel Menu"
           slug="panel-menu"
-          description="Kebab-trigger overflow menu for panel headers. The trigger (IconButton, ghost, sm) flips to a held-pressed look while the menu is open. Items support icons, separators, destructive styling, persistent selection, and a single level of right-flyout submenu. Closes on outside click or Escape."
+          description="Kebab-trigger overflow menu for panel headers. The trigger is a ghost IconButton, md by default and sized sm/md/lg, that flips to a held-pressed look while the menu is open. Items support icons, separators, destructive styling, persistent selection, and a single level of right-flyout submenu. Closes on outside click or Escape."
         >
           {(() => {
             // Each cell is laid out vertically (label on top, kebab below);
