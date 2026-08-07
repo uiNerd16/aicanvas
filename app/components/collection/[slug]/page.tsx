@@ -39,9 +39,9 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: '/AIcanvas-OG-v2.png',
-          width: 1200,
-          height: 630,
+          url: '/og-aug2026-aicanvas.me.png',
+          width: 2400,
+          height: 1260,
           alt: `AI Canvas: ${collection.h1}`,
         },
       ],
@@ -50,7 +50,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: collection.title,
       description: collection.description,
-      images: ['/AIcanvas-OG-v2.png'],
+      images: ['/og-aug2026-aicanvas.me.png'],
     },
   }
 }

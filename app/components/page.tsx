@@ -34,10 +34,10 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: '/AIcanvas-OG-v2.png',
-          width: 1200,
-          height: 630,
-          alt: 'AI Canvas: native React components, design systems, and templates',
+          url: '/og-aug2026-aicanvas.me.png',
+          width: 2400,
+          height: 1260,
+          alt: 'AI Canvas: AI native components, design systems, blocks, templates and skills',
         },
       ],
     },
@@ -45,7 +45,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: INDEX_TITLE,
       description: INDEX_DESCRIPTION,
-      images: ['/AIcanvas-OG-v2.png'],
+      images: ['/og-aug2026-aicanvas.me.png'],
     },
   }
 }
