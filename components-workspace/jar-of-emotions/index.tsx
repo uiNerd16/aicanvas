@@ -568,13 +568,19 @@ export default function JarOfEmotions() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center"
+      // items-stretch, not items-center: the jar column below takes its height
+      // from this root instead of naming 100vh. Standalone that is the same
+      // pixels (the root is min-h-screen, so stretching to it IS the viewport
+      // height), and in a container shorter than the viewport the column now
+      // follows the container rather than overflowing it. The 520px floor stays
+      // — that is a real minimum for the jar, not a viewport measurement.
+      className="flex min-h-screen w-full items-stretch justify-center"
       style={{ background: isDark ? '#1A1A19' : '#E8E8DF' }}
     >
       <div
         ref={containerRef}
         className="relative flex w-full max-w-2xl flex-col items-center justify-center gap-7 overflow-hidden px-4 py-6 sm:gap-8 sm:px-6 sm:py-10"
-        style={{ height: '100vh', minHeight: 520 }}
+        style={{ minHeight: 520 }}
       >
         {/* Jar area + banner — wrapper gives the banner a reference rect = jar size */}
         <div className="relative">

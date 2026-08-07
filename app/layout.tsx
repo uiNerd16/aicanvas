@@ -182,13 +182,14 @@ export default async function RootLayout({
                 <MobileNav promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
               </Suspense>
               {/* Content area scrolls independently of the sidebar.
-                  scrollbar-gutter:stable reserves space for the vertical
-                  scrollbar regardless of whether content overflows, so the
-                  visible width never shifts between auth states. */}
-              <div
-                className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950"
-                style={{ scrollbarGutter: 'stable' }}
-              >
+                  .app-scroll-column (globals.css) reserves the scrollbar
+                  gutter so the visible width never shifts between auth
+                  states, and releases it on routes that clip themselves and
+                  own their own scroller — otherwise this column reserves a
+                  full-height strip it can never paint a bar in. In CSS rather
+                  than an inline style so the :has() release can out-specify
+                  it; an inline declaration would always win. */}
+              <div className="app-scroll-column aic-page-scroll flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950">
                 {children}
               </div>
               {/* Global auth dialog — toggles between sign-in and sign-up modes */}

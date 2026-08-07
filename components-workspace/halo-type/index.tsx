@@ -221,12 +221,17 @@ export default function HaloType() {
   return (
     <div
       ref={rootRef}
-      className="flex min-h-screen w-full items-center justify-center"
+      // No items-center, so the wrapper stretches to this root's height instead
+      // of naming a viewport height of its own. The glyph size is measured off
+      // the wrapper's real rect (Math.min(rect.width, rect.height) above), so
+      // the min(vh,vw) intent is preserved wherever the component is dropped —
+      // and in a container shorter than the viewport it no longer overflows.
+      className="flex min-h-screen w-full justify-center"
       style={{ backgroundColor: bg }}
     >
       <div
         ref={wrapRef}
-        className="relative flex h-[min(100vh,100vw)] w-full items-center justify-center overflow-hidden"
+        className="relative flex w-full items-center justify-center overflow-hidden"
         style={{
           maskImage: edgeMask,
           WebkitMaskImage: edgeMask,
