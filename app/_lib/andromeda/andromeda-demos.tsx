@@ -881,6 +881,42 @@ function PanelMenuDemo() {
           />
         </Row>
       </div>
+      <div style={{ width: 200 }}>
+        <Row label="Trigger size">
+          {(['sm', 'md', 'lg'] as const).map((s) => (
+            <div
+              key={s}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: tokens.spacing[2],
+              }}
+            >
+              <PanelMenu
+                size={s}
+                align="left"
+                ariaLabel={`Panel options (${s})`}
+                items={[
+                  { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                  { label: 'Export',  icon: Export,         onSelect: () => {} },
+                ]}
+              />
+              <span
+                style={{
+                  fontFamily: tokens.typography.fontMono,
+                  fontSize: tokens.typography.size.xs,
+                  color: tokens.color.text.faint,
+                  textTransform: 'uppercase',
+                  letterSpacing: tokens.typography.tracking.wide,
+                }}
+              >
+                {s}
+              </span>
+            </div>
+          ))}
+        </Row>
+      </div>
     </div>
   )
 }

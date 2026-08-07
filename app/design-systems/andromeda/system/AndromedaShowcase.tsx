@@ -882,6 +882,33 @@ export default function AndromedaShowcase({
                     ]}
                   />
                 </div>
+                <div style={cellStyle}>
+                  <div style={labelStyle}>Trigger size</div>
+                  <div style={{ display: 'flex', gap: tokens.spacing[4], alignItems: 'flex-end' }}>
+                    {(['sm', 'md', 'lg'] as const).map((s) => (
+                      <div
+                        key={s}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: tokens.spacing[2],
+                        }}
+                      >
+                        <PanelMenu
+                          size={s}
+                          align="left"
+                          ariaLabel={`Panel options (${s})`}
+                          items={[
+                            { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                            { label: 'Export',  icon: Export,         onSelect: () => {} },
+                          ]}
+                        />
+                        <span style={labelStyle}>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             );
           })()}
