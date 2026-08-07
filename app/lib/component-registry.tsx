@@ -225,7 +225,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'wave-lines',
     image: 'https://ik.imagekit.io/aitoolkit/wave-lines.png',
     name: 'Wave Lines',
-    description: 'Dense vertical lines that ripple across the canvas — two layered sine waves create organic bunching and breathing. Hover to send the lines into extreme waves across the whole canvas.',
+    description: 'An animated line background. Dense vertical lines ripple with two layered sine waves, bunching and breathing. Hover to send waves across the canvas.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -240,7 +240,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'distortion-grid',
     image: 'https://ik.imagekit.io/aitoolkit/distortion-grid.png',
     name: 'Distortion Grid',
-    description: 'A canvas grid of thin lines that slowly undulate with large sweeping waves. Hovering repels the grid fabric outward from the cursor, amplifying the distortion across the entire canvas.',
+    description: 'An animated grid background. Thin lines undulate in slow sweeping waves, and hovering repels the grid fabric outward from your cursor.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -255,7 +255,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'grid-lines',
     image: 'https://ik.imagekit.io/aitoolkit/grid-lines.png?v=3',
     name: 'Grid Lines',
-    description: 'A dot grid connected by thin lines. On hover, a radial wave pulses outward from the cursor, illuminating lines and dots as it spreads.',
+    description: 'A grid background of dots connected by thin lines. The cursor lights a radial glow and bulges the grid outward like a lens as it moves.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -270,7 +270,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'bubble-field',
     image: 'https://ik.imagekit.io/aitoolkit/bubble-field.png?v=2',
     name: 'Bubble Field',
-    description: 'A grid of outline circles that burst on hover — each expanding and fading like a soap bubble popping, then reforming, with a soft pastel blue palette.',
+    description: 'An animated bubble background. A monochrome grid of outline circles bursts near the cursor, expanding and fading, then reforming.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -285,7 +285,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'noise-bg',
     image: 'https://ik.imagekit.io/aitoolkit/noise-bg.png',
     name: 'Grain Background',
-    description: 'A canvas-based grain background of randomly scattered dots that illuminate with a soft Gaussian glow and organic connection lines on hover.',
+    description: 'A grain background of randomly scattered dots. Hover to illuminate them with a soft Gaussian glow and organic connection lines.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -360,7 +360,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     slug: 'x-grid',
     image: 'https://ik.imagekit.io/aitoolkit/x-grid.png',
     name: 'X Grid',
-    description: 'A canvas-based interactive background of × marks that illuminate and connect to neighbours with constellation lines on hover.',
+    description: 'An animated X grid background. Marks illuminate and connect to their neighbors with constellation lines as your cursor passes.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -391,7 +391,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     image: 'https://ik.imagekit.io/aitoolkit/dot-grid.png',
     name: 'Dot Grid',
     description:
-      'A canvas-based dot grid background where hovering illuminates nearby dots with a smooth radial glow and organic fade.',
+      'An animated dot grid background. Hovering lights up nearby dots with a smooth glow and an organic fade.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -499,7 +499,7 @@ const COMPONENTS_RAW: ComponentEntry[] = [
     image: 'https://ik.imagekit.io/aitoolkit/particle-sphere.png',
     name: 'Particle Sphere',
     description:
-      '9,000 particles arranged on a sphere with warm gold and cool silver tones, slowly spinning in Three.js.',
+      'A 3D particle background built with Three.js. 9,000 particles sit on a slowly spinning sphere in warm gold and cool silver.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: '3D & Shaders', accent: true },
@@ -573,7 +573,7 @@ Requirements:
     slug: 'sphere-lines',
     image: 'https://ik.imagekit.io/aitoolkit/sphere-lines.png',
     name: 'Wireframe Globe',
-    description: 'A wire-frame globe that breathes on its own — a narrow wave band drifts quietly across the surface. Hover to ripple the lines right where your cursor lands.',
+    description: 'An animated wireframe globe background. A narrow wave band drifts slowly across the surface, and hovering ripples the lines under your cursor.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -588,7 +588,7 @@ Requirements:
     slug: 'magnetic-dots',
     image: 'https://ik.imagekit.io/aitoolkit/magnetic-dots.png',
     name: 'Magnetic Dots',
-    description: 'A dense grid of dots that get magnetically pulled toward the cursor, snapping back with a satisfying elastic bounce when you leave.',
+    description: 'An interactive dot background. A dense grid of dots is magnetically pulled toward your cursor, snapping back with an elastic bounce.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -603,7 +603,7 @@ Requirements:
     slug: 'particle-constellation',
     image: 'https://ik.imagekit.io/aitoolkit/particle-constellation.png?v=2',
     name: 'Spider Web',
-    description: 'An organic silk web that breathes with a slow idle bow. Hover to physically push the nodes — each intersection bounces back with tension, fading the strings near your cursor.',
+    description: 'An animated spider web background. Silk strands bow slowly at rest, and hovering pushes each node so it bounces back under tension.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -646,7 +646,7 @@ Requirements:
     slug: 'noise-field',
     image: 'https://ik.imagekit.io/aitoolkit/noise-field.png',
     name: 'Noise Field',
-    description: 'A grid of flowing arrows driven by layered sine-wave noise — like wind mapped on a weather chart. Hover to create a swirling vortex at the cursor.',
+    description: 'An animated flow field background. A grid of arrows driven by layered sine-wave noise drifts like wind. Hover and they turn to point at your cursor.',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },
@@ -1207,7 +1207,7 @@ Requirements:
     name: 'New Project Modal',
     description: 'A pill button that morphs into a soft-UI project creation form — title, description, 7-swatch color label picker, Private toggle, and a checkmark-confirm Create button.',
     tags: [
-      { label: 'UI', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Modal' },
       { label: 'Interactive' },
     ],
@@ -1222,7 +1222,7 @@ Requirements:
     name: 'Live Session Pill',
     description: 'A compact live-session presence pill with an animated speaking indicator and overlapping avatars — clicks open a soft-UI modal showing all participants with a Join Now button.',
     tags: [
-      { label: 'UI', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Modal' },
       { label: 'Interactive' },
     ],

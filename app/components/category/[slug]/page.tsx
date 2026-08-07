@@ -5,6 +5,7 @@ import { HomeClient } from '../../HomeClient'
 import { COMPONENT_META } from '../../../lib/component-meta.generated'
 import { CATEGORIES, getCategoryBySlug } from '../../../lib/categories'
 import { SITE_URL } from '../../../lib/config'
+import { buildItemListJsonLd } from '../../../lib/jsonld'
 
 export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ slug: c.slug }))
@@ -82,11 +83,25 @@ export default async function CategoryPage({
     ],
   }
 
+  // Names every component the category actually lists, so the page is
+  // described as a collection rather than left to be inferred from the card
+  // grid. INITIAL_LOAD (48) is above the largest category, so every item in
+  // this list really is rendered on first paint.
+  const itemListJsonLd = buildItemListJsonLd({
+    name: category.h1,
+    description: category.intro,
+    items: filtered,
+  })
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <HomeClient
         components={filtered}

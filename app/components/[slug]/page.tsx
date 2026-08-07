@@ -15,17 +15,24 @@ export function generateStaticParams() {
   return COMPONENTS.map((c) => ({ slug: c.slug }))
 }
 
+// Keys MUST be real accent-tag labels, spelled exactly as the registry spells
+// them. They previously read 'Cards', 'Text', 'Buttons', 'Glass' and so on,
+// none of which is an accent label ('Cards & Modals', 'Typography',
+// 'Buttons & Toggles'; Glass is never the accent tag), so only Backgrounds and
+// Navigation ever matched and 65 of 83 titles fell through to the bare
+// 'Animated' default. Add a category, add its label here too.
+// 'Blocks' is deliberately absent: a block is a page section, so the plain
+// 'Animated' default reads better than naming it.
 const DESCRIPTOR_PREFIXES: Record<string, string> = {
   Backgrounds: 'Animated Background',
-  Glass: 'Glassmorphism',
-  Cards: 'Animated Card',
-  Buttons: 'Animated Button',
+  Typography: 'Animated Text',
+  Widgets: 'Animated Widget',
+  Notifications: 'Animated Notification',
   Navigation: 'Animated Navigation',
-  Inputs: 'Animated Input',
-  Toggles: 'Animated Toggle',
-  Text: 'Animated Text',
-  Overlays: 'Animated Overlay',
-  Lists: 'Animated List',
+  'Cards & Modals': 'Animated Card',
+  'Buttons & Toggles': 'Animated Button',
+  'Inputs & Controls': 'Animated Input',
+  '3D & Shaders': '3D',
 }
 
 function firstSentenceOf(description: string): string {
