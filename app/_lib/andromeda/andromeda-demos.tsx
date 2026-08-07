@@ -462,8 +462,8 @@ function MetricChartDemo() {
 // Two funnels, because the interesting thing about this chart is not its
 // shape but what its colour is allowed to mean.
 //
-// The first declares no tones, so every band rests in accent: the bands ARE
-// the measurement, and nothing about any single stage is worth calling out.
+// The first declares no tones, so every band rests in neutral ink: nothing
+// about any single stage is a reading, so nothing earns colour.
 // The second derives a tone per stage from that stage's own step conversion,
 // which is the only sanctioned reason a band changes colour — never to tell
 // the five stages apart, which the labels already do.
