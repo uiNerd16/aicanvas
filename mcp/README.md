@@ -13,7 +13,7 @@ AI:    [edits the file directly]
 
 ## What it exposes
 
-Eight tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. Adding a component to the website auto-updates the MCP within minutes. The registry holds 75 standalone components, plus the Andromeda design system with its own components and templates.
+Nine tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. Adding a component to the website auto-updates the MCP within minutes. The registry holds 75 standalone components, plus the Andromeda design system with its own components and templates.
 
 | Tool | Purpose |
 |---|---|
@@ -24,6 +24,7 @@ Eight tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. 
 | `get_install_command` | Get the `npx shadcn add @aicanvas/<slug>` command for any standalone or design-system component. |
 | `list_systems` | List the design systems available (e.g. Andromeda), with component and template counts. |
 | `get_system` | Every file for a whole design system, plus its shared tokens, its component install commands, and the dependency chain. |
+| `list_templates` | List the ready-made templates (complete example screens), optionally filtered by design system. |
 | `get_template` | Every file for a single template (a ready-made composition), with the registry dependencies it pulls in. |
 
 All tools are read-only. Nothing is mutated on AI Canvas's side.
@@ -124,7 +125,7 @@ This opens a browser UI where you can call each tool by hand.
 
 ### Accounts and premium content
 
-Browsing metadata (`list_categories`, `list_components`, `search_components`, `list_systems`, `get_install_command`) is free and needs no account. Pulling actual source (`get_component`, `get_system`, `get_template`) runs against a free AI Canvas account: set `AICANVAS_TOKEN` from your account and the website gives you the ready-made config. Without a token, a free-component source pull returns a short "create a free account" notice instead of the code, and premium content (full design systems and templates) returns HTTP 402 with an upgrade link at [aicanvas.me/pricing](https://aicanvas.me/pricing). Update anytime with `npx @aicanvas/mcp@latest`.
+Browsing metadata (`list_categories`, `list_components`, `search_components`, `list_systems`, `list_templates`, `get_install_command`) is free and needs no account. Pulling actual source (`get_component`, `get_system`, `get_template`) runs against a free AI Canvas account: set `AICANVAS_TOKEN` from your account and the website gives you the ready-made config. Without a token, a free-component source pull returns a short "create a free account" notice instead of the code, and premium content (full design systems and templates) returns HTTP 402 with an upgrade link at [aicanvas.me/pricing](https://aicanvas.me/pricing). Update anytime with `npx @aicanvas/mcp@latest`.
 
 ## How the registry stays fresh
 

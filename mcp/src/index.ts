@@ -24,7 +24,7 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.2.1'
+const MCP_VERSION = '0.2.3'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 // Optional per-user token (the website bakes it into the copied MCP config).
 // Identifies the account so free-component source pulls are authorized and any
@@ -650,7 +650,7 @@ server.registerTool(
           `  ${s.name.padEnd(16)}  ${String(s.componentCount).padStart(2)} components, ${s.templateSlugs.length} templates`,
         ),
         '',
-        'Use `get_system` to fetch the full source of a system, or `get_template` for a single composition.',
+        'Use `get_system` to fetch the full source of a system, or `list_templates` to see the ready-made screens built from one.',
       ]
       return {
         content: [asTextContent(lines.join('\n'))],
@@ -735,6 +735,65 @@ server.registerTool(
   },
 )
 
+// ── Tool: list_templates ─────────────────────────────────────────────────────
+
+server.registerTool(
+  'list_templates',
+  {
+    title: 'List AI Canvas design-system templates',
+    description:
+      'Return every ready-made template on AI Canvas. A template is a complete example screen built from one design system — a dashboard, a console, a control room — installable in one CLI command. Use to discover what full screens exist before fetching one with `get_template`, or when the user asks for "a dashboard" / "an admin screen" rather than a single component.',
+    inputSchema: {
+      system: z
+        .string()
+        .optional()
+        .describe(
+          'Optional design system slug to filter by, e.g. "andromeda". Omit to list templates from every system.',
+        ),
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ system }) => {
+    try {
+      const meta = await fetchMeta()
+      const all = meta.templates ?? []
+      const templates = system
+        ? all.filter((t) => t.system.toLowerCase() === system.toLowerCase())
+        : all
+
+      if (templates.length === 0) {
+        return {
+          content: [
+            asTextContent(
+              system
+                ? `No templates found for design system "${system}". Use \`list_systems\` to see which systems exist.`
+                : 'No templates available in this registry build.',
+            ),
+          ],
+          structuredContent: { templates: [] },
+        }
+      }
+
+      const lines = [
+        `${templates.length} template${templates.length === 1 ? '' : 's'}${system ? ` in ${system}` : ' on AI Canvas'}:`,
+        '',
+        ...templates.map(
+          (t) =>
+            `  ${t.slug.padEnd(32)}  ${t.system}${t.domain ? ` · ${t.domain}` : ''}, ${t.fileCount} files`,
+        ),
+        '',
+        'Use `get_template` with a slug above to fetch every file for one template.',
+      ]
+      return {
+        content: [asTextContent(lines.join('\n'))],
+        structuredContent: { templates },
+      }
+    } catch (err) {
+      return errorResult(err instanceof Error ? err.message : String(err))
+    }
+  },
+)
+
 // ── Tool: get_template ───────────────────────────────────────────────────────
 
 server.registerTool(
@@ -748,7 +807,7 @@ server.registerTool(
         .string()
         .min(1)
         .describe(
-          'Template slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_systems` then inspect templateSlugs to discover.',
+          'Template slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_templates` to discover.',
         ),
     },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
@@ -759,7 +818,7 @@ server.registerTool(
       const template = (meta.templates ?? []).find((t) => t.slug === slug)
       if (!template) {
         return errorResult(
-          `No template found with slug "${slug}". Use \`list_systems\` to see available templates.`,
+          `No template found with slug "${slug}". Use \`list_templates\` to see available templates.`,
         )
       }
       const item = await fetchComponentSource(slug)
