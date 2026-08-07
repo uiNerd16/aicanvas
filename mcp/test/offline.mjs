@@ -168,7 +168,7 @@ try {
   const toolsRes = await client.request('tools/list')
   record(
     'tools/list works without registry (schemas are local)',
-    Array.isArray(toolsRes?.result?.tools) && toolsRes.result.tools.length === 8,
+    Array.isArray(toolsRes?.result?.tools) && toolsRes.result.tools.length === 9,
     `got ${toolsRes?.result?.tools?.length} tools`,
   )
 
@@ -274,6 +274,34 @@ try {
         : '',
     ),
     'tokens note missing from summary',
+  )
+
+  // list_templates → discovery for templates (no filter, then filtered)
+  const ltRes = await call('list_templates', {})
+  const ltSc = sc(ltRes)
+  record(
+    'local: list_templates returns templates',
+    Array.isArray(ltSc?.templates) && ltSc.templates.length > 0,
+    `got ${JSON.stringify(ltSc?.templates?.length)}`,
+  )
+  record(
+    'local: list_templates surfaces andromeda-mission-control',
+    (ltSc?.templates ?? []).some((t) => t.slug === 'andromeda-mission-control'),
+    `slugs: ${(ltSc?.templates ?? []).map((t) => t.slug).join(', ').slice(0, 90)}`,
+  )
+  const ltFiltered = sc(await call('list_templates', { system: 'ANDROMEDA' }))
+  record(
+    'local: list_templates system filter is case-insensitive',
+    Array.isArray(ltFiltered?.templates) &&
+      ltFiltered.templates.length === ltSc.templates.length &&
+      ltFiltered.templates.every((t) => t.system === 'andromeda'),
+    `got ${ltFiltered?.templates?.length} of ${ltSc?.templates?.length}`,
+  )
+  const ltNone = await call('list_templates', { system: 'no-such-system' })
+  record(
+    'local: list_templates on an unknown system is empty, not an error',
+    !ltNone?.result?.isError && (sc(ltNone)?.templates ?? null)?.length === 0,
+    `isError=${ltNone?.result?.isError}, templates=${JSON.stringify(sc(ltNone)?.templates)}`,
   )
 
   // get_template → a real template
