@@ -1207,7 +1207,7 @@ Requirements:
     name: 'New Project Modal',
     description: 'A pill button that morphs into a soft-UI project creation form — title, description, 7-swatch color label picker, Private toggle, and a checkmark-confirm Create button.',
     tags: [
-      { label: 'UI', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Modal' },
       { label: 'Interactive' },
     ],
@@ -1222,7 +1222,7 @@ Requirements:
     name: 'Live Session Pill',
     description: 'A compact live-session presence pill with an animated speaking indicator and overlapping avatars — clicks open a soft-UI modal showing all participants with a Join Now button.',
     tags: [
-      { label: 'UI', accent: true },
+      { label: 'Cards & Modals', accent: true },
       { label: 'Modal' },
       { label: 'Interactive' },
     ],

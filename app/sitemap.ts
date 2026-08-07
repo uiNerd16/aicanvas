@@ -6,17 +6,22 @@ import { SITE_URL } from './lib/config'
 import { ANDROMEDA_COMPONENT_META } from './_lib/andromeda/andromeda-meta'
 import { DESIGN_SYSTEMS } from '../scripts/lib/design-systems.config.mjs'
 
+// No `lastModified`. Every entry used to emit `new Date()`, i.e. the build
+// timestamp, so all 154 URLs claimed to change on every deploy. Google only
+// trusts lastmod when it is verifiably accurate, and a value that is provably
+// wrong on every URL teaches it to ignore the field sitewide. Omitting it is
+// valid and honest. To restore a real signal, commit a per-slug date map
+// (generated from git history at authoring time, not at build time: Vercel
+// shallow-clones, so `git log` for a path is unreliable during a build).
 export default function sitemap(): MetadataRoute.Sitemap {
   const componentPages: MetadataRoute.Sitemap = COMPONENTS.map((c) => ({
     url: `${SITE_URL}/components/${c.slug}`,
-    lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.8,
   }))
 
   const categoryPages: MetadataRoute.Sitemap = CATEGORIES.map((c) => ({
     url: `${SITE_URL}/components/category/${c.slug}`,
-    lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.85,
   }))
@@ -27,7 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     (c) => collectionMembers(c, COMPONENTS).length >= 3,
   ).map((c) => ({
     url: `${SITE_URL}/components/collection/${c.slug}`,
-    lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
@@ -40,13 +44,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     (s: { slug: string; templates?: { slug: string }[] }) => [
       {
         url: `${SITE_URL}/design-systems/${s.slug}`,
-        lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.9,
       },
       {
         url: `${SITE_URL}/design-systems/${s.slug}/system`,
-        lastModified: new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       },
@@ -55,7 +57,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
           new RegExp(`^${s.slug}-`),
           '',
         )}`,
-        lastModified: new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.6,
       })),
@@ -66,7 +67,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const andromedaComponentPages: MetadataRoute.Sitemap = ANDROMEDA_COMPONENT_META.map(
     (c: { slug: string }) => ({
       url: `${SITE_URL}/design-systems/andromeda/${c.slug}`,
-      lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -75,43 +75,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: SITE_URL,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
       url: `${SITE_URL}/components`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${SITE_URL}/about`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${SITE_URL}/pricing`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${SITE_URL}/faq`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${SITE_URL}/mcp`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${SITE_URL}/lab`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },

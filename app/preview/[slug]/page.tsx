@@ -1,6 +1,16 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { COMPONENTS } from '../../lib/component-registry'
 import { BackButton } from './BackButton'
+
+// Chrome-free full-screen previews, not destinations: no copy of their own,
+// and they inherited the root canonical, which pointed every one of them at
+// the homepage. They are absent from the sitemap and nothing links to them,
+// so noindex is the whole fix. A self-canonical would instead invite indexing
+// of a page that has no content to rank.
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+}
 
 // SERVER component (deliberately no 'use client'). COMPONENTS carries every
 // entry's raw `code` string — including the closed-source premium ones — so it
