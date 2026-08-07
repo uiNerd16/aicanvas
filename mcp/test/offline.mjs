@@ -24,6 +24,7 @@
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const SERVER = new URL('../dist/index.js', import.meta.url).pathname
@@ -217,6 +218,19 @@ try {
   )
 
   // ── Phase B: server pointed at a local registry-data/ file server ──────────
+  // registry-data/ is GENERATED, not tracked, so a fresh clone has none of it.
+  // Without this guard every Phase B assertion fails on a 404 and reads like the
+  // tools are broken. Fail once, with the command that fixes it.
+  if (!existsSync(join(REGISTRY_DATA_DIR, '_manifest.json'))) {
+    console.error(
+      `\n✗ registry-data/ is empty or missing (looked in ${REGISTRY_DATA_DIR}).\n` +
+        '  Phase B serves those generated files as fixtures. From the repo root run:\n' +
+        '      node scripts/generate-registry.mjs\n' +
+        '  then re-run this suite. Phase A results above are still valid.\n',
+    )
+    process.exit(1)
+  }
+
   local = await startLocalRegistry()
   console.log(`\n── Phase B: server pointed at local registry ${local.base} ──`)
   localClient = new McpClient(local.base)
@@ -378,6 +392,34 @@ try {
     !srB?.result?.isError &&
       (srBSc?.components ?? []).some((c) => c.slug === 'andromeda-heat-grid'),
     `got ${JSON.stringify((srBSc?.components ?? []).map((c) => c.slug))?.slice(0, 120)}`,
+  )
+
+  // search_components → templates rank too, tagged so the agent picks the right
+  // fetch tool. Before this, "dashboard" matched nothing in the whole registry.
+  const srT = sc(await call('search_components', { query: 'dashboard', limit: 10 }))
+  const srTHits = (srT?.components ?? []).filter((c) => c.kind === 'template')
+  record(
+    'local: search_components surfaces templates for "dashboard"',
+    srTHits.length > 0,
+    `got ${JSON.stringify((srT?.components ?? []).map((c) => c.slug))?.slice(0, 120)}`,
+  )
+  record(
+    'local: template search hits are tagged kind=template',
+    srTHits.length > 0 && srTHits.every((c) => c.kind === 'template' && c.slug && c.installCommand),
+    `tagged ${srTHits.length} of ${srT?.components?.length}`,
+  )
+  const srMC = sc(await call('search_components', { query: 'mission control', limit: 5 }))
+  record(
+    'local: search_components ranks andromeda-mission-control first for its own name',
+    (srMC?.components ?? [])[0]?.slug === 'andromeda-mission-control',
+    `top hit ${JSON.stringify((srMC?.components ?? [])[0]?.slug)}`,
+  )
+  const srReg = sc(await call('search_components', { query: 'card stack', limit: 5 }))
+  record(
+    'local: adding templates does not displace standalone matches',
+    (srReg?.components ?? []).length > 0 &&
+      (srReg?.components ?? []).every((c) => c.kind !== 'template'),
+    `got ${JSON.stringify((srReg?.components ?? []).map((c) => c.slug))?.slice(0, 120)}`,
   )
 
   // list_components must NOT leak DS components into the standalone catalog.

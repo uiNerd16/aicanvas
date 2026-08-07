@@ -13,7 +13,7 @@ AI:    [edits the file directly]
 
 ## What it exposes
 
-Nine tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. Adding a component to the website auto-updates the MCP within minutes. The registry holds 75 standalone components, plus the Andromeda design system with its own components and templates.
+Nine tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. Adding a component to the website auto-updates the MCP within minutes. The registry holds 80+ standalone components, plus the Andromeda design system with its own components and templates.
 
 | Tool | Purpose |
 |---|---|
@@ -29,7 +29,7 @@ Nine tools, derived from the live [aicanvas.me](https://aicanvas.me) registry. A
 
 All tools are read-only. Nothing is mutated on AI Canvas's side.
 
-Standalone components and design-system components are kept in separate buckets. `list_components` and `list_categories` cover the 75 standalones only, so the catalog stays clean. Design-system components are reached through `list_systems` / `get_system`, and are also resolvable by slug through `get_component`, `get_install_command`, and `search_components`.
+Standalone components and design-system components are kept in separate buckets. `list_components` and `list_categories` cover the 80+ standalones only, so the catalog stays clean. Design-system components are reached through `list_systems` / `get_system`, and are also resolvable by slug through `get_component`, `get_install_command`, and `search_components`.
 
 ## Setup
 

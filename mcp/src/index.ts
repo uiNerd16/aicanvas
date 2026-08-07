@@ -7,7 +7,7 @@
  * inspect, and install components without leaving the chat.
  *
  * Data flow:
- *   - aicanvas.me/r/aicanvas-mcp.json   → metadata for the 75 standalone
+ *   - aicanvas.me/r/aicanvas-mcp.json   → metadata for the 80+ standalone
  *     components plus the Andromeda design system, its components, and templates
  *   - aicanvas.me/r/<slug>.json         → full source code per component
  *
@@ -24,7 +24,7 @@ const REGISTRY_BASE =
   process.env.AICANVAS_REGISTRY_BASE ?? 'https://aicanvas.me/r'
 const META_URL = `${REGISTRY_BASE}/aicanvas-mcp.json`
 const META_TTL_MS = 5 * 60 * 1000 // 5 minutes — meta updates with deploys
-const MCP_VERSION = '0.2.3'
+const MCP_VERSION = '0.2.4'
 const USER_AGENT = `aicanvas-mcp/${MCP_VERSION}`
 // Optional per-user token (the website bakes it into the copied MCP config).
 // Identifies the account so free-component source pulls are authorized and any
@@ -109,6 +109,14 @@ interface TemplateMeta {
   sourceUrl: string
   installCommand: string
 }
+
+// One ranked result from `search_components`. Standalones and design-system
+// components keep their own shape; templates carry a `kind` tag so the caller
+// knows to reach for `get_template` instead of `get_component`.
+type SearchHit =
+  | ComponentMeta
+  | SystemComponentMeta
+  | (TemplateMeta & { kind: 'template' })
 
 interface MetaPayload {
   name: string
@@ -399,7 +407,7 @@ server.registerTool(
   {
     title: 'Search AI Canvas components',
     description:
-      'Fuzzy keyword search across component slug, name, description, categories, and tags. Returns best matches ranked by relevance. Use when the user describes what they want in their own words, e.g. "an animated card stack", "background with waves", "typography that reveals on scroll". Results include screenshot URLs and install commands for immediate evaluation.',
+      'Fuzzy keyword search across standalone components, design-system components, AND ready-made templates (whole example screens). Matches on slug, name, description, categories, and tags; returns best matches ranked by relevance. Use when the user describes what they want in their own words, e.g. "an animated card stack", "background with waves", "a mission control dashboard". Results include screenshot URLs and install commands for immediate evaluation. A result tagged `"kind": "template"` is a full screen — fetch it with `get_template`, not `get_component`.',
     inputSchema: {
       query: z
         .string()
@@ -425,15 +433,26 @@ server.registerTool(
       // usable: standalones keep their full shape; DS components carry their
       // metadata (slug, name, description, system, install command, …).
       const standaloneRanked = meta.components.map((c) => ({
-        item: c as ComponentMeta | SystemComponentMeta,
+        item: c as SearchHit,
         score: scoreMatch(query, c),
       }))
       const systemRanked = (meta.systemComponents ?? []).map((c) => ({
-        item: c as ComponentMeta | SystemComponentMeta,
+        item: c as SearchHit,
         score: scoreSystemComponent(query, c),
       }))
+      // Templates rank in the same list, otherwise the most natural query for a
+      // whole screen ("dashboard", "mission control") matches nothing at all.
+      // Tagged so the agent calls `get_template`, not `get_component`. The domain
+      // ("Sci-Fi", "Telecom") folds into the system field to stay searchable.
+      const templateRanked = (meta.templates ?? []).map((t) => ({
+        item: { ...t, kind: 'template' as const } as SearchHit,
+        score: scoreSystemComponent(query, {
+          ...t,
+          system: t.domain ? `${t.system} ${t.domain}` : t.system,
+        }),
+      }))
 
-      const ranked = [...standaloneRanked, ...systemRanked]
+      const ranked = [...standaloneRanked, ...systemRanked, ...templateRanked]
         .filter((r) => r.score > 0)
         .sort((a, b) => b.score - a.score)
         .slice(0, limit)
@@ -441,7 +460,7 @@ server.registerTool(
 
       const summary =
         ranked.length === 0
-          ? `No matches for "${query}". Try \`list_categories\` to browse standalones, or \`list_systems\` for design systems.`
+          ? `No matches for "${query}". Try \`list_categories\` to browse standalones, \`list_systems\` for design systems, or \`list_templates\` for ready-made screens.`
           : `${ranked.length} match${ranked.length === 1 ? '' : 'es'} for "${query}"`
 
       return {
@@ -807,7 +826,7 @@ server.registerTool(
         .string()
         .min(1)
         .describe(
-          'Template slug, e.g. "andromeda-mission-control", "andromeda-exchange-terminal". Use `list_templates` to discover.',
+          'Template slug, e.g. "andromeda-mission-control", "andromeda-signal-room". Use `list_templates` to discover.',
         ),
     },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
