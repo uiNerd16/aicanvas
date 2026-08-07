@@ -100,7 +100,7 @@ function ChannelRow({ ch }) {
           }}
         />
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */, minWidth: 0 }}>
         <span
           style={{
             fontFamily: tokens.typography.fontMono,

@@ -6,6 +6,8 @@
 // No background fill — the indicator alone marks the selected row.
 // Inactive: text.secondary, hover surface.hover.
 // Mono label is the default; pass `mono={false}` for sans labels.
+// `collapsed` is the icon-rail form: same row, same active contract, label
+// kept for screen readers only. Pair it with a Tooltip for the visible name.
 // ============================================================
 
 'use client';
@@ -16,6 +18,7 @@ import { motion } from 'framer-motion';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
+import { useReducedMotion } from './lib/motion';
 import { tokens } from '../tokens';
 
 // Touch-target floor — a nav row is full-bleed (no isolated chrome to protect),
@@ -81,10 +84,21 @@ const navItemVariants = cva(
           '[letter-spacing:var(--andromeda-tracking-normal)]',
         ],
       },
+      // Icon rail form: the same row with its label taken out of the visual
+      // layout. Everything that makes a NavItem a NavItem is unchanged — the
+      // right-edge dot, the no-background-fill active state, the hover lift,
+      // the layoutId slide — so a rail is a narrow nav list rather than a
+      // different component. The asymmetric reading inset collapses to a
+      // symmetric one because there is no longer a label to indent past.
+      collapsed: {
+        true: ['justify-center', 'px-[var(--andromeda-2)]', 'gap-0'],
+        false: [],
+      },
     },
     defaultVariants: {
       active: false,
       mono: true,
+      collapsed: false,
     },
   },
 );
@@ -96,6 +110,7 @@ const navItemVariants = cva(
  * @property {React.ReactNode} label Visible content of the nav row.
  * @property {boolean} [active=false] Marks the row as the current selection, applying accent text and the indicator dot.
  * @property {boolean} [mono=true] Renders the label in uppercase mono type; set false for sans.
+ * @property {boolean} [collapsed=false] Icon-rail form: centers the icon, drops the label to screen readers only, and pulls the active dot in one step. Requires `icon`; pair with a Tooltip so the label is still reachable by sight.
  * @property {boolean} [asChild=false] Renders via Radix Slot, merging props onto the child instead of a native button.
  * @property {'button'|'submit'|'reset'} [type='button'] HTML button type; defaults to 'button' to avoid accidental form submits, and is omitted when asChild is set.
  * @property {string} [layoutGroupId='andromeda-navitem-indicator']
@@ -114,6 +129,7 @@ export const NavItem = forwardRef(function NavItem(
     label,
     active = false,
     mono = true,
+    collapsed = false,
     asChild = false,
     layoutGroupId = 'andromeda-navitem-indicator',
     style,
@@ -123,6 +139,11 @@ export const NavItem = forwardRef(function NavItem(
   ref,
 ) {
   const Comp = asChild ? Slot : 'button';
+  // The indicator slide is the one piece of motion this row owns, and it was
+  // playing at full duration for users who asked for less. Same opt-out
+  // IconButton and Badge use: the dot still moves to the right row, it just
+  // arrives instead of travelling.
+  const reducedMotion = useReducedMotion();
 
   return (
     <>
@@ -131,7 +152,7 @@ export const NavItem = forwardRef(function NavItem(
         type={asChild ? undefined : type}
         data-active={active ? 'true' : 'false'}
         aria-current={active ? 'page' : undefined}
-        className={cn(navItemVariants({ active, mono }), 'andromeda-navitem-touch', className)}
+        className={cn(navItemVariants({ active, mono, collapsed }), 'andromeda-navitem-touch', className)}
         style={{ ...andromedaVars(), ...style }}
         {...props}
       >
@@ -141,10 +162,13 @@ export const NavItem = forwardRef(function NavItem(
           <motion.span
             layoutId={layoutGroupId}
             aria-hidden="true"
-            transition={INDICATOR_TX}
+            transition={reducedMotion ? { duration: 0 } : INDICATOR_TX}
             style={{
               position: 'absolute',
-              right: 'var(--andromeda-3, 12px)',
+              // Collapsed rows are a fraction of the width, so the dot pulls
+              // in a step to stay an EDGE marker rather than drifting into
+              // the icon it sits beside.
+              right: collapsed ? 'var(--andromeda-2, 8px)' : 'var(--andromeda-3, 12px)',
               top: '50%',
               translateY: '-50%',
               width: 'var(--andromeda-1, 4px)',
@@ -157,7 +181,12 @@ export const NavItem = forwardRef(function NavItem(
           />
         ) : null}
         {Icon ? <Icon size={20} weight="regular" /> : null}
-        <span>{label}</span>
+        {/* Collapsed keeps the label in the accessibility tree and takes it
+            out of the picture. Hiding it outright would leave a button whose
+            only content is a decorative glyph, so the row would announce as
+            nothing; this way the accessible name still comes from the row's
+            own content and no caller has to remember an aria-label. */}
+        <span className={collapsed ? 'sr-only' : undefined}>{label}</span>
       </Comp>
       <style>{TOUCH_TARGET_STYLE}</style>
     </>

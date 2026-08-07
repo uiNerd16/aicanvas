@@ -39,9 +39,9 @@ function ensureKeyframesInjected() {
 }
 
 const SIZE_MAP = {
-  sm: { wrap: 14, cell: 4, gap: 1 },
-  md: { wrap: 20, cell: 6, gap: 1 },
-  lg: { wrap: 28, cell: 8, gap: 2 },
+  sm: { wrap: 14, cell: 4, gap: 1 /* andromeda-allow: SVG cell geometry, not a CSS gap — spacing.md category 6 */ },
+  md: { wrap: 20, cell: 6, gap: 1 /* andromeda-allow: SVG cell geometry, not a CSS gap — spacing.md category 6 */ },
+  lg: { wrap: 28, cell: 8, gap: 2 /* andromeda-allow: SVG cell geometry, not a CSS gap — spacing.md category 6 */ },
 };
 
 const colorByVariant = {

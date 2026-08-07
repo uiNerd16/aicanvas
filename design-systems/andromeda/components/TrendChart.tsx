@@ -348,7 +348,7 @@ export const TrendChart = forwardRef(function TrendChart(
         <RechartsTooltip
           content={<ChartTooltip />}
           // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
-          cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: tokens.chart.dash }}
+          cursor={{ stroke: tokens.color.border.bright, strokeWidth: parseInt(tokens.border.width, 10), strokeDasharray: tokens.chart.dash }}
           position={{ y: 0 }}
           allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
@@ -366,7 +366,7 @@ export const TrendChart = forwardRef(function TrendChart(
             strokeDasharray={isThreshold(s) ? '4 4' : undefined}
             fill={`url(#tc-fill-${s.key})`}
             dot={false}
-            activeDot={{ r: 4, fill: colorOf(s), stroke: tokens.color.surface.raised, strokeWidth: 1 }}
+            activeDot={{ r: 4, fill: colorOf(s), stroke: tokens.color.surface.raised, strokeWidth: parseInt(tokens.border.width, 10) }}
             isAnimationActive={false}
           />
         ))}

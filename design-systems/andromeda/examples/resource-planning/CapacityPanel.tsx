@@ -131,7 +131,7 @@ const VIZ_HEIGHT = 40;
 // ── Skewed-bar grid (cluster utilisation) ────────────────────────
 function BarGrid({ values }) {
   return (
-    <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: `${VIZ_HEIGHT}px`, width: '100%' }}>
+    <div style={{ display: 'flex', gap: '3px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */, alignItems: 'flex-end', height: `${VIZ_HEIGHT}px`, width: '100%' }}>
       {values.map((v, i) => (
         <div
           key={i}
@@ -166,7 +166,7 @@ function ThresholdBar({ value }) {
       <div
         style={{
           position: 'relative',
-          marginTop: '8px',
+          marginTop: tokens.spacing[2],
           height: '12px',
           background: `linear-gradient(90deg, ${tokens.color.red[400]} 0%, ${tokens.color.orange[300]} 50%, ${tokens.color.accent[300]} 100%)`,
           border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
@@ -223,7 +223,7 @@ function Sparkline({ data }) {
             type="monotone"
             dataKey="v"
             stroke={tokens.color.text.primary}
-            strokeWidth={1.25}
+            strokeWidth={tokens.chart.lineWidth}
             fill="url(#rp-spark-fill)"
             dot={false}
             isAnimationActive={false}

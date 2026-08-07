@@ -139,7 +139,7 @@ function SpaceTick({ x, y, payload, cx, cy }) {
       style={{
         fontFamily: tokens.typography.fontMono,
         // ponytail: identity constant — 9px polar tick is off the text scale
-        fontSize: '9px',
+        fontSize: '9px' /* andromeda-allow: chart tick below text.xs; spacing.md category 6 names this exact case */,
         fill: tokens.color.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
@@ -251,7 +251,7 @@ export const RadarChart = forwardRef(function RadarChart(
         padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
         display: 'flex',
         flexDirection: 'column',
-        gap: '2px',
+        gap: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */,
       }}>
         <span aria-hidden style={{
           position: 'absolute',
@@ -288,7 +288,7 @@ export const RadarChart = forwardRef(function RadarChart(
             color: tokens.color.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wide,
-            marginTop: '2px',
+            marginTop: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */,
           }}>
             {description}
           </span>
@@ -349,7 +349,7 @@ export const RadarChart = forwardRef(function RadarChart(
                 key={s.key}
                 dataKey={s.key}
                 stroke={s.color ?? tokens.color.accent[300]}
-                strokeWidth={1.5}
+                strokeWidth={tokens.chart.lineWidth}
                 fill={s.color ?? tokens.color.accent[300]}
                 fillOpacity={i === 0 ? 0.12 : 0.06}
                 dot={false}

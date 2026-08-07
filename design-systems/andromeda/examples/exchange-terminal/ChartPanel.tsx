@@ -320,7 +320,7 @@ function CandlesSvg() {
           key={`gy-${p}`}
           x1={0} x2={N} y1={cy(p)} y2={cy(p)}
           stroke={tokens.color.border.subtle}
-          strokeWidth={1}
+          strokeWidth={parseInt(tokens.border.width, 10)}
           strokeDasharray="2 4"
           vectorEffect="non-scaling-stroke"
         />
@@ -338,7 +338,7 @@ function CandlesSvg() {
             <line
               x1={x} x2={x} y1={cy(c.h)} y2={cy(c.l)}
               stroke={color}
-              strokeWidth={1}
+              strokeWidth={parseInt(tokens.border.width, 10)}
               vectorEffect="non-scaling-stroke"
             />
             <rect x={x - 0.38} width={0.76} y={bodyTop} height={bodyH} fill={color} />
@@ -352,7 +352,7 @@ function CandlesSvg() {
           d={maPath(maSeries[p])}
           fill="none"
           stroke={MA_COLORS[p]}
-          strokeWidth={1.5}
+          strokeWidth={tokens.chart.lineWidth}
           vectorEffect="non-scaling-stroke"
         />
       ))}
@@ -360,7 +360,7 @@ function CandlesSvg() {
       <line
         x1={0} x2={N} y1={cy(last.c)} y2={cy(last.c)}
         stroke={tokens.color.accent[300]}
-        strokeWidth={1}
+        strokeWidth={parseInt(tokens.border.width, 10)}
         strokeDasharray="2 3"
         vectorEffect="non-scaling-stroke"
       />
@@ -393,7 +393,7 @@ function VolumeSvg() {
             y={volMax - c.v} height={c.v}
             fill={tint}
             stroke={fill}
-            strokeWidth={1}
+            strokeWidth={parseInt(tokens.border.width, 10)}
             vectorEffect="non-scaling-stroke"
           />
         );

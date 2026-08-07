@@ -71,7 +71,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
       header: 'Track',
       primary: true,
       render: (r) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
           <span
             style={{
               fontFamily: tokens.typography.fontSans,

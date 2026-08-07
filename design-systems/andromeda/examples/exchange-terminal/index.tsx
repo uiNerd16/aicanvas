@@ -372,7 +372,7 @@ function PairHeader() {
       {/* Tier 1 — hero price block. Spot is 3xl, USD reference is sm muted,
           24h change sits inline under the spot so the eye reads price → delta
           without scanning across to a separate Stat tile. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */, minWidth: 0 }}>
         <span
           className="ex-hero-price"
           style={{
@@ -636,8 +636,8 @@ export default function ExchangeTerminal() {
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
         overflow: 'hidden',
-        gap: '12px',
-        padding: '24px',
+        gap: tokens.spacing[3],
+        padding: tokens.spacing[6],
         boxSizing: 'border-box',
       }}
     >
@@ -660,7 +660,7 @@ export default function ExchangeTerminal() {
         style={{
           flex: 1,
           display: 'flex',
-          gap: '12px',
+          gap: tokens.spacing[3],
           minHeight: 0,
         }}
       >

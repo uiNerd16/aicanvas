@@ -364,7 +364,7 @@ export function RequestsTable() {
                       verticalAlign: 'top',
                     }}
                   >
-                    <span style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
                       <span
                         style={{
                           fontFamily: tokens.typography.fontMono,

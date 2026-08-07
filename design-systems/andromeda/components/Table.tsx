@@ -219,7 +219,7 @@ export const TableCell = forwardRef(function TableCell(
         color: muted ? tokens.color.text.secondary : tokens.color.text.primary,
         letterSpacing: tokens.typography.tracking.wide,
         whiteSpace: nowrap ? 'nowrap' : 'normal',
-        lineHeight: 1,
+        lineHeight: tokens.typography.lineHeight.none,
         ...style,
       }}
       {...props}
