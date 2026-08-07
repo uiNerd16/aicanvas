@@ -3,7 +3,7 @@
 // file inherits the same posture.
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   ArrowClockwise,
   Bell,
@@ -114,6 +114,65 @@ function Row({ label, children }: { label?: string; children: React.ReactNode })
   )
 }
 
+// ─── Size ramp ───────────────────────────────────────────────────────────────
+
+// THE way a component's size ladder is shown, on both the component page and
+// the system showcase. One definition, imported by both, so the two surfaces
+// cannot drift apart.
+//
+// A two-row grid, not a flex row of stacked columns. Stacked columns have
+// different total heights (a 24px control and a 40px control make 42px and 58px
+// columns), so no value of alignItems can put BOTH the controls and the captions
+// on a shared line — centring walks both edges, flex-end walks the tops. Here
+// row 1 holds every control and row 2 holds every caption, so the caption
+// baseline is shared by construction.
+//
+// ponytail: the grid also means no slot-height constant. Row 1 auto-sizes to the
+// tallest control, which is the only thing that survives Spinner (14/20/28) and
+// Gauge (80/110/144) using the same helper.
+// direction='column' stacks the ramp instead, for components too wide to sit
+// three-across (UserCard, and anything else block-scale). The shared caption
+// LINE simply becomes a shared caption COLUMN — same guarantee, same grid, one
+// axis flipped.
+export function SizeRamp({ sizes = ['sm', 'md', 'lg'], render, direction = 'row' }) {
+  const column = direction === 'column'
+  return (
+    <div
+      style={{
+        display: 'grid',
+        ...(column
+          ? { gridTemplateColumns: 'max-content max-content', gridAutoFlow: 'row' }
+          : { gridTemplateRows: 'auto auto', gridAutoFlow: 'column', gridAutoColumns: 'max-content' }),
+        columnGap: tokens.spacing[column ? 3 : 5],
+        rowGap: tokens.spacing[column ? 3 : 2],
+        alignItems: 'center',
+        justifyItems: column ? 'start' : 'center',
+      }}
+    >
+      {sizes.map((s) => (
+        <Fragment key={s}>
+          {render(s)}
+          <span
+            style={{
+              fontFamily: tokens.typography.fontMono,
+              fontSize: tokens.typography.size.xs,
+              // Pins the caption box so font metrics cannot reintroduce drift.
+              lineHeight: tokens.typography.lineHeight.none,
+              color: tokens.color.text.faint,
+              textTransform: 'uppercase',
+              // One notch below the cell label's `widest`, so it reads as
+              // subordinate to the label above the ramp.
+              letterSpacing: tokens.typography.tracking.wider,
+            }}
+          >
+            {s}
+          </span>
+        </Fragment>
+      ))}
+    </div>
+  )
+}
+
 // ─── Per-slug demos ──────────────────────────────────────────────────────────
 
 function IconButtonDemo() {
@@ -126,9 +185,7 @@ function IconButtonDemo() {
         <IconButton variant="destructive" aria-label="Delete" icon={Trash} />
       </Row>
       <Row label="Sizes">
-        <IconButton size="sm" aria-label="Settings" icon={Gear} />
-        <IconButton size="md" aria-label="Settings" icon={Gear} />
-        <IconButton size="lg" aria-label="Settings" icon={Gear} />
+        <SizeRamp render={(s) => <IconButton size={s} aria-label={`Settings (${s})`} icon={Gear} />} />
       </Row>
       <Row label="Disabled">
         <IconButton aria-label="Settings" icon={Gear} disabled />
@@ -149,9 +206,7 @@ function ButtonDemo() {
         <Button variant="link">Link</Button>
       </Row>
       <Row label="Sizes">
-        <Button size="sm">Small</Button>
-        <Button size="md">Medium</Button>
-        <Button size="lg">Large</Button>
+        <SizeRamp render={(s) => <Button size={s}>Deploy</Button>} />
       </Row>
       <Row label="With icon">
         <Button icon={Bell}>Notifications</Button>
@@ -183,9 +238,7 @@ function AvatarDemo() {
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
       <Row label="Sizes">
-        <Avatar name="Reza Quinn" size="sm" />
-        <Avatar name="Reza Quinn" size="md" />
-        <Avatar name="Reza Quinn" size="lg" />
+        <SizeRamp render={(s) => <Avatar name="Reza Quinn" size={s} />} />
       </Row>
       <Row label="With status">
         <Avatar name="Reza Quinn" status="online" />
@@ -433,9 +486,7 @@ function GaugeDemo() {
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
       <Row label="Sizes">
-        <Gauge size="sm" />
-        <Gauge size="md" />
-        <Gauge size="lg" />
+        <SizeRamp render={(s) => <Gauge size={s} />} />
       </Row>
       <Row label="Variants">
         <Gauge variant="accent" value={82} label="CPU" />
@@ -649,9 +700,7 @@ function SpinnerDemo() {
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
       <Row label="Sizes">
-        <Spinner size="sm" />
-        <Spinner size="md" />
-        <Spinner size="lg" />
+        <SizeRamp render={(s) => <Spinner size={s} />} />
       </Row>
       <Row label="Variants">
         <Spinner variant="default" />
@@ -771,26 +820,22 @@ function SegmentedControlDemo() {
   const [period, setPeriod] = useState('1w')
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
-      <Row label="Icons · sm">
-        <SegmentedControl
-          size="sm"
-          value={chartType}
-          onChange={setChartType}
-          options={[
-            { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
-            { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
-          ]}
-        />
-      </Row>
-      <Row label="Icons · lg">
-        <SegmentedControl
-          size="lg"
-          value={chartType}
-          onChange={setChartType}
-          options={[
-            { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
-            { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
-          ]}
+      <Row label="Sizes">
+        <SizeRamp
+          render={(s) => (
+            <SegmentedControl
+              size={s}
+              // Distinct per instance: the sliding indicator is a shared
+              // layoutId, and three ramp instances would fight over one.
+              layoutGroupId={`andromeda-segmented-size-${s}`}
+              value={chartType}
+              onChange={setChartType}
+              options={[
+                { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+                { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+              ]}
+            />
+          )}
         />
       </Row>
       <Row label="Labels">
@@ -885,16 +930,8 @@ function PanelMenuDemo() {
       </div>
       <div style={{ width: 200 }}>
         <Row label="Trigger size">
-          {(['sm', 'md', 'lg'] as const).map((s) => (
-            <div
-              key={s}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: tokens.spacing[2],
-              }}
-            >
+          <SizeRamp
+            render={(s) => (
               <PanelMenu
                 size={s}
                 align="left"
@@ -904,19 +941,8 @@ function PanelMenuDemo() {
                   { label: 'Export',  icon: Export,         onSelect: () => {} },
                 ]}
               />
-              <span
-                style={{
-                  fontFamily: tokens.typography.fontMono,
-                  fontSize: tokens.typography.size.xs,
-                  color: tokens.color.text.faint,
-                  textTransform: 'uppercase',
-                  letterSpacing: tokens.typography.tracking.wide,
-                }}
-              >
-                {s}
-              </span>
-            </div>
-          ))}
+            )}
+          />
         </Row>
       </div>
     </div>
@@ -1018,6 +1044,20 @@ function UserMenuDemo() {
           align="end"
         />
       </Row>
+      <Row label="Avatar size">
+        <SizeRamp
+          render={(s) => (
+            <UserMenu
+              name="OPS-01"
+              src={USER_AVATAR_SRC}
+              status="online"
+              avatarSize={s}
+              items={USER_MENU_ITEMS}
+              ariaLabel={`User menu (${s})`}
+            />
+          )}
+        />
+      </Row>
     </div>
   )
 }
@@ -1053,6 +1093,29 @@ function UserCardDemo() {
               align="stretch"
             />
           </div>
+        </Row>
+      </div>
+      <div style={{ width: 224 }}>
+        <Row label="Avatar size">
+          {/* Stacked: three 200px cards will not sit three-across in this cell. */}
+          <SizeRamp
+            direction="column"
+            render={(s) => (
+              <div style={{ width: 200, background: tokens.color.surface.raised }}>
+                <UserCard
+                  name="Reza Quinn"
+                  role="Flight Director"
+                  src={USER_CARD_SRC}
+                  status="online"
+                  avatarSize={s}
+                  items={USER_MENU_ITEMS}
+                  placement="top"
+                  align="stretch"
+                  ariaLabel={`User card (${s})`}
+                />
+              </div>
+            )}
+          />
         </Row>
       </div>
     </div>

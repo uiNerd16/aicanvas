@@ -106,6 +106,9 @@ import {
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
 import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer } from '../../../lib/andromeda-v2.generated'
+// One definition, shared with the per-component demos, so the size ladders on
+// the two surfaces cannot drift apart.
+import { SizeRamp } from '../../../_lib/andromeda/andromeda-demos'
 import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
 import { ShowcaseInstallCard } from '../../../_components/ShowcaseInstallCard'
 
@@ -701,9 +704,7 @@ export default function AndromedaShowcase({
             <Button variant="link">Link</Button>
           </Row>
           <Row label="Sizes">
-            <Button size="sm">Small</Button>
-            <Button size="md">Medium</Button>
-            <Button size="lg">Large</Button>
+            <SizeRamp render={(s) => <Button size={s}>Deploy</Button>} />
           </Row>
           <Row label="With icon">
             <Button icon={Bell}>Notifications</Button>
@@ -738,9 +739,7 @@ export default function AndromedaShowcase({
             <IconButton aria-label="Destructive" variant="destructive" icon={Bell} />
           </Row>
           <Row label="Sizes">
-            <IconButton aria-label="Small"  size="sm" icon={Gear} />
-            <IconButton aria-label="Medium" size="md" icon={Gear} />
-            <IconButton aria-label="Large"  size="lg" icon={Gear} />
+            <SizeRamp render={(s) => <IconButton aria-label={`Settings (${s})`} size={s} icon={Gear} />} />
           </Row>
           <Row label="Disabled">
             <IconButton aria-label="Disabled default"     variant="default"     icon={Bell} disabled />
@@ -884,30 +883,19 @@ export default function AndromedaShowcase({
                 </div>
                 <div style={cellStyle}>
                   <div style={labelStyle}>Trigger size</div>
-                  <div style={{ display: 'flex', gap: tokens.spacing[4], alignItems: 'flex-end' }}>
-                    {(['sm', 'md', 'lg'] as const).map((s) => (
-                      <div
-                        key={s}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: tokens.spacing[2],
-                        }}
-                      >
-                        <PanelMenu
-                          size={s}
-                          align="left"
-                          ariaLabel={`Panel options (${s})`}
-                          items={[
-                            { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
-                            { label: 'Export',  icon: Export,         onSelect: () => {} },
-                          ]}
-                        />
-                        <span style={labelStyle}>{s}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <SizeRamp
+                    render={(s) => (
+                      <PanelMenu
+                        size={s}
+                        align="left"
+                        ariaLabel={`Panel options (${s})`}
+                        items={[
+                          { label: 'Refresh', icon: ArrowClockwise, onSelect: () => {} },
+                          { label: 'Export',  icon: Export,         onSelect: () => {} },
+                        ]}
+                      />
+                    )}
+                  />
                 </div>
               </div>
             );
@@ -937,9 +925,7 @@ export default function AndromedaShowcase({
           description="3 sizes. Shows an image when `src` is provided, with a fallback to initials. Optional status bar in 4 states."
         >
           <Row label="Sizes">
-            <Avatar name="Reza Quinn" size="sm" />
-            <Avatar name="Reza Quinn" size="md" />
-            <Avatar name="Reza Quinn" size="lg" />
+            <SizeRamp render={(s) => <Avatar name="Reza Quinn" size={s} />} />
           </Row>
           <Row label="With status">
             <Avatar name="Reza Quinn" status="online" />
@@ -1188,7 +1174,7 @@ export default function AndromedaShowcase({
               </div>
             </div>
           </Row>
-          <Row label="Sizes · without readout">
+          <Row label="Fill levels · without readout">
             <HeatGrid value={30} cellSize={16} gap={2} showValue={false} label="Low" />
             <HeatGrid value={75} cellSize={16} gap={2} showValue={false} label="High" />
             <HeatGrid value={100} cellSize={16} gap={2} showValue={false} label="Full" />
@@ -1315,26 +1301,22 @@ export default function AndromedaShowcase({
           slug="segmented-control"
           description="Row of icon-or-label buttons that share a single border. The active background slides between segments on selection (Framer Motion layout animation). Sized sm/md/lg to align with the Button/IconButton baseline."
         >
-          <Row label="Icons · sm">
-            <SegmentedControl
-              size="sm"
-              value={chartTypeSm}
-              onChange={setChartTypeSm}
-              options={[
-                { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
-                { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
-              ]}
-            />
-          </Row>
-          <Row label="Icons · lg">
-            <SegmentedControl
-              size="lg"
-              value={chartTypeLg}
-              onChange={setChartTypeLg}
-              options={[
-                { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
-                { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
-              ]}
+          <Row label="Sizes">
+            <SizeRamp
+              render={(s) => (
+                <SegmentedControl
+                  size={s}
+                  // Distinct per instance: the sliding indicator is a shared
+                  // layoutId, and three ramp instances would fight over one.
+                  layoutGroupId={`andromeda-showcase-segmented-size-${s}`}
+                  value={s === 'lg' ? chartTypeLg : chartTypeSm}
+                  onChange={s === 'lg' ? setChartTypeLg : setChartTypeSm}
+                  options={[
+                    { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
+                    { value: 'bars', icon: ChartBar,  ariaLabel: 'Bar chart' },
+                  ]}
+                />
+              )}
             />
           </Row>
           <Row label="Labels">
@@ -1384,9 +1366,7 @@ export default function AndromedaShowcase({
           description="A 3x3 pixel grid with a snake-game trail cycling via a single CSS keyframe, running on the compositor. 4 color variants and 3 sizes."
         >
           <Row label="Sizes">
-            <Spinner size="sm" />
-            <Spinner size="md" />
-            <Spinner size="lg" />
+            <SizeRamp render={(s) => <Spinner size={s} />} />
           </Row>
           <Row label="Variants">
             <Spinner variant="default" />
@@ -1606,9 +1586,7 @@ export default function AndromedaShowcase({
           description="Radial percentage gauge. The arc IS the measurement, so it takes the semantic color (accent live, orange warning, red fault) over a neutral track; the readout counts up in sync with the sweep. A bare primitive that composes into Cards and panels."
         >
           <Row label="Sizes">
-            <Gauge size="sm" />
-            <Gauge size="md" />
-            <Gauge size="lg" />
+            <SizeRamp render={(s) => <Gauge size={s} />} />
           </Row>
           <Row label="Variants">
             <Gauge variant="accent" value={82} label="CPU" />
