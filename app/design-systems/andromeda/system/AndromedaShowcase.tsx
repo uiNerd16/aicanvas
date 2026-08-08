@@ -163,6 +163,22 @@ const FUNNEL_DEMO_TONED = FUNNEL_DEMO_STAGES.map((stage, i) => ({
 // to abstract anything reusable. Each Section is a Card; each Row is a flex
 // strip with an uppercase mono mini-label above it.
 
+// Section descriptions author code identifiers in `backticks`. Render those in
+// their true case; everything around them is body copy. Without this the
+// backticks printed literally AND the uppercase transform flattened the camel
+// hump, so `onClose` reached the page as ONCLOSE — one unreadable word.
+function withCode(text: string) {
+  return text.split(/(`[^`]+`)/g).map((part, i) =>
+    part.length > 2 && part.startsWith('`') && part.endsWith('`') ? (
+      <code key={i} style={{ fontFamily: 'inherit', color: tokens.color.text.primary }}>
+        {part.slice(1, -1)}
+      </code>
+    ) : (
+      part
+    ),
+  )
+}
+
 function Section({
   title,
   kicker,
@@ -234,14 +250,17 @@ function Section({
               margin: 0,
               marginBottom: tokens.spacing[6],
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
-              textTransform: 'uppercase',
-              letterSpacing: tokens.typography.tracking.wide,
-              lineHeight: 1.6,
+              // Body copy, per voice-and-copy: normal case, text.secondary,
+              // normal tracking. It used to render uppercase / muted / wide,
+              // which is the UI-LABEL treatment — wrong for a paragraph, and
+              // the reason every prop name in here lost its camel hump.
+              fontSize: tokens.typography.size.sm,
+              color: tokens.color.text.secondary,
+              letterSpacing: tokens.typography.tracking.normal,
+              lineHeight: tokens.typography.lineHeight.relaxed,
             }}
           >
-            {description}
+            {withCode(description)}
           </p>
         ) : null}
         {children}
@@ -1328,7 +1347,7 @@ export default function AndromedaShowcase({
         <Section
           title="Tag"
           slug="tag"
-          description="Compact uppercase mono label. 4 variants. Optional dismiss button when onClose is provided."
+          description="Compact uppercase mono label. 4 variants × 3 sizes. Optional dismiss button when `onClose` is provided."
         >
           <Row label="Variants">
             <Tag variant="default">Default</Tag>

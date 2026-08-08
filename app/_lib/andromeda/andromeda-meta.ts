@@ -272,7 +272,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'tag',
     name: 'Tag',
     description:
-      'Compact uppercase mono label. 4 variants. Optional dismiss button when onClose is provided.',
+      'Compact uppercase mono label. 4 variants × 3 sizes. Optional dismiss button when onClose is provided.',
     sourceFile: 'Tag.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/tag.png?v=3',
   },
