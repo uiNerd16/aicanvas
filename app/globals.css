@@ -15,13 +15,24 @@
   --foreground: #1C1916;
 }
 
-/* Reserve scrollbar gutter on every scrollable element so toggling between
-   short and tall content (e.g. signed-in vs signed-out states) doesn't
-   reflow the layout horizontally when the scrollbar appears or disappears. */
-html,
-body {
-  scrollbar-gutter: stable;
+/* Tell the browser which way the page leans, so every control it draws for us
+   — scrollbars above all — comes out in the right palette without us styling
+   it. This is what lets the custom scrollbar CSS stay deleted: a native bar on
+   a dark page is dark because of this line, not because we painted it. */
+html {
+  color-scheme: light;
 }
+html.dark {
+  color-scheme: dark;
+}
+
+/* No scrollbar-gutter on html/body on purpose. body is overflow-hidden
+   (app/layout.tsx), so its overflow propagates to the viewport and there is
+   no document-level scroll to reflow — the reserve this used to declare could
+   never be filled by a bar, and Chromium still narrows the initial containing
+   block for it, which pushed every page one scrollbar-width short of the
+   window edge. The auth-state reflow it was written for is handled one level
+   in, on .app-scroll-column, by the element that actually scrolls. */
 
 .dark {
   --background: #1A1712;
@@ -109,47 +120,92 @@ html[data-frame] body {
   color: var(--color-sand-50);
 }
 
-/* ── Custom scrollbar ── */
-/* Webkit (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
-  width: 18px;
+/* ── Page scroll column ── */
+/* The root chrome column (app/layout.tsx) reserves a scrollbar gutter so the
+   content width never shifts between auth states. Some routes scroll
+   THEMSELVES instead, and then the column never overflows: its gutter is
+   reserved and never painted, a dead full-height strip at the right of the
+   window with the route's real scrollbar drawn one gutter-width inside it.
+   Such a route marks its root with data-owns-scroll and this releases the
+   outer reserve.
+
+   Two ways a route ends up owning the scroll, both present in this app:
+     - it clips itself to the column's height (h-full + overflow-hidden):
+       app/design-systems/andromeda/layout.tsx, app/ideation/layout.tsx
+     - it sets overflow on one axis (overflow-x-hidden), which computes the
+       other axis to auto AND drops its flex auto-minimum to 0 so it shrinks
+       to the column rather than growing past it: app/home/HomePageClient.tsx
+
+   Declared here rather than inline so the :has() override can win — an inline
+   scrollbar-gutter on the column would beat any selector. */
+.app-scroll-column {
+  scrollbar-gutter: stable;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-sand-300);
-  border-radius: 9999px;
-  border-left: 4px solid transparent;
-  border-right: 8px solid transparent;
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-sand-400);
-  border-left: 4px solid transparent;
-  border-right: 8px solid transparent;
-  background-clip: padding-box;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: var(--color-sand-800);
-  border-left: 4px solid transparent;
-  border-right: 8px solid transparent;
-  background-clip: padding-box;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-sand-700);
-  border-left: 4px solid transparent;
-  border-right: 8px solid transparent;
-  background-clip: padding-box;
+.app-scroll-column:has(> [data-owns-scroll]) {
+  scrollbar-gutter: auto;
 }
 
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-sand-300) transparent;
+/* ── Fullscreen component preview: kill the phantom 80px of scroll ──
+   The panel is `sm:inset-10`, so its height is 100vh MINUS 80px. Almost every
+   component in the catalogue is authored `min-h-screen` (100vh) to be
+   copy-paste ready, so inside this panel each one is 80px taller than its box
+   and the panel scrolls by exactly that — a component that visibly fits still
+   drifts up and down under the wheel. The panel used to hide the scrollbar to
+   mask it; this removes the overflow instead.
+
+   min-height, not height: a genuinely tall component (a scroll-driven block)
+   still exceeds 100% and still scrolls, which the panel must allow — being
+   `fixed`, it is the only scrollable ancestor such a block has, and without it
+   the block would freeze on its first frame.
+
+   Deliberately UNLAYERED. `.min-h-screen` is a Tailwind utility and this has
+   the same specificity, so equal-specificity source order inside the utilities
+   layer would decide the winner. Unlayered CSS beats every layered rule
+   outright, which is exactly the override intended here. */
+[data-preview-fullscreen] > * {
+  min-height: 100%;
 }
-.dark * {
-  scrollbar-color: var(--color-sand-800) transparent;
+
+/* ── Scrollbars: thin everywhere INSIDE, native for the page itself ──
+   Two different jobs, so two different answers.
+
+   Inside the app — sidebar nav, tables, drawers, menus, template panels — a
+   scroller is a small box and the platform's classic bar is far too heavy for
+   it. Those get a thin, theme-toned bar. There are ~28 such scrollers across
+   app/ and design-systems/, so this is a `*` rule rather than 28 edits.
+
+   The PAGE's own scroller is exempt via .aic-page-scroll. Styling a scrollbar
+   at all is what opts macOS out of overlay scrollbars, and the page bar is
+   exactly where overlay is wanted: it floats over the content, auto-hides,
+   and takes no layout width, so there is no strip to be flush with. Setting
+   both properties back to `auto` leaves that one element unstyled and hands it
+   back to the platform. Windows and Linux still draw a classic bar there;
+   `color-scheme` at the top of this file keeps it dark on a dark page.
+
+   IN @layer base, and that is load-bearing, not tidiness. Unlayered CSS beats
+   every layered rule regardless of specificity, so an unlayered `*` here would
+   out-rank Tailwind's own utilities and silently override any element that
+   opts OUT of a scrollbar with a class — [scrollbar-width:none] on the
+   expanded component preview, for one. In base, utilities win, so
+   `[scrollbar-width:none]` and `[&::-webkit-scrollbar]:hidden` do what they
+   say and any future opt-out works without being listed here.
+
+   The 18px ::-webkit-scrollbar block that used to live here is gone for good.
+   It only reached WebKit, it fought this rule on Chromium 121+, and its
+   painted pill was what sat inset from its own track. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sand-300) transparent;
+  }
+  .dark * {
+    scrollbar-color: var(--color-sand-800) transparent;
+  }
+  /* Must come after `.dark *` — same specificity, so source order decides. */
+  .aic-page-scroll {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
 }
 
 /* Step timeline connector — used by app/components/Step.tsx */

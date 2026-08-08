@@ -29,11 +29,15 @@ export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   // clearance for the retired floating TemplateChrome widget. Templates now
   // carry a TOP bar (TemplatePreviewShell), so the reserve would just read as
   // a dead 112px band at the end of the mobile scroll.
+  // aic-page-scroll on every branch: this column IS the page scroller on
+  // /design-systems/andromeda/*, so it opts out of the thin `*` bar and keeps
+  // the platform's native one (overlay on macOS). The thin bar stays where it
+  // belongs — the panels, tables and menus INSIDE the page.
   const className = isTemplate
-    ? 'flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:overflow-y-hidden'
+    ? 'aic-page-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:overflow-y-hidden'
     : isOverview
-      ? 'flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950'
-      : 'flex flex-1 scroll-smooth flex-col overflow-y-auto'
+      ? 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950'
+      : 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto'
 
   const style = isTemplate
     ? { backgroundColor: tokens.color.surface.base }

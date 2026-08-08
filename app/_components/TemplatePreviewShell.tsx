@@ -96,12 +96,13 @@ export function TemplatePreviewShell({
 // ── Frame payload (renders INSIDE the preview iframe) ────────────────────────
 // Makes the framed composition behave like a real touch device viewed on a
 // desktop:
-//   • Hidden, overlay-style scrollbars with no reserved gutter — the app
-//     reserves an 18px scrollbar gutter on every scroller (globals.css
-//     scrollbar-gutter:stable + a custom 18px ::-webkit-scrollbar, echoed on
-//     AndromedaContentColumn); inside the mobile frame that strip reads
-//     as dead space on the right and keeps painting a desktop bar. We cancel
-//     both for every element.
+//   • Hidden, overlay-style scrollbars with no reserved gutter. The site's own
+//     custom scrollbar is gone now (globals.css → "Page scrollbar: NATIVE"),
+//     but scrollers inside a composition can still reserve a gutter of their
+//     own (AndromedaContentColumn, and any component that sets one), and on a
+//     desktop OS that draws classic bars the frame would show one. Inside a
+//     mobile frame both read as dead space, so we cancel them for every
+//     element regardless of what the page outside is doing.
 //   • Text isn't selectable, so a click-drag PANS instead of highlighting the
 //     telemetry numbers.
 //   • Click-drag scrolls the nearest scrollable ancestor (x and/or y) the way a

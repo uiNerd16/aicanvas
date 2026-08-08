@@ -1675,6 +1675,11 @@ export default function ComponentPageView({
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               data-card-theme={cardTheme}
+              // Collapses each min-h-screen child to the panel's own height —
+              // see [data-preview-fullscreen] in globals.css. Without it every
+              // component overflows this panel by the sm:inset-10 (80px) and
+              // drifts under the wheel while visibly fitting.
+              data-preview-fullscreen
               className={`absolute inset-0 isolate overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl [&::-webkit-scrollbar]:hidden ${
                 cardTheme === 'dark'
                   ? 'dark bg-sand-950 sm:border-sand-800'
