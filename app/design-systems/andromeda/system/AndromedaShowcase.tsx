@@ -6,7 +6,7 @@
 // place.
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
 import { SiteFooter } from '../../../components/SiteFooter'
@@ -266,6 +266,58 @@ function Section({
         {children}
       </CardContent>
     </Card>
+  )
+}
+
+// Size × state matrix. Columns are the three control rungs, rows are variants
+// or states, so one glance answers both "how big can it be" and "what states
+// does it have" — and every cell is directly comparable to the one above it.
+// Prefer this over separate Variants and Sizes rows, which show each axis at a
+// single fixed value of the other and hide the combinations.
+function Matrix({
+  rows,
+  render,
+  sizes = ['sm', 'md', 'lg'] as const,
+}: {
+  rows: { label: string; props?: Record<string, unknown> }[]
+  render: (size: 'sm' | 'md' | 'lg', props: Record<string, unknown>) => ReactNode
+  sizes?: readonly ('sm' | 'md' | 'lg')[]
+}) {
+  const head = {
+    fontFamily: tokens.typography.fontMono,
+    fontSize: tokens.typography.size.xs,
+    color: tokens.color.text.faint,
+    textTransform: 'uppercase' as const,
+    letterSpacing: tokens.typography.tracking.widest,
+  }
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `max-content repeat(${sizes.length}, max-content)`,
+        gap: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
+        alignItems: 'center',
+        justifyContent: 'start',
+        // The matrix is the widest thing in a narrow card, so it scrolls
+        // inside its own box rather than forcing the page to scroll.
+        overflowX: 'auto',
+      }}
+    >
+      <span />
+      {sizes.map((s) => (
+        <span key={s} style={head}>
+          {s}
+        </span>
+      ))}
+      {rows.map((r) => (
+        <Fragment key={r.label}>
+          <span style={head}>{r.label}</span>
+          {sizes.map((s) => (
+            <span key={s}>{render(s, r.props ?? {})}</span>
+          ))}
+        </Fragment>
+      ))}
+    </div>
   )
 }
 
@@ -1347,25 +1399,22 @@ export default function AndromedaShowcase({
         <Section
           title="Tag"
           slug="tag"
-          description="Compact uppercase mono label. 4 variants × 3 sizes. Optional dismiss button when `onClose` is provided."
+          description="Compact labels for metadata, filters, and multi-select inputs. Like Badge, but dismissible: pass `onClose` and it grows a dismiss button. 4 variants × 3 sizes."
         >
-          <Row label="Variants">
-            <Tag variant="default">Default</Tag>
-            <Tag variant="accent">Accent</Tag>
-            <Tag variant="warning">Warning</Tag>
-            <Tag variant="fault">Fault</Tag>
-          </Row>
-          <Row label="Sizes">
-            <SizeRamp render={(s) => <Tag size={s} variant="accent">Accent</Tag>} />
-          </Row>
-          <Row label="Dismissible">
-            <Tag variant="default" onClose={() => {}}>
-              Removable
-            </Tag>
-            <Tag variant="accent" onClose={() => {}}>
-              Active filter
-            </Tag>
-          </Row>
+          <Matrix
+            rows={[
+              { label: 'Default', props: { variant: 'default' } },
+              { label: 'Accent', props: { variant: 'accent' } },
+              { label: 'Warning', props: { variant: 'warning' } },
+              { label: 'Fault', props: { variant: 'fault' } },
+              { label: 'Dismissible', props: { variant: 'default', onClose: () => {} } },
+            ]}
+            render={(size, props) => (
+              <Tag size={size} {...props}>
+                Label
+              </Tag>
+            )}
+          />
         </Section>
 
         {/* ── Checkbox ───────────────────────────────────────────────────── */}
