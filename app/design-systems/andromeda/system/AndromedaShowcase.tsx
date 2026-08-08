@@ -219,7 +219,7 @@ function Section({
           <span
             style={{
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
+              fontSize: tokens.typography.size.sm,
               color: tokens.color.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
@@ -235,7 +235,7 @@ function Section({
           // rendering when asChild is true.
           <Link
             href={`/design-systems/andromeda/${slug}`}
-            className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            className={buttonVariants({ variant: 'ghost', size: 'md' })}
             style={andromedaVars()}
           >
             Open {title}
@@ -254,7 +254,7 @@ function Section({
               // normal tracking. It used to render uppercase / muted / wide,
               // which is the UI-LABEL treatment — wrong for a paragraph, and
               // the reason every prop name in here lost its camel hump.
-              fontSize: tokens.typography.size.sm,
+              fontSize: tokens.typography.size.md,
               color: tokens.color.text.secondary,
               letterSpacing: tokens.typography.tracking.normal,
               lineHeight: tokens.typography.lineHeight.relaxed,
@@ -285,7 +285,7 @@ function Matrix({
 }) {
   const head = {
     fontFamily: tokens.typography.fontMono,
-    fontSize: tokens.typography.size.xs,
+    fontSize: tokens.typography.size.sm,
     color: tokens.color.text.faint,
     textTransform: 'uppercase' as const,
     letterSpacing: tokens.typography.tracking.widest,
@@ -329,7 +329,7 @@ function Row({ label, children }: { label?: string; children: ReactNode }) {
           style={{
             marginBottom: tokens.spacing[3],
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.xs,
+            fontSize: tokens.typography.size.sm,
             color: tokens.color.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
