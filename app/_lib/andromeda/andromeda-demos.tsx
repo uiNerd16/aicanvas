@@ -457,8 +457,8 @@ function NavItemDemo() {
             key={item.label}
             label={item.label}
             position="right"
-            // inline-flex by default, which would shrink-wrap the row and pull
-            // the active dot in beside the glyph instead of to the rail edge.
+            // inline-flex by default, which would shrink-wrap the row and
+            // leave the hover fill and tap target narrower than the rail.
             style={{ display: 'flex', width: '100%' }}
           >
             <NavItem collapsed icon={item.icon} label={item.label} active={i === 0} />

@@ -105,7 +105,7 @@ import {
 // v2 components come from the build-time-injected shim (real re-exports when
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
-import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer } from '../../../lib/andromeda-v2.generated'
+import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer, FunnelChart } from '../../../lib/andromeda-v2.generated'
 // One definition, shared with the per-component demos, so the size ladders on
 // the two surfaces cannot drift apart.
 import { SizeRamp } from '../../../_lib/andromeda/andromeda-demos'
@@ -139,6 +139,24 @@ const TREND_DEMO_DATA = Array.from({ length: 31 }, (_, i) => {
     reserved: Math.round(1480 + (_tcNoise(i, 3) - 0.5) * 160),
   }
 })
+
+// Funnel demo data — mirrors the per-component page (andromeda-demos) so the
+// two surfaces show the same story. Tone is DERIVED from step conversion,
+// never assigned to tell stages apart; that is the only sanctioned way colour
+// enters a funnel (FunnelChart.rules.md).
+const FUNNEL_DEMO_TONE = (share: number) =>
+  share >= 0.85 ? 'accent' : share >= 0.75 ? 'warning' : 'fault'
+const FUNNEL_DEMO_STAGES = [
+  { id: 'awareness', label: 'Awareness', value: 4100 },
+  { id: 'interest', label: 'Interest', value: 2957 },
+  { id: 'consideration', label: 'Consideration', value: 2184 },
+  { id: 'intent', label: 'Intent', value: 1038 },
+  { id: 'purchase', label: 'Purchase', value: 820 },
+]
+const FUNNEL_DEMO_TONED = FUNNEL_DEMO_STAGES.map((stage, i) => ({
+  ...stage,
+  tone: i === 0 ? 'accent' : FUNNEL_DEMO_TONE(stage.value / FUNNEL_DEMO_STAGES[i - 1].value),
+}))
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 // Local to this page — they exist only to keep the JSX below readable, not
@@ -1675,6 +1693,29 @@ export default function AndromedaShowcase({
               ]}
               tooltipLabelFormatter={(l) => `DAY ${String(l).padStart(2, '0')}`}
             />
+          </div>
+        </Section>
+
+        {/* ── Funnel Chart ───────────────────────────────────────────────── */}
+        <Section
+          title="Funnel Chart"
+          slug="funnel-chart"
+          kicker="Component · Charts"
+          description="Stage-to-stage conversion. Resting ink is neutral — a filled band takes text.secondary, one grey step below a line's ink, because a band covering most of the chart washes out brighter than a 1px stroke. Colour enters only when it is derived from the data (accent healthy, orange warning, red fault per step conversion); hover is subtractive, the other stages fade back."
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: '100%' }}>
+            <Row label="Overall conversion">
+              <div style={{ position: 'relative', background: tokens.color.surface.raised, padding: tokens.spacing[5], width: '100%' }}>
+                <CornerMarkers />
+                <FunnelChart stages={FUNNEL_DEMO_STAGES} height={160} style={{ width: '100%' }} />
+              </div>
+            </Row>
+            <Row label="Step conversion · tone from the data">
+              <div style={{ position: 'relative', background: tokens.color.surface.raised, padding: tokens.spacing[5], width: '100%' }}>
+                <CornerMarkers />
+                <FunnelChart stages={FUNNEL_DEMO_TONED} percentOf="previous" height={160} style={{ width: '100%' }} />
+              </div>
+            </Row>
           </div>
         </Section>
 
