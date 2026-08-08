@@ -2,7 +2,7 @@
 // ============================================================
 // COMPONENT: Tooltip
 // Wraps any child and shows a floating label on hover.
-// Positioned above by default; pass position="bottom" to flip.
+// Positioned above by default; top | bottom | left | right.
 // Sharp corners, surface.overlay background — no arrow, no portal.
 // Uses inline hover state (onMouseEnter/Leave) so it works without
 // a class-based stylesheet.
@@ -28,7 +28,7 @@ const EXIT_TX  = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1
 /**
  * @typedef {object} TooltipProps
  * @property {string} label              Text shown in the tooltip.
- * @property {'top'|'bottom'} [position='top']
+ * @property {'top'|'bottom'|'left'|'right'} [position='top'] Side of the trigger the label hangs off. `left`/`right` are for icon rails, where a label above the row would cover its neighbour.
  * @property {React.ReactNode} children  The trigger element.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -47,41 +47,91 @@ export const Tooltip = forwardRef(function Tooltip(
   const [shiftX, setShiftX] = useState(0);
   const floatRef = useRef(null);
 
-  const floatStyle =
-    position === 'bottom'
-      ? { top: `calc(100% + ${tokens.spacing[2]})` }
-      : { bottom: `calc(100% + ${tokens.spacing[2]})` };
+  // Side placements exist for icon rails, where a label above the row would
+  // cover the row above it. They centre on the OTHER axis, so the two
+  // orientations divide framer's transform between them rather than fighting
+  // over it: a vertical tooltip centres with `x` and enters on `y`, a side one
+  // centres with `y` and enters on `x`.
+  const side = position === 'left' || position === 'right';
 
-  // Edge-clamp: once the centred tooltip is in the DOM, measure its rect and
-  // nudge it back on-screen if either edge has crossed the viewport inset.
-  // The correction is folded into framer's `x` (so framer owns the transform —
-  // we never mutate node.style.transform out from under it) and computed
-  // INCREMENTALLY from the rect as currently rendered: the new shift is the
-  // current shift adjusted by however far the box still pokes past an edge.
-  // `shiftX` is a dep, so after each correction the effect re-measures the
-  // now-shifted box; once it's in-bounds `next === shiftX` and the loop stops
-  // (one reflow in practice). resize re-measures too.
+  const floatStyle = side
+    ? {
+        top: '50%',
+        y: '-50%',
+        ...(position === 'right'
+          ? { left: `calc(100% + ${tokens.spacing[2]})` }
+          : { right: `calc(100% + ${tokens.spacing[2]})` }),
+      }
+    : {
+        // Centre horizontally — left:50% positions the box's left edge, the
+        // -50% transform shifts it back by half its own width. shiftX (px,
+        // measured) is the viewport-edge correction folded into the same
+        // framer-owned `x` transform, so an edge-anchored trigger can't push
+        // the box off-screen and force horizontal page scroll.
+        left: '50%',
+        x: `calc(-50% + ${shiftX}px)`,
+        ...(position === 'bottom'
+          ? { top: `calc(100% + ${tokens.spacing[2]})` }
+          : { bottom: `calc(100% + ${tokens.spacing[2]})` }),
+      };
+
+  // 4px of travel on whichever axis the tooltip is NOT centred on.
+  const enterFrom = side
+    ? { x: position === 'right' ? -4 : 4 }
+    : { y: position === 'bottom' ? -4 : 4 };
+  const enterTo = side ? { x: 0 } : { y: 0 };
+
+  // Edge-clamp: work out where a centred label WOULD sit, and if that lands
+  // past a viewport inset, fold the correction into framer's `x` (framer owns
+  // the transform; we never mutate node.style.transform out from under it).
+  //
+  // Nothing here measures the float's own on-screen position, and that is the
+  // whole design. Framer writes `x` on an animation frame, while React flushes
+  // a setState made FROM a layout effect synchronously — re-rendering and
+  // re-running this effect without ever yielding to the browser. So during such
+  // a loop no frame fires, framer never paints the shift, and every pass
+  // re-measures the same untransformed box. A formula that reads its own output
+  // back through that rect therefore never converges; it adds the same
+  // correction again and again until React kills it at its update-depth limit.
+  // That is where "Maximum update depth exceeded" came from on hover of an icon
+  // rail: a wide label centred on a narrow row at the window edge needs a clamp
+  // every time, so it looped every time.
+  //
+  // Instead: the host's rect (never transformed) gives the centre, offsetWidth
+  // (a layout box, immune to transforms) gives the width, and those two are all
+  // a centred box's edges are. The result depends only on the layout, so it is
+  // the same on every pass — no feedback, and `shiftX` stays out of the deps.
   useIsomorphicLayoutEffect(() => {
-    if (!visible || !label) {
-      if (shiftX !== 0) setShiftX(0);
+    // Side placements are not horizontally centred, so there is nothing for
+    // this correction to correct — they hang off the trigger's own edge.
+    if (side || !visible || !label) {
+      setShiftX(0);
       return undefined;
     }
     const measure = () => {
       const node = floatRef.current;
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      let next = shiftX;
-      if (rect.left < EDGE_INSET) {
-        next = shiftX + (EDGE_INSET - rect.left); // push right
-      } else if (rect.right > window.innerWidth - EDGE_INSET) {
-        next = shiftX - (rect.right - (window.innerWidth - EDGE_INSET)); // push left
-      }
-      if (next !== shiftX) setShiftX(next);
+      // The float is rendered directly inside the relative wrapper, so its
+      // parent IS the element `left: 50%` is resolved against.
+      const host = node?.parentElement;
+      if (!node || !host) return;
+
+      const hostRect = host.getBoundingClientRect();
+      const centre = hostRect.left + hostRect.width / 2;
+      const half = node.offsetWidth / 2;
+      const limit = window.innerWidth - EDGE_INSET;
+
+      let next = 0;
+      if (centre - half < EDGE_INSET) next = EDGE_INSET - (centre - half);
+      else if (centre + half > limit) next = limit - (centre + half);
+
+      // React bails out of the re-render when the rounded value is unchanged,
+      // which is what ends the pass.
+      setShiftX(Math.round(next));
     };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [visible, label, position, shiftX]);
+  }, [visible, label, position]);
 
   return (
     <div
@@ -101,19 +151,12 @@ export const Tooltip = forwardRef(function Tooltip(
           <motion.div
             ref={floatRef}
             role="tooltip"
-            initial={{ opacity: 0, y: position === 'bottom' ? -4 : 4 }}
-            animate={{ opacity: 1, y: 0, transition: ENTER_TX }}
-            exit={{ opacity: 0, y: position === 'bottom' ? -4 : 4, transition: EXIT_TX }}
+            initial={{ opacity: 0, ...enterFrom }}
+            animate={{ opacity: 1, ...enterTo, transition: ENTER_TX }}
+            exit={{ opacity: 0, ...enterFrom, transition: EXIT_TX }}
             style={{
               position: 'absolute',
               ...floatStyle,
-              // Centre horizontally — left:50% positions the box's left edge,
-              // the -50% transform shifts it back by half its own width. shiftX
-              // (px, measured) is the viewport-edge correction folded into the
-              // same framer-owned `x` transform, so an edge-anchored trigger
-              // can't push the box off-screen and force horizontal page scroll.
-              left: '50%',
-              x: `calc(-50% + ${shiftX}px)`,
               pointerEvents: 'none',
               // Clamp to the viewport so a long centred label can't overflow a
               // screen edge and force horizontal page scroll on a phone. A

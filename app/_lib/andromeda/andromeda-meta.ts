@@ -93,6 +93,14 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/empty-state.png?v=3',
   },
   {
+    slug: 'funnel-chart',
+    name: 'Funnel Chart',
+    description:
+      'Stage-to-stage conversion, where each stage is a subset of the one before it and the reading is the drop between neighbours. Bands taper from one stage into the next; a band rests in the tone its own data earns, and hovering one fades every other stage back rather than lighting that one up.',
+    sourceFile: 'FunnelChart.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/funnel-chart.png?v=1',
+  },
+  {
     slug: 'gauge',
     name: 'Gauge',
     description:

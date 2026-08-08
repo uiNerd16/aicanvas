@@ -88,7 +88,7 @@ function StackedBar() {
     <div
       style={{
         display: 'flex',
-        gap: '3px',
+        gap: '3px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */,
         height: tokens.spacing[5],
         padding: `0 ${tokens.spacing[5]} ${tokens.spacing[5]} ${tokens.spacing[5]}`,
       }}

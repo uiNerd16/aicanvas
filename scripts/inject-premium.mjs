@@ -120,7 +120,7 @@ function writeStubShim() {
 // a placeholder component instead of a real re-export. UPDATE this list when a
 // new v2 component ships (it mirrors the vault manifest's
 // freeSystemComponents.andromeda).
-const V2_FALLBACK_NAMES = ['MetricChart', 'Gauge', 'Waveform', 'MediaCard', 'DataTable', 'MusicPlayer']
+const V2_FALLBACK_NAMES = ['MetricChart', 'Gauge', 'Waveform', 'MediaCard', 'DataTable', 'MusicPlayer', 'FunnelChart']
 
 // Managed block markers in `git info/exclude` — doubles as the state that
 // remembers which files a previous run injected (for stale-file cleanup).

@@ -94,7 +94,7 @@ function maxAmount(rows) {
 // Used as `children` of IconButton (custom glyph, not a phosphor icon).
 function ModeIcon({ topColor, botColor }) {
   return (
-    <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */ }}>
       <span style={{ width: tokens.spacing[3], height: '3px', background: topColor }} />
       <span style={{ width: tokens.spacing[3], height: '3px', background: botColor }} />
     </span>

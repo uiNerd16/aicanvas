@@ -148,8 +148,11 @@ export function andromedaVars() {
     // Raw default, NOT t.radius.frame — that string embeds var(--andromeda-
     // radius-frame,…) and would self-reference. Keep in sync with tokens.ts.
     '--andromeda-radius-frame': '0px',
-    // Border + marker stroke widths (1px hairline identity, theme-tunable)
-    '--andromeda-border-width': t.border.width,
+    // Border + marker stroke widths (theme-tunable). --andromeda-border-width
+    // stays step 1 of the scale — the hairline identity every existing var()
+    // consumer already reads; heavier steps get their own numbered var.
+    '--andromeda-border-width': t.border.width[1],
+    '--andromeda-border-width-4': t.border.width[4],
     '--andromeda-marker-width': `${t.marker.borderWidth}px`,
     // Opacity — disabled-control constant (unitless; used via opacity-[var(--andromeda-opacity-disabled)])
     '--andromeda-opacity-disabled': String(t.opacity.disabled),

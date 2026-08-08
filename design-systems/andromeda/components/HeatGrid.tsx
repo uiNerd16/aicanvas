@@ -218,7 +218,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
             fontWeight: tokens.typography.weight.medium,
             letterSpacing: tokens.typography.tracking.tight,
             color: 'var(--andromeda-accent-300, #0FCFB2)',
-            lineHeight: 1,
+            lineHeight: tokens.typography.lineHeight.none,
             fontVariantNumeric: 'tabular-nums',
           }}
         >

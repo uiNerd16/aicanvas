@@ -71,7 +71,7 @@ import {
 // v2 components come from the build-time-injected shim (real re-exports when
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
-import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer } from '../../lib/andromeda-v2.generated'
+import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer, FunnelChart } from '../../lib/andromeda-v2.generated'
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 
@@ -416,20 +416,55 @@ function SearchFieldDemo() {
 }
 
 function NavItemDemo() {
+  const items = [
+    { icon: Compass, label: 'Overview' },
+    { icon: Pulse, label: 'Activity' },
+    { icon: ChartLine, label: 'Reports' },
+    { icon: Bell, label: 'Alerts' },
+    { icon: Users, label: 'Members' },
+    { icon: Database, label: 'Logs' },
+    { icon: Gear, label: 'Settings' },
+  ]
   return (
-    <div
-      style={{
-        width: 260,
-        background: tokens.color.surface.raised,
-        position: 'relative',
-      }}
-    >
-      <CornerMarkers />
-      <NavItem icon={Compass} label="Overview" active />
-      <NavItem icon={Pulse} label="Activity" />
-      <NavItem icon={Users} label="Members" />
-      <NavItem icon={Database} label="Logs" />
-      <NavItem icon={Gear} label="Settings" />
+    <div style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'flex-start' }}>
+      <div
+        style={{
+          width: 260,
+          background: tokens.color.surface.raised,
+          position: 'relative',
+        }}
+      >
+        <CornerMarkers />
+        {items.map((item, i) => (
+          <NavItem key={item.label} icon={item.icon} label={item.label} active={i === 0} />
+        ))}
+      </div>
+
+      {/* The same list collapsed to an icon rail. Same component, no edge
+          square — a rail is too narrow for one to read as an edge, so the
+          accent glyph marks the current row. The label is still there for
+          screen readers. */}
+      <div
+        style={{
+          width: 56,
+          background: tokens.color.surface.raised,
+          position: 'relative',
+        }}
+      >
+        <CornerMarkers />
+        {items.map((item, i) => (
+          <Tooltip
+            key={item.label}
+            label={item.label}
+            position="right"
+            // inline-flex by default, which would shrink-wrap the row and pull
+            // the active dot in beside the glyph instead of to the rail edge.
+            style={{ display: 'flex', width: '100%' }}
+          >
+            <NavItem collapsed icon={item.icon} label={item.label} active={i === 0} />
+          </Tooltip>
+        ))}
+      </div>
     </div>
   )
 }
@@ -497,6 +532,48 @@ function MetricChartDemo() {
   return (
     <div style={{ width: '100%', maxWidth: 640 }}>
       <MetricChart label="/// Station" title="Orbital Altitude" unit="km" />
+    </div>
+  )
+}
+
+// Two funnels, because the interesting thing about this chart is not its
+// shape but what its colour is allowed to mean.
+//
+// The first declares no tones, so every band rests in neutral ink: nothing
+// about any single stage is a reading, so nothing earns colour.
+// The second derives a tone per stage from that stage's own step conversion,
+// which is the only sanctioned reason a band changes colour — never to tell
+// the five stages apart, which the labels already do.
+const FUNNEL_TONE = (share: number) =>
+  share >= 0.85 ? 'accent' : share >= 0.75 ? 'warning' : 'fault'
+
+const FUNNEL_STAGES = [
+  { id: 'awareness', label: 'Awareness', value: 4100 },
+  { id: 'interest', label: 'Interest', value: 2957 },
+  { id: 'consideration', label: 'Consideration', value: 2184 },
+  { id: 'intent', label: 'Intent', value: 1038 },
+  { id: 'purchase', label: 'Purchase', value: 820 },
+]
+
+const FUNNEL_TONED = FUNNEL_STAGES.map((stage, i) => ({
+  ...stage,
+  tone: i === 0 ? 'accent' : FUNNEL_TONE(stage.value / FUNNEL_STAGES[i - 1].value),
+}))
+
+function FunnelChartDemo() {
+  return (
+    <div style={{ width: '100%' }}>
+      <Row label="Overall conversion">
+        <FunnelChart stages={FUNNEL_STAGES} height={160} style={{ width: '100%' }} />
+      </Row>
+      <Row label="Step conversion, tone from the data">
+        <FunnelChart
+          stages={FUNNEL_TONED}
+          percentOf="previous"
+          height={160}
+          style={{ width: '100%' }}
+        />
+      </Row>
     </div>
   )
 }
@@ -1212,6 +1289,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
   'empty-state': EmptyStateDemo,
+  'funnel-chart': FunnelChartDemo,
   gauge: GaugeDemo,
   'heat-grid': HeatGridDemo,
   'icon-button': IconButtonDemo,
