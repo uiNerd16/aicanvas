@@ -225,6 +225,21 @@ export const tokens = {
     borderWidth: 1,     // px stroke thickness of the L; rendered through
                         // --andromeda-marker-width so themes can thicken it
   },
+  // Control ladder — the ONE height ladder every interactive control lands on,
+  // so an `sm` field and an `sm` button line up in a row with no props passed.
+  // Height is stated, not derived: Button used to reach 31.2px from padding +
+  // leading while Input reached ~37px from its own padding, and two controls
+  // that each compute their own height cannot be made to agree. Every control
+  // now pins `height` to this rung and centres its content inside it, which is
+  // what makes the alignment a guarantee rather than an arithmetic coincidence.
+  // padX/text repeat spacing[3,4,5] and typography.size[xs,sm,md] as literals
+  // because a single object literal cannot reference itself; change them here
+  // and in those scales together.
+  control: {
+    sm: { height: '24px', padX: '12px', text: '10px' },
+    md: { height: '32px', padX: '16px', text: '12px' },
+    lg: { height: '40px', padX: '20px', text: '14px' },
+  },
   layout: {
     sidebarWidth: '224px',
     headerHeight: '60px',

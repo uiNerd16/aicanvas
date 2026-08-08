@@ -13,8 +13,13 @@ import { forwardRef, useState } from 'react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 
+// Leading glyph per rung, off tokens.iconSize. Was a hardcoded 14, which is on
+// neither the icon scale nor the control ladder.
+const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
+
 /**
  * @typedef {object} SearchFieldProps
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 24, 32 or 40px tall. Matches Button, IconButton and Input at the same value.
  * @property {string} [placeholder='Search anything'] Text shown when empty. Defaults to "Search anything".
  * @property {string|null} [shortcut='⌘ K'] Keyboard shortcut chip. Pass null to hide. Defaults to "⌘ K".
  * @property {React.ComponentType<{ size?: number, weight?: string, color?: string, style?: React.CSSProperties }>} [icon=MagnifyingGlass] Phosphor-style leading icon. Defaults to MagnifyingGlass. Pass null to hide.
@@ -30,6 +35,7 @@ import { tokens } from '../tokens';
 /** @type {React.ForwardRefExoticComponent<SearchFieldProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange'>>} */
 export const SearchField = forwardRef(function SearchField(
   {
+    size = 'md',
     placeholder = 'Search anything',
     shortcut = '⌘ K',
     icon: Icon = MagnifyingGlass,
@@ -44,6 +50,7 @@ export const SearchField = forwardRef(function SearchField(
   },
   ref,
 ) {
+  const rung = tokens.control[size];
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : uncontrolledValue;
@@ -89,13 +96,17 @@ export const SearchField = forwardRef(function SearchField(
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        gap: tokens.spacing[3],
+        gap: tokens.spacing[2],
         width: '100%',
         // border-box so the horizontal padding stays INSIDE the 100% width —
         // without it a full-width field overflows its container by the padding
-        // and forces horizontal page scroll on a phone.
+        // and forces horizontal page scroll on a phone. It also keeps the 1px
+        // border inside the ladder height below.
         boxSizing: 'border-box',
-        padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
+        // Height is the rung, not a padding sum, so this field agrees with a
+        // Button of the same size to the pixel. See tokens.control.
+        height: rung.height,
+        padding: `0 ${rung.padX}`,
         border: `${tokens.border.thin} ${borderColor}`,
         borderRadius: tokens.radius.frame,
         background,
@@ -112,7 +123,7 @@ export const SearchField = forwardRef(function SearchField(
     >
       {Icon ? (
         <Icon
-          size={14}
+          size={ICON_FOR_SIZE[size]}
           weight="regular"
           style={{
             flexShrink: 0,
@@ -145,7 +156,7 @@ export const SearchField = forwardRef(function SearchField(
               transform: 'translateY(-50%)',
               pointerEvents: 'none',
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.md,
+              fontSize: rung.text,
               color: tokens.color.text.muted,
               letterSpacing: tokens.typography.tracking.wide,
               whiteSpace: 'nowrap',
@@ -178,7 +189,7 @@ export const SearchField = forwardRef(function SearchField(
             outline: 'none',
             background: 'transparent',
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.md,
+            fontSize: rung.text,
             color: tokens.color.text.primary,
             letterSpacing: tokens.typography.tracking.wide,
             caretColor: 'var(--andromeda-accent-400, #109380)',

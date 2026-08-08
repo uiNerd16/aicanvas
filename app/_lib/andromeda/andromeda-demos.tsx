@@ -223,14 +223,19 @@ function ButtonDemo() {
 
 function BadgeDemo() {
   return (
-    <Row>
-      <Badge variant="default">Default</Badge>
-      <Badge variant="accent">Live</Badge>
-      <Badge variant="warning">Caution</Badge>
-      <Badge variant="fault">Fault</Badge>
-      <Badge variant="subtle">Subtle</Badge>
-      <Badge variant="outline">Outline</Badge>
-    </Row>
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="Variants">
+        <Badge variant="default">Default</Badge>
+        <Badge variant="accent">Live</Badge>
+        <Badge variant="warning">Caution</Badge>
+        <Badge variant="fault">Fault</Badge>
+        <Badge variant="subtle">Subtle</Badge>
+        <Badge variant="outline">Outline</Badge>
+      </Row>
+      <Row label="Sizes">
+        <SizeRamp render={(s) => <Badge size={s} variant="accent">Live</Badge>} />
+      </Row>
+    </div>
   )
 }
 
@@ -360,19 +365,27 @@ function CornerMarkersDemo() {
 
 function InputDemo() {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: tokens.spacing[5],
-        width: '100%',
-        maxWidth: 720,
-      }}
-    >
-      <Input label="Callsign" placeholder="ENTER CALLSIGN" />
-      <Input label="Search" icon={MagnifyingGlass} placeholder="QUERY DATABASE" />
-      <Input label="Email" icon={Envelope} placeholder="OPERATOR@DOMAIN.COM" />
-      <Input label="Validation" defaultValue="INVALID" error="Field cannot be empty" />
+    <div style={{ width: '100%', maxWidth: 720 }}>
+      <Row label="Sizes">
+        <SizeRamp
+          direction="column"
+          render={(s) => <Input size={s} placeholder="ENTER CALLSIGN" style={{ width: 260 }} />}
+        />
+      </Row>
+      <div
+        style={{
+          display: 'grid',
+          // auto-fit so the pair stacks instead of squeezing on a narrow card
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: tokens.spacing[5],
+          width: '100%',
+        }}
+      >
+        <Input label="Callsign" placeholder="ENTER CALLSIGN" />
+        <Input label="Search" icon={MagnifyingGlass} placeholder="QUERY DATABASE" />
+        <Input label="Email" icon={Envelope} placeholder="OPERATOR@DOMAIN.COM" />
+        <Input label="Validation" defaultValue="INVALID" error="Field cannot be empty" />
+      </div>
     </div>
   )
 }
@@ -388,6 +401,12 @@ function SearchFieldDemo() {
         maxWidth: 520,
       }}
     >
+      <Row label="Sizes">
+        <SizeRamp
+          direction="column"
+          render={(s) => <SearchField size={s} placeholder="Search anything" style={{ width: 320 }} />}
+        />
+      </Row>
       <SearchField placeholder="Search anything" />
       <SearchField placeholder="Search tracks, channels, waveforms" shortcut="⌘ F" />
       <SearchField placeholder="No shortcut" shortcut={null} />
@@ -574,6 +593,9 @@ function TagDemo() {
         <Tag variant="warning">Warning</Tag>
         <Tag variant="fault">Fault</Tag>
       </Row>
+      <Row label="Sizes">
+        <SizeRamp render={(s) => <Tag size={s} variant="accent">Accent</Tag>} />
+      </Row>
       <Row label="Dismissible">
         <Tag variant="default" onClose={() => {}}>Removable</Tag>
         <Tag variant="accent" onClose={() => {}}>Active filter</Tag>
@@ -584,12 +606,17 @@ function TagDemo() {
 
 function CheckboxDemo() {
   return (
-    <Row label="States">
-      <Checkbox label="Unchecked" />
-      <Checkbox label="Checked" defaultChecked />
-      <Checkbox label="Disabled" disabled />
-      <Checkbox label="Disabled checked" disabled defaultChecked />
-    </Row>
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="States">
+        <Checkbox label="Unchecked" />
+        <Checkbox label="Checked" defaultChecked />
+        <Checkbox label="Disabled" disabled />
+        <Checkbox label="Disabled checked" disabled defaultChecked />
+      </Row>
+      <Row label="Sizes">
+        <SizeRamp render={(s) => <Checkbox size={s} label={s} defaultChecked />} />
+      </Row>
+    </div>
   )
 }
 
@@ -608,6 +635,9 @@ function RadioDemo() {
           <Radio value="ground" label="Ground" />
           <Radio value="disabled" label="Restricted" disabled />
         </RadioGroup>
+      </Row>
+      <Row label="Sizes">
+        <SizeRamp render={(s) => <Radio size={s} label={s} defaultChecked />} />
       </Row>
       <Row label="Standalone">
         <Radio label="Standalone" defaultChecked />
@@ -687,12 +717,17 @@ function TooltipDemo() {
 
 function ToggleDemo() {
   return (
-    <Row label="States">
-      <Toggle label="Off" />
-      <Toggle label="On" defaultChecked />
-      <Toggle label="Disabled" disabled />
-      <Toggle label="Disabled on" disabled defaultChecked />
-    </Row>
+    <div style={{ width: '100%', maxWidth: 640 }}>
+      <Row label="States">
+        <Toggle label="Off" />
+        <Toggle label="On" defaultChecked />
+        <Toggle label="Disabled" disabled />
+        <Toggle label="Disabled on" disabled defaultChecked />
+      </Row>
+      <Row label="Sizes">
+        <SizeRamp render={(s) => <Toggle size={s} label={s} defaultChecked />} />
+      </Row>
+    </div>
   )
 }
 
@@ -717,6 +752,12 @@ function SliderDemo() {
   const [b, setB] = useState(38)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: '100%', maxWidth: 520 }}>
+      <Row label="Sizes">
+        <SizeRamp
+          direction="column"
+          render={(s) => <Slider size={s} value={64} showValue={false} style={{ width: 300 }} />}
+        />
+      </Row>
       <Slider label="Throttle" unit="%" value={a} onValueChange={setA} />
       <Slider label="Thrust Vector" unit="°" min={-30} max={30} value={b} onValueChange={setB} />
       <Slider label="Locked" value={50} disabled />
@@ -726,17 +767,25 @@ function SliderDemo() {
 
 function TextareaDemo() {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: tokens.spacing[5],
-        width: '100%',
-        maxWidth: 720,
-      }}
-    >
-      <Textarea label="Description" placeholder="ENTER DESCRIPTION…" rows={4} />
-      <Textarea label="Validation" defaultValue="TOO SHORT" error="Brief must be at least 80 characters" rows={4} />
+    <div style={{ width: '100%', maxWidth: 720 }}>
+      <Row label="Sizes">
+        <SizeRamp
+          direction="column"
+          render={(s) => <Textarea size={s} placeholder="ENTER DESCRIPTION…" rows={2} style={{ width: 300 }} />}
+        />
+      </Row>
+      <div
+        style={{
+          display: 'grid',
+          // auto-fit so the pair stacks instead of squeezing on a narrow card
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: tokens.spacing[5],
+          width: '100%',
+        }}
+      >
+        <Textarea label="Description" placeholder="ENTER DESCRIPTION…" rows={4} />
+        <Textarea label="Validation" defaultValue="TOO SHORT" error="Brief must be at least 80 characters" rows={4} />
+      </div>
     </div>
   )
 }

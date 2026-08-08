@@ -61,19 +61,26 @@ const badgeVariants = cva(
     // max-w-full + min-w-0 keep a long label from forcing horizontal scroll
     // when the Badge sits in a stacked (single-column) layout; the label
     // span truncates instead (see render below).
-    // ponytail: 5px gap and 2px pad are identity constants, no token
+    // ponytail: 5px gap is an identity constant, no token
     'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
-    'max-w-full min-w-0',
+    'max-w-full min-w-0 box-border',
     'rounded-[var(--andromeda-radius-frame,0px)]',
-    'px-[var(--andromeda-2)] py-[2px]',
     '[font-family:var(--andromeda-font-mono)]',
-    'text-[length:var(--andromeda-text-xs)]',
     'font-[number:var(--andromeda-weight-medium)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
     '[line-height:var(--andromeda-leading-normal)]',
   ],
   {
     variants: {
+      // Same rungs and the same sm default as Tag, for the same reason: a badge
+      // is a status label inside a row or a cell, so md would grow every
+      // existing one. Sharing the ladder is what lets a badge sit level with a
+      // field when it is deliberately put in a control strip.
+      size: {
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
+      },
       variant: {
         default: [
           'bg-[color:var(--andromeda-surface-active)]',
@@ -103,6 +110,7 @@ const badgeVariants = cva(
       },
     },
     defaultVariants: {
+      size: 'sm',
       variant: 'default',
     },
   },
@@ -122,6 +130,7 @@ const dotColor = {
 /**
  * @typedef {object} BadgeProps
  * @property {'default'|'accent'|'warning'|'fault'|'subtle'|'outline'} [variant='default']
+ * @property {'sm'|'md'|'lg'} [size='sm'] Rung on the shared control ladder: 24, 32 or 40px tall. Defaults to sm, the inline density; pass md or lg to align with a field or button of that size.
  * @property {React.ReactNode} [children]
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -129,7 +138,7 @@ const dotColor = {
 
 /** @type {React.ForwardRefExoticComponent<BadgeProps & React.HTMLAttributes<HTMLSpanElement>>} */
 export const Badge = forwardRef(function Badge(
-  { className, variant = 'default', children, style, ...props },
+  { className, variant = 'default', size = 'sm', children, style, ...props },
   ref,
 ) {
   const dotOpacity = useBlink();
@@ -137,7 +146,7 @@ export const Badge = forwardRef(function Badge(
   return (
     <span
       ref={ref}
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, size }), className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >

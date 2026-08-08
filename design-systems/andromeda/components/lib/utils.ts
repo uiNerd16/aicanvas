@@ -132,6 +132,11 @@ export function andromedaVars() {
     '--andromeda-8':  t.spacing[8],
     '--andromeda-10': t.spacing[10],
     '--andromeda-12': t.spacing[12],
+    // Control ladder — one shared height per rung so fields, buttons and
+    // toggles in the same row agree. See tokens.control.
+    '--andromeda-control-sm': t.control.sm.height,
+    '--andromeda-control-md': t.control.md.height,
+    '--andromeda-control-lg': t.control.lg.height,
     // Radius
     '--andromeda-radius-none':  t.radius.none,
     '--andromeda-radius-sm':    t.radius.sm,

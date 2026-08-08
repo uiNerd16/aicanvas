@@ -47,8 +47,7 @@ const TOUCH_TARGET_STYLE = `
 
 const boxVariants = cva(
   [
-    'relative inline-flex items-center justify-center shrink-0',
-    'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
+    'relative inline-flex items-center justify-center shrink-0 box-border',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
@@ -59,6 +58,14 @@ const boxVariants = cva(
   ],
   {
     variants: {
+      // A checkbox has no field to fill, so its rung scales the box and the
+      // label rather than an outer height. md is exactly today's 16px box with
+      // 12px label, which is why the default rendering does not move.
+      size: {
+        sm: 'w-[12px] h-[12px]',
+        md: 'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
+        lg: 'w-[length:var(--andromeda-5)] h-[length:var(--andromeda-5)]',
+      },
       state: {
         unchecked: [
           'bg-[color:var(--andromeda-surface-raised)]',
@@ -77,6 +84,7 @@ const boxVariants = cva(
       },
     },
     defaultVariants: {
+      size: 'md',
       state: 'unchecked',
       disabled: false,
     },
@@ -85,12 +93,20 @@ const boxVariants = cva(
 
 const labelClass = cn(
   '[font-family:var(--andromeda-font-mono)]',
-  'text-[length:var(--andromeda-text-sm)]',
   'font-[number:var(--andromeda-weight-medium)]',
   'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
   'text-[color:var(--andromeda-text-secondary)]',
   'select-none cursor-pointer',
 );
+
+// Label text and tick glyph step with the box, so the whole row reads as one
+// density rather than a small box beside a fixed-size word.
+const LABEL_TEXT = {
+  sm: 'text-[length:var(--andromeda-text-xs)]',
+  md: 'text-[length:var(--andromeda-text-sm)]',
+  lg: 'text-[length:var(--andromeda-text-md)]',
+};
+const TICK_FOR_SIZE = { sm: 9, md: 12, lg: 15 };
 
 /**
  * @typedef {object} CheckboxProps
@@ -98,6 +114,7 @@ const labelClass = cn(
  * @property {boolean} [defaultChecked=false]  Uncontrolled initial state.
  * @property {(next: boolean) => void} [onCheckedChange]  Handler called with the next checked state when toggled.
  * @property {string}  [label]                 Optional inline label.
+ * @property {'sm'|'md'|'lg'} [size='md']      Rung on the shared control ladder. Scales the box, its tick and the label together (12, 16 and 20px boxes); md is the long-standing default rendering.
  * @property {boolean} [disabled=false]        Disables the checkbox and blocks interaction.
  * @property {string}  [className]             Extra classes merged onto the visual box.
  * @property {React.CSSProperties} [style]     Inline styles applied to the outer wrapper.
@@ -112,6 +129,7 @@ export const Checkbox = forwardRef(function Checkbox(
     defaultChecked = false,
     onCheckedChange,
     label,
+    size = 'md',
     disabled = false,
     id: idProp,
     style,
@@ -156,6 +174,7 @@ export const Checkbox = forwardRef(function Checkbox(
           aria-hidden="true"
           className={cn(
             boxVariants({
+              size,
               state: checked ? 'checked' : 'unchecked',
               disabled,
             }),
@@ -166,7 +185,7 @@ export const Checkbox = forwardRef(function Checkbox(
         >
           {checked ? (
             <Check
-              size={12}
+              size={TICK_FOR_SIZE[size]}
               weight="light"
               style={{
                 color: 'var(--andromeda-accent-on, var(--andromeda-accent-100))',
@@ -177,7 +196,7 @@ export const Checkbox = forwardRef(function Checkbox(
         </span>
       </span>
       {label ? (
-        <label htmlFor={id} className={labelClass}>
+        <label htmlFor={id} className={cn(labelClass, LABEL_TEXT[size])}>
           {label}
         </label>
       ) : null}

@@ -114,11 +114,12 @@ const iconButtonVariants = cva(
         ],
       },
       size: {
-        // Each step matches a Button height so the two line up in a strip.
-        // Button sm = 24px, md = 32px, lg = 40px (computed from py + line-height).
-        sm: 'w-[var(--andromeda-6)] h-[var(--andromeda-6)]',
-        md: 'w-[var(--andromeda-8)] h-[var(--andromeda-8)]',
-        lg: 'w-[var(--andromeda-10)] h-[var(--andromeda-10)]',
+        // Square on the shared control ladder (tokens.control): 24 / 32 / 40.
+        // Reading the ladder rather than spacing[6,8,10] is what keeps this in
+        // step with Button and every field if a rung ever moves.
+        sm: 'w-[var(--andromeda-control-sm)] h-[var(--andromeda-control-sm)]',
+        md: 'w-[var(--andromeda-control-md)] h-[var(--andromeda-control-md)]',
+        lg: 'w-[var(--andromeda-control-lg)] h-[var(--andromeda-control-lg)]',
       },
     },
     defaultVariants: {

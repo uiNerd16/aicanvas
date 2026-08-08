@@ -12,6 +12,13 @@
 import { forwardRef, useId } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
+
+// Per-rung values the cva classes cannot express: the left icon has to shrink
+// with the field, and the text has to clear it. Padding-left is the rung's own
+// padX twice over plus the glyph, so the gap left of the caret matches the gap
+// right of it.
+const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
 
 const inputVariants = cva(
   [
@@ -19,7 +26,6 @@ const inputVariants = cva(
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-sans)]',
-    'text-[length:var(--andromeda-text-md)]',
     'text-[color:var(--andromeda-text-primary)]',
     'bg-[color:var(--andromeda-surface-raised)]',
     'outline-none',
@@ -29,10 +35,14 @@ const inputVariants = cva(
   ],
   {
     variants: {
-      hasIcon: {
-        // ponytail: 9px vertical padding is a deliberate off-grid optical value, no token
-        true:  'pl-[var(--andromeda-8,32px)] pr-[var(--andromeda-3)] py-[9px]',
-        false: 'px-[var(--andromeda-3)] py-[9px]',
+      // Height, horizontal padding and text step together on the shared control
+      // ladder (tokens.control), so a field and a Button of the same size line
+      // up in a row with no props. This replaced a single off-grid 9px vertical
+      // padding that put the field at ~37px, on neither rung of the ladder.
+      size: {
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-5)] text-[length:var(--andromeda-text-md)]',
       },
       state: {
         default: [
@@ -49,7 +59,7 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      hasIcon: false,
+      size: 'md',
       state: 'default',
     },
   },
@@ -58,7 +68,8 @@ const inputVariants = cva(
 /**
  * @typedef {object} InputProps
  * @property {string} [label] Uppercase mono label rendered above the field.
- * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon] Optional left icon.
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 24, 32 or 40px tall. Matches Button and IconButton at the same value, so a field and a button in one row align without further styling.
+ * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon] Optional left icon. Its glyph scales with `size` (12, 16, 20px).
  * @property {string} [error] When set, switches the field into the error state and renders the message.
  * @property {string} [className] Class name forwarded to the <input> element.
  * @property {string} [wrapperClassName] Class name forwarded to the outer wrapper.
@@ -70,6 +81,7 @@ export const Input = forwardRef(function Input(
     className,
     wrapperClassName,
     label,
+    size = 'md',
     icon: Icon,
     error,
     id: idProp,
@@ -82,8 +94,9 @@ export const Input = forwardRef(function Input(
   const reactId = useId();
   const id = idProp ?? `andromeda-input-${reactId}`;
   const errorId = error ? `${id}-error` : undefined;
-  const hasIcon = Boolean(Icon);
   const state = error ? 'error' : 'default';
+  const padX = tokens.control[size].padX;
+  const iconPx = ICON_FOR_SIZE[size];
 
   return (
     <div
@@ -109,13 +122,14 @@ export const Input = forwardRef(function Input(
         {Icon ? (
           <div
             aria-hidden="true"
+            style={{ left: padX }}
             className={cn(
-              'absolute left-[var(--andromeda-3)] top-1/2 -translate-y-1/2',
+              'absolute top-1/2 -translate-y-1/2',
               'flex items-center pointer-events-none',
               'text-[color:var(--andromeda-text-muted)]',
             )}
           >
-            <Icon size={20} weight="regular" />
+            <Icon size={iconPx} weight="regular" />
           </div>
         ) : null}
 
@@ -125,7 +139,8 @@ export const Input = forwardRef(function Input(
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={errorId}
           disabled={disabled}
-          className={cn(inputVariants({ hasIcon, state }), className)}
+          style={Icon ? { paddingLeft: `calc(${padX} * 2 + ${iconPx}px)` } : undefined}
+          className={cn(inputVariants({ size, state }), className)}
           {...props}
         />
       </div>

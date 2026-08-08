@@ -33,6 +33,15 @@ function snap(n, step) {
   return Math.round(n / step) * step;
 }
 
+// ponytail: identity constants — the slider's shape is a ratio, not a token.
+// Each rung keeps the thumb twice as tall as it is wide and the row tall enough
+// to contain it, so md is exactly today's 18px row with an 8x16 thumb.
+const SIZES = {
+  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  text: 'text-[length:var(--andromeda-text-xs)]' },
+  md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  text: 'text-[length:var(--andromeda-text-xs)]' },
+  lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', text: 'text-[length:var(--andromeda-text-sm)]' },
+};
+
 /**
  * @typedef {object} SliderProps
  * @property {number} [value]                  Controlled value.
@@ -42,6 +51,7 @@ function snap(n, step) {
  * @property {number} [step=1]               Increment the value snaps to.
  * @property {(next: number) => void} [onValueChange]  Handler called with the new value on drag or keyboard change.
  * @property {string} [label]                  Optional uppercase mono label.
+ * @property {'sm'|'md'|'lg'} [size='md']      Rung on the shared control ladder. Scales the track row, thumb and readout together; md is today's slider.
  * @property {boolean} [showValue=true]        Render the numeric readout next to the label.
  * @property {string} [unit]                   Optional unit suffix (e.g. "%", "KM").
  * @property {boolean} [disabled=false]      Disables interaction and dims the slider.
@@ -61,6 +71,7 @@ export const Slider = forwardRef(function Slider(
     step = 1,
     onValueChange,
     label,
+    size = 'md',
     showValue = true,
     unit,
     disabled = false,
@@ -181,7 +192,7 @@ export const Slider = forwardRef(function Slider(
             <span
               className={cn(
                 '[font-family:var(--andromeda-font-mono)]',
-                'text-[length:var(--andromeda-text-xs)]',
+                SIZES[size].text,
                 'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
                 'text-[color:var(--andromeda-text-secondary)]',
               )}
@@ -193,7 +204,7 @@ export const Slider = forwardRef(function Slider(
             <span
               className={cn(
                 '[font-family:var(--andromeda-font-mono)]',
-                'text-[length:var(--andromeda-text-xs)]',
+                SIZES[size].text,
                 'font-[number:var(--andromeda-weight-medium)]',
                 'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
                 'text-[color:var(--andromeda-text-primary)]',
@@ -222,7 +233,8 @@ export const Slider = forwardRef(function Slider(
         onKeyDown={handleKeyDown}
         className={cn(
           'andromeda-slider-track',
-          'relative h-[18px] w-full select-none touch-none',
+          'relative w-full select-none touch-none',
+          SIZES[size].row,
           'cursor-pointer',
           disabled && 'opacity-[var(--andromeda-opacity-disabled)] cursor-not-allowed pointer-events-none',
           'focus-visible:outline-none',
@@ -233,7 +245,8 @@ export const Slider = forwardRef(function Slider(
         <div
           className={cn(
             'absolute left-0 right-0 top-1/2 -translate-y-1/2',
-            'h-[3px] border-[length:var(--andromeda-border-width,1px)] border-solid',
+            SIZES[size].line,
+            'border-[length:var(--andromeda-border-width,1px)] border-solid',
             'bg-[color:var(--andromeda-surface-overlay)]',
             'border-[color:var(--andromeda-border-subtle)]',
           )}
@@ -242,7 +255,8 @@ export const Slider = forwardRef(function Slider(
             glow (glow is reserved for the focused/active thumb, below). */}
         <div
           className={cn(
-            'absolute left-0 top-1/2 -translate-y-1/2 h-[3px]',
+            'absolute left-0 top-1/2 -translate-y-1/2',
+            SIZES[size].line,
             '[background:linear-gradient(90deg,var(--andromeda-accent-400)_0%,var(--andromeda-accent-300)_100%)]',
           )}
           style={{ width: `${percent}%` }}
@@ -252,7 +266,7 @@ export const Slider = forwardRef(function Slider(
           aria-hidden="true"
           className={cn(
             'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
-            'w-[8px] h-[16px]',
+            SIZES[size].thumb,
             'bg-[color:var(--andromeda-accent-300)]',
             'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
             // No resting glow; the focus-visible state sets --slider-thumb-shadow.

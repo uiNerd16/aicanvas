@@ -908,13 +908,16 @@ export default function AndromedaShowcase({
           slug="badge"
           description="6 variants for status, metric tags, and inline labels. A leading per-variant status dot blinks on a loop to carry the signal, and holds steady when reduced motion is requested."
         >
-          <Row>
+          <Row label="Variants">
             <Badge variant="default">Default</Badge>
             <Badge variant="accent">Live</Badge>
             <Badge variant="warning">Caution</Badge>
             <Badge variant="fault">Fault</Badge>
             <Badge variant="subtle">Subtle</Badge>
             <Badge variant="outline">Outline</Badge>
+          </Row>
+          <Row label="Sizes">
+            <SizeRamp render={(s) => <Badge size={s} variant="accent">Live</Badge>} />
           </Row>
         </Section>
 
@@ -1078,6 +1081,12 @@ export default function AndromedaShowcase({
               error="Field cannot be empty"
             />
           </div>
+          <Row label="Sizes">
+            <SizeRamp
+              direction="column"
+              render={(s) => <Input size={s} placeholder="ENTER CALLSIGN" style={{ width: 260 }} />}
+            />
+          </Row>
         </Section>
 
         {/* ── SearchField ────────────────────────────────────────────────── */}
@@ -1100,6 +1109,12 @@ export default function AndromedaShowcase({
             <SearchField placeholder="No shortcut" shortcut={null} />
             <SearchField defaultValue="orbital launch" />
           </div>
+          <Row label="Sizes">
+            <SizeRamp
+              direction="column"
+              render={(s) => <SearchField size={s} placeholder="Search anything" style={{ width: 320 }} />}
+            />
+          </Row>
         </Section>
 
         {/* ── NavItem ────────────────────────────────────────────────────── */}
@@ -1230,6 +1245,9 @@ export default function AndromedaShowcase({
             <Tag variant="warning">Warning</Tag>
             <Tag variant="fault">Fault</Tag>
           </Row>
+          <Row label="Sizes">
+            <SizeRamp render={(s) => <Tag size={s} variant="accent">Accent</Tag>} />
+          </Row>
           <Row label="Dismissible">
             <Tag variant="default" onClose={() => {}}>
               Removable
@@ -1251,6 +1269,9 @@ export default function AndromedaShowcase({
             <Checkbox label="Checked" defaultChecked />
             <Checkbox label="Disabled" disabled />
             <Checkbox label="Disabled checked" disabled defaultChecked />
+          </Row>
+          <Row label="Sizes">
+            <SizeRamp render={(s) => <Checkbox size={s} label={s} defaultChecked />} />
           </Row>
         </Section>
 
@@ -1275,6 +1296,9 @@ export default function AndromedaShowcase({
               <Radio value="disabled" label="Restricted" disabled />
             </RadioGroup>
           </Row>
+          <Row label="Sizes">
+            <SizeRamp render={(s) => <Radio size={s} label={s} defaultChecked />} />
+          </Row>
           <Row label="Standalone">
             <Radio label="Standalone" defaultChecked />
             <Radio label="Off" />
@@ -1292,6 +1316,9 @@ export default function AndromedaShowcase({
             <Toggle label="On" defaultChecked />
             <Toggle label="Disabled" disabled />
             <Toggle label="Disabled on" disabled defaultChecked />
+          </Row>
+          <Row label="Sizes">
+            <SizeRamp render={(s) => <Toggle size={s} label={s} defaultChecked />} />
           </Row>
         </Section>
 
@@ -1406,6 +1433,12 @@ export default function AndromedaShowcase({
             />
             <Slider label="Locked" value={50} disabled />
           </div>
+          <Row label="Sizes">
+            <SizeRamp
+              direction="column"
+              render={(s) => <Slider size={s} value={64} showValue={false} style={{ width: 300 }} />}
+            />
+          </Row>
         </Section>
 
         {/* ── Textarea ───────────────────────────────────────────────────── */}
@@ -1433,6 +1466,12 @@ export default function AndromedaShowcase({
               rows={4}
             />
           </div>
+          <Row label="Sizes">
+            <SizeRamp
+              direction="column"
+              render={(s) => <Textarea size={s} placeholder="ENTER DESCRIPTION…" rows={2} style={{ width: 300 }} />}
+            />
+          </Row>
         </Section>
 
         {/* ── Alert ──────────────────────────────────────────────────────── */}

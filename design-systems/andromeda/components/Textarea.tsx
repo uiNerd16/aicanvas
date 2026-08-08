@@ -18,10 +18,8 @@ const textareaVariants = cva(
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-sans)]',
-    'text-[length:var(--andromeda-text-md)]',
     'text-[color:var(--andromeda-text-primary)]',
     'bg-[color:var(--andromeda-surface-raised)]',
-    'px-[var(--andromeda-3)] py-[var(--andromeda-2)]',
     'leading-[var(--andromeda-leading-normal,1.5)]',
     'outline-none',
     'transition-[border-color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
@@ -30,6 +28,15 @@ const textareaVariants = cva(
   ],
   {
     variants: {
+      // Same rung names as every other control, but a textarea's height belongs
+      // to `rows`, so the ladder governs padding and text size only. That is
+      // what keeps an `sm` textarea reading as the same density as an `sm`
+      // Input stacked above it, without capping it to one line.
+      size: {
+        sm: 'px-[var(--andromeda-3)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
+        md: 'px-[var(--andromeda-4)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'px-[var(--andromeda-5)] py-[var(--andromeda-3)] text-[length:var(--andromeda-text-md)]',
+      },
       state: {
         default: [
           'border-[color:var(--andromeda-border-base)]',
@@ -44,13 +51,14 @@ const textareaVariants = cva(
         ],
       },
     },
-    defaultVariants: { state: 'default' },
+    defaultVariants: { size: 'md', state: 'default' },
   },
 );
 
 /**
  * @typedef {object} TextareaProps
  * @property {string} [label]            Uppercase mono label rendered above the field.
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder. Sets padding and text size to match an Input of the same size; the height still comes from `rows`.
  * @property {string} [error]            When set, switches the field into the error state.
  * @property {number} [rows=4]           Number of visible text lines; sets the field's initial and minimum height.
  * @property {string} [className]        Forwarded to the <textarea>.
@@ -63,6 +71,7 @@ export const Textarea = forwardRef(function Textarea(
     className,
     wrapperClassName,
     label,
+    size = 'md',
     error,
     id: idProp,
     rows = 4,
@@ -104,7 +113,7 @@ export const Textarea = forwardRef(function Textarea(
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={errorId}
         disabled={disabled}
-        className={cn(textareaVariants({ state }), className)}
+        className={cn(textareaVariants({ size, state }), className)}
         {...props}
       />
 

@@ -35,9 +35,7 @@ const TOUCH_TARGET_STYLE = `
 
 const trackVariants = cva(
   [
-    'relative inline-flex items-center shrink-0',
-    // ponytail: identity constant, no token — 34x18 track / 12px thumb / 2px inset geometry is the switch's fixed shape
-    'w-[34px] h-[18px]',
+    'relative inline-flex items-center shrink-0 box-border',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
@@ -46,6 +44,14 @@ const trackVariants = cva(
   ],
   {
     variants: {
+      // ponytail: identity constants — the switch's shape is a fixed ratio, not
+      // a token. Each rung keeps the same 2px inset all round, so the thumb
+      // travel below is always trackWidth - thumb - 4. md is today's 34x18.
+      size: {
+        sm: 'w-[26px] h-[14px]',
+        md: 'w-[34px] h-[18px]',
+        lg: 'w-[42px] h-[22px]',
+      },
       state: {
         off: [
           'bg-[color:var(--andromeda-surface-raised)]',
@@ -64,6 +70,7 @@ const trackVariants = cva(
       },
     },
     defaultVariants: {
+      size: 'md',
       state: 'off',
       disabled: false,
     },
@@ -73,24 +80,42 @@ const trackVariants = cva(
 const thumbVariants = cva(
   [
     'absolute top-[2px]',
-    'w-[12px] h-[12px]',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[left,background-color,transform] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
   ],
   {
     variants: {
+      size: {
+        sm: 'w-[8px] h-[8px]',
+        md: 'w-[12px] h-[12px]',
+        lg: 'w-[16px] h-[16px]',
+      },
       state: {
         off: 'left-[2px] bg-[color:var(--andromeda-text-muted)]',
-        on:  'left-[18px] bg-[color:var(--andromeda-accent-300)] shadow-[0_0_8px_var(--andromeda-accent-500)]',
+        on:  'bg-[color:var(--andromeda-accent-300)] shadow-[0_0_8px_var(--andromeda-accent-500)]',
       },
     },
-    defaultVariants: { state: 'off' },
+    // The on-position is per rung: track width minus thumb minus the 2px inset
+    // on each side. Splitting it out of `state` is what keeps the thumb landing
+    // flush at every size instead of only at md.
+    compoundVariants: [
+      { size: 'sm', state: 'on', class: 'left-[14px]' },
+      { size: 'md', state: 'on', class: 'left-[18px]' },
+      { size: 'lg', state: 'on', class: 'left-[22px]' },
+    ],
+    defaultVariants: { size: 'md', state: 'off' },
   },
 );
 
+// Label text steps with the switch, matching Checkbox and Radio.
+const LABEL_TEXT = {
+  sm: 'text-[length:var(--andromeda-text-xs)]',
+  md: 'text-[length:var(--andromeda-text-sm)]',
+  lg: 'text-[length:var(--andromeda-text-md)]',
+};
+
 const labelClass = cn(
   '[font-family:var(--andromeda-font-mono)]',
-  'text-[length:var(--andromeda-text-sm)]',
   'font-[number:var(--andromeda-weight-medium)]',
   'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
   'text-[color:var(--andromeda-text-secondary)]',
@@ -103,6 +128,7 @@ const labelClass = cn(
  * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled.
  * @property {(next: boolean) => void} [onCheckedChange] Handler called with the next checked state whenever the switch toggles.
  * @property {string}  [label] Optional text rendered beside the switch and linked to it via htmlFor.
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder. Scales the track, thumb travel and label together (26x14, 34x18, 42x22); md is today's switch.
  * @property {boolean} [disabled=false] Disables interaction and dims the switch.
  * @property {string}  [className] Extra classes merged onto the visual track.
  * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
@@ -117,6 +143,7 @@ export const Toggle = forwardRef(function Toggle(
     defaultChecked = false,
     onCheckedChange,
     label,
+    size = 'md',
     disabled = false,
     id: idProp,
     style,
@@ -160,13 +187,13 @@ export const Toggle = forwardRef(function Toggle(
         />
         <span
           aria-hidden="true"
-          className={cn(trackVariants({ state, disabled }), className)}
+          className={cn(trackVariants({ size, state, disabled }), className)}
         >
-          <span className={thumbVariants({ state })} />
+          <span className={thumbVariants({ size, state })} />
         </span>
       </span>
       {label ? (
-        <label htmlFor={id} className={labelClass}>
+        <label htmlFor={id} className={cn(labelClass, LABEL_TEXT[size])}>
           {label}
         </label>
       ) : null}

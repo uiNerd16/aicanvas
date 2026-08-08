@@ -65,6 +65,10 @@ const buttonVariants = cva(
     // structural
     'relative inline-flex items-center justify-center select-none whitespace-nowrap',
     'gap-[var(--andromeda-2)]',
+    // box-border is stated, not inherited from preflight: the size variants pin
+    // an exact ladder height and the 1px border has to sit inside it, including
+    // when these files are pasted into a project without Tailwind's reset.
+    'box-border',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     // typography (all token-driven via CSS vars)
@@ -139,9 +143,13 @@ const buttonVariants = cva(
         ],
       },
       size: {
-        sm: 'px-[var(--andromeda-3)] py-[calc(var(--andromeda-1)+1px)] text-[length:var(--andromeda-text-xs)]',
-        md: 'px-[var(--andromeda-4)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'px-[var(--andromeda-5)] py-[calc(var(--andromeda-3)-1px)] text-[length:var(--andromeda-text-md)]',
+        // Height comes from the shared control ladder (tokens.control) instead
+        // of vertical padding. The old py values landed on 23 / 31.2 / 39.4px,
+        // which no field could match without copying the same arithmetic; the
+        // base's items-center keeps the label optically centred in the rung.
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-5)] text-[length:var(--andromeda-text-md)]',
       },
     },
     defaultVariants: {

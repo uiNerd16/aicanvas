@@ -21,17 +21,26 @@ const tagVariants = cva(
     'inline-flex items-center select-none whitespace-nowrap',
     'max-w-full min-w-0',
     'gap-[var(--andromeda-2)]',
-    // ponytail: identity constant — 3px vertical pad is off the spacing grid by design
-    'px-[var(--andromeda-2)] py-[3px]',
+    'box-border',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-mono)]',
-    'text-[length:var(--andromeda-text-xs)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
     'transition-colors duration-150 ease-out',
   ],
   {
     variants: {
+      // Heights come off the shared control ladder (tokens.control) so a tag
+      // can sit in a row with a field or a button and share its baseline. The
+      // DEFAULT is sm, not md: a tag is usually inline in a table cell or
+      // beside a title rather than in a control strip, and md would make every
+      // existing tag 12px taller. Horizontal padding runs one step tighter than
+      // the ladder's, which is what keeps a chip reading as a chip.
+      size: {
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
+      },
       variant: {
         // Text is always text.primary across variants (mirrors Badge): the
         // background + border carry the meaning, never the label color. The
@@ -60,6 +69,7 @@ const tagVariants = cva(
       },
     },
     defaultVariants: {
+      size: 'sm',
       variant: 'default',
     },
   },
@@ -82,6 +92,7 @@ const closeButtonClass = cn(
 /**
  * @typedef {object} TagProps
  * @property {'default'|'accent'|'warning'|'fault'} [variant='default']
+ * @property {'sm'|'md'|'lg'} [size='sm'] Rung on the shared control ladder: 24, 32 or 40px tall. Defaults to sm because a tag usually sits inline rather than in a control row; pass md or lg to line it up with a field or button of that size.
  * @property {React.ReactNode} [children]
  * @property {() => void} [onClose] When provided, renders a close button.
  * @property {string} [className]
@@ -90,13 +101,13 @@ const closeButtonClass = cn(
 
 /** @type {React.ForwardRefExoticComponent<TagProps & React.HTMLAttributes<HTMLSpanElement>>} */
 export const Tag = forwardRef(function Tag(
-  { className, variant = 'default', children, onClose, style, ...props },
+  { className, variant = 'default', size = 'sm', children, onClose, style, ...props },
   ref,
 ) {
   return (
     <span
       ref={ref}
-      className={cn(tagVariants({ variant }), className)}
+      className={cn(tagVariants({ variant, size }), className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >

@@ -50,8 +50,7 @@ const TOUCH_TARGET_STYLE = `
 
 const boxVariants = cva(
   [
-    'relative inline-flex items-center justify-center shrink-0',
-    'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
+    'relative inline-flex items-center justify-center shrink-0 box-border',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
@@ -61,6 +60,13 @@ const boxVariants = cva(
   ],
   {
     variants: {
+      // Mirrors Checkbox exactly, so a radio and a checkbox at the same size
+      // are the same square. md is today's 16px box.
+      size: {
+        sm: 'w-[12px] h-[12px]',
+        md: 'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
+        lg: 'w-[length:var(--andromeda-5)] h-[length:var(--andromeda-5)]',
+      },
       state: {
         unchecked: [
           'bg-[color:var(--andromeda-surface-raised)]',
@@ -79,15 +85,29 @@ const boxVariants = cva(
       },
     },
     defaultVariants: {
+      size: 'md',
       state: 'unchecked',
       disabled: false,
     },
   },
 );
 
+// ponytail: identity constants — mark geometry, kept proportional to the box
+const MARK_FOR_SIZE = {
+  sm: 'block w-[4px] h-[4px]',
+  md: 'block w-[6px] h-[6px]',
+  lg: 'block w-[8px] h-[8px]',
+};
+
+// Label text steps with the box, matching Checkbox.
+const LABEL_TEXT = {
+  sm: 'text-[length:var(--andromeda-text-xs)]',
+  md: 'text-[length:var(--andromeda-text-sm)]',
+  lg: 'text-[length:var(--andromeda-text-md)]',
+};
+
 const labelClass = cn(
   '[font-family:var(--andromeda-font-mono)]',
-  'text-[length:var(--andromeda-text-sm)]',
   'font-[number:var(--andromeda-weight-medium)]',
   'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
   'text-[color:var(--andromeda-text-secondary)]',
@@ -154,6 +174,7 @@ export function RadioGroup({
  * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled and standalone.
  * @property {(next: boolean) => void} [onCheckedChange] Handler called with the new checked state when toggled.
  * @property {string}  [label]               Text label rendered beside the box.
+ * @property {'sm'|'md'|'lg'} [size='md']    Rung on the shared control ladder. Scales the box, its mark and the label together (12, 16 and 20px boxes), matching Checkbox at the same value.
  * @property {boolean} [disabled]            Disables the radio and blocks interaction.
  * @property {string}  [className]           Extra classes merged onto the visual box.
  * @property {React.CSSProperties} [style]   Inline styles merged onto the wrapper.
@@ -170,6 +191,7 @@ export const Radio = forwardRef(function Radio(
     defaultChecked = false,
     onCheckedChange,
     label,
+    size = 'md',
     disabled: disabledProp,
     id: idProp,
     name: nameProp,
@@ -231,6 +253,7 @@ export const Radio = forwardRef(function Radio(
           aria-hidden="true"
           className={cn(
             boxVariants({
+              size,
               state: checked ? 'checked' : 'unchecked',
               disabled,
             }),
@@ -239,8 +262,8 @@ export const Radio = forwardRef(function Radio(
         >
           {checked ? (
             <span
-              // ponytail: identity constant, no token (6px mark geometry)
-              className="block w-[6px] h-[6px]"
+              // Mark geometry tracks the box so the ring around it stays even.
+              className={MARK_FOR_SIZE[size]}
               style={{
                 background: 'var(--andromeda-accent-300)',
                 boxShadow: '0 0 6px var(--andromeda-accent-500)',
@@ -252,7 +275,7 @@ export const Radio = forwardRef(function Radio(
         </span>
       </span>
       {label ? (
-        <label htmlFor={id} className={labelClass}>
+        <label htmlFor={id} className={cn(labelClass, LABEL_TEXT[size])}>
           {label}
         </label>
       ) : null}
