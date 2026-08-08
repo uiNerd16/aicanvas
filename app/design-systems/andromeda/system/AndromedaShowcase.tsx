@@ -214,7 +214,12 @@ function Section({
       // open inline popover opt out via `allowOverflow`.
       style={allowOverflow ? undefined : { contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
     >
-      <CardHeader>
+      {/* A showcase section is a SECTION, not a card-in-a-dashboard, so it takes
+          the section padding step (spacing[6]) rather than Card's spacing[3]
+          default. Scoped here on purpose: Card's 12px is a documented must and
+          every template depends on it. The inset dividers stay on spacing[3]
+          either way — that inset is fixed by rule, it does not track padding. */}
+      <CardHeader className="px-[var(--andromeda-6)] py-[var(--andromeda-6)]">
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
           <span
             style={{
@@ -243,7 +248,7 @@ function Section({
           </Link>
         ) : null}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-[var(--andromeda-6)]">
         {description ? (
           <p
             style={{
