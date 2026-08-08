@@ -51,7 +51,19 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
   const componentTotal =
     total + ANDROMEDA_COMPONENT_META.length + ANDROMEDA_TEMPLATE_META.length
   return (
-    <div className="flex min-h-full flex-col overflow-x-hidden bg-sand-950">
+    <div
+      // overflow-x-hidden makes this element own the page's vertical scroll,
+      // via two CSS rules at once: a non-visible value on one axis computes
+      // the other axis to auto, and a flex item with non-visible overflow gets
+      // an automatic minimum size of 0 so it shrinks to the column instead of
+      // growing past it. So this scrolls and the root chrome column does not —
+      // and the column must not reserve a gutter it can never paint a bar in.
+      // (/components has the same min-h-full wrapper WITHOUT overflow-x-hidden,
+      // so there the column scrolls and keeps its gutter. That is the whole
+      // difference between the two pages.) See .app-scroll-column in globals.css.
+      data-owns-scroll
+      className="aic-page-scroll flex min-h-full flex-col overflow-x-hidden bg-sand-950"
+    >
 
       {/* ── Top bar ── */}
       <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-800 bg-sand-950 px-6 md:flex">

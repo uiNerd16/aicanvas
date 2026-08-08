@@ -25,6 +25,10 @@ export const metadata = {
 export default function IdeationLayout({ children }: { children: ReactNode }) {
   return (
     <div
+      // Same as the Andromeda layout: this clips itself to the root chrome
+      // column, so the column's reserved gutter would be dead space. The
+      // inner overflow-y-auto column below owns the scrolling.
+      data-owns-scroll
       className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
     >
       {/* Desktop-only rail. Below md the embedded Sidebar (a full-height 240px
@@ -35,7 +39,7 @@ export default function IdeationLayout({ children }: { children: ReactNode }) {
           <Sidebar embedded promoteDS counts={CATEGORY_COUNTS} total={TOTAL_COMPONENTS} />
         </div>
       </Suspense>
-      <div className="flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">
+      <div className="aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950">
         <IdeationTopBar />
         {children}
       </div>
