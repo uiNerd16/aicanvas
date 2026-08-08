@@ -20,6 +20,11 @@ const SQUARE_W   = 6;   // width in px
 const SQUARE_H   = parseInt(tokens.spacing[4]);  // height in px (spacing[4] = 16px)
 const GAP_INNER  = 2;   // ponytail: identity constant
 const GAP_COL    = 3;   // gap between columns
+// The strip is fixed geometry (segments never stretch or shrink), so the
+// label/value row has to be pinned to the same width. Left to the container
+// width it would justify-between across the whole card and park the readout
+// far to the right of where the bar actually ends.
+const STRIP_W    = BARS * SQUARE_W + (BARS - 1) * GAP_COL;
 
 const variantConfig = {
   default: {
@@ -103,8 +108,13 @@ export const ProgressBar = forwardRef(function ProgressBar(
       style={{ ...andromedaVars(), ...style }}
       {...props}
     >
+      {/* The readout row is pinned to the strip's width so the percentage ends
+          where the bar ends. maxWidth keeps that pin from turning the one
+          shrinkable part of the component into a hard px width: a caller passing
+          `label` inside a panel narrower than STRIP_W would otherwise get silent
+          horizontal overflow. */}
       {label ? (
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between" style={{ width: STRIP_W, maxWidth: '100%' }}>
           <span className={labelClass}>{label}</span>
           <span className={valueClass}>{clamped}%</span>
         </div>

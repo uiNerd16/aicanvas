@@ -887,17 +887,25 @@ function SegmentedControlDemo() {
           )}
         />
       </Row>
-      <Row label="Labels">
-        <SegmentedControl
-          size="md"
-          value={period}
-          onChange={setPeriod}
-          options={[
-            { value: '1d',  label: '1D' },
-            { value: '1w',  label: '1W' },
-            { value: '1m',  label: '1M' },
-            { value: 'all', label: 'ALL' },
-          ]}
+      <Row label="Control group">
+        {/* Stacked: a four-segment lg strip runs past 250px, so three of them
+            will not sit three-across in this cell. */}
+        <SizeRamp
+          direction="column"
+          render={(s) => (
+            <SegmentedControl
+              size={s}
+              layoutGroupId={`andromeda-segmented-labels-${s}`}
+              value={period}
+              onChange={setPeriod}
+              options={[
+                { value: '1d',  label: '1D' },
+                { value: '1w',  label: '1W' },
+                { value: '1m',  label: '1M' },
+                { value: 'all', label: 'ALL' },
+              ]}
+            />
+          )}
         />
       </Row>
     </div>
@@ -931,6 +939,26 @@ function PanelHeaderDemo() {
             }
           />
         </div>
+      </Row>
+      <Row label="Sizes">
+        {/* Stacked, and each rung gets its own fixed-width panel: a block
+            header has no intrinsic width, so a max-content ramp column would
+            otherwise shrink every panel to its own title. The actions control
+            matches the header rung by name, which is the pairing the
+            component's JSDoc prescribes. */}
+        <SizeRamp
+          direction="column"
+          render={(s) => (
+            <div style={{ width: 320, maxWidth: '100%', position: 'relative', background: tokens.color.surface.raised }}>
+              <CornerMarkers />
+              <PanelHeader
+                size={s}
+                title={{ sm: 'Capacity', md: 'Requests', lg: 'Fleet Overview' }[s]}
+                actions={<IconButton size={s} variant="ghost" aria-label={`Refresh (${s})`} icon={ArrowClockwise} />}
+              />
+            </div>
+          )}
+        />
       </Row>
     </div>
   )
@@ -1093,14 +1121,14 @@ function UserMenuDemo() {
           align="end"
         />
       </Row>
-      <Row label="Avatar size">
+      <Row label="Sizes">
         <SizeRamp
           render={(s) => (
             <UserMenu
               name="OPS-01"
               src={USER_AVATAR_SRC}
               status="online"
-              avatarSize={s}
+              size={s}
               items={USER_MENU_ITEMS}
               ariaLabel={`User menu (${s})`}
             />
@@ -1145,7 +1173,7 @@ function UserCardDemo() {
         </Row>
       </div>
       <div style={{ width: 224 }}>
-        <Row label="Avatar size">
+        <Row label="Sizes">
           {/* Stacked: three 200px cards will not sit three-across in this cell. */}
           <SizeRamp
             direction="column"
@@ -1156,7 +1184,7 @@ function UserCardDemo() {
                   role="Flight Director"
                   src={USER_CARD_SRC}
                   status="online"
-                  avatarSize={s}
+                  size={s}
                   items={USER_MENU_ITEMS}
                   placement="top"
                   align="stretch"

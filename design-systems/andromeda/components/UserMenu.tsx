@@ -39,6 +39,25 @@ import { mq } from './lib/responsive';
 const toSeconds = (ms) => parseInt(ms, 10) / 1000;
 const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
 
+// Chevron per rung, at half the avatar's box (24/32/40 gives 12/16/20) so the
+// indicator holds the same weight against the face at every size. Same ramp
+// SearchField's leading glyph uses. The old flat 14 sat on neither
+// tokens.iconSize (12/16/18/20/22) nor any avatar ratio.
+export const CHEVRON_FOR_SIZE = {
+  sm: tokens.iconSize.xs,
+  md: tokens.iconSize.sm,
+  lg: tokens.iconSize.lg,
+};
+
+// Trigger geometry per rung. The avatar sets the scale and the chrome follows
+// it. Vertical padding cannot step below md's, because the spacing scale
+// floors at 4px, so sm tightens the sides and the gap only.
+const TRIGGER_FOR_SIZE = {
+  sm: { padY: tokens.spacing[1], padX: tokens.spacing[1], gap: tokens.spacing[1] },
+  md: { padY: tokens.spacing[1], padX: tokens.spacing[2], gap: tokens.spacing[2] },
+  lg: { padY: tokens.spacing[2], padX: tokens.spacing[3], gap: tokens.spacing[3] },
+};
+
 // Roving arrow-key navigation for the `role="menu"` panel. Queries the
 // menuitem buttons, finds the focused one, and moves focus up/down with
 // wrap-around; Home/End jump to first/last. Separators are ignored because
@@ -201,6 +220,12 @@ function UserMenuItemRow({ item, onClose }) {
  * Shared panel — renders the floating menu surface and its items.
  * Visibility, placement, and alignment are controlled by props so
  * each trigger component can pick its own canonical defaults.
+ *
+ * The rows deliberately do NOT take the trigger's `size`. A trigger is chrome
+ * fitted to the slot it sits in (a top-bar cluster, a sidebar footer); the
+ * panel is a floating reading surface, and one product rendering the same
+ * action list at three row heights reads as a bug. PanelMenu already settled
+ * this: its trigger takes a size, its rows keep one height.
  */
 export function UserMenuPanel({ open, items, placement = 'bottom', align = 'start', panelMinWidth = 200, ariaLabel = 'User menu', onClose }) {
   if (!open) return null;
@@ -293,7 +318,7 @@ export { UserMenuStyles };
  * @property {string} name             Display name; passed to Avatar for the initial fallback.
  * @property {string} [src]            Avatar image URL.
  * @property {'online'|'busy'|'away'|'offline'} [status] Presence state; passed to Avatar for the status dot.
- * @property {'sm'|'md'|'lg'} [avatarSize='md'] Size of the trigger avatar.
+ * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole trigger: avatar (24/32/40), padding, gap and chevron. The popover rows are unaffected. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
  * @property {UserMenuItem[]} items The menu rows to render, including separators.
  * @property {'top'|'bottom'} [placement='bottom'] Whether the panel opens below or above the trigger.
  * @property {'start'|'end'} [align='end'] Which trigger edge the panel aligns to horizontally.
@@ -310,7 +335,7 @@ export const UserMenu = forwardRef(function UserMenu(
     name,
     src,
     status,
-    avatarSize = 'md',
+    size = 'md',
     items,
     placement = 'bottom',
     align = 'end',
@@ -323,6 +348,12 @@ export const UserMenu = forwardRef(function UserMenu(
   },
   ref,
 ) {
+  // Resolve the rung once. `size` comes from a caller, so an unrecognised value
+  // must fall back to md instead of throwing on `rung.padY` and taking the whole
+  // subtree down. The same key feeds the chevron and the Avatar so all three
+  // land on one rung. Same guard as PanelHeader.
+  const sizeKey = TRIGGER_FOR_SIZE[size] ? size : 'md';
+  const rung = TRIGGER_FOR_SIZE[sizeKey];
   const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
@@ -352,14 +383,14 @@ export const UserMenu = forwardRef(function UserMenu(
           boxSizing: 'border-box',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: tokens.spacing[2],
-          padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+          gap: rung.gap,
+          padding: `${rung.padY} ${rung.padX}`,
           cursor: 'pointer',
           background: highlight ? tokens.color.surface.hover : 'transparent',
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >
-        <Avatar name={name} src={src} status={status} size={avatarSize} />
+        <Avatar name={name} src={src} status={status} size={sizeKey} />
         <motion.span
           aria-hidden
           animate={{ rotate: open ? 180 : 0 }}
@@ -373,7 +404,7 @@ export const UserMenu = forwardRef(function UserMenu(
             transition: `color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
           }}
         >
-          <CaretUpDown size={14} weight="regular" />
+          <CaretUpDown size={CHEVRON_FOR_SIZE[sizeKey]} weight="regular" />
         </motion.span>
       </button>
 

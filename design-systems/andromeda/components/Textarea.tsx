@@ -20,7 +20,11 @@ const textareaVariants = cva(
     '[font-family:var(--andromeda-font-sans)]',
     'text-[color:var(--andromeda-text-primary)]',
     'bg-[color:var(--andromeda-surface-raised)]',
-    'leading-[var(--andromeda-leading-normal,1.5)]',
+    // Arbitrary-property form, not leading-*: tailwind-merge puts leading-* and
+    // text-[length:*] in conflicting groups, so the leading-* that used to sit
+    // here was deleted by the size variant's text-[length:*] and the field ran
+    // at the font's normal leading (~1.32 for JetBrains Mono) instead of 1.5.
+    '[line-height:var(--andromeda-leading-normal,1.5)]',
     'outline-none',
     'transition-[border-color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'placeholder:text-[color:var(--andromeda-text-muted)]',
@@ -29,13 +33,28 @@ const textareaVariants = cva(
   {
     variants: {
       // Same rung names as every other control, but a textarea's height belongs
-      // to `rows`, so the ladder governs padding and text size only. That is
-      // what keeps an `sm` textarea reading as the same density as an `sm`
-      // Input stacked above it, without capping it to one line.
+      // to `rows`, so the ladder governs padding and text size only. Padding is
+      // the ladder's field inset (padInset), equal on all four sides, so an `sm`
+      // textarea and an `sm` Input stacked above it hold their text at the same
+      // distance from the border. Sides used to be padX (12/16/20) against a
+      // narrower top, which read as broken in a left-aligned field.
+      // The leading is 1.5 from the base classes, because pinning it to 1 the
+      // way Input does would collide the lines of a multi-line field. So here
+      // the vertical inset is padInset as real padding, not the leftover half
+      // of a pinned height: same number, different mechanism.
+      // That 1.5 only started applying once the base class moved to the
+      // [line-height:...] form above. Until then tailwind-merge stripped it and
+      // every textarea rendered at the font's ~1.32 normal leading.
+      // Combined effect of that leading and the padding move, measured at
+      // rows=4 as 2*border + 2*pad + rows*text*leading:
+      //   sm 70.8 -> 74.0 (+3.2), md 81.4 -> 92.0 (+10.6), lg 99.9 -> 110.0 (+10.1)
+      // All six call sites are demos and showcase, none in examples or
+      // templates, and two sit inside a scrolling DrawerBody, so nothing
+      // fixed-height breaks.
       size: {
-        sm: 'px-[var(--andromeda-3)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
-        md: 'px-[var(--andromeda-4)] py-[var(--andromeda-2)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'px-[var(--andromeda-5)] py-[var(--andromeda-3)] text-[length:var(--andromeda-text-md)]',
+        sm: 'p-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-xs)]',
+        md: 'p-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'p-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-md)]',
       },
       state: {
         default: [

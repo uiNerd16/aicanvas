@@ -106,6 +106,20 @@ export const tokens = {
     // distinction is kept only so existing component references work unchanged.
     fontSans: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
     fontMono: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace",
+    // Modifier / symbol glyphs (⌘ ⌥ ⇧ ⌃ ⏎ ⌫ ⎋). JetBrains Mono is loaded with
+    // subsets ['latin'] and none of the unicode-ranges it serves covers U+2318,
+    // so the browser ALWAYS draws the command glyph from some fallback family,
+    // whichever the machine happens to offer, and that family sets the symbol
+    // well below JetBrains' cap height. Naming the fallback here makes the
+    // substitution deliberate and identical everywhere, instead of every
+    // component that renders a shortcut rediscovering the same diagnosis.
+    fontSymbol: "Menlo, 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'Apple Symbols', monospace",
+    // Optical step-up for a fontSymbol glyph so it reads at the same weight as
+    // the JetBrains text beside it. Unitless on purpose: multiply it into an
+    // `em` font-size, and divide it back out of the line-height so the taller
+    // glyph does not grow the line box it sits in. Retune if the first family
+    // in fontSymbol changes; 1.25 is an optical match against Menlo.
+    symbolScale: 1.25,
     size: {
       xs:   '10px',
       sm:   '12px',
@@ -235,10 +249,27 @@ export const tokens = {
   // padX/text repeat spacing[3,4,5] and typography.size[xs,sm,md] as literals
   // because a single object literal cannot reference itself; change them here
   // and in those scales together.
+  //
+  // Two horizontal paddings, because a button and a field want different things
+  // from the same rung:
+  //   padX     — a BUTTON's side padding. Its label is centred, so the sides are
+  //              breathing room and are deliberately wider than the top/bottom.
+  //   padInset — a FIELD's inset on ALL FOUR sides. Text in a field is
+  //              left-aligned against the border, so an inset that is wider at
+  //              the sides than above reads as broken. padInset is exactly
+  //              (height - 2*border - text) / 2, which is what makes the gap
+  //              above the glyphs equal the gap left of them.
+  //              What that identity depends on is the PINNED HEIGHT, not the
+  //              line-height: a single-line field centres its em box inside the
+  //              fixed content box, so md leaves the glyphs 9px off the frame
+  //              whether the leading is 1 or the font's ~1.32 normal. Apply
+  //              padInset horizontally and let the pinned height supply the
+  //              vertical half. A field with NO pinned height (a textarea) has
+  //              to apply it on all four sides as real padding instead.
   control: {
-    sm: { height: '24px', padX: '12px', text: '10px' },
-    md: { height: '32px', padX: '16px', text: '12px' },
-    lg: { height: '40px', padX: '20px', text: '14px' },
+    sm: { height: '24px', padX: '12px', text: '10px', padInset: '6px' },
+    md: { height: '32px', padX: '16px', text: '12px', padInset: '9px' },
+    lg: { height: '40px', padX: '20px', text: '14px', padInset: '12px' },
   },
   layout: {
     sidebarWidth: '224px',

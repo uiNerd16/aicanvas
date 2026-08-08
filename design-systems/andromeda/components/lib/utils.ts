@@ -137,6 +137,10 @@ export function andromedaVars() {
     '--andromeda-control-sm': t.control.sm.height,
     '--andromeda-control-md': t.control.md.height,
     '--andromeda-control-lg': t.control.lg.height,
+    // Field inset — equal on all four sides at each rung. See tokens.control.
+    '--andromeda-inset-sm': t.control.sm.padInset,
+    '--andromeda-inset-md': t.control.md.padInset,
+    '--andromeda-inset-lg': t.control.lg.padInset,
     // Radius
     '--andromeda-radius-none':  t.radius.none,
     '--andromeda-radius-sm':    t.radius.sm,

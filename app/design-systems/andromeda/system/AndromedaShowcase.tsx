@@ -807,6 +807,27 @@ export default function AndromedaShowcase({
                     />
                   </div>
                 </div>
+                <div>
+                  <div style={labelStyle}>Sizes</div>
+                  {/* Stacked, and each rung keeps the 320px panel: a block
+                      header has no intrinsic width, so a max-content ramp
+                      column would otherwise shrink every panel to its own
+                      title. The actions control matches the header rung by
+                      name, which is the pairing the JSDoc prescribes. */}
+                  <SizeRamp
+                    direction="column"
+                    render={(s) => (
+                      <div style={panelStyle}>
+                        <CornerMarkers />
+                        <PanelHeader
+                          size={s}
+                          title={{ sm: 'Capacity', md: 'Requests', lg: 'Fleet Overview' }[s]}
+                          actions={<IconButton size={s} variant="ghost" aria-label={`Refresh (${s})`} icon={ArrowClockwise} />}
+                        />
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
             );
           })()}
@@ -1346,17 +1367,25 @@ export default function AndromedaShowcase({
               )}
             />
           </Row>
-          <Row label="Labels">
-            <SegmentedControl
-              size="md"
-              value={periodValue}
-              onChange={setPeriodValue}
-              options={[
-                { value: '1d',  label: '1D' },
-                { value: '1w',  label: '1W' },
-                { value: '1m',  label: '1M' },
-                { value: 'all', label: 'ALL' },
-              ]}
+          <Row label="Control group">
+            {/* Stacked: a four-segment lg strip runs past 250px, so three of
+                them will not sit three-across in this cell. */}
+            <SizeRamp
+              direction="column"
+              render={(s) => (
+                <SegmentedControl
+                  size={s}
+                  layoutGroupId={`andromeda-showcase-segmented-labels-${s}`}
+                  value={periodValue}
+                  onChange={setPeriodValue}
+                  options={[
+                    { value: '1d',  label: '1D' },
+                    { value: '1w',  label: '1W' },
+                    { value: '1m',  label: '1M' },
+                    { value: 'all', label: 'ALL' },
+                  ]}
+                />
+              )}
             />
           </Row>
         </Section>
@@ -1870,6 +1899,7 @@ export default function AndromedaShowcase({
               { id: 'sep1',        type: 'separator' as const },
               { id: 'signout',     label: 'Sign Out',            icon: SignOut },
             ];
+            const src = 'https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
             return (
               <div
                 style={{
@@ -1886,7 +1916,7 @@ export default function AndromedaShowcase({
                 <Row label="Open up">
                   <UserMenu
                     name="OPS-01"
-                    src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    src={src}
                     status="online"
                     items={items}
                     placement="top"
@@ -1900,7 +1930,7 @@ export default function AndromedaShowcase({
                   <Row label="Open down">
                     <UserMenu
                       name="OPS-01"
-                      src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                      src={src}
                       status="online"
                       items={items}
                       placement="bottom"
@@ -1909,6 +1939,20 @@ export default function AndromedaShowcase({
                     />
                   </Row>
                 </div>
+                <Row label="Sizes">
+                  <SizeRamp
+                    render={(s) => (
+                      <UserMenu
+                        name="OPS-01"
+                        src={src}
+                        status="online"
+                        size={s}
+                        items={items}
+                        ariaLabel={`User menu (${s})`}
+                      />
+                    )}
+                  />
+                </Row>
               </div>
             );
           })()}
@@ -1929,6 +1973,7 @@ export default function AndromedaShowcase({
               { id: 'sep1',        type: 'separator' as const },
               { id: 'signout',     label: 'Sign Out',            icon: SignOut },
             ];
+            const src = 'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
             return (
               <div
                 style={{
@@ -1949,7 +1994,7 @@ export default function AndromedaShowcase({
                       <UserCard
                         name="Reza Quinn"
                         role="Flight Director"
-                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        src={src}
                         status="online"
                         items={items}
                         placement="bottom"
@@ -1965,13 +2010,36 @@ export default function AndromedaShowcase({
                       <UserCard
                         name="Reza Quinn"
                         role="Flight Director"
-                        src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        src={src}
                         status="online"
                         items={items}
                         placement="top"
                         align="stretch"
                       />
                     </div>
+                  </Row>
+                </div>
+                <div style={{ width: 224 }}>
+                  <Row label="Sizes">
+                    {/* Stacked: three 200px cards will not sit three-across in this cell. */}
+                    <SizeRamp
+                      direction="column"
+                      render={(s) => (
+                        <div style={{ width: 200, background: tokens.color.surface.raised }}>
+                          <UserCard
+                            name="Reza Quinn"
+                            role="Flight Director"
+                            src={src}
+                            status="online"
+                            size={s}
+                            items={items}
+                            placement="top"
+                            align="stretch"
+                            ariaLabel={`User card (${s})`}
+                          />
+                        </div>
+                      )}
+                    />
                   </Row>
                 </div>
               </div>

@@ -31,7 +31,7 @@ const RESPONSIVE_STYLE = `
       max-width: 100% !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
-      /* Hide the scroll affordance. The strip has a fixed cellSize height
+      /* Hide the scroll affordance. The strip has a fixed ladder height
          (24/32/40px); a classic, space-consuming horizontal scrollbar (narrow
          desktop window, some platforms) would eat that height and vertically
          crush the segment row. Scrolling still works — the gutter just isn't
@@ -45,17 +45,13 @@ const RESPONSIVE_STYLE = `
   }
 `;
 
-const SIZE_PX = {
-  sm: 24,
-  md: 32,
-  lg: 40,
-};
-
-// CSS var per size — heights sit on the spacing grid (6=24px, 8=32px, 10=40px).
+// CSS var per size, pointing at the shared control ladder instead of the
+// spacing grid it happens to duplicate today: a theme that retunes
+// tokens.control has to move this strip along with the Buttons beside it.
 const SIZE_VAR = {
-  sm: '--andromeda-6',
-  md: '--andromeda-8',
-  lg: '--andromeda-10',
+  sm: '--andromeda-control-sm',
+  md: '--andromeda-control-md',
+  lg: '--andromeda-control-lg',
 };
 
 const ICON_PX = {
@@ -106,7 +102,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
   // animation (rare).
   const generatedId = useId();
   const indicatorId = layoutGroupId ?? `andromeda-segmented-${generatedId}`;
-  const cellSize = SIZE_PX[size] ?? SIZE_PX.md;
+  const rung = tokens.control[size] ?? tokens.control.md;
   const cellVar = SIZE_VAR[size] ?? SIZE_VAR.md;
   const iconSize = ICON_PX[size] ?? ICON_PX.md;
 
@@ -119,7 +115,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       className={cn('andromeda-segmented inline-flex relative select-none', className)}
       style={{
         ...andromedaVars(),
-        height: `var(${cellVar}, ${cellSize}px)`,
+        height: `var(${cellVar}, ${rung.height})`,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
         borderRadius: tokens.radius.frame,
         background: tokens.color.surface.raised,
@@ -147,9 +143,12 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               alignItems: 'center',
               justifyContent: 'center',
               gap: tokens.spacing[2],
-              minWidth: showLabel ? undefined : `var(${cellVar}, ${cellSize}px)`,
+              minWidth: showLabel ? undefined : `var(${cellVar}, ${rung.height})`,
               height: '100%',
-              padding: showLabel ? `0 ${tokens.spacing[3]}` : 0,
+              // A labelled segment is a centred-label button, so it takes the
+              // rung's padX like Button does. A flat spacing[3] left an lg
+              // strip padded like an sm one next to an lg Button.
+              padding: showLabel ? `0 ${rung.padX}` : 0,
               background: 'transparent',
               border: 'none',
               borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${tokens.color.border.base}`,
@@ -162,7 +161,9 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               // container ("View all") drops to a second line.
               whiteSpace: 'nowrap',
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.sm,
+              // Label type steps with the rung. Pinned at size.sm the sm strip
+              // read as a shrunken md and the lg strip as an inflated one.
+              fontSize: rung.text,
               fontWeight: active ? tokens.typography.weight.medium : tokens.typography.weight.regular,
               color: active ? tokens.color.text.primary : tokens.color.text.muted,
               textTransform: 'uppercase',

@@ -28,6 +28,7 @@ import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
 import { andromedaVars, easingArray } from './lib/utils';
 import {
+  CHEVRON_FOR_SIZE,
   UserMenuPanel,
   UserMenuStyles,
   useUserMenuPanel,
@@ -40,13 +41,24 @@ const toSeconds = (ms) => parseInt(ms, 10) / 1000;
 // framer boundary: derived from tokens, cannot follow runtime var overrides
 const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 
+// Card geometry per rung. The inset stays uniform on all four sides (the card
+// is a labelled block, not a centred control) and steps one stop of the
+// spacing scale per rung. Name and role share one size because they read as
+// one identity lockup, and the type scale has nothing under 10px, so sm keeps
+// md's reading size rather than inventing a token below xs.
+const CARD_FOR_SIZE = {
+  sm: { pad: tokens.spacing[2], gap: tokens.spacing[2], text: tokens.typography.size.xs },
+  md: { pad: tokens.spacing[3], gap: tokens.spacing[3], text: tokens.typography.size.xs },
+  lg: { pad: tokens.spacing[4], gap: tokens.spacing[4], text: tokens.typography.size.sm },
+};
+
 /**
  * @typedef {object} UserCardProps
  * @property {string} name Shown as the card's primary label and used for the avatar initials.
  * @property {string} [role]           Subtitle under the name (e.g. "Flight Director").
  * @property {string} [src] Optional avatar image URL; falls back to initials when absent.
  * @property {'online'|'caution'|'fault'|'offline'} [status] Presence status shown as a dot on the avatar. Passed verbatim to Avatar, whose enum this is; any other value renders no dot.
- * @property {'sm'|'md'|'lg'} [avatarSize='md'] Size of the avatar shown in the card.
+ * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole card: avatar (24/32/40), inset, gap, name/role type and chevron. The popover rows are unaffected. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
  * @property {UserMenuItem[]} items Entries rendered in the popover menu.
  * @property {'top'|'bottom'} [placement='top'] Which side of the card the menu opens toward.
  * @property {'start'|'end'|'stretch'} [align='stretch'] How the panel aligns to the card; stretch matches its width.
@@ -64,7 +76,7 @@ export const UserCard = forwardRef(function UserCard(
     role,
     src,
     status,
-    avatarSize = 'md',
+    size = 'md',
     items,
     placement = 'top',
     align = 'stretch',
@@ -77,6 +89,12 @@ export const UserCard = forwardRef(function UserCard(
   },
   ref,
 ) {
+  // Resolve the rung once. `size` comes from a caller, so an unrecognised value
+  // must fall back to md instead of throwing on `rung.pad` and taking the whole
+  // subtree down. The same key feeds the chevron and the Avatar so all three
+  // land on one rung. Same guard as PanelHeader.
+  const sizeKey = CARD_FOR_SIZE[size] ? size : 'md';
+  const rung = CARD_FOR_SIZE[sizeKey];
   const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
@@ -106,21 +124,21 @@ export const UserCard = forwardRef(function UserCard(
           boxSizing: 'border-box',
           position: 'relative',
           width: '100%',
-          padding: tokens.spacing[3],
+          padding: rung.pad,
           display: 'flex',
           alignItems: 'center',
-          gap: tokens.spacing[3],
+          gap: rung.gap,
           cursor: 'pointer',
           background: highlight ? tokens.color.surface.hover : 'transparent',
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
-        <Avatar name={name} src={src} status={status} size={avatarSize} />
+        <Avatar name={name} src={src} status={status} size={sizeKey} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size.xs,
+              fontSize: rung.text,
               fontWeight: tokens.typography.weight.semibold,
               color: tokens.color.text.primary,
               textTransform: 'uppercase',
@@ -136,7 +154,7 @@ export const UserCard = forwardRef(function UserCard(
             <div
               style={{
                 fontFamily: tokens.typography.fontMono,
-                fontSize: tokens.typography.size.xs,
+                fontSize: rung.text,
                 color: tokens.color.text.muted,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.wide,
@@ -159,7 +177,7 @@ export const UserCard = forwardRef(function UserCard(
             transition: `color var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
           }}
         >
-          <CaretUpDown size={14} weight="regular" />
+          <CaretUpDown size={CHEVRON_FOR_SIZE[sizeKey]} weight="regular" />
         </motion.span>
       </button>
 

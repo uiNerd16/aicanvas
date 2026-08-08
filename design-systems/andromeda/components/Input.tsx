@@ -16,9 +16,14 @@ import { tokens } from '../tokens';
 
 // Per-rung values the cva classes cannot express: the left icon has to shrink
 // with the field, and the text has to clear it. Padding-left is the rung's own
-// padX twice over plus the glyph, so the gap left of the caret matches the gap
-// right of it.
+// padInset twice over plus the glyph, so the space between icon and text is the
+// same inset the field already carries on its four sides.
 const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
+
+// `size` arrives from a caller and is read straight into a style value below,
+// so an unrecognised string throws rather than degrades. Same guard the other
+// sized components in this system carry.
+const SIZES = { sm: true, md: true, lg: true };
 
 const inputVariants = cva(
   [
@@ -26,6 +31,18 @@ const inputVariants = cva(
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-sans)]',
+    // Pins the line box to the font size so padInset, defined as
+    // (height - 2*border - text) / 2, describes the real line box and not only
+    // the em box inside it. It does NOT move pixels at the pinned rung heights:
+    // a single-line input centres its em box in the fixed content box whatever
+    // the line box measures, so md leaves the glyphs 9px off the frame at
+    // leading 1 and at the font's 1.32 normal alike. What it buys is the
+    // unpinned case, a consumer className dropping h-*, where the line box
+    // alone would set the field height.
+    // Arbitrary-property form, not leading-*: tailwind-merge puts leading-* and
+    // text-[length:*] in conflicting groups, so the leading-* written here was
+    // deleted by the size variant's text-[length:*] and never reached the DOM.
+    '[line-height:var(--andromeda-leading-none,1)]',
     'text-[color:var(--andromeda-text-primary)]',
     'bg-[color:var(--andromeda-surface-raised)]',
     'outline-none',
@@ -35,14 +52,17 @@ const inputVariants = cva(
   ],
   {
     variants: {
-      // Height, horizontal padding and text step together on the shared control
-      // ladder (tokens.control), so a field and a Button of the same size line
-      // up in a row with no props. This replaced a single off-grid 9px vertical
+      // Height, inset and text step together on the shared control ladder
+      // (tokens.control), so a field and a Button of the same size line up in a
+      // row with no props. The side value is the rung's padInset, not a
+      // Button's wider padX: a field's text is left-aligned against the border,
+      // so a side gap wider than the one the pinned height leaves above the
+      // glyphs reads as broken. This replaced a single off-grid 9px vertical
       // padding that put the field at ~37px, on neither rung of the ladder.
       size: {
-        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-xs)]',
-        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-5)] text-[length:var(--andromeda-text-md)]',
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-md)]',
       },
       state: {
         default: [
@@ -95,8 +115,9 @@ export const Input = forwardRef(function Input(
   const id = idProp ?? `andromeda-input-${reactId}`;
   const errorId = error ? `${id}-error` : undefined;
   const state = error ? 'error' : 'default';
-  const padX = tokens.control[size].padX;
-  const iconPx = ICON_FOR_SIZE[size];
+  const sizeKey = SIZES[size] ? size : 'md';
+  const padInset = tokens.control[sizeKey].padInset;
+  const iconPx = ICON_FOR_SIZE[sizeKey];
 
   return (
     <div
@@ -122,7 +143,10 @@ export const Input = forwardRef(function Input(
         {Icon ? (
           <div
             aria-hidden="true"
-            style={{ left: padX }}
+            // The wrapper is the input's BORDER box, while padding-left below
+            // measures from inside the border, so the icon has to add the
+            // border back to sit the same inset off the frame as the text.
+            style={{ left: `calc(var(--andromeda-border-width, 1px) + ${padInset})` }}
             className={cn(
               'absolute top-1/2 -translate-y-1/2',
               'flex items-center pointer-events-none',
@@ -139,8 +163,8 @@ export const Input = forwardRef(function Input(
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={errorId}
           disabled={disabled}
-          style={Icon ? { paddingLeft: `calc(${padX} * 2 + ${iconPx}px)` } : undefined}
-          className={cn(inputVariants({ size, state }), className)}
+          style={Icon ? { paddingLeft: `calc(${padInset} * 2 + ${iconPx}px)` } : undefined}
+          className={cn(inputVariants({ size: sizeKey, state }), className)}
           {...props}
         />
       </div>
