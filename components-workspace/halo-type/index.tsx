@@ -198,9 +198,15 @@ export default function HaloType() {
   // Back-arc letters are rendered upside-down (not mirror-flipped) via a twin
   // glyph facing inward. They get a dimmer hue so the front arc stays hero.
   const fgBack = isDark ? '#7A756C' : '#6A655C'
+  // Vertical radius in px off the measured box, not 60% of it. The wrapper used
+  // to be clamped square, so 60%/60% drew a circle on a portrait phone; now that
+  // it stretches to the root, a percentage would smear the glow into a full-
+  // height wash. `size` is already the smaller of the two axes, so 60% of it
+  // reproduces the old radius exactly at every aspect ratio, and it stays
+  // container-relative rather than going back to viewport units.
   const vignette = isDark
-    ? 'radial-gradient(60% 60% at 50% 52%, rgba(245,241,232,0.10) 0%, rgba(245,241,232,0.04) 35%, rgba(10,10,10,0) 70%)'
-    : 'radial-gradient(60% 60% at 50% 52%, rgba(10,10,10,0.08) 0%, rgba(10,10,10,0.03) 35%, rgba(245,241,232,0) 70%)'
+    ? `radial-gradient(60% ${size * 0.6}px at 50% 52%, rgba(245,241,232,0.10) 0%, rgba(245,241,232,0.04) 35%, rgba(10,10,10,0) 70%)`
+    : `radial-gradient(60% ${size * 0.6}px at 50% 52%, rgba(10,10,10,0.08) 0%, rgba(10,10,10,0.03) 35%, rgba(245,241,232,0) 70%)`
 
   // Shared pointer handlers — work for hover AND touch.
   const handleEngage = () => engagement.set(1)
