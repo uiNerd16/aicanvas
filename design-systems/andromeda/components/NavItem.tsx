@@ -6,8 +6,9 @@
 // No background fill — the indicator alone marks the selected row.
 // Inactive: text.secondary, hover surface.hover.
 // Mono label is the default; pass `mono={false}` for sans labels.
-// `collapsed` is the icon-rail form: same row, same active contract, label
-// kept for screen readers only. Pair it with a Tooltip for the visible name.
+// `collapsed` is the icon-rail form: same row, label kept for screen readers
+// only, and NO edge square — the accent glyph carries active on a rail.
+// Pair it with a Tooltip for the visible name.
 // ============================================================
 
 'use client';
@@ -85,11 +86,11 @@ const navItemVariants = cva(
         ],
       },
       // Icon rail form: the same row with its label taken out of the visual
-      // layout. Everything that makes a NavItem a NavItem is unchanged — the
-      // right-edge dot, the no-background-fill active state, the hover lift,
-      // the layoutId slide — so a rail is a narrow nav list rather than a
-      // different component. The asymmetric reading inset collapses to a
-      // symmetric one because there is no longer a label to indent past.
+      // layout. The no-background-fill active state, the hover lift and the
+      // layoutId slide are unchanged, so a rail is a narrow nav list rather
+      // than a different component. Two things do change: the asymmetric
+      // reading inset collapses to a symmetric one (no label to indent past),
+      // and the right-edge square is dropped (no width left to be an edge).
       collapsed: {
         true: ['justify-center', 'px-[var(--andromeda-2)]', 'gap-0'],
         false: [],
@@ -110,7 +111,7 @@ const navItemVariants = cva(
  * @property {React.ReactNode} label Visible content of the nav row.
  * @property {boolean} [active=false] Marks the row as the current selection, applying accent text and the indicator dot.
  * @property {boolean} [mono=true] Renders the label in uppercase mono type; set false for sans.
- * @property {boolean} [collapsed=false] Icon-rail form: centers the icon, drops the label to screen readers only, and pulls the active dot in one step. Requires `icon`; pair with a Tooltip so the label is still reachable by sight.
+ * @property {boolean} [collapsed=false] Icon-rail form: centers the icon, drops the label to screen readers only, and drops the active edge square — the accent glyph is the active signal on a rail. Requires `icon`; pair with a Tooltip so the label is still reachable by sight.
  * @property {boolean} [asChild=false] Renders via Radix Slot, merging props onto the child instead of a native button.
  * @property {'button'|'submit'|'reset'} [type='button'] HTML button type; defaults to 'button' to avoid accidental form submits, and is omitted when asChild is set.
  * @property {string} [layoutGroupId='andromeda-navitem-indicator']
@@ -157,18 +158,19 @@ export const NavItem = forwardRef(function NavItem(
         {...props}
       >
         {/* Right indicator square — when wrapped in <LayoutGroup>, this slides
-            between sibling NavItems on active change via `layoutId`. */}
-        {active ? (
+            between sibling NavItems on active change via `layoutId`.
+            Expanded rows only: on a rail the row is barely wider than the
+            glyph, so an edge marker sits on top of the icon instead of beside
+            it and reads as a defect. Collapsed marks active with the accent
+            glyph alone (the icon inherits the row's `currentColor`). */}
+        {active && !collapsed ? (
           <motion.span
             layoutId={layoutGroupId}
             aria-hidden="true"
             transition={reducedMotion ? { duration: 0 } : INDICATOR_TX}
             style={{
               position: 'absolute',
-              // Collapsed rows are a fraction of the width, so the dot pulls
-              // in a step to stay an EDGE marker rather than drifting into
-              // the icon it sits beside.
-              right: collapsed ? 'var(--andromeda-2, 8px)' : 'var(--andromeda-3, 12px)',
+              right: 'var(--andromeda-3, 12px)',
               top: '50%',
               translateY: '-50%',
               width: 'var(--andromeda-1, 4px)',

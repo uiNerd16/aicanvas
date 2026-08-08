@@ -345,6 +345,8 @@ function NavItemDemo() {
   const items = [
     { icon: Compass, label: 'Overview' },
     { icon: Pulse, label: 'Activity' },
+    { icon: ChartLine, label: 'Reports' },
+    { icon: Bell, label: 'Alerts' },
     { icon: Users, label: 'Members' },
     { icon: Database, label: 'Logs' },
     { icon: Gear, label: 'Settings' },
@@ -364,9 +366,10 @@ function NavItemDemo() {
         ))}
       </div>
 
-      {/* The same list collapsed to an icon rail. Same component, same active
-          contract — the dot is still the only thing marking the current row,
-          and the label is still there for screen readers. */}
+      {/* The same list collapsed to an icon rail. Same component, no edge
+          square — a rail is too narrow for one to read as an edge, so the
+          accent glyph marks the current row. The label is still there for
+          screen readers. */}
       <div
         style={{
           width: 56,

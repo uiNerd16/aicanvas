@@ -705,13 +705,23 @@ export default function AndromedaShowcase({
             <Button size="md">Medium</Button>
             <Button size="lg">Large</Button>
           </Row>
+          {/* Every variant carries the icon slot — it is orthogonal to variant,
+              so the row runs the full five rather than a sample. The link +
+              ArrowUpRight pairing is the "way out of this panel" footer button
+              (see the City Operations alerts panel). */}
           <Row label="With icon">
             <Button icon={Bell}>Notifications</Button>
             <Button variant="outline" icon={Gear}>
               Settings
             </Button>
+            <Button variant="ghost" icon={EyeSlash}>
+              Hide
+            </Button>
             <Button variant="destructive" icon={Bell}>
               Abort
+            </Button>
+            <Button variant="link" icon={ArrowUpRight}>
+              View all
             </Button>
           </Row>
           <Row label="Disabled">
@@ -719,8 +729,14 @@ export default function AndromedaShowcase({
             <Button variant="outline" disabled>
               Outline
             </Button>
+            <Button variant="ghost" disabled>
+              Ghost
+            </Button>
             <Button variant="destructive" disabled>
               Destructive
+            </Button>
+            <Button variant="link" disabled>
+              Link
             </Button>
           </Row>
         </Section>
@@ -1093,21 +1109,57 @@ export default function AndromedaShowcase({
         <Section
           title="Nav Item"
           slug="nav-item"
-          description="Sidebar item with icon, active state, right-edge indicator dot. Mono label by default; pass mono={false} for sans."
+          description="Sidebar item with icon, active state, right-edge indicator dot. Mono label by default; pass mono={false} for sans. collapsed is the icon-rail form: label kept for screen readers, no edge square (a rail has no width to be an edge), so the accent glyph carries active — pair it with a Tooltip so the label stays reachable by sight."
         >
-          <div
-            style={{
-              width: 260,
-              background: tokens.color.surface.raised,
-              position: 'relative',
-            }}
-          >
-            <CornerMarkers />
-            <NavItem icon={Compass} label="Overview" active />
-            <NavItem icon={Pulse} label="Activity" />
-            <NavItem icon={Users} label="Members" />
-            <NavItem icon={Database} label="Logs" />
-            <NavItem icon={Gear} label="Settings" />
+          <div style={{ display: 'flex', gap: tokens.spacing[5], alignItems: 'flex-start' }}>
+            <div
+              style={{
+                width: 260,
+                background: tokens.color.surface.raised,
+                position: 'relative',
+              }}
+            >
+              <CornerMarkers />
+              <NavItem icon={Compass} label="Overview" active />
+              <NavItem icon={Pulse} label="Activity" />
+              <NavItem icon={ChartLine} label="Reports" />
+              <NavItem icon={Bell} label="Alerts" />
+              <NavItem icon={Users} label="Members" />
+              <NavItem icon={Database} label="Logs" />
+              <NavItem icon={Gear} label="Settings" />
+            </div>
+
+            {/* The same list collapsed to an icon rail. No edge square here —
+                the accent glyph marks the current row. Tooltip is inline-flex
+                by default, which would shrink-wrap the row to the glyph and
+                leave the hover fill narrower than the rail. */}
+            <div
+              style={{
+                width: 56,
+                background: tokens.color.surface.raised,
+                position: 'relative',
+              }}
+            >
+              <CornerMarkers />
+              {[
+                { icon: Compass, label: 'Overview' },
+                { icon: Pulse, label: 'Activity' },
+                { icon: ChartLine, label: 'Reports' },
+                { icon: Bell, label: 'Alerts' },
+                { icon: Users, label: 'Members' },
+                { icon: Database, label: 'Logs' },
+                { icon: Gear, label: 'Settings' },
+              ].map((item, i) => (
+                <Tooltip
+                  key={item.label}
+                  label={item.label}
+                  position="right"
+                  style={{ display: 'flex', width: '100%' }}
+                >
+                  <NavItem collapsed icon={item.icon} label={item.label} active={i === 0} />
+                </Tooltip>
+              ))}
+            </div>
           </div>
         </Section>
 

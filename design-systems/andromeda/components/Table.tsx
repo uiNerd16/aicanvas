@@ -5,7 +5,7 @@
 //   Table / TableHead / TableBody / TableRow / TableHeader / TableCell
 //
 // Features:
-//   - Consistent mono typography, verticalAlign:top, 1px subtle dividers
+//   - Consistent mono typography, verticalAlign:middle, 1px subtle dividers
 //   - TableHeader accepts sort="asc|desc|sortable" → renders the correct caret
 //   - TableRow accepts selected (accent-300 left edge + surface.active bg)
 //     and hover state via the included <TableStyles /> helper
@@ -170,8 +170,11 @@ export const TableHeader = forwardRef(function TableHeader(
       aria-sort={sortable ? ariaSort : undefined}
       style={{
         textAlign: align,
-        verticalAlign: 'top',
-        padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
+        verticalAlign: 'middle',
+        // spacing[5] horizontally, matching PanelHeader's content inset — a
+        // table inside a panel shares the panel title's left edge instead of
+        // hanging 8px outside it. spacing[3] vertically, unchanged.
+        padding: `${tokens.spacing[3]} ${tokens.spacing[5]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
         fontWeight: tokens.typography.weight.medium,
@@ -212,8 +215,12 @@ export const TableCell = forwardRef(function TableCell(
       ref={ref}
       style={{
         textAlign: align,
-        verticalAlign: 'top',
-        padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
+        // middle, not top: a row is as tall as its tallest cell, so the moment
+        // one column holds something bigger than a line of text (an action
+        // button group, a Badge stack) top-alignment strands every other cell
+        // against the ceiling. Middle keeps a row reading as one line.
+        verticalAlign: 'middle',
+        padding: `${tokens.spacing[3]} ${tokens.spacing[5]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
         color: muted ? tokens.color.text.secondary : tokens.color.text.primary,
