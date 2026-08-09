@@ -5,6 +5,11 @@
 // the ideation Andromeda landing render this so the body lives in one
 // place.
 //
+// INTERNAL PREVIEW as of 2026-08-09: every component on one page, nothing
+// collapsed, for reviewing the system as a whole instead of 40 tabs. The public
+// /system is a gallery of cards now (AndromedaGallery), the same shape Lumen
+// uses. Dev-only — see preview/page.tsx.
+//
 // COLLAPSED 2026-08-09. This page used to hold 40 hand-written component
 // sections, ~1900 lines of them, beside the per-component pages' own
 // hand-written demos. Two hand-written bodies is what made the two surfaces
@@ -19,23 +24,23 @@ import { Fragment, type ReactNode } from 'react'
 import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
 import { ArrowUpRight } from '@phosphor-icons/react'
-import { SiteFooter } from '../../../components/SiteFooter'
-import { tokens } from '../../../../design-systems/andromeda/tokens'
-import { mq } from '../../../../design-systems/andromeda/components/lib/responsive'
-import { buttonVariants } from '../../../../design-systems/andromeda/components/Button'
-import { andromedaVars } from '../../../../design-systems/andromeda/components/lib/utils'
+import { SiteFooter } from '../../../../components/SiteFooter'
+import { tokens } from '../../../../../design-systems/andromeda/tokens'
+import { mq } from '../../../../../design-systems/andromeda/components/lib/responsive'
+import { buttonVariants } from '../../../../../design-systems/andromeda/components/Button'
+import { andromedaVars } from '../../../../../design-systems/andromeda/components/lib/utils'
 import {
   Card,
   CardHeader,
   CardContent,
   CardTitle,
-} from '../../../../design-systems/andromeda/components/Card'
-import { ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta'
-import { MatrixBlock } from '../../../_lib/andromeda/matrix/Matrix'
-import { SPEC_BY_SLUG } from '../../../_lib/andromeda/matrix'
-import { SECTION_COPY } from './section-copy'
-import { ShowcaseInstall } from '../../../_components/ShowcaseInstall'
-import { ShowcaseInstallCard } from '../../../_components/ShowcaseInstallCard'
+} from '../../../../../design-systems/andromeda/components/Card'
+import { ANDROMEDA_COMPONENT_META } from '../../../../_lib/andromeda/andromeda-meta'
+import { MatrixBlock } from '../../../../_lib/andromeda/matrix/Matrix'
+import { SPEC_BY_SLUG } from '../../../../_lib/andromeda/matrix'
+import { SECTION_COPY } from '../section-copy'
+import { ShowcaseInstall } from '../../../../_components/ShowcaseInstall'
+import { ShowcaseInstallCard } from '../../../../_components/ShowcaseInstallCard'
 
 // Same JetBrains Mono setup as the dashboard page so the showcase
 // matches the design system's only font exactly.

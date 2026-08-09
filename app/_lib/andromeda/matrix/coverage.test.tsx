@@ -8,6 +8,8 @@ import { join } from 'node:path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { ANDROMEDA_COMPONENT_META } from '../andromeda-meta'
+import { COMPONENT_COUNTS } from '../../../design-systems/andromeda/system/component-counts'
+import { CATEGORY } from '../../../design-systems/andromeda/system/categories'
 import { SPECS } from './index'
 import { MatrixBlock } from './Matrix'
 import type { MatrixCase, MatrixSpec } from './types'
@@ -231,6 +233,28 @@ describe('andromeda matrix — overlay rule', () => {
       if (opens) {
         expect(spec.overflow, `${spec.slug} opens a popover inline and must set overflow: true`).toBe(true)
       }
+    }
+  })
+})
+
+describe('andromeda matrix — the gallery cards cannot drift', () => {
+  // The public /system page is a SERVER component, so it reads plain numbers
+  // instead of importing the specs (which would drag every design-system
+  // component, three.js included, into an index page that renders none of
+  // them). These two checks are what make that copy safe.
+  it('every card count matches its declaration', () => {
+    for (const spec of SPECS) {
+      const counts = COMPONENT_COUNTS[spec.slug]
+      expect(counts, `${spec.slug} is missing from component-counts.ts`).toBeDefined()
+      expect(counts.variants, `${spec.slug} variant count is stale`).toBe(spec.variants.length)
+      expect(counts.states, `${spec.slug} state count is stale`).toBe(spec.states.length)
+    }
+    expect(Object.keys(COMPONENT_COUNTS).length).toBe(SPECS.length)
+  })
+
+  it('every component has a gallery category', () => {
+    for (const m of ANDROMEDA_COMPONENT_META) {
+      expect(CATEGORY[m.slug], `${m.slug} has no category — it would land in "Other"`).toBeDefined()
     }
   })
 })
