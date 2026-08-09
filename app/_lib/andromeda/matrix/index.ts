@@ -8,30 +8,48 @@ import { badge } from './badge'
 import { button } from './button'
 import { card } from './card'
 import { checkbox } from './checkbox'
+import { cornerMarkers } from './corner-markers'
+import { dataTable } from './data-table'
+import { dateRangePicker } from './date-range-picker'
+import { drawer } from './drawer'
 import { emptyState } from './empty-state'
+import { funnelChart } from './funnel-chart'
 import { gauge } from './gauge'
 import { heatGrid } from './heat-grid'
 import { iconButton } from './icon-button'
 import { input } from './input'
+import { mediaCard } from './media-card'
+import { metricChart } from './metric-chart'
+import { musicPlayer } from './music-player'
 import { navItem } from './nav-item'
 import { panelHeader } from './panel-header'
+import { panelMenu } from './panel-menu'
 import { planet } from './planet'
 import { progressBar } from './progress-bar'
+import { radarChart } from './radar-chart'
 import { radio } from './radio'
 import { searchField } from './search-field'
 import { segmentedControl } from './segmented-control'
 import { slider } from './slider'
 import { spinner } from './spinner'
 import { statTile } from './stat-tile'
+import { table_ } from './table'
 import { tag } from './tag'
 import { textarea } from './textarea'
 import { toggle } from './toggle'
+import { tooltip } from './tooltip'
+import { trendChart } from './trend-chart'
+import { userCard } from './user-card'
+import { userMenu } from './user-menu'
+import { waveform } from './waveform'
 
 export const SPECS: readonly MatrixSpec[] = [
-  alert, avatar, badge, button, card, checkbox, emptyState, gauge, heatGrid,
-  iconButton, input, navItem, panelHeader, planet, progressBar, radio,
-  searchField, segmentedControl, slider, spinner, statTile, tag, textarea,
-  toggle,
+  alert, avatar, badge, button, card, checkbox, cornerMarkers, dataTable,
+  dateRangePicker, drawer, emptyState, funnelChart, gauge, heatGrid, iconButton,
+  input, mediaCard, metricChart, musicPlayer, navItem, panelHeader, panelMenu,
+  planet, progressBar, radarChart, radio, searchField, segmentedControl, slider,
+  spinner, statTile, table_, tag, textarea, toggle, tooltip, trendChart,
+  userCard, userMenu, waveform,
 ]
 
 export const SPEC_BY_SLUG: Record<string, MatrixSpec> = Object.fromEntries(

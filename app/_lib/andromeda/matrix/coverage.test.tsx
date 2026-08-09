@@ -14,15 +14,9 @@ import type { MatrixCase, MatrixSpec } from './types'
 
 const COMPONENT_DIR = join(process.cwd(), 'design-systems/andromeda/components')
 
-// Slugs not yet migrated to a declaration. This is a MIGRATION TRACKER, not a
-// drift guard: it shrinks every batch and is deleted, with its check, when it
-// empties. A slug in both SPECS and UNDECLARED fails, so healing a component
-// forces its allowlist entry out.
-const UNDECLARED = new Set([
-  'corner-markers', 'data-table', 'date-range-picker', 'drawer', 'funnel-chart',
-  'media-card', 'metric-chart', 'music-player', 'panel-menu', 'radar-chart',
-  'table', 'tooltip', 'trend-chart', 'user-card', 'user-menu', 'waveform',
-])
+// The UNDECLARED migration allowlist that lived here is gone: every component
+// is declared, so the catalog check below is now an exact match in both
+// directions and a new component cannot be added without a declaration.
 
 const html = new Map<string, string>()
 const markup = (spec: MatrixSpec) => {
@@ -113,19 +107,10 @@ describe('andromeda matrix — membership and migration', () => {
     }
   })
 
-  it('a declared slug is out of the UNDECLARED allowlist', () => {
-    for (const s of SPECS) {
-      expect(UNDECLARED.has(s.slug), `${s.slug} is declared — remove it from UNDECLARED`).toBe(false)
-    }
-  })
-
-  it('SPECS + UNDECLARED covers the whole catalog', () => {
-    const covered = new Set([...SPECS.map((s) => s.slug), ...UNDECLARED])
+  it('every component in the catalog is declared', () => {
+    const declared = new Set(SPECS.map((s) => s.slug))
     for (const slug of known) {
-      expect(covered, `${slug} is neither declared nor listed as undeclared`).toContain(slug)
-    }
-    for (const slug of UNDECLARED) {
-      expect(known, `UNDECLARED lists ${slug}, which is not a component`).toContain(slug)
+      expect(declared, `${slug} has no matrix declaration`).toContain(slug)
     }
   })
 })
@@ -166,10 +151,19 @@ describe('andromeda matrix — every forced state has something to paint', () =>
         if (spec.gaps?.[c.label]) return
         const slice = canvas(markup(spec), 'state', c.label)!
         const classes = [...slice.matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/))
-        const hit = classes.some((t) => FORCEABLE.test(t))
+        // Two legitimate mechanisms, and the check accepts either. A Tailwind
+        // variant class in the markup, or — for the inline-styled composites
+        // whose states live in their own scoped stylesheet — a companion rule
+        // in the source. The second half is what fails if someone deletes a
+        // companion line while the forced cell still claims to show the state.
+        const meta = ANDROMEDA_COMPONENT_META.find((m) => m.slug === spec.slug)!
+        const file = join(COMPONENT_DIR, meta.sourceFile)
+        const companion =
+          existsSync(file) && readFileSync(file, 'utf8').includes(`data-force~="${c.force}"`)
+        const hit = companion || classes.some((t) => FORCEABLE.test(t))
         expect(
           hit,
-          `${spec.slug}/${c.label} forces "${c.force}" but no ${c.force} rule exists in its markup — document it in gaps or restore the class`,
+          `${spec.slug}/${c.label} forces "${c.force}" but neither a ${c.force} class nor a companion rule exists — document it in gaps, or restore whichever went missing`,
         ).toBe(true)
       })
     }

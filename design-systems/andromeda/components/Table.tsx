@@ -28,6 +28,11 @@ const TABLE_STYLES = `
       .andro-tr         { transition: background-color 100ms ease; cursor: default; }
       .andro-tr-hover   { cursor: pointer; }
       .andro-tr-hover:hover { background-color: var(--andromeda-surface-hover) !important; }
+      /* Companion for documentation surfaces that show hover at rest: the same
+         declaration fired by an attribute instead of the pointer. It lives on
+         the line below the rule it mirrors so the two cannot drift. Self-form
+         only — a table with every row lit reads as broken, not hovered. */
+      .andro-tr-hover[data-force~="hover"] { background-color: var(--andromeda-surface-hover) !important; }
       /* Horizontal-scroll wrapper. The wide table scrolls INSIDE this panel
          (faithful stack — never reflow rows into cards), and the panel itself
          never grows past its grid cell, so it can't force horizontal page

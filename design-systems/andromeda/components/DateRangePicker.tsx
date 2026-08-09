@@ -114,6 +114,16 @@ function PickerStyles() {
     <style>{`
       .adp-trigger { transition: background var(--andromeda-duration-normal) var(--andromeda-easing-standard), border-color var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
       .adp-trigger:hover { border-color: var(--andromeda-border-bright) !important; }
+      /* Documentation companions for the trigger, the component's face: the
+         same declarations fired by an attribute instead of the pointer or the
+         keyboard, kept beside the rules they mirror so they cannot drift. The
+         descendant form is safe here because a picker has exactly ONE trigger —
+         unlike the day grid below, where it would light every cell at once. */
+      [data-force~="hover"] .adp-trigger { border-color: var(--andromeda-border-bright) !important; }
+      [data-force~="focus"] .adp-trigger {
+        border-color: var(--andromeda-accent-400) !important;
+        box-shadow: 0 0 0 1px var(--andromeda-accent-400), 0 0 var(--andromeda-glow) var(--andromeda-accent-500);
+      }
       .adp-trigger[data-state="open"] {
         background: var(--andromeda-surface-hover);
         border-color: var(--andromeda-border-bright);

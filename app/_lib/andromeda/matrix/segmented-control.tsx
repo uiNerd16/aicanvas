@@ -43,6 +43,6 @@ export const segmentedControl: MatrixSpec = {
   states: [],
   gaps: {
     Hover:
-      'segment hover is a rule inside the component\'s own scoped <style> block, which the force marker cannot reach without a companion line beside it',
+      'segments are DATA (an options array), not elements the caller can reach, and the hover rule in the component\'s stylesheet is per-segment — marking one would mean lighting every unselected segment at once',
   },
 }

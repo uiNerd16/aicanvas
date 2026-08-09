@@ -1,0 +1,49 @@
+// @ts-nocheck — imports an untyped design-system source.
+import { Gear, Keyboard, SignOut, UserCircle } from '@phosphor-icons/react'
+import { UserCard } from '../../../../design-systems/andromeda/components/UserCard'
+import { tokens } from '../../../../design-systems/andromeda/tokens'
+import type { MatrixSpec } from './types'
+
+const ITEMS = [
+  { id: 'profile', label: 'Profile', icon: UserCircle },
+  { id: 'preferences', label: 'Preferences', icon: Gear },
+  { id: 'shortcuts', label: 'Keyboard shortcuts', icon: Keyboard },
+  { id: 'sep1', type: 'separator' },
+  { id: 'signout', label: 'Sign out', icon: SignOut },
+]
+
+const SRC =
+  'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+
+export const userCard: MatrixSpec = {
+  slug: 'user-card',
+  sizes: ['sm', 'md', 'lg'],
+  overflow: true,
+  // A user card fills the foot of a rail, so it needs a rail-width box to sit
+  // in; open cases also need room below for the panel.
+  render: (size, props) => (
+    <div style={{ width: 220, background: tokens.color.surface.raised, minHeight: props.staticOpen ? 280 : undefined }}>
+      <UserCard
+        name="Reza Quinn"
+        role="Flight Director"
+        src={SRC}
+        status="online"
+        size={size}
+        items={ITEMS}
+        align="stretch"
+        {...props}
+      />
+    </div>
+  ),
+  variants: [
+    { label: 'Closed', props: {} },
+    { label: 'Open up', props: { staticOpen: true, placement: 'top' } },
+    { label: 'Open down', props: { staticOpen: true, placement: 'bottom' } },
+    { label: 'No role', props: { role: undefined } },
+  ],
+  states: [],
+  gaps: {
+    'Item hover':
+      'the panel rows are DATA (an items array), not elements the caller can reach, and the hover rule is per-row — marking one would mean lighting all of them',
+  },
+}
