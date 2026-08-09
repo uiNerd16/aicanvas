@@ -46,9 +46,12 @@ const TREATMENTS: Treatment[] = [
   {
     id: 'proposed',
     name: '02 · Proposed',
-    note: 'Labels off the control ladder at 24px and at regular weight; the button borderless on the brighter fill with a dark label. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
+    note: 'Labels off the control ladder at 24px and at regular weight; the button on the brighter fill with a dark label, keeping its own accent-200 border. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
+    // No border classes at all: dropping the overrides lets the variant's OWN
+    // accent-200 border through unchanged, which is what "the same borders as
+    // default" means. Nothing else about the treatment moves.
     button:
-      'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
+      'bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
     tag: 'h-[24px] px-[8px] text-[10px] font-normal',
     badge: 'h-[24px] px-[8px] text-[10px] font-normal',
   },
