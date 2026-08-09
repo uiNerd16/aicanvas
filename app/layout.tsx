@@ -13,6 +13,7 @@ import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { PaywallModalProvider } from './components/billing/PaywallModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { PaddlePaymentLink } from './components/billing/PaddlePaymentLink'
 // Registry-free nav counts (generated) — keeps the heavy component-registry,
 // and the three.js/matter-js it references, out of the shared client bundle.
 import { CATEGORY_COUNTS, TOTAL_COMPONENTS } from './lib/component-nav.generated'
@@ -201,6 +202,8 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <DevBranchBadge />
+        {/* Resumes checkout when the URL carries a Paddle payment link (?_ptxn=) */}
+        <PaddlePaymentLink />
       </body>
     </html>
   )
