@@ -7,7 +7,6 @@
 // impossible rather than merely discouraged.
 'use client'
 
-import { Fragment } from 'react'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { matrixId, REST, type MatrixCase, type MatrixSpec } from './types'
 
@@ -20,7 +19,9 @@ const head = {
 }
 
 function defaultRender(spec: MatrixSpec) {
-  return (size: string | undefined, props: Record<string, unknown>, c?: MatrixCase) => {
+  // Named, because a bare arrow here reads to the linter as an anonymous
+  // component. It is a render callback, not a component.
+  return function renderCase(size: string | undefined, props: Record<string, unknown>, c?: MatrixCase) {
     const children = c?.children ?? spec.children
     const C = spec.Component
     return (
@@ -65,66 +66,167 @@ function MatrixCell({
   )
 }
 
-// Cases down the rows, sizes across the columns. `sizes: null` renders a single
-// column — that is how the states grid always renders, because hover at sm and
-// hover at lg are the same border colour and tripling the states would spend
-// half the page's height on zero information.
-export function CaseGrid({
+// One CARD per case, two across. The old dense grid put every case on one row
+// of a size × case table, which reads as a spreadsheet; a labelled card per case
+// is what the component pages needed and what the sibling system uses.
+//
+// The size ladder stays INSIDE a variant card, side by side with its own
+// captions, so "how big can it be" is still one glance and does not become
+// three more cards.
+//
+// A STATE card carries its own Rest baseline beside the forced instance. That
+// adjacency is the whole reason a forced state is legible: an 8-point border
+// shift is invisible without the default sitting next to it, and two cards apart
+// in a grid is not next to it.
+function CaseCard({
+  spec,
+  kind,
+  c,
+  render,
+}: {
+  spec: MatrixSpec
+  kind: 'variant' | 'state'
+  c: MatrixCase
+  render: ReturnType<typeof defaultRender>
+}) {
+  const sizes = kind === 'variant' && spec.sizes && !c.node ? spec.sizes : null
+  const withBaseline = kind === 'state' && c.label !== REST.label && !c.node
+
+  return (
+    <div
+      id={matrixId(spec.slug, kind, c.label)}
+      className="scroll-mt-14"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        background: tokens.color.surface.raised,
+        border: `1px solid ${tokens.color.border.subtle}`,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
+          borderBottom: `1px solid ${tokens.color.border.subtle}`,
+          fontFamily: tokens.typography.fontMono,
+          fontSize: tokens.typography.size.sm,
+          color: tokens.color.text.primary,
+          fontWeight: tokens.typography.weight.medium,
+          letterSpacing: tokens.typography.tracking.wide,
+        }}
+      >
+        {c.label}
+      </div>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: tokens.spacing[6],
+          padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
+          overflowX: 'auto',
+        }}
+      >
+        {withBaseline ? (
+          <>
+            <Instance caption="Rest" spec={spec} kind={kind} c={REST} render={render} />
+            <Instance caption={c.label} spec={spec} kind={kind} c={c} render={render} />
+          </>
+        ) : sizes ? (
+          sizes.map((s) => (
+            <Instance key={s} caption={s} spec={spec} kind={kind} c={c} size={s} render={render} />
+          ))
+        ) : (
+          <MatrixCell spec={spec} kind={kind} c={c} size="md" render={render} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+// One rendered component plus the caption that says which one it is. The caption
+// is what turns two look-alike boxes into a comparison.
+function Instance({
+  caption,
+  spec,
+  kind,
+  c,
+  size,
+  render,
+}: {
+  caption: string
+  spec: MatrixSpec
+  kind: 'variant' | 'state'
+  c: MatrixCase
+  size?: string
+  render: ReturnType<typeof defaultRender>
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: tokens.spacing[3],
+        minWidth: 0,
+        flex: spec.wide ? '1 1 100%' : '0 1 auto',
+      }}
+    >
+      <MatrixCell spec={spec} kind={kind} c={c} size={size} render={render} />
+      <span style={head}>{caption}</span>
+    </div>
+  )
+}
+
+function CaseSection({
   spec,
   kind,
   cases,
-  sizes,
   render,
 }: {
   spec: MatrixSpec
   kind: 'variant' | 'state'
   cases: readonly MatrixCase[]
-  sizes: readonly string[] | null
   render: ReturnType<typeof defaultRender>
 }) {
-  const cols = sizes ?? [undefined]
-  const track = spec.wide ? 'minmax(0, 1fr)' : 'max-content'
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `max-content repeat(${cols.length}, ${track})`,
-        gap: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
-        alignItems: 'center',
-        justifyContent: 'start',
-        // The matrix is the widest thing in a narrow card, so it scrolls inside
-        // its own box rather than forcing the page to scroll.
-        overflowX: 'auto',
-      }}
-    >
-      <span />
-      {cols.map((s, i) => (
-        <span key={i} style={head}>
-          {s ?? 'md'}
+    <section>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: tokens.spacing[4],
+          marginBottom: tokens.spacing[4],
+        }}
+      >
+        <h3
+          style={{
+            margin: 0,
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size.md,
+            fontWeight: tokens.typography.weight.medium,
+            color: tokens.color.text.primary,
+            letterSpacing: tokens.typography.tracking.wide,
+          }}
+        >
+          {kind === 'variant' ? 'Variants' : 'States'}
+        </h3>
+        <span style={head}>
+          {cases.length} {cases.length === 1 ? 'example' : 'examples'}
         </span>
-      ))}
-      {cases.map((c) => (
-        <Fragment key={c.label}>
-          {/* The deep-link anchor sits once per case row, on its label, not on
-              every cell across the size axis. scroll-mt-14 clears the sticky
-              topbar inside the scroll column. */}
-          <span id={matrixId(spec.slug, kind, c.label)} className="scroll-mt-14" style={head}>
-            {c.label}
-          </span>
-          {/* A live-demo case is one thing, not one per size: it spans the whole
-              size axis rather than repeating itself three times. */}
-          {c.node ? (
-            <span style={{ gridColumn: `span ${cols.length}` }}>
-              <MatrixCell spec={spec} kind={kind} c={c} render={render} />
-            </span>
-          ) : (
-            cols.map((s, i) => (
-              <MatrixCell key={i} spec={spec} kind={kind} c={c} size={s ?? 'md'} render={render} />
-            ))
-          )}
-        </Fragment>
-      ))}
-    </div>
+      </div>
+      <div
+        className={`andromeda-matrix-grid${spec.wide ? ' is-wide' : ''}`}
+        style={{ display: 'grid', gap: tokens.spacing[3] }}
+      >
+        {cases.map((c) => (
+          <CaseCard key={c.label} spec={spec} kind={kind} c={c} render={render} />
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -143,7 +245,7 @@ function GapList({ gaps }: { gaps: Record<string, string> }) {
             lineHeight: tokens.typography.lineHeight.relaxed,
           }}
         >
-          /// NOT SHOWABLE AT REST — {label}: {reason}
+          {'/// '}NOT SHOWABLE AT REST — {label}: {reason}
         </span>
       ))}
     </div>
@@ -164,12 +266,22 @@ export function MatrixPreview({ spec }: { spec: MatrixSpec }) {
 export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
   const render = spec.render ?? defaultRender(spec)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[6] }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[8], width: '100%' }}>
+      {/* Two across on anything but a phone. A `wide` component (tables, charts,
+          banners) takes the full row instead — two charts side by side in a
+          preview panel are two unreadable charts. */}
+      <style>{`
+        .andromeda-matrix-grid { grid-template-columns: minmax(0, 1fr); }
+        @media (min-width: 768px) {
+          .andromeda-matrix-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .andromeda-matrix-grid.is-wide { grid-template-columns: minmax(0, 1fr); }
+        }
+      `}</style>
       {spec.variants.length > 0 ? (
-        <CaseGrid spec={spec} kind="variant" cases={spec.variants} sizes={spec.sizes} render={render} />
+        <CaseSection spec={spec} kind="variant" cases={spec.variants} render={render} />
       ) : null}
       {spec.states.length > 0 ? (
-        <CaseGrid spec={spec} kind="state" cases={[REST, ...spec.states]} sizes={null} render={render} />
+        <CaseSection spec={spec} kind="state" cases={spec.states} render={render} />
       ) : null}
       {spec.gaps ? <GapList gaps={spec.gaps} /> : null}
     </div>
