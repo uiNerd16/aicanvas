@@ -19,7 +19,13 @@ import { SiteFooter } from '../../../components/SiteFooter'
 import { Button } from '../../../components/Button'
 import { SaveButton } from '../../../components/SaveButton'
 import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
-import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
+// The preview renders from the component's MATRIX DECLARATION, the same one
+// the system page renders, so the two surfaces cannot show different things.
+// This replaced a hand-written per-slug demo whose size ramp had no state axis,
+// which is why this page could not show Destructive at lg while the system page
+// could.
+import { MatrixPreview } from '../../../_lib/andromeda/matrix/Matrix'
+import { SPEC_BY_SLUG } from '../../../_lib/andromeda/matrix'
 import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
@@ -314,7 +320,7 @@ export function AndromedaComponentView({
               className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
               style={{ backgroundColor: tokens.color.surface.base }}
             >
-              {!fullscreen && <AndromedaDemo slug={slug} />}
+              {!fullscreen && SPEC_BY_SLUG[slug] ? <MatrixPreview spec={SPEC_BY_SLUG[slug]} /> : null}
             </div>
           ) : (
             <div
@@ -681,7 +687,7 @@ export function AndromedaComponentView({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex min-h-full items-center justify-center p-8 sm:p-12">
-              <AndromedaDemo slug={slug} />
+              {SPEC_BY_SLUG[slug] ? <MatrixPreview spec={SPEC_BY_SLUG[slug]} /> : null}
             </div>
 
             <button

@@ -3,9 +3,8 @@
 //
 // THE review surface: all 40 Andromeda components on one page, every declared
 // variant and state, hover / focus / pressed painted at rest beside their own
-// baseline. Components without a declaration yet fall back to the legacy
-// per-component-page demo, so a missing component is structurally impossible —
-// only a not-yet-migrated one is visible as such.
+// baseline. Every component is declared now, and the coverage test fails if one
+// is not, so the legacy fallback branch that carried the migration is gone.
 //
 // This route is a MIGRATION SCAFFOLD. It collapses onto
 // /design-systems/andromeda/system in phase 5 and is deleted; the gate
@@ -24,7 +23,6 @@ import {
   CardTitle,
 } from '../../../../design-systems/andromeda/components/Card'
 import { ANDROMEDA_COMPONENT_META } from '../../../_lib/andromeda/andromeda-meta'
-import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { MatrixBlock } from '../../../_lib/andromeda/matrix/Matrix'
 import { SPEC_BY_SLUG } from '../../../_lib/andromeda/matrix'
 
@@ -189,7 +187,7 @@ export default function AndromedaReview() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-[var(--andromeda-6)]">
-                  {spec ? <MatrixBlock spec={spec} /> : <AndromedaDemo slug={m.slug} />}
+                  <MatrixBlock spec={spec} />
                 </CardContent>
               </Card>
             )

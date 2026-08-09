@@ -142,6 +142,17 @@ function GapList({ gaps }: { gaps: Record<string, string> }) {
   )
 }
 
+// The preview surface for a single component, gated so its forced states can
+// paint. Every consumer goes through this rather than placing the attribute
+// itself — a gate on the wrong box is the one mistake this system can make.
+export function MatrixPreview({ spec }: { spec: MatrixSpec }) {
+  return (
+    <div data-andromeda-matrix style={{ width: '100%' }}>
+      <MatrixBlock spec={spec} />
+    </div>
+  )
+}
+
 export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
   const render = spec.render ?? defaultRender(spec)
   return (

@@ -1,6 +1,14 @@
 // @ts-nocheck — design-systems components are not type-checked yet
 // (see design-systems/CLAUDE.md). Demos consume those components, so this
 // file inherits the same posture.
+//
+// ponytail: CAPTURE-ONLY as of 2026-08-09. Its single remaining consumer is
+// app/andromeda-capture/[slug]/CaptureFrame.tsx, which shoots the 16:9 card
+// posters. The system page and the component pages now render from the matrix
+// declarations (app/_lib/andromeda/matrix/) instead. Flipping capture over too
+// would silently re-shoot every card poster, so that stays the maintainer's
+// call; until he makes it, this file is curation for the posters and nothing
+// else. Do not add a new consumer.
 'use client'
 
 import { Fragment, useState } from 'react'
@@ -134,7 +142,10 @@ function Row({ label, children }: { label?: string; children: React.ReactNode })
 // three-across (UserCard, and anything else block-scale). The shared caption
 // LINE simply becomes a shared caption COLUMN — same guarantee, same grid, one
 // axis flipped.
-export function SizeRamp({ sizes = ['sm', 'md', 'lg'], render, direction = 'row' }) {
+// No longer exported: the system page and the component pages used to import
+// this, and its lack of a state axis IS the drift this project removed. It
+// survives as a private helper of the poster demos below.
+function SizeRamp({ sizes = ['sm', 'md', 'lg'], render, direction = 'row' }) {
   const column = direction === 'column'
   return (
     <div
