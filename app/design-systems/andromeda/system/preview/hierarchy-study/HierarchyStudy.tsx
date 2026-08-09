@@ -32,6 +32,9 @@ type Treatment = {
   badge: string
 }
 
+// The neutral tint, used wherever the grid shows a label with no tone.
+const NEUTRAL_ALPHA = 'bg-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
+
 // control ladder md = 32px. The off-ladder rows drop labels to 24px, which is
 // below every rung, so a label can never line up with a field or a button again.
 const TREATMENTS: Treatment[] = [
@@ -46,26 +49,35 @@ const TREATMENTS: Treatment[] = [
   {
     id: 'proposed',
     name: '02 · Proposed',
-    note: 'Labels off the control ladder at 24px and at regular weight; the button on the brighter fill with a dark label, keeping its own accent-200 border. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
+    note: 'Labels off the control ladder at 24px and at regular weight; the button on the brighter fill with a dark label, keeping its own accent-200 border; the labels take the family alpha tints instead of solid fills. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
     // No border classes at all: dropping the overrides lets the variant's OWN
     // accent-200 border through unchanged, which is what "the same borders as
     // default" means. Nothing else about the treatment moves.
     button:
       'bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
-    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
-    badge: 'h-[24px] px-[8px] text-[10px] font-normal',
+    tag: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
+    badge: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
   },
 ]
 
 // The four meanings a label carries. There is no success/positive token in this
 // system: accent doubles as the positive reading, which is worth deciding on its
 // own — accent is otherwise "the measurement in focus", not "good".
+//
+// In the proposal the fills are the family ALPHA tokens instead of the solid
+// -500 stops: one translucent tint per family is already sanctioned (each family
+// carries exactly one), and a tint over the surface is what separates a label
+// from a filled control without touching shape. The label takes the family's
+// bright stop, because a light foreground on a 25% tint over surface.base is the
+// only pairing that holds contrast — accent-on and friends are tuned for the
+// SOLID fill and go muddy on a tint.
 const TONES = [
-  { label: 'Neutral', variant: 'default' },
-  { label: 'Positive', variant: 'accent' },
-  { label: 'Warning', variant: 'warning' },
-  { label: 'Fault', variant: 'fault' },
+  { label: 'Neutral', variant: 'default', alpha: 'bg-[rgba(255,255,255,0.10)] text-[#F5F5F5]' },
+  { label: 'Positive', variant: 'accent', alpha: 'bg-[rgba(15,207,178,0.25)] text-[#BAF8EC]' },
+  { label: 'Warning', variant: 'warning', alpha: 'bg-[rgba(255,160,0,0.25)] text-[#FFE5B5]' },
+  { label: 'Fault', variant: 'fault', alpha: 'bg-[rgba(255,57,57,0.25)] text-[#FFCFCF]' },
 ]
+
 
 const STATES = [
   { label: 'Rest', force: undefined },
@@ -266,7 +278,11 @@ export function HierarchyStudy() {
                 <span style={rowLabel}>Badge</span>
                 {TONES.map((tone) => (
                   <Cell key={`badge-tone-${tone.label}`}>
-                    <Badge variant={tone.variant} size="md" className={t.badge}>
+                    <Badge
+                      variant={tone.variant}
+                      size="md"
+                      className={t.id === 'proposed' ? `${t.badge} ${tone.alpha}` : t.badge}
+                    >
                       {tone.label}
                     </Badge>
                   </Cell>
@@ -275,7 +291,12 @@ export function HierarchyStudy() {
                 <span style={rowLabel}>Tag</span>
                 {TONES.map((tone) => (
                   <Cell key={`tag-tone-${tone.label}`}>
-                    <Tag variant={tone.variant} size="md" className={t.tag} onClose={noop}>
+                    <Tag
+                      variant={tone.variant}
+                      size="md"
+                      className={t.id === 'proposed' ? `${t.tag} ${tone.alpha}` : t.tag}
+                      onClose={noop}
+                    >
                       {tone.label}
                     </Tag>
                   </Cell>
