@@ -1,3 +1,4 @@
+import { Bell } from '@phosphor-icons/react'
 import { Button } from '../../../../design-systems/andromeda/components/Button'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
@@ -12,6 +13,9 @@ export const button: MatrixSpec = {
     { label: 'Ghost', props: { variant: 'ghost' } },
     { label: 'Destructive', props: { variant: 'destructive' } },
     { label: 'Link', props: { variant: 'link' } },
+    // The icon slot is orthogonal to variant, so it is its own case rather than
+    // a fifth copy of the ladder.
+    { label: 'With icon', props: { icon: Bell } },
   ],
   states: [
     ...CONTROL_STATES,

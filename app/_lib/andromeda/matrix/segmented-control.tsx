@@ -1,5 +1,8 @@
 // @ts-nocheck — this spec AUTHORS JSX against untyped design-system
 // components. Data-only specs in this directory need no such line.
+'use client'
+
+import { useState } from 'react'
 import { ChartBar, ChartLine } from '@phosphor-icons/react'
 import { SegmentedControl } from '../../../../design-systems/andromeda/components/SegmentedControl'
 import type { MatrixSpec } from './types'
@@ -16,6 +19,21 @@ const PERIODS = [
   { value: '1m', label: '1M' },
   { value: 'all', label: 'ALL' },
 ]
+
+// The sliding indicator is the component's whole character, and it only exists
+// between two selections. Carried over from the system page's hand-written
+// section in the 2026-08-09 collapse.
+function LiveSegmentedControl() {
+  const [period, setPeriod] = useState('1w')
+  return (
+    <SegmentedControl
+      layoutGroupId="andromeda-matrix-segmented-live"
+      options={PERIODS}
+      value={period}
+      onChange={setPeriod}
+    />
+  )
+}
 
 export const segmentedControl: MatrixSpec = {
   slug: 'segmented-control',
@@ -34,6 +52,7 @@ export const segmentedControl: MatrixSpec = {
     />
   ),
   variants: [
+    { label: 'Live', node: <LiveSegmentedControl /> },
     { label: 'Labels', props: {} },
     { label: 'Icons', props: { options: ICONS, value: 'line' } },
     // Selection is a prop, so it costs nothing to show it selected somewhere

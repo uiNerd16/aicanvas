@@ -13,6 +13,11 @@ export type MatrixCase = {
   props?: Record<string, unknown>
   /** Overrides spec.children for this case. Omit both for void elements (Input etc.). */
   children?: ReactNode
+  /** Renders exactly this instead of the component, for the few cells that are
+      a LIVE demo rather than a configuration — the behaviours no arrangement of
+      still cells can show (a gauge that crossfades, a picker that commits a
+      range). Bypasses props, sizes and the spec's render. */
+  node?: ReactNode
   /** Fire the component's own :hover / :focus-visible / :focus / :active at rest
       via the data-force attribute the gated @custom-variant blocks in
       globals.css key off. */

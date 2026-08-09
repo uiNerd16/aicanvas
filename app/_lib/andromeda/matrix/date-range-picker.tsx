@@ -1,5 +1,8 @@
 // @ts-nocheck — this spec AUTHORS JSX against untyped design-system
 // components. Data-only specs in this directory need no such line.
+'use client'
+
+import { useState } from 'react'
 import { DateRangePicker } from '../../../../design-systems/andromeda/components/DateRangePicker'
 import type { MatrixSpec } from './types'
 
@@ -8,6 +11,24 @@ const noop = () => {}
 // every build is a diff that never settles.
 const RANGE = { start: new Date(2026, 6, 20), end: new Date(2026, 7, 20) }
 const SHORT = { start: new Date(2026, 7, 1), end: new Date(2026, 7, 14) }
+
+// Anchor-then-confirm is a two-click behaviour with a hover preview in between;
+// a pinned-open calendar shows the panel but never the selection. Carried over
+// from the system page's hand-written section in the 2026-08-09 collapse.
+function LiveDateRangePicker() {
+  const [range, setRange] = useState(RANGE)
+  const [preset, setPreset] = useState<string | null>('Last month')
+  return (
+    <DateRangePicker
+      value={range}
+      presetLabel={preset}
+      onChange={(next) => {
+        setRange(next)
+        setPreset(null)
+      }}
+    />
+  )
+}
 
 export const dateRangePicker: MatrixSpec = {
   slug: 'date-range-picker',
@@ -18,6 +39,7 @@ export const dateRangePicker: MatrixSpec = {
   overflow: true,
   render: (_size, props) => <DateRangePicker value={RANGE} onChange={noop} {...props} />,
   variants: [
+    { label: 'Live', node: <LiveDateRangePicker /> },
     { label: 'With preset', props: { presetLabel: 'Last month' } },
     { label: 'No preset', props: { value: SHORT } },
     { label: 'Open', props: { staticOpen: true } },

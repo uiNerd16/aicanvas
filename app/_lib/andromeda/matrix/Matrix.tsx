@@ -60,7 +60,7 @@ function MatrixCell({
       data-force={c.force && !c.forceSelf ? c.force : undefined}
       style={{ display: spec.wide ? 'block' : 'inline-flex', minWidth: 0 }}
     >
-      {render(size, c.props ?? {}, c)}
+      {c.node ?? render(size, c.props ?? {}, c)}
     </span>
   )
 }
@@ -111,9 +111,17 @@ export function CaseGrid({
           <span id={matrixId(spec.slug, kind, c.label)} className="scroll-mt-14" style={head}>
             {c.label}
           </span>
-          {cols.map((s, i) => (
-            <MatrixCell key={i} spec={spec} kind={kind} c={c} size={s ?? 'md'} render={render} />
-          ))}
+          {/* A live-demo case is one thing, not one per size: it spans the whole
+              size axis rather than repeating itself three times. */}
+          {c.node ? (
+            <span style={{ gridColumn: `span ${cols.length}` }}>
+              <MatrixCell spec={spec} kind={kind} c={c} render={render} />
+            </span>
+          ) : (
+            cols.map((s, i) => (
+              <MatrixCell key={i} spec={spec} kind={kind} c={c} size={s ?? 'md'} render={render} />
+            ))
+          )}
         </Fragment>
       ))}
     </div>
