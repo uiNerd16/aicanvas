@@ -1,0 +1,275 @@
+// @ts-nocheck — renders JSX design-system components whose forwardRef wrappers
+// carry no TypeScript prop types.
+'use client'
+
+// Button vs Tag vs Badge: does the family have a hierarchy?
+//
+// All three are rendered at the SAME size on purpose. Their defaults differ
+// (Button md, Tag and Badge sm), which is the only reason they usually look
+// distinct on a page — and a default is not a rule, so any composition that
+// sets sizes explicitly collapses the distinction. Matching them is what makes
+// the question visible.
+//
+// Every candidate is the REAL component plus a className. Nothing here edits
+// Button.tsx, Tag.tsx or Badge.tsx; this is a decision aid.
+//
+// Class strings are written out in full — Tailwind scans source TEXT, so a class
+// assembled by interpolation never compiles.
+import { Button } from '../../../../../../design-systems/andromeda/components/Button'
+import { Tag } from '../../../../../../design-systems/andromeda/components/Tag'
+import { Badge } from '../../../../../../design-systems/andromeda/components/Badge'
+import { andromedaVars } from '../../../../../../design-systems/andromeda/components/lib/utils'
+import { tokens } from '../../../../../../design-systems/andromeda/tokens'
+
+const noop = () => {}
+
+type Treatment = {
+  id: string
+  name: string
+  note: string
+  button: string
+  tag: string
+  badge: string
+}
+
+// control ladder md = 32px. The "off-ladder" rows drop labels to 24px, which is
+// below every rung, so a label can never line up with a field or a button again.
+const TREATMENTS: Treatment[] = [
+  {
+    id: 'current',
+    name: '01 · Current',
+    note: 'What ships today, at one size. Same height, same mono uppercase at the same tracking and weight, same square frame — the only separation is a 4px padding step, and on the page it is really just the differing size defaults.',
+    button: '',
+    tag: '',
+    badge: '',
+  },
+  {
+    id: 'borderless',
+    name: '02 · Borderless button',
+    note: 'Only the button changes: its border comes off. Tag keeps its 1px frame, so the border becomes a label signal rather than a shared one.',
+    button: 'border-transparent hover:border-transparent active:border-transparent',
+    tag: '',
+    badge: '',
+  },
+  {
+    id: 'height',
+    name: '03 · Labels off the control ladder',
+    note: 'Tag and Badge drop to 24px. The ladder exists so a field and a button align in a strip; a label has no business on it. Height is the strongest of the levers here.',
+    button: '',
+    tag: 'h-[24px] px-[8px] text-[10px]',
+    badge: 'h-[24px] px-[8px] text-[10px]',
+  },
+  {
+    id: 'shape',
+    name: '04 · Badge goes pill',
+    note: 'Badge is the only one of the three that is never clickable, and shape is the fastest signal the eye reads. Square stays with the interactive pair.',
+    button: '',
+    tag: '',
+    badge: 'rounded-full px-[10px]',
+  },
+  {
+    id: 'weight',
+    name: '05 · Weight split',
+    note: 'Button keeps medium, labels drop to regular. Interactive things look heavier. The quietest lever, and the easiest to miss on its own.',
+    button: '',
+    tag: 'font-normal',
+    badge: 'font-normal',
+  },
+  {
+    id: 'combined',
+    name: '06 · Combined: height + shape + weight',
+    note: 'The three levers together, button untouched. This is the cheapest full separation: nothing about the button changes, and the labels stop competing with it.',
+    button: '',
+    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
+    badge: 'h-[24px] px-[10px] text-[10px] font-normal rounded-full',
+  },
+  {
+    id: 'full',
+    name: '07 · Combined, plus a louder button',
+    note: 'Same as 06, and the button takes the brighter fill with a dark label and a borderless edge (candidate 04 from the button study). Maximum separation: the button is the only saturated, heavy, tall thing in the row.',
+    button:
+      'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
+    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
+    badge: 'h-[24px] px-[10px] text-[10px] font-normal rounded-full',
+  },
+]
+
+const STATES = [
+  { label: 'Rest', force: undefined },
+  { label: 'Hover', force: 'hover' },
+  { label: 'Focus', force: 'focus' },
+  { label: 'Pressed', force: 'active' },
+  { label: 'Disabled', force: undefined, disabled: true },
+]
+
+const caption = {
+  fontFamily: tokens.typography.fontMono,
+  fontSize: tokens.typography.size.xs,
+  color: tokens.color.text.faint,
+  textTransform: 'uppercase' as const,
+  letterSpacing: tokens.typography.tracking.wider,
+}
+
+const rowLabel = {
+  ...caption,
+  color: tokens.color.text.secondary,
+  whiteSpace: 'nowrap' as const,
+}
+
+// Badge and Tag take no `disabled` prop — they are not controls. The cell says
+// so rather than rendering a copy of Rest and letting it read as a bug.
+function NotApplicable() {
+  return <span style={{ ...caption, color: tokens.color.text.faint }}>n/a</span>
+}
+
+function Cell({ children }: { children: React.ReactNode }) {
+  return <span style={{ display: 'inline-flex' }}>{children}</span>
+}
+
+export function HierarchyStudy() {
+  return (
+    <div
+      data-andromeda-matrix
+      style={{
+        ...andromedaVars(),
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        background: tokens.color.surface.base,
+        padding: `${tokens.spacing[10]} ${tokens.spacing[8]}`,
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <h1
+          style={{
+            margin: 0,
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size['2xl'],
+            color: tokens.color.text.primary,
+            letterSpacing: tokens.typography.tracking.wide,
+          }}
+        >
+          Button · Tag · Badge — hierarchy
+        </h1>
+        <p
+          style={{
+            marginTop: tokens.spacing[3],
+            marginBottom: tokens.spacing[8],
+            maxWidth: '72ch',
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size.md,
+            color: tokens.color.text.secondary,
+            lineHeight: tokens.typography.lineHeight.relaxed,
+          }}
+        >
+          All three at md, so the comparison is like-for-like. Read the Rest column first: that is
+          the hierarchy question. The state columns answer a second one — Badge declares no
+          interaction rules at all, so its row is flat by design, and that flatness is itself an
+          argument for making it look like a label.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5] }}>
+          {TREATMENTS.map((t) => (
+            <section
+              key={t.id}
+              style={{
+                background: tokens.color.surface.raised,
+                border: `1px solid ${tokens.color.border.subtle}`,
+                borderRadius: '12px',
+              }}
+            >
+              <div
+                style={{
+                  padding: `${tokens.spacing[3]} ${tokens.spacing[5]}`,
+                  borderBottom: `1px solid ${tokens.color.border.subtle}`,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: tokens.typography.fontMono,
+                    fontSize: tokens.typography.size.md,
+                    color: tokens.color.text.primary,
+                    letterSpacing: tokens.typography.tracking.wide,
+                  }}
+                >
+                  {t.name}
+                </div>
+                <div
+                  style={{
+                    marginTop: tokens.spacing[1],
+                    maxWidth: '80ch',
+                    fontFamily: tokens.typography.fontMono,
+                    fontSize: tokens.typography.size.sm,
+                    color: tokens.color.text.secondary,
+                    lineHeight: tokens.typography.lineHeight.relaxed,
+                  }}
+                >
+                  {t.note}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `max-content repeat(${STATES.length}, max-content)`,
+                  gap: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
+                  padding: `${tokens.spacing[6]} ${tokens.spacing[5]}`,
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  overflowX: 'auto',
+                }}
+              >
+                <span />
+                {STATES.map((s) => (
+                  <span key={s.label} style={caption}>
+                    {s.label}
+                  </span>
+                ))}
+
+                <span style={rowLabel}>Button</span>
+                {STATES.map((s) => (
+                  <span key={`btn-${s.label}`} data-force={s.force}>
+                    <Cell>
+                      <Button variant="default" size="md" className={t.button} disabled={s.disabled}>
+                        Deploy
+                      </Button>
+                    </Cell>
+                  </span>
+                ))}
+
+                <span style={rowLabel}>Tag</span>
+                {STATES.map((s) => (
+                  <span key={`tag-${s.label}`} data-force={s.force}>
+                    <Cell>
+                      {s.disabled ? (
+                        <NotApplicable />
+                      ) : (
+                        <Tag variant="default" size="md" className={t.tag} onClose={noop}>
+                          Filter
+                        </Tag>
+                      )}
+                    </Cell>
+                  </span>
+                ))}
+
+                <span style={rowLabel}>Badge</span>
+                {STATES.map((s) => (
+                  <span key={`badge-${s.label}`} data-force={s.force}>
+                    <Cell>
+                      {s.disabled ? (
+                        <NotApplicable />
+                      ) : (
+                        <Badge variant="default" size="md" className={t.badge}>
+                          Nominal
+                        </Badge>
+                      )}
+                    </Cell>
+                  </span>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
