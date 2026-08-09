@@ -95,7 +95,7 @@ function CaseCard({
   return (
     <div
       id={matrixId(spec.slug, kind, c.label)}
-      className="scroll-mt-14"
+      className="andromeda-matrix-case scroll-mt-14"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -272,6 +272,14 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
           preview panel are two unreadable charts. */}
       <style>{`
         .andromeda-matrix-grid { grid-template-columns: minmax(0, 1fr); }
+        /* The card a coverage chip just jumped to. :target is the whole
+           mechanism — no state, no script, and the browser clears it when you
+           navigate away or click another chip. Accent is the system's own
+           "selected", so this reads as selection rather than as an error. */
+        .andromeda-matrix-case:target {
+          box-shadow: 0 0 0 2px var(--andromeda-accent-300);
+          border-color: var(--andromeda-accent-300);
+        }
         @media (min-width: 768px) {
           .andromeda-matrix-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .andromeda-matrix-grid.is-wide { grid-template-columns: minmax(0, 1fr); }

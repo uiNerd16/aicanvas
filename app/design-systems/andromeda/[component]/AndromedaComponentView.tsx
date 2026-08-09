@@ -25,7 +25,7 @@ import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 // which is why this page could not show Destructive at lg while the system page
 // could.
 import { MatrixPreview } from '../../../_lib/andromeda/matrix/Matrix'
-import { SPEC_BY_SLUG } from '../../../_lib/andromeda/matrix'
+import { SPEC_BY_SLUG, matrixId } from '../../../_lib/andromeda/matrix'
 import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { trackInstall } from '../../../lib/track-install'
@@ -51,6 +51,14 @@ interface Props {
   // place of the runnable command. Reading the source (Code tab) stays public.
   freeAccountGate?: boolean
 }
+
+// Same chip and panel chrome the sibling system's component pages use, so the
+// two read as one site.
+const coverageChip =
+  'rounded-lg bg-sand-200 px-2.5 py-1.5 text-xs font-semibold text-sand-600 transition-colors hover:bg-sand-300 hover:text-sand-900 dark:bg-sand-800 dark:text-sand-400 dark:hover:bg-sand-700 dark:hover:text-sand-50'
+
+const coveragePanel =
+  'rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900'
 
 export function AndromedaComponentView({
   slug,
@@ -91,6 +99,9 @@ export function AndromedaComponentView({
   }, [user])
   // Signed-out derives to null at render — no setState in the effect body.
   const userToken = user ? fetchedToken : null
+  // One lookup for the whole page: the preview, the fullscreen preview and the
+  // coverage chips all render from the same declaration.
+  const spec = SPEC_BY_SLUG[slug]
   const [tab, setTab] = useState<'preview' | 'code'>('preview')
   const [codeCopied, setCodeCopied] = useState(false)
   const [cliCopied, setCliCopied] = useState(false)
@@ -320,7 +331,7 @@ export function AndromedaComponentView({
               className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
               style={{ backgroundColor: tokens.color.surface.base }}
             >
-              {!fullscreen && SPEC_BY_SLUG[slug] ? <MatrixPreview spec={SPEC_BY_SLUG[slug]} /> : null}
+              {!fullscreen && spec ? <MatrixPreview spec={spec} /> : null}
             </div>
           ) : (
             <div
@@ -360,6 +371,47 @@ export function AndromedaComponentView({
           </Button>
         </div>
       </div>
+
+      {/* ── Coverage ─────────────────────────────────────────────────────
+          Chips jump to the matching case in the preview above and light it,
+          which is what makes a 12-card preview navigable. Both lists come from
+          the same declaration the preview renders, so a chip can never point at
+          a case that is not there. */}
+      {spec ? (
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {spec.variants.length > 0 && (
+            <section className={coveragePanel}>
+              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">Variants</h2>
+              <p className="mt-1.5 mb-4 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+                Supported configurations for this component.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {spec.variants.map((c) => (
+                  <a key={c.label} href={`#${matrixId(spec.slug, 'variant', c.label)}`} className={coverageChip}>
+                    {c.label}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {spec.states.length > 0 && (
+            <section className={coveragePanel}>
+              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">States</h2>
+              <p className="mt-1.5 mb-4 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+                Interaction states covered by the API and the style contract.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {spec.states.map((c) => (
+                  <a key={c.label} href={`#${matrixId(spec.slug, 'state', c.label)}`} className={coverageChip}>
+                    {c.label}
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      ) : null}
 
       {/* ── Installation ─────────────────────────────────────────────── */}
       <section className="mt-12">
@@ -687,7 +739,7 @@ export function AndromedaComponentView({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex min-h-full items-center justify-center p-8 sm:p-12">
-              {SPEC_BY_SLUG[slug] ? <MatrixPreview spec={SPEC_BY_SLUG[slug]} /> : null}
+              {spec ? <MatrixPreview spec={spec} /> : null}
             </div>
 
             <button
