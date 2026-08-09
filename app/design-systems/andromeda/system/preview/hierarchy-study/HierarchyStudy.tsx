@@ -46,16 +46,7 @@ const TREATMENTS: Treatment[] = [
   {
     id: 'proposed',
     name: '02 · Proposed',
-    note: 'Labels off the control ladder at 24px, Badge pill because it is never clickable, both at regular weight; the button borderless on the brighter fill with a dark label. Every lever at once — the button is the only saturated, heavy, tall thing in the row. (Was 07 in the seven-way; the intermediate steps were cut on 2026-08-09 because none of them separated the three on their own.)',
-    button:
-      'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
-    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
-    badge: 'h-[24px] px-[10px] text-[10px] font-normal rounded-full',
-  },
-  {
-    id: 'proposed-square',
-    name: '03 · Proposed, square',
-    note: 'Identical to 02 with the pill dropped. Square corners are the system identity, so this asks whether height and weight alone carry the separation — the pill was the one lever that spends identity to buy it.',
+    note: 'Labels off the control ladder at 24px and at regular weight; the button borderless on the brighter fill with a dark label. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
     button:
       'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
     tag: 'h-[24px] px-[8px] text-[10px] font-normal',
