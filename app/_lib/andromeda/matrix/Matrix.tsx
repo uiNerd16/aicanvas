@@ -16,8 +16,16 @@ import { matrixId, REST, type MatrixCase, type MatrixSpec } from './types'
 // of it so a runtime-themed page (the Studio overrides these vars) still wins.
 //
 // Neutral, not accent: accent is a MEASUREMENT in this system, and a jumped-to
-// card is a place, not a reading. The bright border step is the whole highlight.
-const TARGET_BORDER = `var(--andromeda-border-bright, ${tokens.color.border.bright})`
+// card is a place, not a reading. Lightest neutral, 2px, matching the sibling
+// system's ink ring — a 1px border step was too quiet to find on a long page.
+const TARGET_INK = `var(--andromeda-text-primary, ${tokens.color.text.primary})`
+
+// Documentation chrome, NOT an Andromeda surface: the system's own radius scale
+// stops at 3px because square corners are its identity, and every card here is
+// a page box around a component rather than a component. Rounding these is a
+// maintainer call, taken 2026-08-09; the components inside them are untouched
+// and still square.
+const CARD_RADIUS = '12px'
 
 const head = {
   fontFamily: tokens.typography.fontMono,
@@ -110,6 +118,7 @@ function CaseCard({
         flexDirection: 'column',
         background: tokens.color.surface.raised,
         border: `1px solid ${tokens.color.border.subtle}`,
+        borderRadius: CARD_RADIUS,
         minWidth: 0,
       }}
     >
@@ -117,6 +126,8 @@ function CaseCard({
         style={{
           padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
           borderBottom: `1px solid ${tokens.color.border.subtle}`,
+          borderTopLeftRadius: CARD_RADIUS,
+          borderTopRightRadius: CARD_RADIUS,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
           color: tokens.color.text.primary,
@@ -294,7 +305,8 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
 
            */
         .andromeda-matrix-case:target {
-          border-color: ${TARGET_BORDER} !important;
+          border-color: ${TARGET_INK} !important;
+          box-shadow: 0 0 0 1px ${TARGET_INK} !important;
         }
         @media (min-width: 768px) {
           .andromeda-matrix-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
