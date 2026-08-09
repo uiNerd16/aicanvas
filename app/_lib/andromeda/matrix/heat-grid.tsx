@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { HeatGrid } from '../../../../design-systems/andromeda/components/HeatGrid'
 import type { MatrixSpec } from './types'
 

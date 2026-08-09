@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { StatTile } from '../../../../design-systems/andromeda/components/StatTile'
 import type { MatrixSpec } from './types'
 

@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Button } from '../../../../design-systems/andromeda/components/Button'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 

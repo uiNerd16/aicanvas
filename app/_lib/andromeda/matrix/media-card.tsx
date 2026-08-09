@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 // v2 component: imported through the build-time shim.
 import { MediaCard } from '../../../lib/andromeda-v2.generated'
 import type { MatrixSpec } from './types'

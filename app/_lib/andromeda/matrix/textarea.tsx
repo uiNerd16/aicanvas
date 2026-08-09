@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Textarea } from '../../../../design-systems/andromeda/components/Textarea'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 

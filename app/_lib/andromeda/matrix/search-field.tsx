@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { SearchField } from '../../../../design-systems/andromeda/components/SearchField'
 import type { MatrixSpec } from './types'
 

@@ -1,4 +1,5 @@
-// @ts-nocheck — imports an untyped design-system source.
+// @ts-nocheck — this spec AUTHORS JSX against untyped design-system
+// components. Data-only specs in this directory need no such line.
 import { ArrowClockwise } from '@phosphor-icons/react'
 import { Tooltip } from '../../../../design-systems/andromeda/components/Tooltip'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'

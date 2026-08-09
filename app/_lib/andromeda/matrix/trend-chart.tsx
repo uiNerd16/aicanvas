@@ -1,4 +1,5 @@
-// @ts-nocheck — imports an untyped design-system source.
+// @ts-nocheck — this spec AUTHORS JSX against untyped design-system
+// components. Data-only specs in this directory need no such line.
 import { TrendChart } from '../../../../design-systems/andromeda/components/TrendChart'
 import { CornerMarkers } from '../../../../design-systems/andromeda/components/CornerMarkers'
 import { tokens } from '../../../../design-systems/andromeda/tokens'

@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Radio } from '../../../../design-systems/andromeda/components/Radio'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 

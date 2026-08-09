@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Gear } from '@phosphor-icons/react'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
 import { CONTROL_STATES, type MatrixSpec } from './types'

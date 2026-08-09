@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Planet } from '../../../../design-systems/andromeda/components/Planet'
 import type { MatrixSpec } from './types'
 

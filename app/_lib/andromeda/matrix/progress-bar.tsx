@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { ProgressBar } from '../../../../design-systems/andromeda/components/ProgressBar'
 import type { MatrixSpec } from './types'
 

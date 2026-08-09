@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { MagnifyingGlass } from '@phosphor-icons/react'
 import { Input } from '../../../../design-systems/andromeda/components/Input'
 import { CONTROL_STATES, type MatrixSpec } from './types'

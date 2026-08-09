@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { Checkbox } from '../../../../design-systems/andromeda/components/Checkbox'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 

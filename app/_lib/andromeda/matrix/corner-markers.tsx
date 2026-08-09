@@ -1,4 +1,3 @@
-// @ts-nocheck — imports an untyped design-system source.
 import { CornerMarkers } from '../../../../design-systems/andromeda/components/CornerMarkers'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import type { MatrixSpec } from './types'

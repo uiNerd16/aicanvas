@@ -131,7 +131,7 @@ export default function AndromedaReview() {
         <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: tokens.spacing[6] }}>
           <header style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
             <span style={{ ...mono, fontSize: tokens.typography.size.sm, textTransform: 'uppercase', color: tokens.color.text.muted }}>
-              /// Andromeda review
+              {'/// '}Andromeda review
             </span>
             <h1 style={{ ...mono, margin: 0, fontSize: tokens.typography.size['2xl'], color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wide }}>
               Every component, every state
@@ -174,7 +174,7 @@ export default function AndromedaReview() {
                 <CardHeader className="px-[var(--andromeda-6)] py-[var(--andromeda-6)]">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
                     <span style={{ ...mono, fontSize: tokens.typography.size.sm, textTransform: 'uppercase', color: tokens.color.text.muted }}>
-                      /// {m.slug}
+                      {'/// '}{m.slug}
                     </span>
                     <CardTitle>{m.name}</CardTitle>
                   </div>
