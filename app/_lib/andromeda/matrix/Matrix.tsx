@@ -10,6 +10,15 @@
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { matrixId, REST, type MatrixCase, type MatrixSpec } from './types'
 
+// The card chrome is styled from tokens in JS, so nothing above it writes the
+// --andromeda-* custom properties: a bare var() here resolves to nothing and the
+// rule silently does nothing. The literal is the value; the var stays in front
+// of it so a runtime-themed page (the Studio overrides these vars) still wins.
+//
+// Neutral, not accent: accent is a MEASUREMENT in this system, and a jumped-to
+// card is a place, not a reading. The bright border step is the whole highlight.
+const TARGET_BORDER = `var(--andromeda-border-bright, ${tokens.color.border.bright})`
+
 const head = {
   fontFamily: tokens.typography.fontMono,
   fontSize: tokens.typography.size.sm,
@@ -275,10 +284,17 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
         /* The card a coverage chip just jumped to. :target is the whole
            mechanism — no state, no script, and the browser clears it when you
            navigate away or click another chip. Accent is the system's own
-           "selected", so this reads as selection rather than as an error. */
+           "selected", so this reads as selection rather than as an error.
+
+           !important is REQUIRED, not defensive: the card paints its border
+           through an inline style, which beats any plain class rule. That is
+           the same precedence trap the interaction-states rules describe for
+           hover on inline-styled controls, and it is why this rule appeared to
+           do nothing at first.
+
+           */
         .andromeda-matrix-case:target {
-          box-shadow: 0 0 0 2px var(--andromeda-accent-300);
-          border-color: var(--andromeda-accent-300);
+          border-color: ${TARGET_BORDER} !important;
         }
         @media (min-width: 768px) {
           .andromeda-matrix-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
