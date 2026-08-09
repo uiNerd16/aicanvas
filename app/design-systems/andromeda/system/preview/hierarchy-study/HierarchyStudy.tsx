@@ -32,7 +32,7 @@ type Treatment = {
   badge: string
 }
 
-// control ladder md = 32px. The "off-ladder" rows drop labels to 24px, which is
+// control ladder md = 32px. The off-ladder rows drop labels to 24px, which is
 // below every rung, so a label can never line up with a field or a button again.
 const TREATMENTS: Treatment[] = [
   {
@@ -44,49 +44,9 @@ const TREATMENTS: Treatment[] = [
     badge: '',
   },
   {
-    id: 'borderless',
-    name: '02 · Borderless button',
-    note: 'Only the button changes: its border comes off. Tag keeps its 1px frame, so the border becomes a label signal rather than a shared one.',
-    button: 'border-transparent hover:border-transparent active:border-transparent',
-    tag: '',
-    badge: '',
-  },
-  {
-    id: 'height',
-    name: '03 · Labels off the control ladder',
-    note: 'Tag and Badge drop to 24px. The ladder exists so a field and a button align in a strip; a label has no business on it. Height is the strongest of the levers here.',
-    button: '',
-    tag: 'h-[24px] px-[8px] text-[10px]',
-    badge: 'h-[24px] px-[8px] text-[10px]',
-  },
-  {
-    id: 'shape',
-    name: '04 · Badge goes pill',
-    note: 'Badge is the only one of the three that is never clickable, and shape is the fastest signal the eye reads. Square stays with the interactive pair.',
-    button: '',
-    tag: '',
-    badge: 'rounded-full px-[10px]',
-  },
-  {
-    id: 'weight',
-    name: '05 · Weight split',
-    note: 'Button keeps medium, labels drop to regular. Interactive things look heavier. The quietest lever, and the easiest to miss on its own.',
-    button: '',
-    tag: 'font-normal',
-    badge: 'font-normal',
-  },
-  {
-    id: 'combined',
-    name: '06 · Combined: height + shape + weight',
-    note: 'The three levers together, button untouched. This is the cheapest full separation: nothing about the button changes, and the labels stop competing with it.',
-    button: '',
-    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
-    badge: 'h-[24px] px-[10px] text-[10px] font-normal rounded-full',
-  },
-  {
-    id: 'full',
-    name: '07 · Combined, plus a louder button',
-    note: 'Same as 06, and the button takes the brighter fill with a dark label and a borderless edge (candidate 04 from the button study). Maximum separation: the button is the only saturated, heavy, tall thing in the row.',
+    id: 'proposed',
+    name: '02 · Proposed',
+    note: 'Labels off the control ladder at 24px, Badge pill because it is never clickable, both at regular weight; the button borderless on the brighter fill with a dark label. Every lever at once — the button is the only saturated, heavy, tall thing in the row. (Was 07 in the seven-way; the intermediate steps were cut on 2026-08-09 because none of them separated the three on their own.)',
     button:
       'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
     tag: 'h-[24px] px-[8px] text-[10px] font-normal',
