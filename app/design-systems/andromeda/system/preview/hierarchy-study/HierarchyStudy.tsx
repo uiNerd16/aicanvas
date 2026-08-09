@@ -52,6 +52,25 @@ const TREATMENTS: Treatment[] = [
     tag: 'h-[24px] px-[8px] text-[10px] font-normal',
     badge: 'h-[24px] px-[10px] text-[10px] font-normal rounded-full',
   },
+  {
+    id: 'proposed-square',
+    name: '03 · Proposed, square',
+    note: 'Identical to 02 with the pill dropped. Square corners are the system identity, so this asks whether height and weight alone carry the separation — the pill was the one lever that spends identity to buy it.',
+    button:
+      'border-transparent hover:border-transparent active:border-transparent bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
+    tag: 'h-[24px] px-[8px] text-[10px] font-normal',
+    badge: 'h-[24px] px-[8px] text-[10px] font-normal',
+  },
+]
+
+// The four meanings a label carries. There is no success/positive token in this
+// system: accent doubles as the positive reading, which is worth deciding on its
+// own — accent is otherwise "the measurement in focus", not "good".
+const TONES = [
+  { label: 'Neutral', variant: 'default' },
+  { label: 'Positive', variant: 'accent' },
+  { label: 'Warning', variant: 'warning' },
+  { label: 'Fault', variant: 'fault' },
 ]
 
 const STATES = [
@@ -224,6 +243,48 @@ export function HierarchyStudy() {
                       )}
                     </Cell>
                   </span>
+                ))}
+              </div>
+
+              {/* Tones. Same treatment, every meaning a label carries — the
+                  hierarchy has to survive colour, not just the neutral case. */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `max-content repeat(${TONES.length}, max-content)`,
+                  gap: `${tokens.spacing[4]} ${tokens.spacing[6]}`,
+                  padding: `0 ${tokens.spacing[5]} ${tokens.spacing[6]}`,
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  overflowX: 'auto',
+                  borderTop: `1px solid ${tokens.color.border.subtle}`,
+                  paddingTop: tokens.spacing[6],
+                  marginTop: tokens.spacing[2],
+                }}
+              >
+                <span />
+                {TONES.map((tone) => (
+                  <span key={tone.label} style={caption}>
+                    {tone.label}
+                  </span>
+                ))}
+
+                <span style={rowLabel}>Badge</span>
+                {TONES.map((tone) => (
+                  <Cell key={`badge-tone-${tone.label}`}>
+                    <Badge variant={tone.variant} size="md" className={t.badge}>
+                      {tone.label}
+                    </Badge>
+                  </Cell>
+                ))}
+
+                <span style={rowLabel}>Tag</span>
+                {TONES.map((tone) => (
+                  <Cell key={`tag-tone-${tone.label}`}>
+                    <Tag variant={tone.variant} size="md" className={t.tag} onClose={noop}>
+                      {tone.label}
+                    </Tag>
+                  </Cell>
                 ))}
               </div>
             </section>
