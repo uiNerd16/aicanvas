@@ -1,0 +1,23 @@
+// @ts-nocheck — imports an untyped design-system source.
+import { Radio } from '../../../../design-systems/andromeda/components/Radio'
+import { CONTROL_STATES, type MatrixSpec } from './types'
+
+export const radio: MatrixSpec = {
+  slug: 'radio',
+  Component: Radio,
+  sizes: ['sm', 'md', 'lg'],
+  baseProps: { label: 'Alternate' },
+  variants: [
+    { label: 'Off', props: {} },
+    { label: 'On', props: { defaultChecked: true } },
+  ],
+  states: [
+    ...CONTROL_STATES,
+    { label: 'On hover', props: { defaultChecked: true }, force: 'hover' },
+    { label: 'Pressed', force: 'active' },
+    { label: 'Disabled on', props: { disabled: true, defaultChecked: true } },
+  ],
+  gaps: {
+    'Group selection': 'exclusive selection is RadioGroup composition, not a state of one radio; the group is shown on the component page',
+  },
+}

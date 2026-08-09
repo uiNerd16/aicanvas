@@ -19,13 +19,9 @@ const COMPONENT_DIR = join(process.cwd(), 'design-systems/andromeda/components')
 // empties. A slug in both SPECS and UNDECLARED fails, so healing a component
 // forces its allowlist entry out.
 const UNDECLARED = new Set([
-  'alert', 'avatar', 'card', 'checkbox', 'corner-markers', 'data-table',
-  'date-range-picker', 'drawer', 'empty-state', 'funnel-chart', 'gauge',
-  'heat-grid', 'icon-button', 'media-card', 'metric-chart', 'music-player',
-  'nav-item', 'panel-header', 'panel-menu', 'planet', 'progress-bar',
-  'radar-chart', 'radio', 'search-field', 'segmented-control', 'slider',
-  'spinner', 'stat-tile', 'table', 'tag', 'textarea', 'toggle', 'tooltip',
-  'trend-chart', 'user-card', 'user-menu', 'waveform',
+  'corner-markers', 'data-table', 'date-range-picker', 'drawer', 'funnel-chart',
+  'media-card', 'metric-chart', 'music-player', 'panel-menu', 'radar-chart',
+  'table', 'tooltip', 'trend-chart', 'user-card', 'user-menu', 'waveform',
 ])
 
 const html = new Map<string, string>()
@@ -93,7 +89,13 @@ function topKeys(block: string): string[] {
   return keys
 }
 function pushKey(chunk: string, out: string[]) {
-  const m = chunk.trim().match(/^['"]?([A-Za-z0-9_-]+)['"]?\s*:/)
+  // Line comments are stripped first: every one of these objects is documented
+  // in place, and a comment sitting above the FIRST key hid that key entirely —
+  // Tag's `default` variant went uncovered until this line existed.
+  const m = chunk
+    .replace(/^\s*\/\/.*$/gm, '')
+    .trim()
+    .match(/^['"]?([A-Za-z0-9_-]+)['"]?\s*:/)
   if (m) out.push(m[1])
 }
 
