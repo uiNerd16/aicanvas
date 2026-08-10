@@ -28,6 +28,10 @@ const cardVariants = cva(
       variant: {
         default: ['bg-[color:var(--andromeda-surface-raised)]'],
         glow:    ['bg-[image:var(--andromeda-gradient-accent-sweep)]'],
+        // The louder glow: same idea, roughly 2x the top-left bloom plus a
+        // small counter-light bottom-right. `glow` is the whisper you can put
+        // on any card; this one claims the eye, so one per screen at most.
+        flare:   ['bg-[image:var(--andromeda-gradient-accent-sweep-dual)]'],
       },
       bordered: {
         true:  ['border-[length:var(--andromeda-border-width,1px)]', 'border-solid'],
@@ -39,6 +43,7 @@ const cardVariants = cva(
       // Glow uses accent-500 (matches the gradient peak) so the perimeter
       // blends with the fill instead of fighting it. accent-400 was too bright.
       { variant: 'glow',    bordered: true, class: 'border-[color:var(--andromeda-accent-500)]' },
+      { variant: 'flare',   bordered: true, class: 'border-[color:var(--andromeda-accent-500)]' },
     ],
     defaultVariants: {
       variant: 'default',
@@ -170,7 +175,10 @@ export const CardTitle = forwardRef(function CardTitle(
       data-slot="card-title"
       className={cn(
         '[font-family:var(--andromeda-font-mono)]',
-        'text-[length:var(--andromeda-text-sm)]',
+        // size.md (14px), raised from size.sm (12px) on 2026-08-10. A card is
+        // a reading surface, not a control: its title and description are the
+        // one place in the system where 12px was doing real prose work.
+        'text-[length:var(--andromeda-text-md)]',
         'font-[number:var(--andromeda-weight-medium)]',
         'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
         'text-[color:var(--andromeda-text-primary)]',
@@ -195,7 +203,9 @@ export const CardDescription = forwardRef(function CardDescription(
       data-slot="card-description"
       className={cn(
         '[font-family:var(--andromeda-font-sans)]',
-        'text-[length:var(--andromeda-text-xs)]',
+        // size.md (14px), raised from size.xs (10px) on 2026-08-10. Body copy
+        // on a card is read, not scanned, and 10px is a label size.
+        'text-[length:var(--andromeda-text-md)]',
         'text-[color:var(--andromeda-text-secondary)]',
         'm-0',
         className,

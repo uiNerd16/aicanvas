@@ -16,13 +16,16 @@ const body = (title: string, description: string, badge: string, badgeVariant: s
   <>
     <CardHeader>
       <CardTitle>{title}</CardTitle>
-      <Badge variant={badgeVariant}>{badge}</Badge>
+      {/* md, not the sm defaults. A card has no size axis of its own, so the
+          demo's scale is set entirely by what sits inside it, and at sm the
+          whole thing read as a thumbnail nobody bothers to read. */}
+      <Badge variant={badgeVariant} size="md">{badge}</Badge>
     </CardHeader>
     <CardContent>
       <CardDescription>{description}</CardDescription>
     </CardContent>
     <CardFooter>
-      <Button size="sm" variant="outline">
+      <Button size="md" variant="outline">
         Configure
       </Button>
     </CardFooter>
@@ -44,6 +47,11 @@ export const card: MatrixSpec = {
       label: 'Glow',
       props: { variant: 'glow' },
       children: body('Highlight card', 'Tinted accent gradient surface with an accent border.', 'Live', 'accent'),
+    },
+    {
+      label: 'Flare',
+      props: { variant: 'flare' },
+      children: body('Featured card', 'A doubled bloom, lit from the top left with a counter-light opposite.', 'Live', 'accent'),
     },
     {
       // bordered and markers are independent booleans, not members of the cva

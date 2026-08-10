@@ -8,7 +8,7 @@ export const COMPONENT_COUNTS: Record<string, { variants: number; states: number
   'avatar': { variants: 6, states: 1 },
   'badge': { variants: 6, states: 0 },
   'button': { variants: 6, states: 6 },
-  'card': { variants: 4, states: 0 },
+  'card': { variants: 5, states: 0 },
   'checkbox': { variants: 2, states: 6 },
   'corner-markers': { variants: 5, states: 0 },
   'data-table': { variants: 2, states: 0 },

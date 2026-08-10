@@ -93,6 +93,7 @@ export function andromedaVars() {
     // Gradients
     '--andromeda-gradient-accent-fade':  t.color.gradient.accentFade,
     '--andromeda-gradient-accent-sweep': t.color.gradient.accentSweep,
+    '--andromeda-gradient-accent-sweep-dual': t.color.gradient.accentSweepDual,
     '--andromeda-gradient-surface-soft': t.color.gradient.surfaceSoft,
     // Typography
     '--andromeda-font-sans': t.typography.fontSans,

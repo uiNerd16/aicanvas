@@ -92,6 +92,16 @@ export const tokens = {
       // Used by Card variant="glow" to draw the eye without painting a
       // colored card.
       accentSweep: 'radial-gradient(ellipse 80% 70% at 0% 0%, #1B2C29 0%, #172321 25%, #141415 65%)',
+      // The louder twin of accentSweep: the top-left bloom at roughly 2x, plus
+      // a small counter-light in the opposite corner so the card reads as lit
+      // from one side rather than tinted all over. Two layers, and the LAST one
+      // listed is the base — it is the only opaque one, so it lands on
+      // surface.raised exactly like accentSweep does. The small layer fades to
+      // rgba(20,20,21,0), the transparent form of surface.raised, so it never
+      // greys out where it meets the base.
+      accentSweepDual:
+        'radial-gradient(ellipse 42% 38% at 100% 100%, rgba(31,54,50,0.95) 0%, rgba(23,35,33,0.5) 45%, rgba(20,20,21,0) 72%), ' +
+        'radial-gradient(ellipse 160% 140% at 0% 0%, #1F3632 0%, #172321 28%, #141415 62%)',
       surfaceSoft: 'linear-gradient(180deg, #181819 0%, #111111 100%)',
     },
   },
