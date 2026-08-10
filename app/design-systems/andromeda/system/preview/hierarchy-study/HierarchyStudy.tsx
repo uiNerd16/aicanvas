@@ -48,13 +48,19 @@ const TREATMENTS: Treatment[] = [
   },
   {
     id: 'proposed',
-    name: '02 · Proposed',
-    note: 'Labels off the control ladder at 24px and at regular weight; the button on the brighter fill with a dark label, keeping its own accent-200 border; the labels take the family alpha tints instead of solid fills. Square throughout — a pill badge was tried and cut on 2026-08-09: it was the one lever that spends the system identity to buy separation, and height and weight carry it without that.',
-    // No border classes at all: dropping the overrides lets the variant's OWN
-    // accent-200 border through unchanged, which is what "the same borders as
-    // default" means. Nothing else about the treatment moves.
+    name: '02 · Proposed, text.primary on accent-300',
+    note: 'The label asked for: text.primary #F5F5F5. On the accent-300 fill it measures 1.82:1 against the fill — below every threshold, and below the 3:1 floor for large text too. Shown because it is the treatment as asked; the row underneath is the same label on a fill that carries it.',
     button:
-      'bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#08201D] hover:text-[#08201D]',
+      'bg-[#0FCFB2] hover:bg-[#56F0D6] active:bg-[#109380] text-[#F5F5F5] hover:text-[#F5F5F5]',
+    tag: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
+    badge: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
+  },
+  {
+    id: 'proposed-deep',
+    name: '03 · Proposed, text.primary on accent-500',
+    note: 'Same label, deeper fill: 6.77:1, clears AA for body text with room to spare. This is the only accent fill that carries text.primary. For reference, what ships today is accent-on on accent-400 at 3.22:1, which does not.',
+    button:
+      'bg-[#126059] hover:bg-[#109380] active:bg-[#126059] text-[#F5F5F5] hover:text-[#F5F5F5]',
     tag: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
     badge: `h-[24px] px-[8px] text-[10px] font-normal ${NEUTRAL_ALPHA}`,
   },
@@ -281,7 +287,7 @@ export function HierarchyStudy() {
                     <Badge
                       variant={tone.variant}
                       size="md"
-                      className={t.id === 'proposed' ? `${t.badge} ${tone.alpha}` : t.badge}
+                      className={t.id === 'current' ? t.badge : `${t.badge} ${tone.alpha}`}
                     >
                       {tone.label}
                     </Badge>
@@ -294,7 +300,7 @@ export function HierarchyStudy() {
                     <Tag
                       variant={tone.variant}
                       size="md"
-                      className={t.id === 'proposed' ? `${t.tag} ${tone.alpha}` : t.tag}
+                      className={t.id === 'current' ? t.tag : `${t.tag} ${tone.alpha}`}
                       onClose={noop}
                     >
                       {tone.label}
