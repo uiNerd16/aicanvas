@@ -36,7 +36,7 @@ export const tokens = {
       overlay: '#19191A',
       hover:   '#1C1C1D',
       active:  '#232325',
-      alpha:   'rgba(0, 0, 0, 0.65)',
+      alpha:   'rgba(0, 0, 0, 0.6)',
     },
     // Borders — solid greys + one alpha border for glassy edges.
     border: {
@@ -44,7 +44,7 @@ export const tokens = {
       base:   '#3E3E3F',
       bright: '#5B5B5C',
       strong: '#939393',
-      alpha:  'rgba(255, 255, 255, 0.18)',
+      alpha:  'rgba(255, 255, 255, 0.4)',
     },
     // Accent — turquoise. 5 stops + 1 alpha (translucent overlay
     // derived from the 300 base, 0.25). The 100 stop pairs with
@@ -55,7 +55,7 @@ export const tokens = {
       300:   '#0FCFB2',
       400:   '#109380',
       500:   '#126059',
-      alpha: 'rgba(15, 207, 178, 0.25)',
+      alpha: 'rgba(15, 207, 178, 0.4)',
       // Text/icon ON an accent-filled surface. The one guaranteed-contrast
       // pairing token — every accent fill takes its foreground from here so
       // a theme retuning the family keeps labels legible. Defaults to the
@@ -69,7 +69,7 @@ export const tokens = {
       300:   '#FF3939',
       400:   '#B82424',
       500:   '#5A1818',
-      alpha: 'rgba(255, 57, 57, 0.25)',
+      alpha: 'rgba(255, 57, 57, 0.4)',
       on:    '#FFCFCF',
     },
     // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
@@ -79,7 +79,7 @@ export const tokens = {
       300:   '#FFA000',
       400:   '#B57009',
       500:   '#4D3712',
-      alpha: 'rgba(255, 160, 0, 0.25)',
+      alpha: 'rgba(255, 160, 0, 0.4)',
       on:    '#FFE5B5',
     },
     // Gradients fade to solid colors (no transparent stops).
