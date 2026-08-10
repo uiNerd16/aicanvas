@@ -93,15 +93,25 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          // On-accent foreground: tracks the accent family, NOT the neutral
-          // text ramp, so a theme that darkens text keeps the label legible.
-          'text-[color:var(--andromeda-accent-on)]',
-          'bg-[color:var(--andromeda-accent-400)]',
+          // Label is text.primary, the neutral ramp's brightest stop, NOT the
+          // accent-on pairing token. That is a deliberate reversal (2026-08-10):
+          // accent-on measured 3.22:1 on the old accent-400 fill and failed AA
+          // outright, and no foreground fixes a fill that light. The fill went
+          // to accent-500 in the same move, where text.primary measures 6.77:1
+          // and clears AA for body text with room.
+          //
+          // KNOWN, ACCEPTED: hover moves the fill to accent-400, where the same
+          // label measures 3.50:1. Rest is what a label is read in; hover is a
+          // 140ms pointer state. If that trade stops being acceptable, hold the
+          // fill on hover and let the border and glow carry the change instead —
+          // the two lines below are the only edit that needs.
+          'text-[color:var(--andromeda-text-primary)]',
+          'bg-[color:var(--andromeda-accent-500)]',
           'border-[color:var(--andromeda-accent-200)]',
           'hover:bg-[color:var(--andromeda-accent-400)]',
           'hover:border-[color:var(--andromeda-accent-200)]',
           'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-400)]',
-          'active:bg-[color:var(--andromeda-accent-400)]',
+          'active:bg-[color:var(--andromeda-accent-500)]',
           'active:border-[color:var(--andromeda-accent-200)]',
         ],
         outline: [

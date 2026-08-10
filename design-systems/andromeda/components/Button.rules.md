@@ -10,7 +10,7 @@ Severity tags follow the same convention: `must` / `should` / `may`.
 
 | Variant | Background | Border | Text | When to use |
 |---|---|---|---|---|
-| `default` | `accent-400` | `accent-200` | `text.primary` | Primary action — one per region. The action the user is most likely to want. |
+| `default` | `accent-500` | `accent-200` | `text.primary` | Primary action — one per region. The action the user is most likely to want. |
 | `outline` | `surface.raised` | `border.base` | `text.primary` | Secondary actions. The safe default when unsure which variant fits. |
 | `ghost` | transparent | transparent | `text.secondary` | Tertiary / dismissive actions. Cancel, close, "not now". |
 | `destructive` | `red-500` | `red-400` | `text.primary` | Irreversible actions only — delete, abort, dispatch. |
