@@ -5,7 +5,7 @@
 // for free, and the test fails the moment they stop matching the specs.
 export const COMPONENT_COUNTS: Record<string, { variants: number; states: number }> = {
   'alert': { variants: 4, states: 0 },
-  'avatar': { variants: 5, states: 1 },
+  'avatar': { variants: 6, states: 1 },
   'badge': { variants: 6, states: 0 },
   'button': { variants: 6, states: 6 },
   'card': { variants: 4, states: 0 },

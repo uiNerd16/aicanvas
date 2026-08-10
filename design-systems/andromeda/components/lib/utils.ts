@@ -66,7 +66,6 @@ export function andromedaVars() {
     '--andromeda-border-base':   t.color.border.base,
     '--andromeda-border-bright': t.color.border.bright,
     '--andromeda-border-strong': t.color.border.strong,
-    '--andromeda-border-alpha':  t.color.border.alpha,
     // Accent (turquoise) — 5 stops + 1 alpha + on-fill foreground
     '--andromeda-accent-100':   t.color.accent[100],
     '--andromeda-accent-200':   t.color.accent[200],

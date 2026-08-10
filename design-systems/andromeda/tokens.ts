@@ -38,13 +38,15 @@ export const tokens = {
       active:  '#232325',
       alpha:   'rgba(0, 0, 0, 0.6)',
     },
-    // Borders — solid greys + one alpha border for glassy edges.
+    // Borders — four solid greys. There was a fifth, `alpha`, a white
+    // translucent "glassy edge"; it was deleted 2026-08-10 with zero consumers
+    // in 40 components. A token nobody reaches for is a suggestion, not a
+    // system: it invites a second edge treatment beside these four.
     border: {
       subtle: '#212122',
       base:   '#3E3E3F',
       bright: '#5B5B5C',
       strong: '#939393',
-      alpha:  'rgba(255, 255, 255, 0.4)',
     },
     // Accent — turquoise. 5 stops + 1 alpha (translucent overlay
     // derived from the 300 base, 0.25). The 100 stop pairs with

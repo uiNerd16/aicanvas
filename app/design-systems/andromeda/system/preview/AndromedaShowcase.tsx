@@ -445,7 +445,6 @@ export default function AndromedaShowcase({
               { name: 'orange.alpha', color: tokens.color.orange.alpha,   note: 'Warning overlay · caution tint' },
               { name: 'red.alpha',     color: tokens.color.red.alpha,     note: 'Fault overlay · error tint' },
               { name: 'surface.alpha', color: tokens.color.surface.alpha, note: 'Modal scrim · backdrop' },
-              { name: 'border.alpha',  color: tokens.color.border.alpha,  note: 'Glassy edge · sheen' },
             ].map(({ name, color, note }) => (
               <div key={name} style={{ width: 148 }}>
                 <div style={{ height: 48, background: color, border: `1px solid ${tokens.color.border.base}`, marginBottom: tokens.spacing[2] }} />
@@ -528,8 +527,7 @@ export default function AndromedaShowcase({
                 { role: 'Warning indicator',   token: 'orange.300 + orange.500' },
                 { role: 'Fault indicator',     token: 'red.300 + red.500' },
                 { role: 'Modal scrim',         token: 'surface.alpha' },
-                { role: 'Glassy edge',         token: 'border.alpha' },
-                { role: 'Selection sheen',     token: 'color.alpha' },
+                { role: 'Toned surface',       token: 'accent / orange / red .alpha' },
               ].map(({ role, token }) => (
                 <div key={role} style={{ padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`, background: tokens.color.surface.raised, border: `1px solid ${tokens.color.border.subtle}` }}>
                   <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>{role}</div>

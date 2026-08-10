@@ -29,7 +29,10 @@ export const alert: MatrixSpec = {
   Component: Alert,
   // No size axis in the source: an alert is a full-width banner.
   sizes: null,
-  wide: true,
+  // NOT wide. An alert stretches to its container, but its content is one line
+  // of title plus one of description, so two per row stay readable and the four
+  // variants read as one 2x2 comparison instead of a scroll.
+  wide: false,
   variants: [
     {
       label: 'Default',
@@ -44,7 +47,7 @@ export const alert: MatrixSpec = {
     {
       label: 'Warning',
       props: { variant: 'warning' },
-      children: body(Warning, 'Caution', 'Heat shield within 12% of operational limit.'),
+      children: body(Warning, 'Caution', 'Heat shield within 12% of limit.'),
     },
     {
       label: 'Fault',

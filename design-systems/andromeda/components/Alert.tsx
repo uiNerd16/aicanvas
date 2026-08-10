@@ -39,24 +39,31 @@ const alertVariants = cva(
           '[--alert-description-color:var(--andromeda-text-secondary)]',
         ],
         accent: [
-          // title 6.2:1 / description 5.1:1 on bg-500 (WCAG AA pass)
-          'bg-[color:var(--andromeda-accent-500)]',
+          // Fill is the family TINT, not the solid 500 stop (2026-08-10). An
+          // alert is a surface carrying a tone, not a control, so it belongs in
+          // the page rather than on top of it. Over surface.raised the tint
+          // resolves to #142725 and every foreground GAINS contrast: title
+          // 13.2:1, description 11.0:1, icon 7.9:1, border 4.1:1, against
+          // 6.2 / 5.2 / 3.7 / 1.9 on the old solid fill.
+          'bg-[color:var(--andromeda-accent-alpha)]',
           'border-[color:var(--andromeda-accent-400)]',
           '[--alert-icon-color:var(--andromeda-accent-300)]',
           '[--alert-title-color:var(--andromeda-accent-100)]',
           '[--alert-description-color:var(--andromeda-accent-200)]',
         ],
         warning: [
-          // title 9.2:1 / description 6.2:1 on bg-500 (WCAG AA pass)
-          'bg-[color:var(--andromeda-orange-500)]',
+          // Tint over surface.raised = #2C2213. title 12.7:1, description
+          // 9.9:1, icon 7.6:1, border 3.9:1 (was 9.2 / 7.1 / 5.5 / 2.8).
+          'bg-[color:var(--andromeda-orange-alpha)]',
           'border-[color:var(--andromeda-orange-400)]',
           '[--alert-icon-color:var(--andromeda-orange-300)]',
           '[--alert-title-color:var(--andromeda-orange-100)]',
           '[--alert-description-color:var(--andromeda-orange-200)]',
         ],
         fault: [
-          // title 9.6:1 / description 6.0:1 on bg-500 (WCAG AA pass)
-          'bg-[color:var(--andromeda-red-500)]',
+          // Tint over surface.raised = #2C1819. title 12.1:1, description
+          // 7.4:1, icon 4.7:1, border 2.7:1 (was 9.6 / 5.9 / 3.7 / 2.1).
+          'bg-[color:var(--andromeda-red-alpha)]',
           'border-[color:var(--andromeda-red-400)]',
           '[--alert-icon-color:var(--andromeda-red-300)]',
           '[--alert-title-color:var(--andromeda-red-100)]',
