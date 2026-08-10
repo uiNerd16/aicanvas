@@ -46,27 +46,35 @@ const tagVariants = cva(
         lg: 'h-[var(--andromeda-8)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
       },
       variant: {
-        // Text is always text.primary across variants (mirrors Badge): the
-        // background + border carry the meaning, never the label color. The
-        // -500 backgrounds are dark, so near-white primary text clears WCAG AA.
+        // TONE FILLS ARE ALPHA (2026-08-10). Each family carries exactly one
+        // sanctioned alpha and this is what it is for: a translucent tint reads
+        // as a LABEL sitting on the surface, where a solid -500 block reads as a
+        // filled control. That difference, not the height, is what separates a
+        // chip from a Button at a glance.
+        //
+        // The label still takes the family `on` token, unchanged — `on` is the
+        // guaranteed-contrast pairing and it is the right indirection whatever
+        // the fill is. Whether it still CLEARS AA over a 25% tint is measured
+        // separately; if a tone fails, the fix is that tone's alpha or its `on`
+        // value, never a per-component hardcoded hex.
         default: [
           'bg-[color:var(--andromeda-surface-raised)]',
           'text-[color:var(--andromeda-text-primary)]',
           'border-[color:var(--andromeda-border-base)]',
         ],
         accent: [
-          'bg-[color:var(--andromeda-accent-500)]',
+          'bg-[color:var(--andromeda-accent-alpha)]',
           // on-fill fix: guaranteed-contrast on-fill foreground (defaults to family 100)
           'text-[color:var(--andromeda-accent-on)]',
           'border-[color:var(--andromeda-accent-400)]',
         ],
         warning: [
-          'bg-[color:var(--andromeda-orange-500)]',
+          'bg-[color:var(--andromeda-orange-alpha)]',
           'text-[color:var(--andromeda-orange-on)]',
           'border-[color:var(--andromeda-orange-400)]',
         ],
         fault: [
-          'bg-[color:var(--andromeda-red-500)]',
+          'bg-[color:var(--andromeda-red-alpha)]',
           'text-[color:var(--andromeda-red-on)]',
           'border-[color:var(--andromeda-red-400)]',
         ],
