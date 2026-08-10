@@ -124,6 +124,11 @@ export function andromedaVars() {
     '--andromeda-tracking-widest': t.typography.tracking.widest,
     // Spacing
     '--andromeda-1':  t.spacing[1],
+    // Half-step. Hyphen, not the dot from the token key and not an underscore:
+    // inside a Tailwind arbitrary value `_` decodes to a SPACE, so
+    // `gap-[var(--andromeda-1_5)]` silently compiles to `var(--andromeda-1 5)`
+    // and the declaration is dropped.
+    '--andromeda-1-5': t.spacing[1.5],
     '--andromeda-2':  t.spacing[2],
     '--andromeda-3':  t.spacing[3],
     '--andromeda-4':  t.spacing[4],

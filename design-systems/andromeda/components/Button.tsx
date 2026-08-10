@@ -64,7 +64,8 @@ const buttonVariants = cva(
   [
     // structural
     'relative inline-flex items-center justify-center select-none whitespace-nowrap',
-    'gap-[var(--andromeda-2)]',
+    // 6px, the half-step. 8px let the icon and its label read as two items.
+    'gap-[var(--andromeda-1-5)]',
     // box-border is stated, not inherited from preflight: the size variants pin
     // an exact ladder height and the 1px border has to sit inside it, including
     // when these files are pasted into a project without Tailwind's reset.
@@ -134,12 +135,17 @@ const buttonVariants = cva(
           // On-fault foreground: bound to the red family, not the text ramp.
           'text-[color:var(--andromeda-red-on)]',
           'bg-[color:var(--andromeda-red-400)]',
-          'border-[color:var(--andromeda-red-400)]',
+          // Border is the family's 200 stop, held constant across every state —
+          // the same shape `default` uses (accent-200 on an accent fill). It was
+          // red-400, i.e. the fill colour, so destructive drew no visible frame
+          // and read as the only unringed filled variant.
+          'border-[color:var(--andromeda-red-200)]',
           'hover:bg-[color:var(--andromeda-red-400)]',
-          'hover:border-[color:var(--andromeda-red-300)]',
+          'hover:border-[color:var(--andromeda-red-200)]',
           'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-red-400)]',
           'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-red-400),0_0_var(--andromeda-glow,8px)_var(--andromeda-red-400)]',
           'active:bg-[color:var(--andromeda-red-400)]',
+          'active:border-[color:var(--andromeda-red-200)]',
         ],
         link: [
           'text-[color:var(--andromeda-text-primary)]',

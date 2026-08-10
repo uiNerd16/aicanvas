@@ -55,7 +55,7 @@ export const tokens = {
       300:   '#0FCFB2',
       400:   '#109380',
       500:   '#126059',
-      alpha: 'rgba(15, 207, 178, 0.4)',
+      alpha: 'rgba(15, 207, 178, 0.1)',
       // Text/icon ON an accent-filled surface. The one guaranteed-contrast
       // pairing token — every accent fill takes its foreground from here so
       // a theme retuning the family keeps labels legible. Defaults to the
@@ -69,7 +69,7 @@ export const tokens = {
       300:   '#FF3939',
       400:   '#B82424',
       500:   '#5A1818',
-      alpha: 'rgba(255, 57, 57, 0.4)',
+      alpha: 'rgba(255, 57, 57, 0.1)',
       on:    '#FFCFCF',
     },
     // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
@@ -79,7 +79,7 @@ export const tokens = {
       300:   '#FFA000',
       400:   '#B57009',
       500:   '#4D3712',
-      alpha: 'rgba(255, 160, 0, 0.4)',
+      alpha: 'rgba(255, 160, 0, 0.1)',
       on:    '#FFE5B5',
     },
     // Gradients fade to solid colors (no transparent stops).
@@ -156,6 +156,11 @@ export const tokens = {
   },
   spacing: {
     1: '4px',
+    // The one half-step. A 4px grid cannot express the gap between an icon and
+    // its label: 4px reads as a collision, 8px reads as two separate things.
+    // Added 2026-08-10 for exactly that, and it is the only sub-grid stop the
+    // system gets — reach for it inside a control, never for layout.
+    1.5: '6px',
     2: '8px',
     3: '12px',
     4: '16px',
