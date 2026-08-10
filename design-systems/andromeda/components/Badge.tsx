@@ -72,14 +72,20 @@ const badgeVariants = cva(
   ],
   {
     variants: {
-      // Same rungs and the same sm default as Tag, for the same reason: a badge
-      // is a status label inside a row or a cell, so md would grow every
-      // existing one. Sharing the ladder is what lets a badge sit level with a
-      // field when it is deliberately put in a control strip.
+      // LABEL LADDER, not the control ladder. 20 / 24 / 32 instead of the
+      // controls' 24 / 32 / 40 (maintainer's call, 2026-08-10). A tag or a badge
+      // is a label inside a row or a cell, not a control in a strip, and sitting
+      // on the same rungs as Button was the whole reason the three read as one
+      // object. The default stays `sm`, so the common case drops 24px -> 20px.
+      //
+      // Heights come from the SPACING scale rather than a new token family:
+      // 20/24/32 are already spacing 5/6/8, and inventing a parallel ladder for
+      // three numbers the grid already names would be a token nobody reads.
+      // Padding and text steps are unchanged — only the box got shorter.
       size: {
-        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
-        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
+        sm: 'h-[var(--andromeda-5)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
+        md: 'h-[var(--andromeda-6)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
+        lg: 'h-[var(--andromeda-8)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
       },
       variant: {
         default: [
