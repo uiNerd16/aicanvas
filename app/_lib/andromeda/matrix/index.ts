@@ -8,6 +8,7 @@ import { badge } from './badge'
 import { button } from './button'
 import { card } from './card'
 import { checkbox } from './checkbox'
+import { contourBackdrop } from './contour-backdrop'
 import { cornerMarkers } from './corner-markers'
 import { dataTable } from './data-table'
 import { dateRangePicker } from './date-range-picker'
@@ -15,7 +16,9 @@ import { drawer } from './drawer'
 import { emptyState } from './empty-state'
 import { funnelChart } from './funnel-chart'
 import { gauge } from './gauge'
+import { gridBackdrop } from './grid-backdrop'
 import { heatGrid } from './heat-grid'
+import { horizonBackdrop } from './horizon-backdrop'
 import { iconButton } from './icon-button'
 import { input } from './input'
 import { mediaCard } from './media-card'
@@ -41,15 +44,17 @@ import { tooltip } from './tooltip'
 import { trendChart } from './trend-chart'
 import { userCard } from './user-card'
 import { userMenu } from './user-menu'
+import { voidBackdrop } from './void-backdrop'
 import { waveform } from './waveform'
 
 export const SPECS: readonly MatrixSpec[] = [
-  alert, avatar, badge, button, card, checkbox, cornerMarkers, dataTable,
-  dateRangePicker, drawer, emptyState, funnelChart, gauge, heatGrid, iconButton,
-  input, mediaCard, metricChart, musicPlayer, navItem, panelHeader, panelMenu,
-  planet, progressBar, radarChart, radio, searchField, segmentedControl, slider,
-  spinner, statTile, table_, tag, textarea, toggle, tooltip, trendChart,
-  userCard, userMenu, waveform,
+  alert, avatar, badge, button, card, checkbox, contourBackdrop, cornerMarkers,
+  dataTable, dateRangePicker, drawer, emptyState, funnelChart, gauge,
+  gridBackdrop, heatGrid, horizonBackdrop, iconButton, input, mediaCard,
+  metricChart, musicPlayer, navItem, panelHeader, panelMenu, planet, progressBar,
+  radarChart, radio, searchField, segmentedControl, slider, spinner, statTile,
+  table_, tag, textarea, toggle, tooltip, trendChart, userCard, userMenu,
+  voidBackdrop, waveform,
 ]
 
 export const SPEC_BY_SLUG: Record<string, MatrixSpec> = Object.fromEntries(

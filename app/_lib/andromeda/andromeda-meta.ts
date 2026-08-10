@@ -61,6 +61,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/checkbox.png?v=3',
   },
   {
+    slug: 'contour-backdrop',
+    name: 'ContourBackdrop',
+    description:
+      'Topographic hairlines from a deterministic noise field, sliced at evenly spaced thresholds by a single SVG filter. Seeded, so the same terrain renders every build. Fills its nearest positioned ancestor, or the viewport with fixed.',
+    sourceFile: 'ContourBackdrop.tsx',
+  },
+  {
     slug: 'corner-markers',
     name: 'Corner Markers',
     description:
@@ -109,12 +116,26 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/gauge.png?v=1',
   },
   {
+    slug: 'grid-backdrop',
+    name: 'GridBackdrop',
+    description:
+      'The blueprint substrate: a hairline measuring grid with an optional heavier major line every Nth step, masked so it dies before the frame. Page background with fixed, section background without.',
+    sourceFile: 'GridBackdrop.tsx',
+  },
+  {
     slug: 'heat-grid',
     name: 'Heat Grid',
     description:
       'A 2-D matrix fill gauge — the cousin of ProgressBar. Cells fill from the bottom-centre outward in a widening pyramid as the value rises, with a dim-to-bright accent ramp toward the wave front. Scroll-gated fill, optional percentage readout.',
     sourceFile: 'HeatGrid.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/heat-grid.png?v=4',
+  },
+  {
+    slug: 'horizon-backdrop',
+    name: 'HorizonBackdrop',
+    description:
+      'A receding ground plane: hairlines that crowd at a horizon and open out toward the bottom edge, fading as fast as they converge. Section scale, for a chart row or a template header to sit on.',
+    sourceFile: 'HorizonBackdrop.tsx',
   },
   {
     slug: 'icon-button',
@@ -139,6 +160,13 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
       'Self-framed single-series telemetry panel: corner brackets, kicker and title header, and a status badge around one fitted-domain area chart. The fitted y-domain keeps non-zero-floor readings like altitude or latency filling the plot instead of flattening into a sliver.',
     sourceFile: 'MetricChart.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/metric-chart.png?v=1',
+  },
+  {
+    slug: 'void-backdrop',
+    name: 'VoidBackdrop',
+    description:
+      'Directional falloff from surface.base to black, from one of four light origins. Nothing to read: it buys edge contrast back for hairline panels and sits under the structural backdrops.',
+    sourceFile: 'VoidBackdrop.tsx',
   },
   {
     slug: 'waveform',

@@ -62,6 +62,13 @@ export const CATEGORY: Record<string, string> = {
   'media-card': 'Media',
   'music-player': 'Media',
 
+  // Backdrops — page- and section-scale substrate. Structural (grid, horizon,
+  // contour) plus one falloff (void); one structural per surface.
+  'grid-backdrop': 'Backdrops',
+  'void-backdrop': 'Backdrops',
+  'horizon-backdrop': 'Backdrops',
+  'contour-backdrop': 'Backdrops',
+
   // Visualization
   planet: 'Visualization',
 }
