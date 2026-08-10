@@ -431,7 +431,16 @@ export function ItemsPanel() {
                       padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`,
                       verticalAlign: 'middle',
                     }}
-                    onClick={(e) => e.stopPropagation()}
+                    // The cell is bigger than the box, so the padding around it
+                    // used to be a dead zone: stopPropagation killed the row's
+                    // own click and nothing replaced it. A click that lands on
+                    // the CELL itself now toggles; a click that lands on the
+                    // checkbox is already handled by the checkbox, and
+                    // stopPropagation is what keeps that from toggling twice.
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (e.target === e.currentTarget) toggleRow(r.id);
+                    }}
                   >
                     <Checkbox
                       aria-label={`Select ${r.id}`}

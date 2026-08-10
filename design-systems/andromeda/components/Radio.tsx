@@ -56,6 +56,12 @@ const boxVariants = cva(
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
+    // A control has to look the same wherever it lands. The tints are painted
+    // as a background-IMAGE layer over this opaque base, so the box composites
+    // against surface.raised every time instead of against whatever row it sits
+    // in — a Service Order row changes colour on hover and selection, and a
+    // translucent background-color made the checkbox change with it.
+    'bg-[color:var(--andromeda-surface-raised)]',
     'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
   {
@@ -63,20 +69,23 @@ const boxVariants = cva(
       // Mirrors Checkbox exactly, so a radio and a checkbox at the same size
       // are the same square. md is today's 16px box.
       size: {
-        sm: 'w-[12px] h-[12px]',
         md: 'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
         lg: 'w-[length:var(--andromeda-5)] h-[length:var(--andromeda-5)]',
       },
       state: {
         unchecked: [
-          'bg-[color:var(--andromeda-surface-raised)]',
+          'bg-[image:linear-gradient(var(--andromeda-surface-alpha),var(--andromeda-surface-alpha))]',
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         checked: [
-          'bg-[color:var(--andromeda-accent-500)]',
-          'border-[color:var(--andromeda-accent-300)]',
-          'hover:border-[color:var(--andromeda-accent-100)]',
+          // The BOX is a surface, so it takes the family tint; the MARK inside
+          // carries the state and stays solid and bright. Border is accent-500,
+          // the deep stop, so the perimeter reads as an edge rather than a
+          // second signal competing with the mark. Hover still brightens it.
+          'bg-[image:linear-gradient(var(--andromeda-accent-alpha),var(--andromeda-accent-alpha))]',
+          'border-[color:var(--andromeda-accent-500)]',
+          'hover:border-[color:var(--andromeda-accent-300)]',
         ],
       },
       disabled: {
@@ -94,14 +103,12 @@ const boxVariants = cva(
 
 // ponytail: identity constants — mark geometry, kept proportional to the box
 const MARK_FOR_SIZE = {
-  sm: 'block w-[4px] h-[4px]',
   md: 'block w-[6px] h-[6px]',
   lg: 'block w-[8px] h-[8px]',
 };
 
 // Label text steps with the box, matching Checkbox.
 const LABEL_TEXT = {
-  sm: 'text-[length:var(--andromeda-text-xs)]',
   md: 'text-[length:var(--andromeda-text-sm)]',
   lg: 'text-[length:var(--andromeda-text-md)]',
 };
@@ -174,7 +181,7 @@ export function RadioGroup({
  * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled and standalone.
  * @property {(next: boolean) => void} [onCheckedChange] Handler called with the new checked state when toggled.
  * @property {string}  [label]               Text label rendered beside the box.
- * @property {'sm'|'md'|'lg'} [size='md']    Rung on the shared control ladder. Scales the box, its mark and the label together (12, 16 and 20px boxes), matching Checkbox at the same value.
+ * @property {'md'|'lg'} [size='md']    Two rungs, 16 and 20px boxes, scaling the box, its mark and the label together, matching Checkbox at the same value. The 12px `sm` rung was dropped 2026-08-10 across Checkbox, Radio and Toggle together.
  * @property {boolean} [disabled]            Disables the radio and blocks interaction.
  * @property {string}  [className]           Extra classes merged onto the visual box.
  * @property {React.CSSProperties} [style]   Inline styles merged onto the wrapper.

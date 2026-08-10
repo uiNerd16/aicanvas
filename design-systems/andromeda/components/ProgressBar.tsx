@@ -26,17 +26,23 @@ const GAP_COL    = 3;   // gap between columns
 // far to the right of where the bar actually ends.
 const STRIP_W    = BARS * SQUARE_W + (BARS - 1) * GAP_COL;
 
+// A lit segment is the family's DEEPEST solid stop, -500, with no border
+// (2026-08-10). The route here was: -400 solid (too loud) -> the 0.1 tint
+// (1.09:1 against the track, effectively invisible once the border came off)
+// -> -500. A bar is data and has no ink of its own, so the fill has to carry
+// the whole reading; -500 is the quietest fill that still does. It is the same
+// stop the primary button uses.
 const variantConfig = {
   default: {
-    activeColor:  'var(--andromeda-accent-400)',
+    activeColor:  'var(--andromeda-accent-500)',
     activeBorder: 'var(--andromeda-accent-400)',
   },
   warning: {
-    activeColor:  'var(--andromeda-orange-400)',
+    activeColor:  'var(--andromeda-orange-500)',
     activeBorder: 'var(--andromeda-orange-400)',
   },
   fault: {
-    activeColor:  'var(--andromeda-red-400)',
+    activeColor:  'var(--andromeda-red-500)',
     activeBorder: 'var(--andromeda-red-400)',
   },
 };
@@ -155,8 +161,10 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     transform: 'skewX(-12deg)',
                     background: active
                       ? cfg.activeColor
-                      : 'var(--andromeda-surface-overlay)',
-                    border: `var(--andromeda-border-width, 1px) solid ${active ? cfg.activeBorder : 'var(--andromeda-border-subtle)'}`,
+                      // one step up from surface.overlay, so the unlit track
+                      // reads as a rail rather than a hole in the card
+                      : 'var(--andromeda-surface-hover)',
+                    border: 'none',
                     boxShadow: 'none',
                     transition: 'background var(--andromeda-duration-cascade) var(--andromeda-easing-out), box-shadow var(--andromeda-duration-cascade) var(--andromeda-easing-out), border-color var(--andromeda-duration-cascade) var(--andromeda-easing-out)',
                     transitionDelay: `calc(${Math.floor(barIndex / 3)} * var(--andromeda-stagger-progressbar))`,

@@ -76,7 +76,12 @@ const buttonVariants = cva(
     '[font-family:var(--andromeda-font-mono)]',
     'font-[number:var(--andromeda-weight-medium)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
-    '[line-height:var(--andromeda-leading-tight)]',
+    // leading-none, not tight. A fixed-height control centres its label in
+    // the leftover space, so any multiplier above 1 makes that leftover
+    // fractional: 1.1 gave 5.5 / 8.4 / 11.3px of clearance. At 1 the label
+    // box IS the font size and the clearance is 6 / 9 / 12px. Uppercase mono
+    // has no descender to protect at these sizes.
+    '[line-height:var(--andromeda-leading-none,1)]',
     // motion — colours/border/shadow tween via CSS at duration.normal so the
     // focus ring fades in (was previously a hard snap). Transform/lift/press
     // are driven by framer-motion's whileHover/whileTap on the motion.button

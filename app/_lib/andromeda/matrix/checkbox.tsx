@@ -4,7 +4,7 @@ import { CONTROL_STATES, type MatrixSpec } from './types'
 export const checkbox: MatrixSpec = {
   slug: 'checkbox',
   Component: Checkbox,
-  sizes: ['sm', 'md', 'lg'],
+  sizes: ['md', 'lg'],
   baseProps: { label: 'Pre-flight' },
   variants: [
     { label: 'Unchecked', props: {} },

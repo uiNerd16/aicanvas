@@ -18,7 +18,9 @@ import { tokens } from '../tokens';
 // with the field, and the text has to clear it. Padding-left is the rung's own
 // padInset twice over plus the glyph, so the space between icon and text is the
 // same inset the field already carries on its four sides.
-const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
+// The shared control-icon ladder, same as Button and IconButton: 16/18/20,
+// which is 3 / 6 / 9px of clearance at every rung. It was 12/16/20 (5 / 7 / 9).
+const ICON_FOR_SIZE = { sm: tokens.iconSize.sm, md: tokens.iconSize.md, lg: tokens.iconSize.lg };
 
 // `size` arrives from a caller and is read straight into a style value below,
 // so an unrecognised string throws rather than degrades. Same guard the other

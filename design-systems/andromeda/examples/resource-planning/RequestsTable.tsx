@@ -320,8 +320,11 @@ export function RequestsTable() {
                   className="rp-row"
                 >
                   {/* stopPropagation so a direct checkbox click doesn't ALSO
-                      trigger the row onClick (which would toggle twice). */}
-                  <td onClick={(e) => e.stopPropagation()} style={{ position: 'relative', padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
+                      trigger the row onClick (which would toggle twice). The
+                      cell is bigger than the box, so a click on the cell ITSELF
+                      falls through to the same toggle instead of dying in the
+                      padding. */}
+                  <td onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) toggleRow(key); }} style={{ position: 'relative', padding: `${tokens.spacing[3]} 0 ${tokens.spacing[3]} ${tokens.spacing[3]}`, verticalAlign: 'top' }}>
                     {/* Selection edge bar — slides in from left when the row
                         is selected. Anchored to the first TD which provides
                         the relative positioning context. transformOrigin:left

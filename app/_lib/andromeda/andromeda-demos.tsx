@@ -702,7 +702,7 @@ function CheckboxDemo() {
         <Checkbox label="Disabled checked" disabled defaultChecked />
       </Row>
       <Row label="Sizes">
-        <SizeRamp render={(s) => <Checkbox size={s} label={s} defaultChecked />} />
+        <SizeRamp sizes={['md', 'lg']} render={(s) => <Checkbox size={s} label={s} defaultChecked />} />
       </Row>
     </div>
   )
@@ -725,7 +725,7 @@ function RadioDemo() {
         </RadioGroup>
       </Row>
       <Row label="Sizes">
-        <SizeRamp render={(s) => <Radio size={s} label={s} defaultChecked />} />
+        <SizeRamp sizes={['md', 'lg']} render={(s) => <Radio size={s} label={s} defaultChecked />} />
       </Row>
       <Row label="Standalone">
         <Radio label="Standalone" defaultChecked />
@@ -813,7 +813,7 @@ function ToggleDemo() {
         <Toggle label="Disabled on" disabled defaultChecked />
       </Row>
       <Row label="Sizes">
-        <SizeRamp render={(s) => <Toggle size={s} label={s} defaultChecked />} />
+        <SizeRamp sizes={['md', 'lg']} render={(s) => <Toggle size={s} label={s} defaultChecked />} />
       </Row>
     </div>
   )

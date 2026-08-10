@@ -53,6 +53,12 @@ const boxVariants = cva(
     'transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
     'active:scale-[0.88]',
+    // A control has to look the same wherever it lands. The tints are painted
+    // as a background-IMAGE layer over this opaque base, so the box composites
+    // against surface.raised every time instead of against whatever row it sits
+    // in — a Service Order row changes colour on hover and selection, and a
+    // translucent background-color made the checkbox change with it.
+    'bg-[color:var(--andromeda-surface-raised)]',
     'focus-visible:outline-none',
     'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
@@ -62,20 +68,23 @@ const boxVariants = cva(
       // label rather than an outer height. md is exactly today's 16px box with
       // 12px label, which is why the default rendering does not move.
       size: {
-        sm: 'w-[12px] h-[12px]',
         md: 'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
         lg: 'w-[length:var(--andromeda-5)] h-[length:var(--andromeda-5)]',
       },
       state: {
         unchecked: [
-          'bg-[color:var(--andromeda-surface-raised)]',
+          'bg-[image:linear-gradient(var(--andromeda-surface-alpha),var(--andromeda-surface-alpha))]',
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         checked: [
-          'bg-[color:var(--andromeda-accent-500)]',
-          'border-[color:var(--andromeda-accent-300)]',
-          'hover:border-[color:var(--andromeda-accent-100)]',
+          // The BOX is a surface, so it takes the family tint; the MARK inside
+          // carries the state and stays solid and bright. Border is accent-500,
+          // the deep stop, so the perimeter reads as an edge rather than a
+          // second signal competing with the mark. Hover still brightens it.
+          'bg-[image:linear-gradient(var(--andromeda-accent-alpha),var(--andromeda-accent-alpha))]',
+          'border-[color:var(--andromeda-accent-500)]',
+          'hover:border-[color:var(--andromeda-accent-300)]',
         ],
       },
       disabled: {
@@ -102,11 +111,10 @@ const labelClass = cn(
 // Label text and tick glyph step with the box, so the whole row reads as one
 // density rather than a small box beside a fixed-size word.
 const LABEL_TEXT = {
-  sm: 'text-[length:var(--andromeda-text-xs)]',
   md: 'text-[length:var(--andromeda-text-sm)]',
   lg: 'text-[length:var(--andromeda-text-md)]',
 };
-const TICK_FOR_SIZE = { sm: 9, md: 12, lg: 15 };
+const TICK_FOR_SIZE = { md: 12, lg: 15 };
 
 /**
  * @typedef {object} CheckboxProps
@@ -114,7 +122,7 @@ const TICK_FOR_SIZE = { sm: 9, md: 12, lg: 15 };
  * @property {boolean} [defaultChecked=false]  Uncontrolled initial state.
  * @property {(next: boolean) => void} [onCheckedChange]  Handler called with the next checked state when toggled.
  * @property {string}  [label]                 Optional inline label.
- * @property {'sm'|'md'|'lg'} [size='md']      Rung on the shared control ladder. Scales the box, its tick and the label together (12, 16 and 20px boxes); md is the long-standing default rendering.
+ * @property {'md'|'lg'} [size='md']      Two rungs, 16 and 20px boxes, scaling the box, its tick and the label together. There was a third, `sm` at 12px; it was dropped 2026-08-10 with zero call sites — at that size the box stopped reading as a checkbox and the label fell to 10px.
  * @property {boolean} [disabled=false]        Disables the checkbox and blocks interaction.
  * @property {string}  [className]             Extra classes merged onto the visual box.
  * @property {React.CSSProperties} [style]     Inline styles applied to the outer wrapper.

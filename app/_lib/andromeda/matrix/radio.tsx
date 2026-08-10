@@ -4,7 +4,7 @@ import { CONTROL_STATES, type MatrixSpec } from './types'
 export const radio: MatrixSpec = {
   slug: 'radio',
   Component: Radio,
-  sizes: ['sm', 'md', 'lg'],
+  sizes: ['md', 'lg'],
   baseProps: { label: 'Alternate' },
   variants: [
     { label: 'Off', props: {} },

@@ -16,6 +16,11 @@ import { cn, andromedaVars } from './lib/utils';
 const avatarVariants = cva(
   [
     'inline-flex items-center justify-center select-none shrink-0',
+    // leading-none: the initials had no line-height at all, so they took the
+    // browser default (~1.2) and centred against a fractional box. At 1 the
+    // text box is the font size and the clearance is 6 / 9 / 12px, the same
+    // numbers Button and Input land on at the same rungs.
+    '[line-height:var(--andromeda-leading-none,1)]',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'bg-[color:var(--andromeda-surface-overlay)]',

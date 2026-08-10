@@ -27,7 +27,10 @@ const dirConfig = {
     icon:  ArrowDown,
     label: 'DN',
     color: tokens.color.accent[100],
-    bg:    tokens.color.accent[500],
+    // The tile is a SURFACE carrying a tone, so it takes the family tint like
+    // Alert, Badge and Tag. It was the solid accent-500 stop, which made these
+    // tiles the loudest thing on the panel once everything around them softened.
+    bg:    tokens.color.accent.alpha,
     border:tokens.color.accent[400],
   },
   up: {
@@ -41,7 +44,7 @@ const dirConfig = {
     icon:  Warning,
     label: '!',
     color: tokens.color.orange[300],
-    bg:    tokens.color.orange[500],
+    bg:    tokens.color.orange.alpha,
     border:tokens.color.orange[400],
   },
 };

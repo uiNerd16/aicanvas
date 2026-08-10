@@ -40,6 +40,12 @@ const trackVariants = cva(
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[background-color,border-color,box-shadow] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
     'cursor-pointer',
+    // A control has to look the same wherever it lands. The tints are painted
+    // as a background-IMAGE layer over this opaque base, so the box composites
+    // against surface.raised every time instead of against whatever row it sits
+    // in — a Service Order row changes colour on hover and selection, and a
+    // translucent background-color made the checkbox change with it.
+    'bg-[color:var(--andromeda-surface-raised)]',
     'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
   ],
   {
@@ -48,20 +54,23 @@ const trackVariants = cva(
       // a token. Each rung keeps the same 2px inset all round, so the thumb
       // travel below is always trackWidth - thumb - 4. md is today's 34x18.
       size: {
-        sm: 'w-[26px] h-[14px]',
         md: 'w-[34px] h-[18px]',
         lg: 'w-[42px] h-[22px]',
       },
       state: {
         off: [
-          'bg-[color:var(--andromeda-surface-raised)]',
+          'bg-[image:linear-gradient(var(--andromeda-surface-alpha),var(--andromeda-surface-alpha))]',
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
         ],
         on: [
-          'bg-[color:var(--andromeda-accent-500)]',
-          'border-[color:var(--andromeda-accent-300)]',
-          'hover:border-[color:var(--andromeda-accent-100)]',
+          // The BOX is a surface, so it takes the family tint; the MARK inside
+          // carries the state and stays solid and bright. Border is accent-500,
+          // the deep stop, so the perimeter reads as an edge rather than a
+          // second signal competing with the mark. Hover still brightens it.
+          'bg-[image:linear-gradient(var(--andromeda-accent-alpha),var(--andromeda-accent-alpha))]',
+          'border-[color:var(--andromeda-accent-500)]',
+          'hover:border-[color:var(--andromeda-accent-300)]',
         ],
       },
       disabled: {
@@ -86,7 +95,6 @@ const thumbVariants = cva(
   {
     variants: {
       size: {
-        sm: 'w-[8px] h-[8px]',
         md: 'w-[12px] h-[12px]',
         lg: 'w-[16px] h-[16px]',
       },
@@ -99,7 +107,6 @@ const thumbVariants = cva(
     // on each side. Splitting it out of `state` is what keeps the thumb landing
     // flush at every size instead of only at md.
     compoundVariants: [
-      { size: 'sm', state: 'on', class: 'left-[14px]' },
       { size: 'md', state: 'on', class: 'left-[18px]' },
       { size: 'lg', state: 'on', class: 'left-[22px]' },
     ],
@@ -109,7 +116,6 @@ const thumbVariants = cva(
 
 // Label text steps with the switch, matching Checkbox and Radio.
 const LABEL_TEXT = {
-  sm: 'text-[length:var(--andromeda-text-xs)]',
   md: 'text-[length:var(--andromeda-text-sm)]',
   lg: 'text-[length:var(--andromeda-text-md)]',
 };
@@ -128,7 +134,7 @@ const labelClass = cn(
  * @property {boolean} [defaultChecked=false] Initial checked state when uncontrolled.
  * @property {(next: boolean) => void} [onCheckedChange] Handler called with the next checked state whenever the switch toggles.
  * @property {string}  [label] Optional text rendered beside the switch and linked to it via htmlFor.
- * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder. Scales the track, thumb travel and label together (26x14, 34x18, 42x22); md is today's switch.
+ * @property {'md'|'lg'} [size='md'] Two rungs, 34x18 and 42x22, scaling the track, thumb travel and label together. The 26x14 `sm` rung was dropped 2026-08-10 across Checkbox, Radio and Toggle together.
  * @property {boolean} [disabled=false] Disables interaction and dims the switch.
  * @property {string}  [className] Extra classes merged onto the visual track.
  * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.

@@ -71,7 +71,9 @@ const badgeVariants = cva(
     // the two read as the same object.
     'font-[number:var(--andromeda-weight-regular)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
-    '[line-height:var(--andromeda-leading-normal)]',
+    // leading-none: at 1.5 the label box was 15 / 18 / 21px inside a
+    // 20 / 24 / 32px chip, leaving 1.5 / 2 / 4.5px. Same reasoning as Button.
+    '[line-height:var(--andromeda-leading-none,1)]',
   ],
   {
     variants: {

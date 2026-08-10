@@ -294,9 +294,15 @@ export const tokens = {
   //              vertical half. A field with NO pinned height (a textarea) has
   //              to apply it on all four sides as real padding instead.
   control: {
-    sm: { height: '24px', padX: '12px', text: '10px', padInset: '6px' },
-    md: { height: '32px', padX: '16px', text: '12px', padInset: '9px' },
-    lg: { height: '40px', padX: '20px', text: '14px', padInset: '12px' },
+    // Heights set 2026-08-10: 26 / 30 / 34, a 4px step. They were 24 / 32 / 40.
+    // The rung is chosen for the CLEARANCE it leaves, not for the number itself:
+    // minus two 1px borders the content boxes are 24 / 28 / 32, so a label sits
+    // at 7 / 8 / 9px and an icon at 4 / 5 / 6px, whole numbers stepping by one.
+    // padInset stays paired to the label clearance so a field's text starts
+    // where a button's does.
+    sm: { height: '26px', padX: '12px', text: '10px', padInset: '7px' },
+    md: { height: '30px', padX: '16px', text: '12px', padInset: '8px' },
+    lg: { height: '34px', padX: '20px', text: '14px', padInset: '9px' },
   },
   layout: {
     sidebarWidth: '224px',

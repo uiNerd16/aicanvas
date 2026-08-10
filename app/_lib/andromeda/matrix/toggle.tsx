@@ -4,7 +4,7 @@ import { CONTROL_STATES, type MatrixSpec } from './types'
 export const toggle: MatrixSpec = {
   slug: 'toggle',
   Component: Toggle,
-  sizes: ['sm', 'md', 'lg'],
+  sizes: ['md', 'lg'],
   baseProps: { label: 'Autopilot' },
   variants: [
     { label: 'Off', props: {} },

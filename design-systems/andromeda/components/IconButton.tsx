@@ -129,10 +129,13 @@ const iconButtonVariants = cva(
   },
 );
 
-// ponytail: not tokens.iconSize — that scale (12/16/18/22) doesn't contain 14,
-// and mapping by shifted names (md button -> iconSize.sm) would drift if the
+// The shared control-icon ladder: iconSize.sm/md/lg = 16/18/20, the same three
+// values Button and Input use, so an icon sits 3 / 6 / 9px from the edge in
+// every control at the same rung. It was 14/16/20, which put IconButton on its
+// own rhythm (4 / 7 / 9) for no reason anyone recorded.
+// (was: not tokens.iconSize because that scale didn't contain 14, and
 // icon grid is retuned. Deliberate per-button-size glyph scale.
-const ICON_SIZE = { sm: 14, md: 16, lg: 20 };
+const ICON_SIZE = { sm: tokens.iconSize.sm, md: tokens.iconSize.md, lg: tokens.iconSize.lg };
 
 /**
  * @typedef {object} IconButtonProps
