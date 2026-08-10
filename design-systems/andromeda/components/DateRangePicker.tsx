@@ -102,7 +102,18 @@ function buildMonthGrid(viewDate) {
 
 function formatRangeChip(range) {
   if (!range || !range.start) return 'Any dates';
-  const fmt = (d) => `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
+  // Day zero-padded so the DAY NUMBERS cannot change the chip's width. The
+  // trigger is shrink-to-fit and the panel now hangs from its edges, so a
+  // 1-digit day used to resize the chip, and with it the open calendar, under
+  // the pointer, mid-pick. Every date is exactly six mono characters now.
+  // What still moves the chip is a change of SHAPE, not of digits: a preset
+  // label appearing or clearing, and a range collapsing to a single date.
+  // Those report a real state change rather than formatting noise, so they are
+  // left to move; freezing them would need a min-width on the whole chip.
+  // A ch-based min-width fits the mono system too, but it is only exact if the
+  // arrow glyph is genuinely monospaced; equal character counts hold whichever
+  // font the arrow resolves to, and leave no dead air after a short chip.
+  const fmt = (d) => `${MONTHS_SHORT[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')}`;
   if (!range.end || isSameDay(range.start, range.end)) return fmt(range.start);
   return `${fmt(range.start)} → ${fmt(range.end)}`;
 }
@@ -153,31 +164,25 @@ function PickerStyles() {
       .adp-day:focus-visible {
         box-shadow: 0 0 0 1px var(--andromeda-accent-400);
       }
-      /* Phone fit — below sm a trigger-anchored, right-pinned popover still
-         overflowed off-screen (the trigger's own width pushed it past the
-         edge). Instead make the picker root full-width so its absolutely-
-         positioned panel spans the whole component, and pin the panel to BOTH
-         edges (left:0; right:0). The calendar then matches the component width
-         and can never overflow sideways. The fixed 7×32px grid goes fluid (1fr
-         columns, cells fill their track) so it grows to fill that width.
-         !important: the root display, panel offsets, grid columns and cell box
-         are all inline styles, so the responsive override must outrank them
+      /* Phone fit — the panel spans the trigger at every width now (see its
+         own left/right pin), so this block is only what phones need ON TOP of
+         that: below sm a popover anchored to a narrow trigger near a screen
+         edge still overflowed off-screen, so the picker root goes full-width
+         and the panel spans the whole component instead. Dropping the 32px
+         column floor drops the panel's min-content with it, so the panel's own
+         minimum falls away too and the calendar can shrink onto a small phone.
+         Below that floor the month header is what sets min-content, not the
+         grid. Tight cells beat a calendar hanging off the screen. !important:
+         the root display is an inline style and the grid columns are set in
+         this same stylesheet, so the responsive override must outrank both
          (the Andromeda interaction-states rules). */
       ${mq.sm} {
         .adp-root {
           display: flex !important;
           width: 100% !important;
         }
-        .adp-panel {
-          left: 0 !important;
-          right: 0 !important;
-        }
         .adp-grid {
           grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-        }
-        .adp-day {
-          width: 100% !important;
-          min-width: 0 !important;
         }
       }
     `}</style>
@@ -401,7 +406,19 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
           style={{
             position: 'absolute',
             top: `calc(100% + ${tokens.spacing[2]})`,
+            // Pinned to BOTH edges of the root, which shrink-wraps the trigger:
+            // the calendar is exactly as wide as the chip it hangs from. A long
+            // chip ("Last month · Jul 20 → Aug 20") used to overhang a panel
+            // sized by its own 7×32px grid, which reads as a misalignment.
+            // `min-content` is the floor for the other direction: under a SHORT
+            // chip ("Aug 01 → Aug 14") the panel keeps its natural width and
+            // overhangs to the right instead of squeezing the day cells below
+            // 32px, where the grid stops reading as a calendar. The floor is
+            // computed from the grid's own column minimum rather than restated
+            // here, so retuning the cell token moves both together.
             left: 0,
+            right: 0,
+            minWidth: 'min-content',
             zIndex: 1000,
             boxSizing: 'border-box',
             background: V.surfaceRaised,
@@ -482,7 +499,11 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
+              // Fluid columns over a 32px floor: they fill whatever width the
+              // panel took from the trigger, and the floor is what the panel's
+              // own `min-content` minimum resolves to. Fixed 7×32px tracks
+              // would leave a gap under a wide trigger.
+              gridTemplateColumns: `repeat(7, minmax(var(--andromeda-8, 32px), 1fr))`,
               gap: tokens.spacing[1],
             }}
           >
@@ -508,7 +529,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             className="adp-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(7, var(--andromeda-8, 32px))`,
+              gridTemplateColumns: `repeat(7, minmax(var(--andromeda-8, 32px), 1fr))`,
               gap: tokens.spacing[1],
             }}
             onMouseLeave={() => { if (anchor) setHover(anchor); }}
@@ -527,7 +548,11 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
 
               const cellStyle = {
                 position: 'relative',
-                width:  `var(--andromeda-8, 32px)`,
+                // Fills its column (the track carries the 32px minimum now);
+                // the height stays fixed, so a wide panel buys wider cells and
+                // never taller ones — the band, the edge cells and the hover
+                // preview all paint per cell, so they follow the column.
+                width:  '100%',
                 height: `var(--andromeda-8, 32px)`,
                 display: 'inline-flex',
                 alignItems: 'center',

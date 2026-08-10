@@ -235,6 +235,28 @@ describe('andromeda matrix — overlay rule', () => {
       }
     }
   })
+
+  // The renderer reserves the panel's room as padding on ONE side, and the
+  // upward rule hands the bottom back to the body's floor — so a card holding
+  // both an upward and a downward panel at once would silently lose its
+  // downward room. Nothing declares that today; this is the tripwire for the
+  // day something does, cheaper than machinery for a case that does not exist.
+  // Per CASE, never per spec: user-menu and user-card each declare an "Open up"
+  // AND an "Open down", which is fine — they are separate cards.
+  it('no single case opens a panel both up and down', () => {
+    for (const spec of SPECS) {
+      for (const kind of ['variant', 'state'] as const) {
+        for (const c of kind === 'variant' ? spec.variants : spec.states) {
+          const slice = canvas(markup(spec), kind, c.label)
+          if (!slice) continue
+          expect(
+            slice.includes('data-placement="top"') && slice.includes('data-placement="bottom"'),
+            `${spec.slug}/${c.label} mounts an upward AND a downward panel in one card — the reserve is one-sided, so split it into two cases or teach Matrix.tsx to reserve both ends`,
+          ).toBe(false)
+        }
+      }
+    }
+  })
 })
 
 describe('andromeda matrix — the gallery cards cannot drift', () => {

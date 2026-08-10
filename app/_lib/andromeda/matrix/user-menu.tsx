@@ -19,10 +19,12 @@ export const userMenu: MatrixSpec = {
   slug: 'user-menu',
   sizes: ['sm', 'md', 'lg'],
   overflow: true,
+  // Room for the open panel is NOT reserved here: a box under the trigger pins
+  // the trigger to its top, so it could only ever add room BELOW an upward
+  // menu. The renderer takes the room from the mounted panel instead, on the
+  // side that panel opens toward, which also covers a case opened by clicking.
   render: (size, props) => (
-    <div style={{ minHeight: props.staticOpen ? 260 : undefined }}>
-      <UserMenu name="OPS-01" src={SRC} status="online" size={size} items={ITEMS} {...props} />
-    </div>
+    <UserMenu name="OPS-01" src={SRC} status="online" size={size} items={ITEMS} {...props} />
   ),
   variants: [
     { label: 'Closed', props: {} },

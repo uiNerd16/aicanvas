@@ -36,8 +36,14 @@ export const panelMenu: MatrixSpec = {
   slug: 'panel-menu',
   sizes: ['sm', 'md', 'lg'],
   overflow: true,
+  // A kebab is narrower than the menu it opens, so this box supplies the
+  // horizontal room. HEIGHT is not reserved here any more: the renderer takes
+  // it from the mounted panel, and a hardcoded minHeight on top of that reserve
+  // is pure dead space. minWidth 0 lets the box shrink below 220 instead of
+  // spilling past the card border on a phone — an open case turns the body's
+  // horizontal scroll off, so a box that cannot shrink has nowhere to go.
   render: (size, props) => (
-    <div style={{ width: 220, minHeight: 240 }}>
+    <div style={{ width: 220, minWidth: 0 }}>
       <PanelMenu size={size} align="left" items={ITEMS} ariaLabel="Panel options" {...props} />
     </div>
   ),

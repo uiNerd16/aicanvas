@@ -138,6 +138,7 @@ function CaseCard({
         {c.label}
       </div>
       <div
+        className="andromeda-matrix-body"
         style={{
           flex: 1,
           display: 'flex',
@@ -146,7 +147,12 @@ function CaseCard({
           justifyContent: 'center',
           gap: tokens.spacing[6],
           padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
-          overflowX: 'auto',
+          // A popover paints OUT of flow, and `auto` on one axis computes the
+          // other to `auto` as well — so this box became a scroll container and
+          // an open panel was clipped behind a scrollbar. Cases that open one
+          // let it through; everything else keeps the horizontal scroll for
+          // content wider than its column.
+          overflowX: spec.overflow ? 'visible' : 'auto',
         }}
       >
         {withBaseline ? (
@@ -291,7 +297,30 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
           banners) takes the full row instead — two charts side by side in a
           preview panel are two unreadable charts. */}
       <style>{`
-        .andromeda-matrix-grid { grid-template-columns: minmax(0, 1fr); }
+        /* A card sizes to its OWN content. Grid items STRETCH to the tallest
+           card in the row by default, so the moment one card reserved room for
+           an open panel its row-mate grew with it, and the row-mate's body
+           centred its content inside that new height: a trigger nobody clicked
+           slid to the middle of its card. Nothing moved relative to its card,
+           the card moved under it, which is why the answer is start on the
+           grid and not a change to the body's own centering. Same rule the
+           sibling system's .ds-showcase-grid carries.
+
+           What it COSTS is the shared bottom edge: every card now ends where
+           its own content ends, and the pinned-open rows LOSE that edge
+           permanently and lose it by a lot, because one card carries a 155 or
+           317 reserve its row-mate does not. Roughly 293px of it on
+           date-range-picker's variants row 2, roughly 131px on the user-card,
+           user-menu and panel-menu variant rows that hold one open panel, and
+           the same 293 arriving on date-range-picker's row 1 the moment the
+           Live calendar is opened. (user-menu's row 2 stays even by accident:
+           Open up's top 155 and Align start's bottom 155 sum alike.)
+           Everywhere else the gap is small: a caption line where a live demo
+           sits beside a size ladder (slider, segmented-control), a panel
+           beside a bare canvas (planet), a taller grid (heat-grid), an error
+           message (input, textarea). A ragged row is this rule working, not a
+           page half painted. */
+        .andromeda-matrix-grid { grid-template-columns: minmax(0, 1fr); align-items: start; }
         /* The card a coverage chip just jumped to. :target is the whole
            mechanism — no state, no script, and the browser clears it when you
            navigate away or click another chip. Accent is the system's own
@@ -307,6 +336,148 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
         .andromeda-matrix-case:target {
           border-color: ${TARGET_INK} !important;
           box-shadow: 0 0 0 1px ${TARGET_INK} !important;
+        }
+        /* A HOVER/FOCUS overlay reserves its room PERMANENTLY, which is the
+           whole difference from the three rules below, and why it comes FIRST:
+           all four are (0,2,0) with !important, so source ORDER is what settles
+           a body matching two of them, and the LARGER reserve has to win. A
+           card holding a tooltip and a menu keeps the menu's 155. (The upward
+           rule's unconditional bottom reset still takes a bottom tooltip's 33
+           with it, the same one-sidedness its own comment flags.)
+
+           Tooltip's bubble mounts on mouseenter OR focus, so a reserve keyed
+           off the mounted [role="tooltip"] would appear under the pointer and
+           the card would grow out from under it: a pointer in the top 9px of a
+           30px trigger gets mouseleave, unmount, shrink, mouseenter, and the
+           card oscillates. PERMANENCE is what stops that, not symmetry, so the
+           room stays one-sided like every other reserve here. The direction
+           comes from the WRAPPER, which Tooltip stamps at rest (its bubble
+           cannot be asked, it does not exist yet) — so anything that wraps a
+           child in Tooltip is served without touching this selector,
+           DataTable's mobile info bubble included.
+
+           TOOLTIP 33 = 25 + 8, the same shape as the sums below — bubble plus
+           its spacing[2] 8px offset from the trigger:
+             bubble = 2 x 1px border + 2 x spacing[1] 4 padding
+                      + size.xs 10 x 1.5 line box                     = 25
+           It REPLACES the body's spacing[6] 24px floor rather than dwarfing
+           it, so a top or bottom card grows by exactly 9px.
+
+           LEFT and RIGHT get nothing, on either axis. Vertically the bubble is
+           centred on the trigger and 25 is inside the 30px control.md square,
+           so it never reaches the body's padding. Horizontally it hangs off the
+           trigger's own edge and reaches
+             86 = 78 + 8, where
+             bubble = 2 x 1px border + 2 x spacing[3] 12 padding
+                      + "REFRESH", 7 glyphs x (10 x 0.6 advance +
+                        tracking.wider 0.14em = 7.4), 51.8 rounded up = 78
+           so 101 from the trigger's centre once its 15px half width is added.
+           The body CENTRES its content, so padding would move the trigger and
+           the card edge together and buy nothing; what has to hold is body
+           width >= 202. The narrowest two-column body the pages produce is 183
+           (768px viewport, 240px rail) with an overlay scrollbar, ~175 where
+           the platform paints a classic 15px one, so the bubble DOES overhang,
+           by 9.5 to 13px. That is harmless because of the case ORDER, not
+           because it fits: Left lands in column 1 and Right in column 2, so
+           each opens toward the preview panel's 48px padding and never across
+           the 12px grid gap. Reorder the four cases and that stops being true.
+           The remedy then is wide: true, which hands the spec a full-row card;
+           a min-width here would only spill the body past its own card border,
+           since the grid tracks are minmax(0, 1fr).
+
+           That 0.6 is JetBrains Mono's advance width, a FONT metric like the
+           1.5 line box below and just as much not an Andromeda token. The
+           label is spec copy, so re-add 78 if it changes; 33 holds for any
+           label that stays on one line. */
+        .andromeda-matrix-body:has([data-tooltip-placement="top"]) {
+          padding-top: 33px !important;
+        }
+        .andromeda-matrix-body:has([data-tooltip-placement="bottom"]) {
+          padding-bottom: 33px !important;
+        }
+        /* An open dropdown is position:absolute, so nothing above it can grow
+           to fit it — the card stayed short and the panel hung outside. Same
+           mechanism the sibling system uses: :has() reserves the room only
+           while a panel is actually mounted, so a closed case keeps its
+           compact card and the card GROWS the moment the dropdown appears.
+
+           The room is PADDING on the side the panel opens, never a min-height
+           on the body. min-height goes inert the moment natural flow height
+           passes it, and this body is flexWrap:'wrap': a size ladder of three
+           220px user-cards wraps to two or three lines in a component-page
+           column and already flows taller than any single-line reserve, so the
+           TOP line's upward panel escaped anyway. Padding is ADDED to the flow
+           height whatever the content does, so one number holds at one line or
+           four, at any body width — and the sums below no longer depend on
+           trigger height, caption height or wrap count at all.
+
+           !important is required for the same reason as :target above, and now
+           for exactly ONE property: the body writes PADDING inline, and inline
+           beats any rule. These rules touch nothing else. They used to
+           set align-items as well, on the theory that pinning the trigger to
+           the reserved edge made the fit exact; it did the opposite (flex-start
+           pins content AWAY from a bottom reserve, and flex-end threw away room
+           on the shorter card of a mixed-height line). Containment never needed
+           it: the panel hangs off its wrapper, and a wrapper's top can never
+           sit above the body's content top nor its bottom below the content
+           bottom, so the reserve holds under ANY alignment. The body keeps its
+           own inline centering.
+
+           The two numbers are ARITHMETIC — summed from tokens.ts and the
+           explicit px each component states, never measured off a screen — so
+           re-add them if a token or an item list moves. Each is just the PANEL
+           plus its spacing[2] 8px offset from the trigger. Both dwarf the
+           body's own spacing[6] 24px padding, which is the floor they replace.
+           Too tall is dead space; too short puts the panel outside the card.
+
+           MENU 155 = 147 + 8. The tallest mounted [role="menu"] is
+           UserMenuPanel at the longest list any case declares, 4 items + 1
+           separator, in BOTH user-menu and user-card (PanelMenu builds its own
+           panel: 123, or 145 counting its open submenu, so it never governs):
+             row   = iconSize.sm 16 + 2 x spacing[2] 8                    = 32
+                     (the size.xs label's line box is shorter than the icon,
+                     so the icon is what sets the row height)
+             panel = 4 x 32 + sep (1 + 2 x spacing[1] 4)
+                     + 2 x spacing[1] padding + 2 x 1px border            = 147
+
+           DIALOG 317 = 309 + 8. The only [role="dialog"] a case can mount is
+           DateRangePicker's calendar (Drawer portals to <body>, where :has()
+           cannot see it):
+             panel = 2 x 1px border + 2 x spacing[3] 12 padding
+                     + header 24 (the nav button box)
+                     + weekday row (size.xs 10 x 1.5 + 2 x spacing[1] 4) 23
+                     + day grid (6 rows x 32 + 5 x spacing[1] 4) 212
+                     + 2 x spacing[3] 12 column gap                       = 309
+           That 1.5 is the line-box factor, and its source is Tailwind
+           preflight's html { line-height: 1.5 } — NOT an Andromeda token.
+           Nothing in this chain sets one. */
+        .andromeda-matrix-body:has([role="dialog"], [role="menu"]) {
+          padding-bottom: 155px !important;
+        }
+        /* A month grid is taller than a menu. */
+        .andromeda-matrix-body:has([role="dialog"]) { padding-bottom: 317px !important; }
+        /* WHICH WAY the room goes. Padding-bottom is right only for a panel
+           that opens down; one that opens up would paint over the card header
+           with its room sitting unused underneath. So an upward panel MOVES
+           the same 155 to the top and hands the bottom back to the body's own
+           spacing[6] floor. The offset is inline, so CSS cannot read it — the
+           panel states its direction and the room follows. Keyed off the
+           mounted panel, so a menu opened by CLICKING flips the room too, not
+           just a pinned case. Direction is the ONLY thing that picks the side,
+           so no component needs a rule of its own: a case that passes no
+           placement still gets the one its component defaults to, because the
+           panel stamps the resolved value (UserCard opens up, UserMenu opens
+           down). Only UserMenuPanel stamps it, so the menu number is the only
+           one needed here. Must stay after the rules above: equal specificity,
+           both !important, so source order decides.
+
+           The bottom reset is UNCONDITIONAL, so a card holding an upward AND a
+           downward panel at once would lose its downward room. No case declares
+           both, and the coverage test fails the day one does — a tripwire is
+           cheaper than machinery for a case that does not exist. */
+        .andromeda-matrix-body:has([data-placement="top"]) {
+          padding-top: 155px !important;
+          padding-bottom: ${tokens.spacing[6]} !important;
         }
         @media (min-width: 768px) {
           .andromeda-matrix-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

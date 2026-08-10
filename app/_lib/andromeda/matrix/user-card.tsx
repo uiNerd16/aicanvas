@@ -21,9 +21,14 @@ export const userCard: MatrixSpec = {
   sizes: ['sm', 'md', 'lg'],
   overflow: true,
   // A user card fills the foot of a rail, so it needs a rail-width box to sit
-  // in; open cases also need room below for the panel.
+  // in. Room for the open panel is NOT reserved here any more: the renderer
+  // takes it from the mounted panel, which also covers a case you open by
+  // clicking, and this box could only ever add room BELOW an upward menu.
+  // minWidth 0 lets the rail shrink below 220 instead of spilling past the card
+  // border on a phone — an open case turns the body's horizontal scroll off, so
+  // a box that cannot shrink has nowhere to go.
   render: (size, props) => (
-    <div style={{ width: 220, background: tokens.color.surface.raised, minHeight: props.staticOpen ? 280 : undefined }}>
+    <div style={{ width: 220, minWidth: 0, background: tokens.color.surface.raised }}>
       <UserCard
         name="Reza Quinn"
         role="Flight Director"

@@ -8,6 +8,14 @@ import type { MatrixSpec } from './types'
 export const tooltip: MatrixSpec = {
   slug: 'tooltip',
   sizes: null,
+  // The bubble is position:absolute with no portal, so it needs BOTH escapes a
+  // popover case needs: the body must not become a scroll container (an `auto`
+  // on one axis computes the other to `auto`), and the showcase section must
+  // not sit in a paint-contained box. No case passes staticOpen, so the
+  // coverage test does not demand this line — the hover and the focus do, and
+  // Matrix.tsx reserves the room the bubble lands in off the wrapper's
+  // data-tooltip-placement.
+  overflow: true,
   render: (_size, props) => (
     <Tooltip label="Refresh" {...props}>
       <IconButton aria-label="Refresh" icon={ArrowClockwise} />

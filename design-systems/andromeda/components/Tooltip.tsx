@@ -138,6 +138,14 @@ export const Tooltip = forwardRef(function Tooltip(
       ref={ref}
       className={className}
       style={{ position: 'relative', display: 'inline-flex', ...style }}
+      // The bubble is out of flow and its side is an inline offset no ancestor
+      // rule can read — and it exists only while hovered or focused, so nothing
+      // outside can key off the bubble itself at rest. The WRAPPER states the
+      // direction instead, always, the same way UserMenuPanel states its own;
+      // a page can then reserve room on the side this opens toward before
+      // anything mounts. Its own attribute name, because a tooltip and a menu
+      // ask for very different amounts of room. Paints nothing.
+      data-tooltip-placement={position}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
       onFocus={() => setVisible(true)}

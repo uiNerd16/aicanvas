@@ -16,7 +16,16 @@ export const searchField: MatrixSpec = {
   gaps: {
     Hover:
       'the border and background come from React state (isHover / isFocus drive inline styles), not CSS pseudo-classes, so no attribute can force them',
+    // Every route in is reachable and each one costs more than the gap.
+    // autoFocus rides the prop spread onto the inner input and does fire its
+    // onFocus, but it carries real document focus with it, and the browser
+    // scrolls the page to whatever holds that. The style in baseProps lands
+    // last on the wrapper, so a case could hand-paint the border and shadow,
+    // at the price of a second copy of values only the component should own.
+    // The data-force companion DateRangePicker uses has nothing to mirror
+    // here: SearchField paints from inline styles and ships no stylesheet, so
+    // it declares no focus rule of its own.
     Focus:
-      'same mechanism as hover — the focus ring is an inline style keyed off component state, not a focus-visible rule',
+      'the focus border and glow are inline styles the input sets from its own onFocus, so painting them means giving this field real document focus: autoFocus reaches the state, but focus is one element per document, so the page would scroll to this cell on load and the first click elsewhere would blur it back to rest. A case can hand-paint the same border and shadow through style, but that copy drifts from the real values the moment they change',
   },
 }

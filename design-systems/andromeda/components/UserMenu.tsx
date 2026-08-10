@@ -246,6 +246,10 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
       onKeyDown={handleMenuKeyDown}
       className="andromeda-user-menu-panel"
       data-align={align}
+      // The direction is an inline `top:`/`bottom:` offset, which no ancestor
+      // rule can read. Stating it as an attribute lets a page reserve room on
+      // the side the panel actually opens toward. Paints nothing itself.
+      data-placement={placement}
       style={{
         position: 'absolute',
         ...vertical,
