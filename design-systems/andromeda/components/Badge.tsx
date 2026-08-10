@@ -66,7 +66,10 @@ const badgeVariants = cva(
     'max-w-full min-w-0 box-border',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-mono)]',
-    'font-[number:var(--andromeda-weight-medium)]',
+    // REGULAR, not medium (2026-08-10). Interactive things look heavier: Button
+    // keeps medium, and a label that matches its weight is one more axis making
+    // the two read as the same object.
+    'font-[number:var(--andromeda-weight-regular)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
     '[line-height:var(--andromeda-leading-normal)]',
   ],

@@ -25,6 +25,11 @@ const tagVariants = cva(
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-mono)]',
+    // Stated, not inherited. Tag set no weight at all, so a chip rendered inside
+    // a heading or a bold cell silently picked that up — the same chip weighed
+    // different things on different pages. Regular for the same reason as Badge:
+    // the weight axis belongs to the controls.
+    'font-[number:var(--andromeda-weight-regular)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
     'transition-colors duration-150 ease-out',
   ],
