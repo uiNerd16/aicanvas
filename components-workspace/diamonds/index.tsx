@@ -24,7 +24,7 @@ const DARK = {
   line: 0.3,
   lineHot: 0.1,
   lineFar: 0.8,
-  pulse: 0.95,
+  pulse: 0.7,
   comp: 'lighter' as GlobalCompositeOperation,
 }
 
@@ -34,7 +34,7 @@ const LIGHT = {
   line: 0.34,
   lineHot: 0.12,
   lineFar: 0.82,
-  pulse: 0.88,
+  pulse: 0.5,
   comp: 'source-over' as GlobalCompositeOperation,
 }
 
@@ -394,8 +394,8 @@ export default function Diamonds({ className, seed = 1337 }: DiamondsProps) {
       setGridTransform(baseCtx, f)
       baseCtx.globalCompositeOperation = C.comp
       baseCtx.lineCap = 'butt'
-      baseCtx.lineWidth = 0.6
-      baseCtx.strokeStyle = styleAt(C.line * 0.18)
+      baseCtx.lineWidth = 1
+      baseCtx.strokeStyle = styleAt(C.line * 0.2)
       baseCtx.beginPath()
 
       for (let col = 0; col < f.cols; col++) {
@@ -410,7 +410,7 @@ export default function Diamonds({ className, seed = 1337 }: DiamondsProps) {
       }
       baseCtx.stroke()
 
-      baseCtx.fillStyle = styleAt(C.line * 0.36)
+      baseCtx.fillStyle = styleAt(C.line * 0.55)
       baseCtx.beginPath()
       for (let row = 0; row < f.rows; row++) {
         const y = f.y0 + row * f.cell
