@@ -157,6 +157,8 @@ import DeleteButton from '../../components-workspace/delete-button'
 import { prompts as deleteButtonPrompts } from '../../components-workspace/delete-button/prompts'
 import ScrollWipeGallery from '../../components-workspace/scroll-wipe-gallery'
 import { prompts as scrollWipeGalleryPrompts } from '../../components-workspace/scroll-wipe-gallery/prompts'
+import DiamondGrid from '../../components-workspace/diamond-grid'
+import { prompts as diamondGridPrompts } from '../../components-workspace/diamond-grid/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1419,6 +1421,22 @@ Requirements:
     PreviewComponent: ScrollWipeGallery,
     code: componentCodes['scroll-wipe-gallery'],
     prompts: scrollWipeGalleryPrompts,
+  },
+  {
+    slug: 'diamond-grid',
+    name: 'Diamond Grid',
+    description: 'A faint canvas grid of diamonds. Seeded sparks send light outward until fronts meet.',
+    image: 'https://ik.imagekit.io/aitoolkit/diamond-grid.png',
+    tags: [
+      { label: 'Backgrounds', accent: true },
+      { label: 'Canvas' },
+      { label: 'Motion' },
+      { label: 'Generative' },
+    ],
+    dualTheme: true,
+    PreviewComponent: DiamondGrid,
+    code: componentCodes['diamond-grid'],
+    prompts: diamondGridPrompts,
   },
 ]
 

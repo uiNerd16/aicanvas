@@ -113,6 +113,7 @@ const ALL_SLUGS = [
   'mood-tracker',
   'delete-button',
   'expanding-tabs',
+  'diamond-grid',
 ]
 
 const arg   = process.argv[2]
@@ -435,6 +436,16 @@ const INTERACTIONS = {
   'expanding-tabs': async (preview) => {
     await preview.locator('button').nth(1).click()
     await preview.page().waitForTimeout(600) // let the spring morph settle
+  },
+
+  // Diamond Grid — not an interaction, a timing wait. Nothing here answers the
+  // pointer. It runs a 64s loop and only reaches its ~15-concurrent steady
+  // state long after SETTLE_MS, so a plain shot lands ~2.5s into a cold loop
+  // with one or two sparks barely off the origin. Wait out the rest of the
+  // component's own STATIC_TIME_MS, the frame its author picked as
+  // representative and the one reduced-motion users are served.
+  'diamond-grid': async (preview, page) => {
+    await page.waitForTimeout(27000 - SETTLE_MS)
   },
 }
 
