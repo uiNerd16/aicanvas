@@ -245,8 +245,15 @@ export default function ComponentPageView({
   useEffect(() => {
     if (enforcing && activeTab === 'code' && codeState.status === 'idle') void openCode()
   }, [enforcing, activeTab, codeState.status, openCode])
-  // Reset when switching components so the next open re-fetches.
-  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
+  // Reset when switching components — or when the VIEWER changes — so the next
+  // open re-fetches. The user id is load-bearing: signing in from the auth
+  // modal calls router.refresh(), which merges the new RSC payload but
+  // deliberately keeps client state (Next docs: "without losing unaffected
+  // client-side React"), so a subscriber who signs in on this page would keep
+  // the logged-out 402 lock until they navigated away and back. Sign-out is the
+  // same bug in reverse. Safe on mount: `user` starts from the server-provided
+  // initialUser, so a normal load never fires a second fetch.
+  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug, user?.id])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   // staticPreview blocks paint their screenshot first, then hand over to the
   // real component on the first sign the visitor cares: hovering the box, or
@@ -894,7 +901,7 @@ export default function ComponentPageView({
                   // Real gating (Plan 3): source fetched on demand from the
                   // gated endpoint. 402 -> paywall; otherwise plain source.
                   codeState.status === 'locked' ? (
-                    <Paywall reason={codeState.reason} limit={codeState.limit} />
+                    <Paywall reason={codeState.reason} limit={codeState.limit} name={name} />
                   ) : codeState.status === 'ready' ? (
                     codeState.highlighted ? (
                       <HighlightedCodeView html={codeState.highlighted} />
@@ -912,7 +919,7 @@ export default function ComponentPageView({
                   // Not enforcing: source is server-rendered (SEO preserved).
                   // Plan 0's stub paywall previews states in dev when the
                   // premium flag is on; otherwise it is always null.
-                  paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode
+                  paywallReason ? <Paywall reason={paywallReason} name={name} /> : highlightedCode
                 )}
               </motion.div>
             </div>
@@ -1280,7 +1287,7 @@ export default function ComponentPageView({
                             <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
                               {enforcing ? (
                                 codeState.status === 'locked' ? (
-                                  <Paywall reason={codeState.reason} limit={codeState.limit} />
+                                  <Paywall reason={codeState.reason} limit={codeState.limit} name={name} />
                                 ) : codeState.status === 'ready' ? (
                                   codeState.highlighted ? (
                                     <HighlightedCodeView html={codeState.highlighted} />
@@ -1945,7 +1952,7 @@ export default function ComponentPageView({
                 {remixPrompt}
               </pre>
               {promptLocked && (
-                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
+                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} name={name} />
               )}
             </div>
           </div>
