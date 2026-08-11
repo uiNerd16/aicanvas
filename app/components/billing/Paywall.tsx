@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { LockSimple } from '@phosphor-icons/react'
+import { useAuthModal } from '../auth/AuthModalProvider'
+import { useSession } from '../auth/SessionProvider'
 import type { PaywallReason } from './PaywallModalProvider'
 
 export type { PaywallReason }
@@ -24,18 +26,37 @@ export function Component({ value, onChange }: Props) {
   )
 }`
 
+// Default sub-copy. True for standalones and blocks, where the source AND the
+// build blocks of the prompt are both withheld. Surfaces that gate only one of
+// the two (Andromeda components carry no remix prompt at all) pass their own.
+const DEFAULT_SUBTITLE = 'The full source and the remix prompt ship with Premium.'
+
 /**
  * Inline locked state rendered where withheld content would be — the Code tab,
- * and the withheld blocks of a premium prompt. Shows a blurred teaser; "See
- * plans" goes to the pricing page. Props are kept for the call sites even
- * though the lock no longer varies by reason. `teaser` overrides the blurred
- * decoration so it matches whatever was withheld.
+ * and the withheld blocks of a premium prompt. Shows a blurred teaser over two
+ * CTAs: buy, and (signed out only) log in, since a subscriber who lands here
+ * logged out has no other way in from this panel. Props are kept for the call
+ * sites even though the lock no longer varies by reason. `teaser` overrides the
+ * blurred decoration so it matches whatever was withheld; `name` titles the
+ * lock with the thing being unlocked.
  */
-export function Paywall({ teaser = FAUX_SOURCE }: { reason: PaywallReason; limit?: number; teaser?: string }) {
+export function Paywall({
+  teaser = FAUX_SOURCE,
+  name,
+  subtitle = DEFAULT_SUBTITLE,
+}: {
+  reason: PaywallReason
+  limit?: number
+  teaser?: string
+  name?: string
+  subtitle?: string
+}) {
+  const { open } = useAuthModal()
+  const { user } = useSession()
   // Metering is gone — the inline lock only ever covers premium content now.
-  // No type noun: this lock also covers blocks and templates, and neither this
-  // component nor the modal has the entry (or isBlock) in scope.
-  const title = 'Premium content'
+  // Named when the caller knows what it is gating; the fallback carries no type
+  // noun, because this lock also covers blocks and templates.
+  const title = name ? `Unlock ${name}` : 'Premium content'
 
   return (
     <div className="relative min-h-[360px] w-full overflow-hidden">
@@ -50,12 +71,27 @@ export function Paywall({ teaser = FAUX_SOURCE }: { reason: PaywallReason; limit
           <LockSimple weight="regular" size={20} className="text-olive-400" />
         </div>
         <h3 className="text-base font-bold text-sand-50">{title}</h3>
-        <Link
-          href="/pricing"
-          className="rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
-        >
-          See plans
-        </Link>
+        <p className="max-w-xs text-sm leading-relaxed text-sand-400">{subtitle}</p>
+        {/* Fixed dark skin, not buttonClasses: this panel is bg-sand-950 in both
+            site themes, so the outline variant's light-mode default would put
+            sand-700 text on black. */}
+        <div className="mt-1 flex items-center gap-2">
+          <Link
+            href="/pricing"
+            className="rounded-lg bg-olive-500 px-4 py-2 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400"
+          >
+            Get Premium
+          </Link>
+          {!user && (
+            <button
+              type="button"
+              onClick={() => open()}
+              className="rounded-lg border border-sand-700 px-4 py-2 text-sm font-semibold text-sand-200 transition-colors hover:border-sand-600 hover:text-sand-50"
+            >
+              Log in
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

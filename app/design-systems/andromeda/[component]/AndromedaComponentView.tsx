@@ -182,7 +182,15 @@ export function AndromedaComponentView({
   // ladder-aware paywall (sign-up / upgrade cards); ready → the source.
   const renderCodePane = () =>
     codeState.status === 'locked' ? (
-      <Paywall reason={codeState.reason} limit={codeState.limit} />
+      <Paywall
+        reason={codeState.reason}
+        limit={codeState.limit}
+        name={name}
+        // Remix with AI is deliberately not offered on system components (see
+        // the note further down), so the default sub-copy would promise a
+        // prompt this page does not have.
+        subtitle="The full source ships with Premium."
+      />
     ) : codeState.status === 'ready' ? (
       codeState.highlighted ? (
         <HighlightedCodeView html={codeState.highlighted} />

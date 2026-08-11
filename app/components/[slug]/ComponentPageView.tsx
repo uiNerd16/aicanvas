@@ -901,7 +901,7 @@ export default function ComponentPageView({
                   // Real gating (Plan 3): source fetched on demand from the
                   // gated endpoint. 402 -> paywall; otherwise plain source.
                   codeState.status === 'locked' ? (
-                    <Paywall reason={codeState.reason} limit={codeState.limit} />
+                    <Paywall reason={codeState.reason} limit={codeState.limit} name={name} />
                   ) : codeState.status === 'ready' ? (
                     codeState.highlighted ? (
                       <HighlightedCodeView html={codeState.highlighted} />
@@ -919,7 +919,7 @@ export default function ComponentPageView({
                   // Not enforcing: source is server-rendered (SEO preserved).
                   // Plan 0's stub paywall previews states in dev when the
                   // premium flag is on; otherwise it is always null.
-                  paywallReason ? <Paywall reason={paywallReason} /> : highlightedCode
+                  paywallReason ? <Paywall reason={paywallReason} name={name} /> : highlightedCode
                 )}
               </motion.div>
             </div>
@@ -1287,7 +1287,7 @@ export default function ComponentPageView({
                             <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
                               {enforcing ? (
                                 codeState.status === 'locked' ? (
-                                  <Paywall reason={codeState.reason} limit={codeState.limit} />
+                                  <Paywall reason={codeState.reason} limit={codeState.limit} name={name} />
                                 ) : codeState.status === 'ready' ? (
                                   codeState.highlighted ? (
                                     <HighlightedCodeView html={codeState.highlighted} />
@@ -1952,7 +1952,7 @@ export default function ComponentPageView({
                 {remixPrompt}
               </pre>
               {promptLocked && (
-                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} />
+                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} name={name} />
               )}
             </div>
           </div>
