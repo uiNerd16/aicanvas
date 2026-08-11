@@ -1,35 +1,48 @@
 'use client'
 
+/**
+ * Renders a canvas field of arrows following an organic flow pattern.
+ * Nearby arrows turn toward the pointer with distance-based easing.
+ */
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const GRID_SPACING = 24    // px between arrows
-const SHAFT_LEN    = 8     // half-shaft length
-const HEAD_SIZE    = 4     // arrowhead branch length
 
-// Cursor-tracking lerp — exponential decay with distance
-const DECAY_DIST = 320     // px — wider influence area
-const LERP_FAST  = 0.12    // lerp speed right at the cursor
-const LERP_MIN   = 0.006   // minimum speed at large distance
-const IDLE_LERP  = 0.010   // speed returning to noise flow when cursor is gone
+// tune: raise to spread the arrows farther apart
+const GRID_SPACING = 24    
+// tune: raise to lengthen each arrow shaft
+const SHAFT_LEN    = 8     
+// tune: raise to enlarge each arrowhead
+const HEAD_SIZE    = 4     
 
-// Organic wobble — each arrow has a personal noise offset so motion feels alive
-const WOBBLE_AMP  = 0.18   // radians of random drift added on top of cursor angle
-const WOBBLE_FREQ = 0.7    // how fast the wobble oscillates per arrow
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// tune: raise to widen pointer influence
+const DECAY_DIST = 320     
+// tune: raise to quicken arrows nearest the pointer
+const LERP_FAST  = 0.12    
+// tune: raise to quicken distant arrows
+const LERP_MIN   = 0.006   
+// tune: raise to quicken the return to idle flow
+const IDLE_LERP  = 0.010   
+
+
+// tune: raise to increase angular drift
+const WOBBLE_AMP  = 0.18   
+// tune: raise to speed the wobble
+const WOBBLE_FREQ = 0.7    
+
+
 interface Arrow {
   gx: number
   gy: number
-  angle: number   // persistent — lerped toward target each frame
-  phase: number   // unique random phase for organic wobble
+  angle: number   
+  phase: number   
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// Idle noise flow — arrows drift here when no cursor
+
+
 function flowAngle(gx: number, gy: number, t: number): number {
   return (
     Math.sin(gx * 0.007 + t) * Math.PI +
@@ -37,7 +50,7 @@ function flowAngle(gx: number, gy: number, t: number): number {
   )
 }
 
-// Shortest-path angle lerp — never spins the long way around
+
 function lerpAngle(current: number, target: number, speed: number): number {
   let diff = target - current
   while (diff >  Math.PI) diff -= Math.PI * 2
@@ -45,7 +58,7 @@ function lerpAngle(current: number, target: number, speed: number): number {
   return current + diff * speed
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function NoiseField() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
@@ -56,7 +69,7 @@ export default function NoiseField() {
 
   useIsomorphicLayoutEffect(() => { isDarkRef.current = isDark }, [isDark])
 
-  // ── Theme detection ───────────────────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -76,7 +89,7 @@ export default function NoiseField() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Mouse tracking ────────────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -106,7 +119,7 @@ export default function NoiseField() {
     }
   }, [])
 
-  // ── Main draw loop ────────────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
@@ -118,7 +131,7 @@ export default function NoiseField() {
     let t = 0
 
     function buildGrid(W: number, H: number) {
-      // Preserve existing angles when grid is rebuilt on resize
+      
       const prev = new Map<string, Arrow>()
       for (const a of arrowsRef.current) prev.set(`${a.gx},${a.gy}`, a)
       const next: Arrow[] = []
@@ -158,7 +171,7 @@ export default function NoiseField() {
       const dark  = isDarkRef.current
       const mouse = mouseRef.current
 
-      // Background
+      
       ctx!.fillStyle = dark ? '#110F0C' : '#F5F1EA'
       ctx!.fillRect(0, 0, W, H)
 
@@ -169,18 +182,18 @@ export default function NoiseField() {
         const { gx, gy } = arrow
 
         if (mouse) {
-          // Point toward cursor — each arrow lerps at its own distance-based speed
+          
           const dx   = mouse.x - gx
           const dy   = mouse.y - gy
           const dist = Math.sqrt(dx * dx + dy * dy)
-          // Organic wobble: personal sine offset that scales down close to cursor
+          
           const proximityFactor = Math.exp(-dist / DECAY_DIST)
           const wobble = WOBBLE_AMP * (1 - proximityFactor * 0.7) * Math.sin(t * WOBBLE_FREQ + arrow.phase)
           const targetAngle = Math.atan2(dy, dx) + wobble
           const speed = LERP_FAST * proximityFactor + LERP_MIN
           arrow.angle = lerpAngle(arrow.angle, targetAngle, speed)
         } else {
-          // Slowly drift back to noise flow (wobble persists here too for life)
+          
           const noiseAngle = flowAngle(gx, gy, t) + WOBBLE_AMP * 0.5 * Math.sin(t * WOBBLE_FREQ * 0.8 + arrow.phase)
           arrow.angle = lerpAngle(arrow.angle, noiseAngle, IDLE_LERP)
         }
@@ -189,18 +202,18 @@ export default function NoiseField() {
         const cos   = Math.cos(angle)
         const sin   = Math.sin(angle)
 
-        // Alpha — distance-based fade: far arrows almost invisible, close ones bright
+        
         let alpha: number
         if (mouse) {
           const dx = mouse.x - gx, dy = mouse.y - gy
           const dist2 = dx * dx + dy * dy
-          // Tight gaussian — drops off steeply beyond ~200px, near-zero by ~420px
+          
           const proximity = Math.exp(-dist2 / (200 * 200))
           alpha = dark
             ? 0.06 + proximity * 0.84
             : 0.05 + proximity * 0.75
         } else {
-          // Idle: gentle uniform low opacity — field is barely there without cursor
+          
           alpha = dark ? 0.18 : 0.15
         }
 
@@ -214,14 +227,14 @@ export default function NoiseField() {
         const tailX = gx - cos * SHAFT_LEN
         const tailY = gy - sin * SHAFT_LEN
 
-        // Shaft
+        
         ctx!.lineWidth = 1.2
         ctx!.beginPath()
         ctx!.moveTo(tailX, tailY)
         ctx!.lineTo(tipX, tipY)
         ctx!.stroke()
 
-        // Arrowhead — tighter V (144°)
+        
         const headAngle = Math.PI - Math.PI / 5
         ctx!.lineWidth = 1.0
         ctx!.beginPath()

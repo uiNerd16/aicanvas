@@ -1,7 +1,10 @@
 'use client'
 
-// npm install matter-js framer-motion
-// types: npm install -D @types/matter-js
+// npm install framer-motion matter-js
+/**
+ * Displays a physics-driven jar that dispenses selected emotion emoji.
+ * Clicking an emotion opens the lid and launches a matching body toward its button.
+ */
 
 import {
   useEffect,
@@ -39,35 +42,40 @@ function useTheme(ref: RefObject<HTMLElement | null>): { theme: 'light' | 'dark'
   return { theme }
 }
 
-// ─── Tuning ──────────────────────────────────────────────────────────────────
+
+// tune: raise to make dispensed emoji fall faster
 const GRAVITY_SCALE = 0.0018
-const EMOJI_SIZE = 34 // px — body diameter
-const EMOJI_FONT = 30 // visual font-size in px
+// tune: change to resize the physics bodies
+const EMOJI_SIZE = 34 
+// tune: change to resize the visible emoji
+const EMOJI_FONT = 30 
+// tune: raise to allow more active emoji
 const MAX_BODIES = 30
-const MAX_INTERIOR = 8 // hard cap on total physics bodies inside the jar
+// tune: raise to keep more emoji inside the jar
+const MAX_INTERIOR = 8 
 const WALL_THICKNESS = 40
 const JAR_WALL_THICKNESS = 24
 
-// Jar geometry, in intrinsic SVG units. We scale to the container width.
+
 const JAR_VIEW_W = 200
 const JAR_VIEW_H = 240
-// Mouth opening inside the jar — where the emoji exits.
+
 const MOUTH_LEFT = 40
 const MOUTH_RIGHT = 160
-// Inner jar walls (physics space).
+
 const JAR_INNER_LEFT = 32
 const JAR_INNER_RIGHT = 168
-const JAR_INNER_TOP = 46 // just below the collar — interior top
+const JAR_INNER_TOP = 46 
 const JAR_INNER_BOTTOM = 226
-// Lid geometry — hinge at the LEFT edge.
+
 const LID_X = 26
-const LID_Y = 22 // centered on y=22 in jar-local coords
+const LID_Y = 22 
 const LID_W = 148
 const LID_H = 18
 const LID_HINGE_X = LID_X
 const LID_HINGE_Y = LID_Y + LID_H / 2
 
-// ─── Emotion catalog ─────────────────────────────────────────────────────────
+
 type Emotion = {
   id: string
   emoji: string
@@ -76,6 +84,7 @@ type Emotion = {
   lightColor: string
 }
 
+// customize: replace the emotion labels and emoji below
 const EMOTIONS: Emotion[] = [
   { id: 'banger',   emoji: '🔥', label: 'Banger',   darkColor: '#FF6B35', lightColor: '#C94400' },
   { id: 'perfect',  emoji: '👌', label: 'Perfect',  darkColor: '#6BD97A', lightColor: '#1E8A35' },
@@ -85,13 +94,13 @@ const EMOTIONS: Emotion[] = [
   { id: 'goat',     emoji: '🐐', label: 'GOAT',     darkColor: '#C4A0F5', lightColor: '#7A45CF' },
 ]
 
-// ─── Body metadata ───────────────────────────────────────────────────────────
+
 type Dispensed = {
   id: number
   body: Body
   emoji: string
   emotionId: string
-  // Interior bodies live inside the jar; once impulsed, they become 'outside'.
+  
   location: 'inside' | 'outside'
 }
 
@@ -117,9 +126,9 @@ export default function JarOfEmotions() {
   const runnerRef = useRef<Runner | null>(null)
   const worldRef = useRef<World | null>(null)
   const dispensedRef = useRef<Dispensed[]>([])
-  // Track jar geometry in physics (container) coords for impulsing.
+  
   const jarBoxRef = useRef<{
-    x: number // top-left
+    x: number 
     y: number
     w: number
     h: number
@@ -128,10 +137,10 @@ export default function JarOfEmotions() {
 
   const [lidOpen, setLidOpen] = useState(false)
   const [dispensedTotal, setDispensedTotal] = useState(0)
-  const [renderTick, setRenderTick] = useState(0) // drives per-frame re-render
+  const [renderTick, setRenderTick] = useState(0) 
   const lidCloseTimerRef = useRef<number | null>(null)
 
-  // ── Boot matter.js ────────────────────────────────────────────────────────
+  
   useEffect(() => {
     let alive = true
     let rafId = 0
@@ -163,12 +172,12 @@ export default function JarOfEmotions() {
       const t = WALL_THICKNESS
       const opts = { isStatic: true, render: { visible: false } }
       return [
-        // Floor — below the buttons so emojis rest on button tops.
+        
         Matter.Bodies.rectangle(w / 2, h + t / 2, w + t * 2, t, opts),
-        // Left + right keep emojis on-canvas if they skitter outward.
+        
         Matter.Bodies.rectangle(-t / 2, h / 2, t, h * 2, opts),
         Matter.Bodies.rectangle(w + t / 2, h / 2, t, h * 2, opts),
-        // Top — way above, so entering emojis that overshoot don't escape forever.
+        
         Matter.Bodies.rectangle(w / 2, -t * 3, w + t * 2, t, opts),
       ]
     }
@@ -179,7 +188,7 @@ export default function JarOfEmotions() {
       const t = JAR_WALL_THICKNESS
       const opts = { isStatic: true, render: { visible: false }, friction: 0.6 }
 
-      // Left wall: 2 SVG units tighter to match the visual collar at the top.
+      
       const leftX = x + (JAR_INNER_LEFT - 2) * scale
       const rightX = x + (JAR_INNER_RIGHT + 2) * scale
       const topY = y + JAR_INNER_TOP * scale
@@ -187,7 +196,7 @@ export default function JarOfEmotions() {
       const innerH = botY - topY
 
       return [
-        // left inner wall — centred on leftX, spanning top→bottom
+        
         Matter.Bodies.rectangle(
           leftX - t / 2,
           topY + innerH / 2,
@@ -195,7 +204,7 @@ export default function JarOfEmotions() {
           innerH,
           opts,
         ),
-        // right inner wall
+        
         Matter.Bodies.rectangle(
           rightX + t / 2,
           topY + innerH / 2,
@@ -203,8 +212,8 @@ export default function JarOfEmotions() {
           innerH,
           opts,
         ),
-        // curved jar floor — 6 angled segments tracing the bottom bezier curve
-        // SVG curve points: (30,218)→(40,226)→(65,233)→(100,236)→(135,233)→(160,226)→(170,218)
+        
+        
         ...(() => {
           const pts = [
             [30, 218], [40, 226], [65, 233], [100, 236],
@@ -238,7 +247,7 @@ export default function JarOfEmotions() {
         if (!el) continue
         const r = el.getBoundingClientRect()
         const x = r.left - cRect.left + r.width / 2
-        // top of the button; make a thin floor there
+        
         const y = r.top - cRect.top + 4
         const body = Matter.Bodies.rectangle(x, y, r.width, 8, {
           isStatic: true,
@@ -261,7 +270,7 @@ export default function JarOfEmotions() {
       const topY = y + JAR_INNER_TOP * scale
       const botY = y + (JAR_INNER_BOTTOM - 10) * scale
       const innerH = botY - topY
-      // Seed one of each emotion, spread across the interior height.
+      
       for (let i = 0; i < EMOTIONS.length; i++) {
         const e = EMOTIONS[i]
         const px = rand(leftX, rightX)
@@ -309,7 +318,7 @@ export default function JarOfEmotions() {
       buttonFloors = buildButtonFloors(Matter)
       Matter.Composite.add(world, buttonFloors)
 
-      // Nudge any dispensed bodies back onto the canvas if the resize moved them outside.
+      
       for (const d of dispensedRef.current) {
         const p = d.body.position
         let nx = p.x
@@ -323,11 +332,11 @@ export default function JarOfEmotions() {
 
     function tick() {
       if (!alive) return
-      // Sleep very-slow bodies to save CPU, keep caps honoured.
+      
       const Matter = matterRef.current
       if (Matter) {
         const list = dispensedRef.current
-        // Cap: remove oldest 'outside' bodies if over MAX_BODIES (inside bodies don't count).
+        
         const outsideCount = list.filter(d => d.location === 'outside').length
         if (outsideCount > MAX_BODIES) {
           const extra = outsideCount - MAX_BODIES
@@ -343,7 +352,7 @@ export default function JarOfEmotions() {
           }
         }
       }
-      // Trigger a React render so the emoji DOM transforms update this frame.
+      
       setRenderTick((t) => (t + 1) & 0xffff)
       rafId = requestAnimationFrame(tick)
     }
@@ -396,7 +405,7 @@ export default function JarOfEmotions() {
     }
   }, [])
 
-  // ── Keep lid in sync with timers if component remounts with stale state ───
+  
   useIsomorphicLayoutEffect(() => {
     return () => {
       if (lidCloseTimerRef.current !== null) {
@@ -406,14 +415,14 @@ export default function JarOfEmotions() {
     }
   }, [])
 
-  // ── Dispense an emotion on click ──────────────────────────────────────────
+  
   function dispense(emotion: Emotion) {
     const Matter = matterRef.current
     const world = worldRef.current
     const container = containerRef.current
     if (!Matter || !world || !container) return
 
-    // Open the lid.
+    
     setLidOpen(true)
     if (lidCloseTimerRef.current !== null) clearTimeout(lidCloseTimerRef.current)
     lidCloseTimerRef.current = window.setTimeout(() => {
@@ -421,7 +430,7 @@ export default function JarOfEmotions() {
       lidCloseTimerRef.current = null
     }, 900)
 
-    // Find an interior emoji of matching emotion. If none, spawn one (if jar has room).
+    
     const list = dispensedRef.current
     let candidate = list.find(
       (d) => d.location === 'inside' && d.emotionId === emotion.id,
@@ -453,10 +462,10 @@ export default function JarOfEmotions() {
         }
         list.push(candidate)
       }
-      // else: jar is full — candidate remains null; handle below by spawning at mouth.
+      
     }
 
-    // If the jar is full and we still have no candidate, spawn directly at the mouth.
+    
     if (!candidate) {
       const { x: jx, y: jy, scale: s } = jarBoxRef.current
       const mouthCx = jx + ((MOUTH_LEFT + MOUTH_RIGHT) / 2) * s
@@ -480,7 +489,7 @@ export default function JarOfEmotions() {
       list.push(candidate)
     }
 
-    // Target: center-top of the clicked button.
+    
     const btn = buttonRefs.current[emotion.id]
     if (!btn) return
     const cRect = container.getBoundingClientRect()
@@ -488,12 +497,12 @@ export default function JarOfEmotions() {
     const targetX = bRect.left - cRect.left + bRect.width / 2
     const targetY = bRect.top - cRect.top + 4
 
-    // First, jump the body up through the mouth opening so it clears the jar
-    // interior. We teleport it just above the lid's open arc — this avoids
-    // fighting the jar walls on the way out.
+    
+    
+    
     const { x: jx, y: jy, scale: s } = jarBoxRef.current
     const mouthCx = jx + ((MOUTH_LEFT + MOUTH_RIGHT) / 2) * s
-    const exitY = jy - 18 // above the jar's collar, lid open
+    const exitY = jy - 18 
 
     Matter.Body.setPosition(candidate.body, {
       x: mouthCx + rand(-6, 6),
@@ -501,14 +510,14 @@ export default function JarOfEmotions() {
     })
     Matter.Body.setAngularVelocity(candidate.body, rand(-0.12, 0.12))
 
-    // Ballistic trajectory toward targetX/targetY.
-    // We want a gentle arc that peaks a bit above the jar, then falls to the
-    // button. A brief upward kick + horizontal velocity aimed at the button.
+    
+    
+    
     const dx = targetX - mouthCx
-    // Upward impulse — larger so emoji rises noticeably.
+    
     const upKick = -14 - Math.min(2, Math.abs(dx) / 200)
-    // Horizontal velocity scaled to distance to travel.
-    const hVel = dx / 60 // lower = slower sideways
+    
+    const hVel = dx / 60 
     Matter.Body.setVelocity(candidate.body, {
       x: hVel + rand(-0.3, 0.3),
       y: upKick,
@@ -517,9 +526,9 @@ export default function JarOfEmotions() {
     candidate.location = 'outside'
     setDispensedTotal(t => t + 1)
 
-    // Delay replacement so it appears well after the dispensed emoji has cleared
-    // the jar top — prevents the "two from upwards" visual where both are visible
-    // near the collar simultaneously.
+    
+    
+    
     const remainingInside = list.some(
       (d) => d.location === 'inside' && d.emotionId === emotion.id,
     )
@@ -548,7 +557,7 @@ export default function JarOfEmotions() {
     }
   }
 
-  // ── Colors + theme styles ────────────────────────────────────────────────
+  
   const styles = useMemo(
     () => ({
       jarFill: isDark ? 'rgba(220, 235, 245, 0.10)' : 'rgba(120, 140, 160, 0.18)',
@@ -562,18 +571,18 @@ export default function JarOfEmotions() {
     [isDark],
   )
 
-  // Avoid unused-var lint for renderTick (it intentionally drives re-render).
+  
   void renderTick
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  
   return (
     <div
-      // items-stretch, not items-center: the jar column below takes its height
-      // from this root instead of naming 100vh. Standalone that is the same
-      // pixels (the root is min-h-screen, so stretching to it IS the viewport
-      // height), and in a container shorter than the viewport the column now
-      // follows the container rather than overflowing it. The 520px floor stays
-      // — that is a real minimum for the jar, not a viewport measurement.
+      
+      
+      
+      
+      
+      
       className="flex min-h-screen w-full items-stretch justify-center"
       style={{ background: isDark ? '#1A1A19' : '#E8E8DF' }}
     >
@@ -582,7 +591,7 @@ export default function JarOfEmotions() {
         className="relative flex w-full max-w-2xl flex-col items-center justify-center gap-7 overflow-hidden px-4 py-6 sm:gap-8 sm:px-6 sm:py-10"
         style={{ minHeight: 520 }}
       >
-        {/* Jar area + banner — wrapper gives the banner a reference rect = jar size */}
+        {}
         <div className="relative">
         <div className="relative z-10 flex items-center justify-center">
           <div
@@ -599,34 +608,34 @@ export default function JarOfEmotions() {
               preserveAspectRatio="xMidYMid meet"
             >
               <defs>
-                {/* Fix 6: Proper glass gradient — specular left edge, transparent middle, shadow right edge */}
+                {}
                 <linearGradient id="jar-body-grad" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%"   stopColor="rgba(255,255,255,0.35)" />
                   <stop offset="18%"  stopColor="rgba(255,255,255,0.08)" />
                   <stop offset="82%"  stopColor="rgba(0,0,0,0.06)" />
                   <stop offset="100%" stopColor="rgba(0,0,0,0.18)" />
                 </linearGradient>
-                {/* Fix 3: Proper metallic lid gradient — highlight top, main mid, darker bottom, specular streak */}
+                {}
                 <linearGradient id="lid-grad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%"   stopColor="rgba(255,255,255,0.55)" stopOpacity={1} />
                   <stop offset="8%"   stopColor={styles.lidFill} stopOpacity={1} />
                   <stop offset="50%"  stopColor={styles.lidFill} stopOpacity={1} />
                   <stop offset="100%" stopColor={styles.lidStroke} stopOpacity={1} />
                 </linearGradient>
-                {/* Fix 3: Soft drop-shadow filter for the lid */}
+                {}
                 <filter id="lid-drop-shadow" x="-20%" y="-20%" width="160%" height="160%">
                   <feDropShadow dx="1" dy="3" stdDeviation="3" floodColor="rgba(0,0,0,0.35)" />
                 </filter>
-                {/* Fix 2: Blur filter for ground shadow */}
+                {}
                 <filter id="shadow-blur" x="-40%" y="-100%" width="180%" height="400%">
                   <feGaussianBlur stdDeviation="6" />
                 </filter>
-                {/* Fix 4: Right-side inner shadow gradient (right-to-left) */}
+                {}
                 <linearGradient id="jar-right-shadow" x1="1" y1="0" x2="0" y2="0">
                   <stop offset="0%"  stopColor="rgba(0,0,0,0.18)" />
                   <stop offset="30%" stopColor="rgba(0,0,0,0)" />
                 </linearGradient>
-                {/* Fix 4: Bottom interior glow */}
+                {}
                 <radialGradient id="jar-bottom-glow" cx="50%" cy="100%" r="50%" fx="50%" fy="100%">
                   <stop offset="0%"   stopColor="rgba(255,255,255,0.12)" />
                   <stop offset="100%" stopColor="rgba(255,255,255,0)" />
@@ -645,7 +654,7 @@ export default function JarOfEmotions() {
                 </clipPath>
               </defs>
 
-              {/* Fix 2: Soft blurred ground shadow using feGaussianBlur filter */}
+              {}
               <ellipse
                 cx={JAR_VIEW_W / 2}
                 cy={JAR_VIEW_H - 16}
@@ -656,7 +665,7 @@ export default function JarOfEmotions() {
                 filter="url(#shadow-blur)"
               />
 
-              {/* Fix 1: Jar body — closed path with Z and proper rounded bottom */}
+              {}
               <path
                 d={`
                   M ${JAR_INNER_LEFT - 4} 44
@@ -672,7 +681,7 @@ export default function JarOfEmotions() {
                 strokeLinejoin="round"
               />
 
-              {/* Fix 5: Collar with glass-matching gradient and wider pill shape */}
+              {}
               <rect
                 x={JAR_INNER_LEFT - 8}
                 y={36}
@@ -685,9 +694,9 @@ export default function JarOfEmotions() {
                 opacity={0.85}
               />
 
-              {/* Fix 4: Improved glass highlights — left specular oval + right inner shadow + bottom glow */}
+              {}
               <g clipPath="url(#jar-clip)">
-                {/* Left specular — tall narrow ellipse following the jar's left interior curve */}
+                {}
                 <ellipse
                   cx={JAR_INNER_LEFT + 10}
                   cy={(JAR_INNER_TOP + JAR_INNER_BOTTOM) / 2}
@@ -696,7 +705,7 @@ export default function JarOfEmotions() {
                   fill="white"
                   opacity={0.30}
                 />
-                {/* Right inner shadow — gradient rect on the right interior edge */}
+                {}
                 <rect
                   x={JAR_INNER_RIGHT - 18}
                   y={JAR_INNER_TOP}
@@ -704,7 +713,7 @@ export default function JarOfEmotions() {
                   height={JAR_INNER_BOTTOM - JAR_INNER_TOP}
                   fill="url(#jar-right-shadow)"
                 />
-                {/* Bottom interior glow — curved path matches jar bezier bottom */}
+                {}
                 <path
                   d={`
                     M ${JAR_INNER_LEFT - 4} ${JAR_INNER_BOTTOM - 40}
@@ -718,7 +727,7 @@ export default function JarOfEmotions() {
                 />
               </g>
 
-              {/* Lid — animated with Framer Motion. Rotate around the hinge. */}
+              {}
               <motion.g
                 animate={{ rotate: lidOpen ? -70 : 0 }}
                 transition={{
@@ -731,7 +740,7 @@ export default function JarOfEmotions() {
                   transformBox: 'fill-box',
                 }}
               >
-                {/* Fix 3: Lid body with proper metallic gradient + drop-shadow filter */}
+                {}
                 <rect
                   x={LID_X}
                   y={LID_Y}
@@ -743,7 +752,7 @@ export default function JarOfEmotions() {
                   strokeWidth={1.5}
                   filter="url(#lid-drop-shadow)"
                 />
-                {/* Fix 3: Top-edge inner highlight — mimics lit top of metal lid */}
+                {}
                 <rect
                   x={LID_X + 4}
                   y={LID_Y + 2}
@@ -753,7 +762,7 @@ export default function JarOfEmotions() {
                   fill="white"
                   opacity={0.35}
                 />
-                {/* Fix 3: Concentric ridge lines simulating screw-top metal lid */}
+                {}
                 <rect
                   x={LID_X + 6}
                   y={LID_Y + 5}
@@ -781,7 +790,7 @@ export default function JarOfEmotions() {
                   fill={styles.lidStroke}
                   opacity={0.15}
                 />
-                {/* hinge dot on the left side */}
+                {}
                 <circle
                   cx={LID_HINGE_X + 3}
                   cy={LID_HINGE_Y}
@@ -793,7 +802,7 @@ export default function JarOfEmotions() {
           </div>
         </div>
 
-        {/* Empty-jar banner — inside the jar wrapper so it centers on the jar */}
+        {}
         <AnimatePresence>
           {dispensedTotal >= 30 && (
             <motion.div
@@ -810,9 +819,9 @@ export default function JarOfEmotions() {
             </motion.div>
           )}
         </AnimatePresence>
-        </div>{/* end jar+banner wrapper */}
+        </div>{}
 
-        {/* Title + tagline */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -833,7 +842,7 @@ export default function JarOfEmotions() {
           </p>
         </motion.div>
 
-        {/* Button row */}
+        {}
         <div
           ref={buttonRowRef}
           className="z-10 flex w-full flex-wrap items-end justify-center gap-2 sm:gap-3"
@@ -880,7 +889,7 @@ export default function JarOfEmotions() {
           ))}
         </div>
 
-        {/* Physics overlay — emojis render here, over everything */}
+        {}
         <div
           ref={overlayRef}
           className="pointer-events-none absolute inset-0 z-20"
@@ -890,8 +899,8 @@ export default function JarOfEmotions() {
             {dispensedRef.current.map((d) => {
               const p = d.body.position
               const angle = d.body.angle
-              // Only render 'outside' emojis here. 'inside' emojis render in a
-              // separate jar-clipped layer below for proper depth.
+              
+              
               if (d.location !== 'outside') return null
               return (
                 <motion.div
@@ -924,10 +933,7 @@ export default function JarOfEmotions() {
           </AnimatePresence>
         </div>
 
-        {/* Interior emojis — sit inside the jar. We render them at the physics
-            coords; they'll appear inside the jar SVG because both use the same
-            container coord system. Z layered below the overlay so the lid art
-            reads on top slightly — not strictly necessary but feels right. */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[15]"
           aria-hidden

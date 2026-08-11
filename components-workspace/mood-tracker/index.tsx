@@ -1,7 +1,10 @@
 'use client'
 
 // npm install framer-motion
-// font: Manrope
+/**
+ * Presents a weekly mood tracker with an editable daily rating.
+ * Selecting a mood animates the chart, summary, and current-day control.
+ */
 
 import {
   useState,
@@ -21,14 +24,14 @@ import {
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-// ─── Theme hook ───────────────────────────────────────────────────────────────
-// Resolves the active theme from the nearest `[data-card-theme]` wrapper when one
-// exists (the preview card toggles a `dark` class on that wrapper, NOT on <html>),
-// and falls back to the `dark` class on <html> otherwise — so this stays fully
-// copy-paste portable: in a user's project with no `[data-card-theme]`, it reads
-// `<html>.dark` exactly as before. Stays in sync via a MutationObserver watching
-// BOTH the card wrapper and <html>, so inline hex colors can branch per theme
-// without any external dependency. Disconnects on cleanup.
+
+
+
+
+
+
+
+
 
 type Theme = 'light' | 'dark'
 
@@ -47,12 +50,12 @@ function useTheme(rootRef: React.RefObject<HTMLElement | null>): Theme {
     if (typeof document === 'undefined') return
     const update = () => setTheme(readTheme(el))
     const observer = new MutationObserver(update)
-    // Watch <html> for the global toggle…
+    
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class'],
     })
-    // …and the card wrapper (when present) for the preview's local toggle.
+    
     const card = el?.closest('[data-card-theme]')
     if (card) {
       observer.observe(card, {
@@ -65,7 +68,7 @@ function useTheme(rootRef: React.RefObject<HTMLElement | null>): Theme {
   return theme
 }
 
-// ─── Color helpers (lerp the mesh between mood colors as the slider moves) ──────
+
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n))
@@ -96,34 +99,30 @@ function lerpHex(a: string, b: string, t: number): string {
   ])
 }
 
-/** Soften / lighten a hex toward white by amount t (0–1). */
+
 function tintHex(hex: string, t: number): string {
   return lerpHex(hex, '#FFFFFF', t)
 }
 
-/** Soft dark neutral the panel/card lean on in dark theme (never near-black). */
+
 const DARK_NEUTRAL = '#1B1B22'
 
-/** Mix a hex toward the soft dark neutral by amount t (0–1). */
+
 function shadeHex(hex: string, t: number): string {
   return lerpHex(hex, DARK_NEUTRAL, t)
 }
 
-/**
- * A deep, mood-tinted ink that stays AA-legible on a soft same-hue wash.
- * Pull the mood color a long way toward near-black, keeping just enough hue
- * that the word reads as "tinted dark" rather than flat charcoal.
- */
+
 function inkHex(hex: string): string {
   return lerpHex(hex, '#14140F', 0.82)
 }
 
-// ─── Mood SVG characters ────────────────────────────────────────────────────
-// Six hand-authored inline SVG faces, each on a 0–64 viewBox. The set shares one
-// eye/mouth vocabulary (round/arc eyes, a thin stroked mouth) but every mood has
-// a DISTINCT body shape + color + expression so they read instantly side by side.
-// `darken` derives a slightly deeper stroke from each body color for the facial
-// features so they stay legible without a second palette to maintain.
+
+
+
+
+
+
 
 interface FaceProps {
   size: number
@@ -135,7 +134,7 @@ function eyeWhite() {
   return '#FFFFFF'
 }
 
-// 1 — Frustrated: rounded-square body, angry down-slanted V brows, tense mouth.
+
 function FrustratedFace({ size }: FaceProps) {
   const ink = '#5A1E0E'
   return (
@@ -148,23 +147,23 @@ function FrustratedFace({ size }: FaceProps) {
           <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </linearGradient>
       </defs>
-      {/* angry V brows */}
+      {}
       <path d="M17 24 L27 28" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" />
       <path d="M47 24 L37 28" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" />
-      {/* small eyes */}
+      {}
       <circle cx="24" cy="33" r="3.4" fill={ink} />
       <circle cx="40" cy="33" r="3.4" fill={ink} />
-      {/* tense flat grimace */}
+      {}
       <path d="M23 45 H41" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" />
     </svg>
   )
 }
 
-// 2 — Surprised: soft scalloped flower/cloud, wide round eyes, small "o" mouth.
+
 function SurprisedFace({ size }: FaceProps) {
   const body = '#E5A85E'
   const ink = '#6B3F12'
-  // 8-lobe scalloped outline approximated with a chain of arcs.
+  
   const lobes = 9
   let d = ''
   for (let i = 0; i < lobes; i++) {
@@ -186,51 +185,51 @@ function SurprisedFace({ size }: FaceProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden focusable="false">
       <path d={d} fill={body} />
-      {/* wide round open eyes */}
+      {}
       <circle cx="25" cy="30" r="5" fill={eyeWhite()} />
       <circle cx="39" cy="30" r="5" fill={eyeWhite()} />
       <circle cx="25" cy="30" r="2.4" fill={ink} />
       <circle cx="39" cy="30" r="2.4" fill={ink} />
-      {/* small open "o" mouth */}
+      {}
       <ellipse cx="32" cy="42" rx="3.4" ry="4.4" fill={ink} />
     </svg>
   )
 }
 
-// 3 — Happy: circle, upward-arc smiling eyes, big open grin, rosy cheeks.
+
 function HappyFace({ size }: FaceProps) {
   const ink = '#6E5806'
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden focusable="false">
       <circle cx="32" cy="32" r="25" fill="#F2D44E" />
-      {/* rosy cheeks */}
+      {}
       <circle cx="20" cy="38" r="4" fill="#F0926B" opacity="0.7" />
       <circle cx="44" cy="38" r="4" fill="#F0926B" opacity="0.7" />
-      {/* smiling arc eyes */}
+      {}
       <path d="M19 30 Q24 25 29 30" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
       <path d="M35 30 Q40 25 45 30" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
-      {/* big open grin */}
+      {}
       <path d="M22 39 Q32 51 42 39 Z" fill={ink} />
     </svg>
   )
 }
 
-// 4 — Uneasy: lumpy wavy organic blob, worried eyes, squiggly mouth.
+
 function UneasyFace({ size }: FaceProps) {
   const ink = '#3F551A'
-  // wobbly blob via cubic loop
+  
   const d =
     'M32 8 C45 8 52 16 53 27 C54 37 50 44 53 50 C49 56 40 55 32 56 ' +
     'C24 57 14 56 11 49 C13 43 10 36 11 27 C13 16 19 8 32 8 Z'
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden focusable="false">
       <path d={d} fill="#A9C95E" />
-      {/* slightly worried eyes (small, with a tiny upper lid) */}
+      {}
       <circle cx="24" cy="31" r="3.4" fill={ink} />
       <circle cx="40" cy="31" r="3.4" fill={ink} />
       <path d="M20 26 Q24 24 28 26" stroke={ink} strokeWidth="2.2" strokeLinecap="round" fill="none" />
       <path d="M36 26 Q40 24 44 26" stroke={ink} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      {/* squiggly wavy mouth */}
+      {}
       <path
         d="M22 44 Q26 41 29 44 T35 44 T42 44"
         stroke={ink}
@@ -242,50 +241,50 @@ function UneasyFace({ size }: FaceProps) {
   )
 }
 
-// 5 — Sad: dome / rounded-top half-shape, downturned teary eyes, a frown.
+
 function SadFace({ size }: FaceProps) {
   const ink = '#1E5663'
-  // dome: rounded top, flatter bottom
+  
   const d = 'M9 40 C9 21 22 8 32 8 C42 8 55 21 55 40 L55 50 Q55 56 49 56 L15 56 Q9 56 9 50 Z'
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden focusable="false">
       <path d={d} fill="#8AC7D8" />
-      {/* downturned eyes */}
+      {}
       <path d="M19 30 Q24 34 29 30" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
       <path d="M35 30 Q40 34 45 30" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
-      {/* tear */}
+      {}
       <path d="M40 33 C40 33 43 38 43 40 A2.6 2.6 0 0 1 37 40 C37 38 40 33 40 33 Z" fill="#E6F4F8" />
-      {/* frown */}
+      {}
       <path d="M24 48 Q32 42 40 48" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
     </svg>
   )
 }
 
-// 6 — Anxious: rounded diamond, worried slanted brows, small uneasy eyes, frown.
+
 function AnxiousFace({ size }: FaceProps) {
   const ink = '#4A2A66'
-  // rounded diamond (square rotated 45° with soft corners)
+  
   const d =
     'M32 7 Q39 7 43 13 L51 21 Q57 25 57 32 Q57 39 51 43 L43 51 Q39 57 32 57 ' +
     'Q25 57 21 51 L13 43 Q7 39 7 32 Q7 25 13 21 L21 13 Q25 7 32 7 Z'
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden focusable="false">
       <path d={d} fill="#BA8FD4" />
-      {/* worried slanted brows */}
+      {}
       <path d="M19 25 L28 28" stroke={ink} strokeWidth="2.4" strokeLinecap="round" />
       <path d="M45 25 L36 28" stroke={ink} strokeWidth="2.4" strokeLinecap="round" />
-      {/* small uneasy eyes */}
+      {}
       <circle cx="25" cy="33" r="3.2" fill={ink} />
       <circle cx="39" cy="33" r="3.2" fill={ink} />
-      {/* small frown */}
+      {}
       <path d="M27 46 Q32 42 37 46" stroke={ink} strokeWidth={STROKE_W} strokeLinecap="round" fill="none" />
     </svg>
   )
 }
 
-// ─── Mood model ─────────────────────────────────────────────────────────────
-// Six moods, in the reference bar order: Frustrated → Surprised → Happy →
-// Uneasy → Sad → Anxious. `color` tints the focal liquid mesh + accents.
+
+
+
 
 interface Mood {
   id: string
@@ -294,6 +293,7 @@ interface Mood {
   Svg: (props: FaceProps) => React.ReactElement
 }
 
+// customize: replace the mood labels and colors below
 const MOODS: readonly Mood[] = [
   { id: 'frustrated', label: 'Frustrated', color: '#CB5E3E', Svg: FrustratedFace },
   { id: 'surprised', label: 'Surprised', color: '#E5A85E', Svg: SurprisedFace },
@@ -303,22 +303,23 @@ const MOODS: readonly Mood[] = [
   { id: 'anxious', label: 'Anxious', color: '#BA8FD4', Svg: AnxiousFace },
 ]
 
-const INITIAL_INDEX = 2 // Happy
+// tune: change to select the initial mood
+const INITIAL_INDEX = 2 
 
-// ─── Liquid mesh blobs ────────────────────────────────────────────────────────
-// Several layered, blurred radial blobs in constant gentle drift, tinted by the
-// current mood color (with a lighter sibling tint for depth). Pure Framer Motion
-// (no Three.js) → portable.
+
+
+
+
 
 interface Blob {
-  /** home position, in % of the panel box */
+  
   x: number
   y: number
-  /** blob diameter, in % of the panel width */
+  
   size: number
-  /** which tint slot: 'base' = mood color, 'soft' = lightened mood color */
+  
   tint: 'base' | 'soft'
-  /** drift orbit radii (%) and per-blob loop duration (s) */
+  
   dx: number
   dy: number
   dur: number
@@ -332,7 +333,7 @@ const BLOBS: readonly Blob[] = [
   { x: 52, y: 50, size: 54, tint: 'base', dx: 10, dy: 7, dur: 17 },
 ]
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 export default function MoodTracker() {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -347,8 +348,8 @@ export default function MoodTracker() {
   const [index, setIndex] = useState(INITIAL_INDEX)
   const mood = MOODS[index]
 
-  // ── Save button: idle → confirming ("Recorded") → back to idle ─────────────
-  // A calm success green reads best for the "saved/done" confirm tint.
+  
+  
   const CONFIRM_GREEN = '#3FA66A'
   const [saved, setSaved] = useState(false)
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -359,16 +360,16 @@ export default function MoodTracker() {
     [],
   )
   const onSave = useCallback(() => {
-    if (saved) return // block re-clicks while confirming
+    if (saved) return 
     setSaved(true)
     savedTimer.current = setTimeout(() => setSaved(false), 1600)
   }, [saved])
 
-  // ── Mood-derived washes ──────────────────────────────────────────────────
-  // Soft, same-hue tints of the current mood so the saturated face sits on an
-  // airy background of its own colour with a clear lightness gap for contrast:
-  //   light → mood lerped toward white (soft pastel + a slightly richer sibling)
-  //   dark  → mood lerped toward a soft dark neutral (muted, coloured)
+  
+  
+  
+  
+  
   const baseTint = useMemo(
     () => (isDark ? shadeHex(mood.color, 0.5) : tintHex(mood.color, 0.5)),
     [mood.color, isDark],
@@ -377,17 +378,17 @@ export default function MoodTracker() {
     () => (isDark ? shadeHex(mood.color, 0.44) : tintHex(mood.color, 0.66)),
     [mood.color, isDark],
   )
-  // Flat panel fill behind the drifting blobs — the airy wash they bloom over.
+  
   const panelWash = useMemo(
     () => (isDark ? shadeHex(mood.color, 0.56) : tintHex(mood.color, 0.62)),
     [mood.color, isDark],
   )
-  // Deep, mood-tinted ink for the feeling word — AA-legible on the wash in both themes.
+  
   const panelInk = useMemo(
     () => (isDark ? tintHex(mood.color, 0.88) : inkHex(mood.color)),
     [mood.color, isDark],
   )
-  // Whole-card surface gently echoes the mood — a very faint same-hue tint.
+  
   const cardTint = useMemo(
     () =>
       isDark
@@ -395,7 +396,7 @@ export default function MoodTracker() {
         : lerpHex('#FFFFFF', mood.color, 0.06),
     [mood.color, isDark],
   )
-  // A deeper version of the mood color for the accent rail / chips.
+  
   const deepAccent = useMemo(() => lerpHex(mood.color, '#000000', 0.18), [mood.color])
 
   const setMood = useCallback((i: number) => {
@@ -405,7 +406,7 @@ export default function MoodTracker() {
     })
   }, [])
 
-  // Slider keyboard: arrows move between moods, Home/End to ends.
+  
   const onSliderKey = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       let next = index
@@ -433,10 +434,10 @@ export default function MoodTracker() {
     [index, setMood],
   )
 
-  // ── Pointer drag on the segmented track ───────────────────────────────────
-  // Map a clientX over the track to the nearest of the six stops. Stops sit at
-  // the CENTRE of each colored segment, so dragging snaps to whichever face the
-  // handle is closest to.
+  
+  
+  
+  
   const trackRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
 
@@ -446,7 +447,7 @@ export default function MoodTracker() {
     const rect = el.getBoundingClientRect()
     if (rect.width === 0) return index
     const ratio = clamp((clientX - rect.left) / rect.width, 0, 1)
-    // segment centres at (i + 0.5)/n → invert: i = round(ratio*n - 0.5)
+    
     return clamp(Math.round(ratio * MOODS.length - 0.5), 0, MOODS.length - 1)
   }, [index])
 
@@ -477,25 +478,25 @@ export default function MoodTracker() {
     [],
   )
 
-  // Handle position: centre of the active segment, as a % of track width.
+  
   const handlePct = ((index + 0.5) / MOODS.length) * 100
 
-  // ── Theme surfaces ────────────────────────────────────────────────────────
-  // The card surface and feeling-word ink now follow the mood (see washes above);
-  // these stay neutral so chrome/legend text reads consistently in both themes.
+  
+  
+  
   const titleColor = isDark ? '#F2F2F0' : '#16160F'
   const subColor = isDark ? '#8A8A86' : '#6B6B62'
   const legendIdle = isDark ? '#26262C' : '#F1F1EC'
   const cardShadow = isDark
     ? '0 24px 60px rgba(0,0,0,0.5)'
     : '0 24px 60px rgba(20,20,18,0.12)'
-  // Soft mood-tinted hairline on the airy panel (deeper outline in light theme
-  // so the pastel wash still reads as a contained card, not a bleed).
+  
+  
   const panelEdge = isDark
     ? `inset 0 0 0 1px ${tintHex(mood.color, 0.4)}33`
     : `inset 0 0 0 1px ${inkHex(mood.color)}1F`
 
-  // Entrance: gentle rise + fade (skipped under reduced motion).
+  
   const enter = reduced
     ? { initial: { opacity: 1 }, animate: { opacity: 1 } }
     : {
@@ -503,7 +504,7 @@ export default function MoodTracker() {
         animate: { opacity: 1, y: 0 },
       }
 
-  // Big-face spring pop on mood change.
+  
   const facePop = reduced
     ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : {
@@ -538,8 +539,7 @@ export default function MoodTracker() {
             'Manrope, ui-sans-serif, system-ui, -apple-system, sans-serif',
         }}
       >
-        {/* Ambient mood glow — a soft, low-opacity radial of the current mood
-            color blooming behind the panel so the whole card reads cohesive. */}
+        {}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -552,9 +552,9 @@ export default function MoodTracker() {
           }}
         />
 
-        {/* Content layer (above the ambient glow) */}
+        {}
         <div className="relative flex flex-col gap-4" style={{ zIndex: 1 }}>
-        {/* ── Header row ───────────────────────────────────────────────────── */}
+        {}
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 flex-col">
             <span
@@ -570,8 +570,7 @@ export default function MoodTracker() {
               Today · 6-day streak
             </span>
           </div>
-          {/* Save button — idle pill that morphs to a "Recorded" confirm
-              state on click. Compact visible pill, expanded ≥44px hit area. */}
+          {}
           <motion.button
             type="button"
             onClick={onSave}
@@ -604,8 +603,8 @@ export default function MoodTracker() {
                 paddingLeft: 10,
                 paddingRight: 10,
                 fontSize: 12,
-                // Idle: soft card-surface pill carrying a faint tint of the
-                // current mood. Confirm: calm success-green tint.
+                
+                
                 background: saved
                   ? `${CONFIRM_GREEN}${isDark ? '33' : '24'}`
                   : isDark
@@ -633,7 +632,7 @@ export default function MoodTracker() {
               }
             >
               {saved ? (
-                // inline check icon (no npm dependency)
+                
                 <svg
                   width="12"
                   height="12"
@@ -651,7 +650,7 @@ export default function MoodTracker() {
                   />
                 </svg>
               ) : (
-                // inline bookmark icon (no npm dependency)
+                
                 <svg
                   width="11"
                   height="11"
@@ -674,7 +673,7 @@ export default function MoodTracker() {
           </motion.button>
         </div>
 
-        {/* ── Focal liquid-mesh panel ──────────────────────────────────────── */}
+        {}
         <div
           className="relative flex flex-col items-center justify-center overflow-hidden rounded-2xl"
           style={{
@@ -686,7 +685,7 @@ export default function MoodTracker() {
             transition: reduced ? undefined : 'background 0.5s ease',
           }}
         >
-          {/* Liquid mesh: layered, blurred radial blobs drifting forever */}
+          {}
           <div
             aria-hidden
             className="absolute inset-0"
@@ -732,10 +731,7 @@ export default function MoodTracker() {
             })}
           </div>
 
-          {/* Readability lift — a gentle same-direction wash that keeps the
-              mood-tinted feeling word AA-legible without muddying the panel.
-              Light: lift the centre toward the soft wash so the deep ink pops;
-              Dark: a faint edge-darken so the light-tone ink stays crisp. */}
+          {}
           <div
             aria-hidden
             className="absolute inset-0"
@@ -746,7 +742,7 @@ export default function MoodTracker() {
             }}
           />
 
-          {/* Panel content: big crossfading face + feeling word */}
+          {}
           <div className="relative flex flex-col items-center gap-3">
             <div
               className="relative flex items-center justify-center"
@@ -811,7 +807,7 @@ export default function MoodTracker() {
           </div>
         </div>
 
-        {/* ── Segmented mood slider ────────────────────────────────────────── */}
+        {}
         <div className="flex flex-col gap-2">
           <span className="text-[12px] font-medium" style={{ color: subColor }}>
             Drag to set your mood
@@ -834,7 +830,7 @@ export default function MoodTracker() {
             className="relative w-full cursor-pointer touch-none select-none"
             style={{ height: 44 }}
           >
-            {/* segmented color rail (centered in the 44px hit area) */}
+            {}
             <div
               aria-hidden
               className="absolute left-0 right-0 flex overflow-hidden rounded-full"
@@ -848,7 +844,7 @@ export default function MoodTracker() {
                 />
               ))}
             </div>
-            {/* draggable handle */}
+            {}
             <motion.span
               aria-hidden
               className="absolute rounded-full"
@@ -881,9 +877,8 @@ export default function MoodTracker() {
           </div>
         </div>
 
-        {/* ── Legend row: six tappable mood-face quick-pick buttons ────────── */}
-        {/* marginTop lifts the legend clear of the slider (gap-4=16 + 4 = 20).
-            gap-1.5 (6px) between faces keeps the row safe at a 320px viewport. */}
+        {}
+        {}
         <div className="grid grid-cols-6 gap-1.5" style={{ marginTop: 4 }}>
           {MOODS.map((m, i) => {
             const active = i === index
@@ -897,8 +892,8 @@ export default function MoodTracker() {
                 className="flex items-center justify-center rounded-xl transition-colors"
                 style={{
                   minHeight: 44,
-                  // Symmetric internal padding so the centered face never hugs
-                  // the selected highlight box's edges.
+                  
+                  
                   padding: 8,
                   background: active ? `${m.color}22` : 'transparent',
                   outline: 'none',

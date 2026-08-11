@@ -1,19 +1,25 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Presents a responsive stack of labeled portfolio cards.
+ * Hover and focus separate the overlapping cards while preserving their spread.
+ */
 
 import { useRef, useState, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Base constants (designed at 480px container width) ──────────────────────
 
+
+// tune: change both dimensions to resize the card stack
 const BASE_CARD_W = 300
-const BASE_CARD_H = 169 // 16:9
+const BASE_CARD_H = 169 
 
-// ─── Card data ───────────────────────────────────────────────────────────────
 
+
+// customize: replace the card labels, colors, and resting positions below
 const CARDS = [
   {
     id: 0,
@@ -72,7 +78,7 @@ const BAR_PATTERN = [1,2,1,1,3,1,2,1,1,3,1,1,2,1,2,1,3,1,1,2,1,3,1,2,1,1,2,1]
 const SPRING_SCATTER = { type: 'spring' as const, stiffness: 240, damping: 24 }
 const SPRING_FOCUS   = { type: 'spring' as const, stiffness: 340, damping: 28 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+
 
 function Barcode({ color, scale }: { color: string; scale: number }) {
   return (
@@ -114,7 +120,7 @@ function LogoMark({ color, scale }: { color: string; scale: number }) {
   )
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 export default function LabelCards() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -126,7 +132,7 @@ export default function LabelCards() {
     const el = containerRef.current
     if (!el) return
 
-    // ── Theme detection ────────────────────────────────────────────────────────
+    
     const checkTheme = () => {
       const card = el.closest('[data-card-theme]')
       setIsDark(
@@ -139,7 +145,7 @@ export default function LabelCards() {
     const cardWrapper = el.closest('[data-card-theme]')
     if (cardWrapper) themeObs.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
 
-    // ── Size tracking ──────────────────────────────────────────────────────────
+    
     const sizeObs = new ResizeObserver(entries => {
       setContainerW(entries[0].contentRect.width)
     })
@@ -148,8 +154,8 @@ export default function LabelCards() {
     return () => { themeObs.disconnect(); sizeObs.disconnect() }
   }, [])
 
-  // ── Responsive scaling ─────────────────────────────────────────────────────
-  // Divide by 1.56 ensures the widest card (offset + half-width) stays in-frame
+  
+  
   const cardW  = Math.min(BASE_CARD_W, Math.floor(containerW / 1.56))
   const cardH  = Math.round(cardW * 9 / 16)
   const scale  = cardW / BASE_CARD_W
@@ -159,7 +165,7 @@ export default function LabelCards() {
       ref={containerRef}
       className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
-      {/* Dot grid */}
+      {}
       <div
         style={{
           position: 'absolute',
@@ -212,7 +218,7 @@ export default function LabelCards() {
                 boxSizing: 'border-box',
               }}
             >
-              {/* Title row */}
+              {}
               <div
                 style={{
                   display: 'flex',
@@ -234,10 +240,10 @@ export default function LabelCards() {
                 </span>
               </div>
 
-              {/* Divider */}
+              {}
               <div style={{ height: 1, background: card.fg, opacity: 0.22, marginBottom: 9 * scale, flexShrink: 0 }} />
 
-              {/* Body */}
+              {}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                   <p style={{ margin: 0, fontSize: 11.5 * scale, fontWeight: 600, color: card.fg, lineHeight: 1.35 }}>
@@ -248,7 +254,7 @@ export default function LabelCards() {
                   </p>
                 </div>
 
-                {/* Bottom bar */}
+                {}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                   <Barcode color={card.fg} scale={scale} />
                   <LogoMark color={card.fg} scale={scale} />
@@ -259,7 +265,7 @@ export default function LabelCards() {
         )
       })}
 
-      {/* Hint */}
+      {}
       <motion.p
         style={{
           position: 'absolute',

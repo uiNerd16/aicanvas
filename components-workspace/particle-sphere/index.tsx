@@ -1,13 +1,18 @@
 'use client'
 
 // npm install three
+/**
+ * Renders a shaded particle sphere with a Three.js point cloud.
+ * Pointer movement rotates the sphere while its particles continue drifting.
+ */
 
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
+// tune: raise to increase sphere density
 const PARTICLE_COUNT = 9000
 
-/** Soft radial glow sprite drawn on a tiny canvas */
+
 function makeSprite(): THREE.CanvasTexture {
   const size = 64
   const canvas = document.createElement('canvas')
@@ -24,7 +29,7 @@ function makeSprite(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(canvas)
 }
 
-/** Map a normalised y value (-1 → +1) to an RGB triple */
+
 function colorFromY(ny: number): [number, number, number] {
   if (ny >= 0) {
     return [1.0, 0.55 + ny * 0.37, 0.02 + ny * 0.63]
