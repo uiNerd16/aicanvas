@@ -69,6 +69,11 @@ export const CATEGORY: Record<string, string> = {
   'horizon-backdrop': 'Dynamic element',
   'contour-backdrop': 'Dynamic element',
 
-  // Visualization
-  planet: 'Visualization',
+  // Objects — the sanctioned decorative class (motion.md#motion-philosophy).
+  // Planet moved here from "Visualization" on the 2026-08-11 ruling: it was
+  // never a visualization, it was the class's first member.
+  planet: 'Objects',
+  orb: 'Objects',
+  nodes: 'Objects',
+  burst: 'Objects',
 }

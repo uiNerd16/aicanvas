@@ -18,8 +18,9 @@ const avatarVariants = cva(
     'inline-flex items-center justify-center select-none shrink-0',
     // leading-none: the initials had no line-height at all, so they took the
     // browser default (~1.2) and centred against a fractional box. At 1 the
-    // text box is the font size and the clearance is 6 / 9 / 12px, the same
-    // numbers Button and Input land on at the same rungs.
+    // text box is the font size and the clearance is 6 / 9 / 12px. Avatar sits
+    // on its own 24 / 32 / 40 box ladder, not the 28 / 34 / 40 control ladder,
+    // so these are close to but not identical with Button's 7 / 9 / 11 inset.
     '[line-height:var(--andromeda-leading-none,1)]',
     'border-[length:var(--andromeda-border-width,1px)] border-solid',
     'rounded-[var(--andromeda-radius-frame,0px)]',
@@ -35,9 +36,9 @@ const avatarVariants = cva(
   {
     variants: {
       size: {
-        sm: 'w-[var(--andromeda-6,24px)] h-[var(--andromeda-6,24px)] text-[length:var(--andromeda-text-xs)]',
-        md: 'w-[var(--andromeda-8,32px)] h-[var(--andromeda-8,32px)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'w-[var(--andromeda-10,40px)] h-[var(--andromeda-10,40px)] text-[length:var(--andromeda-text-md)]',
+        sm: 'w-[var(--andromeda-6,24px)] h-[var(--andromeda-6,24px)] text-[length:var(--andromeda-text-sm)]',
+        md: 'w-[var(--andromeda-8,32px)] h-[var(--andromeda-8,32px)] text-[length:var(--andromeda-text-md)]',
+        lg: 'w-[var(--andromeda-10,40px)] h-[var(--andromeda-10,40px)] text-[length:var(--andromeda-text-lg)]',
       },
     },
     defaultVariants: {
@@ -100,6 +101,7 @@ export const Avatar = forwardRef(function Avatar(
   return (
     <div
       ref={ref}
+      data-size={size}
       className="relative inline-flex shrink-0"
       style={{ ...andromedaVars(), ...style }}
       aria-label={status ? `${name}, ${status}` : name}

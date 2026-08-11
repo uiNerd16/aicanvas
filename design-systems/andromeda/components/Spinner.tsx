@@ -80,8 +80,12 @@ export const Spinner = forwardRef(function Spinner(
 ) {
   useEffect(() => { ensureKeyframesInjected(); }, []);
 
-  const sz = SIZE_MAP[size] ?? SIZE_MAP.md;
-  const bright = colorByVariant[variant] ?? colorByVariant.default;
+  // Resolve both rungs once: the same keys feed the geometry, the colour and
+  // the data-* attributes, so an unknown prop value can never be reflected.
+  const sizeKey = SIZE_MAP[size] ? size : 'md';
+  const variantKey = colorByVariant[variant] ? variant : 'default';
+  const sz = SIZE_MAP[sizeKey];
+  const bright = colorByVariant[variantKey];
   const dim = `var(--andromeda-text-faint, ${tokens.color.text.faint})`;
 
   const cells = [];
@@ -116,6 +120,8 @@ export const Spinner = forwardRef(function Spinner(
       ref={ref}
       role="status"
       aria-label={label}
+      data-size={sizeKey}
+      data-variant={variantKey}
       className={className}
       style={{
         ...andromedaVars(),

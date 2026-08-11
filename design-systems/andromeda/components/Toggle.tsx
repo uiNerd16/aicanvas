@@ -116,8 +116,8 @@ const thumbVariants = cva(
 
 // Label text steps with the switch, matching Checkbox and Radio.
 const LABEL_TEXT = {
-  md: 'text-[length:var(--andromeda-text-sm)]',
-  lg: 'text-[length:var(--andromeda-text-md)]',
+  md: 'text-[length:var(--andromeda-text-md)]',
+  lg: 'text-[length:var(--andromeda-text-lg)]',
 };
 
 const labelClass = cn(
@@ -172,6 +172,7 @@ export const Toggle = forwardRef(function Toggle(
 
   return (
     <div
+      data-size={size}
       className="inline-flex items-center gap-[var(--andromeda-3)]"
       style={{ ...andromedaVars(), ...style }}
     >

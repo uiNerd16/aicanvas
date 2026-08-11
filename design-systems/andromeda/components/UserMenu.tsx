@@ -370,6 +370,10 @@ export const UserMenu = forwardRef(function UserMenu(
         else if (ref) ref.current = node;
       }}
       data-slot="user-menu"
+      // The rung that actually rendered, after the default and the guard above.
+      // A default never appears in props, so <UserMenu /> is otherwise
+      // un-inspectable.
+      data-size={sizeKey}
       className={className}
       style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       {...props}

@@ -36,7 +36,7 @@ const tagVariants = cva(
   {
     variants: {
       // LABEL LADDER, not the control ladder. 20 / 24 / 32 instead of the
-      // controls' 24 / 32 / 40 (maintainer's call, 2026-08-10). A tag or a badge
+      // controls' 28 / 34 / 40 (maintainer's call, 2026-08-10). A tag or a badge
       // is a label inside a row or a cell, not a control in a strip, and sitting
       // on the same rungs as Button was the whole reason the three read as one
       // object. The default stays `sm`, so the common case drops 24px -> 20px.
@@ -46,9 +46,9 @@ const tagVariants = cva(
       // three numbers the grid already names would be a token nobody reads.
       // Padding and text steps are unchanged — only the box got shorter.
       size: {
-        sm: 'h-[var(--andromeda-5)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-xs)]',
-        md: 'h-[var(--andromeda-6)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'h-[var(--andromeda-8)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
+        sm: 'h-[var(--andromeda-5)] px-[var(--andromeda-2)] text-[length:var(--andromeda-text-sm)]',
+        md: 'h-[var(--andromeda-6)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-md)]',
+        lg: 'h-[var(--andromeda-8)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-lg)]',
       },
       variant: {
         // TONE FILLS ARE ALPHA (2026-08-10). Each family carries exactly one
@@ -109,7 +109,7 @@ const closeButtonClass = cn(
 /**
  * @typedef {object} TagProps
  * @property {'default'|'accent'|'warning'|'fault'} [variant='default']
- * @property {'sm'|'md'|'lg'} [size='sm'] Rung on the shared control ladder: 24, 32 or 40px tall. Defaults to sm because a tag usually sits inline rather than in a control row; pass md or lg to line it up with a field or button of that size.
+ * @property {'sm'|'md'|'lg'} [size='sm'] Rung on the LABEL ladder: 20, 24 or 32px tall (not the 28/34/40 control ladder). Defaults to sm because a tag usually sits inline rather than in a control row; pass md or lg to line it up beside a field or button of that size.
  * @property {React.ReactNode} [children]
  * @property {() => void} [onClose] When provided, renders a close button.
  * @property {string} [className]
@@ -124,6 +124,8 @@ export const Tag = forwardRef(function Tag(
   return (
     <span
       ref={ref}
+      data-size={size}
+      data-variant={variant}
       className={cn(tagVariants({ variant, size }), className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}

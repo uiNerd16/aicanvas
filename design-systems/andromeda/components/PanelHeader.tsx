@@ -23,7 +23,7 @@ import { mq } from './lib/responsive';
 // Size ramp. PanelHeader is a block header, not an inline control, so it does
 // NOT pin to the 24/32/40 control ladder: a panel title sets the panel's weight
 // in the page, and a fixed row height would cap the type. It steps the type
-// scale instead (lg 15 / xl 18 / 2xl 22, one rung either side of today's xl)
+// scale instead (lg 16 / xl 18 / 2xl 20, one rung either side of today's xl)
 // with the padding moving one spacing step alongside, which keeps the
 // text-to-edge ratio roughly constant across rungs. padXNarrow is the existing
 // below-md step-down, carried to every rung as the same one-notch cut.
@@ -32,9 +32,9 @@ import { mq } from './lib/responsive';
 // still moves the header); padXNarrow is a raw token because it is interpolated
 // into the <style> block, the same split the file used before the prop existed.
 const SIZES = {
-  sm: { text: 'var(--andromeda-text-lg, 15px)',  padY: 'var(--andromeda-3, 12px)', padX: 'var(--andromeda-4, 16px)', padXNarrow: tokens.spacing[3] },
+  sm: { text: 'var(--andromeda-text-lg, 16px)',  padY: 'var(--andromeda-3, 12px)', padX: 'var(--andromeda-4, 16px)', padXNarrow: tokens.spacing[3] },
   md: { text: 'var(--andromeda-text-xl, 18px)',  padY: 'var(--andromeda-4, 16px)', padX: 'var(--andromeda-5, 20px)', padXNarrow: tokens.spacing[4] },
-  lg: { text: 'var(--andromeda-text-2xl, 22px)', padY: 'var(--andromeda-5, 20px)', padX: 'var(--andromeda-6, 24px)', padXNarrow: tokens.spacing[5] },
+  lg: { text: 'var(--andromeda-text-2xl, 20px)', padY: 'var(--andromeda-5, 20px)', padX: 'var(--andromeda-6, 24px)', padXNarrow: tokens.spacing[5] },
 };
 
 /**

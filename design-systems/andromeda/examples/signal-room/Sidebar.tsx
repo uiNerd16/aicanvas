@@ -268,9 +268,9 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
         <InsetDivider side="top" />
         <UserCard
           name="Kerem Alkan"
-          role="Engineer · Premium"
           src="https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           status="online"
+          size="sm"
           items={userMenuItems}
           placement="top"
           align="stretch"

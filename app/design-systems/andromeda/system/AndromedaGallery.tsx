@@ -121,9 +121,13 @@ export function AndromedaGallery({
                   {item.description}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-1.5">
-                  <span className="rounded-md bg-sand-200 px-2 py-1 text-xxs font-semibold text-sand-600 dark:bg-sand-800 dark:text-sand-400">
-                    {item.variants} variants
-                  </span>
+                  {/* One canonical look is not a count: "1 variants" reads as a
+                      component that lost the other two. */}
+                  {item.variants > 1 && (
+                    <span className="rounded-md bg-sand-200 px-2 py-1 text-xxs font-semibold text-sand-600 dark:bg-sand-800 dark:text-sand-400">
+                      {item.variants} variants
+                    </span>
+                  )}
                   {item.states > 0 && (
                     <span className="rounded-md bg-sand-200 px-2 py-1 text-xxs font-semibold text-sand-600 dark:bg-sand-800 dark:text-sand-400">
                       {item.states} states

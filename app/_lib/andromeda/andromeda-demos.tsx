@@ -79,7 +79,7 @@ import {
 // v2 components come from the build-time-injected shim (real re-exports when
 // injected, placeholder panels on degraded builds) — never import them from
 // design-systems/ directly. See scripts/inject-premium.mjs.
-import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer, FunnelChart } from '../../lib/andromeda-v2.generated'
+import { MetricChart, Gauge, Waveform, MediaCard, DataTable, MusicPlayer, FunnelChart, Orb, Nodes, Burst } from '../../lib/andromeda-v2.generated'
 
 // ─── Layout helpers ──────────────────────────────────────────────────────────
 
@@ -655,9 +655,51 @@ function MusicPlayerDemo() {
 
 function PlanetDemo() {
   return (
-    <div style={{ width: '100%', maxWidth: 360, height: 300, position: 'relative', margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: 640, height: 460, position: 'relative', margin: '0 auto' }}>
       <Planet />
     </div>
+  )
+}
+
+// Orb, Nodes and Burst are Objects: set-pieces, one per surface, framed by the
+// system's own Card instead of floating on a bare page. One shared frame — the
+// only thing that differs between the three is the title and the body.
+// The box is deliberately large: an Object fills a surface, and at 280px it
+// reads as a widget instead.
+function ObjectPanel({ title, children }) {
+  return (
+    <Card style={{ width: '100%', maxWidth: 640, margin: '0 auto' }}>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <div style={{ padding: tokens.spacing[4] }}>
+        <div style={{ height: 420, position: 'relative' }}>{children}</div>
+      </div>
+    </Card>
+  )
+}
+
+function OrbDemo() {
+  return (
+    <ObjectPanel title="Core">
+      <Orb />
+    </ObjectPanel>
+  )
+}
+
+function NodesDemo() {
+  return (
+    <ObjectPanel title="Signal lattice">
+      <Nodes />
+    </ObjectPanel>
+  )
+}
+
+function BurstDemo() {
+  return (
+    <ObjectPanel title="Convergence">
+      <Burst />
+    </ObjectPanel>
   )
 }
 
@@ -1314,6 +1356,9 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   'panel-header': PanelHeaderDemo,
   'panel-menu': PanelMenuDemo,
   planet: PlanetDemo,
+  orb: OrbDemo,
+  nodes: NodesDemo,
+  burst: BurstDemo,
   'search-field': SearchFieldDemo,
   'segmented-control': SegmentedControlDemo,
   'progress-bar': ProgressBarDemo,

@@ -211,7 +211,7 @@ const codeClass = cn(
 
 const valueClass = cn(
   '[font-family:var(--andromeda-font-sans)]',
-  'text-[length:var(--andromeda-text-4xl)]',
+  'text-[length:var(--andromeda-text-5xl)]',
   'font-[number:var(--andromeda-weight-thin)]',
   'text-[color:var(--andromeda-text-primary)]',
   '[line-height:var(--andromeda-leading-tight)]',

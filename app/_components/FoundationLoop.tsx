@@ -122,9 +122,9 @@ const F_BLOCKS = [
       <FTypeRow token="xs" px="10px" />
       <FTypeRow token="sm" px="12px" />
       <FTypeRow token="md" px="14px" />
-      <FTypeRow token="lg" px="15px" />
+      <FTypeRow token="lg" px="16px" />
       <FTypeRow token="xl" px="18px" />
-      <FTypeRow token="2xl" px="22px" />
+      <FTypeRow token="2xl" px="20px" />
     </>
   ),
   // Spacing scale (showcase: Foundation · Spacing)

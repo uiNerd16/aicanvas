@@ -314,7 +314,7 @@ export default function AndromedaShowcase({
           ${mq.sm} {
             .as-usage-grid { grid-template-columns: minmax(0, 1fr); }
             .as-shell { padding: ${tokens.spacing[6]} ${tokens.spacing[4]} !important; padding-bottom: 7.5rem !important; }
-            .as-title { font-size: ${tokens.typography.size['2xl']} !important; }
+            .as-title { font-size: ${tokens.typography.size['3xl']} !important; }
             /* Phones: drop the right-hand usage gloss on the Type Scale and
                Spacing rows — at phone widths it crowds the specimen off-screen.
                Desktop/tablet keep it (rule is mq.sm-only). */
@@ -553,12 +553,13 @@ export default function AndromedaShowcase({
                 { token: 'xs',  px: '10px', usage: 'Data labels · kickers · row headers' },
                 { token: 'sm',  px: '12px', usage: 'Descriptions · captions · error text' },
                 { token: 'md',  px: '14px', usage: 'UI body · card descriptions' },
-                { token: 'lg',  px: '15px', usage: 'Card titles · nav labels' },
+                { token: 'lg',  px: '16px', usage: 'Card titles · nav labels · size="lg" controls' },
                 { token: 'xl',  px: '18px', usage: 'Section headings' },
-                { token: '2xl', px: '22px', usage: 'Sub-page headings' },
-                { token: '3xl', px: '28px', usage: 'Showcase page title' },
-                { token: '4xl', px: '36px', usage: 'Dashboard hero readout' },
-                { token: '5xl', px: '48px', usage: 'Stat primary value' },
+                { token: '2xl', px: '20px', usage: 'Large panel headers' },
+                { token: '3xl', px: '22px', usage: 'Sub-page headings' },
+                { token: '4xl', px: '28px', usage: 'Showcase page title' },
+                { token: '5xl', px: '36px', usage: 'Dashboard hero readout' },
+                { token: '6xl', px: '48px', usage: 'Stat primary value' },
               ].map(({ token, px, usage }) => (
                 <div key={token} style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[4], padding: `${tokens.spacing[2]} 0`, borderBottom: `1px solid ${tokens.color.border.subtle}` }}>
                   <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest, width: 28, flexShrink: 0 }}>{token}</span>
@@ -579,7 +580,7 @@ export default function AndromedaShowcase({
               { name: 'bold',     val: 700 },
             ].map(({ name, val }) => (
               <div key={name} style={{ width: 148 }}>
-                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size['2xl'], fontWeight: val, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>NOVA</div>
+                <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size['3xl'], fontWeight: val, color: tokens.color.text.primary, letterSpacing: tokens.typography.tracking.wider, marginBottom: tokens.spacing[1] }}>NOVA</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>weight.{name}</div>
                 <div style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint }}>{val}</div>
               </div>

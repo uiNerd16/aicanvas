@@ -79,7 +79,7 @@ const buttonVariants = cva(
     // leading-none, not tight. A fixed-height control centres its label in
     // the leftover space, so any multiplier above 1 makes that leftover
     // fractional: 1.1 gave 5.5 / 8.4 / 11.3px of clearance. At 1 the label
-    // box IS the font size and the clearance is 6 / 9 / 12px. Uppercase mono
+    // box IS the font size and the clearance is 7 / 9 / 11px. Uppercase mono
     // has no descender to protect at these sizes.
     '[line-height:var(--andromeda-leading-none,1)]',
     // motion — colours/border/shadow tween via CSS at duration.normal so the
@@ -168,9 +168,12 @@ const buttonVariants = cva(
         // of vertical padding. The old py values landed on 23 / 31.2 / 39.4px,
         // which no field could match without copying the same arithmetic; the
         // base's items-center keeps the label optically centred in the rung.
-        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-xs)]',
-        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-5)] text-[length:var(--andromeda-text-md)]',
+        // Type follows the size step (2026-08-11): sm 12, md 14, lg 16. It was
+        // one rung low (10 / 12 / 14), which put a size="sm" label under the
+        // 12px legibility floor.
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-3)] text-[length:var(--andromeda-text-sm)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-4)] text-[length:var(--andromeda-text-md)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-5)] text-[length:var(--andromeda-text-lg)]',
       },
     },
     defaultVariants: {

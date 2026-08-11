@@ -66,7 +66,7 @@ export function NowTransmitting() {
                 style={{
                   margin: 0,
                   fontFamily: tokens.typography.fontSans,
-                  fontSize: tokens.typography.size['3xl'],
+                  fontSize: tokens.typography.size['4xl'],
                   fontWeight: tokens.typography.weight.semibold,
                   color: tokens.color.text.primary,
                   letterSpacing: '-0.02em',
@@ -165,7 +165,7 @@ export function NowTransmitting() {
         ${mq.sm} {
           /* Step the hero reading down one stop (3xl → 2xl) — the largest
              display size on the page overpowers a phone at full size. */
-          .sr-hero-title { font-size: ${tokens.typography.size['2xl']} !important; }
+          .sr-hero-title { font-size: ${tokens.typography.size['3xl']} !important; }
         }
       `}</style>
     </Card>

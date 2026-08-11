@@ -101,7 +101,7 @@ export function NextDestination() {
             </div>
             <div style={{
               fontFamily: tokens.typography.fontMono,
-              fontSize: tokens.typography.size['3xl'],
+              fontSize: tokens.typography.size['4xl'],
               fontWeight: tokens.typography.weight.bold,
               color: tokens.color.text.primary,
               letterSpacing: tokens.typography.tracking.wider,

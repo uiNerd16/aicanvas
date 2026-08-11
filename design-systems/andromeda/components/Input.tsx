@@ -19,7 +19,8 @@ import { tokens } from '../tokens';
 // padInset twice over plus the glyph, so the space between icon and text is the
 // same inset the field already carries on its four sides.
 // The shared control-icon ladder, same as Button and IconButton: 16/18/20,
-// which is 3 / 6 / 9px of clearance at every rung. It was 12/16/20 (5 / 7 / 9).
+// which leaves 5 / 7 / 9px above and below the glyph inside the rung's content
+// box (26 / 32 / 38). It was 12/16/20, i.e. 7 / 8 / 9.
 const ICON_FOR_SIZE = { sm: tokens.iconSize.sm, md: tokens.iconSize.md, lg: tokens.iconSize.lg };
 
 // `size` arrives from a caller and is read straight into a style value below,
@@ -62,9 +63,12 @@ const inputVariants = cva(
       // glyphs reads as broken. This replaced a single off-grid 9px vertical
       // padding that put the field at ~37px, on neither rung of the ladder.
       size: {
-        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-xs)]',
-        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-md)]',
+        // Type follows the size step (2026-08-11): sm 12, md 14, lg 16, the same
+        // rungs tokens.control now carries, so padInset stays exactly
+        // (height - 2*border - text) / 2. It was one rung low (10 / 12 / 14).
+        sm: 'h-[var(--andromeda-control-sm)] px-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-sm)]',
+        md: 'h-[var(--andromeda-control-md)] px-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-md)]',
+        lg: 'h-[var(--andromeda-control-lg)] px-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-lg)]',
       },
       state: {
         default: [
@@ -90,8 +94,8 @@ const inputVariants = cva(
 /**
  * @typedef {object} InputProps
  * @property {string} [label] Uppercase mono label rendered above the field.
- * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 24, 32 or 40px tall. Matches Button and IconButton at the same value, so a field and a button in one row align without further styling.
- * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon] Optional left icon. Its glyph scales with `size` (12, 16, 20px).
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 28, 34 or 40px tall. Matches Button and IconButton at the same value, so a field and a button in one row align without further styling.
+ * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon] Optional left icon. Its glyph scales with `size` (16, 18, 20px).
  * @property {string} [error] When set, switches the field into the error state and renders the message.
  * @property {string} [className] Class name forwarded to the <input> element.
  * @property {string} [wrapperClassName] Class name forwarded to the outer wrapper.
@@ -123,6 +127,7 @@ export const Input = forwardRef(function Input(
 
   return (
     <div
+      data-size={sizeKey}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', wrapperClassName)}
       style={{ ...andromedaVars(), ...style }}
     >
@@ -131,7 +136,9 @@ export const Input = forwardRef(function Input(
           htmlFor={id}
           className={cn(
             '[font-family:var(--andromeda-font-mono)]',
-            'text-[length:var(--andromeda-text-xs)]',
+            // 12px at every rung, not 10: a field label is read, so it sits on
+            // the legibility floor rather than below it (2026-08-11).
+            'text-[length:var(--andromeda-text-sm)]',
             'font-[number:var(--andromeda-weight-medium)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
             'text-[color:var(--andromeda-text-secondary)]',
@@ -177,7 +184,9 @@ export const Input = forwardRef(function Input(
           role="alert"
           className={cn(
             '[font-family:var(--andromeda-font-mono)]',
-            'text-[length:var(--andromeda-text-xs)]',
+            // 12px, same floor as the label: an error message is the most
+            // important text in the field, never the smallest.
+            'text-[length:var(--andromeda-text-sm)]',
             'text-[color:var(--andromeda-red-300)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
           )}

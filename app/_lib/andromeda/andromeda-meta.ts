@@ -360,6 +360,30 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
       'Topographic hairlines from a deterministic noise field, sliced at evenly spaced thresholds by a single SVG filter. Seeded, so the same terrain renders every build. Fills its nearest positioned ancestor, or the viewport with fixed.',
     sourceFile: 'ContourBackdrop.tsx',
   },
+
+  // Objects — the system's sanctioned decorative class (Planet is its first
+  // member, above). Monochrome, transparent ground, one per surface.
+  {
+    slug: 'orb',
+    name: 'Orb',
+    description:
+      'One circle swept through a shared centre and projected over a full turn: two lobes of hairline loops that collapse to a single vertical line when the family turns edge on. Grey only on a transparent canvas, one revolution per 78 seconds, with light pulses riding the loops.',
+    sourceFile: 'Orb.tsx',
+  },
+  {
+    slug: 'nodes',
+    name: 'Nodes',
+    description:
+      'A hairline lattice with a survey glyph at every crossing, near invisible at rest. Light travels the lines and each crossing it reaches ignites and sends light onward, so every lit node is caused by one the viewer just watched arrive. Branching is subcritical, so cascades die out instead of flooding.',
+    sourceFile: 'Nodes.tsx',
+  },
+  {
+    slug: 'burst',
+    name: 'Burst',
+    description:
+      'Several hundred hairlines running from a spacing-step endpoint lattice down to one focal point below centre, gathered into angular bundles so dark wedges open between them. Pulses travel the strands and fire the dots they pass; the hot core is emergent overlap, never a painted glow.',
+    sourceFile: 'Burst.tsx',
+  },
 ]
 
 // Per-file registry-slug overrides. Button's natural slug (andromeda-button)

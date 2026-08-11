@@ -120,7 +120,7 @@ function writeStubShim() {
 // a placeholder component instead of a real re-export. UPDATE this list when a
 // new v2 component ships (it mirrors the vault manifest's
 // freeSystemComponents.andromeda).
-const V2_FALLBACK_NAMES = ['MetricChart', 'Gauge', 'Waveform', 'MediaCard', 'DataTable', 'MusicPlayer', 'FunnelChart']
+const V2_FALLBACK_NAMES = ['MetricChart', 'Gauge', 'Waveform', 'MediaCard', 'DataTable', 'MusicPlayer', 'FunnelChart', 'Orb', 'Nodes', 'Burst']
 
 // Managed block markers in `git info/exclude` — doubles as the state that
 // remembers which files a previous run injected (for stale-file cleanup).
@@ -171,13 +171,17 @@ function syncGitExclude(paths) {
 
 // Delete previously injected files that are no longer in the manifest (or any
 // previously injected file at all on a no-vault run). The path-shape check
-// means a corrupted exclude file can never delete anything outside
-// design-systems/<system>/components/.
+// means a corrupted exclude file can never delete anything outside the two
+// shapes this script owns: design-systems/<system>/components/<Name>.tsx and
+// anything under design-systems/<system>/examples/<slug>/.
 function cleanupFreeDs(currentPaths) {
   const current = new Set(currentPaths)
   for (const prev of readExcludedFreeDs()) {
     if (current.has(prev)) continue
-    if (!/^design-systems\/[a-z0-9-]+\/components\/[A-Za-z][A-Za-z0-9]*\.tsx$/.test(prev)) continue
+    const owned =
+      /^design-systems\/[a-z0-9-]+\/components\/[A-Za-z][A-Za-z0-9]*\.tsx$/.test(prev) ||
+      /^design-systems\/[a-z0-9-]+\/examples\/[a-z0-9-]+\/[A-Za-z0-9._/-]+$/.test(prev)
+    if (!owned) continue
     rmSync(join(ROOT, prev), { force: true })
   }
 }
@@ -726,7 +730,57 @@ const andromedaExpected = [...new Set([
   ...V2_FALLBACK_NAMES,
 ])]
 const freePlaceholders = writeFreeDsPlaceholders('andromeda', andromedaExpected, andromedaInjected)
-const allFreePaths = [...freePaths, ...freePlaceholders]
+
+// ── 4b-ii. Vault-authored template compositions (manifest key `systemExamples`)
+// { <system>: [<example-slug>] }. A template is a FOLDER, not one file, so the
+// whole tree is copied (marker-stripped, like everything else) into
+// design-systems/<system>/examples/<slug>/. The public route under
+// app/design-systems/<system>/templates/<slug>/ imports it by relative path, so
+// once the folder is here the route resolves exactly like the committed v1
+// templates. Absent/empty key → no-op, so an older pin still builds green.
+const exampleMap =
+  manifest.systemExamples && typeof manifest.systemExamples === 'object' ? manifest.systemExamples : {}
+const examplePaths = []
+const examplesInjected = []
+for (const [system, slugs] of Object.entries(exampleMap)) {
+  if (!/^[a-z0-9-]+$/.test(system)) {
+    console.error('[inject-premium] invalid system slug in systemExamples: ' + JSON.stringify(system))
+    process.exit(1)
+  }
+  for (const slug of Array.isArray(slugs) ? slugs : []) {
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      console.error('[inject-premium] invalid example slug in systemExamples: ' + JSON.stringify(slug))
+      process.exit(1)
+    }
+    const relDir = `design-systems/${system}/examples/${slug}`
+    const srcDir = join(source, relDir)
+    // Same bijection rule as the standalones: a listed example missing from the
+    // vault is a broken publish, and a route importing a folder that is not
+    // there fails the build anyway. Fail loud here instead.
+    if (!existsSync(srcDir)) {
+      console.error(`[inject-premium] systemExamples lists "${system}/${slug}" but ${relDir} is missing from the premium source`)
+      process.exit(1)
+    }
+    const walk = (dir) => {
+      for (const entry of readdirSync(join(srcDir, dir), { withFileTypes: true })) {
+        const rel = dir ? `${dir}/${entry.name}` : entry.name
+        if (entry.isDirectory()) { walk(rel); continue }
+        const out = join(ROOT, relDir, rel)
+        mkdirSync(dirname(out), { recursive: true })
+        const body = readFileSync(join(srcDir, rel), 'utf8')
+        writeFileSync(out, body.split('\n').filter((l) => !l.includes(MARKER)).join('\n'))
+        examplePaths.push(`${relDir}/${rel}`)
+      }
+    }
+    walk('')
+    examplesInjected.push(`${system}/${slug}`)
+  }
+}
+if (examplePaths.length > 0) {
+  log(`injected ${examplesInjected.length} template composition(s): ${examplesInjected.join(', ')} (${examplePaths.length} file(s))`)
+}
+
+const allFreePaths = [...freePaths, ...freePlaceholders, ...examplePaths]
 cleanupFreeDs(allFreePaths)  // previously injected, no longer in the manifest
 syncGitExclude(allFreePaths) // keep `git status` clean (skips silently without git)
 writeV2Shim(freeInjected['andromeda'] ?? [], manifest)

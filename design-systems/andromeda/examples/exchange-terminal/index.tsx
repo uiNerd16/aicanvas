@@ -77,7 +77,7 @@ function HoverStyles() {
       /* Hero spot price is the only display-tier reading here; step it
          down one stop on phones so it never overruns its wrapped row. */
       ${mq.sm} {
-        .ex-hero-price { font-size: ${tokens.typography.size['2xl']} !important; }
+        .ex-hero-price { font-size: ${tokens.typography.size['3xl']} !important; }
       }
 
       /* Main bento to single column below md. Source order is
@@ -377,7 +377,7 @@ function PairHeader() {
           className="ex-hero-price"
           style={{
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size['3xl'],
+            fontSize: tokens.typography.size['4xl'],
             fontWeight: tokens.typography.weight.bold,
             color: changeColor,
             letterSpacing: tokens.typography.tracking.tight,

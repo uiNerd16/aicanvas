@@ -5,6 +5,7 @@ import type { MatrixSpec } from './types'
 import { alert } from './alert'
 import { avatar } from './avatar'
 import { badge } from './badge'
+import { burst } from './burst'
 import { button } from './button'
 import { card } from './card'
 import { checkbox } from './checkbox'
@@ -25,6 +26,8 @@ import { mediaCard } from './media-card'
 import { metricChart } from './metric-chart'
 import { musicPlayer } from './music-player'
 import { navItem } from './nav-item'
+import { nodes } from './nodes'
+import { orb } from './orb'
 import { panelHeader } from './panel-header'
 import { panelMenu } from './panel-menu'
 import { planet } from './planet'
@@ -48,13 +51,13 @@ import { voidBackdrop } from './void-backdrop'
 import { waveform } from './waveform'
 
 export const SPECS: readonly MatrixSpec[] = [
-  alert, avatar, badge, button, card, checkbox, contourBackdrop, cornerMarkers,
-  dataTable, dateRangePicker, drawer, emptyState, funnelChart, gauge,
-  gridBackdrop, heatGrid, horizonBackdrop, iconButton, input, mediaCard,
-  metricChart, musicPlayer, navItem, panelHeader, panelMenu, planet, progressBar,
-  radarChart, radio, searchField, segmentedControl, slider, spinner, statTile,
-  table_, tag, textarea, toggle, tooltip, trendChart, userCard, userMenu,
-  voidBackdrop, waveform,
+  alert, avatar, badge, burst, button, card, checkbox, contourBackdrop,
+  cornerMarkers, dataTable, dateRangePicker, drawer, emptyState, funnelChart,
+  gauge, gridBackdrop, heatGrid, horizonBackdrop, iconButton, input, mediaCard,
+  metricChart, musicPlayer, navItem, nodes, orb, panelHeader, panelMenu, planet,
+  progressBar, radarChart, radio, searchField, segmentedControl, slider, spinner,
+  statTile, table_, tag, textarea, toggle, tooltip, trendChart, userCard,
+  userMenu, voidBackdrop, waveform,
 ]
 
 export const SPEC_BY_SLUG: Record<string, MatrixSpec> = Object.fromEntries(

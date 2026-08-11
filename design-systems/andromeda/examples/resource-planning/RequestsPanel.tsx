@@ -56,7 +56,7 @@ function Cell({ label, value, share, last = false }) {
       <span
         style={{
           fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size['2xl'],
+          fontSize: tokens.typography.size['3xl'],
           fontWeight: tokens.typography.weight.bold,
           color: tokens.color.text.primary,
           letterSpacing: tokens.typography.tracking.tight,

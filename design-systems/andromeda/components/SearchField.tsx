@@ -14,12 +14,13 @@ import { MagnifyingGlass } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 
 // Leading glyph per rung, off tokens.iconSize. Was a hardcoded 14, which is on
-// neither the icon scale nor the control ladder. sm deliberately stays 12 rather
-// than dropping to 10: Input runs this same 12/16/20 ladder at the same rungs,
-// so a SearchField sitting beside an Input has to show the same glyph, and 10 is
-// not on tokens.iconSize at all. The 1px the sm glyph rides into the padding is
-// how every Andromeda field icon behaves: padInset is the TEXT inset, and md/lg
-// ride into it by 2px and 3px without anyone calling it a defect.
+// neither the icon scale nor the control ladder. NOTE: this map is 12/16/20,
+// while Input and Button moved to the 16/18/20 control-icon ladder (2026-08-11),
+// so a SearchField beside an Input now shows a smaller glyph at every rung. Left
+// as-is here: matching it is a styling call, not a stale number. The glyph rides
+// into the TEXT inset (padInset 7/9/11 against the 7/8/9 of clearance it leaves
+// in the 26/32/38 content box) by 0 / 1 / 2px, which is how every Andromeda
+// field icon behaves.
 const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
 
 // Which characters get the symbol treatment. The stack and the optical step-up
@@ -32,7 +33,9 @@ const MODIFIER_GLYPHS = /([⌘⌥⇧⌃⏎⌫⎋])/;
 // that way once produced 6px type at sm, below the 10px floor of
 // typography.size and past the point of being readable.
 // Resulting heights against the field's content box (rung height less its two
-// borders): sm 16 in 22, md 18 in 30, lg 22 in 38. Slack every rung.
+// borders): sm 14 in 26, md 16 in 32, lg 20 in 38. Slack every rung.
+// The chip stays on xs where the field text does not: it is aria-hidden
+// decoration, and the 12px floor governs text that is read or clicked.
 const CHIP_FOR_SIZE = {
   sm: { text: tokens.typography.size.xs, padY: '2px', padX: '4px' },
   md: { text: tokens.typography.size.xs, padY: '3px', padX: '6px' },
@@ -46,7 +49,7 @@ const SIZES = { sm: true, md: true, lg: true };
 
 /**
  * @typedef {object} SearchFieldProps
- * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 24, 32 or 40px tall. Matches Button, IconButton and Input at the same value.
+ * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 28, 34 or 40px tall. Matches Button, IconButton and Input at the same value.
  * @property {string} [placeholder='Search anything'] Text shown when empty. Defaults to "Search anything".
  * @property {string|null} [shortcut='⌘ K'] Keyboard shortcut chip. Pass null to hide. Defaults to "⌘ K".
  * @property {React.ComponentType<{ size?: number, weight?: string, color?: string, style?: React.CSSProperties }>} [icon=MagnifyingGlass] Phosphor-style leading icon. Defaults to MagnifyingGlass. Pass null to hide.
@@ -77,8 +80,11 @@ export const SearchField = forwardRef(function SearchField(
   },
   ref,
 ) {
-  const rung = tokens.control[SIZES[size] ? size : 'md'];
-  const chip = CHIP_FOR_SIZE[CHIP_FOR_SIZE[size] ? size : 'md'];
+  // Resolve the rung once: the same key feeds the styles and data-size, so an
+  // unknown value cannot reach either.
+  const sizeKey = SIZES[size] ? size : 'md';
+  const rung = tokens.control[sizeKey];
+  const chip = CHIP_FOR_SIZE[sizeKey];
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : uncontrolledValue;
@@ -117,6 +123,7 @@ export const SearchField = forwardRef(function SearchField(
 
   return (
     <div
+      data-size={sizeKey}
       className={className}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}

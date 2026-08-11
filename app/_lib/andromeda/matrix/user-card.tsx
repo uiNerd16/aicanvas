@@ -28,7 +28,13 @@ export const userCard: MatrixSpec = {
   // border on a phone — an open case turns the body's horizontal scroll off, so
   // a box that cannot shrink has nowhere to go.
   render: (size, props) => (
-    <div style={{ width: 220, minWidth: 0, background: tokens.color.surface.raised }}>
+    // 300, not the old 220. A rail-width box was cutting the name and role of
+    // every rung once the type went up, and a gallery case that truncates its
+    // own sample teaches the reader nothing except that the box is too small.
+    // The card is width:100% and takes whatever it is given; the real rail is
+    // still narrower, and truncation there is correct behaviour, just not the
+    // thing this case exists to show.
+    <div style={{ width: 300, minWidth: 0, background: tokens.color.surface.raised }}>
       <UserCard
         name="Reza Quinn"
         role="Flight Director"

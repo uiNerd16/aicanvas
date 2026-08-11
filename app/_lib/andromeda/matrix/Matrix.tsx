@@ -100,15 +100,21 @@ function CaseCard({
   kind,
   c,
   render,
+  solo = false,
 }: {
   spec: MatrixSpec
   kind: 'variant' | 'state'
   c: MatrixCase
   render: ReturnType<typeof defaultRender>
+  /** The only case in its section: no card chrome, no label, no nested frame. */
+  solo?: boolean
 }) {
   const sizes = kind === 'variant' && spec.sizes && !c.node ? spec.sizes : null
   const withBaseline = kind === 'state' && c.label !== REST.label && !c.node
 
+  // The card stays: it is what separates one case from the next on a long page.
+  // Only a SOLO case drops it, since a lone box inside the page panel is a frame
+  // inside a frame.
   return (
     <div
       id={matrixId(spec.slug, kind, c.label)}
@@ -116,12 +122,13 @@ function CaseCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: tokens.color.surface.raised,
-        border: `1px solid ${tokens.color.border.subtle}`,
-        borderRadius: CARD_RADIUS,
+        background: solo ? 'transparent' : tokens.color.surface.raised,
+        border: solo ? 'none' : `1px solid ${tokens.color.border.subtle}`,
+        borderRadius: solo ? 0 : CARD_RADIUS,
         minWidth: 0,
       }}
     >
+      {solo ? null : (
       <div
         style={{
           padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
@@ -137,6 +144,7 @@ function CaseCard({
       >
         {c.label}
       </div>
+      )}
       <div
         className="andromeda-matrix-body"
         style={{
@@ -217,8 +225,21 @@ function CaseSection({
   cases: readonly MatrixCase[]
   render: ReturnType<typeof defaultRender>
 }) {
+  // One case is not a matrix. A "Variants / 1 example" header over a single
+  // labelled card is a frame inside a frame saying nothing the page has not
+  // already said, so the lone case renders bare, straight into the page.
+  const solo = cases.length === 1
+
+  // "Variants" only when the component actually HAS a variant prop. Everything
+  // else on this axis is a set of prop combinations — an open menu, a missing
+  // role — and calling those variants taught readers the wrong word for the
+  // one word the system uses precisely.
+  const isVariantAxis = kind === 'variant' && cases.some((c) => c.props && 'variant' in c.props)
+  const heading = kind === 'state' ? 'States' : isVariantAxis ? 'Variants' : 'Configurations'
+
   return (
     <section>
+      {solo ? null : (
       <div
         style={{
           display: 'flex',
@@ -238,43 +259,22 @@ function CaseSection({
             letterSpacing: tokens.typography.tracking.wide,
           }}
         >
-          {kind === 'variant' ? 'Variants' : 'States'}
+          {heading}
         </h3>
         <span style={head}>
           {cases.length} {cases.length === 1 ? 'example' : 'examples'}
         </span>
       </div>
+      )}
       <div
         className={`andromeda-matrix-grid${spec.wide ? ' is-wide' : ''}`}
         style={{ display: 'grid', gap: tokens.spacing[3] }}
       >
         {cases.map((c) => (
-          <CaseCard key={c.label} spec={spec} kind={kind} c={c} render={render} />
+          <CaseCard key={c.label} spec={spec} kind={kind} c={c} render={render} solo={solo} />
         ))}
       </div>
     </section>
-  )
-}
-
-// Gaps are shown, never swallowed: a state that cannot be painted at rest says
-// so on the page, with the mechanism that prevents it.
-function GapList({ gaps }: { gaps: Record<string, string> }) {
-  return (
-    <div style={{ marginTop: tokens.spacing[4], display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
-      {Object.entries(gaps).map(([label, reason]) => (
-        <span
-          key={label}
-          style={{
-            fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size.sm,
-            color: tokens.color.text.muted,
-            lineHeight: tokens.typography.lineHeight.relaxed,
-          }}
-        >
-          {'/// '}NOT SHOWABLE AT REST — {label}: {reason}
-        </span>
-      ))}
-    </div>
   )
 }
 
@@ -490,7 +490,6 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
       {spec.states.length > 0 ? (
         <CaseSection spec={spec} kind="state" cases={spec.states} render={render} />
       ) : null}
-      {spec.gaps ? <GapList gaps={spec.gaps} /> : null}
     </div>
   )
 }

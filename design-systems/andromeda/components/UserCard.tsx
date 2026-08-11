@@ -44,12 +44,24 @@ const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 // Card geometry per rung. The inset stays uniform on all four sides (the card
 // is a labelled block, not a centred control) and steps one stop of the
 // spacing scale per rung. Name and role share one size because they read as
-// one identity lockup, and the type scale has nothing under 10px, so sm keeps
-// md's reading size rather than inventing a token below xs.
+// one identity lockup, and that size follows the size-step law: 12 / 14 / 16.
+// The whole card is a button, so its name and role are interactive text, not
+// metadata — they were sitting at 10px, which is what the legibility floor
+// exists to prevent.
+// The name takes the rung; the ROLE sits one rung below it and never goes under
+// 12px. They used to share one size, which stopped working the moment the rung
+// moved up: uppercase mono at wider tracking is a wide face, and "FLIGHT
+// DIRECTOR" at 14px no longer fits the text column of a 224px card, so the role
+// wrapped to two lines and the name truncated. A rung of separation also gives
+// the lockup the hierarchy it was missing.
+// Avatar rung per card rung. sm borrows md's 32px square: see the note at the
+// Avatar call below.
+const AVATAR_FOR_SIZE = { sm: 'md', md: 'md', lg: 'lg' };
+
 const CARD_FOR_SIZE = {
-  sm: { pad: tokens.spacing[2], gap: tokens.spacing[2], text: tokens.typography.size.xs },
-  md: { pad: tokens.spacing[3], gap: tokens.spacing[3], text: tokens.typography.size.xs },
-  lg: { pad: tokens.spacing[4], gap: tokens.spacing[4], text: tokens.typography.size.sm },
+  sm: { pad: tokens.spacing[2], gap: tokens.spacing[2], text: tokens.typography.size.sm, roleText: tokens.typography.size.sm },
+  md: { pad: tokens.spacing[3], gap: tokens.spacing[3], text: tokens.typography.size.md, roleText: tokens.typography.size.sm },
+  lg: { pad: tokens.spacing[4], gap: tokens.spacing[4], text: tokens.typography.size.lg, roleText: tokens.typography.size.md },
 };
 
 /**
@@ -107,6 +119,10 @@ export const UserCard = forwardRef(function UserCard(
         else if (ref) ref.current = node;
       }}
       data-slot="user-card"
+      // The rung that actually rendered, after the default and the guard above.
+      // A default never appears in props, so <UserCard /> is otherwise
+      // un-inspectable. Mirrors UserMenu.
+      data-size={sizeKey}
       className={className}
       style={{ ...andromedaVars(), position: 'relative', display: 'block', width: '100%', ...style }}
       {...props}
@@ -133,7 +149,12 @@ export const UserCard = forwardRef(function UserCard(
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
-        <Avatar name={name} src={src} status={status} size={sizeKey} />
+        {/* The avatar is sized to the LOCKUP, not to the rung name. An sm card
+            stacks a 12px name over a 12px role, so its block of text is around
+            34px tall and a 24px avatar reads undersized beside it; md's 32px
+            carries it. md and lg keep their own rungs, where the pairing
+            already works. */}
+        <Avatar name={name} src={src} status={status} size={AVATAR_FOR_SIZE[sizeKey]} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -154,10 +175,18 @@ export const UserCard = forwardRef(function UserCard(
             <div
               style={{
                 fontFamily: tokens.typography.fontMono,
-                fontSize: rung.text,
-                color: tokens.color.text.muted,
+                fontSize: rung.roleText,
+                // secondary, not muted: the floor forbids muted at 12px, and
+                // this line sits inside a button.
+                color: tokens.color.text.secondary,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.wide,
+                // Truncate like the name above. A role is one line of metadata;
+                // wrapping it to two grows the card and breaks the row rhythm
+                // of the sidebar it lives in.
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
               {role}

@@ -81,7 +81,7 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
         className="rp-cap-value"
         style={{
           fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size['3xl'],
+          fontSize: tokens.typography.size['4xl'],
           fontWeight: tokens.typography.weight.bold,
           color: tokens.color.text.primary,
           letterSpacing: tokens.typography.tracking.tight,
@@ -300,7 +300,7 @@ export function CapacityPanel() {
         ${mq.sm} {
           /* Step the hero KPI reading down one stop (3xl → 2xl) so it stops
              overpowering a phone. */
-          .rp-cap-value { font-size: ${tokens.typography.size['2xl']} !important; }
+          .rp-cap-value { font-size: ${tokens.typography.size['3xl']} !important; }
         }
       `}</style>
     </div>

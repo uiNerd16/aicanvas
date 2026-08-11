@@ -114,7 +114,7 @@ const iconButtonVariants = cva(
         ],
       },
       size: {
-        // Square on the shared control ladder (tokens.control): 24 / 32 / 40.
+        // Square on the shared control ladder (tokens.control): 28 / 34 / 40.
         // Reading the ladder rather than spacing[6,8,10] is what keeps this in
         // step with Button and every field if a rung ever moves.
         sm: 'w-[var(--andromeda-control-sm)] h-[var(--andromeda-control-sm)]',

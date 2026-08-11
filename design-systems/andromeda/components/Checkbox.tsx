@@ -65,8 +65,8 @@ const boxVariants = cva(
   {
     variants: {
       // A checkbox has no field to fill, so its rung scales the box and the
-      // label rather than an outer height. md is exactly today's 16px box with
-      // 12px label, which is why the default rendering does not move.
+      // label rather than an outer height. md is a 16px box with a 14px label,
+      // lg a 20px box with a 16px label.
       size: {
         md: 'w-[length:var(--andromeda-4)] h-[length:var(--andromeda-4)]',
         lg: 'w-[length:var(--andromeda-5)] h-[length:var(--andromeda-5)]',
@@ -110,9 +110,11 @@ const labelClass = cn(
 
 // Label text and tick glyph step with the box, so the whole row reads as one
 // density rather than a small box beside a fixed-size word.
+// Size-step rule (2026-08-11): the rung names the type size, so md is 14px
+// (text-md) and lg is 16px (text-lg). Both were one rung low.
 const LABEL_TEXT = {
-  md: 'text-[length:var(--andromeda-text-sm)]',
-  lg: 'text-[length:var(--andromeda-text-md)]',
+  md: 'text-[length:var(--andromeda-text-md)]',
+  lg: 'text-[length:var(--andromeda-text-lg)]',
 };
 const TICK_FOR_SIZE = { md: 12, lg: 15 };
 
@@ -160,6 +162,10 @@ export const Checkbox = forwardRef(function Checkbox(
 
   return (
     <div
+      // Reflect the rung actually rendered. A default never shows up in props,
+      // so <Checkbox /> is otherwise un-inspectable — md and lg look identical
+      // to a dev inspector reading the React tree.
+      data-size={size}
       className="inline-flex items-center gap-[var(--andromeda-2)]"
       style={{ ...andromedaVars(), ...style }}
     >

@@ -32,7 +32,7 @@ const RESPONSIVE_STYLE = `
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
       /* Hide the scroll affordance. The strip has a fixed ladder height
-         (24/32/40px); a classic, space-consuming horizontal scrollbar (narrow
+         (28/34/40px); a classic, space-consuming horizontal scrollbar (narrow
          desktop window, some platforms) would eat that height and vertically
          crush the segment row. Scrolling still works — the gutter just isn't
          painted. */
@@ -102,15 +102,20 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
   // animation (rare).
   const generatedId = useId();
   const indicatorId = layoutGroupId ?? `andromeda-segmented-${generatedId}`;
-  const rung = tokens.control[size] ?? tokens.control.md;
-  const cellVar = SIZE_VAR[size] ?? SIZE_VAR.md;
-  const iconSize = ICON_PX[size] ?? ICON_PX.md;
+  // Resolve the rung ONCE. Three separate ?? fallbacks meant an out-of-ladder
+  // value rendered md geometry while data-size still published the raw string,
+  // so the inspector would read "xl" over a control that is md in every
+  // dimension. Same guard shape the other sized components use.
+  const sizeKey = tokens.control[size] ? size : 'md';
+  const rung = tokens.control[sizeKey];
+  const cellVar = SIZE_VAR[sizeKey];
+  const iconSize = ICON_PX[sizeKey];
 
   return (
     <div
       ref={ref}
       role="tablist"
-      data-size={size}
+      data-size={sizeKey}
       data-slot="segmented-control"
       className={cn('andromeda-segmented inline-flex relative select-none', className)}
       style={{

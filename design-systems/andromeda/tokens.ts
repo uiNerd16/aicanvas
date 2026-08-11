@@ -132,16 +132,24 @@ export const tokens = {
     // glyph does not grow the line box it sits in. Retune if the first family
     // in fontSymbol changes; 1.25 is an optical match against Menlo.
     symbolScale: 1.25,
+    // Set 2026-08-11. A component's SIZE STEP decides its type size:
+    // size="sm" → 12px (sm), size="md" → 14px (md), size="lg" → 16px (lg).
+    // That ruling moved lg 15 → 16 and inserted a 20px step, so every key
+    // above 18px shifted up one NAME while keeping its exact PIXEL value
+    // (old 2xl 22 → 3xl, 3xl 28 → 4xl, 4xl 36 → 5xl, 5xl 48 → 6xl).
+    // LEGIBILITY FLOOR: interactive text never below 12px (sm). xs (10px) is
+    // for decorative/metadata labels only — things that are read, not clicked.
     size: {
       xs:   '10px',
       sm:   '12px',
       md:   '14px',
-      lg:   '15px',
+      lg:   '16px',
       xl:   '18px',
-      '2xl':'22px',
-      '3xl':'28px',
-      '4xl':'36px',
-      '5xl':'48px',
+      '2xl':'20px',
+      '3xl':'22px',
+      '4xl':'28px',
+      '5xl':'36px',
+      '6xl':'48px',
     },
     weight: {
       thin:     200,
@@ -273,7 +281,7 @@ export const tokens = {
   // that each compute their own height cannot be made to agree. Every control
   // now pins `height` to this rung and centres its content inside it, which is
   // what makes the alignment a guarantee rather than an arithmetic coincidence.
-  // padX/text repeat spacing[3,4,5] and typography.size[xs,sm,md] as literals
+  // padX/text repeat spacing[3,4,5] and typography.size[sm,md,lg] as literals
   // because a single object literal cannot reference itself; change them here
   // and in those scales together.
   //
@@ -288,21 +296,26 @@ export const tokens = {
   //              above the glyphs equal the gap left of them.
   //              What that identity depends on is the PINNED HEIGHT, not the
   //              line-height: a single-line field centres its em box inside the
-  //              fixed content box, so md leaves the glyphs 9px off the frame
+  //              fixed content box, so md leaves the glyphs 10px off the frame
   //              whether the leading is 1 or the font's ~1.32 normal. Apply
   //              padInset horizontally and let the pinned height supply the
   //              vertical half. A field with NO pinned height (a textarea) has
   //              to apply it on all four sides as real padding instead.
   control: {
-    // Heights set 2026-08-10: 26 / 30 / 34, a 4px step. They were 24 / 32 / 40.
-    // The rung is chosen for the CLEARANCE it leaves, not for the number itself:
-    // minus two 1px borders the content boxes are 24 / 28 / 32, so a label sits
-    // at 7 / 8 / 9px and an icon at 4 / 5 / 6px, whole numbers stepping by one.
-    // padInset stays paired to the label clearance so a field's text starts
-    // where a button's does.
-    sm: { height: '26px', padX: '12px', text: '10px', padInset: '7px' },
-    md: { height: '30px', padX: '16px', text: '12px', padInset: '8px' },
-    lg: { height: '34px', padX: '20px', text: '14px', padInset: '9px' },
+    // Reset 2026-08-11 for the size-step rule: text is now 12 / 14 / 16, the
+    // same sm/md/lg rungs of typography.size, so a size="sm" control renders
+    // 12px instead of the old 10px. The BOXES GREW to carry the bigger type
+    // (26/30/34 → 28/34/40, a 6px step) rather than eating it as lost padding.
+    // padInset is (height - 2*border - text) / 2 and still lands on whole px:
+    //   sm  (28 - 2 - 12) / 2 = 14 / 2 =  7
+    //   md  (34 - 2 - 14) / 2 = 18 / 2 =  9
+    //   lg  (40 - 2 - 16) / 2 = 22 / 2 = 11
+    // Content boxes (height minus two 1px borders) are 26 / 32 / 38.
+    // Keep the identity exact when retuning: an odd (height - 2 - text) puts
+    // the glyphs a half pixel off centre.
+    sm: { height: '28px', padX: '12px', text: '12px', padInset: '7px'  },
+    md: { height: '34px', padX: '16px', text: '14px', padInset: '9px'  },
+    lg: { height: '40px', padX: '20px', text: '16px', padInset: '11px' },
   },
   layout: {
     sidebarWidth: '224px',

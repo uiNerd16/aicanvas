@@ -37,9 +37,9 @@ function snap(n, step) {
 // Each rung keeps the thumb twice as tall as it is wide and the row tall enough
 // to contain it, so md is exactly today's 18px row with an 8x16 thumb.
 const SIZES = {
-  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  text: 'text-[length:var(--andromeda-text-xs)]' },
-  md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  text: 'text-[length:var(--andromeda-text-xs)]' },
-  lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', text: 'text-[length:var(--andromeda-text-sm)]' },
+  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  text: 'text-[length:var(--andromeda-text-sm)]' },
+  md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  text: 'text-[length:var(--andromeda-text-md)]' },
+  lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', text: 'text-[length:var(--andromeda-text-lg)]' },
 };
 
 /**
@@ -182,6 +182,7 @@ export const Slider = forwardRef(function Slider(
   return (
     <div
       ref={ref}
+      data-size={size}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', className)}
       style={{ ...andromedaVars(), ...style }}
       {...props}

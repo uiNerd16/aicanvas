@@ -54,7 +54,13 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
     {
       key: 'play',
       header: '',
-      width: '48px',
+      // Derived from the control ladder, never a magic number: the cell adds
+      // spacing[3] of padding on each side, so anything narrower than the
+      // control plus that padding overflows, and DataTable's cell style carries
+      // text-overflow:ellipsis, which paints a phantom "..." under the button.
+      // The old hardcoded 48px was already 2px short before the sm control grew
+      // from 26 to 28.
+      width: `calc(var(--andromeda-control-sm, 28px) + ${tokens.spacing[3]} * 2)`,
       render: (r) => (
         <IconButton
           variant={r.id === currentCode ? 'default' : 'ghost'}

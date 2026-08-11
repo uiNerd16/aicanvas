@@ -2,9 +2,13 @@
 // ============================================================
 // COMPONENT: Planet
 // Particle-sphere rendered with Three.js — a slowly-rotating
-// 3D sphere lit from one side. All particle colors are sourced
-// from the Andromeda accent ramp (100 lit → 500 shadow), so the
-// component automatically follows the system palette.
+// 3D sphere lit from one side. A member of the Objects class, so
+// its particles run a MONOCHROME ramp (text.primary lit → border.base
+// shadow), never accent: an Object measures nothing, and accent is
+// measurement. Reskinned from the accent ramp 2026-08-11 on the
+// maintainer's ruling, when Objects became a named class. The ramp's two ends
+// are the `color` / `shadowColor` props: monochrome tokens by default, so a
+// template can recolour the body without the Object choosing a hue itself.
 //
 // Designed for "next destination" / "active body" widgets in the
 // mission-control dashboard. The canvas is transparent — drop it
@@ -52,6 +56,8 @@ function makeSprite(): THREE.CanvasTexture {
  * @property {number} [particleSize=0.028] Per-particle point size in world units.
  * @property {number} [rotationSpeed=0.0035] Auto-rotation speed in radians per frame (assumes about 60fps).
  * @property {boolean} [paused=false] When true, the planet does not auto-rotate.
+ * @property {string} [color] Lit-body colour, any CSS colour syntax; defaults to `var(--andromeda-text-secondary, #A3A3A3)`. The terminator and the highlight specks are derived from this and `shadowColor`, so one value recolours the whole planet.
+ * @property {string} [shadowColor] Unlit-side colour, any CSS colour syntax; defaults to `var(--andromeda-border-base, #3E3E3F)`.
  * @property {string} [className] Additional CSS classes applied to the root element.
  * @property {React.CSSProperties} [style] Inline styles applied to the root element.
  */
@@ -64,6 +70,11 @@ export function Planet({
   rotationSpeed = 0.0035,
   /** When true, the planet doesn't auto-rotate. */
   paused = false,
+  /** Lit-body colour. The var default keeps the planet monochrome and
+   *  token-driven out of the box; pass a string to recolour it. */
+  color = `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
+  /** Unlit-side colour. */
+  shadowColor = `var(--andromeda-border-base, ${tokens.color.border.base})`,
   className,
   style,
 }: {
@@ -71,6 +82,8 @@ export function Planet({
   particleSize?: number;
   rotationSpeed?: number;
   paused?: boolean;
+  color?: string;
+  shadowColor?: string;
   className?: string;
   style?: React.CSSProperties;
 } = {}) {
@@ -96,17 +109,32 @@ export function Planet({
     container.appendChild(renderer.domElement);
 
     // ── Andromeda palette → THREE.Color ─────────────────────────────────────
-    // WebGL needs raw hex (var() cannot resolve on the GPU), so read the
-    // RESOLVED CSS vars at mount time — a themed page renders a themed planet.
-    // Mount-time read only; var changes after mount don't re-tint.
-    const cs = getComputedStyle(container);
-    const accent = (stop) =>
-      cs.getPropertyValue(`--andromeda-accent-${stop}`).trim() ||
-      tokens.color.accent[stop];
-    const cHi  = new THREE.Color(accent(100)); // lit highlight
-    const cLit = new THREE.Color(accent(200)); // lit body
-    const cMid = new THREE.Color(accent(400)); // terminator
-    const cShd = new THREE.Color(accent(500)); // shadow side
+    // THREE.Color cannot parse var() any more than a 2D canvas can, so we never
+    // parse a token ourselves — we let the browser do it: assign the prop to
+    // `color` on the container (inert, the WebGL canvas never reads it), read
+    // the computed value back, then clear it. Any syntax a caller or a retheme
+    // uses resolves for free. Mount-time read only; var changes after mount
+    // don't re-tint.
+    const resolve = (value) => {
+      container.style.color = value;
+      const out = getComputedStyle(container).color;
+      container.style.color = '';
+      return new THREE.Color(out);
+    };
+    // Monochrome by class law: one grey, lit to shadow. The accent ramp this
+    // used to read is reserved for measurement, and an Object measures nothing.
+    // Only the two ends are props; the terminator and the highlight are derived
+    // from them (never a second var) so recolouring with one value stays
+    // coherent instead of half-recoloured. THREE works in linear space, so the
+    // two constants below are linear-space factors: at the default tokens they
+    // land on border.strong (#939393) and text.primary (#F5F5F5) — the exact
+    // stops the four-token version read.
+    const cLit = resolve(color);        // lit body
+    const cShd = resolve(shadowColor);  // shadow side
+    const cMid = cShd.clone().lerp(cLit, 0.77);         // terminator
+    const cHi  = cLit.clone().multiplyScalar(2.49);     // lit highlight
+    // Additive blending, so an over-1 channel would bloom out; clamp.
+    cHi.setRGB(Math.min(cHi.r, 1), Math.min(cHi.g, 1), Math.min(cHi.b, 1));
 
     // Light comes from the front-right, slightly above. Choose a direction
     // that's NOT axis-aligned so the rotating planet shows a moving terminator.
@@ -217,7 +245,7 @@ export function Planet({
         container.removeChild(renderer.domElement);
       }
     };
-  }, [particleCount, particleSize, rotationSpeed, paused, reducedMotion]);
+  }, [particleCount, particleSize, rotationSpeed, paused, color, shadowColor, reducedMotion]);
 
   return (
     <>

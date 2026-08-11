@@ -157,7 +157,7 @@ export const SECTION_COPY: Record<string, SectionCopy> = {
   },
   'planet': {
     title: "Planet",
-    kicker: "Component \u00b7 Visualization",
+    kicker: "Component \u00b7 Objects",
     description: "Particle sphere rendered in Three.js on a transparent canvas, lit from one side and slowly rotating: a hero set piece for an active body or a next destination. It shows no value, so use `ProgressBar` or `HeatGrid` when a measurement is the point. Every particle takes its color from the accent ramp read at mount, so a themed page renders a themed planet, and reduced motion holds the sphere still.",
   },
   'table': {

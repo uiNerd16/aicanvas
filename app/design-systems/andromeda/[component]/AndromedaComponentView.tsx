@@ -328,7 +328,11 @@ export function AndromedaComponentView({
         <div className="relative min-h-[420px]">
           {tab === 'preview' ? (
             <div
-              className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
+              /* Horizontal inset matches the tab bar above (px-3 sm:px-5) so the
+                 case cards line up with the Preview tab and the fullscreen
+                 button instead of sitting 28px inside them. Vertical padding
+                 stays generous: that is breathing room, not alignment. */
+              className="flex min-h-[420px] items-center justify-center overflow-auto px-3 py-8 sm:px-5 sm:py-12"
               style={{ backgroundColor: tokens.color.surface.base }}
             >
               {!fullscreen && spec ? <MatrixPreview spec={spec} /> : null}
@@ -738,7 +742,8 @@ export function AndromedaComponentView({
             style={{ backgroundColor: tokens.color.surface.base }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex min-h-full items-center justify-center p-8 sm:p-12">
+            {/* Same inset rule as the inline preview above. */}
+            <div className="flex min-h-full items-center justify-center px-3 py-8 sm:px-5 sm:py-12">
               {spec ? <MatrixPreview spec={spec} /> : null}
             </div>
 

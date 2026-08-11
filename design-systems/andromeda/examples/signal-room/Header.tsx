@@ -56,10 +56,13 @@ export function Header({ sectionTitle = 'Library', motionProps }) {
           style={{
             margin: 0,
             fontFamily: tokens.typography.fontSans,
-            fontSize: tokens.typography.size.lg,
+            // xl (18px). A section heading has to outrank the panel titles under
+            // it, and those sit at 16 to 20 on PanelHeader's own ramp.
+            fontSize: tokens.typography.size.xl,
             fontWeight: tokens.typography.weight.semibold,
             color: tokens.color.text.primary,
-            letterSpacing: '-0.01em',
+            // Was a raw -0.01em, which pufi correctly flagged as off-scale.
+            letterSpacing: tokens.typography.tracking.tight,
           }}
         >
           {sectionTitle}

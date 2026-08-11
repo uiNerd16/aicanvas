@@ -214,7 +214,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
           aria-hidden="true"
           style={{
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size['3xl'],
+            fontSize: tokens.typography.size['4xl'],
             fontWeight: tokens.typography.weight.medium,
             letterSpacing: tokens.typography.tracking.tight,
             color: 'var(--andromeda-accent-300, #0FCFB2)',

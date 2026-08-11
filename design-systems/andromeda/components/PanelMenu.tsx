@@ -35,7 +35,7 @@ import { andromedaVars } from './lib/utils';
  * @property {'left'|'right'} [align='right'] Edge of the trigger the menu aligns to.
  * @property {'sm'|'md'|'lg'} [size='md'] Trigger size, forwarded straight to
  *   IconButton. `md` is the panel-header default. Drop to `sm` when the menu is
- *   a per-row overflow inside a dense table, where a 32px square would set the
+ *   a per-row overflow inside a dense table, where a 34px square would set the
  *   row height. The menu panel itself never changes size.
  * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
@@ -408,6 +408,9 @@ export const PanelMenu = forwardRef(function PanelMenu(
         else if (ref) ref.current = node;
       }}
       data-slot="panel-menu"
+      // The rung that actually rendered — the default never appears in props,
+      // so <PanelMenu /> is otherwise un-inspectable.
+      data-size={size}
       className={className}
       style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       {...props}
@@ -417,11 +420,10 @@ export const PanelMenu = forwardRef(function PanelMenu(
         aria-haspopup="menu"
         aria-expanded={open}
         variant="ghost"
-        // Defaults to md (32px box / 16px glyph). The sm glyph was never
-        // under-scaled (14/24 = 58%, vs 50% at md and lg) — the 24px BOX was
-        // what read undersized beside a panel title. Sizing the box up fixes it
-        // without touching ICON_SIZE.sm, which 11 other call sites share.
-        // Dense table rows pass size="sm" to get the old square back.
+        // Defaults to md — the shared control ladder's 34px box with an 18px
+        // glyph. md is what reads correctly beside a panel title; sm (a 28px
+        // box, 16px glyph) is for dense table rows, where the trigger must not
+        // be the thing setting the row height.
         size={size}
         icon={DotsThreeVertical}
         onClick={(e) => {

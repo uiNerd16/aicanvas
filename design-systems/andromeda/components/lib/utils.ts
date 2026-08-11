@@ -107,6 +107,7 @@ export function andromedaVars() {
     '--andromeda-text-3xl':  t.typography.size['3xl'],
     '--andromeda-text-4xl':  t.typography.size['4xl'],
     '--andromeda-text-5xl':  t.typography.size['5xl'],
+    '--andromeda-text-6xl':  t.typography.size['6xl'],
     '--andromeda-weight-thin':     String(t.typography.weight.thin),
     '--andromeda-weight-regular':  String(t.typography.weight.regular),
     '--andromeda-weight-medium':   String(t.typography.weight.medium),

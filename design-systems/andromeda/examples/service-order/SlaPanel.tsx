@@ -161,7 +161,7 @@ export function SlaPanel() {
           className="so-sla-pct"
           style={{
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size['4xl'],
+            fontSize: tokens.typography.size['5xl'],
             fontWeight: tokens.typography.weight.bold,
             color: tokens.color.accent[300],
             letterSpacing: tokens.typography.tracking.tight,
@@ -212,7 +212,7 @@ export function SlaPanel() {
             <span
               style={{
                 fontFamily: tokens.typography.fontMono,
-                fontSize: tokens.typography.size['2xl'],
+                fontSize: tokens.typography.size['3xl'],
                 fontWeight: tokens.typography.weight.bold,
                 color: tokens.color.text.primary,
                 letterSpacing: tokens.typography.tracking.tight,
@@ -245,7 +245,7 @@ export function SlaPanel() {
           /* Step the 4xl hero reading down one stop on phones so it doesn't
              overpower the narrow panel (rules → Responsive: only 4xl/5xl
              display sizes step down; the mono UI type stays fixed). */
-          .so-sla-pct { font-size: ${tokens.typography.size['3xl']} !important; }
+          .so-sla-pct { font-size: ${tokens.typography.size['4xl']} !important; }
         }
       `}</style>
     </Card>

@@ -132,7 +132,7 @@ export function ButtonStudy() {
           style={{
             margin: 0,
             fontFamily: tokens.typography.fontMono,
-            fontSize: tokens.typography.size['2xl'],
+            fontSize: tokens.typography.size['3xl'],
             color: tokens.color.text.primary,
             letterSpacing: tokens.typography.tracking.wide,
           }}

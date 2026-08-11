@@ -107,10 +107,11 @@ const MARK_FOR_SIZE = {
   lg: 'block w-[8px] h-[8px]',
 };
 
-// Label text steps with the box, matching Checkbox.
+// Label text steps with the box, matching Checkbox. Size-step rule
+// (2026-08-11): md is 14px, lg is 16px — both were one rung low.
 const LABEL_TEXT = {
-  md: 'text-[length:var(--andromeda-text-sm)]',
-  lg: 'text-[length:var(--andromeda-text-md)]',
+  md: 'text-[length:var(--andromeda-text-md)]',
+  lg: 'text-[length:var(--andromeda-text-lg)]',
 };
 
 const labelClass = cn(
@@ -236,6 +237,9 @@ export const Radio = forwardRef(function Radio(
 
   return (
     <div
+      // Reflect the rung actually rendered — the default never appears in
+      // props, so <Radio /> would otherwise be un-inspectable. Mirrors Checkbox.
+      data-size={size}
       className="inline-flex items-center gap-[var(--andromeda-2)]"
       style={{ ...andromedaVars(), ...style }}
     >

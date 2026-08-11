@@ -51,10 +51,14 @@ const textareaVariants = cva(
       // All six call sites are demos and showcase, none in examples or
       // templates, and two sit inside a scrolling DrawerBody, so nothing
       // fixed-height breaks.
+      // Type follows the size step (2026-08-11): sm 12, md 14, lg 16, matching
+      // an Input at the same rung. It was one rung low (10 / 12 / 14). Nothing
+      // here is pinned, so at rows=4 the field simply grows with its type:
+      //   sm 74 -> 88, md 92 -> 104, lg 110 -> 120.
       size: {
-        sm: 'p-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-xs)]',
-        md: 'p-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-sm)]',
-        lg: 'p-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-md)]',
+        sm: 'p-[var(--andromeda-inset-sm)] text-[length:var(--andromeda-text-sm)]',
+        md: 'p-[var(--andromeda-inset-md)] text-[length:var(--andromeda-text-md)]',
+        lg: 'p-[var(--andromeda-inset-lg)] text-[length:var(--andromeda-text-lg)]',
       },
       state: {
         default: [
@@ -107,6 +111,7 @@ export const Textarea = forwardRef(function Textarea(
 
   return (
     <div
+      data-size={size}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', wrapperClassName)}
       style={{ ...andromedaVars(), ...style }}
     >
@@ -115,7 +120,9 @@ export const Textarea = forwardRef(function Textarea(
           htmlFor={id}
           className={cn(
             '[font-family:var(--andromeda-font-mono)]',
-            'text-[length:var(--andromeda-text-xs)]',
+            // 12px at every rung, not 10: a field label is read, so it sits on
+            // the legibility floor rather than below it (2026-08-11).
+            'text-[length:var(--andromeda-text-sm)]',
             'font-[number:var(--andromeda-weight-medium)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
             'text-[color:var(--andromeda-text-secondary)]',
@@ -142,7 +149,9 @@ export const Textarea = forwardRef(function Textarea(
           role="alert"
           className={cn(
             '[font-family:var(--andromeda-font-mono)]',
-            'text-[length:var(--andromeda-text-xs)]',
+            // 12px, same floor as the label: an error message is the most
+            // important text in the field, never the smallest.
+            'text-[length:var(--andromeda-text-sm)]',
             'text-[color:var(--andromeda-red-300)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
           )}
