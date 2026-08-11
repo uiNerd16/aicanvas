@@ -89,6 +89,19 @@ function writeBuildInfo(sha) {
 // marker — otherwise the leak guard would flag inject-premium.mjs itself.
 const MARKER = ['AICANVAS', 'PREMIUM', 'DO', 'NOT', 'COMMIT'].join('-')
 
+function stripMarkerBlock(text) {
+  let stripping = false
+  return text.split('\n').filter((line) => {
+    if (line.includes(MARKER)) {
+      stripping = true
+      return false
+    }
+    if (stripping && /^\s*\/\//.test(line)) return false
+    stripping = false
+    return true
+  }).join('\n')
+}
+
 const log = (m) => console.log('[inject-premium] ' + m)
 
 // Always leave a shim behind (empty when no premium) so component-registry.tsx's
@@ -654,14 +667,14 @@ for (const slug of standalones) {
 
   const outDir = join(TARGET, slug)
   mkdirSync(outDir, { recursive: true })
-  const stripped = readFileSync(idx, 'utf8').split('\n').filter((l) => !l.includes(MARKER)).join('\n')
+  const stripped = stripMarkerBlock(readFileSync(idx, 'utf8'))
   writeFileSync(join(outDir, 'index.tsx'), stripped)
   cpSync(metaPath, join(outDir, 'meta.json'))
 
   const promptsPath = join(srcDir, 'prompts.ts')
   const hasPrompts = existsSync(promptsPath)
   if (hasPrompts) {
-    const strippedPrompts = readFileSync(promptsPath, 'utf8').split('\n').filter((l) => !l.includes(MARKER)).join('\n')
+    const strippedPrompts = stripMarkerBlock(readFileSync(promptsPath, 'utf8'))
     writeFileSync(join(outDir, 'prompts.ts'), strippedPrompts)
   }
 
@@ -711,7 +724,7 @@ for (const [system, names] of Object.entries(freeMap)) {
     }
     const outFile = join(ROOT, rel)
     mkdirSync(dirname(outFile), { recursive: true })
-    const strippedSrc = readFileSync(src, 'utf8').split('\n').filter((l) => !l.includes(MARKER)).join('\n')
+    const strippedSrc = stripMarkerBlock(readFileSync(src, 'utf8'))
     writeFileSync(outFile, strippedSrc)
     ;(freeInjected[system] ??= []).push(name)
     freePaths.push(rel)
