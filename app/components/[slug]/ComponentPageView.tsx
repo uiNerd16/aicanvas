@@ -253,6 +253,41 @@ export default function ComponentPageView({
   // pressing the theme toggle, which a one-theme screenshot physically cannot
   // answer. Nobody who scrolls past pays for the block's WebGL scene.
   const [posterLive, setPosterLive] = useState(false)
+  // The live block mounts UNDER the poster and only takes the box once it has
+  // something to show. Without this the poster is dropped the instant the block
+  // mounts, so the first hover crossfades into a bare background while the
+  // block's photos / textures are still downloading.
+  const [liveReady, setLiveReady] = useState(false)
+  const liveRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!posterLive || liveReady) return
+    let alive = true
+    // Poll, don't snapshot: premium blocks are dynamic() chunks, so at mount
+    // the wrapper is still empty and a one-shot image check would find nothing
+    // to wait for and hand over instantly. Ready = the block rendered
+    // something AND every image in it has loaded. Zero images (canvas / WebGL)
+    // passes as soon as the chunk paints.
+    // ponytail: img.complete is close enough to "painted"; swap for decode()
+    // if a block ever lands mid-decode.
+    const ready = () => {
+      const el = liveRef.current
+      if (!el?.firstElementChild) return false
+      return Array.from(el.querySelectorAll('img')).every((img) => img.complete)
+    }
+    const finish = () => {
+      // Two frames so the block's first paint is on screen before the poster
+      // starts fading, not racing it.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => { if (alive) setLiveReady(true) }),
+      )
+    }
+    const poll = setInterval(() => { if (ready()) { clearInterval(poll); finish() } }, 100)
+    // Backstop: a chunk that fails, or a lazy image outside the crop that never
+    // loads, must not leave the poster up forever.
+    const timer = setTimeout(() => { clearInterval(poll); finish() }, 2500)
+    if (ready()) { clearInterval(poll); clearTimeout(timer); finish() }
+    return () => { alive = false; clearInterval(poll); clearTimeout(timer) }
+  }, [posterLive, liveReady])
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
@@ -327,6 +362,12 @@ export default function ComponentPageView({
   // which restarts any animations / effects / canvas inits inside the
   // children component.
   const [previewKey, setPreviewKey] = useState(0)
+  // Refresh remounts the block, so the poster has to cover it again instead of
+  // sitting invisible over a box that is reloading. Slug-to-slug navigation
+  // reuses this component without a remount, so the next block starts from its
+  // own poster rather than inheriting this one's handover.
+  useEffect(() => { setLiveReady(false) }, [previewKey])
+  useEffect(() => { setPosterLive(false); setLiveReady(false) }, [slug])
 
   // Remix panel — ONE general prompt per component. The Claude Code lane is
   // the comprehensive one and doubles as the platform-agnostic prompt; other
@@ -611,8 +652,12 @@ export default function ComponentPageView({
                     onClick={() => {
                       if (!dualTheme) return
                       // A screenshot cannot answer a theme change — this is the
-                      // one press that always earns the live block.
+                      // one press that always earns the live block. It also
+                      // retires the poster on the spot: it is a shot of the
+                      // theme being left behind, so holding it over the block
+                      // would answer the press with the wrong picture.
                       setPosterLive(true)
+                      setLiveReady(true)
                       setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))
                     }}
                     className="overflow-hidden"
@@ -727,14 +772,24 @@ export default function ComponentPageView({
                 {!fullscreen && (
                   staticPreview && previewImage ? (
                     <>
-                      {/* The poster stays mounted underneath: it is the instant
-                          first paint, and it backs the live block while three.js
-                          loads so the box never flashes empty. */}
+                      {/* The poster stays mounted OVER the live block until the
+                          block has painted, then fades out. Underneath it would
+                          be covered the moment the block mounts, which is the
+                          moment the block has the least to show. */}
                       <img
                         src={optimizeImageKitUrl(previewImage, 'detail')}
                         alt={name}
                         aria-hidden={posterLive}
-                        className="absolute inset-0 h-full w-full object-cover object-top"
+                        // pointer-events-none throughout: while the poster is
+                        // holding, the full-box CTA has already unmounted, so a
+                        // poster that took clicks would swallow every press
+                        // meant for the block underneath.
+                        // Only the fade-OUT animates. Re-holding the poster (a
+                        // refresh press, a new slug) has to snap back to opaque,
+                        // or the box shows through while the poster fades in.
+                        className={`pointer-events-none absolute inset-0 z-20 h-full w-full object-cover object-top ${
+                          liveReady ? 'opacity-0 transition-opacity duration-300' : 'opacity-100'
+                        }`}
                       />
                       {posterLive && (
                         // Multi-card blocks are laid out at a pinned width, not
@@ -751,9 +806,10 @@ export default function ComponentPageView({
                         // so they fill the box instead (the default).
                         <motion.div
                           key={previewKey}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.25 }}
+                          ref={liveRef}
+                          // No fade of its own: the poster on top is what
+                          // crossfades, and fading the block in as well made the
+                          // half-loaded state visible through it.
                           // Pinned width only from lg up. Tailwind breakpoints are
                           // viewport-based, so pinning 1200px on a 700px window
                           // would lay the block out at its two-column breakpoint
@@ -775,7 +831,7 @@ export default function ComponentPageView({
                         // of this, open it". No dim and no full-box hit area this
                         // time: the block underneath is interactive now, so only
                         // the pill itself takes the pointer.
-                        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
+                        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
                           <button
                             type="button"
                             onClick={() => {
@@ -801,7 +857,9 @@ export default function ComponentPageView({
                             track('Fullscreen Open', { component: slug })
                             setFullscreen(true)
                           }}
-                          className="group/static absolute inset-0 cursor-pointer"
+                          // z-30: the poster now sits at z-20, so the hover CTA
+                          // and its dim have to clear it.
+                          className="group/static absolute inset-0 z-30 cursor-pointer"
                           aria-label={`Expand ${name} preview`}
                         >
                           <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover/static:bg-black/30">

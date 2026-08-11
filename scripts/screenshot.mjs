@@ -140,8 +140,11 @@ const INTERACTIONS = {
     // old image forever. The handover is one-way, so move the pointer back off
     // the box afterwards or the "Click for full view" pill bakes into the
     // poster.
+    // Past the handover's own budget: the poster now holds until the block's
+    // images have loaded (2.5s backstop) and then fades for 300ms, so a shorter
+    // wait bakes a half-faded OLD poster into the new one.
     await hoverCenter(preview, page)
-    await page.waitForTimeout(2200)
+    await page.waitForTimeout(3400)
     await page.mouse.move(0, 0)
     await page.waitForTimeout(400)
   },

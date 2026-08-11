@@ -1405,7 +1405,10 @@ Requirements:
     slug: 'scroll-wipe-gallery',
     name: 'Scroll Wipe Gallery',
     description: 'A full-bleed, scroll-driven photo gallery. Each photo wipes in from a different edge.',
-    image: 'https://ik.imagekit.io/aitoolkit/scroll-wipe-gallery.png',
+    // ?v=2 — the poster was re-shot and re-uploaded under the same filename,
+    // and ImageKit serves max-age=1y, so anyone who loaded the page before the
+    // re-shoot kept the old mid-sequence frame until the URL changed.
+    image: 'https://ik.imagekit.io/aitoolkit/scroll-wipe-gallery.png?v=2',
     tags: [
       { label: 'Blocks', accent: true },
       { label: 'Motion' },
