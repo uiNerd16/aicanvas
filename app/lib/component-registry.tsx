@@ -157,6 +157,8 @@ import DeleteButton from '../../components-workspace/delete-button'
 import { prompts as deleteButtonPrompts } from '../../components-workspace/delete-button/prompts'
 import ScrollWipeGallery from '../../components-workspace/scroll-wipe-gallery'
 import { prompts as scrollWipeGalleryPrompts } from '../../components-workspace/scroll-wipe-gallery/prompts'
+import Diamonds from '../../components-workspace/diamonds'
+import { prompts as diamondsPrompts } from '../../components-workspace/diamonds/prompts'
 import { componentCodes } from './component-codes.generated'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1419,6 +1421,23 @@ Requirements:
     PreviewComponent: ScrollWipeGallery,
     code: componentCodes['scroll-wipe-gallery'],
     prompts: scrollWipeGalleryPrompts,
+  },
+  {
+    slug: 'diamonds',
+    name: 'Diamonds',
+    description:
+      'A near-invisible diamond grid breathes into view as seeded sparks send slow light along the lines and meeting fronts reveal the pattern.',
+    image: '',
+    tags: [
+      { label: 'Backgrounds', accent: true },
+      { label: 'Canvas' },
+      { label: 'Motion' },
+      { label: 'Generative' },
+    ],
+    dualTheme: true,
+    PreviewComponent: Diamonds,
+    code: componentCodes['diamonds'],
+    prompts: diamondsPrompts,
   },
 ]
 
