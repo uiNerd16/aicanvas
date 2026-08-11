@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-type DiamondsProps = {
+type DiamondGridProps = {
   /** Extra classes merged onto the outermost root element. */
   className?: string
   /** Determines grid placement, ignition positions and the complete loop sequence. */
@@ -253,7 +253,7 @@ function addStarPath(
   context.closePath()
 }
 
-export default function Diamonds({ className, seed = 1337 }: DiamondsProps) {
+export default function DiamondGrid({ className, seed = 1337 }: DiamondGridProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -658,7 +658,7 @@ export default function Diamonds({ className, seed = 1337 }: DiamondsProps) {
     <div
       ref={hostRef}
       role="img"
-      aria-label="A faint diagonal diamonds slowly illuminated by travelling light"
+      aria-label="A faint diagonal diamond grid slowly illuminated by travelling light"
       className={`relative min-h-screen w-full overflow-hidden bg-[#FAF8F5] dark:bg-[#000000]${className ? ` ${className}` : ''}`}
     >
       <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 block" />
