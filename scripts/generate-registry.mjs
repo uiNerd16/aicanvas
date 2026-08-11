@@ -1226,8 +1226,13 @@ for (const ds of DESIGN_SYSTEMS) {
   }
 }
 
+// No $schema: this catalog is our own shape, not a shadcn registry item, and
+// there is no schema document to point at. The field used to advertise
+// /r/aicanvas-mcp.schema.json, which 404s twice over — no such file was ever
+// generated, and the route's filename guard (`^[a-z0-9-]+\.json$`,
+// app/r/[file]/route.ts:24) rejects the second dot anyway. Publish a real
+// schema before re-adding the field.
 const mcpMeta = {
-  $schema: 'https://aicanvas.me/r/aicanvas-mcp.schema.json',
   name: 'aicanvas',
   homepage: 'https://aicanvas.me',
   generatedAt: new Date().toISOString(),
