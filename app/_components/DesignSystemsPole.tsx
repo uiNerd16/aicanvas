@@ -44,22 +44,8 @@ const SYSTEMS = [
 // fill the viewport. Exported so the sidebars can suppress themselves on them.
 export const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 
-// Small olive pill for per-row nav highlights (New on Brain, Updated on a
-// freshly-reworked template). Same treatment as the old Design Systems header
-// badge, reused per row.
-function NavBadge({ children, tone = 'olive' }: { children: string; tone?: 'olive' | 'cyan' }) {
-  const palette =
-    tone === 'cyan'
-      ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
-      : 'border-olive-500/30 bg-olive-500/10 text-olive-600 dark:text-olive-400'
-  return (
-    <span
-      className={`shrink-0 rounded-md border px-1.5 py-0.5 text-xxs font-semibold uppercase tracking-wider ${palette}`}
-    >
-      {children}
-    </span>
-  )
-}
+// Per-row New/Updated pills live in ./NavBadge now. None are shown today —
+// import it and drop one in a row when something is worth flagging again.
 
 export function DesignSystemsPole({
   collapsed,
@@ -191,8 +177,7 @@ export function DesignSystemsPole({
                               : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                           }`}
                         >
-                          <span className="truncate">Brain</span>
-                          <NavBadge tone="cyan">New</NavBadge>
+                          <span className="flex-1 truncate">Brain</span>
                           {/* Lightning marks premium, same affordance as the
                               template rows below. */}
                           <Lightning
@@ -225,8 +210,7 @@ export function DesignSystemsPole({
                                     : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                 }`}
                               >
-                                <span className={t.slug === 'signal-room' ? 'truncate' : 'flex-1 truncate'}>{t.name}</span>
-                                {t.slug === 'signal-room' && <NavBadge>Updated</NavBadge>}
+                                <span className="flex-1 truncate">{t.name}</span>
                                 {/* Lightning marks the template as Premium (replaces
                                     the old domain tag). The bolt is decorative; the
                                     sr-only word folds "Premium" into the link's
