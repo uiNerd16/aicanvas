@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion geist
+// font-pkg: geist/font/pixel|GeistPixelGrid
 /**
  * Displays words whose characters continuously scramble while idle.
  * Hovering resolves each word from left to right before restoring the loop.

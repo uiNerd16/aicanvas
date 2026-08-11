@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion next
+// font: Science Gothic
 /**
  * Renders variable-font lettering that responds to pointer proximity.
  * Nearby glyphs change width, weight, and position as the pointer moves.

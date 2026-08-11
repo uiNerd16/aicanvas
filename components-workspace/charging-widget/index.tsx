@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion
+// font: Manrope
 
 /**
  * Circular charging indicator with liquid waves that rise with a looping count.

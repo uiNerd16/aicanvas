@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion
+// font: Manrope
 /**
  * Presents a weekly mood tracker with an editable daily rating.
  * Selecting a mood animates the chart, summary, and current-day control.

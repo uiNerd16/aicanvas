@@ -1,5 +1,6 @@
 'use client'
 // npm install framer-motion
+// font: Anton
 /**
  * Renders a word whose corners warp through a matrix transform.
  * Pointer position selects an upper or lower deformation before easing back at rest.

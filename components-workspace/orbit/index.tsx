@@ -1,6 +1,7 @@
 'use client'
 
 // npm install next
+// font: Anton
 /**
  * Displays text arranged around a responsive elliptical orbit.
  * Pointer movement shifts the ring perspective and its central marker.

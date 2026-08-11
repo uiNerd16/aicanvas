@@ -1,6 +1,7 @@
 'use client'
 
 // npm install framer-motion next
+// font: Science Gothic
 /**
  * Renders variable-font letters that react independently to pointer distance.
  * Nearby glyphs adjust width, weight, slant, and scale with eased falloff.

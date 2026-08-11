@@ -1,6 +1,7 @@
 'use client'
 
 // npm install @carbon/icons-react class-variance-authority clsx next tailwind-merge
+// font: JetBrains Mono
 /**
  * Demonstrates a tokenized button family with hover, focus, pressed, and disabled states.
  */
