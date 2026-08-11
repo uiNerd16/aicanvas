@@ -1,5 +1,10 @@
 'use client'
 
+/**
+ * Renders a seeded diamond grid with traveling ignition pulses.
+ * It adapts its canvas animation to visibility, theme, and reduced motion.
+ */
+
 import { useEffect, useRef } from 'react'
 
 type DiamondGridProps = {
@@ -10,8 +15,7 @@ type DiamondGridProps = {
 }
 
 const LOOP_MS = 64000
-// Concurrency is EVENT_COUNT * average duration / LOOP_MS: at 34 events and a
-// ~28.5s life, roughly 15 nodes are alive at any moment.
+// tune: raise the event count to increase concurrent ignitions
 const EVENT_COUNT = 34
 const STATIC_TIME_MS = 27000
 const STAR_SIZE = 30
@@ -130,7 +134,7 @@ function screenToGrid(transform: GridTransform, x: number, y: number) {
 
 function buildField(W: number, H: number, seed: number): Field {
   const rnd = mulberry32(seed)
-  // Cell shrunk by 1/sqrt(2) so the intersection count doubles.
+  // tune: raise the scale factor to widen the grid spacing
   const cell = clamp(Math.min(W, H) * 0.113, 65, 124)
   const transform = makeGridTransform(W, H)
   const corners = [
@@ -441,10 +445,6 @@ export default function DiamondGrid({ className, seed = 1337 }: DiamondGridProps
     }
 
     const frontDistance = (event: Ignition, age: number) => {
-      // One continuous ease-out across the whole life, never eased per cell:
-      // easing inside each cell has zero velocity at both ends, which stalls the
-      // front at every crossing and reads as a freeze. This never stops, it only
-      // decelerates, and it is still decelerating while it fades.
       const span = event.travel * event.reach * 2.6
       const p = Math.min(1, age / span)
       return event.reach * (1 - Math.pow(1 - p, 3))
@@ -629,8 +629,6 @@ export default function DiamondGrid({ className, seed = 1337 }: DiamondGridProps
       if (!running) drawIdle()
     })
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    // The per-card Light toggle flips data-card-theme and the dark class on a
-    // wrapper, not on <html>, so the global observer alone never fires for it.
     const cardWrapper = host.closest('[data-card-theme]')
     if (cardWrapper) {
       mo.observe(cardWrapper, {

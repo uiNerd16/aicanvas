@@ -1,18 +1,21 @@
 'use client'
 
+/**
+ * Canvas field of outlined bubbles that react to nearby pointer and touch input.
+ * Each affected bubble expands, fades, and reforms in a repeating burst.
+ */
+
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING     = 20    // px between circle centres
+const SPACING     = 20    // tune: raise to spread the circles farther apart
 const RADIUS      = 200
 const BASE_R      = 1.5
 const BURST_R     = 16
 const BASE_A_DARK  = 0.55
 const BASE_A_LIGHT = 0.75
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 type Bubble = { x: number; y: number; b: number; phase: number }
 
 export default function BubbleField() {
@@ -22,7 +25,6 @@ export default function BubbleField() {
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ────────────────────────────────────────────────────────
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -42,7 +44,6 @@ export default function BubbleField() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas render loop ─────────────────────────────────────────────────────
   useEffect(() => {
     const canvas: HTMLCanvasElement = canvasRef.current!
     const ctx = canvas.getContext('2d')!
@@ -93,7 +94,6 @@ export default function BubbleField() {
         bub.b += (tgt > bub.b ? 0.16 : 0.07) * (tgt - bub.b)
         if (bub.b < 0.004) bub.b = 0
 
-        // Advance burst phase — faster at hover centre, slower at edges
         if (bub.b > 0.08) {
           bub.phase = (bub.phase + 0.025 * bub.b) % 1
         }
@@ -101,10 +101,8 @@ export default function BubbleField() {
         const p = bub.phase
 
         if (bub.b > 0.08) {
-          // ── Burst cycle ───────────────────────────────────────────────
           if (p < 0.55) {
-            // Expanding + fading (burst)
-            const t     = p / 0.55                          // 0 → 1
+            const t     = p / 0.55
             const r     = BASE_R + t * BURST_R
             const alpha = baseA * (1 - t)
             if (alpha > 0.004) {
@@ -115,10 +113,8 @@ export default function BubbleField() {
               ctx.stroke()
             }
           } else if (p < 0.72) {
-            // Invisible — fully popped, nothing drawn
           } else {
-            // Reforming — shrinks back into existence
-            const t     = (p - 0.72) / 0.28               // 0 → 1
+            const t     = (p - 0.72) / 0.28
             const r     = BASE_R * t
             const alpha = baseA * t
             if (r > 0.2 && alpha > 0.004) {
@@ -130,7 +126,6 @@ export default function BubbleField() {
             }
           }
         } else {
-          // ── Resting state — normal circle ─────────────────────────────
           ctx.strokeStyle = `rgba(${dotRGB},${baseA.toFixed(3)})`
           ctx.lineWidth   = 0.5
           ctx.beginPath()

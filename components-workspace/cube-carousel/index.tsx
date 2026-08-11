@@ -1,37 +1,38 @@
 'use client'
 // npm install framer-motion
 
+/**
+ * Rotatable photo cube controlled by dragging or the arrow keys.
+ * Momentum carries the cube after a pointer gesture ends.
+ */
+
 import { useRef } from 'react'
 import { motion, useMotionValue, animate, type AnimationPlaybackControls, type MotionValue, type PanInfo } from 'framer-motion'
 
 type FaceShape = 'wide' | 'side'
 
-// Unsplash photos (in face-slot order):
-//   00 Jeremy Bishop, 01 Jeremy Bishop, 02 giacomo ambrosini,
-//   03 Luke Paris, 04 Jonny Gios, 05 Cloris Chou
+// Photos by Jeremy Bishop, giacomo ambrosini, Luke Paris, Jonny Gios, and Cloris Chou via Unsplash.
 const wide = (id: string) => `https://images.unsplash.com/photo-${id}?w=960&h=540&fit=crop&auto=format&q=80`
 const square = (id: string) => `https://images.unsplash.com/photo-${id}?w=720&h=720&fit=crop&auto=format&q=80`
 
-const P00 = '1602303832953-05d841ee21f7' // Jeremy Bishop      — woman in white hallway
-const P01 = '1560841650-fa45ffd48b77'    // Jeremy Bishop      — woman in white strap top
-const P02 = '1568464992136-fae8c7322eee' // giacomo ambrosini  — colored walls room
-const P03 = '1565105337533-d23f47c0fd58' // Luke Paris         — multicolored glass board
-const P04 = '1661632359984-0954ccc8a149' // Jonny Gios         — colorful tunnel walls
-const P05 = '1637909837540-80e1b9198ea9' // Cloris Chou        — colorful art pieces
+const P00 = '1602303832953-05d841ee21f7'
+const P01 = '1560841650-fa45ffd48b77'
+const P02 = '1568464992136-fae8c7322eee'
+const P03 = '1565105337533-d23f47c0fd58'
+const P04 = '1661632359984-0954ccc8a149'
+const P05 = '1637909837540-80e1b9198ea9'
 
 const FACES: { src: string; shape: FaceShape; transform: string }[] = [
-  // Wide 16:9 faces (front, back, top, bottom)
   { src: wide(P00), shape: 'wide', transform: 'translateZ(var(--half-d))' },
   { src: wide(P01), shape: 'wide', transform: 'rotateY(180deg) translateZ(var(--half-d))' },
   { src: wide(P04), shape: 'wide', transform: 'rotateX(90deg) translateZ(var(--half-h))' },
   { src: wide(P05), shape: 'wide', transform: 'rotateX(-90deg) translateZ(var(--half-h))' },
-  // Square side faces (left, right) — depth = height makes these H × H
   { src: square(P02), shape: 'side', transform: 'rotateY(90deg) translateZ(var(--half-w))' },
   { src: square(P03), shape: 'side', transform: 'rotateY(-90deg) translateZ(var(--half-w))' },
 ]
 
 const DRAG_SENSITIVITY = 0.5
-const KEY_STEP = 30 // degrees per arrow-key press
+const KEY_STEP = 30 // tune: raise to increase each keyboard rotation
 const COAST = { type: 'spring' as const, stiffness: 40, damping: 22 }
 
 export default function CubeCarousel() {
@@ -60,7 +61,6 @@ export default function CubeCarousel() {
   }
 
   const onPanEnd = (_: PointerEvent, info: PanInfo) => {
-    // info.velocity is in px/sec; convert to deg/sec via the same sensitivity
     const vy = info.velocity.x * DRAG_SENSITIVITY
     const vx = -info.velocity.y * DRAG_SENSITIVITY
     const projectY = rotateY.get() + vy * 0.18

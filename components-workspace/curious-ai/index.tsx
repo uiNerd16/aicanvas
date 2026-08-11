@@ -1,14 +1,16 @@
 'use client'
 
-// npm install three framer-motion
+// npm install framer-motion three
+
+/**
+ * Renders a shader-driven orb that tracks pointer movement with animated eyes.
+ * Idle gaze and blink cycles continue when the pointer leaves the component.
+ */
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import * as THREE from 'three'
 
-// Inline theme reader — observes `.dark` on `<html>` and an optional
-// `[data-card-theme]` ancestor (per-card override on the homepage grid).
-// Kept inline so this file is self-contained when copy-pasted.
 function useScopedTheme(ref: React.RefObject<HTMLElement | null>) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   useEffect(() => {
@@ -38,8 +40,6 @@ function useScopedTheme(ref: React.RefObject<HTMLElement | null>) {
   }, [ref])
   return theme
 }
-
-// ─── Shaders ──────────────────────────────────────────────────────────────────
 
 const VERT = /* glsl */ `
   uniform float uTime;
@@ -269,16 +269,12 @@ const FRAG = /* glsl */ `
   }
 `
 
-// ─── Theme palette ────────────────────────────────────────────────────────────
-// Dark teal body with two-tone rim (cyan / magenta) and iridescent pink+cyan
-// speckles — same on both themes since the orb is intrinsically dark.
-
 type Palette = {
   base:      [number, number, number]
-  rimA:      [number, number, number]  // cyan rim — upper-left light
-  rimB:      [number, number, number]  // magenta rim — lower-right light
-  speckA:    [number, number, number]  // electric pink speckle
-  speckB:    [number, number, number]  // electric cyan speckle
+  rimA:      [number, number, number]
+  rimB:      [number, number, number]
+  speckA:    [number, number, number]
+  speckB:    [number, number, number]
   eye:       string
   eyeGlow:   string
 }
@@ -290,8 +286,8 @@ const PALETTE: Record<'dark' | 'light', Palette> = {
     rimB:    [0.730, 0.330, 0.940],
     speckA:  [0.880, 0.275, 0.985],
     speckB:  [0.400, 0.910, 1.000],
-    eye:     'rgba(255, 140, 245, 0.85)',  // hot pink — slightly translucent so it glows rather than reads solid
-    eyeGlow: 'rgba(225, 90, 230, 0.70)',   // saturated magenta halo
+    eye:     'rgba(255, 140, 245, 0.85)',
+    eyeGlow: 'rgba(225, 90, 230, 0.70)',
   },
   light: {
     base:    [0.075, 0.105, 0.120],
@@ -304,48 +300,38 @@ const PALETTE: Record<'dark' | 'light', Palette> = {
   },
 }
 
-// ─── Idle look-around script ─────────────────────────────────────────────────
-// left → slightly right → slightly left → top → back, then loop.
-// x and y are in normalised stage coords (-1..1). y is "up = negative".
+// tune: adjust coordinates and durations to change the idle gaze pattern
 const LOOK_SEQUENCE: { x: number; y: number; dur: number }[] = [
-  { x: -0.65, y:  0.00, dur: 2400 },  // left
-  { x:  0.32, y:  0.00, dur: 2800 },  // slightly right
-  { x: -0.24, y:  0.00, dur: 2200 },  // slightly left
-  { x:  0.00, y: -0.55, dur: 2800 },  // top
-  { x:  0.00, y:  0.00, dur: 2600 },  // back
+  { x: -0.65, y:  0.00, dur: 2400 },
+  { x:  0.32, y:  0.00, dur: 2800 },
+  { x: -0.24, y:  0.00, dur: 2200 },
+  { x:  0.00, y: -0.55, dur: 2800 },
+  { x:  0.00, y:  0.00, dur: 2600 },
 ]
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function CuriousAi() {
-  const containerRef = useRef<HTMLDivElement>(null) // outer chrome — theme scope
-  const stageRef     = useRef<HTMLDivElement>(null) // inner square — pointer events + rect
-  const canvasRef    = useRef<HTMLDivElement>(null) // canvas host
+  const containerRef = useRef<HTMLDivElement>(null)
+  const stageRef     = useRef<HTMLDivElement>(null)
+  const canvasRef    = useRef<HTMLDivElement>(null)
   const sizeRef      = useRef({ w: 320, h: 320 })
 
-  // One source of truth for "where is the orb looking?":
-  // pointer overrides during hover, idle script drives otherwise.
-  const lookTargetRef  = useRef({ x: 0, y: 0 })  // desired
-  const lookCurrentRef = useRef({ x: 0, y: 0 })  // smoothed
+  const lookTargetRef  = useRef({ x: 0, y: 0 })
+  const lookCurrentRef = useRef({ x: 0, y: 0 })
   const hoverActiveRef = useRef(false)
 
-  // Alertness — how "awake" the orb is. Driven by hover/touch.
   const activeRef = useRef(0)
   const targetRef = useRef(0)
 
-  // Eye HTML offset — driven from RAF loop using lookCurrentRef.
   const eyeX = useMotionValue(0)
   const eyeY = useMotionValue(0)
   const sx   = useSpring(eyeX, { stiffness: 200, damping: 22, mass: 0.4 })
   const sy   = useSpring(eyeY, { stiffness: 200, damping: 22, mass: 0.4 })
 
   const [blinkAt, setBlinkAt] = useState(0)
-  // Eye open-state: idle (off-page) = 0.85, in container = 0.70, on orb = 0.32 (shrink).
   const [open,    setOpen]    = useState(0.85)
 
   const theme = useScopedTheme(containerRef)
 
-  // ── Three.js scene ──────────────────────────────────────────────────────────
   useEffect(() => {
     const host = canvasRef.current
     if (!host) return
@@ -360,7 +346,6 @@ export default function CuriousAi() {
     const camera = new THREE.PerspectiveCamera(38, W / H, 0.1, 100)
     camera.position.z = 4.4
 
-    // Transparent canvas — the orb breathes against whatever page bg is behind.
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(W, H)
@@ -417,13 +402,12 @@ export default function CuriousAi() {
       const dt = Math.min(clock.getDelta(), 0.05)
       uniforms.uTime.value += dt
 
-      // Alertness smoothing.
+      // tune: raise the response rate to sharpen alert transitions
       const ka = 1 - Math.exp(-dt * 6)
       activeRef.current += (targetRef.current - activeRef.current) * ka
       uniforms.uActive.value = activeRef.current
 
-      // Look direction smoothing — slower during idle script (deliberate gaze),
-      // snappier under cursor (responsive feel).
+      // tune: raise either rate to make gaze tracking more responsive
       const speed = hoverActiveRef.current ? 7 : 2.2
       const kl    = 1 - Math.exp(-dt * speed)
       const lc    = lookCurrentRef.current
@@ -433,15 +417,12 @@ export default function CuriousAi() {
 
       uniforms.uLook.value.set(lc.x, -lc.y)
 
-      // Orb leans toward the cursor — visible but still subtler than the eye
-      // travel, so the eyes remain the primary expressive surface.
+      // tune: raise the lean range to increase orb travel
       const lean = 0.12 + activeRef.current * 0.06
       mesh.position.x += (lc.x * lean - mesh.position.x) * kl
       mesh.position.y += (-lc.y * lean - mesh.position.y) * kl
 
-      // Eye overlay follows the look direction — wide range so it reads clearly
-      // as "the eyes moved left / right / down". This must out-pace the orb's
-      // own lean so the eyes carry the personality.
+      // tune: raise the range factor to increase eye travel
       const range = sizeRef.current.w * 0.18
       eyeX.set(lc.x * range)
       eyeY.set(lc.y * range)
@@ -464,14 +445,6 @@ export default function CuriousAi() {
     }
   }, [theme, eyeX, eyeY])
 
-  // ── Pointer / activity handling ────────────────────────────────────────────
-  // Events live on the OUTER container so the eyes drift toward the cursor
-  // anywhere on the page — not just when it's directly on the orb. We
-  // distinguish three states based on the cursor's distance from the orb's
-  // centre:
-  //   • off-page         → idle script drives look + relaxed eyes (0.85)
-  //   • in container     → eyes track slightly toward cursor (0.70)
-  //   • cursor on the orb→ eyes squint/focus + full tracking (0.32)
   useEffect(() => {
     const container = containerRef.current
     const stage     = stageRef.current
@@ -481,15 +454,14 @@ export default function CuriousAi() {
       const rect    = stage!.getBoundingClientRect()
       const centerX = rect.left + rect.width  / 2
       const centerY = rect.top  + rect.height / 2
-      const radius  = rect.width / 2   // stage is square
+      const radius  = rect.width / 2
       const dx      = clientX - centerX
       const dy      = clientY - centerY
       const nx      = Math.max(-1, Math.min(1, dx / radius))
       const ny      = Math.max(-1, Math.min(1, dy / radius))
       const dist    = Math.sqrt(nx * nx + ny * ny)
 
-      // The orb visually occupies ~0.65 of the stage half-radius (accounts
-      // for morph extension beyond the geometric 1.0 mesh radius).
+      // tune: raise the threshold to enlarge the focused pointer region
       const onOrb = dist < 0.62
 
       hoverActiveRef.current = true
@@ -499,8 +471,7 @@ export default function CuriousAi() {
         setOpen(0.32)
       } else {
         targetRef.current = 0.35
-        // Slight tracking — eyes drift toward the cursor but the orb itself
-        // doesn't lean much.
+        // tune: raise the multiplier to increase off-orb eye tracking
         lookTargetRef.current = { x: nx * 0.40, y: ny * 0.40 }
         setOpen(0.70)
       }
@@ -523,7 +494,7 @@ export default function CuriousAi() {
       update(e.clientX, e.clientY)
     }
     function onUp() {
-      // Touch lift: small grace period in case it was a tap.
+      // tune: raise the delay to extend the touch-release grace period
       window.setTimeout(() => {
         if (!container?.matches(':hover')) onLeave()
       }, 500)
@@ -546,7 +517,6 @@ export default function CuriousAi() {
     }
   }, [])
 
-  // ── Idle look-around script: left, slightly right, slightly left, top, back ─
   useEffect(() => {
     if (typeof window === 'undefined') return
     let idx = 0
@@ -563,12 +533,12 @@ export default function CuriousAi() {
     return () => window.clearTimeout(timer)
   }, [])
 
-  // ── Idle blink scheduler ───────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let t: number
     function schedule() {
+      // tune: raise either bound to reduce blink frequency
       const wait = 3800 + Math.random() * 3200
       t = window.setTimeout(() => {
         setBlinkAt((v) => v + 1)
@@ -579,7 +549,6 @@ export default function CuriousAi() {
     return () => window.clearTimeout(t)
   }, [])
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   const palette = PALETTE[theme]
   const bgColor = theme === 'dark' ? '#0A0A09' : '#E8E8DF'
 
@@ -595,7 +564,7 @@ export default function CuriousAi() {
       >
         <div ref={canvasRef} className="absolute inset-0" />
 
-        {/* Vertical robot-eye pills — sit on the orb's "face" and track the look direction. */}
+        {}
         <motion.div
           className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-between"
           style={{ x: sx, y: sy, width: '11%', height: '15%' }}
@@ -608,10 +577,6 @@ export default function CuriousAi() {
   )
 }
 
-// ─── Eye ──────────────────────────────────────────────────────────────────────
-// Vertical pill — narrow + tall, like a robot's lens slit. ScaleY animates the
-// blink and the open/close transition between idle ↔ alert.
-
 function Eye({
   open, blinkKey, palette,
 }: {
@@ -622,12 +587,12 @@ function Eye({
   return (
     <motion.div
       style={{
-        width: '32%',          // ~3.5% of stage — narrow vertical bar
-        height: '100%',        // full wrapper height — ~15% of stage
+        // tune: raise to widen the eyes
+        width: '32%',
+        // tune: raise to lengthen the eyes
+        height: '100%',
         background: palette.eye,
         borderRadius: 9999,
-        // Two-layer halo: tight inner core glow + wide outer bloom — sells the
-        // LED-lens read so the eyes feel luminous, not painted on.
         boxShadow: `0 0 4px 0 ${palette.eye}, 0 0 14px 1px ${palette.eyeGlow}, 0 0 28px 4px ${palette.eyeGlow}`,
         originY: 0.5,
       }}

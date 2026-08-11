@@ -1,14 +1,14 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents an avatar stack that advances on horizontal swipes and confirms a tapped selection.
+ */
 
 import { useState, useLayoutEffect, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Check } from '@phosphor-icons/react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
-
-
-// ─── Config ──────────────────────────────────────────────────────────────────
 
 const CARD_W = 174
 const CARD_H = 218
@@ -48,7 +48,6 @@ const PHOTOS: Photo[] = [
   },
 ]
 
-// Slot layout: [front, right, left, back]
 const SLOTS = [
   { x: 0,   y: 0,   rotate: 1.5,  scale: 1,    z: 4 },
   { x: 52,  y: -8,  rotate: 8,    scale: 0.92, z: 3 },
@@ -58,26 +57,20 @@ const SLOTS = [
 
 const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
 
-// ─── AvatarPicker ─────────────────────────────────────────────────────────────
-
 export default function AvatarPicker() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // order[i] = photo ID at slot i (0 = front, 3 = back)
   const [order, setOrder] = useState<number[]>([0, 1, 2, 3])
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [exiting, setExiting] = useState<{ id: number; dir: 'left' | 'right' } | null>(null)
-  // IDs that just returned to back slot and need an instant (duration:0) transition
   const [returning, setReturning] = useState<Set<number>>(new Set())
 
-  // Refs for use inside stable callbacks
   const orderRef = useRef(order)
   const dismissing = useRef(false)
   const dragDelta = useRef(0)
   useIsomorphicLayoutEffect(() => { orderRef.current = order }, [order])
 
-  // Theme detection
   useIsomorphicLayoutEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'))
     check()
@@ -92,12 +85,10 @@ export default function AvatarPicker() {
     const frontId = orderRef.current[0]
     setExiting({ id: frontId, dir })
 
-    // After exit animation (420ms), snap card to back and resume normal animations
     setTimeout(() => {
       setReturning(prev => new Set([...prev, frontId]))
       setOrder(prev => [...prev.slice(1), prev[0]])
       setExiting(null)
-      // Two RAFs: first lets the snap render, second re-enables spring transitions
       requestAnimationFrame(() => requestAnimationFrame(() => {
         setReturning(prev => {
           const s = new Set(prev)
@@ -121,7 +112,6 @@ export default function AvatarPicker() {
       ref={containerRef}
       className="relative flex h-full w-full select-none flex-col items-center justify-center gap-8 bg-[#E8E8DF] dark:bg-[#1A1A19]"
     >
-      {/* Label */}
       <p
         className="text-[#21211F] dark:text-white/35"
         style={{
@@ -136,7 +126,6 @@ export default function AvatarPicker() {
         Meet the Crew
       </p>
 
-      {/* Card stack */}
       <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
         {PHOTOS.map(photo => {
           const slotIndex = order.indexOf(photo.id)
@@ -211,7 +200,6 @@ export default function AvatarPicker() {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
 
-              {/* Bottom gradient + name */}
               <div style={{
                 position: 'absolute',
                 bottom: 0, left: 0, right: 0,
@@ -266,7 +254,6 @@ export default function AvatarPicker() {
                 )}
               </div>
 
-              {/* Selected ring overlay */}
               {isSelected && (
                 <div style={{
                   position: 'absolute',
@@ -281,7 +268,6 @@ export default function AvatarPicker() {
         })}
       </div>
 
-      {/* Dots indicator */}
       <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
         {PHOTOS.map(photo => {
           const isCurrent = order[0] === photo.id
@@ -300,7 +286,6 @@ export default function AvatarPicker() {
         })}
       </div>
 
-      {/* Action row */}
       <div style={{ height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {selectedId !== null ? (
           <motion.button
