@@ -1,19 +1,24 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a responsive pill toggle with an expressive face on its thumb.
+ * Toggling slides the thumb and morphs the face between inactive and happy states.
+ */
 
 import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── TagaToggle ────────────────────────────────────────────────────────────────
-// A playful pill toggle with a face on the thumb.
-// Off: dead face (×× eyes, flat mouth). On: happy face (arc eyes, smile, blush).
 
+
+
+
+// tune: change these bounds to resize the responsive track
 const MAX_TRACK_W = 80
 const MIN_TRACK_W = 48
-const FACE_COLOR  = '#4A3F35'  // warm dark — legible on white in both themes
+const FACE_COLOR  = '#4A3F35'  
 
 export default function TagaToggle() {
   const [isOn, setIsOn]             = useState(false)
@@ -23,7 +28,7 @@ export default function TagaToggle() {
   const containerRef                = useRef<HTMLDivElement>(null)
   const isOnRef                     = useRef(false)
 
-  // ── Derived dimensions ───────────────────────────────────────────────────────
+  
   const trackH = Math.round(trackW * 0.58)
   const thumb  = Math.round(trackW * 0.50)
   const pad    = Math.max(3, Math.round(trackW * 0.04))
@@ -32,7 +37,7 @@ export default function TagaToggle() {
 
   const thumbX = useMotionValue(offX)
 
-  // ── Theme detection + resize observer ────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -62,17 +67,17 @@ export default function TagaToggle() {
     return () => { mo.disconnect(); ro.disconnect() }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Snap thumb on resize ─────────────────────────────────────────────────────
+  
   useEffect(() => {
     thumbX.set(isOnRef.current ? onX : offX)
   }, [trackW]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Colours ──────────────────────────────────────────────────────────────────
+  
   const offTrack   = pageIsDark ? '#4A4540' : '#9E9890'
   const onTrack    = pageIsDark ? '#D4960A' : '#F5C518'
   const trackColor = useTransform(thumbX, [offX, onX], [offTrack, onTrack])
 
-  // ── Toggle ───────────────────────────────────────────────────────────────────
+  
   const handleToggle = useCallback(async () => {
     if (animating) return
     setAnimating(true)
@@ -83,7 +88,7 @@ export default function TagaToggle() {
     setAnimating(false)
   }, [isOn, animating, thumbX, offX, onX])
 
-  // ── Theme tokens ─────────────────────────────────────────────────────────────
+  
   const previewBg   = pageIsDark ? '#110F0C' : '#EDEAE5'
   const trackInset  = pageIsDark
     ? 'inset 0 1px 4px rgba(0,0,0,0.50)'
@@ -92,14 +97,14 @@ export default function TagaToggle() {
     ? '0 3px 8px rgba(0,0,0,0.50), 0 1px 3px rgba(0,0,0,0.30)'
     : '0 3px 8px rgba(0,0,0,0.18), 0 1px 3px rgba(0,0,0,0.10)'
 
-  // ── Face: mouth paths share M+Q structure → Framer Motion interpolates ───────
+  
   const mouthPath = isOn
-    ? 'M -0.40,0.15 Q 0,0.50 0.40,0.15'   // smile
-    : 'M -0.40,0.43 Q 0,0.43 0.40,0.43'   // straight (Q control on the line = flat)
+    ? 'M -0.40,0.15 Q 0,0.50 0.40,0.15'   
+    : 'M -0.40,0.43 Q 0,0.43 0.40,0.43'   
 
   const faceSize = thumb * 0.78
 
-  // ── Eye animation config ─────────────────────────────────────────────────────
+  
   const eyeSpring = { duration: 0.16, ease: [0.34, 1.56, 0.64, 1] as [number, number, number, number] }
 
   return (
@@ -114,7 +119,7 @@ export default function TagaToggle() {
         transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
         className="select-none"
       >
-        {/* ── Track ────────────────────────────────────────────────────────────── */}
+        {}
         <motion.button
           type="button"
           role="switch"
@@ -136,7 +141,7 @@ export default function TagaToggle() {
           whileTap={{ scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 400, damping: 28 }}
         >
-          {/* ── Thumb ──────────────────────────────────────────────────────────── */}
+          {}
           <motion.div
             style={{
               position: 'absolute',
@@ -152,13 +157,13 @@ export default function TagaToggle() {
               justifyContent: 'center',
             }}
           >
-            {/* ── Face SVG ─────────────────────────────────────────────────────── */}
+            {}
             <svg
               viewBox="-1 -1 2 2"
               width={faceSize}
               height={faceSize}
             >
-              {/* Left eye */}
+              {}
               <AnimatePresence mode="wait">
                 {isOn ? (
                   <motion.path
@@ -186,7 +191,7 @@ export default function TagaToggle() {
                 )}
               </AnimatePresence>
 
-              {/* Right eye */}
+              {}
               <AnimatePresence mode="wait">
                 {isOn ? (
                   <motion.path
@@ -214,7 +219,7 @@ export default function TagaToggle() {
                 )}
               </AnimatePresence>
 
-              {/* Mouth — path `d` interpolates because both use M+Q */}
+              {}
               <motion.path
                 d={mouthPath}
                 stroke={FACE_COLOR}

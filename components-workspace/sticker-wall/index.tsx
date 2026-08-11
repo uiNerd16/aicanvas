@@ -1,7 +1,10 @@
 'use client'
 
-// npm install matter-js framer-motion
-// types: npm install -D @types/matter-js
+// npm install framer-motion matter-js
+/**
+ * Presents a physics wall where text and emoji stickers can be added and dragged.
+ * New stickers fall into the scene and collide with existing bodies and boundaries.
+ */
 
 import { useEffect, useLayoutEffect, useRef, useState, FormEvent } from 'react'
 import { motion } from 'framer-motion'
@@ -9,30 +12,36 @@ import type { Engine, Runner, World, Body, MouseConstraint as MC, Mouse as Matte
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-// ─── Tuning ──────────────────────────────────────────────────────────────────
+
+// tune: raise to make stickers fall faster
 const GRAVITY_SCALE = 0.0012
+// tune: raise to increase collision bounce
 const RESTITUTION   = 0.05
 const FRICTION      = 0.6
 const FRICTION_AIR  = 0.02
 const DENSITY       = 0.0015
+// tune: raise to allow more stickers in the scene
 const STICKER_CAP   = 60
+// tune: raise to slow sticker removal fades
 const FADE_MS       = 250
 
 const WALL_THICKNESS = 60
 
 const TEXT_FONT_PX   = 15
+// tune: raise to allow wider text stickers
 const TEXT_MAX_WIDTH = 180
 const TEXT_PAD_X     = 14
 const TEXT_PAD_Y     = 10
 const TEXT_LINE_H    = 20
 
+// tune: change to resize emoji sticker bodies
 const EMOJI_SIZE     = 72
 const EMOJI_FONT_PX  = 42
 
 const CARD_RADIUS    = 32
 const BORDER_WIDTH   = 2
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
+
 const PALETTE_DARK = ['#FDE68A', '#BBF7D0', '#FBCFE8', '#C7D2FE', '#BAE6FD', '#FED7AA']
 const PALETTE_LIGHT = ['#F59E0B', '#34D399', '#F472B6', '#A78BFA', '#38BDF8', '#FB923C']
 
@@ -41,6 +50,7 @@ const STICKER_TEXT_COLOR_LIGHT = '#FFFFFF'
 const BG_DARK  = '#0F0F12'
 const BG_LIGHT = '#F5F1E8'
 
+// customize: replace the initial text and emoji stickers below
 const SEED_QUOTES = [
   'love the new layout',
   'prompts are 🔥',
@@ -56,7 +66,7 @@ const SEED_QUOTES = [
 
 const SEED_EMOJIS = ['👏', '💡', '🙌', '👀', '💬', '✅', '🔥', '💯', '🎉', '❤️', '🤔', '⭐']
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+
 type StickerKind = 'text' | 'emoji'
 
 interface Sticker {
@@ -66,14 +76,14 @@ interface Sticker {
   w: number
   h: number
   color: string
-  lines: string[] // pre-wrapped text lines; empty for emoji
+  lines: string[] 
   createdAt: number
   fadeStart?: number
 }
 
 type BodyWithPlugin = Body & { plugin: { sticker?: Sticker } }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function roundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -92,8 +102,8 @@ function roundedRect(
   ctx.closePath()
 }
 
-// Word-wrap text into lines that fit within maxWidth. Measured by given ctx
-// with its fillStyle/font already set.
+
+
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const words = text.trim().split(/\s+/)
   const lines: string[] = []
@@ -104,7 +114,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
     if (width <= maxWidth) {
       current = candidate
     } else if (!current) {
-      // Single word wider than maxWidth — take it as its own line
+      
       lines.push(word)
       current = ''
     } else {
@@ -142,21 +152,21 @@ function pickPalette(isDark: boolean): string[] {
   return isDark ? PALETTE_DARK : PALETTE_LIGHT
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+
 export default function StickerWall() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const inputRef     = useRef<HTMLInputElement>(null)
 
-  // Handles for submit-from-outside-effect access.
+  
   const engineRef    = useRef<Engine | null>(null)
   const worldRef     = useRef<World | null>(null)
   const stickersRef  = useRef<Sticker[]>([])
   const sizeRef      = useRef<{ w: number; h: number }>({ w: 0, h: 0 })
-  // Measurement ctx — uses the visible canvas's 2D context.
+  
   const measureCtxRef = useRef<CanvasRenderingContext2D | null>(null)
   const paletteRef   = useRef<string[]>(PALETTE_DARK)
-  // Import handle for Matter, set once the dynamic import resolves.
+  
   const matterRef    = useRef<typeof import('matter-js') | null>(null)
 
   const [isDark, setIsDark] = useState<boolean>(() =>
@@ -176,7 +186,7 @@ export default function StickerWall() {
     })
   }, [isDark])
 
-  // ── Theme detection (follows murmuration pattern) ──────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -196,7 +206,7 @@ export default function StickerWall() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Physics + render loop ─────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas    = canvasRef.current
     const container = containerRef.current
@@ -208,7 +218,7 @@ export default function StickerWall() {
     let alive = true
     let rafId = 0
 
-    // Will hold matter references once loaded.
+    
     let engine: Engine | null = null
     let runner: Runner | null = null
     let world: World | null = null
@@ -223,10 +233,10 @@ export default function StickerWall() {
       const t = WALL_THICKNESS
       const opts = { isStatic: true, render: { visible: false } }
       return [
-        Matter.Bodies.rectangle(w / 2, -t / 2, w + t * 2, t, opts), // top
-        Matter.Bodies.rectangle(w / 2, h + t / 2, w + t * 2, t, opts), // bottom
-        Matter.Bodies.rectangle(-t / 2, h / 2, t, h + t * 2, opts), // left
-        Matter.Bodies.rectangle(w + t / 2, h / 2, t, h + t * 2, opts), // right
+        Matter.Bodies.rectangle(w / 2, -t / 2, w + t * 2, t, opts), 
+        Matter.Bodies.rectangle(w / 2, h + t / 2, w + t * 2, t, opts), 
+        Matter.Bodies.rectangle(-t / 2, h / 2, t, h + t * 2, opts), 
+        Matter.Bodies.rectangle(w + t / 2, h / 2, t, h + t * 2, opts), 
       ]
     }
 
@@ -296,7 +306,7 @@ export default function StickerWall() {
 
     function seed(Matter: typeof import('matter-js'), w: number, h: number) {
       const palette = paletteRef.current
-      // 8 text cards, distributed across the whole area so they pre-pile.
+      
       for (let i = 0; i < SEED_QUOTES.length; i++) {
         const quote = SEED_QUOTES[i]
         const color = palette[i % palette.length]
@@ -308,7 +318,7 @@ export default function StickerWall() {
         Matter.Composite.add(world!, sticker.body)
         stickersRef.current.push(sticker)
       }
-      // 6 emoji stickers
+      
       for (let i = 0; i < SEED_EMOJIS.length; i++) {
         const emoji = SEED_EMOJIS[i]
         const color = palette[(i + 3) % palette.length]
@@ -335,14 +345,14 @@ export default function StickerWall() {
       canvas!.style.height = `${h}px`
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-      // Rebuild walls to new size. Static bodies — cheap to remove/re-add.
+      
       if (walls.length > 0) {
         for (const wall of walls) Matter.Composite.remove(world, wall)
       }
       walls = buildWalls(Matter, w, h)
       Matter.Composite.add(world, walls)
 
-      // Re-nudge bodies that may now be outside the viewport back inside.
+      
       for (const s of stickersRef.current) {
         const p = s.body.position
         let nx = p.x
@@ -364,7 +374,7 @@ export default function StickerWall() {
       const bg = dark ? BG_DARK : BG_LIGHT
       const { w: W, h: H } = sizeRef.current
 
-      // Full clear — no trails.
+      
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx!.fillStyle = bg
       ctx!.fillRect(0, 0, W, H)
@@ -372,7 +382,7 @@ export default function StickerWall() {
       const stickers = stickersRef.current
       const Matter = matterRef.current
 
-      // Scan + prune faded stickers in reverse so splicing is safe.
+      
       if (Matter && world) {
         for (let i = stickers.length - 1; i >= 0; i--) {
           const s = stickers[i]
@@ -386,7 +396,7 @@ export default function StickerWall() {
         }
       }
 
-      // Draw every sticker.
+      
       for (const s of stickers) {
         const { body, w, h, color, kind, lines, content } = s
 
@@ -401,12 +411,12 @@ export default function StickerWall() {
         ctx!.translate(body.position.x, body.position.y)
         ctx!.rotate(body.angle)
 
-        // Card fill
+        
         ctx!.fillStyle = color
         roundedRect(ctx!, -w / 2, -h / 2, w, h, CARD_RADIUS)
         ctx!.fill()
 
-        // Inner border — inset by half the stroke so it reads as an inner line.
+        
         ctx!.strokeStyle = 'rgba(255,255,255,0.7)'
         ctx!.lineWidth = BORDER_WIDTH
         const inset = BORDER_WIDTH
@@ -443,7 +453,7 @@ export default function StickerWall() {
       rafId = requestAnimationFrame(drawFrame)
     }
 
-    // ── Boot sequence: dynamic-import matter-js, then set everything up ──────
+    
     import('matter-js').then((Matter) => {
       if (!alive) return
       matterRef.current = Matter
@@ -457,8 +467,8 @@ export default function StickerWall() {
       runner = Matter.Runner.create()
       Matter.Runner.run(runner, engine)
 
-      // Canvas mouse — forward to matter-js. Must be created AFTER resize so
-      // pixelRatio is correct for the initial DPR.
+      
+      
       resize()
       mouse = Matter.Mouse.create(canvas!)
       mouse.pixelRatio = dpr
@@ -498,7 +508,7 @@ export default function StickerWall() {
     }
   }, [])
 
-  // ── Submit handler: spawn a new text sticker above the canvas ──────────────
+  
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const input = inputRef.current
@@ -546,7 +556,7 @@ export default function StickerWall() {
     Matter.Composite.add(world, body)
     stickersRef.current.push(sticker)
 
-    // Enforce soft cap: fade the oldest that's not already fading.
+    
     if (stickersRef.current.length > STICKER_CAP) {
       for (const s of stickersRef.current) {
         if (s.fadeStart === undefined) {
