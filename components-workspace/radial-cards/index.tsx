@@ -1,6 +1,10 @@
 'use client'
 
-// npm install framer-motion @phosphor-icons/react react
+// npm install @phosphor-icons/react framer-motion
+/**
+ * Arranges activity cards around a continuously rotating radial track.
+ * Pointer engagement lifts and centers the nearest card for inspection.
+ */
 
 import { useEffect, useRef, useState, type ComponentType, type RefObject } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
@@ -16,55 +20,60 @@ import {
 } from 'framer-motion'
 import { Footprints, Fire, Moon, Drop, Heart, Lightning, Path } from '@phosphor-icons/react'
 
-// ─── Theme + tuning constants ────────────────────────────────────────────────
-const SECONDS_PER_TURN = 45
-const REDUCED_SECONDS_PER_TURN = SECONDS_PER_TURN * 4 // 1/4 speed when reduced
 
+// tune: raise to slow the orbit
+const SECONDS_PER_TURN = 45
+const REDUCED_SECONDS_PER_TURN = SECONDS_PER_TURN * 4 
+
+// tune: raise to bring the engaged card farther forward
 const ENGAGED_LIFT_Z = 120
 const REDUCED_LIFT_Z = 30
+// tune: raise to enlarge the engaged card
 const ENGAGED_SCALE = 1.18
 const REDUCED_ENGAGED_SCALE = 1.06
 
-// Lift/scale/centering — softer, glide-forward feel (no flip snap).
+
 const LIFT_SPRING = { stiffness: 140, damping: 28, mass: 1 } as const
-// Redistribution (slot angle, idle rotation factor, skew, outward) — softened
-// slightly so the post-click rearrangement glides instead of snapping.
+
+
 const SPRING = { stiffness: 200, damping: 24, mass: 1 } as const
 const SPEED_SPRING = { stiffness: 90, damping: 20, mass: 1 } as const
 
-// Card dimensions.
+
+// tune: change both dimensions to resize the cards
 const CARD_W = 240
 const CARD_H = 138
 
-// Petal tilt — slight skew so the rectangle reads as a slightly off-rectangular
-// petal in the bouquet, matching the reference image.
+
+
 const PETAL_SKEW_Y = 0
 
-// Outward push from the shared anchor — set to 0 per the Figma redesign so all
-// 7 cards converge at a single anchor point with no perimeter ring. The
-// centeringFactor interpolation collapses on the slot side to translate(-50%,
-// -100%) — cards sit with their bottom-centre exactly at the anchor.
+
+
+
+
 const OUTWARD_OFFSET_PX = '0px'
 
-// Hand-arranged slot angles for the 7-card bouquet, in clockwise order
-// starting from the upper-right (Steps).
+
+
+// tune: adjust to redistribute cards around the orbit
 const SLOT_ANGLES: readonly number[] = [
-  -35.55, // 0 Steps
-  22.14, // 1 Calories
-  71.01, // 2 Sleep
-  122.25, // 3 Water
-  161.58, // 4 Heart
-  -150.4, // 5 Active
-  -108.41, // 6 Distance
+  -35.55, 
+  22.14, 
+  71.01, 
+  122.25, 
+  161.58, 
+  -150.4, 
+  -108.41, 
 ]
 
-// Stage that holds the bouquet. With BL pivot, cards extend up-and-right from
-// the shared anchor at the canvas centre. The bouquet bounding box is roughly
-// 2 × max(W, H) ≈ 560px, so the clamp gives some breathing room around the
-// rotated bouquet without clipping.
+
+
+
+
 const STAGE_SIZE = 'clamp(300px, 50vw, 560px)'
 
-// ─── 7 metrics + theme palette ───────────────────────────────────────────────
+
 type PhosphorIconProps = {
   size?: number | string
   weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'
@@ -76,18 +85,19 @@ type Metric = {
   label: string
   value: string
   delta: string
-  /** Pastel card gradient start (top). */
+  
   surface: string
-  /** Deeper gradient end (bottom). */
+  
   gradientEnd: string
-  /** Dark variant — used for metric value, pill bg, sparkline stroke. */
+  
   dark: string
-  /** 7 y-values (px, 0=top 31=bottom) for the sparkline in viewBox 0 0 108 31. */
+  
   sparkline: readonly number[]
-  /** Phosphor icon for the header. */
+  
   Icon: ComponentType<PhosphorIconProps>
 }
 
+// customize: replace the activity metrics below
 const METRICS: Metric[] = [
   {
     title: 'Steps',
@@ -168,8 +178,8 @@ const METRICS: Metric[] = [
   },
 ]
 
-// ─── Sparkline ───────────────────────────────────────────────────────────────
-// Proper Catmull-Rom → cubic bezier conversion for silky-smooth curves.
+
+
 function SparkLine({ points, color, id }: { points: readonly number[]; color: string; id: string }) {
   const W = 54, H = 36
   const n = points.length
@@ -206,7 +216,7 @@ function SparkLine({ points, color, id }: { points: readonly number[]; color: st
   )
 }
 
-// ─── Hooks ───────────────────────────────────────────────────────────────────
+
 
 function useTheme(ref: RefObject<HTMLElement | null>) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
@@ -248,17 +258,17 @@ function useReducedMotion(): boolean {
   return reduced
 }
 
-// ─── Card ────────────────────────────────────────────────────────────────────
+
 type CardProps = {
   index: number
   metric: Metric
-  /** Shared idle rotation in degrees. */
+  
   rotation: MotionValue<number>
-  /** Index of the currently engaged card, or null. */
+  
   engagedIndex: number | null
-  /** Index of the most-recently-clicked card, or null. Persists past release. */
+  
   topIndex: number | null
-  /** True when reduced motion is in effect. */
+  
   reduced: boolean
   onToggle: (index: number) => void
 }
@@ -275,22 +285,22 @@ function Card({
   const engaged = engagedIndex === index
   const isTop = topIndex === index
 
-  // ─── Compute the target slot angle ──────────────────────────────────────
-  // Idle (engagedIndex == null): 7-slot bouquet using the hand-arranged
-  // SLOT_ANGLES array.
-  // Someone-else engaged: 6-slot redistribution. j is this card's index in
-  // the 6-card layout (0..5), computed by skipping the engaged slot.
-  // Self engaged: slot is irrelevant because centeringFactor=1 collapses
-  // outwardOffset+rotation contribution; we just feed a placeholder.
-  // Each card always owns its hand-tuned slot — no redistribution when a sibling engages.
+  
+  
+  
+  
+  
+  
+  
+  
   const slotTargetDeg = SLOT_ANGLES[index]
 
-  // Per-card springs ──────────────────────────────────────────────────────
+  
   const outwardFactorTarget = useMotionValue(1)
   const outwardFactor = useSpring(outwardFactorTarget, SPRING)
 
-  // Centering uses the softer LIFT_SPRING — it drives the move-to-centre
-  // glide alongside the lift/scale, so they should share the same easing.
+  
+  
   const centeringFactorTarget = useMotionValue(0)
   const centeringFactor = useSpring(centeringFactorTarget, LIFT_SPRING)
 
@@ -306,50 +316,50 @@ function Card({
   const opacityTarget = useMotionValue(1)
   const cardOpacity = useSpring(opacityTarget, SPRING)
 
-  // ─── Per-card rotation MotionValue (shortest-path engagement) ──────────
-  // This single MotionValue is the actual visual rotation of the card's
-  // pivot in degrees. It operates in two modes:
-  //
-  //   FOLLOW mode (default, non-engaged, no transition in flight):
-  //     cardRotation continuously syncs to SLOT_ANGLES[index] + idleRotation.
-  //     Updated via a useMotionValueEvent listener on idleRotation — no
-  //     spring lag, no separate slot spring. Both engaging and releasing
-  //     transitions briefly leave this mode.
-  //
-  //   SPRING mode (engagement transitions):
-  //     cardRotation is animated by `animate(...)` to a shortest-path
-  //     equivalent of the desired target (engaged: 0; non-engaged: current
-  //     slot+idle). The spring traverses at most 180° in either direction —
-  //     never a full revolution.
-  //
-  // The mode is tracked by `followModeRef`. It flips off at engagement
-  // transitions and back on after the spring lands.
-  //
-  // The "follow base" — the slot angle this card tracks while in FOLLOW
-  // mode — is held in a ref so the listener always reads the latest value
-  // (it changes when another card engages and redistribution kicks in).
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   const initialRot = SLOT_ANGLES[index] + rotation.get()
   const cardRotation = useMotionValue(initialRot)
   const followModeRef = useRef<boolean>(true)
   const followBaseRef = useRef<number>(SLOT_ANGLES[index])
 
-  // FOLLOW mode listener — when active, cardRotation tracks idle continuously.
-  // While in spring mode this listener is a no-op (followModeRef.current is
-  // false), so the running spring is not fought by idle drift.
+  
+  
+  
   useMotionValueEvent(rotation, 'change', (latest) => {
     if (!followModeRef.current) return
     cardRotation.set(followBaseRef.current + latest)
   })
 
-  // ─── Engagement transition driver ───────────────────────────────────────
-  // On engagement state change (or redistribution-base change), compute the
-  // shortest-path equivalent target and animate cardRotation there with
-  // LIFT_SPRING. After the spring lands (or is interrupted), if we're back
-  // in non-engaged state, re-enable FOLLOW mode so cardRotation resumes
-  // tracking idle from the (possibly new) base slot.
+  
+  
+  
+  
+  
+  
   useEffect(() => {
-    // Compute the shortest-path equivalent of `target` relative to `current`.
-    // Returns a value V such that V ≡ target (mod 360) and |V - current| ≤ 180.
+    
+    
     const shortestEquivalent = (current: number, target: number): number => {
       let delta = target - current
       while (delta > 180) delta -= 360
@@ -358,9 +368,9 @@ function Card({
     }
 
     if (engaged) {
-      // Engaging: spring cardRotation from current slot angle toward 0 (centre).
-      // The card is at its slot (centeringFactor≈0) so this rotation is visible
-      // and intentional — it sweeps the card inward along its arc.
+      
+      
+      
       followBaseRef.current = 0
       followModeRef.current = false
 
@@ -373,24 +383,24 @@ function Card({
       })
       return () => controls.stop()
     } else {
-      // Releasing: snap rotation instantly to the correct slot+idle angle.
-      // This is invisible — while centeringFactor=1 the card is centred ON its
-      // pivot, so rotating the pivot doesn't change the card's screen position.
-      // The visual return is handled entirely by the centeringFactor/lift/scale
-      // springs: the card glides straight outward along its slot direction.
+      
+      
+      
+      
+      
       followBaseRef.current = slotTargetDeg
       cardRotation.set(slotTargetDeg + rotation.get())
       followModeRef.current = true
     }
-    // Run when engagement state OR the redistribution slot changes.
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engaged, slotTargetDeg, index])
 
-  // Drive remaining (non-rotation) targets from the engagement model ──────
+  
   useEffect(() => {
     if (engaged) {
-      // This is the focused card. Move to centre, lift forward in Z, scale
-      // up — front face stays visible the whole time. No flip.
+      
+      
       outwardFactorTarget.set(0)
       centeringFactorTarget.set(1)
       skewFactorTarget.set(0)
@@ -398,14 +408,14 @@ function Card({
       scaleTarget.set(reduced ? REDUCED_ENGAGED_SCALE : ENGAGED_SCALE)
       opacityTarget.set(1)
     } else {
-      // Petal — either idle or sibling of an engaged card. Same target either
-      // way (slot-centre with full skew + outward offset + idle rotation).
+      
+      
       outwardFactorTarget.set(1)
       centeringFactorTarget.set(0)
       skewFactorTarget.set(1)
       liftTarget.set(0)
       scaleTarget.set(1)
-      // In reduced motion, petals dim slightly when a sibling is engaged.
+      
       opacityTarget.set(reduced && engagedIndex != null ? 0.7 : 1)
     }
   }, [
@@ -421,30 +431,30 @@ function Card({
     opacityTarget,
   ])
 
-  // Pivot transform — uses the per-card rotation MotionValue directly.
-  // FOLLOW mode keeps it tracking SLOT_ANGLES[index] + idle continuously;
-  // SPRING mode glides it along the shortest path to the engagement target.
+  
+  
+  
   const pivotTransform = useTransform(
     cardRotation,
     (r) => `rotate(${r as number}deg)`,
   )
 
-  // Card body transform — interpolates between two anchors. The card element
-  // has transform-origin at its bottom-left (0% 100%), so:
-  //   centeringFactor=0 → bottom-LEFT at the pivot (translate(0, -100%))
-  //                       all 7 cards' BL corners coincide at the canvas centre
-  //   centeringFactor=1 → CENTRE on the pivot (translate(-50%, -50%))
-  // Both translateX and translateY interpolate together via centeringFactor.
-  // Plus skewY scaled by skewFactor so the engaged card eases to 0° skew.
-  // outwardFactor multiplies OFFSET (currently 0) for any future radial gap.
+  
+  
+  
+  
+  
+  
+  
+  
   const cardBodyTransform = useTransform(
     [centeringFactor, skewFactor, outwardFactor],
     ([c, sk, ow]) => {
       const cf = c as number
       const skf = sk as number
       const owf = ow as number
-      // X-anchor blend: 0% (BL at pivot) → -50% (centre)
-      // Y-anchor blend: -100% (BL at pivot) → -50% (centre)
+      
+      
       const txPct = -50 * cf
       return (
         `translate(${txPct}%, calc(-50% - (50% + (${OUTWARD_OFFSET_PX}) * ${owf}) * ${1 - cf})) ` +
@@ -453,25 +463,25 @@ function Card({
     },
   )
 
-  // Lift transform — applied to a CHILD wrapper inside the layout transform,
-  // so the lift comes off the petal's surface in its LOCAL frame (which reads
-  // as "out of the bouquet" in screen space). translateZ requires the
-  // ancestors' transform-style: preserve-3d + the stage's perspective.
+  
+  
+  
+  
   const liftTransform = useTransform(
     [lift, scale],
     ([z, s]) => `translateZ(${z as number}px) scale(${s as number})`,
   )
 
-  // Z-index priority (highest to lowest):
-  //   lift > 4 (mid-glide, either lifting or returning)        → 50
-  //   currently engaged at rest                                → 40
-  //   most-recently-clicked card (persists past release)       → 30
-  //   default (slot, never clicked OR superseded by a newer)   → 1
-  // The closure captures `engaged` and `isTop` at hook setup time. When state
-  // changes, the component re-renders and useTransform is re-invoked with the
-  // fresh closure values; we additionally nudge the underlying MotionValue
-  // (see useEffect below) so the transform recomputes immediately rather than
-  // waiting for the next lift change.
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   const dynamicZIndex = useTransform(lift, (z) => {
     if (z > 4) return 50
     if (engaged) return 40
@@ -479,13 +489,13 @@ function Card({
     return 1
   })
 
-  // Force the dynamicZIndex transform to recompute when the booleans change.
-  // Without this, the zIndex would only update on the next lift spring tick.
+  
+  
   useEffect(() => {
     lift.set(lift.get())
   }, [engaged, isTop, lift])
 
-  // Layered drop shadow grows when engaged for the "lifted" feel.
+  
   const restShadow =
     '4px 6px 14px rgba(0,0,0,0.18), 12px 18px 40px rgba(0,0,0,0.22)'
   const liftedShadow =
@@ -496,7 +506,7 @@ function Card({
     onToggle(index)
   }
 
-  // ─── Face content ──────────────────────────────────────────────────────────
+  
   const interStack =
     '"Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 
@@ -542,7 +552,7 @@ function Card({
             transform: liftTransform,
           }}
         >
-          {/* Outer card shell — gradient + border */}
+          {}
           <div
             style={{
               position: 'absolute',
@@ -559,7 +569,7 @@ function Card({
               fontFamily: interStack,
             }}
           >
-            {/* Header — 12px circle bullet + title */}
+            {}
             <div
               style={{
                 display: 'flex',
@@ -583,7 +593,7 @@ function Card({
               </span>
             </div>
 
-            {/* Inner panel — cream bg, pill top-right, text+sparkline bottom */}
+            {}
             <div
               style={{
                 flex: '1 0 0',
@@ -597,7 +607,7 @@ function Card({
                 minHeight: 0,
               }}
             >
-              {/* Pill — top right */}
+              {}
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <span
                   style={{
@@ -615,7 +625,7 @@ function Card({
                 </span>
               </div>
 
-              {/* Bottom row — label+value left, sparkline right */}
+              {}
               <div
                 style={{
                   display: 'flex',
@@ -664,7 +674,7 @@ function Card({
   )
 }
 
-// ─── Root ────────────────────────────────────────────────────────────────────
+
 
 export default function RadialCards() {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -672,33 +682,33 @@ export default function RadialCards() {
   const isDark = theme === 'dark'
   const reduced = useReducedMotion()
 
-  // Shared idle rotation (degrees) — single source for all 7 cards.
+  
   const rotation = useMotionValue(0)
 
-  // Speed multiplier eases between idle (1) and paused (0) so rotation never
-  // snaps to a stop when a card engages.
+  
+  
   const speedTargetRef = useRef(1)
   const speedTarget = useMotionValue(1)
   const speedSmooth = useSpring(speedTarget, SPEED_SPRING)
 
-  // Engagement state — single source of truth.
+  
   const [engagedIndex, setEngagedIndex] = useState<number | null>(null)
 
-  // Most-recently-clicked card. Persists across release so the just-released
-  // card retains a higher zIndex than its untouched neighbours until a
-  // different card is clicked. Background releases do NOT clear this.
+  
+  
+  
   const [topIndex, setTopIndex] = useState<number | null>(null)
 
-  // Push speed target whenever engagement changes — petals keep orbiting at
-  // full speed when nothing is engaged; when something engages, the SHARED
-  // rotation continues (petals continue), but the engaged card's
-  // idleRotationFactor=0 keeps it locked relative to the screen.
+  
+  
+  
+  
   useEffect(() => {
     speedTargetRef.current = 1
     speedTarget.set(speedTargetRef.current)
   }, [engagedIndex, speedTarget])
 
-  // Continuous rotation tick — degrees per second × dt × speed multiplier.
+  
   const prevTs = useRef<number | null>(null)
   useAnimationFrame((t) => {
     const last = prevTs.current
@@ -712,17 +722,17 @@ export default function RadialCards() {
   })
 
   function handleToggle(i: number) {
-    // Every click — engaging OR releasing — marks this card as the top of the
-    // stack. topIndex is independent of engagement and only changes when a
-    // different card is clicked.
+    
+    
+    
     setTopIndex(i)
     setEngagedIndex((prev) => (prev === i ? null : i))
   }
 
   function handleStageRelease() {
-    // Tap outside any card on the stage / root background. Engagement clears,
-    // but topIndex is intentionally preserved — the last-clicked card keeps
-    // its top-of-stack status until someone else clicks a different card.
+    
+    
+    
     setEngagedIndex(null)
   }
 
@@ -735,7 +745,7 @@ export default function RadialCards() {
       }}
       onPointerDown={handleStageRelease}
     >
-      {/* Subtle radial vignette to lift the centre of the bouquet. */}
+      {}
       <div
         aria-hidden
         style={{
@@ -747,7 +757,7 @@ export default function RadialCards() {
         }}
       />
 
-      {/* Perspective stage / bouquet container — clicking the empty stage clears engagement. */}
+      {}
       <div
         style={{
           position: 'relative',

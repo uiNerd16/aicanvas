@@ -2,6 +2,11 @@
 
 // npm install framer-motion
 
+/**
+ * Displays layered warning stripes with repeating text.
+ * Hovering jitters the stripes, while clicking briefly increases the motion.
+ */
+
 import { useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
@@ -108,11 +113,6 @@ export default function DangerStripes() {
     hoveringRef.current = false
   }, [])
 
-  // items-stretch, and the stripe box below takes its height from the root
-  // rather than naming a viewport height of its own. Standalone that is
-  // identical, since stretching to a full-height root IS the viewport height.
-  // Dropped into a container shorter than the viewport, the box now follows
-  // the container instead of overflowing it by the difference.
   return (
     <div className="flex min-h-screen w-full items-stretch justify-center bg-[#FF6B1A]">
       <div className="relative w-full overflow-hidden select-none">

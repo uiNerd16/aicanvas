@@ -1,6 +1,10 @@
 'use client'
 
-// npm install framer-motion react
+// npm install framer-motion
+/**
+ * Renders repeated words as a vertically rotating typographic tower.
+ * Hovering a row increases its scale while the stack continues cycling.
+ */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -11,13 +15,18 @@ import {
 } from 'framer-motion'
 import type { MotionValue } from 'framer-motion'
 
-// Swap to customise.
+
+// customize: replace the alternating tower words below
 const WORDS = ['STACK', 'TOWER'] as const
-const ROW_COUNT = 12 // number of stacked rows
-const SECONDS_PER_CYCLE = 5 // time for one full "rotation" of the stack
-const AMPLITUDE_PX = 22 // peak horizontal shift
-const HOVER_SCALE_BOOST = 0.1 // extra scale on the hovered row (fraction)
-const HOVER_EASE_RATE = 10 // 1/s — how fast the hover highlight ramps in/out
+// tune: raise to add more stacked rows
+const ROW_COUNT = 12 
+// tune: raise to slow the tower cycle
+const SECONDS_PER_CYCLE = 5 
+// tune: raise to increase horizontal row travel
+const AMPLITUDE_PX = 22 
+// tune: raise to enlarge the hovered row further
+const HOVER_SCALE_BOOST = 0.1 
+const HOVER_EASE_RATE = 10 
 
 function useTheme(ref: React.RefObject<HTMLElement | null>) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
@@ -73,8 +82,8 @@ function TowerRow({
 }: RowProps) {
   const rowOffset = rowIndex * 0.35
 
-  // Transform blends the phase-driven rotation illusion with a subtle scale
-  // boost on hover. Motion rhythm is unchanged — only the size nudges.
+  
+  
   const transform = useTransform([phase, hover], ([p, h]) => {
     const local = (p as number) * Math.PI * 2 + rowOffset
     const scaleX = 0.55 + 0.45 * Math.cos(local)
@@ -86,7 +95,7 @@ function TowerRow({
     }, ${boost})`
   })
 
-  // Color eases from the phase-driven brightness into the accent on hover.
+  
   const color = useTransform([phase, hover], ([p, h]) => {
     const local = (p as number) * Math.PI * 2 + rowOffset
     const tt = (Math.cos(local) + 1) / 2
@@ -133,7 +142,7 @@ function TowerRow({
   )
 }
 
-// Hex mix — simple sRGB lerp. Both colors must be `#RRGGBB`.
+
 function mix(a: string, b: string, t: number): string {
   const pa = parseInt(a.slice(1), 16)
   const pb = parseInt(b.slice(1), 16)
@@ -175,19 +184,19 @@ export default function StackTower() {
     return () => mq.removeEventListener('change', update)
   }, [])
 
-  // Hovered row tracked via ref — no re-renders on hover change, so the
-  // rotation stays silky smooth.
+  
+  
   const hoveredIndexRef = useRef<number | null>(null)
 
-  // Per-row phase — kept in sync because every row advances at rate 1. Having
-  // one per row is a leftover from earlier iterations and is still useful if
-  // we ever need per-row seed offsets.
+  
+  
+  
   const phases = useMemo<MotionValue<number>[]>(
     () => Array.from({ length: ROW_COUNT }, () => motionValue(0)),
     [],
   )
 
-  // Per-row hover accent (0 → 1). Drives colour + scale boost.
+  
   const hovers = useMemo<MotionValue<number>[]>(
     () => Array.from({ length: ROW_COUNT }, () => motionValue(0)),
     [],
@@ -211,10 +220,10 @@ export default function StackTower() {
 
     const hov = hoveredIndexRef.current
     for (let i = 0; i < ROW_COUNT; i++) {
-      // Motion is identical for every row — no hover speed modulation.
+      
       phases[i].set(phases[i].get() + phaseDt)
 
-      // Smoothly ease the hover accent toward 1 or 0.
+      
       const target = i === hov ? 1 : 0
       const cur = hoverEased.current[i]
       const next = cur + (target - cur) * alpha
@@ -259,7 +268,7 @@ export default function StackTower() {
           />
         ))}
 
-        {/* Top + bottom fades for the infinite-column feel. */}
+        {}
         <div
           aria-hidden
           style={{

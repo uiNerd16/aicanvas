@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a responsive pill toggle with an icon-bearing thumb.
+ * Toggling slides the thumb and morphs its mark between an X and check.
+ */
 
 import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion'
@@ -8,10 +12,11 @@ import { X, Check } from '@phosphor-icons/react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── MarkToggle ───────────────────────────────────────────────────────────────
-// iOS-style pill toggle in earth/sand tones. The thumb carries a small icon
-// that morphs from X (off) to Check (on) as it slides across.
 
+
+
+
+// tune: change these bounds to resize the responsive track
 const MAX_TRACK_W = 80
 const MIN_TRACK_W = 48
 
@@ -23,7 +28,7 @@ export default function MarkToggle() {
   const containerRef                = useRef<HTMLDivElement>(null)
   const isOnRef                     = useRef(false)
 
-  // ── Derived dimensions ───────────────────────────────────────────────────────
+  
   const trackH   = Math.round(trackW * 0.55)
   const thumb    = Math.round(trackW * 0.45)
   const pad      = Math.max(3, Math.round(trackW * 0.05))
@@ -33,7 +38,7 @@ export default function MarkToggle() {
 
   const thumbX = useMotionValue(offX)
 
-  // ── Theme detection + resize observer ────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -66,20 +71,20 @@ export default function MarkToggle() {
     return () => { mo.disconnect(); ro.disconnect() }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Snap thumb to correct side when container resizes ────────────────────────
+  
   useEffect(() => {
     thumbX.set(isOnRef.current ? onX : offX)
   }, [trackW]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Earth/sand colour palette ─────────────────────────────────────────────────
+  
   const offTrack  = pageIsDark ? '#8C7B6B' : '#B09478'
   const onTrack   = pageIsDark ? '#4A5935' : '#6B8040'
   const trackColor = useTransform(thumbX, [offX, onX], [offTrack, onTrack])
 
-  // Icon colour matches the track it lives above for visual harmony
+  
   const iconColor = isOn ? onTrack : offTrack
 
-  // ── Toggle ───────────────────────────────────────────────────────────────────
+  
   const handleToggle = useCallback(async () => {
     if (animating) return
     setAnimating(true)
@@ -90,7 +95,7 @@ export default function MarkToggle() {
     setAnimating(false)
   }, [isOn, animating, thumbX, offX, onX])
 
-  // ── Theme tokens ─────────────────────────────────────────────────────────────
+  
   const previewBg   = pageIsDark ? '#110F0C' : '#EDEAE5'
   const trackInset  = pageIsDark
     ? 'inset 0 1px 4px rgba(0,0,0,0.50)'
@@ -111,7 +116,7 @@ export default function MarkToggle() {
         transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
         className="select-none"
       >
-        {/* ── Track ──────────────────────────────────────────────────────────── */}
+        {}
         <motion.button
           type="button"
           role="switch"
@@ -133,7 +138,7 @@ export default function MarkToggle() {
           whileTap={{ scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 400, damping: 28 }}
         >
-          {/* ── Thumb ────────────────────────────────────────────────────────── */}
+          {}
           <motion.div
             style={{
               position: 'absolute',
@@ -150,7 +155,7 @@ export default function MarkToggle() {
               overflow: 'hidden',
             }}
           >
-            {/* ── Icon morph ─────────────────────────────────────────────────── */}
+            {}
             <AnimatePresence mode="wait" initial={false}>
               {isOn ? (
                 <motion.span

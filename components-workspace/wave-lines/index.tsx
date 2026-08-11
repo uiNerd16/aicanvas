@@ -1,18 +1,28 @@
 'use client'
 
+/**
+ * Renders a theme-aware canvas field of vertically sampled wave lines.
+ * Pointer presence amplifies the field and repels nearby line segments.
+ */
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING      = 32     // px between lines at rest
-const ROW_STEP     = 4      // px between sample points per line (smoothness)
-const AMP          = 18     // px — resting wave amplitude (calm default)
-const FREQ_Y       = 0.015  // wave frequency along Y (curves each line)
-const FREQ_X       = 0.006  // phase offset per column (creates cloth fold)
-const HOVER_BOOST  = 5.0    // global amplitude multiplier on hover (extremely wavy)
-const LOCAL_AMP    = 58     // px — cursor repulsion strength
-const LOCAL_RADIUS = 220    // px — repulsion radius
+
+// tune: raise to spread the lines farther apart
+const SPACING      = 32     
+// tune: lower to smooth each line with more samples
+const ROW_STEP     = 4      
+// tune: raise to increase resting wave amplitude
+const AMP          = 18     
+const FREQ_Y       = 0.015  
+const FREQ_X       = 0.006  
+// tune: raise to amplify the field further on hover
+const HOVER_BOOST  = 5.0    
+// tune: raise to strengthen local pointer repulsion
+const LOCAL_AMP    = 58     
+// tune: raise to widen local pointer repulsion
+const LOCAL_RADIUS = 220    
 const LINE_A_DARK  = 0.55
 const LINE_A_LIGHT = 0.75
 
@@ -23,7 +33,7 @@ export default function WaveLines() {
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ──────────────────────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -43,7 +53,7 @@ export default function WaveLines() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas render loop ───────────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas = canvasRef.current!
     const ctx    = canvas.getContext('2d')!
@@ -74,7 +84,7 @@ export default function WaveLines() {
       if (!alive) return
       t += 0.003
 
-      // Global hover strength — eased across entire canvas
+      
       const hasHover = mouseRef.current !== null
       hoverStr += ((hasHover ? 1 : 0) - hoverStr) * (hasHover ? 0.018 : 0.010)
 
@@ -91,7 +101,7 @@ export default function WaveLines() {
       ctx.strokeStyle = `rgba(${dotRGB},${lineA.toFixed(3)})`
       ctx.lineWidth = 0.8
 
-      // One path per vertical line — quadratic curves through midpoints for smooth result
+      
       for (let c = 0; c < cols; c++) {
         const rx = ox + c * SPACING
         ctx.beginPath()
@@ -101,13 +111,13 @@ export default function WaveLines() {
         for (let r = 0; r <= rows; r++) {
           const ry = r * ROW_STEP
 
-          // Primary wave + secondary wave at different frequency → organic beating
+          
           const wx = amp * Math.sin(ry * FREQ_Y + rx * FREQ_X + t)
                    + amp * 0.38 * Math.sin(ry * FREQ_Y * 1.6 + rx * FREQ_X * 1.4 + t * 1.5 + 1.1)
-          // Small Y drift — lines breathe, not just slide
+          
           const wy = amp * 0.12 * Math.cos(rx * FREQ_X * 0.9 + ry * FREQ_Y * 0.4 + t * 0.8)
 
-          // Gaussian repulsion from cursor
+          
           const dx = rx - mx
           const dy = ry - my
           const dist2 = dx * dx + dy * dy
@@ -125,7 +135,7 @@ export default function WaveLines() {
           if (r === 0) {
             ctx.moveTo(x, y)
           } else {
-            // Midpoint quadratic: original point is control, midpoint is anchor → always smooth
+            
             const mx2 = (prevX + x) / 2
             const my2 = (prevY + y) / 2
             ctx.quadraticCurveTo(prevX, prevY, mx2, my2)
@@ -133,7 +143,7 @@ export default function WaveLines() {
           prevX = x
           prevY = y
         }
-        // Final segment to last point
+        
         ctx.lineTo(prevX, prevY)
         ctx.stroke()
       }

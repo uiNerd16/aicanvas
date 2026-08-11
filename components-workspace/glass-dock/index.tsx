@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Renders a horizontally scrollable glass dock of labeled icons.
+ * Nearby icons magnify and lift as the pointer moves across the dock.
+ */
 
 import { useRef } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
@@ -67,7 +71,7 @@ function DockItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 18, delay: index * 0.04 }}
     >
-      {/* Tooltip */}
+      {}
       <motion.div
         className="pointer-events-none absolute -top-10 rounded-lg px-3 py-1.5 text-xs font-medium text-white/90 opacity-0 group-hover:opacity-100"
         style={{
@@ -81,7 +85,7 @@ function DockItem({
         {label}
       </motion.div>
 
-      {/* Icon — notification-style tinted badge */}
+      {}
       <motion.div
         style={{
           width: size,
@@ -105,20 +109,16 @@ export default function GlassDock() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-end overflow-hidden bg-[#1A1A19] pb-8">
-      {/* Background image */}
+      {}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Scroll track — lets the dock scroll horizontally instead of clipping on
-          narrow screens. Symmetric vertical padding keeps the dock centered while
-          giving the lifted icons and tooltips room to overflow without being cut. */}
+      {}
       <div className="flex w-full overflow-x-auto py-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {/* Dock container — auto margins center it when there is room and keep the
-            left edge reachable while scrolling (justify-center would push overflow
-            off the unscrollable left side at 320px). */}
+        {}
         <motion.div
           initial={{ y: 50 }}
           animate={{ y: 0 }}
@@ -132,7 +132,7 @@ export default function GlassDock() {
             boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
           }}
         >
-          {/* Blur layer — non-animating so it isn't recalculated on every mouse-move frame */}
+          {}
           <div
             className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
             style={{

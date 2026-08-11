@@ -1,14 +1,22 @@
 'use client'
 
+/**
+ * Renders a theme-aware canvas grid of connected cross marks.
+ * Pointer proximity brightens nearby marks and their connecting lines.
+ */
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING = 20     // px between × centres
-const RADIUS  = 340    // px — hover influence radius
-const BASE_A  = 0.13   // resting × opacity
-const PEAK_A  = 0.92   // fully-lit × opacity
+
+// tune: raise to spread the cross marks farther apart
+const SPACING = 20     
+// tune: raise to widen pointer influence
+const RADIUS  = 340    
+// tune: raise to brighten resting marks
+const BASE_A  = 0.13   
+// tune: raise to brighten highlighted marks
+const PEAK_A  = 0.92   
 
 export default function XGrid() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -17,7 +25,7 @@ export default function XGrid() {
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ────────────────────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -37,7 +45,7 @@ export default function XGrid() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas render loop ─────────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas: HTMLCanvasElement = canvasRef.current!
     const ctx = canvas.getContext('2d')!
@@ -80,7 +88,7 @@ export default function XGrid() {
       if (!alive) return
       ctx.clearRect(0, 0, cw, ch)
 
-      // Reset lineWidth before the mark loop so it doesn't bleed between frames
+      
       ctx.lineWidth = 0.5
 
       const mx      = mouseRef.current?.x ?? -99999
@@ -98,8 +106,8 @@ export default function XGrid() {
         d.b += (tgt > d.b ? 0.16 : 0.05) * (tgt - d.b)
         if (d.b < 0.004) d.b = 0
 
-        const arm   = 2 + d.b * 1.0   // arm length: 2px resting → 3px lit
-        const sw    = 0.5 + d.b * 0.3 // stroke width: 0.5px resting → 0.8px lit
+        const arm   = 2 + d.b * 1.0   
+        const sw    = 0.5 + d.b * 0.3 
         const baseA = isDarkRef.current ? BASE_A : 0.25
         const wave  = Math.sin(d.col * 0.3 + d.row * 0.3 - t * 0.5)
         const restingAlpha = baseA * (1 + wave * 0.3)
@@ -115,16 +123,16 @@ export default function XGrid() {
         ctx.stroke()
       }
 
-      // ── Connection lines between lit neighbours ──────────────────────────────
+      
       ctx.lineWidth = 0.5
       for (const d of marks) {
         if (d.b < 0.05) continue
-        // Check right neighbour and bottom neighbour only (avoids drawing each line twice)
+        
         const neighbours = [
-          grid[d.row]?.[d.col + 1],     // right
-          grid[d.row + 1]?.[d.col],     // below
-          grid[d.row + 1]?.[d.col + 1], // diagonal down-right
-          grid[d.row + 1]?.[d.col - 1], // diagonal down-left
+          grid[d.row]?.[d.col + 1],     
+          grid[d.row + 1]?.[d.col],     
+          grid[d.row + 1]?.[d.col + 1], 
+          grid[d.row + 1]?.[d.col - 1], 
         ]
         for (const n of neighbours) {
           if (!n || n.b < 0.05) continue

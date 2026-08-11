@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a glass upgrade modal with an animated entrance and feature list.
+ * The close control removes the card with an exit transition.
+ */
 
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -11,14 +15,14 @@ export default function GlassModal() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Modal card */}
+      {}
       <AnimatePresence>
         {open && (
       <motion.div
@@ -33,18 +37,18 @@ export default function GlassModal() {
           boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
         }}
       >
-        {/* Blur layer — non-animating, isolated from entrance spring */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
           style={{ backdropFilter: 'blur(40px) saturate(1.8)', WebkitBackdropFilter: 'blur(40px) saturate(1.8)' }}
         />
-        {/* Top edge highlight */}
+        {}
         <div
           className="absolute left-8 right-8 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)' }}
         />
 
-        {/* Close button */}
+        {}
         <motion.button
           type="button"
           aria-label="Close"
@@ -58,9 +62,9 @@ export default function GlassModal() {
           <X size={14} weight="regular" className="text-white/60" />
         </motion.button>
 
-        {/* Content */}
+        {}
         <div className="flex flex-col items-center px-8 pb-8 pt-10">
-          {/* Icon — notification-style tinted badge */}
+          {}
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -92,7 +96,7 @@ export default function GlassModal() {
             Unlock premium components, priority support, and early access to new features.
           </motion.p>
 
-          {/* Features */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -118,7 +122,7 @@ export default function GlassModal() {
             ))}
           </motion.div>
 
-          {/* CTA buttons */}
+          {}
           <div className="flex w-full flex-col gap-2">
             <motion.button
               whileHover={{

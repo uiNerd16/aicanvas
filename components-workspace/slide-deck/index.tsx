@@ -1,14 +1,19 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Presents a responsive deck of numbered presentation slides.
+ * Dragging or using navigation controls moves the focused slide through the stack.
+ */
 
 import { useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Data ────────────────────────────────────────────────────────────────────
 
+
+// customize: replace the slide content and colors below
 const SLIDES = [
   {
     id: 0,
@@ -56,19 +61,21 @@ const SLIDES = [
   },
 ]
 
+// tune: change both dimensions to resize the slide cards
 const CARD_W = 260
 const CARD_H = 300
 
-// Visible stack positions
+
+// tune: adjust to change the stacked slide positions
 const STACK = [
   { x: 0, y: 0,  scale: 1.000, opacity: 1 },
   { x: 0, y: 11, scale: 0.962, opacity: 1 },
   { x: 0, y: 20, scale: 0.926, opacity: 1 },
 ]
-// Cards beyond offset 2 sit offscreen (neutral hidden position)
+
 const OFFSCREEN = { x: 0, y: 30, scale: 0.88, opacity: 0 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 export default function SlideDeck() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -91,18 +98,18 @@ export default function SlideDeck() {
 
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState<1 | -1>(1)
-  // Track the card that just left the front so it can fly out correctly
+  
   const [exitInfo, setExitInfo] = useState<{ slideId: number; xTarget: number } | null>(null)
-  // Track the card entering from the right during backward navigation
+  
   const [enterFromRight, setEnterFromRight] = useState<number | null>(null)
 
   const goTo = useCallback((newIdx: number, dir: 1 | -1) => {
     if (dir > 0) {
-      // Forward: current front card flies out to the left
+      
       setExitInfo({ slideId: SLIDES[current].id, xTarget: -380 })
       setEnterFromRight(null)
     } else {
-      // Backward: new card slides in from the right on top — no exit flyout needed
+      
       setExitInfo(null)
       setEnterFromRight(SLIDES[newIdx].id)
     }
@@ -120,7 +127,7 @@ export default function SlideDeck() {
       className="flex h-full w-full flex-col items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]"
       style={{ isolation: 'isolate' }}
     >
-      {/* Card stage — always render all slides, no key conflicts possible */}
+      {}
       <div
         style={{
           position: 'relative',
@@ -130,13 +137,13 @@ export default function SlideDeck() {
         }}
       >
         {SLIDES.map(slide => {
-          // offset: 0 = front, 1 = second, 2 = third, 3 = hidden
+          
           const offset = (slide.id - current + SLIDES.length) % SLIDES.length
 
-          // Forward only: departed card lands at last slot
+          
           const isExiting = exitInfo?.slideId === slide.id && offset === SLIDES.length - 1
 
-          // Backward only: new card slides in over the top from the right
+          
           const isEnteringFromRight = enterFromRight === slide.id && offset === 0
 
           const animTarget = isExiting
@@ -145,7 +152,7 @@ export default function SlideDeck() {
               ? STACK[offset]
               : OFFSCREEN
 
-          // Entering card sits above everything; exiting card also above the stack
+          
           const zIndex = isEnteringFromRight ? 20
             : isExiting ? 15
             : offset === 0 ? 10
@@ -184,10 +191,10 @@ export default function SlideDeck() {
                 else if (info.offset.x > 60 || info.velocity.x > 400) navigate(-1)
               } : undefined}
             >
-              {/* Geometric decoration */}
+              {}
               <ShapeDecor type={slide.shape} accent={slide.accent} primary={slide.textPrimary} />
 
-              {/* Content */}
+              {}
               <div
                 style={{
                   position: 'absolute',
@@ -198,7 +205,7 @@ export default function SlideDeck() {
                   justifyContent: 'space-between',
                 }}
               >
-                {/* Top: label + number */}
+                {}
                 <div
                   style={{
                     display: 'flex',
@@ -229,7 +236,7 @@ export default function SlideDeck() {
                   </span>
                 </div>
 
-                {/* Bottom: big number + title */}
+                {}
                 <div>
                   <div
                     style={{
@@ -265,7 +272,7 @@ export default function SlideDeck() {
         })}
       </div>
 
-      {/* Navigation dots */}
+      {}
       <div style={{ display: 'flex', gap: 6, marginTop: 32 }}>
         {SLIDES.map((s, i) => (
           <motion.button
@@ -289,7 +296,7 @@ export default function SlideDeck() {
   )
 }
 
-// ─── Geometric decoration per slide ──────────────────────────────────────────
+
 
 function ShapeDecor({
   type,

@@ -1,21 +1,28 @@
 'use client'
 
+/**
+ * Displays the current time and date with seven-segment neon digits.
+ * Active segments and calendar labels update from the local clock.
+ */
 import { useState, useEffect } from 'react'
 
-// ─── Colors ───────────────────────────────────────────────────────────────────
+
 const CYAN     = '#55E8E2'
-const CYAN_OFF  = 'rgba(85,232,226,0.055)'  // inactive digit segments — barely visible
-const CYAN_IDLE = 'rgba(85,232,226,0.28)'   // inactive text labels (AM/PM, days)
-const CYAN_DIM  = 'rgba(85,232,226,0.65)'   // date text
+const CYAN_OFF  = 'rgba(85,232,226,0.055)'  
+const CYAN_IDLE = 'rgba(85,232,226,0.28)'   
+const CYAN_DIM  = 'rgba(85,232,226,0.65)'   
 const BG       = '#060a0a'
 const GLOW_SVG = `drop-shadow(0 0 3px ${CYAN}) drop-shadow(0 0 8px ${CYAN}99)`
 const GLOW_TXT = `0 0 5px ${CYAN}, 0 0 11px ${CYAN}88`
 
-// ─── 7-segment geometry  (viewBox 0 0 42 80) ─────────────────────────────────
+
 const VW = 42, VH = 80
-const T  = 6    // segment thickness
-const BV = 3    // bevel at each segment tip
-const GP = 2    // gap between segments and digit edges
+// tune: raise to thicken the digit segments
+const T  = 6    
+// tune: raise to deepen the segment bevels
+const BV = 3    
+// tune: raise to increase segment edge gaps
+const GP = 2    
 
 function hPts(y: number): string {
   const x1 = GP + BV, x2 = VW - GP - BV, cy = y + T / 2
@@ -29,22 +36,22 @@ function vPts(x: number, y1: number, y2: number): string {
 
 const aY = GP, gY = VH / 2 - T / 2, dY = VH - GP - T
 const lX = GP, rX = VW - GP - T
-// Verticals start at aY and end at dY+T — same outer edges as a and d.
-// This makes every digit span the full height, so "1" and "4" match "0" and "8".
+
+
 const aEnd = aY,         gTop = gY - GP
 const gEnd = gY + T + GP, dTop = dY + T
 
 const SHAPES = [
-  hPts(aY),               // a — top horiz
-  vPts(rX, aEnd, gTop),  // b — top-right vert
-  vPts(rX, gEnd, dTop),  // c — bot-right vert
-  hPts(dY),               // d — bot horiz
-  vPts(lX, gEnd, dTop),  // e — bot-left vert
-  vPts(lX, aEnd, gTop),  // f — top-left vert
-  hPts(gY),               // g — mid horiz
+  hPts(aY),               
+  vPts(rX, aEnd, gTop),  
+  vPts(rX, gEnd, dTop),  
+  hPts(dY),               
+  vPts(lX, gEnd, dTop),  
+  vPts(lX, aEnd, gTop),  
+  hPts(gY),               
 ]
 
-// segment on/off per digit  [a,  b,  c,  d,  e,  f,  g ]
+
 const SEG: Record<string, boolean[]> = {
   '0': [true,  true,  true,  true,  true,  true,  false],
   '1': [false, true,  true,  false, false, false, false],
@@ -58,7 +65,7 @@ const SEG: Record<string, boolean[]> = {
   '9': [true,  true,  true,  true,  false, true,  true ],
 }
 
-// ─── Digit ────────────────────────────────────────────────────────────────────
+
 function Digit({ char, size }: { char: string; size: number }) {
   const segs = SEG[char] ?? SEG['8']
   return (
@@ -80,7 +87,7 @@ function Digit({ char, size }: { char: string; size: number }) {
   )
 }
 
-// ─── Colon dots ───────────────────────────────────────────────────────────────
+
 function ColonDots({ dim, size }: { dim: boolean; size: number }) {
   return (
     <svg
@@ -103,7 +110,7 @@ function ColonDots({ dim, size }: { dim: boolean; size: number }) {
   )
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const pad2 = (n: number) => n.toString().padStart(2, '0')
 const DAYS  = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const
 
@@ -131,20 +138,22 @@ function getNow(): Now {
   }
 }
 
-// ─── Size constants ───────────────────────────────────────────────────────────
-const BIG       = 50                          // HH MM digit px width
-const SML       = 24                          // SS digit px width (~half of BIG)
-const GAP       = 3                           // gap between all flex children
-const COLON_BIG = Math.round(BIG * 0.44)     // = 22  (steady colon, same size as BIG)
-const COLON_SML = Math.round(SML * 0.44)     // = 11  (blinking colon, same size as SML)
-// Width of the HH:MM:SS display (8 items, 7 gaps) — days row matches this exactly
-const TIME_W    = 4 * BIG + COLON_BIG + COLON_SML + 2 * SML + 7 * GAP
-//              = 200     + 22         + 11         + 48     + 21  = 302
 
-// ─── NeonClock ────────────────────────────────────────────────────────────────
+// tune: change to resize the primary time digits
+const BIG       = 50                          
+// tune: change to resize the seconds digits
+const SML       = 24                          
+const GAP       = 3                           
+const COLON_BIG = Math.round(BIG * 0.44)     
+const COLON_SML = Math.round(SML * 0.44)     
+
+const TIME_W    = 4 * BIG + COLON_BIG + COLON_SML + 2 * SML + 7 * GAP
+
+
+
 export default function NeonClock() {
-  // Start from a stable placeholder so the server and the client's first paint
-  // agree — reading the system clock during render causes a hydration mismatch.
+  
+  
   const [now,     setNow]     = useState<Now | null>(null)
   const [colonOn, setColonOn] = useState(true)
 
@@ -157,8 +166,8 @@ export default function NeonClock() {
     return () => clearInterval(id)
   }, [])
 
-  // First render (pre-mount / SSR): render the chrome with no time yet so the
-  // server and client markup match. The real time fills in after mount.
+  
+  
   if (now === null) {
     return (
       <div
@@ -181,10 +190,10 @@ export default function NeonClock() {
       className="relative flex h-full w-full select-none items-center justify-center overflow-hidden"
       style={{ background: BG, fontFamily: '"Courier New", Courier, monospace' }}
     >
-      {/* ── Left-anchored block — centered as a whole in the viewport ─────── */}
+      {}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
 
-        {/* ── Time row — everything bottom-aligned ────────────────────────── */}
+        {}
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: GAP }}>
           <Digit char={now.h[0]} size={BIG} />
           <Digit char={now.h[1]} size={BIG} />
@@ -193,7 +202,7 @@ export default function NeonClock() {
           <Digit char={now.m[1]} size={BIG} />
           <ColonDots dim={!colonOn} size={SML} />
 
-          {/* Seconds + AM/PM stacked — AM/PM floats above the SS digits, right-aligned */}
+          {}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             <div style={{ display: 'flex', gap: 6, fontSize: 13, letterSpacing: '0.08em', marginBottom: 3 }}>
               <span style={{ color: !now.isPM ? CYAN : CYAN_IDLE, textShadow: !now.isPM ? GLOW_TXT : 'none' }}>AM</span>
@@ -206,7 +215,7 @@ export default function NeonClock() {
           </div>
         </div>
 
-        {/* ── Days row — spans exactly TIME_W, evenly distributed ──────────── */}
+        {}
         <div
           style={{
             display: 'flex',
@@ -230,7 +239,7 @@ export default function NeonClock() {
           ))}
         </div>
 
-        {/* ── Date — centered under the days row ───────────────────────────── */}
+        {}
         <div
           style={{
             width: TIME_W,
@@ -245,7 +254,7 @@ export default function NeonClock() {
         </div>
       </div>
 
-      {/* ── LCD pixel-grid overlay ───────────────────────────────────────────── */}
+      {}
       <div
         className="pointer-events-none absolute inset-0"
         style={{

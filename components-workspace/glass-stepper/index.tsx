@@ -1,12 +1,15 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays glass stepper fields with bounded increment and decrement controls.
+ * Value changes animate the readout and its supporting progress fill.
+ */
 
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Minus, Plus } from '@phosphor-icons/react'
 
-// ─── Glass family shared styles ─────────────────────────────────────────────
 
 const glassBlur = {
   backdropFilter: 'blur(24px) saturate(1.8)',
@@ -23,11 +26,9 @@ const glassPanel = {
 const BACKGROUND_IMAGE =
   'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
 
-// ─── Spring configs ──────────────────────────────────────────────────────────
 
 const BUTTON_SPRING = { type: 'spring' as const, stiffness: 300, damping: 20 }
 
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface GlassStepperFieldProps {
   min?: number
@@ -39,7 +40,6 @@ interface GlassStepperFieldProps {
   gradient: string
 }
 
-// ─── GlassStepperField ──────────────────────────────────────────────────────
 
 function GlassStepperField({
   min = 0,
@@ -74,7 +74,7 @@ function GlassStepperField({
 
   return (
     <div className="flex w-[132px] flex-col">
-      {/* Label + value readout */}
+      {}
       {label && (
         <div className="mb-2 flex items-baseline justify-between px-1">
           <span className="font-sans text-[10px] font-semibold uppercase tracking-widest text-white/40">
@@ -89,26 +89,26 @@ function GlassStepperField({
         </div>
       )}
 
-      {/* Stepper pill */}
+      {}
       <div
         className="relative isolate overflow-hidden rounded-2xl"
         style={glassPanel}
       >
-        {/* Blur layer — non-animating, behind content */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl"
           style={glassBlur}
         />
 
-        {/* Top edge highlight */}
+        {}
         <div
           className="absolute left-4 right-4 top-0 z-10 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)' }}
         />
 
-        {/* Content row */}
+        {}
         <div className="relative z-10 flex items-stretch justify-between p-2">
-          {/* Minus button — notification-style tinted */}
+          {}
           <motion.button
             onClick={decrement}
             whileHover={atMin || prefersReduced ? undefined : { scale: 1.08 }}
@@ -129,7 +129,7 @@ function GlassStepperField({
             <Minus size={16} weight="regular" style={{ color: atMin ? 'rgba(255,255,255,0.3)' : color }} />
           </motion.button>
 
-          {/* Number display */}
+          {}
           <div
             className="flex items-center justify-center overflow-hidden"
             style={{ width: 36 }}
@@ -170,7 +170,7 @@ function GlassStepperField({
             </AnimatePresence>
           </div>
 
-          {/* Plus button — notification-style tinted */}
+          {}
           <motion.button
             onClick={increment}
             whileHover={atMax || prefersReduced ? undefined : { scale: 1.08 }}
@@ -196,19 +196,18 @@ function GlassStepperField({
   )
 }
 
-// ─── Main export ─────────────────────────────────────────────────────────────
 
 export default function GlassStepper() {
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src={BACKGROUND_IMAGE}
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Steppers container */}
+      {}
       <div className="relative z-10 flex flex-wrap items-start justify-center gap-5 px-4">
         <GlassStepperField
           label="Quantity"

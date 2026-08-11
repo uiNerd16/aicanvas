@@ -1,7 +1,10 @@
 'use client'
 
-// npm install class-variance-authority clsx tailwind-merge @carbon/icons-react
+// npm install @carbon/icons-react class-variance-authority clsx next tailwind-merge
 // font: JetBrains Mono
+/**
+ * Demonstrates a tokenized button family with hover, focus, pressed, and disabled states.
+ */
 
 import { forwardRef } from 'react'
 import type { ComponentType, ReactNode, ButtonHTMLAttributes } from 'react'
@@ -11,14 +14,10 @@ import { twMerge } from 'tailwind-merge'
 import { JetBrains_Mono } from 'next/font/google'
 import { Notification, Settings } from '@carbon/icons-react'
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Andromeda design tokens inlined as CSS custom properties —
-// no external token file or design-system folder needed.
 function andromedaVars(): React.CSSProperties {
   return {
     '--andromeda-text-primary':    'rgba(255, 255, 255, 0.96)',
@@ -51,8 +50,6 @@ function andromedaVars(): React.CSSProperties {
     '--andromeda-radius-none':     '0',
   } as React.CSSProperties
 }
-
-// ─── Button ───────────────────────────────────────────────────────────────────
 
 const buttonVariants = cva(
   [
@@ -130,15 +127,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   )
 })
 
-// ─── Font ─────────────────────────────────────────────────────────────────────
-
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
 })
-
-// ─── Demo ─────────────────────────────────────────────────────────────────────
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (

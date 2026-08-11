@@ -1,11 +1,15 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Renders a configurable row of selectable glass tags.
+ * Clicking a tag toggles its checkmark and selection glow without shifting layout.
+ */
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-// ─── Customise here ──────────────────────────────────────────────────────────
+// customize: replace the background and tag labels below
 
 const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%203%20(1).png?updatedAt=1775226815629'
 
@@ -24,10 +28,8 @@ const TAGS = [
   { label: 'Prototyping',  color: '#FFD166' },
 ]
 
-// Shared glass surface parameters
 const GLASS_FILTER = 'blur(24px) saturate(1.8)'
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 function GlassTag({ label, color, index }: { label: string; color: string; index: number }) {
   const [selected, setSelected] = useState(false)
@@ -59,12 +61,12 @@ function GlassTag({ label, color, index }: { label: string; color: string; index
         transition: 'background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      {/* Blur layer — non-animating, isolated from scale hover/tap */}
+      {}
       <div
         className="pointer-events-none absolute inset-0 z-[-1] rounded-full"
         style={{ backdropFilter: GLASS_FILTER, WebkitBackdropFilter: GLASS_FILTER }}
       />
-      {/* Selection glow */}
+      {}
       <motion.div
         className="absolute inset-0 rounded-full"
         animate={{ opacity: selected ? 0.15 : 0 }}
@@ -73,7 +75,7 @@ function GlassTag({ label, color, index }: { label: string; color: string; index
       />
 
       <div className="relative z-10 flex items-center gap-2">
-        {/* Fixed-width slot — dot fades out, checkmark fades in, no layout shift */}
+        {}
         <div className="relative h-3.5 w-3.5 shrink-0">
           <motion.div
             animate={{ scale: selected ? 0 : 1, opacity: selected ? 0 : hovered ? 0.8 : 0.5 }}

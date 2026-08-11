@@ -1,14 +1,14 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays AI job card stacks that cycle by button press or vertical drag.
+ */
 
 import { useRef, useState, useLayoutEffect, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { BookmarkSimple } from '@phosphor-icons/react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
-
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type LogoKey = 'claude' | 'openai' | 'gemini' | 'vercel' | 'mistral' | 'perplexity'
 
@@ -22,11 +22,9 @@ interface StackData {
   logo: LogoKey
   company: string
   borderColor: string
-  borderColorLight?: string  // optional override for light mode
+  borderColorLight?: string  
   cards: [CardData, CardData, CardData]
 }
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const STACKS: StackData[] = [
   {
@@ -62,18 +60,14 @@ const STACKS: StackData[] = [
   },
 ]
 
-// ─── Stack layout constants ───────────────────────────────────────────────────
-
-const CARD_H = 234  // px — fixed height for each card
-const PEEK   = 20   // px — how far the back card peeks below the front
+const CARD_H = 234  // tune: raise to make each card taller
+const PEEK   = 20   // tune: raise to reveal more of the stacked cards
 
 const SLOTS = [
-  { y: 0,        scale: 1,    z: 3 },  // front
-  { y: PEEK,     scale: 0.96, z: 2 },  // middle — peeks below front
-  { y: PEEK * 2, scale: 0.92, z: 1 },  // back — peeks below middle
+  { y: 0,        scale: 1,    z: 3 },  
+  { y: PEEK,     scale: 0.96, z: 2 },  
+  { y: PEEK * 2, scale: 0.92, z: 1 },  
 ]
-
-// ─── Brand Logos ──────────────────────────────────────────────────────────────
 
 function ClaudeLogo() {
   return (
@@ -138,7 +132,7 @@ function VercelLogo({ isDark }: { isDark: boolean }) {
 function MistralLogo() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Mistral's grid/pinwheel mark — 4 orange squares in 2x2 arrangement with 1 rotated */}
+      {}
       <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#FF7000" />
       <rect x="13" y="3" width="8" height="8" rx="1.5" fill="#FF7000" opacity="0.7" />
       <rect x="3" y="13" width="8" height="8" rx="1.5" fill="#FF7000" opacity="0.7" />
@@ -168,8 +162,6 @@ function BrandLogo({ logo, isDark }: { logo: LogoKey; isDark: boolean }) {
   }
 }
 
-// ─── Theme hook ───────────────────────────────────────────────────────────────
-
 function useIsDark(ref: React.RefObject<HTMLElement | null>) {
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   useIsomorphicLayoutEffect(() => {
@@ -191,14 +183,12 @@ function useIsDark(ref: React.RefObject<HTMLElement | null>) {
   return isDark
 }
 
-// ─── Single Card Visual ───────────────────────────────────────────────────────
-
 interface SingleCardProps {
   card: CardData
   stack: StackData
   isDark: boolean
   isFront: boolean
-  frontIndex: number       // which index is currently front — for dots
+  frontIndex: number       
   onCycle: () => void
 }
 
@@ -245,7 +235,7 @@ function SingleCard({ card, stack, isDark, isFront, frontIndex, onCycle }: Singl
         overflow: 'hidden',
       }}
     >
-      {/* Top row: rate + bookmark */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: rateColor, letterSpacing: '0.02em' }}>
           {card.rate}
@@ -261,7 +251,7 @@ function SingleCard({ card, stack, isDark, isFront, frontIndex, onCycle }: Singl
         </motion.button>
       </div>
 
-      {/* Title (left) + dots pushed to right */}
+      {}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flex: 1 }}>
         <h3
           style={{
@@ -304,10 +294,10 @@ function SingleCard({ card, stack, isDark, isFront, frontIndex, onCycle }: Singl
         </motion.button>
       </div>
 
-      {/* Divider */}
+      {}
       <div style={{ height: 1, background: dividerColor, marginBottom: 14 }} />
 
-      {/* Bottom row: logo + company | View button */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 24, height: 24, flexShrink: 0 }}>
@@ -341,15 +331,12 @@ function SingleCard({ card, stack, isDark, isFront, frontIndex, onCycle }: Singl
   )
 }
 
-// ─── Card Stack ───────────────────────────────────────────────────────────────
-
 interface CardStackProps {
   stack: StackData
   isDark: boolean
 }
 
 function CardStack({ stack, isDark }: CardStackProps) {
-  // order[0] = index of front card in stack.cards
   const [order, setOrder] = useState<[number, number, number]>([0, 1, 2])
   const [exitingId, setExitingId] = useState<number | null>(null)
   const exitDir = useRef<'up' | 'down'>('up')
@@ -446,8 +433,6 @@ function CardStack({ stack, isDark }: CardStackProps) {
     </div>
   )
 }
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function AiJobCards() {
   const containerRef = useRef<HTMLDivElement>(null)

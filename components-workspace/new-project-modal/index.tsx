@@ -1,12 +1,17 @@
 'use client'
-// npm install framer-motion @phosphor-icons/react
 
+// npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a new-project form that expands from its trigger button.
+ * Opening moves focus into the modal and submission validates the project title.
+ */
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Check } from '@phosphor-icons/react'
 
 const MORPH = { type: 'spring' as const, stiffness: 320, damping: 30, mass: 1 }
 
+// customize: replace the project color choices below
 const COLORS = [
   { value: '#E05C50', label: 'Rose' },
   { value: '#E09A3A', label: 'Amber' },
@@ -190,7 +195,7 @@ function ModalCard({
           animate="show"
           exit="exit"
         >
-          {/* Header */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: -6 },
@@ -211,7 +216,7 @@ function ModalCard({
             </motion.button>
           </motion.div>
 
-          {/* Inputs */}
+          {}
           <div className="flex flex-col gap-3">
             <motion.div
               variants={{
@@ -258,7 +263,7 @@ function ModalCard({
             />
           </div>
 
-          {/* Color picker */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 8 },
@@ -287,7 +292,7 @@ function ModalCard({
             ))}
           </motion.div>
 
-          {/* Footer */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 8 },

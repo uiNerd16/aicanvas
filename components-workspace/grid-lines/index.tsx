@@ -1,27 +1,33 @@
 'use client'
 
+/**
+ * Renders a canvas grid of connected dots with theme-aware coloring.
+ * Pointer proximity brightens the grid and pushes nearby nodes into a lens shape.
+ */
+
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING = 20     // px between dot/node centres
-const RADIUS_FRAC = 0.30   // hover influence radius — fraction of max(cw, ch)
-const LENS_FRAC = 0.06   // lens push strength — fraction of R
-const BASE_A = 0.13   // resting dot opacity
-const PEAK_A = 0.95   // fully-lit opacity
-const LINE_A_DARK = 0.07   // resting line opacity (dark theme)
-const LINE_A_LIGHT = 0.12   // resting line opacity (light theme)
-const MOUSE_LERP = 0.14   // smoothed mouse movement
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-// b  = brightness (0..1, smoothed)
-// l  = lens influence (0..1, smoothed) — bell curve over distance from cursor
-// px/py = current displaced position (recomputed each frame)
+// tune: raise to spread the grid nodes farther apart
+const SPACING = 20
+// tune: raise to widen the pointer influence
+const RADIUS_FRAC = 0.30
+// tune: raise to strengthen the lens displacement
+const LENS_FRAC = 0.06
+// tune: raise to brighten resting dots
+const BASE_A = 0.13
+// tune: raise to brighten highlighted dots
+const PEAK_A = 0.95
+// tune: raise to brighten resting lines in dark mode
+const LINE_A_DARK = 0.07
+// tune: raise to brighten resting lines in light mode
+const LINE_A_LIGHT = 0.12
+// tune: raise to quicken pointer tracking
+const MOUSE_LERP = 0.14
 type Dot = { x: number; y: number; b: number; l: number; px: number; py: number }
 type Segment = { a: Dot; b: Dot }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function GridLines() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -29,7 +35,6 @@ export default function GridLines() {
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ──────────────────────────────────────────────────────────
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -49,7 +54,6 @@ export default function GridLines() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas render loop ───────────────────────────────────────────────────────
   useEffect(() => {
     const canvas: HTMLCanvasElement = canvasRef.current!
     const ctx = canvas.getContext('2d')!
@@ -79,13 +83,11 @@ export default function GridLines() {
       const ox = (cw % SPACING) / 2
       const oy = (ch % SPACING) / 2
 
-      // Map existing dots by position to persist state during resize
       const prev = new Map<string, Dot>()
       for (const d of dots) {
         prev.set(`${d.x.toFixed(0)},${d.y.toFixed(0)}`, d)
       }
 
-      // Build dot grid as 2D array for easy neighbour lookup
       const grid: Dot[][] = []
       dots = []
       for (let r = 0; r < rows; r++) {
@@ -101,7 +103,6 @@ export default function GridLines() {
         }
       }
 
-      // Build segments — horizontal and vertical only
       hSegs = []
       vSegs = []
       for (let r = 0; r < rows; r++) {
@@ -135,28 +136,20 @@ export default function GridLines() {
       const baseA = isDarkRef.current ? BASE_A : 0.22
       const lineRestA = isDarkRef.current ? LINE_A_DARK : LINE_A_LIGHT
 
-      // ── 1. Per-dot update: brightness, lens influence, displaced position ──
-      // Brightness uses a Gaussian halo (soft blend into the background).
-      // Lens uses a sin(πt) bell curve so dots at mid-distance get the
-      // strongest outward push, dots at the cursor and at the edge of R
-      // stay put — the grid bulges around the cursor like a lens.
       for (const d of dots) {
         const dx = d.x - mx
         const dy = d.y - my
         const dist2 = dx * dx + dy * dy
         const dist = Math.sqrt(dist2)
 
-        // Brightness — Gaussian
         const tgtB = dist2 < r2 ? Math.exp(-dist2 / (r2 * 0.45)) : 0
         d.b += (tgtB > d.b ? 0.16 : 0.07) * (tgtB - d.b)
         if (d.b < 0.004) d.b = 0
 
-        // Lens influence — bell curve, peaks at mid-distance
         const tgtL = dist < R ? Math.sin(Math.PI * (dist / R)) : 0
         d.l += (tgtL > d.l ? 0.18 : 0.08) * (tgtL - d.l)
         if (d.l < 0.004) d.l = 0
 
-        // Displaced position — push outward along the cursor→dot ray
         if (dist > 0.5 && d.l > 0.004) {
           const push = lensPush * d.l
           const ux = dx / dist
@@ -169,9 +162,6 @@ export default function GridLines() {
         }
       }
 
-      // ── 2. Draw lines through displaced dot positions ──────────────────────
-      // Because both endpoints move, lines bend as they cross the lens area,
-      // making the grid visibly warp.
       const allSegs = [...hSegs, ...vSegs]
       for (const seg of allSegs) {
         const segB = (seg.a.b + seg.b.b) / 2
@@ -184,7 +174,6 @@ export default function GridLines() {
         ctx.stroke()
       }
 
-      // ── 3. Draw dots on top, at displaced positions ────────────────────────
       for (const d of dots) {
         const alpha = baseA + (PEAK_A - baseA) * d.b
         const sz = 1 + d.b * 2.2

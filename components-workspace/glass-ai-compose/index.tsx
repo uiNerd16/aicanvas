@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a glass-styled AI composer with model and web-search controls.
+ * Text input expands with content and supports removable image attachments.
+ */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
@@ -11,7 +15,6 @@ import {
   X,
 } from '@phosphor-icons/react'
 
-// ─── Constants ──────────────────────────────────────────────────────────────
 
 const BACKGROUND =
   'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
@@ -27,7 +30,6 @@ type Model = (typeof MODELS)[number]
 
 const MAX_TEXTAREA_HEIGHT = 160
 
-// ─── Glass family shared styles ─────────────────────────────────────────────
 
 const glassBlur = {
   backdropFilter: 'blur(24px) saturate(1.8)',
@@ -44,7 +46,6 @@ const glassPanel = {
 const ACTIVE_GLOW =
   '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 255, 255, 0.25), 0 0 20px rgba(255, 255, 255, 0.06)'
 
-// ─── Model Switcher ─────────────────────────────────────────────────────────
 
 function ModelSwitcher({
   activeModel,
@@ -91,7 +92,6 @@ function ModelSwitcher({
   )
 }
 
-// ─── Image Thumbnail ────────────────────────────────────────────────────────
 
 function ImageThumbnail({
   src,
@@ -132,12 +132,11 @@ function ImageThumbnail({
   )
 }
 
-// ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function GlassAiCompose() {
   const [isActive, setIsActive] = useState(false)
   const [message, setMessage] = useState('')
-  const [activeModel, setActiveModel] = useState<Model>(MODELS[0]) // Claude default
+  const [activeModel, setActiveModel] = useState<Model>(MODELS[0])
   const [images, setImages] = useState<string[]>([])
   const [webSearch, setWebSearch] = useState(false)
   const [showWebLabel, setShowWebLabel] = useState(false)
@@ -151,7 +150,6 @@ export default function GlassAiCompose() {
 
   const canSend = message.trim().length > 0 || images.length > 0
 
-  // Flash "Web search on" label for 2 seconds
   useEffect(() => {
     if (!webSearch) { setShowWebLabel(false); return }
     setShowWebLabel(true)
@@ -159,7 +157,6 @@ export default function GlassAiCompose() {
     return () => clearTimeout(timer)
   }, [webSearch])
 
-  // Auto-resize textarea
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current
     if (!el) return
@@ -167,7 +164,6 @@ export default function GlassAiCompose() {
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
   }, [])
 
-  // Click outside to deactivate
   useEffect(() => {
     if (!isActive) return
     const handler = (e: MouseEvent | TouchEvent) => {
@@ -183,7 +179,6 @@ export default function GlassAiCompose() {
     }
   }, [isActive])
 
-  // Handle image upload
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
     if (!files) return
@@ -196,7 +191,6 @@ export default function GlassAiCompose() {
       }
       reader.readAsDataURL(files[i])
     }
-    // Reset input so re-uploading the same file works
     e.target.value = ''
   }
 
@@ -222,14 +216,14 @@ export default function GlassAiCompose() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src={BACKGROUND}
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Compose container */}
+      {}
       <div
         ref={containerRef}
         className="relative z-10 w-[calc(100%-2rem)] max-w-[420px]"
@@ -245,13 +239,13 @@ export default function GlassAiCompose() {
             border: glassPanel.border,
           }}
         >
-          {/* Blur layer */}
+          {}
           <div
             className="pointer-events-none absolute inset-0 z-[-1] rounded-2xl"
             style={glassBlur}
           />
 
-          {/* Top edge highlight */}
+          {}
           <div
             className="absolute left-6 right-6 top-0 z-10 h-[1px]"
             style={{
@@ -260,9 +254,9 @@ export default function GlassAiCompose() {
             }}
           />
 
-          {/* Compose area */}
+          {}
           <div className="relative z-10 flex flex-col gap-6 p-4 pb-2">
-            {/* Textarea */}
+            {}
             <textarea
               ref={textareaRef}
               value={message}
@@ -281,7 +275,7 @@ export default function GlassAiCompose() {
               }}
             />
 
-            {/* Image thumbnails */}
+            {}
             <AnimatePresence>
               {images.length > 0 && (
                 <motion.div
@@ -306,9 +300,9 @@ export default function GlassAiCompose() {
               )}
             </AnimatePresence>
 
-            {/* Toolbar — upload + send */}
+            {}
             <div className="flex items-center justify-between">
-              {/* Left — upload */}
+              {}
               <div className="flex items-center gap-2">
                 <motion.button
                   onClick={() => fileInputRef.current?.click()}
@@ -341,7 +335,7 @@ export default function GlassAiCompose() {
                   className="hidden"
                 />
 
-                {/* Web search toggle */}
+                {}
                 <motion.button
                   onClick={() => setWebSearch((v) => !v)}
                   whileHover={reducedMotion ? undefined : { scale: 1.08, background: webSearch ? `${activeModel.color}28` : 'rgba(255, 255, 255, 0.14)' }}
@@ -366,7 +360,7 @@ export default function GlassAiCompose() {
                   />
                 </motion.button>
 
-                {/* Web search label */}
+                {}
                 <AnimatePresence>
                   {showWebLabel && (
                     <motion.span
@@ -383,7 +377,7 @@ export default function GlassAiCompose() {
                 </AnimatePresence>
               </div>
 
-              {/* Right — send */}
+              {}
               <motion.button
                 onClick={handleSend}
                 disabled={!canSend}
@@ -424,13 +418,13 @@ export default function GlassAiCompose() {
             </div>
           </div>
 
-          {/* Divider */}
+          {}
           <div
             className="mx-4 h-[1px]"
             style={{ background: 'rgba(255, 255, 255, 0.07)' }}
           />
 
-          {/* Model switcher */}
+          {}
           <div className="relative z-10 px-3 py-2.5">
             <ModelSwitcher activeModel={activeModel} onSelect={setActiveModel} />
           </div>

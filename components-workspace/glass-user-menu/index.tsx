@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents an avatar-triggered glass user menu with grouped actions.
+ * The dropdown animates open and closes after outside pointer interaction.
+ */
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,7 +17,6 @@ import {
   CaretUpDown,
 } from '@phosphor-icons/react'
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 
 const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png?updatedAt=1775223702866'
 
@@ -40,7 +43,6 @@ const MENU_GROUPS = [
   },
 ]
 
-// ─── Shared glass style ───────────────────────────────────────────────────────
 
 const glassPanel = {
   background: 'rgba(255, 255, 255, 0.08)',
@@ -53,11 +55,9 @@ const glassPanelBlur = {
   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
 }
 
-// Active glow — white border + ambient glow (matches glass-search-bar)
 const ACTIVE_GLOW =
   '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.08)'
 
-// ─── MenuItem ─────────────────────────────────────────────────────────────────
 
 function MenuItem({
   icon: Icon,
@@ -82,7 +82,7 @@ function MenuItem({
       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5"
       style={{ minHeight: 44, background: 'transparent' }}
     >
-      {/* Animated group: icon badge + label — scales and nudges right on hover */}
+      {}
       <motion.button
         onClick={() => {}}
         animate={{
@@ -94,7 +94,7 @@ function MenuItem({
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5"
         style={{ background: 'transparent', transformOrigin: 'left center' }}
       >
-        {/* Icon badge — notification-style tinted */}
+        {}
         <div
           className="flex shrink-0 items-center justify-center rounded-xl"
           style={{
@@ -120,13 +120,11 @@ function MenuItem({
   )
 }
 
-// ─── GlassUserMenu ────────────────────────────────────────────────────────────
 
 export default function GlassUserMenu() {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  // Close on outside click or touch
   useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent | TouchEvent) => {
@@ -152,7 +150,7 @@ export default function GlassUserMenu() {
 
       <div ref={ref} className="relative flex flex-col items-center" style={{ marginTop: -150 }}>
 
-        {/* Trigger — white glow when open */}
+        {}
         <motion.button
           onClick={() => setOpen(v => !v)}
           whileHover={{ scale: 1.02 }}
@@ -175,7 +173,7 @@ export default function GlassUserMenu() {
           <CaretUpDown size={16} weight="regular" className="text-white/40" />
         </motion.button>
 
-        {/* Dropdown */}
+        {}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -186,13 +184,13 @@ export default function GlassUserMenu() {
               className="absolute left-1/2 top-full mt-2 w-[min(256px,calc(100vw-32px))] rounded-2xl p-2"
               style={{ ...glassPanel, ...glassPanelBlur, transformOrigin: 'top center' }}
             >
-              {/* Left edge highlight */}
+              {}
               <div
                 className="absolute bottom-6 left-0 top-6 w-[1px]"
                 style={{ background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.18), transparent)' }}
               />
 
-              {/* Menu groups */}
+              {}
               {MENU_GROUPS.map((group) => (
                 <div key={group.label} className="mb-1">
                   <p className="mb-0.5 px-3 pt-1 text-[10px] font-semibold uppercase tracking-widest text-white/25">
@@ -204,10 +202,10 @@ export default function GlassUserMenu() {
                 </div>
               ))}
 
-              {/* Divider */}
+              {}
               <div className="mx-2 my-1.5 h-[1px]" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
-              {/* Log out — same hover pattern */}
+              {}
               <LogOutItem index={itemIndex} />
             </motion.div>
           )}
@@ -217,7 +215,6 @@ export default function GlassUserMenu() {
   )
 }
 
-// ─── Log Out Item ─────────────────────────────────────────────────────────────
 
 function LogOutItem({ index }: { index: number }) {
   const [hovered, setHovered] = useState(false)

@@ -1,30 +1,27 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a responsive pull control whose slat animation swaps between moon and sun icons.
+ */
 
 import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, useAnimate, stagger } from 'framer-motion'
 import { Moon, Sun } from '@phosphor-icons/react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-
-// ─── BlindPullToggle ──────────────────────────────────────────────────────────
-// A dark/light toggle styled as a window-blind pull cord.
-// All dimensions are derived from the container size — fully responsive.
-
 const SLATS      = 6
-const MAX_SIZE   = 80  // button px cap
-const MIN_SIZE   = 48  // button px floor
+const MAX_SIZE   = 80  // tune: raise to increase the maximum control size
+const MIN_SIZE   = 48  // tune: raise to increase the minimum control size
 
 export default function BlindPullToggle() {
   const [toggleDark, setToggleDark] = useState(true)
   const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [animating, setAnimating]   = useState(false)
-  const [size, setSize]             = useState(MAX_SIZE) // button px, reactive
-  const sizeRef                     = useRef(MAX_SIZE)   // stable ref for async handler
+  const [size, setSize]             = useState(MAX_SIZE) 
+  const sizeRef                     = useRef(MAX_SIZE)   
   const [scope, animate]            = useAnimate()
 
-  // ── Theme detection ──────────────────────────────────────────────────────────
   useIsomorphicLayoutEffect(() => {
     const el = scope.current
     if (!el) return
@@ -44,7 +41,6 @@ export default function BlindPullToggle() {
     return () => mo.disconnect()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Responsive sizing — derived from container ───────────────────────────────
   useEffect(() => {
     const el = scope.current
     if (!el) return
@@ -61,13 +57,11 @@ export default function BlindPullToggle() {
     return () => ro.disconnect()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Derived tokens ───────────────────────────────────────────────────────────
-  const iconSize   = Math.round(size * 0.45)               // 36 at 80
-  const radius     = Math.round(size * 0.275)              // 22 at 80
-  const cordRestH  = Math.round(size * 0.30)               // 24 at 80
-  const dotSize    = Math.max(8, Math.round(size * 0.138)) // 11 at 80
+  const iconSize   = Math.round(size * 0.45)               // tune: raise the multiplier to enlarge the icon
+  const radius     = Math.round(size * 0.275)              // tune: raise the multiplier to round the corners further
+  const cordRestH  = Math.round(size * 0.30)               // tune: raise the multiplier to lengthen the resting cord
+  const dotSize    = Math.max(8, Math.round(size * 0.138)) // tune: raise the multiplier to enlarge the pull dot
 
-  // ── Theme-derived colors ─────────────────────────────────────────────────────
   const previewBg    = pageIsDark ? '#110F0C' : '#EDEAE5'
   const buttonBg     = pageIsDark
     ? 'linear-gradient(145deg, #3a3530, #252019)'
@@ -84,7 +78,6 @@ export default function BlindPullToggle() {
   const dotBg        = pageIsDark ? 'rgba(255,255,255,0.62)' : 'rgba(0,0,0,0.32)'
   const dotShadow    = pageIsDark ? '0 2px 8px rgba(0,0,0,0.5)' : '0 2px 6px rgba(0,0,0,0.12)'
 
-  // ── Toggle handler ───────────────────────────────────────────────────────────
   const handleToggle = useCallback(async () => {
     if (animating) return
     setAnimating(true)
@@ -92,15 +85,10 @@ export default function BlindPullToggle() {
     const pullH = Math.round(sizeRef.current * 0.65)
     const restH = Math.round(sizeRef.current * 0.30)
 
-    // 1. Line stretches downward
     await animate('.cord-line', { height: pullH }, { duration: 0.1, ease: [0.4, 0, 1, 1] })
-    // 2. Spring back (concurrent)
     animate('.cord-line', { height: restH }, { type: 'spring', stiffness: 300, damping: 18 })
-    // 3. Close blinds
     await animate('.slat', { scaleY: 0 }, { delay: stagger(0.04), duration: 0.1, ease: 'easeIn' })
-    // 4. Swap icon
     setToggleDark((d) => !d)
-    // 5. Open blinds
     await animate('.slat', { scaleY: 1 }, { delay: stagger(0.04), duration: 0.13, ease: 'easeOut' })
 
     setAnimating(false)
@@ -118,7 +106,6 @@ export default function BlindPullToggle() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="flex select-none flex-col items-center"
       >
-        {/* ── Button ───────────────────────────────────────────────────────── */}
         <motion.button
           onClick={handleToggle}
           whileHover={{ scale: 1.06 }}
@@ -135,7 +122,6 @@ export default function BlindPullToggle() {
             background: 'transparent',
           }}
         >
-          {/* Slat container — clips every slat to the rounded button shape */}
           <div
             style={{
               position: 'absolute',
@@ -145,7 +131,6 @@ export default function BlindPullToggle() {
             }}
           >
             {Array.from({ length: SLATS }).map((_, i) => {
-              // Pixel-perfect slat bounds — Math.round prevents subpixel gaps
               const topPx     = Math.round((i / SLATS) * size)
               const nextTopPx = i === SLATS - 1
                 ? size
@@ -166,7 +151,6 @@ export default function BlindPullToggle() {
                     transformOrigin: '50% 50%',
                   }}
                 >
-                  {/* Full button face (bg + icon), shifted so only this strip shows */}
                   <div
                     style={{
                       position: 'absolute',
@@ -193,12 +177,10 @@ export default function BlindPullToggle() {
           </div>
         </motion.button>
 
-        {/* ── Cord ─────────────────────────────────────────────────────────── */}
         <div
           className="flex cursor-pointer flex-col items-center"
           onClick={handleToggle}
         >
-          {/* String — grows downward on pull, stays anchored at top */}
           <div
             className="cord-line"
             style={{
@@ -208,7 +190,6 @@ export default function BlindPullToggle() {
               borderRadius: 1,
             }}
           />
-          {/* Pull dot */}
           <div
             style={{
               width: dotSize,

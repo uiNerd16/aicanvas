@@ -1,12 +1,15 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays staggered glass progress bars with animated counters and fills.
+ * The replay control resets every bar and runs the sequence again.
+ */
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, useSpring, useMotionValueEvent, useReducedMotion } from 'framer-motion'
 import { ArrowClockwise } from '@phosphor-icons/react'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const GLASS_BLUR = {
   backdropFilter: 'blur(24px) saturate(1.8)',
@@ -23,7 +26,6 @@ const GLASS_PANEL = {
 const BACKGROUND_IMAGE =
   'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GlassProgressBarProps {
   value: number
@@ -41,7 +43,6 @@ interface BarConfig {
   delay: number
 }
 
-// ─── Bar data ─────────────────────────────────────────────────────────────────
 
 const BARS: BarConfig[] = [
   { label: 'Storage', value: 72, color: '#3A86FF', gradient: '#3A86FF, #2962FF', delay: 200 },
@@ -50,7 +51,6 @@ const BARS: BarConfig[] = [
   { label: 'Memory',  value: 30, color: '#FFBE0B', gradient: '#FFBE0B, #FF9800', delay: 800 },
 ]
 
-// ─── Internal progress bar ──────────────────────────────────────────────────
 
 function GlassProgressBar({
   value,
@@ -61,7 +61,6 @@ function GlassProgressBar({
 }: GlassProgressBarProps) {
   const prefersReduced = useReducedMotion()
 
-  // Animated percentage counter via useSpring
   const springValue = useSpring(0, { stiffness: 80, damping: 20 })
   const [displayPercent, setDisplayPercent] = useState(0)
 
@@ -73,18 +72,15 @@ function GlassProgressBar({
     setDisplayPercent(Math.round(latest))
   })
 
-  // Glow intensity scales with progress
   const glowAlpha = Math.round(40 + value * 0.4)
     .toString(16)
     .padStart(2, '0')
   const glowSize = 4 + value * 0.08
 
-  // Transitions
   const fillTransition = prefersReduced
     ? { duration: 0.3 }
     : { type: 'spring' as const, stiffness: 200, damping: 24 }
 
-  // Pulse animation for the fill (only when animated + no reduced motion)
   const pulseAnimate =
     animated && !prefersReduced
       ? {
@@ -103,7 +99,7 @@ function GlassProgressBar({
 
   return (
     <div className="w-full">
-      {/* Label row */}
+      {}
       <div className="mb-2 flex items-center justify-between px-1">
         {label && (
           <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40 font-sans">
@@ -118,18 +114,18 @@ function GlassProgressBar({
         </span>
       </div>
 
-      {/* Track */}
+      {}
       <div
         className="relative h-2 w-full overflow-hidden rounded-full"
         style={{ ...GLASS_PANEL }}
       >
-        {/* Blur layer — non-animating */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 rounded-full"
           style={GLASS_BLUR}
         />
 
-        {/* Fill bar */}
+        {}
         <motion.div
           className="absolute bottom-0 left-0 top-0 rounded-full"
           style={{
@@ -145,7 +141,6 @@ function GlassProgressBar({
   )
 }
 
-// ─── Exported showcase ──────────────────────────────────────────────────────
 
 export default function GlassProgress() {
   const [values, setValues] = useState<number[]>([0, 0, 0, 0])
@@ -177,7 +172,7 @@ export default function GlassProgress() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src={BACKGROUND_IMAGE}
         alt=""
@@ -185,7 +180,7 @@ export default function GlassProgress() {
       />
 
       <div className="relative flex w-full max-w-[340px] flex-col items-center gap-4 px-4">
-        {/* Glass panel */}
+        {}
         <motion.div
           initial={{ scale: 0.92, y: 16 }}
           animate={{ scale: 1, y: 0 }}
@@ -193,19 +188,19 @@ export default function GlassProgress() {
           className="relative isolate w-full overflow-hidden rounded-3xl"
           style={{ ...GLASS_PANEL }}
         >
-          {/* Blur layer — non-animating */}
+          {}
           <div
             className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
             style={GLASS_BLUR}
           />
 
-          {/* Top edge highlight */}
+          {}
           <div
             className="absolute left-8 right-8 top-0 h-[1px]"
             style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}
           />
 
-          {/* Progress bars stack */}
+          {}
           <div className="flex flex-col gap-5 px-6 py-6">
             {BARS.map((bar, i) => (
               <GlassProgressBar
@@ -220,7 +215,7 @@ export default function GlassProgress() {
           </div>
         </motion.div>
 
-        {/* Refresh button */}
+        {}
         <motion.button
           onClick={replay}
           whileHover={{ scale: 1.12, background: 'rgba(255,255,255,0.12)' }}

@@ -1,18 +1,23 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a responsive pill toggle with a sliding thumb.
+ * Toggling animates the thumb position and interpolates the track color.
+ */
 
 import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── PillToggle ───────────────────────────────────────────────────────────────
-// iOS-style slider toggle. All dimensions derived from container size so the
-// toggle scales down gracefully on mobile.
 
-const MAX_TRACK_W = 80   // px cap
-const MIN_TRACK_W = 48   // px floor
+
+
+
+// tune: change these bounds to resize the responsive track
+const MAX_TRACK_W = 80   
+const MIN_TRACK_W = 48   
 
 export default function PillToggle() {
   const [isOn, setIsOn]             = useState(false)
@@ -20,23 +25,23 @@ export default function PillToggle() {
   const [pageIsDark, setPageIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [trackW, setTrackW]         = useState(MAX_TRACK_W)
   const containerRef                = useRef<HTMLDivElement>(null)
-  const isOnRef                     = useRef(false) // stable for resize effect
+  const isOnRef                     = useRef(false) 
 
-  // ── Derived dimensions (all scale with trackW) ───────────────────────────────
-  const trackH = Math.round(trackW * 0.55)                    // 44 at 80
-  const thumb  = Math.round(trackW * 0.45)                    // 36 at 80
-  const pad    = Math.max(3, Math.round(trackW * 0.05))       //  4 at 80
+  
+  const trackH = Math.round(trackW * 0.55)                    
+  const thumb  = Math.round(trackW * 0.45)                    
+  const pad    = Math.max(3, Math.round(trackW * 0.05))       
   const offX   = pad
   const onX    = trackW - thumb - pad
 
   const thumbX = useMotionValue(offX)
 
-  // ── Theme detection + resize observer (combined to share one ref) ────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
 
-    // Theme
+    
     const check = () => {
       const card = el.closest('[data-card-theme]')
       setPageIsDark(
@@ -51,7 +56,7 @@ export default function PillToggle() {
     const cardWrapper = el.closest('[data-card-theme]')
     if (cardWrapper) mo.observe(cardWrapper, { attributes: true, attributeFilter: ['class'] })
 
-    // Resize
+    
     const update = () => {
       const s = Math.max(
         MIN_TRACK_W,
@@ -66,16 +71,16 @@ export default function PillToggle() {
     return () => { mo.disconnect(); ro.disconnect() }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Snap thumb to correct position when container resizes ────────────────────
+  
   useEffect(() => {
     thumbX.set(isOnRef.current ? onX : offX)
   }, [trackW]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Track colour transitions as thumb slides ─────────────────────────────────
+  
   const offTrack   = pageIsDark ? '#3D3A3A' : '#D1D1D6'
   const trackColor = useTransform(thumbX, [offX, onX], [offTrack, '#22c55e'])
 
-  // ── Toggle ───────────────────────────────────────────────────────────────────
+  
   const handleToggle = useCallback(async () => {
     if (animating) return
     setAnimating(true)
@@ -86,7 +91,7 @@ export default function PillToggle() {
     setAnimating(false)
   }, [isOn, animating, thumbX, offX, onX])
 
-  // ── Theme tokens ─────────────────────────────────────────────────────────────
+  
   const previewBg   = pageIsDark ? '#110F0C' : '#EDEAE5'
   const trackInset  = pageIsDark
     ? 'inset 0 1px 4px rgba(0,0,0,0.50)'
@@ -107,7 +112,7 @@ export default function PillToggle() {
         transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
         className="select-none"
       >
-        {/* ── Track ──────────────────────────────────────────────────────────── */}
+        {}
         <motion.button
           type="button"
           role="switch"
@@ -129,7 +134,7 @@ export default function PillToggle() {
           whileTap={{ scale: 0.96 }}
           transition={{ type: 'spring', stiffness: 400, damping: 28 }}
         >
-          {/* ── Thumb ────────────────────────────────────────────────────────── */}
+          {}
           <motion.div
             style={{
               position: 'absolute',

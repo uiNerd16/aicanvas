@@ -1,5 +1,9 @@
 'use client'
-// npm install framer-motion @phosphor-icons/react
+// npm install @phosphor-icons/react framer-motion
+/**
+ * Presents simulated file uploads in a collapsible progress card.
+ * Each transfer can be paused, resumed, canceled, or restarted after completion.
+ */
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,6 +16,7 @@ import {
   ArrowsInSimple,
 } from '@phosphor-icons/react'
 
+// customize: replace the simulated files and durations below
 const FILES = [
   { name: 'Brand reel.mp4', durationMs: 8000 },
   { name: 'Product demo.mp4', durationMs: 12500 },
@@ -176,7 +181,7 @@ export default function UploadProgress() {
               }}
             >
 
-              {/* Header */}
+              {}
               <div className="flex items-start justify-between px-6 pt-5 pb-4">
                 <div className="min-w-0 flex-1 pr-3">
                   <h2
@@ -210,9 +215,9 @@ export default function UploadProgress() {
                   </AnimatePresence>
                 </div>
 
-                {/* Action buttons */}
+                {}
                 <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-                  {/* Group 1: Pause/Play + Refresh — hidden when complete */}
+                  {}
                   <AnimatePresence initial={false}>
                     {!isDone && (
                       <motion.div
@@ -223,7 +228,7 @@ export default function UploadProgress() {
                         transition={SPRING}
                         className="flex items-center gap-1.5"
                       >
-                        {/* 1. Pause / Play */}
+                        {}
                         <IconBtn onClick={togglePause} bg={btnBg} color={btnColor}>
                           <AnimatePresence mode="wait" initial={false}>
                             {isPaused ? (
@@ -252,7 +257,7 @@ export default function UploadProgress() {
                           </AnimatePresence>
                         </IconBtn>
 
-                        {/* 2. Refresh */}
+                        {}
                         <IconBtn onClick={handleRefresh} bg={btnBg} color={btnColor}>
                           <ArrowCounterClockwise size={15} weight="regular" />
                         </IconBtn>
@@ -260,7 +265,7 @@ export default function UploadProgress() {
                     )}
                   </AnimatePresence>
 
-                  {/* 3. Expand / Collapse — always visible */}
+                  {}
                   <IconBtn
                     onClick={() => setExpanded(e => !e)}
                     bg={btnBg}
@@ -293,7 +298,7 @@ export default function UploadProgress() {
                     </AnimatePresence>
                   </IconBtn>
 
-                  {/* Group 2: Stop / Close — hidden when complete */}
+                  {}
                   <AnimatePresence initial={false}>
                     {!isDone && (
                       <motion.div
@@ -304,7 +309,7 @@ export default function UploadProgress() {
                         transition={SPRING}
                         className="flex items-center"
                       >
-                        {/* 4. Stop / Close */}
+                        {}
                         <IconBtn onClick={handleStop} bg={btnBg} color={btnColor}>
                           <X size={15} weight="regular" />
                         </IconBtn>
@@ -314,7 +319,7 @@ export default function UploadProgress() {
                 </div>
               </div>
 
-              {/* Expanded file list */}
+              {}
               <AnimatePresence initial={false}>
                 {expanded && (
                   <motion.div
@@ -387,7 +392,7 @@ export default function UploadProgress() {
                 )}
               </AnimatePresence>
 
-              {/* Collapsed bottom progress bar */}
+              {}
               <AnimatePresence initial={false}>
                 {!expanded && (
                   <motion.div

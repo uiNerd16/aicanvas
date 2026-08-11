@@ -1,11 +1,15 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a tilted coverflow of captioned image cards.
+ * Dragging, tapping, or using the keyboard changes the centered slide.
+ */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, type PanInfo } from 'framer-motion'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+
 
 interface Slide {
   id: number
@@ -13,11 +17,12 @@ interface Slide {
   image: string
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-// Atmospheric Unsplash photos paired with each wellness theme. The `?w=600&h=750`
-// query string asks Unsplash to deliver a portrait crop, keeping the 4:5 aspect
-// of every card crisp at the rendered size.
 
+
+
+
+
+// customize: replace the coverflow images and captions below
 const SLIDES: Slide[] = [
   {
     id: 0,
@@ -63,33 +68,36 @@ const SLIDES: Slide[] = [
   },
 ]
 
-// ─── Layout constants ─────────────────────────────────────────────────────────
-// A flat horizontal fan with a size gradient: the focused center card is the
-// largest, and every step outward shrinks the next card. Cards share a single
-// base width — the visual scale comes from Framer Motion's `scale` prop, so
-// the layout math operates on the same baseline for every card. Horizontal
-// positions are computed by walking outward from the center and adding half
-// of each neighbour's scaled width plus a constant pixel gap, so adjacent
-// cards never overlap.
+
+
+
+
+
+
+
+
 
 const TOTAL = 7
-const HALF = 3                                   // |offset| range for stagger math
-const ROTATION_PER_STEP = 14 // degrees per offset step
-const ARC_Y = 8              // px of vertical arc per |offset| (outer cards drop)
-const GAP_PX = 30            // constant visible pixel gap between adjacent cards
-const SCALE_BY_OFFSET = [1.0, 0.88, 0.76, 0.64] // index = |offset|
+const HALF = 3                                   
+// tune: raise to increase card tilt between slots
+const ROTATION_PER_STEP = 14 
+// tune: raise to deepen the vertical arc
+const ARC_Y = 8              
+// tune: raise to spread cards farther apart
+const GAP_PX = 30            
+const SCALE_BY_OFFSET = [1.0, 0.88, 0.76, 0.64] 
 
-// Runtime transitions (drag, click, key) — snappy, no bounce.
+
 const SPRING = { type: 'spring' as const, stiffness: 240, damping: 30 }
-// Mount entrance — slightly bouncier so the focus card has a satisfying settle.
+
 const MOUNT_SPRING = { type: 'spring' as const, stiffness: 180, damping: 18 }
 const STAGGER_MS = 0.09
 
-// Wrap-around offset so the 7-card fan always shows 3 left + 1 center + 3 right.
-// Without this, cards at the start of the array would drift to offsets like -4/-5
-// once focus advances and fall outside the visible fan. By looping any out-of-range
-// offset by +/- TOTAL, the leftmost card re-enters from the right edge (and vice
-// versa) the instant focus crosses a boundary, keeping the fan perfectly balanced.
+
+
+
+
+
 function visibleOffset(cardIndex: number, focus: number, total: number) {
   const half = Math.floor(total / 2)
   let off = cardIndex - focus
@@ -99,13 +107,13 @@ function visibleOffset(cardIndex: number, focus: number, total: number) {
 }
 
 function buildXPositions(scales: number[], baseWidth: number, gap: number) {
-  // scales: array indexed 0..3 by |offset|, scales[0] = center
-  // returns: Map<offset, translateXPx>, offset in -3..3
+  
+  
   const positions = new Map<number, number>()
   positions.set(0, 0)
   let cursor = 0
   for (let i = 1; i <= 3; i++) {
-    // distance from previous card's center to this card's center
+    
     const step = (scales[i - 1] / 2 + scales[i] / 2) * baseWidth + gap
     cursor += step
     positions.set(i, cursor)
@@ -114,23 +122,23 @@ function buildXPositions(scales: number[], baseWidth: number, gap: number) {
   return positions
 }
 
-// ─── TiltedCoverflow ──────────────────────────────────────────────────────────
+
 
 export default function TiltedCoverflow() {
-  const [focus, setFocus] = useState(3) // start with the middle slide
+  const [focus, setFocus] = useState(3) 
   const [maxSide, setMaxSide] = useState(3)
   const [cardWidth, setCardWidth] = useState(180)
   const [mounted, setMounted] = useState(false)
 
   const cardRef = useRef<HTMLButtonElement | null>(null)
 
-  // Flip on after first paint so the entrance transition runs once,
-  // then every subsequent state change uses the snappy runtime spring.
+  
+  
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Collapse to 1 visible side card under 640px wide.
+  
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mq = window.matchMedia('(min-width: 640px)')
@@ -140,7 +148,7 @@ export default function TiltedCoverflow() {
     return () => mq.removeEventListener('change', apply)
   }, [])
 
-  // Measure the rendered card width so translateX scales with viewport.
+  
   useEffect(() => {
     if (typeof window === 'undefined') return
     const measure = () => {
@@ -166,7 +174,7 @@ export default function TiltedCoverflow() {
     })
   }, [])
 
-  // Arrow keys cycle focus.
+  
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (event.key === 'ArrowRight') {
@@ -213,28 +221,28 @@ export default function TiltedCoverflow() {
             const hidden = absOffset > maxSide
             const isFocus = offset === 0
 
-            // Size gradient + spaced fan: scale comes from |offset|, rotateY
-            // tilts side cards inward, translateX is precomputed so adjacent
-            // cards keep a constant pixel gap, translateY adds a gentle arc.
+            
+            
+            
             const scale = SCALE_BY_OFFSET[absOffset] ?? 0.6
             const rotateY = -offset * ROTATION_PER_STEP
             const translateX = positions.get(offset) ?? 0
             const translateY = absOffset * ARC_Y
 
-            // Stagger entrance: outermost cards land first, focus card last.
-            // |offset|=3 → 0s, 2 → 0.09s, 1 → 0.18s, 0 → 0.27s. After mount,
-            // every transition uses the runtime spring with no delay.
+            
+            
+            
             const mountDelay = (HALF - absOffset) * STAGGER_MS
             const transition = mounted
               ? SPRING
               : { ...MOUNT_SPRING, delay: mountDelay }
 
-            // Breathing loop: each card drifts on its own period, picture-frame
-            // swing (rotateZ), small amplitude so caption text stays legible.
+            
+            
             const breathDuration = 7 + slide.id * 0.6
 
-            // Caption split — word-by-word entrance only for the focused card.
-            // Non-focused cards render plain spans so swiping doesn't flicker.
+            
+            
             const words = slide.caption.split(' ')
 
             return (
@@ -266,11 +274,7 @@ export default function TiltedCoverflow() {
                 transition={transition}
                 whileTap={isFocus ? { cursor: 'grabbing' } : undefined}
               >
-                {/* Middle breathing layer. Owns the visual chrome (rounded
-                    corners, overflow clip, ring, shadow) so the entire card
-                    moves as one unit — no interior translation that could
-                    expose the outer button's background. The image and caption
-                    fill this layer edge-to-edge. */}
+                {}
                 <motion.div
                   className="relative h-full w-full overflow-hidden rounded-[20px] ring-1 ring-black/10 dark:ring-white/10"
                   style={{
@@ -296,9 +300,7 @@ export default function TiltedCoverflow() {
                     className="absolute inset-0 h-full w-full object-cover"
                   />
 
-                  {/* Caption with soft gradient fade into the photo. No border,
-                      no backdrop-blur, no pill — text reads like an album-art
-                      title that's been laid into the image. */}
+                  {}
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end px-4 pb-3 pt-12">
                     <div
                       aria-hidden
@@ -347,7 +349,7 @@ export default function TiltedCoverflow() {
           })()}
         </motion.div>
 
-        {/* Dot indicator + hint */}
+        {}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-1.5">
             {SLIDES.map((slide) => {

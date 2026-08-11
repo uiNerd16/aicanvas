@@ -1,21 +1,23 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Renders a terminal-styled button with a character scramble effect.
+ * Hovering replaces unresolved letters with symbols before restoring the label.
+ */
 
 import { useState, useRef, useCallback, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── GlitchButton ─────────────────────────────────────────────────────────────
-// Terminal-inspired button with a glitch/scramble text effect on hover.
-// Characters scramble through random symbols, then resolve left-to-right.
-// Supports both light and dark themes.
 
 const LABEL = 'INITIALIZE'
 const GLITCH_CHARS = '@#$%&!*^~<>?+='
-const SCRAMBLE_DURATION = 700 // ms total for full resolve
-const SCRAMBLE_INTERVAL = 40  // ms between character updates
+// tune: raise to lengthen the scramble
+const SCRAMBLE_DURATION = 700
+// tune: raise to slow character updates
+const SCRAMBLE_INTERVAL = 40
 
 const DARK = {
   text: '#00ff41',
@@ -143,7 +145,7 @@ export default function GlitchButton() {
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         >
-          {/* Corner brackets */}
+          {}
           {(['tl', 'tr', 'bl', 'br'] as const).map((corner) => (
             <span
               key={corner}

@@ -1,18 +1,30 @@
 'use client'
 
+/**
+ * Renders a canvas field of dots connected to spring-based positions.
+ * Pointer movement pulls nearby dots before they glide back into the grid.
+ */
 import { useEffect, useRef } from 'react'
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING      = 22      // px between dot centres
-const DOT_RADIUS   = 1.5     // canvas dot radius in px
-const INFLUENCE_R  = 180     // px — magnetic pull radius
-const SPRING_K     = 0.055   // spring stiffness — softer so dots float back
-const DAMPING      = 0.11    // velocity multiplier = (1 - 0.11) = 0.89 — lets dots glide
-const MAG_STRENGTH = 16      // magnetic force — lower because damping is now gentler
-const LERP_FACTOR  = 0.06    // hoverStr lerp speed (enter/leave)
-const MOUSE_LERP   = 0.14    // smoothed mouse lerp — eliminates jerk on fast moves
 
-// ─── Dot type ─────────────────────────────────────────────────────────────────
+// tune: raise to spread the dots farther apart
+const SPACING      = 22      
+// tune: raise to enlarge each dot
+const DOT_RADIUS   = 1.5     
+// tune: raise to widen the magnetic field
+const INFLUENCE_R  = 180     
+// tune: raise to quicken the return to the grid
+const SPRING_K     = 0.055   
+// tune: raise to reduce velocity more quickly
+const DAMPING      = 0.11    
+// tune: raise to strengthen the pointer pull
+const MAG_STRENGTH = 16      
+// tune: raise to quicken hover transitions
+const LERP_FACTOR  = 0.06    
+// tune: raise to quicken pointer tracking
+const MOUSE_LERP   = 0.14    
+
+
 type Dot = {
   restX: number
   restY: number
@@ -22,7 +34,7 @@ type Dot = {
   vy: number
 }
 
-// ─── MagneticDots ─────────────────────────────────────────────────────────────
+
 export default function MagneticDots() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
@@ -31,7 +43,7 @@ export default function MagneticDots() {
   const isDarkRef    = useRef(true)
   const bgRef        = useRef('#110F0C')
 
-  // ── Theme detection ────────────────────────────────────────────────────────
+  
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -64,7 +76,7 @@ export default function MagneticDots() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas physics loop ────────────────────────────────────────────────────
+  
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -77,7 +89,7 @@ export default function MagneticDots() {
     let cw      = 0
     let ch      = 0
     let dpr     = 1
-    // Smoothed mouse — follows raw mouse with a lerp so fast moves don't teleport the field
+    
     let smoothMx = -99999
     let smoothMy = -99999
 
@@ -93,13 +105,13 @@ export default function MagneticDots() {
       canvas.height = Math.round(ch * dpr)
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-      // Centre the grid so dots sit symmetrically edge-to-edge
+      
       const cols = Math.ceil(cw / SPACING) + 1
       const rows = Math.ceil(ch / SPACING) + 1
       const ox   = ((cw % SPACING) / 2)
       const oy   = ((ch % SPACING) / 2)
 
-      // Keep existing dots' positions if possible; rebuild from scratch
+      
       const prev = new Map<string, Dot>()
       for (const d of dots) {
         prev.set(`${d.restX},${d.restY}`, d)
@@ -123,7 +135,7 @@ export default function MagneticDots() {
     function frame() {
       if (!alive || !ctx) return
 
-      // Lerp hoverStr toward target
+      
       const hasPointer = mouseRef.current !== null
       const targetStr  = hasPointer ? 1 : 0
       hoverStrRef.current += (targetStr - hoverStrRef.current) * LERP_FACTOR
@@ -131,7 +143,7 @@ export default function MagneticDots() {
       const hStr = hoverStrRef.current
       const raw  = mouseRef.current
       if (raw) {
-        // First contact — snap to position so there's no initial lag
+        
         if (smoothMx === -99999) { smoothMx = raw.x; smoothMy = raw.y }
         smoothMx += (raw.x - smoothMx) * MOUSE_LERP
         smoothMy += (raw.y - smoothMy) * MOUSE_LERP
@@ -152,7 +164,7 @@ export default function MagneticDots() {
       ctx.fillStyle = dotColor
 
       for (const d of dots) {
-        // ── Magnetic pull ──────────────────────────────────────────────────
+        
         if (hStr > 0.001) {
           const dx   = d.x - mx
           const dy   = d.y - my
@@ -160,28 +172,28 @@ export default function MagneticDots() {
 
           if (dist2 < r2 && dist2 > 0.01) {
             const dist  = Math.sqrt(dist2)
-            // Inverse-square-ish: strongest at 0, zero at boundary
+            
             const t     = 1 - dist / INFLUENCE_R
             const force = t * t * MAG_STRENGTH * hStr
-            // Pull direction: toward cursor
+            
             d.vx += (-dx / dist) * force
             d.vy += (-dy / dist) * force
           }
         }
 
-        // ── Spring back to rest position ───────────────────────────────────
+        
         d.vx += (d.restX - d.x) * SPRING_K
         d.vy += (d.restY - d.y) * SPRING_K
 
-        // ── Damping ────────────────────────────────────────────────────────
+        
         d.vx *= (1 - DAMPING)
         d.vy *= (1 - DAMPING)
 
-        // ── Integrate ──────────────────────────────────────────────────────
+        
         d.x += d.vx
         d.y += d.vy
 
-        // ── Draw dot ───────────────────────────────────────────────────────
+        
         ctx.beginPath()
         ctx.arc(d.x, d.y, DOT_RADIUS, 0, Math.PI * 2)
         ctx.fill()
@@ -203,7 +215,7 @@ export default function MagneticDots() {
     }
   }, [])
 
-  // ── Pointer tracking ───────────────────────────────────────────────────────
+  
   function updateMouse(clientX: number, clientY: number) {
     const rect = canvasRef.current?.getBoundingClientRect()
     if (!rect) return

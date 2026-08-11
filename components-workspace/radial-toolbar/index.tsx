@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents formatting tools around an expandable radial menu.
+ * Opening fans the controls outward, while selection toggles each tool state.
+ */
 
 import { useState, useLayoutEffect, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,7 +21,7 @@ import {
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-// ─── Types & Constants ────────────────────────────────────────────────────────
+
 
 interface Tool {
   id: string
@@ -27,11 +31,14 @@ interface Tool {
 
 const CX = 120
 const CY = 120
-const R_IN  = 30   // exactly half the button diameter (60px / 2) — no gap
+const R_IN  = 30   
+// tune: raise to widen the expanded toolbar
 const R_OUT = 114
+// tune: raise to move icons farther from the center
 const R_ICON = 78
 const GAP   = 0
 
+// customize: replace the toolbar actions below
 const TOOLS: Tool[] = [
   { id: 'bold',    label: 'Bold',          Icon: TextB },
   { id: 'italic',  label: 'Italic',        Icon: TextItalic },
@@ -41,7 +48,7 @@ const TOOLS: Tool[] = [
   { id: 'color',   label: 'Color',         Icon: Palette },
 ]
 
-// ─── Geometry ─────────────────────────────────────────────────────────────────
+
 
 const toRad = (d: number) => (d - 90) * (Math.PI / 180)
 
@@ -60,7 +67,7 @@ function iconXY(midDeg: number) {
   return { x: CX + R_ICON * Math.cos(r), y: CY + R_ICON * Math.sin(r) }
 }
 
-// ─── RadialToolbar ────────────────────────────────────────────────────────────
+
 
 export default function RadialToolbar() {
   const [open, setOpen]       = useState(false)
@@ -93,7 +100,7 @@ export default function RadialToolbar() {
   return (
     <div ref={containerRef} className="relative flex h-full w-full items-center justify-center" style={{ background: isDark ? '#0a0a0a' : '#F5F1EA' }}>
 
-      {/* ── Wheel — fades in around the persistent circle ─────────────────── */}
+      {}
       <AnimatePresence>
         {open && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -143,7 +150,7 @@ export default function RadialToolbar() {
                 })}
               </svg>
 
-              {/* Icons */}
+              {}
               {TOOLS.map((tool, i) => {
                 const { x, y } = iconXY(i * 60 + 30)
                 const isH = hoveredId === tool.id
@@ -181,7 +188,7 @@ export default function RadialToolbar() {
         )}
       </AnimatePresence>
 
-      {/* ── Persistent circle — always visible, only content inside animates ── */}
+      {}
       <motion.button
         style={{
           position: 'relative',
@@ -205,7 +212,7 @@ export default function RadialToolbar() {
       >
         <AnimatePresence mode="wait">
           {!open ? (
-            /* EDIT label */
+            
             <motion.span
               key="edit"
               initial={{ opacity: 0, scale: 0.7 }}
@@ -224,7 +231,7 @@ export default function RadialToolbar() {
               EDIT
             </motion.span>
           ) : (
-            /* X icon */
+            
             <motion.span
               key="x-icon"
               initial={{ opacity: 0, rotate: -90, scale: 0.4 }}
@@ -239,7 +246,7 @@ export default function RadialToolbar() {
         </AnimatePresence>
       </motion.button>
 
-      {/* ── Label pill ────────────────────────────────────────────────────────── */}
+      {}
       <AnimatePresence>
         {open && labelTool && (
           <motion.div

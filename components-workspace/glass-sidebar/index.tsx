@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a collapsible glass navigation sidebar with icon tiles.
+ * Expanding reveals labels, while the collapsed state exposes hover tooltips.
+ */
 
 import { useState, useEffect } from 'react'
 import { motion, useSpring, AnimatePresence } from 'framer-motion'
@@ -16,12 +20,11 @@ import {
   ArrowLeft,
 } from '@phosphor-icons/react'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const COLLAPSED_WIDTH = 64
 const EXPANDED_WIDTH = 220
 
-// Design size for icon tiles — intentionally fixed, not responsive
+// tune: change to resize the icon tiles
 const ICON_TILE_SIZE = 44
 const TOGGLE_BUTTON_HEIGHT = 36
 
@@ -37,7 +40,6 @@ const NAV_ITEMS = [
 
 type NavItem = (typeof NAV_ITEMS)[number]
 
-// Blur is on a separate non-animating layer so it isn't recalculated every spring frame
 const GLASS_BLUR_STYLE = {
   backdropFilter: 'blur(24px) saturate(1.8)',
   WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
@@ -49,7 +51,6 @@ const GLASS_STYLE = {
   boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 } as const
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function NavItemRow({
   item,
@@ -67,12 +68,11 @@ function NavItemRow({
   const [hovered, setHovered] = useState(false)
   const Icon = item.icon
 
-  // Reset stuck hover state when sidebar opens/closes — avoids tooltip lingering
   useEffect(() => { setHovered(false) }, [isOpen])
 
   return (
     <div className="relative flex w-full items-center">
-      {/* Tooltip — only shown in collapsed state to surface the hidden label */}
+      {}
       <AnimatePresence>
         {!isOpen && hovered && (
           <motion.div
@@ -89,24 +89,23 @@ function NavItemRow({
         )}
       </AnimatePresence>
 
-      {/* Icon tile + label row */}
+      {}
       <motion.button
         onClick={onActivate}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         animate={{
-          // Collapsed: nudge right + scale up more to signal interactivity without a label
           scale: hovered ? (isOpen ? 1.08 : 1.15) : 1,
           x: hovered ? (isOpen ? 0 : 3) : 0,
         }}
         whileTap={{ scale: 0.90 }}
-        // stiffness 320 / damping 20 — snappy enough to feel physical without overshooting
+        // tune: raise stiffness to sharpen item motion
         transition={{ type: 'spring', stiffness: 320, damping: 20 }}
         className="flex w-full items-center gap-3 rounded-xl cursor-pointer justify-start"
         style={{ background: 'transparent', border: 'none', outline: 'none' }}
         aria-label={item.label}
       >
-        {/* Icon tile — notification-style tinted badge */}
+        {}
         <motion.div
           className="flex shrink-0 items-center justify-center rounded-xl"
           style={{
@@ -120,7 +119,7 @@ function NavItemRow({
           <Icon size={20} weight="regular" style={{ color: item.color }} />
         </motion.div>
 
-        {/* Label — only rendered when sidebar is open */}
+        {}
         <AnimatePresence>
           {isOpen && (
             <motion.span
@@ -142,14 +141,12 @@ function NavItemRow({
   )
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function GlassSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [toggleHovered, setToggleHovered] = useState(false)
 
-  // Spring width gives the expand/collapse a physical, momentum-based feel
   const widthSpring = useSpring(COLLAPSED_WIDTH, { stiffness: 280, damping: 26 })
 
   function toggle() {
@@ -160,16 +157,16 @@ export default function GlassSidebar() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Fixed-width anchor: keeps the left edge stable so the sidebar expands rightward */}
+      {}
       <div style={{ width: EXPANDED_WIDTH }} className="flex items-center justify-start">
-        {/* Sidebar panel */}
+        {}
         <motion.div
           style={{
             width: widthSpring,
@@ -177,17 +174,17 @@ export default function GlassSidebar() {
           }}
           initial={{ x: -20 }}
           animate={{ x: 0 }}
-          // delay: 0.1s lets the background settle before the sidebar slides in
+          // tune: raise the delay to postpone the sidebar entrance
           transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
           className="relative isolate flex h-auto flex-col items-center gap-2 overflow-visible rounded-3xl px-2.5 py-3"
         >
-          {/* Blur layer — absolute, never animates, so blur is not recalculated every spring frame */}
+          {}
           <div
             className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
             style={GLASS_BLUR_STYLE}
           />
 
-          {/* Nav items */}
+          {}
           <div className="flex w-full flex-col gap-1.5">
             {NAV_ITEMS.map((item, i) => (
               <NavItemRow
@@ -201,13 +198,13 @@ export default function GlassSidebar() {
             ))}
           </div>
 
-          {/* Divider */}
+          {}
           <div
             className="my-1 w-full"
             style={{ height: 1, background: 'rgba(255,255,255,0.1)' }}
           />
 
-          {/* Toggle button */}
+          {}
           <div className={`flex w-full items-center ${isOpen ? 'justify-start px-1' : 'justify-center'}`}>
             <motion.button
               onClick={toggle}
@@ -226,7 +223,7 @@ export default function GlassSidebar() {
               }}
               aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             >
-              {/* Arrow spins 90° on enter/exit — gives the swap a sense of rotation direction */}
+              {}
               <AnimatePresence mode="wait" initial={false}>
                 {isOpen ? (
                   <motion.span

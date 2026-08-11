@@ -1,36 +1,50 @@
 'use client'
 
+/**
+ * Renders a radial canvas constellation with bowed connecting strands.
+ * Pointer proximity repels nodes and bends nearby connections.
+ */
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
+
 const N_RADIALS = 24
 const N_RINGS   = 14
 
-// Idle organic sway (slow, broad)
-const SWAY_AMP  = 3.5     // px — node drift amplitude
-const SWAY_SPD  = 0.00045 // time step per frame
 
-// Idle strand bow — curves every string even at rest
-const BOW_AMP   = 6       // px — perpendicular bow amplitude
-const BOW_SPD   = 0.55    // how fast the bow oscillates per strand
+// tune: raise to increase idle node drift
+const SWAY_AMP  = 3.5     
+// tune: raise to speed idle drift
+const SWAY_SPD  = 0.00045 
 
-// Node spring physics — cursor pushes nodes, they bounce back
-const NODE_PUSH_R   = 90  // px — cursor repels nodes within this radius
-const NODE_PUSH_STR = 3.2 // push impulse strength
-const SPRING_K      = 0.07 // spring return stiffness
-const SPRING_DAMP   = 0.84 // velocity retention per frame (lower = more bouncy)
 
-// Hover bezier push on strands (very subtle — let node movement do the heavy work)
-const PUSH_RADIUS = 280   // px
-const PUSH_MAX    = 18    // px — gentle, not dramatic
+// tune: raise to deepen resting strand curves
+const BOW_AMP   = 6       
+// tune: raise to speed strand oscillation
+const BOW_SPD   = 0.55    
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+
+// tune: raise to widen node repulsion
+const NODE_PUSH_R   = 90  
+// tune: raise to strengthen node repulsion
+const NODE_PUSH_STR = 3.2 
+// tune: raise to quicken the spring return
+const SPRING_K      = 0.07 
+// tune: lower to reduce retained velocity
+const SPRING_DAMP   = 0.84 
+
+
+// tune: raise to widen strand bending
+const PUSH_RADIUS = 280   
+// tune: raise to increase strand displacement
+const PUSH_MAX    = 18    
+
+
 interface WebNode {
   bx: number; by: number
-  phase: number       // personal sway phase
-  // spring state — offset from sway position
+  phase: number       
+  
   sx: number; sy: number
   svx: number; svy: number
 }
@@ -39,13 +53,13 @@ interface Strand {
   a: number; b: number
   kind: 'radial' | 'ring'
   ring: number
-  // precomputed for idle bow
-  bowPhase: number    // avg of both node phases
-  bowPerpX: number    // unit perpendicular X (rotated 90° from strand direction)
-  bowPerpY: number    // unit perpendicular Y
+  
+  bowPhase: number    
+  bowPerpX: number    
+  bowPerpY: number    
 }
 
-// ─── Build geometry ───────────────────────────────────────────────────────────
+
 function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] } {
   const cx   = W / 2
   const cy   = H / 2
@@ -53,7 +67,7 @@ function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] }
 
   const nodes: WebNode[] = []
 
-  // Node 0 = center
+  
   nodes.push({ bx: cx, by: cy, phase: 0, sx: 0, sy: 0, svx: 0, svy: 0 })
 
   for (let r = 1; r <= N_RINGS; r++) {
@@ -76,7 +90,7 @@ function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] }
     const na = nodes[a], nb = nodes[b]
     const dx = nb.bx - na.bx, dy = nb.by - na.by
     const len = Math.sqrt(dx * dx + dy * dy) || 1
-    // Perpendicular: rotate strand direction 90°
+    
     strands.push({
       a, b, kind, ring,
       bowPhase: (na.phase + nb.phase) / 2,
@@ -85,7 +99,7 @@ function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] }
     })
   }
 
-  // Radial strands
+  
   for (let s = 0; s < N_RADIALS; s++) {
     addStrand(0, 1 + s, 'radial', 1)
     for (let r = 1; r < N_RINGS; r++) {
@@ -95,7 +109,7 @@ function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] }
     }
   }
 
-  // Ring strands
+  
   for (let r = 1; r <= N_RINGS; r++) {
     for (let s = 0; s < N_RADIALS; s++) {
       const ai = 1 + (r - 1) * N_RADIALS + s
@@ -107,14 +121,14 @@ function buildWeb(W: number, H: number): { nodes: WebNode[]; strands: Strand[] }
   return { nodes, strands }
 }
 
-// ─── Theme ────────────────────────────────────────────────────────────────────
+
 function detectDark(el: HTMLElement): boolean {
   const w = el.closest('[data-card-theme]')
   if (w) return w.classList.contains('dark')
   return document.documentElement.classList.contains('dark')
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function ParticleConstellation() {
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -124,7 +138,7 @@ export default function ParticleConstellation() {
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme ──────────────────────────────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -137,7 +151,7 @@ export default function ParticleConstellation() {
     return () => mo.disconnect()
   }, [])
 
-  // ── Main loop ──────────────────────────────────────────────────────────────
+  
   useIsomorphicLayoutEffect(() => {
     const canvas    = canvasRef.current
     const container = containerRef.current
@@ -184,13 +198,13 @@ export default function ParticleConstellation() {
       const W = container!.clientWidth
       const H = container!.clientHeight
 
-      // ── Update node spring physics ───────────────────────────────────────
+      
       for (const n of web.nodes) {
-        // Sway position (slow broad drift)
+        
         const swayX = n.bx + Math.sin(time * 1.1 + n.phase)       * SWAY_AMP
         const swayY = n.by + Math.cos(time * 0.9 + n.phase * 1.4) * SWAY_AMP
 
-        // Cursor repulsion impulse on the spring
+        
         if (mouse) {
           const liveX = swayX + n.sx
           const liveY = swayY + n.sy
@@ -204,7 +218,7 @@ export default function ParticleConstellation() {
           }
         }
 
-        // Spring return toward zero offset + damping
+        
         n.svx += -n.sx * SPRING_K
         n.svy += -n.sy * SPRING_K
         n.svx *= SPRING_DAMP
@@ -213,13 +227,13 @@ export default function ParticleConstellation() {
         n.sy  += n.svy
       }
 
-      // ── Compute live positions ───────────────────────────────────────────
+      
       const pos = web.nodes.map(n => ({
         x: n.bx + Math.sin(time * 1.1 + n.phase)       * SWAY_AMP + n.sx,
         y: n.by + Math.cos(time * 0.9 + n.phase * 1.4) * SWAY_AMP + n.sy,
       }))
 
-      // ── Draw ─────────────────────────────────────────────────────────────
+      
       const dark = isDarkRef.current
       const fg   = dark ? '255,255,255' : '28,25,22'
 
@@ -236,12 +250,12 @@ export default function ParticleConstellation() {
         const mx = (pa.x + pb.x) / 2
         const my = (pa.y + pb.y) / 2
 
-        // ── Always-on idle bow — never a straight line ─────────────────
+        
         const bow    = BOW_AMP * Math.sin(time * BOW_SPD * 60 + s.bowPhase)
         let cpx = mx + s.bowPerpX * bow
         let cpy = my + s.bowPerpY * bow
 
-        // ── Subtle additional push on hover (small, additive) ──────────
+        
         if (mouse) {
           const cdx    = mouse.x - mx
           const cdy    = mouse.y - my
@@ -255,7 +269,7 @@ export default function ParticleConstellation() {
           }
         }
 
-        // ── Opacity ────────────────────────────────────────────────────
+        
         const depthFade = 1 - (s.ring - 1) / (N_RINGS + 2)
         let alpha = s.kind === 'radial' ? 0.42 * depthFade : 0.20 * depthFade
 
@@ -274,7 +288,7 @@ export default function ParticleConstellation() {
         ctx.stroke()
       }
 
-      // ── Nodes ───────────────────────────────────────────────────────────
+      
       for (let i = 0; i < pos.length; i++) {
         const p = pos[i]
         let alpha = i === 0 ? 0.45 : 0.16

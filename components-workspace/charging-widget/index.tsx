@@ -3,19 +3,19 @@
 // npm install framer-motion
 // font: Manrope
 
+/**
+ * Circular charging indicator with liquid waves that rise with a looping count.
+ * The displayed percentage resets after reaching its target.
+ */
+
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { useMotionValue, animate } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── ChargingWidget ───────────────────────────────────────────────────────────
-// Circular battery-charging indicator with animated liquid waves that rise
-// as the percentage counts up from 0 to 78, then loops.
-// Supports both dark and light preview modes.
-
 const TARGET_PERCENT = 78
-const COUNT_DURATION = 4 // seconds
-const PAUSE_DURATION = 1 // seconds between loops
+const COUNT_DURATION = 4 // tune: raise to slow the count-up
+const PAUSE_DURATION = 1 // tune: raise to lengthen the pause between loops
 
 export default function ChargingWidget() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -36,7 +36,6 @@ export default function ChargingWidget() {
     return () => observer.disconnect()
   }, [])
 
-  // Theme-derived colors
   const WAVE1_COLOR = isDark ? 'rgba(120, 60, 220, 0.45)' : 'rgba(109, 40, 217, 0.28)'
   const WAVE2_COLOR = isDark ? 'rgba(160, 80, 255, 0.70)' : 'rgba(124, 58, 237, 0.52)'
   const RING_COLOR  = isDark ? '#a855f7' : '#7c3aed'
@@ -45,16 +44,13 @@ export default function ChargingWidget() {
   const TEXT_MUTED  = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(28,25,22,0.60)'
   const BOLT_COLOR  = isDark ? '#e0b0ff' : '#6d28d9'
 
-  // MotionValue for the animated percentage (0–78)
   const percent = useMotionValue(0)
 
-  // Refs for direct DOM mutation (RAF-based wave animation)
   const wave1Ref   = useRef<SVGPathElement>(null)
   const wave2Ref   = useRef<SVGPathElement>(null)
   const displayRef = useRef<SVGTextElement>(null)
   const percentRef = useRef(0)
 
-  // Keep a mutable ref in sync with the MotionValue for RAF access
   useEffect(() => {
     const unsub = percent.on('change', (v) => {
       percentRef.current = v
@@ -65,7 +61,6 @@ export default function ChargingWidget() {
     return unsub
   }, [percent])
 
-  // Count-up loop using Framer Motion animate
   useEffect(() => {
     let alive = true
 
@@ -89,7 +84,6 @@ export default function ChargingWidget() {
     return () => { alive = false }
   }, [percent])
 
-  // RAF wave animation — mutates SVG path refs directly, no React state
   useEffect(() => {
     let rafId: number
     let offset1 = 0
@@ -141,31 +135,31 @@ export default function ChargingWidget() {
         aria-label={`Charging: ${TARGET_PERCENT}%`}
       >
         <defs>
-          {/* Clip to circle interior */}
+          {}
           <clipPath id="cw-circle-clip">
             <circle cx="100" cy="100" r="88" />
           </clipPath>
 
-          {/* Bolt glow */}
+          {}
           <filter id="cw-bolt-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
             <feComposite in="blur" in2="SourceGraphic" operator="over" />
           </filter>
         </defs>
 
-        {/* Background circle */}
+        {}
         <circle cx="100" cy="100" r="88" fill={BG_CIRCLE_COLOR} />
 
-        {/* Wave group — clipped to circle */}
+        {}
         <g clipPath="url(#cw-circle-clip)">
           <path ref={wave1Ref} fill={WAVE1_COLOR} d="M 0 200 L 200 200 L 200 200 L 0 200 Z" />
           <path ref={wave2Ref} fill={WAVE2_COLOR} d="M 0 200 L 200 200 L 200 200 L 0 200 Z" />
         </g>
 
-        {/* Ring */}
+        {}
         <circle cx="100" cy="100" r="88" fill="none" stroke={RING_COLOR} strokeWidth="3" />
 
-        {/* Lightning bolt */}
+        {}
         <g transform="translate(100, 52) scale(0.7)" filter="url(#cw-bolt-glow)">
           <path
             d="M 8 -20 L -8 2 L 0 2 L -8 20 L 8 -2 L 0 -2 Z"
@@ -174,7 +168,7 @@ export default function ChargingWidget() {
           />
         </g>
 
-        {/* Percentage number — direct DOM text updated by RAF/MotionValue */}
+        {}
         <text
           ref={displayRef}
           x="100"
@@ -190,7 +184,7 @@ export default function ChargingWidget() {
           0
         </text>
 
-        {/* % sign below number */}
+        {}
         <text
           x="100"
           y="140"

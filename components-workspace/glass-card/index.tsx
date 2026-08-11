@@ -1,13 +1,17 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a set of glass feature cards over a shared image backdrop.
+ * Pointer movement tilts each card while its border gradient rotates.
+ */
 
 import { useRef } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { ChartLineUp, Lightning, ShieldCheck, ArrowRight } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
 
-// ─── Customise here ──────────────────────────────────────────────────────────
+// customize: replace the background and card data below
 
 const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
 
@@ -17,7 +21,6 @@ const CARDS: { title: string; subtitle: string; color: string; gradient: string;
   { title: 'Security',   subtitle: 'Enterprise-grade protection for your data.',              color: '#FF7B54', gradient: '#FF7B54, #FFBE0B', cta: 'View Report',        Icon: ShieldCheck  },
 ]
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 function GlassCardItem({
   title,
@@ -62,7 +65,7 @@ function GlassCardItem({
       style={{ rotateX, rotateY, transformPerspective: 800 }}
       className="relative w-64 cursor-pointer overflow-hidden rounded-3xl p-[1px]"
     >
-      {/* Rotating border gradient */}
+      {}
       <motion.div
         className="absolute inset-0 rounded-3xl opacity-30"
         style={{ background: `linear-gradient(135deg, ${gradient}, transparent 60%)` }}
@@ -70,7 +73,7 @@ function GlassCardItem({
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
       />
 
-      {/* Card body */}
+      {}
       <div
         className="relative rounded-3xl p-6"
         style={{
@@ -80,7 +83,7 @@ function GlassCardItem({
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
         }}
       >
-        {/* Icon — notification-style tinted badge */}
+        {}
         <motion.div
           className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
           style={{
@@ -96,7 +99,7 @@ function GlassCardItem({
         <h3 className="mb-2 text-base font-semibold text-white/90">{title}</h3>
         <p className="mb-5 text-sm leading-relaxed text-white/40">{subtitle}</p>
 
-        {/* CTA */}
+        {}
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
@@ -123,7 +126,7 @@ function GlassCardItem({
           />
         </motion.button>
 
-        {/* Top edge highlight */}
+        {}
         <div
           className="absolute left-6 right-6 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}

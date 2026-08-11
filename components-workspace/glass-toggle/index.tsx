@@ -1,6 +1,10 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a glass settings panel with a spring-animated toggle.
+ * Switching changes the thumb position, status label, and track glow.
+ */
 
 import { useState, useEffect, useId } from 'react'
 import { motion, useSpring, useTransform } from 'framer-motion'
@@ -74,14 +78,14 @@ function Toggle({
         }}
         whileTap={{ scale: 0.95 }}
       >
-        {/* Glow when on */}
+        {}
         <motion.div
           className="absolute inset-0 rounded-full"
           animate={{ opacity: on ? 0.3 : 0 }}
           style={{ background: `radial-gradient(circle at 75% 50%, ${color}, transparent 70%)` }}
         />
 
-        {/* Thumb */}
+        {}
         <motion.div
           className="absolute top-1/2 h-6 w-6 rounded-full"
           style={{
@@ -93,7 +97,7 @@ function Toggle({
             boxShadow: thumbShadow,
           }}
         >
-          {/* Thumb inner highlight */}
+          {}
           <div
             className="absolute inset-[2px] rounded-full"
             style={{
@@ -109,13 +113,13 @@ function Toggle({
 export default function GlassToggle() {
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image */}
+      {}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%201%20(1).png"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
-      {/* Settings panel */}
+      {}
       <motion.div
         initial={{ y: 20, scale: 0.96 }}
         animate={{ y: 0, scale: 1 }}
@@ -127,18 +131,18 @@ export default function GlassToggle() {
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         }}
       >
-        {/* Blur layer — non-animating, isolated from entrance spring */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
           style={{ backdropFilter: 'blur(24px) saturate(1.6)', WebkitBackdropFilter: 'blur(24px) saturate(1.6)' }}
         />
-        {/* Top highlight */}
+        {}
         <div
           className="absolute left-7 right-7 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}
         />
 
-        {/* Header */}
+        {}
         <h3 className="text-base font-semibold text-white/80">Preferences</h3>
 
         <Toggle label="Dark Mode" defaultOn={true} color="#FF6BF5" delay={0.1} />

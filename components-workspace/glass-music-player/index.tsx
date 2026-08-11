@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Simulates a glass music player with track switching and playback progress.
+ * Play and skip drive the simulated timeline, while like and shuffle toggle local state.
+ */
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
@@ -23,12 +27,11 @@ export default function GlassMusicPlayer() {
   const [playing,   setPlaying]   = useState(false)
   const [liked,     setLiked]     = useState(false)
   const [shuffled,  setShuffled]  = useState(false)
-  const [elapsed,   setElapsed]   = useState(0)   // seconds — updated at ~4fps for timestamps only
+  const [elapsed,   setElapsed]   = useState(0)
   const rafRef      = useRef<number>(0)
   const startRef    = useRef(0)
   const progressRef = useRef(0)
 
-  // MotionValue drives the bar width directly — zero React re-renders per frame
   const progressMV  = useMotionValue(0)
   const barWidth    = useTransform(progressMV, v => `${v * 100}%`)
 
@@ -44,10 +47,9 @@ export default function GlassMusicPlayer() {
       const pct = Math.min(ms / (track.duration * (1000 / SPEED)), 1)
       progressRef.current = pct
 
-      // Update bar without triggering React render
       progressMV.set(pct)
 
-      // Update timestamp text at ~4 fps — imperceptible lag, zero jank
+      // tune: raise the interval to reduce timestamp updates
       if (now - lastLabelUpdate > 250) {
         setElapsed(pct * track.duration)
         lastLabelUpdate = now
@@ -76,14 +78,14 @@ export default function GlassMusicPlayer() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background */}
+      {}
       <img
         src="https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Card */}
+      {}
       <motion.div
         initial={{ y: 24, scale: 0.95 }}
         animate={{ y: 0, scale: 1 }}
@@ -95,12 +97,12 @@ export default function GlassMusicPlayer() {
           boxShadow: '0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)',
         }}
       >
-        {/* Blur layer — non-animating, isolated from entrance spring */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-[32px]"
           style={{ backdropFilter: 'blur(48px) saturate(1.6)', WebkitBackdropFilter: 'blur(48px) saturate(1.6)' }}
         />
-        {/* Top edge highlight */}
+        {}
         <div
           className="absolute left-12 right-12 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)' }}
@@ -108,9 +110,9 @@ export default function GlassMusicPlayer() {
 
         <div className="flex flex-col items-center px-7 pb-7 pt-6">
 
-          {/* ── Top bar ───────────────────────────────────────────────────────── */}
+          {}
           <div className="mb-6 flex w-full items-center justify-between">
-            {/* Decorative chrome — no real navigation in this demo, so not announced as actionable */}
+            {}
             <motion.div
               aria-hidden
               whileHover={{ scale: 1.15, color: 'rgba(255,255,255,0.8)' }}
@@ -139,7 +141,7 @@ export default function GlassMusicPlayer() {
             </motion.button>
           </div>
 
-          {/* ── Album art — large circle ──────────────────────────────────────── */}
+          {}
           <AnimatePresence mode="wait">
             <motion.div
               key={trackIdx}
@@ -149,7 +151,7 @@ export default function GlassMusicPlayer() {
               transition={{ type: 'spring', stiffness: 260, damping: 26 }}
               className="relative mb-7"
             >
-              {/* Ambient glow behind the disc */}
+              {}
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
@@ -159,7 +161,7 @@ export default function GlassMusicPlayer() {
                   transform: 'scale(1.15)',
                 }}
               />
-              {/* Disc */}
+              {}
               <div
                 className="relative flex h-44 w-44 items-center justify-center rounded-full"
                 style={{
@@ -183,7 +185,7 @@ export default function GlassMusicPlayer() {
                       }}
                     />
                   ))}
-                  {/* Center hole */}
+                  {}
                   <div
                     className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full"
                     style={{
@@ -196,7 +198,7 @@ export default function GlassMusicPlayer() {
             </motion.div>
           </AnimatePresence>
 
-          {/* ── Track info ────────────────────────────────────────────────────── */}
+          {}
           <AnimatePresence mode="wait">
             <motion.div
               key={trackIdx}
@@ -211,7 +213,7 @@ export default function GlassMusicPlayer() {
             </motion.div>
           </AnimatePresence>
 
-          {/* ── Pagination dots ───────────────────────────────────────────────── */}
+          {}
           <div className="mb-5 flex items-center gap-[7px]">
             {TRACKS.map((_, i) => (
               <motion.button
@@ -235,9 +237,9 @@ export default function GlassMusicPlayer() {
             ))}
           </div>
 
-          {/* ── Progress bar ──────────────────────────────────────────────────── */}
+          {}
           <div className="mb-5 w-full">
-            {/* Track */}
+            {}
             <div
               className="relative h-[3px] w-full overflow-hidden rounded-full"
               style={{ background: 'rgba(255,255,255,0.07)' }}
@@ -260,7 +262,7 @@ export default function GlassMusicPlayer() {
             </div>
           </div>
 
-          {/* ── Controls ──────────────────────────────────────────────────────── */}
+          {}
           <div className="flex w-full items-center justify-between">
 
             <motion.button
@@ -284,7 +286,7 @@ export default function GlassMusicPlayer() {
               <SkipBack size={26} weight="fill" />
             </motion.button>
 
-            {/* Play / Pause — main CTA */}
+            {}
             <motion.button
               whileHover={{ scale: 1.07 }}
               whileTap={{ scale: 0.92 }}
@@ -331,7 +333,7 @@ export default function GlassMusicPlayer() {
               <SkipForward size={26} weight="fill" />
             </motion.button>
 
-            {/* Decorative chrome — no real queue panel in this demo, so not announced as actionable */}
+            {}
             <motion.div
               aria-hidden
               whileHover={{ scale: 1.15, color: 'rgba(255,255,255,0.75)' }}

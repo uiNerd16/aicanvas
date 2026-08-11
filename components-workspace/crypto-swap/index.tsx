@@ -1,6 +1,10 @@
 'use client'
 
-// npm install framer-motion @phosphor-icons/react
+// npm install @phosphor-icons/react framer-motion react-dom
+/**
+ * Presents a token swap card with live quotes, token pickers, and configurable slippage.
+ * Selecting a duplicate token flips the pair, while submission animates confirmation.
+ */
 
 import {
   useState,
@@ -30,15 +34,6 @@ import {
   GearSix,
 } from '@phosphor-icons/react'
 
-// ─── Theme hook ───────────────────────────────────────────────────────────────
-// Resolves the active theme from the nearest `[data-card-theme]` wrapper when one
-// exists (the preview card toggles a `dark` class on that wrapper, NOT on <html>),
-// and falls back to the `dark` class on <html> otherwise — so this stays fully
-// copy-paste portable: in a user's project with no `[data-card-theme]`, it reads
-// `<html>.dark` exactly as before. Stays in sync via a MutationObserver watching
-// both the card wrapper and <html>, so inline hex colors can branch per theme
-// without any external dependency.
-
 type Theme = 'light' | 'dark'
 
 function readTheme(el: HTMLElement | null): Theme {
@@ -56,12 +51,10 @@ function useTheme(rootRef: React.RefObject<HTMLElement | null>): { theme: Theme 
     if (typeof document === 'undefined') return
     const update = () => setTheme(readTheme(el))
     const observer = new MutationObserver(update)
-    // Watch <html> for the global toggle…
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class'],
     })
-    // …and the card wrapper (when present) for the preview's local toggle.
     const card = el?.closest('[data-card-theme]')
     if (card) {
       observer.observe(card, {
@@ -74,30 +67,19 @@ function useTheme(rootRef: React.RefObject<HTMLElement | null>): { theme: Theme 
   return { theme }
 }
 
-// ─── Types ─────────────────────────────────────────────────────────────────
 
 interface Token {
   symbol: string
   name: string
   usdPrice: number
-  /** Seed price captured once — the 24h-change baseline as the live price drifts. */
   basePrice: number
   balance: number
-  /** signed 24h price change in percent, e.g. 1.52 or -0.84 */
   change24h: number
-  /** two-stop gradient for the fallback coin disc (used when a symbol has no
-   *  inlined SVG mark in COIN_SVGS — see CoinIcon/CoinDisc) */
   gradient: [string, string]
 }
 
 type SwapStatus = 'idle' | 'swapping' | 'success'
 type Side = 'sell' | 'buy'
-
-// ─── Mock token table ───────────────────────────────────────────────────────
-// Realistic-ish prices + signed 24h change. Each token renders with its real
-// brand coin mark (inlined SVG, see COIN_SVGS) — the `gradient` is only a
-// fallback disc for any symbol without an inlined mark, so there are still zero
-// external image/icon deps. Stablecoins (USDC/USDT) hold a ~0% change by design.
 
 const INITIAL_TOKENS: Token[] = [
   { symbol: 'ETH',   name: 'Ethereum',   usdPrice: 3412.55,  basePrice: 3412.55,  balance: 52.32,    change24h:  2.41, gradient: ['#627EEA', '#8FA7FF'] },
@@ -111,41 +93,35 @@ const INITIAL_TOKENS: Token[] = [
 ]
 
 const PRICE_DRIFT_MS = 3000
-/** "Swapping…" spinner is visible for this long before success. */
+// tune: raise to extend the swapping state
 const SWAP_SWAPPING_MS = 900
-/** "Swapped!" success state is held visible for this long before resetting. */
+// tune: raise to extend the success state
 const SWAP_SUCCESS_MS = 1600
 
-// ─── Swap economics (a coherent constant-product-ish model) ───────────────────
-// Liquidity depth of the pool: bigger trades eat more of the book, so a $68k
-// trade nudges price ~0.27% while a $5M trade gets clamped near the cap.
+// tune: raise to reduce quoted price impact
 const POOL_DEPTH_USD = 25_000_000
-/** Smallest impact a non-zero trade can show (a tiny base spread). */
-const IMPACT_FLOOR = 0.0005 // 0.05%
-/** Largest impact we'll quote (protects the headline from huge trades). */
-const IMPACT_CAP = 0.05 // 5%
-/** Base gas estimate in USD. Paid in the native token — does NOT cut output. */
+// tune: raise to increase the minimum quoted price impact
+const IMPACT_FLOOR = 0.0005
+// tune: raise to increase the maximum quoted price impact
+const IMPACT_CAP = 0.05
+// tune: raise to increase the baseline network fee
 const NETWORK_FEE_BASE_USD = 2.4
 
-/** Slippage tolerance options offered in the settings popover. */
 interface SlippageOption {
   label: string
   value: number
 }
 const SLIPPAGE_OPTIONS: SlippageOption[] = [
-  { label: 'Auto', value: 0.005 }, // 0.5%
+  { label: 'Auto', value: 0.005 },
   { label: '0.1%', value: 0.001 },
   { label: '0.5%', value: 0.005 },
   { label: '1.0%', value: 0.01 },
 ]
 const DEFAULT_SLIPPAGE = SLIPPAGE_OPTIONS[0].value
 
-/** Default Sell amount — seeds the input and is restored when the Sell token is
- *  changed to a brand-new token (a stale amount like "525 BTC" shouldn't carry
- *  over to a different token). */
+// tune: change to set the initial sell amount
 const DEFAULT_SELL_INPUT = '1'
 
-/** Angles (radians) for the one-shot success spark burst — 6 evenly spaced. */
 const SUCCESS_SPARKS: number[] = Array.from(
   { length: 6 },
   (_, i) => (i / 6) * Math.PI * 2,
@@ -155,7 +131,6 @@ function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n))
 }
 
-// ─── Trend colors (readable in both themes) ──────────────────────────────────
 
 interface TrendColors {
   up: string
@@ -168,7 +143,6 @@ function trendColors(isDark: boolean): TrendColors {
     : { up: '#0FA968', down: '#E5484D', flat: '#6E6E66' }
 }
 
-// ─── Formatting helpers ──────────────────────────────────────────────────────
 
 function formatUsd(value: number): string {
   if (!Number.isFinite(value)) return '$0.00'
@@ -180,28 +154,12 @@ function formatUsd(value: number): string {
   })
 }
 
-/**
- * How many fraction digits a magnitude deserves. Normal amounts (≥1) stay at the
- * preferred 2 decimals; sub-unit amounts get progressively more so a small but
- * nonzero value never collapses to "0":
- *   abs >= 1     → 2   (64,308.33 stays 2 decimals)
- *   0.01–1       → 4   (0.5 stays "0.5", 0.0123 keeps 4)
- *   < 0.01 (≠0)  → 8   (0.0000147 keeps its digits)
- */
 function adaptiveFractionDigits(abs: number): number {
   if (abs >= 1) return 2
   if (abs >= 0.01) return 4
   return 8
 }
 
-/**
- * Token-amount display: magnitude-adaptive fraction digits (see
- * adaptiveFractionDigits), with thousands separators and trailing zeros trimmed.
- * Whole numbers show no decimal point — so `64308.33`, `1.5`, `1000`, and a tiny
- * `0.0000147` keeps its digits instead of flattening to `0`. `minimumFractionDigits: 0`
- * already drops trailing zeros, so `1.50` → `1.5` and `2.00` → `2`. A genuine 0
- * (or non-finite) → `'0'`.
- */
 function formatTokenAmount(value: number): string {
   if (!Number.isFinite(value) || value === 0) return '0'
   return value.toLocaleString('en-US', {
@@ -210,29 +168,17 @@ function formatTokenAmount(value: number): string {
   })
 }
 
-/**
- * Cap a numeric value for DISPLAY in the editable Sell input. Truncates (not
- * rounds) past the magnitude-adaptive digit count so the digits the user sees
- * match what they typed, and trims trailing zeros / a dangling dot. Used by
- * handleFlip / handleMax when seeding the Sell field from a precise amount.
- * NEVER returns "0" for a nonzero input — if truncation would zero it out, it
- * falls back to value.toPrecision(4) so a tiny amount stays seedable (and the
- * Swap button stays enabled). Returns '' for a genuine 0 / non-finite.
- */
 function capForInput(value: number): string {
   if (!Number.isFinite(value) || value === 0) return ''
   const digits = adaptiveFractionDigits(Math.abs(value))
   const factor = 10 ** digits
-  // Truncate toward zero at `digits` decimals, then drop trailing zeros via Number().
   const truncated = Math.trunc(value * factor) / factor
   if (truncated === 0) {
-    // Truncation wiped a nonzero value — keep significant digits instead of "0".
     return String(Number(value.toPrecision(4)))
   }
   return String(truncated)
 }
 
-/** Rate value precision: adaptive — small numbers need more decimals. */
 function formatRate(value: number): string {
   if (!Number.isFinite(value) || value === 0) return '0'
   const abs = Math.abs(value)
@@ -247,22 +193,10 @@ function formatRate(value: number): string {
   })
 }
 
-/**
- * Sign-less percent for the 24h trend, e.g. "2.41%" / "0.84%". Direction is
- * conveyed entirely by the caret + red/green color in TrendChip, so we never
- * render a + or − here.
- */
 function formatChange(value: number): string {
   return `${Math.abs(value).toFixed(2)}%`
 }
 
-/**
- * Keep only a valid decimal string: digits + a single dot, capped at 8 digits
- * after the decimal point so fractional BTC/ETH (e.g. 0.00045123) are enterable.
- * Typing 2 decimals on big amounts still works exactly as before. A typed 9th+
- * decimal is dropped (no thousands separators here — the input owns its own
- * cursor, so it stays raw digits + dot).
- */
 function sanitizeDecimal(raw: string): string {
   let cleaned = raw.replace(/[^0-9.]/g, '')
   const firstDot = cleaned.indexOf('.')
@@ -271,12 +205,10 @@ function sanitizeDecimal(raw: string): string {
       cleaned.slice(0, firstDot + 1) +
       cleaned.slice(firstDot + 1).replace(/\./g, '')
   }
-  // Cap to 8 decimals: anything past the 8th digit after the dot is ignored.
   const dot = cleaned.indexOf('.')
   if (dot !== -1) {
     cleaned = cleaned.slice(0, dot + 1) + cleaned.slice(dot + 1, dot + 9)
   }
-  // strip leading zeros like "007" → "7" but keep "0." and "0"
   if (cleaned.length > 1 && cleaned[0] === '0' && cleaned[1] !== '.') {
     cleaned = cleaned.replace(/^0+/, '')
     if (cleaned === '' || cleaned[0] === '.') cleaned = '0' + cleaned
@@ -284,8 +216,7 @@ function sanitizeDecimal(raw: string): string {
   return cleaned
 }
 
-// ─── Trend classification (for ~0 stablecoins) ────────────────────────────────
-/** Anything within ±0.05% reads as flat/neutral. */
+// tune: raise to widen the neutral trend band
 const TREND_FLAT_EPS = 0.05
 function classifyTrend(change: number): 'up' | 'down' | 'flat' {
   if (change > TREND_FLAT_EPS) return 'up'
@@ -293,19 +224,8 @@ function classifyTrend(change: number): 'up' | 'down' | 'flat' {
   return 'flat'
 }
 
-// ─── Coin icons ───────────────────────────────────────────────────────────────
-// Coin icons: spothq/cryptocurrency-icons (CC0-1.0, public domain — no
-// attribution required, commercial use OK). The SVG markup below is inlined
-// VERBATIM from that set's `svg/color/<symbol>.svg` files (not redrawn), with
-// SVG attributes converted to valid JSX (fill-rule → fillRule, fill-opacity →
-// fillOpacity, etc.) and the literal width/height dropped so each mark renders
-// at the requested `size` while keeping its own 0 0 32 32 viewBox. These marks
-// are brand-colored and identical in light + dark — coin logos don't theme.
-// Logos are trademarks of their respective projects; used nominatively to
-// identify each token.
-//
-// Keyed by token symbol (uppercase). Any symbol absent here falls back to the
-// gradient/letter disc (see CoinDisc) so nothing breaks.
+// Coin marks are adapted from spothq/cryptocurrency-icons under CC0-1.0.
+// Trademarks belong to their respective projects.
 
 const COIN_SVGS: Record<string, React.ReactNode> = {
   ETH: (
@@ -387,11 +307,6 @@ const COIN_SVGS: Record<string, React.ReactNode> = {
   ),
 }
 
-/**
- * Real, brand-colored coin mark for a token symbol. Renders the inlined SVG
- * from COIN_SVGS at `size` (width = height = size), keeping the source 32×32
- * viewBox. Symbols missing from the map fall back to the gradient/letter disc.
- */
 function CoinIcon({ token, size }: { token: Token; size: number }) {
   const mark = COIN_SVGS[token.symbol]
   if (!mark) return <CoinDisc token={token} size={size} />
@@ -411,7 +326,6 @@ function CoinIcon({ token, size }: { token: Token; size: number }) {
   )
 }
 
-// ─── Coin disc (gradient/letter fallback) ─────────────────────────────────────
 
 function CoinDisc({ token, size }: { token: Token; size: number }) {
   const letters = token.symbol.slice(0, token.symbol.length <= 3 ? 1 : 2)
@@ -433,10 +347,6 @@ function CoinDisc({ token, size }: { token: Token; size: number }) {
   )
 }
 
-// ─── Trend chip (caret + sign-less %) ─────────────────────────────────────────
-// Direction is shown by the caret (up/down) + red/green color only — the
-// percentage is rendered as an absolute value with NO leading + or − sign.
-
 function TrendChip({ token, isDark }: { token: Token; isDark: boolean }) {
   const dir = classifyTrend(token.change24h)
   const colors = trendColors(isDark)
@@ -453,7 +363,6 @@ function TrendChip({ token, isDark }: { token: Token; isDark: boolean }) {
   )
 }
 
-// ─── Animated number (count / roll) ──────────────────────────────────────────
 
 function AnimatedNumber({
   value,
@@ -470,9 +379,6 @@ function AnimatedNumber({
 }) {
   const mv = useMotionValue(value)
   const display = useTransform(mv, (n) => format(n))
-  // Last value we actually animated TO — lets us skip re-tweening on the tiny
-  // sub-perceptible deltas the live price-drift tick produces (which would
-  // otherwise restart a 0.5s tween every few seconds and never settle).
   const last = useRef(value)
 
   useEffect(() => {
@@ -481,8 +387,7 @@ function AnimatedNumber({
       last.current = value
       return
     }
-    // Relative change below 0.1% is imperceptible at these magnitudes — just snap
-    // the motion value (no tween) so drift ticks don't continuously re-animate.
+    // tune: raise the threshold to snap more price changes
     const rel = Math.abs(value - last.current) / (Math.abs(last.current) || 1)
     if (rel < 0.001) {
       mv.set(value)
@@ -504,32 +409,18 @@ function AnimatedNumber({
   )
 }
 
-// ─── Desktop dropdown anchoring (CONTAINED inside the component box) ──────────
-// The desktop dropdown is portaled to <body> (for clip-safety against the card's
-// transformed Framer-Motion wrapper) but its size AND position are computed from
-// the COMPONENT box (`cardRef`), never the viewport. The panel therefore:
-//   • spans the full width of the component (left/right aligned to the card)
-//   • never grows taller than the component box
-//   • opens just under the clicked pill, flipping UP (above the pill) when 3
-//     rows below would spill past the component's bottom edge — so it always
-//     stays inside the component bounds.
-// Measurement runs in a layout effect (the established pattern — avoids the
-// ghost-row scroll bug) and recomputes on scroll/resize while open.
-
-/** Compact desktop row height — three of these set the default open height. */
+// tune: raise to make token rows taller
 const ROW_HEIGHT = 48
-/** Rows visible before the list scrolls. */
+// tune: raise to show more token rows before scrolling
 const VISIBLE_ROWS = 3
-/** Vertical gap between the row gaps in the list (matches gap-1 = 4px). */
+// tune: raise to increase spacing between token rows
 const ROW_GAP = 4
-/** Inner vertical padding of the panel (p-1.5 top + bottom = 6 + 6). */
+// tune: raise to increase the dropdown's vertical padding
 const PANEL_PAD_Y = 12
-/** Default list height: 3 rows + the gaps between them. */
 const LIST_DEFAULT_HEIGHT =
   ROW_HEIGHT * VISIBLE_ROWS + ROW_GAP * (VISIBLE_ROWS - 1)
-/** Default panel height (list + padding) — the small, short case. */
 const PANEL_DEFAULT_HEIGHT = LIST_DEFAULT_HEIGHT + PANEL_PAD_Y
-/** Gap between the pill and the dropdown edge. */
+// tune: raise to move the dropdown farther from its trigger
 const DROPDOWN_GAP = 8
 
 type Placement = 'down' | 'up'
@@ -542,17 +433,6 @@ interface PopoverPosition {
   placement: Placement
 }
 
-/**
- * Anchors a `fixed` popover so it is CONTAINED by the component box.
- *
- * Width + left/right come from `boundRef` (the component card) — the panel
- * spans the whole component and never exceeds its width. The vertical anchor
- * comes from `triggerRef` (the clicked pill): the panel opens just under the
- * pill, but its height is clamped so its bottom never passes the card's bottom
- * edge. When 3 rows below the pill won't fit inside the card, it flips up and
- * its top is clamped to the card's top edge. `maxHeight` is therefore always
- * ≤ the component's height. Returns `null` until the first measurement lands.
- */
 function usePopoverPosition(
   triggerRef: React.RefObject<HTMLElement | null> | undefined,
   boundRef: React.RefObject<HTMLElement | null> | undefined,
@@ -566,15 +446,10 @@ function usePopoverPosition(
       return
     }
 
-    // Last committed position, kept so reflow-driven re-measures can diff against
-    // it WITHOUT triggering a re-render. We only call setState when the
-    // newly-measured geometry actually moved past a small epsilon (below).
     let last: PopoverPosition | null = null
-    // Re-anchoring only matters down to sub-pixel; anything under this is noise
-    // (sub-pixel layout rounding) and re-rendering on it would thrash the panel.
+    // tune: raise to ignore larger dropdown position shifts
     const EPS = 0.5
 
-    /** Measure-only: returns the would-be position, or null if refs are gone. */
     const measure = (): PopoverPosition | null => {
       const pill = triggerRef?.current
       const card = boundRef?.current
@@ -582,22 +457,15 @@ function usePopoverPosition(
       const pillRect = pill.getBoundingClientRect()
       const cardRect = card.getBoundingClientRect()
 
-      // Width + horizontal position = the component's box exactly.
       const width = cardRect.width
       const left = cardRect.left
 
-      // Room available below the pill but still INSIDE the card, vs. above it.
       const spaceBelow = cardRect.bottom - pillRect.bottom - DROPDOWN_GAP
       const spaceAbove = pillRect.top - cardRect.top - DROPDOWN_GAP
 
-      // The panel's height ceiling is the component's own height (never taller).
       const cardHeight = cardRect.height
-      // Default short height (3 rows) — but never taller than the card.
       const desired = Math.min(PANEL_DEFAULT_HEIGHT, cardHeight)
 
-      // Drop down if the desired short panel fits below the pill inside the
-      // card; otherwise flip up so it stays contained. If it fits neither
-      // (a very short component), take whichever side has more room.
       let placement: Placement
       if (desired <= spaceBelow) placement = 'down'
       else if (desired <= spaceAbove) placement = 'up'
@@ -607,22 +475,17 @@ function usePopoverPosition(
       let maxHeight: number
       if (placement === 'down') {
         top = pillRect.bottom + DROPDOWN_GAP
-        // Cap to the room that remains inside the card below the pill.
         maxHeight = Math.min(desired, Math.max(0, spaceBelow))
       } else {
-        // Flip up: cap to the room above the pill inside the card, and seat the
-        // bottom edge ~gap above the pill top.
         maxHeight = Math.min(desired, Math.max(0, spaceAbove))
         top = pillRect.top - DROPDOWN_GAP - maxHeight
       }
 
-      // Final guard — the panel can never exceed the component's height.
       maxHeight = Math.min(maxHeight, cardHeight)
 
       return { top, left, width, maxHeight, placement }
     }
 
-    /** True when `next` has meaningfully moved from `prev` (or placement changed). */
     const changed = (
       prev: PopoverPosition | null,
       next: PopoverPosition,
@@ -637,7 +500,6 @@ function usePopoverPosition(
       )
     }
 
-    /** Measure + commit, but only when geometry actually changed (anti-thrash). */
     const compute = () => {
       const next = measure()
       if (!next) return
@@ -647,17 +509,8 @@ function usePopoverPosition(
       }
     }
 
-    // First measurement lands synchronously in the layout effect (the
-    // established pattern — avoids the ghost-row scroll bug).
     compute()
 
-    // Re-anchor on REFLOW rather than every frame. The card is vertically
-    // centered, so ANY height change (expanding the details accordion, opening
-    // the slippage popover, the animated-number height, the success state)
-    // re-centers the stack and moves the trigger pill. A ResizeObserver on the
-    // card (boundRef) fires on exactly those height changes, so the portaled
-    // dropdown stays glued to its pill — without a per-frame getBoundingClientRect
-    // loop. Observing the trigger pill too covers any pill-size change.
     const card = boundRef?.current ?? null
     const pill = triggerRef?.current ?? null
     let ro: ResizeObserver | null = null
@@ -667,8 +520,6 @@ function usePopoverPosition(
       if (pill) ro.observe(pill)
     }
 
-    // Scroll/resize listeners keep the anchor correct when the page (not the
-    // component) moves — a scroll or a viewport resize.
     window.addEventListener('scroll', compute, true)
     window.addEventListener('resize', compute)
     return () => {
@@ -681,7 +532,6 @@ function usePopoverPosition(
   return pos
 }
 
-// ─── Token picker (single contained dropdown, at every width) ────────────────
 
 function TokenPicker({
   tokens,
@@ -698,9 +548,7 @@ function TokenPicker({
   activeSymbol: string
   isDark: boolean
   reduced: boolean
-  /** id used for the listbox container + `aria-controls` on the trigger pill. */
   listId: string
-  /** Builds a stable per-option id (shared base from the SwapCard's useId). */
   optionId: (symbol: string) => string
   triggerRef?: React.RefObject<HTMLButtonElement | null>
   boundRef?: React.RefObject<HTMLElement | null>
@@ -708,10 +556,6 @@ function TokenPicker({
 }) {
   const position = usePopoverPosition(triggerRef, boundRef, true)
 
-  // ── Keyboard navigation (listbox roving focus) ──────────────────────────────
-  // These hooks MUST run before the `!position` early-return below, so they sit
-  // at the top of the component (rules of hooks). The active descendant starts on
-  // the currently-selected token and moves with Arrow/Home/End; Enter/Space pick.
   const activeStart = Math.max(
     0,
     tokens.findIndex((t) => t.symbol === activeSymbol),
@@ -720,22 +564,14 @@ function TokenPicker({
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([])
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // Clamp the active index if the token list length ever changes under us.
   const safeIndex = Math.min(activeIndex, tokens.length - 1)
 
-  // When the panel mounts (position measured), move focus to the active option so
-  // keyboard users land inside the list. preventScroll keeps the page still.
   useEffect(() => {
     if (!position) return
     optionRefs.current[safeIndex]?.focus({ preventScroll: true })
-    // Run once the panel is first positioned.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position !== null])
 
-  // On unmount (picker closed for ANY reason), restore focus to the trigger pill
-  // — but ONLY if focus was still inside the panel at close time. A pointer/tap
-  // close lands focus elsewhere, so this never steals focus from the tap flow;
-  // keyboard close (Esc, arrow + Enter, click-select) keeps focus in the panel.
   useEffect(() => {
     const trigger = triggerRef?.current
     const panel = panelRef.current
@@ -782,8 +618,6 @@ function TokenPicker({
           onSelect(tokens[safeIndex].symbol)
           break
         case 'Tab': {
-          // Trap focus within the panel (wrap at both ends) so keyboard users
-          // can't tab out into the page behind the popover.
           const last = tokens.length - 1
           if (e.shiftKey && safeIndex === 0) {
             e.preventDefault()
@@ -804,21 +638,12 @@ function TokenPicker({
     [focusIndex, onSelect, safeIndex, tokens],
   )
 
-  // Borderless: surfaces separate by fill contrast + soft shadow only. The
-  // dropdown sits one notch above the inner blocks so it reads as elevated.
   const surface = isDark ? '#26262A' : '#FFFFFF'
   const titleColor = isDark ? '#ECECEC' : '#16160F'
   const subColor = isDark ? '#8A8A86' : '#6B6B62'
   const rowHover = isDark ? '#2F2F34' : '#F2F2EF'
-  // Active token row → periwinkle tint (the reference's signature accent).
   const activeFill = isDark ? 'rgba(174,182,236,0.16)' : 'rgba(154,166,234,0.16)'
 
-  // Visible custom scrollbar ("sidebar navigation"). Scoped via Tailwind
-  // arbitrary variants (no global CSS) for WebKit, plus inline props for
-  // Firefox. The full per-theme class strings are written out as complete
-  // literals (not concatenated value fragments) so Tailwind's JIT scanner
-  // detects them and the component stays copy-paste portable. Tuned to read as
-  // an intentional element, not the thin auto-hide default.
   const scrollThumb = isDark ? '#46464C' : '#C9C9BC'
   const SCROLL_BASE =
     'overflow-y-auto [scrollbar-gutter:stable] ' +
@@ -837,8 +662,6 @@ function TokenPicker({
     ? { duration: 0.15 }
     : ({ type: 'spring', stiffness: 360, damping: 30 } as const)
 
-  // The single token list — compact 48px rows (clears the 44px touch-target
-  // minimum), a visible custom scrollbar, and an active-row highlight.
   const renderList = (listStyle: React.CSSProperties, className: string) => (
     <div
       className={`flex flex-col gap-1 ${scrollClass} ${className}`}
@@ -846,8 +669,6 @@ function TokenPicker({
     >
       {tokens.map((t, i) => {
         const isActive = t.symbol === activeSymbol
-        // Roving tabindex: only the keyboard-active option is tabbable; the rest
-        // are reachable via Arrow/Home/End (and trapped Tab) within the listbox.
         const isCurrent = i === safeIndex
         return (
           <button
@@ -895,16 +716,8 @@ function TokenPicker({
     </div>
   )
 
-  // ── Contained dropdown (short + CONTAINED inside the component box) ──────────
-  // The ONE picker UI at every width. Portaled to <body> so no transformed/
-  // overflow-clipping ancestor (the card's Framer-Motion wrapper) can capture or
-  // cut it off — but its size + position are bounded by `boundRef` (the card; see
-  // usePopoverPosition). Search-free: just the scrollable list. Held back until
-  // the first measurement lands.
   if (typeof document === 'undefined' || !position) return null
 
-  // The panel is only its own vertical padding (p-1.5 = 6px top + bottom); the
-  // list fills the rest and scrolls. maxHeight is already ≤ the component height.
   const listMaxHeight = Math.max(0, position.maxHeight - PANEL_PAD_Y)
 
   return createPortal(
@@ -947,7 +760,6 @@ function TokenPicker({
   )
 }
 
-// ─── Swap card (sell / buy) ───────────────────────────────────────────────────
 
 function SwapCard({
   side,
@@ -973,26 +785,18 @@ function SwapCard({
   hasAmount: boolean
   isDark: boolean
   reduced: boolean
-  /** Trade is confirming — flip/pills/Max go inert (no mutation mid-swap). */
   locked: boolean
   pickerOpen: boolean
   tokens: Token[]
   cardRef: React.RefObject<HTMLDivElement | null>
-  /** Only the Sell side renders an editable input — optional, omitted on Buy. */
   onInputChange?: (value: string) => void
-  /** Only the Sell side renders a Max button — optional, omitted on Buy. */
   onMax?: () => void
   onTogglePicker: () => void
   onSelect: (symbol: string) => void
 }) {
   const isSell = side === 'sell'
-  // The dropdown anchors to this pill's rect (the Sell pill sits high, the Buy
-  // pill lower — each measures its own trigger).
   const pillRef = useRef<HTMLButtonElement>(null)
 
-  // Stable, collision-free ids for the listbox + its options (one base per side).
-  // The trigger pill points `aria-controls` at the listbox; the listbox points
-  // `aria-activedescendant` at an option id; each option carries its own id.
   const idBase = useId()
   const listId = `${idBase}-list`
   const optionId = useCallback(
@@ -1000,7 +804,6 @@ function SwapCard({
     [idBase],
   )
 
-  // Inner block: one notch lighter than the tray, no border (separated by fill).
   const cardBg = isDark ? '#1D1D20' : '#F2F2EF'
   const labelColor = isDark ? '#8A8A86' : '#6B6B62'
   const amountColor = isDark ? '#ECECEC' : '#16160F'
@@ -1016,7 +819,7 @@ function SwapCard({
       </span>
 
       <div className="mt-1 flex items-center gap-3">
-        {/* Amount (editable on sell, computed on buy) */}
+        {}
         <div className="min-w-0 flex-1">
           {isSell ? (
             <input
@@ -1034,9 +837,6 @@ function SwapCard({
               aria-label="Sell amount"
             />
           ) : (
-            // Computed estimate: a polite live region with an accessible name so
-            // screen readers announce + name the value (the editable Sell input
-            // already carries its own aria-label).
             <div
               role="status"
               aria-live="polite"
@@ -1057,9 +857,7 @@ function SwapCard({
           )}
         </div>
 
-        {/* Token selector — pill alone, top-right. Clicking it TOGGLES this
-            side's picker (open if closed, close if already open for this side);
-            see onTogglePicker in the parent. */}
+        {}
         <TokenPill
           ref={pillRef}
           token={token}
@@ -1072,7 +870,7 @@ function SwapCard({
         />
       </div>
 
-      {/* Bottom row — LEFT: 24h trend chip. RIGHT: balance + Max (sell only). */}
+      {}
       <div className="mt-2 flex items-center justify-between gap-2">
         <TrendChip token={token} isDark={isDark} />
 
@@ -1085,10 +883,6 @@ function SwapCard({
               type="button"
               onClick={onMax}
               disabled={locked}
-              // 44px hit area (project rule) with the visible chip kept compact:
-              // the button is a transparent inline-flex ≥44px tall and the
-              // periwinkle fill lives on the inner span, so the touch target
-              // grows without enlarging the visible pill.
               className="inline-flex min-h-[44px] items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed [@media(hover:hover)]:hover:[&>span]:bg-[var(--max-hover)]"
               style={{ opacity: locked ? 0.5 : 1 }}
             >
@@ -1100,9 +894,6 @@ function SwapCard({
                     background: isDark
                       ? 'rgba(174,182,236,0.16)'
                       : 'rgba(154,166,234,0.16)',
-                    // Desktop hover brightens the periwinkle tint (pointer-only).
-                    // While locked, the hover target equals the base fill so a
-                    // hover over the inert button is a visual no-op.
                     '--max-hover': locked
                       ? isDark
                         ? 'rgba(174,182,236,0.16)'
@@ -1120,7 +911,7 @@ function SwapCard({
         )}
       </div>
 
-      {/* Token picker (contained dropdown — portaled + anchored to this pill) */}
+      {}
       <AnimatePresence>
         {pickerOpen && (
           <TokenPicker
@@ -1140,25 +931,20 @@ function SwapCard({
   )
 }
 
-// ─── Token select pill ───────────────────────────────────────────────────────
 
 const TokenPill = forwardRef<
   HTMLButtonElement,
   {
     token: Token
     isDark: boolean
-    /** Whether THIS side's picker is open — drives the caret up/down rotation. */
     open: boolean
     reduced: boolean
-    /** Trade confirming — inert: no hover/tap animation, no click. */
     disabled: boolean
-    /** id of the listbox this pill controls (for `aria-controls`). */
     listId: string
     onClick: () => void
   }
 >(function TokenPill({ token, isDark, open, reduced, disabled, listId, onClick }, ref) {
   const pillBg = isDark ? '#2A2A2E' : '#FFFFFF'
-  // Desktop hover: a faint lift of the pill fill (pointer-only via whileHover).
   const pillHoverBg = isDark ? '#34343A' : '#F4F4F1'
   const caretColor = isDark ? '#8A8A86' : '#6B6B62'
   return (
@@ -1197,8 +983,7 @@ const TokenPill = forwardRef<
       >
         {token.symbol}
       </span>
-      {/* Caret points UP (180°) when this side's picker is open, DOWN when
-          closed. Reduced motion → instant snap (no rotation tween). */}
+      {}
       <motion.span
         animate={{ rotate: open ? 180 : 0 }}
         transition={
@@ -1214,7 +999,6 @@ const TokenPill = forwardRef<
   )
 })
 
-// ─── Details panel (rate row + expandable breakdown + slippage popover) ────────
 
 interface SwapQuote {
   sellToken: Token
@@ -1244,7 +1028,6 @@ function DetailsPanel({
   slippage: number
   onSlippageChange: (value: number) => void
 }) {
-  // Collapsed by default — only the rate row shows until the user expands.
   const [expanded, setExpanded] = useState(false)
   const [inverted, setInverted] = useState(false)
   const [slipOpen, setSlipOpen] = useState(false)
@@ -1252,41 +1035,29 @@ function DetailsPanel({
 
   const labelColor = isDark ? '#8A8A86' : '#6B6B62'
   const valueColor = isDark ? '#ECECEC' : '#16160F'
-  // Inner block: same notch-lighter fill as the Sell/Buy cards, no border.
   const panelBg = isDark ? '#1D1D20' : '#F2F2EF'
-  // Faint fill-lift used for desktop hover on the rate row + chevron toggle (a
-  // subtle wash one notch above the panel fill — applied on pointer devices only
-  // so a mobile tap never sticks).
   const rowHoverFill = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(20,20,18,0.045)'
-  // Hairline divider INSIDE the panel (kept as a subtle fill line, not a border
-  // around any surface) — replaces the old top border on the breakdown.
   const dividerColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(20,20,18,0.08)'
-  // Chips sit on the panel fill — separated by their own fill + soft shadow.
   const chipBg = isDark ? '#26262A' : '#FFFFFF'
-  // Desktop hover fill for the slippage gear chip (a notch above its base fill).
   const chipHoverBg = isDark ? '#303036' : '#F4F4F1'
   const chipShadow = isDark
     ? '0 1px 2px rgba(0,0,0,0.3)'
     : '0 1px 2px rgba(20,20,18,0.08)'
-  // Active slippage chip → periwinkle tint.
   const chipActiveBg = isDark
     ? 'rgba(174,182,236,0.16)'
     : 'rgba(154,166,234,0.16)'
   const chipActiveText = isDark ? '#C7CDF2' : '#4A57B8'
   const colors = trendColors(isDark)
 
-  // Price-impact severity → color (neutral/green <0.5%, amber 0.5–2%, red >2%).
   const impactPct = quote.priceImpact * 100
   const amber = isDark ? '#F5A524' : '#C77700'
   const impactColor =
     impactPct > 2 ? colors.down : impactPct >= 0.5 ? amber : colors.up
 
-  // Rate line: 1 SELL = N BUY, tappable to invert.
   const fromTok = inverted ? quote.buyToken : quote.sellToken
   const toTok = inverted ? quote.sellToken : quote.buyToken
   const rate = inverted ? 1 / quote.midRate : quote.midRate
 
-  // Slippage popover: click-outside + Esc to close.
   useEffect(() => {
     if (!slipOpen) return
     function onKey(e: KeyboardEvent) {
@@ -1323,10 +1094,7 @@ function DetailsPanel({
       className="overflow-hidden rounded-3xl px-4"
       style={{ background: panelBg }}
     >
-      {/* Rate row — fixed 48px so the collapsed accordion reads as one block of
-          the same height as the Swap button. Left button inverts the rate; the
-          chevron toggles the breakdown. The whole row gets a faint desktop
-          hover-lift (pointer devices only, so a mobile tap never sticks). */}
+      {}
       <div
         className="flex items-center justify-between gap-2 -mx-4 px-4 transition-colors [@media(hover:hover)]:hover:bg-[var(--row-hover)]"
         style={
@@ -1336,8 +1104,6 @@ function DetailsPanel({
         <button
           type="button"
           onClick={() => setInverted((v) => !v)}
-          // self-stretch makes the button fill the 48px rate row, so its hit area
-          // clears the 44px minimum (project rule) without changing the layout.
           className="group flex min-w-0 items-center gap-1.5 self-stretch transition-colors"
           aria-label="Invert exchange rate"
         >
@@ -1367,9 +1133,6 @@ function DetailsPanel({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          // 44px hit area (project rule); the visible 26px hover circle lives on
-          // the inner span (negative margin keeps the row layout compact) so the
-          // touch target grows without enlarging the visible toggle.
           className="-my-[9px] -mr-[9px] inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center transition-colors [@media(hover:hover)]:hover:[&>span]:bg-[var(--toggle-hover)]"
           style={{ '--toggle-hover': rowHoverFill } as React.CSSProperties}
           aria-label={expanded ? 'Hide swap details' : 'Show swap details'}
@@ -1390,7 +1153,7 @@ function DetailsPanel({
         </button>
       </div>
 
-      {/* Expandable breakdown */}
+      {}
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
@@ -1401,9 +1164,7 @@ function DetailsPanel({
             transition={reduced ? { duration: 0 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             style={{ overflow: 'visible' }}
           >
-            {/* Divider is a fill-line (inset box-shadow), not a chrome border.
-                pb-3 restores the bottom breathing room now that the panel root
-                no longer carries py (the rate row owns its fixed 48px height). */}
+            {}
             <div
               className="mt-3 flex flex-col gap-1.5 pt-3 pb-3"
               style={{ boxShadow: `inset 0 1px 0 0 ${dividerColor}` }}
@@ -1433,7 +1194,7 @@ function DetailsPanel({
                 />
               </div>
 
-              {/* Slippage row with inline settings popover */}
+              {}
               <div
                 className="relative flex items-center justify-between gap-2"
                 style={{ minHeight: 28 }}
@@ -1445,10 +1206,6 @@ function DetailsPanel({
                 <button
                   type="button"
                   onClick={() => setSlipOpen((v) => !v)}
-                  // 44px hit area (project rule): transparent inline-flex ≥44px
-                  // tall (negative vertical margin keeps the 28px row compact) with
-                  // the visible chip fill on the inner span — touch target grows
-                  // without enlarging the visible chip.
                   className="-my-2 inline-flex min-h-[44px] items-center justify-center transition-colors [@media(hover:hover)]:hover:[&>span]:bg-[var(--chip-hover)]"
                   style={{ '--chip-hover': chipHoverBg } as React.CSSProperties}
                   aria-label="Change slippage tolerance"
@@ -1492,15 +1249,9 @@ function DetailsPanel({
                               onSlippageChange(o.value)
                               setSlipOpen(false)
                             }}
-                            // 44px hit area (project rule): the visible chip fill
-                            // lives on the inner span while the button itself is a
-                            // transparent inline-flex ≥44px tall, so the touch
-                            // target grows without enlarging the visible chip.
                             className="inline-flex min-h-[44px] items-center justify-center transition-colors [@media(hover:hover)]:hover:[&>span]:bg-[var(--opt-hover)]"
                             style={
                               {
-                                // Desktop hover: active chip brightens its tint,
-                                // inactive picks up a faint fill (pointer-only).
                                 '--opt-hover': active
                                   ? chipActiveBg
                                   : rowHoverFill,
@@ -1545,11 +1296,8 @@ function DetailsPanel({
   )
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────
 
 export default function CryptoSwap() {
-  // The component's root element — `useTheme` resolves the theme from the nearest
-  // `[data-card-theme]` wrapper around it (preview card), falling back to <html>.
   const rootRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme(rootRef)
   const isDark = theme === 'dark'
@@ -1567,11 +1315,7 @@ export default function CryptoSwap() {
 
   const cardRef = useRef<HTMLDivElement>(null)
   const flipAngle = useMotionValue(0)
-  // Discrete flip counter — the caret is ALWAYS aimed at flipCount * 180, a clean
-  // multiple of 180, so an interrupted spring on rapid clicks re-aims at the grid
-  // and self-corrects instead of compounding a fractional offset off-axis.
   const flipCount = useRef(0)
-  // The in-flight flip animation, stopped before a new one starts (and on unmount).
   const flipControls = useRef<ReturnType<typeof animate> | null>(null)
   useEffect(() => () => flipControls.current?.stop(), [])
 
@@ -1584,15 +1328,6 @@ export default function CryptoSwap() {
     [tokens, buySymbol],
   )
 
-  // ── Swap math ──────────────────────────────────────────────────────────────
-  // Authentic DEX model:
-  //   sellUsd     = sellAmount * sellPrice
-  //   midRate     = sellPrice / buyPrice   (buy units per 1 sell unit)
-  //   idealBuy    = sellAmount * midRate
-  //   priceImpact = clamp(sellUsd / POOL_DEPTH_USD, FLOOR, CAP)
-  //   buyAmount   = idealBuy * (1 - priceImpact)   → received side is slightly LESS
-  //   minReceived = buyAmount * (1 - slippage)
-  // The network fee is paid in the native token and does NOT reduce the output.
   const sellAmount = parseFloat(sellInput) || 0
   const sellUsd = sellAmount * sellToken.usdPrice
   const midRate = buyToken.usdPrice > 0 ? sellToken.usdPrice / buyToken.usdPrice : 0
@@ -1605,9 +1340,6 @@ export default function CryptoSwap() {
 
   const hasAmount = sellAmount > 0
 
-  // Trade is locked while a swap is confirming (swapping/success). Flip, pills,
-  // Max, and the picker all early-return + go visually inert so the trade can't
-  // mutate mid-confirmation.
   const locked = status !== 'idle'
 
   const quote: SwapQuote = useMemo(
@@ -1624,18 +1356,14 @@ export default function CryptoSwap() {
     [sellToken, buyToken, midRate, priceImpact, networkFeeUsd, buyAmount, minReceived, slippage],
   )
 
-  // ── Live price drift + tiny network-fee jitter (skip when reduced motion) ───
   useEffect(() => {
     if (reduced) return
     const id = window.setInterval(() => {
       setTokens((prev) =>
         prev.map((t) => {
-          // keep stablecoins effectively pegged
           if (t.symbol === 'USDC' || t.symbol === 'USDT') return t
-          const drift = 1 + (Math.random() - 0.5) * 0.006 // ±0.3%
+          const drift = 1 + (Math.random() - 0.5) * 0.006 // tune: raise the multiplier to increase price drift
           const next = t.usdPrice * drift
-          // 24h trend tracks the drifting price against the captured seed price,
-          // so the caret/percentage stays in sync with the live number.
           return {
             ...t,
             usdPrice: next,
@@ -1643,7 +1371,7 @@ export default function CryptoSwap() {
           }
         }),
       )
-      // Gas wobbles within ~$1.60–$3.20 so the fee row feels live.
+      // tune: widen the jitter and bounds to increase fee variation
       setNetworkFeeUsd(
         clamp(NETWORK_FEE_BASE_USD + (Math.random() - 0.5) * 1.6, 1.6, 3.2),
       )
@@ -1651,7 +1379,6 @@ export default function CryptoSwap() {
     return () => window.clearInterval(id)
   }, [reduced])
 
-  // ── Picker: Esc + click-outside (the contained dropdown) ────────────────────
   useEffect(() => {
     if (!picker) return
     function onKey(e: KeyboardEvent) {
@@ -1659,9 +1386,6 @@ export default function CryptoSwap() {
     }
     function onPointer(e: MouseEvent | TouchEvent) {
       const target = e.target as Node | null
-      // The dropdown is portaled to <body>, so it lives OUTSIDE the card. Treat
-      // both the card (which holds the trigger pills) and the portaled dropdown
-      // as "inside" — only close on a click that lands in neither.
       const inCard = cardRef.current?.contains(target ?? null) ?? false
       const inDropdown =
         target instanceof Element &&
@@ -1680,19 +1404,11 @@ export default function CryptoSwap() {
     }
   }, [picker])
 
-  // ── Flip sell ⇄ buy (tokens + amounts), spring icon rotate ──────────────────
   const handleFlip = useCallback(() => {
-    // Trade-defining action — inert while a swap is confirming.
     if (locked) return
     setSellSymbol(buySymbol)
     setBuySymbol(sellSymbol)
-    // Carry the computed buy amount up into the sell field, adaptively capped so a
-    // long quote (e.g. 64308.334542) shows as 64308.33 while a tiny amount keeps
-    // enough digits to stay nonzero in the input.
     setSellInput(buyAmount > 0 ? capForInput(buyAmount) : '')
-    // Aim the caret at an EXACT multiple of 180. Stop any in-flight spring first
-    // so a rapid second click re-targets the clean grid value (self-correcting)
-    // instead of reading a mid-flight angle and compounding a fractional offset.
     flipCount.current += 1
     const target = flipCount.current * 180
     flipControls.current?.stop()
@@ -1708,31 +1424,21 @@ export default function CryptoSwap() {
     }
   }, [locked, buySymbol, sellSymbol, buyAmount, flipAngle, reduced])
 
-  // ── Token selection (auto-flip on duplicate) ────────────────────────────────
   const handleSelect = useCallback(
     (side: Side, symbol: string) => {
-      // Trade-defining action — inert while a swap is confirming.
       if (locked) return
       setPicker(null)
       if (side === 'sell') {
         if (symbol === buySymbol) {
-          // Picked the token currently on the Buy side → auto-flip. Flipping
-          // intentionally preserves the trade, so the amount is NOT reset.
           handleFlip()
         } else if (symbol !== sellSymbol) {
-          // A different, brand-new Sell token → switch and reset the amount to
-          // the default. A stale amount (e.g. "525 BTC") shouldn't carry over to
-          // a different token; the Buy amount recomputes from 1 automatically.
           setSellSymbol(symbol)
           setSellInput(DEFAULT_SELL_INPUT)
         }
-        // Re-picked the same Sell token → no change (picker just closes).
       } else {
         if (symbol === sellSymbol) {
           handleFlip()
         } else {
-          // Changing the Buy token never resets the Sell amount (Buy is
-          // computed from Sell).
           setBuySymbol(symbol)
         }
       }
@@ -1740,8 +1446,6 @@ export default function CryptoSwap() {
     [locked, buySymbol, sellSymbol, handleFlip],
   )
 
-  // ── Swap button state machine ───────────────────────────────────────────────
-  // swapping (~900ms) → success (held ~1600ms) → idle. Amounts are kept.
   useEffect(() => {
     if (status === 'swapping') {
       const t = window.setTimeout(() => setStatus('success'), SWAP_SWAPPING_MS)
@@ -1760,55 +1464,33 @@ export default function CryptoSwap() {
   }, [hasAmount, status])
 
   const handleMax = useCallback(() => {
-    // Trade-defining action — inert while a swap is confirming.
     if (locked) return
     setSellInput(capForInput(sellToken.balance))
   }, [locked, sellToken.balance])
 
-  // ── Theme palette ───────────────────────────────────────────────────────────
-  // Near-black page; the unified tray is one fill notch lighter; inner blocks
-  // (Sell/Buy/details) are a further notch lighter (set per-block). No borders.
   const pageBg = isDark ? '#0A0A0A' : '#E6E6E3'
-  // The tray fill — the flip button's ring uses this so it reads cleanly over
-  // the Sell/Buy seam (it sits on the inner-block fill but is ringed in tray).
   const trayBg = isDark ? '#141416' : '#FFFFFF'
   const trayShadow = isDark
     ? '0 24px 60px rgba(0,0,0,0.6)'
     : '0 20px 50px rgba(20,20,18,0.12)'
-  // Flip button: dark circle with light icon (dark theme) / black circle with
-  // white icon (light theme — the reference's black-button look). Ring = tray.
   const flipBtnBg = isDark ? '#2A2A2E' : '#0A0A0A'
-  // Desktop hover for the flip button: a faint lighten of the circle fill (so it
-  // still degrades to a clear color cue when reduced motion skips the scale).
   const flipBtnHoverBg = isDark ? '#34343A' : '#1F1F1F'
   const flipIconColor = isDark ? '#ECECEC' : '#FFFFFF'
 
-  // Swap button = the periwinkle CTA (the reference's signature accent) with
-  // near-black text. Disabled falls back to a muted tray-adjacent fill.
   const swapBg = isDark ? '#AEB6EC' : '#9AA6EA'
-  // Desktop hover: the periwinkle CTA brightens a touch (pointer-only via Framer
-  // whileHover, which never fires on touch). Only used while the button is idle
-  // + enabled — swapping/success keep their own palettes.
   const swapHoverBg = isDark ? '#C2C8F2' : '#AEB8F0'
   const swapText = '#0A0A0A'
   const swapDisabledBg = isDark ? '#26262A' : '#DCDCD8'
   const swapDisabledText = isDark ? '#9A9A95' : '#5F5F58'
 
-  // Success: confident green fill + near-black text/check/sparks. Near-black
-  // (#0A0A0A) clears ~6.5–8.7:1 on the bright greens (white was ~1.9–2.3:1) and
-  // matches the on-light-fill text used elsewhere in the component.
   const swapSuccessBg = isDark ? '#22C55E' : '#0FA968'
   const swapSuccessText = '#0A0A0A'
-  // Soft green outer glow used for the success "bloom" ring.
   const swapSuccessGlow = isDark
     ? 'rgba(34,197,94,0.55)'
     : 'rgba(15,169,104,0.45)'
 
-  // The button only accepts clicks when there's an amount and we're idle…
   const buttonEnabled = hasAmount && status === 'idle'
 
-  // …but its PALETTE is driven by `status` so swapping/success never inherit the
-  // disabled grey (that was making "Swapped!" read as a switched-off button).
   let buttonBg = swapBg
   let buttonText = swapText
   let buttonCursor: React.CSSProperties['cursor'] = 'pointer'
@@ -1817,7 +1499,6 @@ export default function CryptoSwap() {
     buttonText = swapSuccessText
     buttonCursor = 'default'
   } else if (status === 'swapping') {
-    // Keep the primary palette so spinner + "Swapping…" stay legible.
     buttonBg = swapBg
     buttonText = swapText
     buttonCursor = 'progress'
@@ -1839,22 +1520,15 @@ export default function CryptoSwap() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-[360px]"
       >
-        {/* Unified tray — ONE container holding all four blocks. Uniform spacing:
-            the inner padding (p-2 = 8px on every side) equals the gap between the
-            four blocks (gap-2 = 8px), which also equals the Sell/Buy seam gap.
-            cardRef lives here so the dropdown still bounds to the component box. */}
+        {}
         <div
           ref={cardRef}
           className="flex flex-col gap-2 rounded-[28px] p-2"
           style={{ background: trayBg, boxShadow: trayShadow }}
         >
-          {/* Sell + Buy with the flip button straddling their 8px seam */}
+          {}
           <div className="flex flex-col gap-2">
-            {/* Sell card is wrapped in a relative box that ends exactly at the
-                Sell/Buy boundary. The Sell card is TALLER than the Buy card
-                (extra balance + Max row), so anchoring the flip button to this
-                wrapper's bottom edge — not the group's geometric center — keeps
-                the button centered on the seam regardless of the cards' heights. */}
+            {}
             <div className="relative">
               <SwapCard
                 side="sell"
@@ -1877,11 +1551,7 @@ export default function CryptoSwap() {
                 onSelect={(symbol) => handleSelect('sell', symbol)}
               />
 
-              {/* Flip button straddling the seam — a circle ringed in the tray
-                  color so it reads cleanly over the Sell/Buy gap. Anchored to
-                  the Sell card's bottom edge (top of the 8px gap) and nudged
-                  down by half the gap (4px), so its center lands exactly on the
-                  gap center: (Sell bottom) + (gap / 2). */}
+              {}
               <div className="pointer-events-none absolute bottom-0 left-1/2 z-10 translate-x-[-50%] translate-y-[calc(50%+4px)]">
                 <motion.button
                   type="button"
@@ -1902,8 +1572,6 @@ export default function CryptoSwap() {
                     height: 44,
                     background: flipBtnBg,
                     opacity: locked ? 0.6 : 1,
-                    // 4px ring in the tray color (box-shadow, not a border) + a
-                    // soft drop shadow stacked after it.
                     boxShadow: isDark
                       ? `0 0 0 4px ${trayBg}, 0 4px 14px rgba(0,0,0,0.5)`
                       : `0 0 0 4px ${trayBg}, 0 4px 14px rgba(20,20,18,0.18)`,
@@ -1946,7 +1614,7 @@ export default function CryptoSwap() {
             />
           </div>
 
-          {/* Details panel — rate line + breakdown + slippage control */}
+          {}
           <DetailsPanel
             quote={quote}
             hasAmount={hasAmount}
@@ -1957,16 +1625,13 @@ export default function CryptoSwap() {
             onSlippageChange={setSlippage}
           />
 
-          {/* Swap button */}
+          {}
           <motion.button
             type="button"
             onClick={handleSwap}
             disabled={!buttonEnabled}
             whileHover={buttonEnabled ? { background: swapHoverBg } : undefined}
             whileTap={buttonEnabled && !reduced ? { scale: 0.98 } : undefined}
-            // Ease the background into green on success (no hard cut), and a quick
-            // scale "pop" when success lands. Color transition is its own tween so
-            // the pop spring doesn't fight the fill animation.
             animate={{
               background: buttonBg,
               scale: status === 'success' && !reduced ? [1, 1.04, 1] : 1,
@@ -1979,8 +1644,6 @@ export default function CryptoSwap() {
           }}
           className="relative flex w-full items-center justify-center gap-2 rounded-3xl text-[16px] font-bold"
           style={{
-            // 48px — matches the collapsed accordion (rate-row) height so the
-            // two read as equal stacked blocks. Spinner (18) + check (22) fit.
             height: 48,
             background: buttonBg,
             color: buttonText,
@@ -1988,7 +1651,7 @@ export default function CryptoSwap() {
             overflow: 'visible',
           }}
         >
-          {/* Success bloom — a soft green ring that expands then fades, once. */}
+          {}
           <AnimatePresence>
             {status === 'success' && !reduced && (
               <motion.span
@@ -2053,8 +1716,7 @@ export default function CryptoSwap() {
                 transition={{ duration: 0.18 }}
                 className="relative flex items-center gap-2"
               >
-                {/* Check that springs in with a little overshoot, plus a one-shot
-                    burst of tiny sparks. Reduced motion → plain crossfade. */}
+                {}
                 <span className="relative inline-flex items-center justify-center">
                   <motion.span
                     className="inline-flex"

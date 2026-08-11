@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a stacked set of travel cards with animated hotel counts.
+ * Dragging the front card downward sends it behind the deck.
+ */
 
 import { useRef, useState, useLayoutEffect, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -17,11 +21,11 @@ const CARDS = [
   { title: 'Bali',       sub: 'Sun-soaked shores', img: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=520&q=80&fit=crop&crop=center', country: 'Indonesia',   hotels: 250 },
 ] as const
 
-// Deck slots: index 0 = back, index 1 = middle, index 2 = front
+// tune: adjust offsets and rotation to change the deck spread
 const POSITIONS = [
-  { x:  12, y: -32, rotate:  6, zIndex: 1, opacity: 1.00 }, // back  — peeks top-right
-  { x:   6, y: -18, rotate:  4, zIndex: 2, opacity: 1.00 }, // middle — peeks top-right
-  { x:   0, y:   0, rotate:  0, zIndex: 3, opacity: 1.00 }, // front  — no rotation, full opacity
+  { x:  12, y: -32, rotate:  6, zIndex: 1, opacity: 1.00 },
+  { x:   6, y: -18, rotate:  4, zIndex: 2, opacity: 1.00 },
+  { x:   0, y:   0, rotate:  0, zIndex: 3, opacity: 1.00 },
 ] as const
 
 function useCountUp(target: number, active: boolean) {
@@ -67,7 +71,6 @@ function HotelsCounter({ target, active }: { target: number; active: boolean }) 
 export default function FloatingCards() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
-  // order[positionIndex] = cardIndex
   const [order, setOrder] = useState<[number, number, number]>([0, 1, 2])
   const [isShuffling, setIsShuffling] = useState(false)
   const [exitingCard, setExitingCard] = useState<number | null>(null)
@@ -94,7 +97,7 @@ export default function FloatingCards() {
       className="relative flex h-full w-full items-center justify-center overflow-hidden"
       style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}
     >
-      {/* Dot grid */}
+      {}
       <div
         className="absolute inset-0"
         style={{
@@ -104,7 +107,7 @@ export default function FloatingCards() {
       />
 
 
-      {/* Deck */}
+      {}
       <div style={{ position: 'relative', width: CARD_W, height: CARD_H }}>
         {CARDS.map((card, i) => {
           const posIndex = order.indexOf(i)
@@ -160,7 +163,7 @@ export default function FloatingCards() {
                 }
               }}
             >
-              {/* ── Top section ───────────────────────────── */}
+              {}
               <div style={{
                 padding: '10px 10px 0',
                 display: 'flex',
@@ -168,12 +171,12 @@ export default function FloatingCards() {
                 gap: 8,
                 flex: '0 0 auto',
               }}>
-                {/* Header row: hotels counter left, arrow button right */}
+                {}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {/* Left cluster: hotels counter */}
+                  {}
                   <HotelsCounter target={card.hotels} active={isFront && !isExiting} />
 
-                  {/* Arrow button */}
+                  {}
                   <div style={{
                     width: 26, height: 26, borderRadius: '50%',
                     background: '#BECF5D',
@@ -183,7 +186,7 @@ export default function FloatingCards() {
                   </div>
                 </div>
 
-                {/* Title + distance */}
+                {}
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                   <p style={{
                     fontSize: 17,
@@ -206,7 +209,7 @@ export default function FloatingCards() {
                 </div>
               </div>
 
-              {/* ── Visual block ──────────────────────────── */}
+              {}
               <div style={{
                 margin: '8px 6px 6px',
                 borderRadius: 12,
@@ -223,7 +226,7 @@ export default function FloatingCards() {
         })}
       </div>
 
-      {/* Hint */}
+      {}
       <p
         style={{
           position: 'absolute',
