@@ -1,11 +1,14 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a button that emits a rotating set of emoji particles.
+ * Each press advances the theme and animates a radial burst around the label.
+ */
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 
 const SETS = [
   {
@@ -42,26 +45,24 @@ const SETS = [
 
 const PARTICLE_COUNT = 18
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Particle {
   id: number
   emoji: string
-  angle: number        // radians
-  distance: number     // px
-  rotation: number     // deg
-  size: number         // rem
-  duration: number     // animation duration — varies per particle for organic feel
+  angle: number
+  distance: number
+  rotation: number
+  size: number
+  duration: number
 }
 
 let uid = 0
 
-// ─── EmojiParticle ────────────────────────────────────────────────────────────
 
 function EmojiParticle({ p }: { p: Particle }) {
   const tx = Math.cos(p.angle) * p.distance
   const ty = Math.sin(p.angle) * p.distance
-  // Arc lift: strongest for particles flying horizontally
+  // tune: raise either value to increase the particle arc
   const lift = 18 + Math.abs(Math.cos(p.angle)) * 22
 
   return (
@@ -86,7 +87,6 @@ function EmojiParticle({ p }: { p: Particle }) {
       }}
       transition={{
         duration: p.duration,
-        // Per-segment easing: fast pop out → then linear drift/fade
         ease: [[0.08, 0.82, 0.17, 1], 'linear'] as never,
         times: [0, 0.2, 1],
       }}
@@ -96,7 +96,6 @@ function EmojiParticle({ p }: { p: Particle }) {
   )
 }
 
-// ─── EmojiBurst ───────────────────────────────────────────────────────────────
 
 export default function EmojiBurst() {
   const [particles, setParticles] = useState<Particle[]>([])
@@ -112,7 +111,7 @@ export default function EmojiBurst() {
     const { emojis } = SETS[setIdx % SETS.length]
 
     const burst: Particle[] = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-      // Evenly distribute base angle + jitter so no clustering
+      // tune: raise the jitter multiplier to vary particle angles
       const baseAngle = (i / PARTICLE_COUNT) * Math.PI * 2
       const jitter    = (Math.random() - 0.5) * ((Math.PI * 2) / PARTICLE_COUNT) * 0.8
       return {
@@ -122,14 +121,13 @@ export default function EmojiBurst() {
         distance: 85 + Math.random() * 95,
         rotation: (Math.random() - 0.5) * 640,
         size:     1.4 + Math.random() * 0.9,
-        duration: 0.55 + Math.random() * 0.25,  // 0.55–0.80s per particle
+        duration: 0.55 + Math.random() * 0.25,  // tune: raise either value to lengthen particle motion
       }
     })
 
     setParticles(burst)
     setSetIdx(prev => prev + 1)
 
-    // Clean up after longest possible animation (800ms max)
     setTimeout(() => {
       setParticles([])
       setIsPopping(false)
@@ -140,14 +138,14 @@ export default function EmojiBurst() {
     <div className="flex h-full w-full items-center justify-center bg-[#E8E8DF] dark:bg-[#1A1A19]">
       <div className="relative flex items-center justify-center">
 
-        {/* Particles */}
+        {}
         <AnimatePresence>
           {particles.map(p => (
             <EmojiParticle key={p.id} p={p} />
           ))}
         </AnimatePresence>
 
-        {/* Button */}
+        {}
         <motion.button
           onClick={explode}
           whileHover={{ scale: 1.06 }}
@@ -160,7 +158,7 @@ export default function EmojiBurst() {
             letterSpacing: '-0.01em',
           }}
         >
-          {/* Label transitions between sets */}
+          {}
           <AnimatePresence mode="wait">
             <motion.span
               key={setIdx}

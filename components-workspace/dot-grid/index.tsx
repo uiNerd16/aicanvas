@@ -1,24 +1,25 @@
 'use client'
 
+/**
+ * Renders a canvas dot grid with theme-aware resting and highlight colors.
+ * Pointer movement brightens and enlarges nearby dots with eased falloff.
+ */
+
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING = 20     // px between dot centres
-const RADIUS  = 130    // px — hover influence radius
-const BASE_A  = 0.13   // resting dot opacity
-const PEAK_A  = 0.92   // fully-lit dot opacity
+const SPACING = 20     // tune: raise to spread the dots farther apart
+const RADIUS  = 130    // tune: raise to widen the pointer influence
+const BASE_A  = 0.13   // tune: raise to brighten resting dots
+const PEAK_A  = 0.92   // tune: raise to brighten highlighted dots
 
 export default function InteractiveDotGrid({
   showLabel = true,
   colors,
 }: {
   showLabel?: boolean
-  // Optional theme override. Omit it and the component keeps its original look
-  // (faint white dots on near-black in dark mode). `dot`/`highlight` are "r,g,b"
-  // strings; each dot interpolates from `dot` (resting) to `highlight` (fully
-  // lit near the cursor) — pass only `dot` for a single-colour grid.
+  /** Overrides the background, dot colors, and resting or highlighted opacity. */
   colors?: {
     background?: string
     dot?: string
@@ -30,13 +31,11 @@ export default function InteractiveDotGrid({
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const mouseRef     = useRef<{ x: number; y: number } | null>(null)
-  // Latest theme override, read by the RAF loop without re-subscribing it.
   const colorsRef    = useRef(colors)
   colorsRef.current  = colors
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ────────────────────────────────────────────────────────
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -56,18 +55,10 @@ export default function InteractiveDotGrid({
     return () => observer.disconnect()
   }, [])
 
-  // ── Pointer tracking ───────────────────────────────────────────────────────
-  // Listens at the window level so the cursor is tracked even when the
-  // dot grid is rendered behind other elements (e.g. as a background under
-  // a `pointer-events: none` wrapper). Only writes to a ref — no React
-  // state, no re-renders. Listeners are passive so the browser never
-  // blocks scroll/touch on this handler.
   useEffect(() => {
     const updateFromClient = (clientX: number, clientY: number) => {
       const canvas = canvasRef.current
       if (!canvas) return
-      // getBoundingClientRect is fast on a stable layout — modern browsers
-      // serve it from the cached layout box without triggering reflow.
       const rect = canvas.getBoundingClientRect()
       mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top }
     }
@@ -83,7 +74,6 @@ export default function InteractiveDotGrid({
     window.addEventListener('touchmove', onTouchMove, { passive: true })
     window.addEventListener('touchend', clearPointer, { passive: true })
     window.addEventListener('touchcancel', clearPointer, { passive: true })
-    // Fires when the cursor leaves the browser viewport entirely.
     document.addEventListener('mouseleave', clearPointer)
 
     return () => {
@@ -95,7 +85,6 @@ export default function InteractiveDotGrid({
     }
   }, [])
 
-  // ── Canvas render loop ─────────────────────────────────────────────────────
   useEffect(() => {
     const canvas: HTMLCanvasElement = canvasRef.current!
     const ctx = canvas.getContext('2d')!
@@ -136,8 +125,6 @@ export default function InteractiveDotGrid({
       const my      = mouseRef.current?.y ?? -99999
       const r2      = RADIUS * RADIUS
 
-      // Resting + lit colours (and opacities), from the theme override when
-      // given, else the original dark/light defaults. Parsed once per frame.
       const ov      = colorsRef.current
       const dark    = isDarkRef.current
       const restRGB = ov?.dot ?? (dark ? '255,255,255' : '28,25,22')
@@ -153,13 +140,12 @@ export default function InteractiveDotGrid({
         const dist2 = dx * dx + dy * dy
         const tgt   = dist2 < r2 ? Math.pow(1 - Math.sqrt(dist2) / RADIUS, 1.5) : 0
 
-        // Fast attack, slow release — feels organic
+        // tune: raise either rate to speed up illumination changes
         d.b += (tgt > d.b ? 0.16 : 0.07) * (tgt - d.b)
         if (d.b < 0.004) d.b = 0
 
         const alpha = baseA + (peakA - baseA) * d.b
-        const sz    = 1 + d.b * 1.2   // grow slightly when lit (1px → 2.2px max)
-        // Interpolate rest → lit by illumination (a no-op when litRGB === restRGB).
+        const sz    = 1 + d.b * 1.2   // tune: raise the multiplier to enlarge highlighted dots
         const r = Math.round(r0 + (r1 - r0) * d.b)
         const g = Math.round(g0 + (g1 - g0) * d.b)
         const b = Math.round(b0 + (b1 - b0) * d.b)

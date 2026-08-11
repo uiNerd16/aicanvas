@@ -1,16 +1,20 @@
 'use client'
 
+/**
+ * Renders a canvas grid of curved lines with ambient wave distortion.
+ * Pointer proximity increases the wave amplitude and repels nearby lines.
+ */
+
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const SPACING      = 32     // px between grid points at rest
-const BASE_AMP     = 30     // px — dramatic resting amplitude (1-2 waves visible)
-const WAVE_FREQ    = 0.007  // low frequency → ~900px wavelength
-const HOVER_BOOST  = 1.5    // amp multiplier on full hover (waves grow 2.5×)
-const LOCAL_AMP    = 60     // px — push away from cursor at centre
-const LOCAL_RADIUS = 260    // px — repulsion radius
+const SPACING      = 32     // tune: raise to spread the grid points farther apart
+const BASE_AMP     = 30     // tune: raise to increase the resting distortion
+const WAVE_FREQ    = 0.007  // tune: raise to shorten the wave length
+const HOVER_BOOST  = 1.5    // tune: raise to amplify the hover distortion
+const LOCAL_AMP    = 60     // tune: raise to strengthen pointer repulsion
+const LOCAL_RADIUS = 260    // tune: raise to widen the pointer influence
 const LINE_A_DARK  = 0.55
 const LINE_A_LIGHT = 0.75
 
@@ -21,7 +25,6 @@ export default function DistortionGrid() {
   const isDarkRef = useRef(typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Theme detection ──────────────────────────────────────────────────────────
   useIsomorphicLayoutEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -41,7 +44,6 @@ export default function DistortionGrid() {
     return () => observer.disconnect()
   }, [])
 
-  // ── Canvas render loop ───────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current!
     const ctx    = canvas.getContext('2d')!
@@ -51,7 +53,7 @@ export default function DistortionGrid() {
     let animId  = 0
     let alive   = true
     let t       = 0
-    let hoverStr = 0  // lerped 0 → 1 on mouse enter, 1 → 0 on leave
+    let hoverStr = 0
 
     function build() {
       const dpr  = window.devicePixelRatio || 1
@@ -73,7 +75,6 @@ export default function DistortionGrid() {
       if (!alive) return
       t += 0.002
 
-      // Global hover strength — smooth ease in/out across entire canvas
       const hasHover = mouseRef.current !== null
       hoverStr += ((hasHover ? 1 : 0) - hoverStr) * (hasHover ? 0.018 : 0.010)
 
@@ -86,18 +87,15 @@ export default function DistortionGrid() {
       const my = mouseRef.current?.y ?? -99999
       const r2 = LOCAL_RADIUS * LOCAL_RADIUS
 
-      // Amplitude grows globally when hovering anywhere on canvas
       const amp = BASE_AMP * (1 + hoverStr * HOVER_BOOST)
 
       function displaced(c: number, r: number): [number, number] {
         const rx = ox + c * SPACING
         const ry = oy + r * SPACING
 
-        // Low-frequency layered sine waves — 1-2 visible undulations
         const wx = amp * (Math.sin(rx * WAVE_FREQ + t) + Math.sin(ry * WAVE_FREQ * 0.6 + t * 1.3) * 0.55)
         const wy = amp * (Math.cos(ry * WAVE_FREQ * 0.8 + t * 1.15) + Math.cos(rx * WAVE_FREQ * 0.5 + t * 0.75) * 0.55)
 
-        // Gaussian repulsion — lines pushed away, leaving a void around cursor
         const dx = rx - mx
         const dy = ry - my
         const dist2 = dx * dx + dy * dy
@@ -115,7 +113,6 @@ export default function DistortionGrid() {
       ctx.strokeStyle = `rgba(${dotRGB},${lineA.toFixed(3)})`
       ctx.lineWidth = 0.5
 
-      // Horizontal lines — one per row
       for (let r = 0; r < rows; r++) {
         ctx.beginPath()
         const [x0, y0] = displaced(0, r)
@@ -127,7 +124,6 @@ export default function DistortionGrid() {
         ctx.stroke()
       }
 
-      // Vertical lines — one per col
       for (let c = 0; c < cols; c++) {
         ctx.beginPath()
         const [x0, y0] = displaced(c, 0)

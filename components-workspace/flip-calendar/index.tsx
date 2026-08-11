@@ -1,6 +1,10 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Renders a draggable day calendar with a split-flap transition.
+ * Pointer movement tilts the card, while vertical swipes change the date.
+ */
 
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
@@ -8,15 +12,12 @@ import type { PanInfo } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── FlipCalendar ─────────────────────────────────────────────────────────────
-// Magic edition: rich gradients, mouse parallax, shimmer, glowing scan line.
-
+// tune: raise to slow the page flip
 const FLIP_MS = 220
 
 function fmt(n: number) { return String(n).padStart(2, '0') }
 
 export default function FlipCalendar() {
-  // ── State ──────────────────────────────────────────────────────────────────
   const [topDisplay,    setTopDisplay   ] = useState(1)
   const [bottomDisplay, setBottomDisplay] = useState(1)
   const [flapContent,   setFlapContent  ] = useState(1)
@@ -26,16 +27,13 @@ export default function FlipCalendar() {
   const rootRef    = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(() => typeof window !== 'undefined' ? document.documentElement.classList.contains('dark') : false)
 
-  // ── Motion values ──────────────────────────────────────────────────────────
   const rotateX     = useMotionValue(0)
   const scanY       = useMotionValue(18)
   const scanYPct    = useTransform(scanY, (v) => `${v}%`)
 
-  // Mouse parallax
   const tiltX = useMotionValue(0)
   const tiltY = useMotionValue(0)
 
-  // ── Cleanup ────────────────────────────────────────────────────────────────
   const aliveRef = useRef(true)
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([])
 
@@ -47,7 +45,6 @@ export default function FlipCalendar() {
     }
   }, [])
 
-  // ── Theme detection — responds to card-local preview toggle + global theme ──
   useIsomorphicLayoutEffect(() => {
     const el = rootRef.current
     if (!el) return
@@ -68,7 +65,6 @@ export default function FlipCalendar() {
     timeouts.current.push(id)
   }
 
-  // ── Core flip ─────────────────────────────────────────────────────────────
   function runFlip(
     target: number,
     durationMs: number,
@@ -105,7 +101,6 @@ export default function FlipCalendar() {
     }, durationMs * 2 + 20)
   }
 
-  // ── Interactive flip ───────────────────────────────────────────────────────
   function flip(dir: 'next' | 'prev') {
     if (flapping) return
     const cur = currentRef.current
@@ -119,7 +114,6 @@ export default function FlipCalendar() {
     flip(info.offset.y > 0 || info.velocity.y > 300 ? 'next' : 'prev')
   }
 
-  // ── Mouse parallax ────────────────────────────────────────────────────────
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (flapping) return
     const r = e.currentTarget.getBoundingClientRect()
@@ -134,7 +128,6 @@ export default function FlipCalendar() {
     animate(tiltY, 0, { type: 'spring', stiffness: 160, damping: 18 })
   }
 
-  // ── Derived styles ────────────────────────────────────────────────────────
   const topGrad = isDark
     ? 'linear-gradient(155deg, #3572cc 0%, #2d62bc 55%, #2455a0 100%)'
     : 'linear-gradient(155deg, #4e9aec 0%, #3d88da 55%, #3078c8 100%)'
@@ -167,7 +160,7 @@ export default function FlipCalendar() {
   return (
     <div ref={rootRef} className="flex h-full w-full flex-col items-center justify-center gap-6" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
 
-      {/* ── Parallax wrapper — provides CSS perspective for 3D tilt ── */}
+      {}
       <div
         style={{ perspective: '900px' }}
         onMouseMove={handleMouseMove}
@@ -191,7 +184,7 @@ export default function FlipCalendar() {
           }}
         >
 
-          {/* ── Page stack ── */}
+          {}
           {[13, 8, 4].map((y, i) => (
             <div
               key={i}
@@ -207,13 +200,13 @@ export default function FlipCalendar() {
             />
           ))}
 
-          {/* ── Main card face ── */}
+          {}
           <div
             className="absolute inset-0 overflow-hidden"
             style={{ zIndex: 1, boxShadow: cardShadow, borderRadius: 18 }}
           >
 
-            {/* Header strip */}
+            {}
             <div
               className="absolute inset-x-0 top-0 flex items-end justify-center gap-8"
               style={{
@@ -238,7 +231,7 @@ export default function FlipCalendar() {
               ))}
             </div>
 
-            {/* Static bottom half */}
+            {}
             <div
               className="absolute inset-x-0 bottom-0 overflow-hidden"
               style={{ top: '59%', background: bottomGrad }}
@@ -246,7 +239,7 @@ export default function FlipCalendar() {
               <Half n={bottomDisplay} half="bottom" numShadow={numShadow} />
             </div>
 
-            {/* Static top half */}
+            {}
             <div
               className="absolute inset-x-0 overflow-hidden"
               style={{
@@ -258,7 +251,7 @@ export default function FlipCalendar() {
               <Half n={topDisplay} half="top" numShadow={numShadow} />
             </div>
 
-            {/* ── Flap ── */}
+            {}
             {flapVisible && (
               <div
                 className="absolute inset-x-0"
@@ -279,7 +272,7 @@ export default function FlipCalendar() {
                   <Half n={flapContent} half="top" numShadow={numShadow} />
                 </motion.div>
 
-                {/* Crease */}
+                {}
                 <div
                   className="absolute inset-x-0 bottom-0 pointer-events-none"
                   style={{
@@ -292,7 +285,7 @@ export default function FlipCalendar() {
               </div>
             )}
 
-            {/* ── Scan line ── */}
+            {}
             {flapVisible && (
               <motion.div
                 className="absolute inset-x-0 pointer-events-none"
@@ -307,7 +300,7 @@ export default function FlipCalendar() {
               />
             )}
 
-            {/* Center seam */}
+            {}
             <div
               className="absolute inset-x-0 pointer-events-none"
               style={{
@@ -316,7 +309,7 @@ export default function FlipCalendar() {
               }}
             />
 
-            {/* Header / body divider */}
+            {}
             <div
               className="absolute inset-x-0 pointer-events-none"
               style={{
@@ -325,7 +318,7 @@ export default function FlipCalendar() {
               }}
             />
 
-            {/* Surface light — subtle top reflection */}
+            {}
             <div
               className="absolute inset-x-0 pointer-events-none"
               style={{
@@ -339,7 +332,7 @@ export default function FlipCalendar() {
         </motion.div>
       </div>
 
-      {/* Hint */}
+      {}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -353,7 +346,6 @@ export default function FlipCalendar() {
   )
 }
 
-// ─── Half ─────────────────────────────────────────────────────────────────────
 
 interface HalfProps {
   n: number
