@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Displays a glass tab bar with icon and label navigation items.
+ * Selecting a tab moves the active pill and updates the highlighted item.
+ */
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -26,7 +30,7 @@ export default function GlassTabBar() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Glass tab bar */}
+      {}
       <motion.div
         initial={{ y: 20 }}
         animate={{ y: 0 }}
@@ -38,7 +42,7 @@ export default function GlassTabBar() {
           boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)',
         }}
       >
-        {/* Blur layer — non-animating, isolated from entrance spring */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-full"
           style={{ backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
@@ -70,7 +74,7 @@ export default function GlassTabBar() {
                 />
               )}
 
-              {/* Shift content to pill center for edge tabs (pill is asymmetric by 8px → offset 4px) */}
+              {}
               <div
                 className="relative z-10 flex flex-col items-center gap-px"
                 style={{

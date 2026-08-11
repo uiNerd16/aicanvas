@@ -1,6 +1,10 @@
 'use client'
 
 // npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a glass search field with a filtered suggestion list.
+ * Typing, clearing, pressing Escape, or clicking outside updates the open state.
+ */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
@@ -12,7 +16,6 @@ import {
   Lightning,
 } from '@phosphor-icons/react'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Suggestion {
   icon: typeof MusicNote
@@ -20,7 +23,6 @@ interface Suggestion {
   color: string
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const BACKGROUND =
   'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20pink%20Flower%20%20(1).png'
@@ -34,7 +36,6 @@ const SUGGESTIONS: Suggestion[] = [
 const BAR_HEIGHT = 48
 const MIN_TOUCH_TARGET = 44
 
-// ─── Glass family shared styles ─────────────────────────────────────────────
 
 const glassBlur = {
   backdropFilter: 'blur(24px) saturate(1.8)',
@@ -48,11 +49,9 @@ const glassPanel = {
     '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 } as const
 
-// Active glow — white border + ambient glow
 const ACTIVE_GLOW =
   '0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1.5px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.08)'
 
-// ─── Suggestion Row ──────────────────────────────────────────────────────────
 
 function SuggestionRow({
   suggestion,
@@ -88,7 +87,7 @@ function SuggestionRow({
         background: 'transparent',
       }}
     >
-      {/* Animated row: icon + label — scales and nudges right on hover */}
+      {}
       <motion.button
         onClick={() => onSelect(suggestion.label)}
         animate={
@@ -104,7 +103,7 @@ function SuggestionRow({
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-3"
         style={{ background: 'transparent', transformOrigin: 'left center' }}
       >
-        {/* Icon badge — notification-style tinted */}
+        {}
         <div
           className="flex shrink-0 items-center justify-center rounded-xl"
           style={{
@@ -128,7 +127,7 @@ function SuggestionRow({
         </span>
       </motion.button>
 
-      {/* Clear button — stays completely still */}
+      {}
       <button
         onClick={(e) => { e.stopPropagation(); onClear(suggestion.label) }}
         className="shrink-0 cursor-pointer rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/40 font-sans"
@@ -141,7 +140,6 @@ function SuggestionRow({
   )
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function GlassSearchBar() {
   const [isActive, setIsActive] = useState(false)
@@ -154,14 +152,12 @@ export default function GlassSearchBar() {
   const prefersReduced = useReducedMotion()
   const reducedMotion = prefersReduced ?? false
 
-  // Filtered suggestions based on query + hidden
   const filteredSuggestions = SUGGESTIONS
     .filter((s) => !hiddenSuggestions.has(s.label))
     .filter((s) =>
       query.trim() ? s.label.toLowerCase().includes(query.toLowerCase()) : true
     )
 
-  // ─── Activate ────────────────────────────────────────────────────────
 
   const activate = useCallback(() => {
     setIsActive(true)
@@ -170,7 +166,6 @@ export default function GlassSearchBar() {
     })
   }, [])
 
-  // ─── Deactivate ──────────────────────────────────────────────────────
 
   const deactivate = useCallback(() => {
     setIsActive(false)
@@ -178,7 +173,6 @@ export default function GlassSearchBar() {
     inputRef.current?.blur()
   }, [])
 
-  // ─── Click outside to deactivate ─────────────────────────────────────
 
   useEffect(() => {
     if (!isActive) return
@@ -200,7 +194,6 @@ export default function GlassSearchBar() {
     }
   }, [isActive, deactivate])
 
-  // ─── Escape key to deactivate ────────────────────────────────────────
 
   useEffect(() => {
     if (!isActive) return
@@ -213,7 +206,6 @@ export default function GlassSearchBar() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isActive, deactivate])
 
-  // ─── Handlers ────────────────────────────────────────────────────────
 
   function handleClear() {
     setQuery('')
@@ -235,20 +227,20 @@ export default function GlassSearchBar() {
 
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#1A1A19]">
-      {/* Background image — consistent with glass family */}
+      {}
       <img
         src={BACKGROUND}
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
       />
 
-      {/* Outer container — fixed vertical position so bar doesn't jump when dropdown opens */}
+      {}
       <div
         ref={containerRef}
         className="absolute w-[calc(100%-2rem)] max-w-[380px]"
         style={{ top: '30%', left: '50%', transform: 'translateX(-50%)' }}
       >
-        {/* ─── Search bar ─────────────────────────────────────────── */}
+        {}
         <motion.div
           animate={{
             boxShadow: isActive ? ACTIVE_GLOW : glassPanel.boxShadow,
@@ -262,13 +254,13 @@ export default function GlassSearchBar() {
             borderRadius: 24,
           }}
         >
-          {/* Blur layer */}
+          {}
           <div
             className="pointer-events-none absolute inset-0 z-[-1]"
             style={{ ...glassBlur, borderRadius: 24 }}
           />
 
-          {/* Search icon */}
+          {}
           <div
             className="flex shrink-0 items-center justify-center"
             style={{
@@ -285,7 +277,7 @@ export default function GlassSearchBar() {
             />
           </div>
 
-          {/* Input — always visible */}
+          {}
           <input
             ref={inputRef}
             value={query}
@@ -297,7 +289,7 @@ export default function GlassSearchBar() {
             aria-label="Search components"
           />
 
-          {/* Clear button — springs in when text is present */}
+          {}
           <AnimatePresence>
             {query.length > 0 && (
               <motion.button
@@ -337,7 +329,7 @@ export default function GlassSearchBar() {
           </AnimatePresence>
         </motion.div>
 
-        {/* ─── Dropdown ───────────────────────────────────────────── */}
+        {}
         <AnimatePresence>
           {isActive && filteredSuggestions.length > 0 && (
             <motion.div
@@ -366,7 +358,7 @@ export default function GlassSearchBar() {
               style={{ ...glassPanel, ...glassBlur, transformOrigin: 'top center', top: BAR_HEIGHT + 8 }}
             >
 
-              {/* Top edge highlight */}
+              {}
               <div
                 className="absolute left-6 right-6 top-0 h-[1px]"
                 style={{
@@ -375,12 +367,12 @@ export default function GlassSearchBar() {
                 }}
               />
 
-              {/* Section label */}
+              {}
               <p className="mb-0.5 px-3 pt-1 text-[10px] font-semibold uppercase tracking-widest text-white/25 font-sans">
                 {query.trim() ? 'Results' : 'Suggestions'}
               </p>
 
-              {/* Suggestion rows */}
+              {}
               {filteredSuggestions.map((suggestion, i) => (
                 <SuggestionRow
                   key={suggestion.label}

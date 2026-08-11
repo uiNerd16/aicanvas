@@ -1,11 +1,14 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Renders a glass slider whose fill and value color follow its gradient.
+ * Pointer dragging and track clicks update the animated thumb position.
+ */
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 
 const BACKGROUND = 'https://ik.imagekit.io/aitoolkit/bg%20images/Ethereal%20Orange%20Flower%204%20(1).png?updatedAt=1775226802133'
 
@@ -16,7 +19,6 @@ const SLIDERS = [
   { label: 'Saturation', defaultValue: 55, colorA: '#06D6A0', colorB: '#5B8FF9' },
 ]
 
-// ─── Hex interpolation — returns gradient color at position t (0–1) ───────────
 
 function lerpHex(a: string, b: string, t: number): string {
   const ah = a.replace('#', '')
@@ -30,7 +32,6 @@ function lerpHex(a: string, b: string, t: number): string {
   return `#${Math.round(ar + (br - ar) * t).toString(16).padStart(2, '0')}${Math.round(ag + (bg - ag) * t).toString(16).padStart(2, '0')}${Math.round(ab + (bb - ab) * t).toString(16).padStart(2, '0')}`
 }
 
-// ─── Slider ───────────────────────────────────────────────────────────────────
 
 function Slider({
   label,
@@ -51,7 +52,6 @@ function Slider({
   const isDragging = useMotionValue(0)
   const thumbScale = useSpring(useTransform(isDragging, [0, 1], [1, 1.3]), { stiffness: 400, damping: 20 })
 
-  // Refs to the active drag listeners so an unmount mid-drag can detach them.
   const onMoveRef = useRef<((ev: PointerEvent) => void) | null>(null)
   const onUpRef = useRef<(() => void) | null>(null)
 
@@ -96,7 +96,6 @@ function Slider({
     setValue(Math.max(0, Math.min(100, next)))
   }
 
-  // Detach any in-flight drag listeners if the slider unmounts mid-drag.
   useEffect(() => {
     return () => {
       if (onMoveRef.current) window.removeEventListener('pointermove', onMoveRef.current)
@@ -113,7 +112,7 @@ function Slider({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Label row */}
+      {}
       <div className="flex items-center justify-between">
         <motion.span
           animate={{ color: hovered ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.5)' }}
@@ -125,7 +124,7 @@ function Slider({
         <span className="font-mono text-sm font-semibold" style={{ color: thumbColor }}>{value}</span>
       </div>
 
-      {/* Track */}
+      {}
       <div
         ref={trackRef}
         role="slider"
@@ -142,7 +141,7 @@ function Slider({
           transition: 'background 0.2s ease',
         }}
       >
-        {/* Gradient fill */}
+        {}
         <div
           className="absolute left-0 top-0 h-full rounded-full"
           style={{
@@ -153,7 +152,7 @@ function Slider({
           }}
         />
 
-        {/* Thumb — larger touch target wraps the visible circle */}
+        {}
         <motion.div
           className="absolute top-1/2 flex h-[44px] w-[44px] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
           style={{ left: `${value}%`, scale: thumbScale }}
@@ -170,7 +169,6 @@ function Slider({
   )
 }
 
-// ─── GlassSlider ──────────────────────────────────────────────────────────────
 
 export default function GlassSlider() {
   return (
@@ -192,12 +190,12 @@ export default function GlassSlider() {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
         }}
       >
-        {/* Blur layer — non-animating so it isn't recalculated during drag frames */}
+        {}
         <div
           className="pointer-events-none absolute inset-0 z-[-1] rounded-3xl"
           style={{ backdropFilter: 'blur(24px) saturate(1.8)', WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
         />
-        {/* Top edge highlight */}
+        {}
         <div
           className="absolute left-7 right-7 top-0 h-[1px]"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}

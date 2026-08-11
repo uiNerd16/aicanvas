@@ -1,20 +1,21 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a responsive stack of bird cards with drag, tap, and keyboard cycling.
+ * The focused card can expose an optional external link.
+ */
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { motion, useReducedMotion, type PanInfo } from 'framer-motion'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Card {
   id: number
   orientation: 'portrait' | 'landscape'
   title?: string
   image: string
-  // Optional. Set this to turn the top-right chip into a real link (opens in a
-  // new tab). Left unset on every demo card below, so the chip is a decorative
-  // affordance with no action. This is the seam for embedding your own links.
+  /** Opens the focused card chip in a new tab when provided. */
   href?: string
 }
 
@@ -26,12 +27,6 @@ interface Slot {
   zIndex: number
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-// Five tropical and woodland birds. Each photo is pre-cropped to its card
-// aspect (portrait 4:5, landscape 16:10) so the CDN delivers a tight crop with
-// no layout shift. Every card carries a short title strip above the image; the
-// title is also the card's accessible name. Photos are decorative here (the
-// visible title names them), so the <img> alt is empty.
 
 const CARDS: Card[] = [
   {
@@ -66,9 +61,7 @@ const CARDS: Card[] = [
   },
 ]
 
-// ─── Slot tables ──────────────────────────────────────────────────────────────
-// Slot 0 is the focused front card. Slots 1-4 scatter behind it. The mobile
-// table tightens the spread so all 5 cards remain visible at narrow widths.
+// tune: adjust the slot tables to change desktop and mobile spread
 
 const SLOTS_DESKTOP: Slot[] = [
   { x:    0, y:   0, rotate:  1.5, scale: 1.00, zIndex: 50 },
@@ -86,7 +79,6 @@ const SLOTS_MOBILE: Slot[] = [
   { x: -55, y:  25, rotate: -4.5, scale: 0.87, zIndex: 10 },
 ]
 
-// ─── Motion + chrome constants (hoisted so identities stay stable) ──────────────
 
 const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26 }
 const MOUNT_SPRING = { type: 'spring' as const, stiffness: 200, damping: 22 }
@@ -100,13 +92,10 @@ const BREATH_ROTATE_REST = [0, 1, 0, -1, 0]
 const SHADOW_FOCUS = '0 24px 48px rgba(0,0,0,0.28), 0 6px 14px rgba(0,0,0,0.16)'
 const SHADOW_REST = '0 12px 28px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.12)'
 
-// Visible focus ring, matched to the olive accent.
 const RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8B94D]'
 
 const TITLE_STYLE: CSSProperties = {
   margin: 0,
-  // Reserve room for the absolutely-positioned open button so the title never
-  // reflows when the button appears on the focused card.
   paddingRight: 34,
   fontFamily: 'var(--font-sans, sans-serif)',
   fontWeight: 600,
@@ -135,7 +124,6 @@ const CHIP_STYLE: CSSProperties = {
   boxShadow: '0 8px 18px rgba(0,0,0,0.42), 0 3px 6px rgba(0,0,0,0.30)',
 }
 
-// The dark chip with the open-arrow glyph, shared by the link and no-op variants.
 const OpenChip = (
   <span style={CHIP_STYLE}>
     <svg
@@ -155,18 +143,13 @@ const OpenChip = (
   </span>
 )
 
-// ─── InteractiveCardStack ───────────────────────────────────────────────────────
 
 export default function InteractiveCardStack() {
-  // order[slotIndex] = cardId. order[0] is always the focused front card.
   const [order, setOrder] = useState<number[]>([0, 1, 2, 3, 4])
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  // Scopes the arrow-key handler so it only fires when focus is inside the
-  // widget, so the host page keeps its own arrow-key behaviour.
   const containerRef = useRef<HTMLDivElement | null>(null)
-  // Separates a tap (< 8px) from a drag on the focused card.
   const dragDelta = useRef(0)
 
   const reduceMotion = useReducedMotion()
@@ -175,7 +158,6 @@ export default function InteractiveCardStack() {
     setMounted(true)
   }, [])
 
-  // Mobile breakpoint: flip slot table below 640px.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mq = window.matchMedia('(min-width: 640px)')
@@ -185,8 +167,6 @@ export default function InteractiveCardStack() {
     return () => mq.removeEventListener('change', apply)
   }, [])
 
-  // Bring a card to slot 0. The rest of the order rotates so the previous
-  // trailing cards keep their relative order behind it.
   const focusCard = useCallback((cardId: number) => {
     setOrder((prev) => {
       const idx = prev.indexOf(cardId)
@@ -195,8 +175,6 @@ export default function InteractiveCardStack() {
     })
   }, [])
 
-  // Cycle focus by ±1 with wrap. +1 → next (front card moves to the back),
-  // -1 → previous (back card comes to the front).
   const step = useCallback((dir: 1 | -1) => {
     setOrder((prev) =>
       dir === 1
@@ -205,8 +183,6 @@ export default function InteractiveCardStack() {
     )
   }, [])
 
-  // Arrow keys cycle focus, but ONLY while focus is inside the widget so the
-  // page's own Left/Right behaviour (caret, scroll, native controls) is intact.
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
@@ -236,8 +212,7 @@ export default function InteractiveCardStack() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#E8E8DF] px-4 dark:bg-[#1A1A19]">
       <div ref={containerRef} className="relative flex w-full max-w-4xl flex-col items-center gap-10 py-12">
-        {/* Stage: overflow-hidden so the scattered, rotated cards never spill
-            past the container and trigger a horizontal page scrollbar. */}
+        {}
         <div
           role="group"
           aria-label="Interactive card stack"
@@ -251,8 +226,6 @@ export default function InteractiveCardStack() {
             const isFocus = slotIndex === 0
             const isLandscape = card.orientation === 'landscape'
 
-            // Entrance stagger (outer cards land first, focus lands last);
-            // skipped entirely under reduced motion.
             const transition =
               !reduceMotion && !mounted
                 ? { ...MOUNT_SPRING, delay: slotIndex * STAGGER_S }
@@ -266,7 +239,6 @@ export default function InteractiveCardStack() {
                 ? 'w-[clamp(130px,42vw,180px)]'
                 : 'w-[clamp(160px,20vw,220px)]'
 
-            // Breathing is suppressed for reduced-motion users.
             const breathY = reduceMotion ? 0 : isFocus ? BREATH_Y_FOCUS : BREATH_Y_REST
             const breathRotate = reduceMotion
               ? 0
@@ -278,8 +250,6 @@ export default function InteractiveCardStack() {
               <motion.div
                 key={card.id}
                 tabIndex={0}
-                // Only back cards are activatable controls. The focused card has
-                // no action (it is dragged, not clicked), so it is not a button.
                 role={isFocus ? undefined : 'button'}
                 aria-label={
                   isFocus
@@ -316,17 +286,13 @@ export default function InteractiveCardStack() {
                 }}
                 onDragEnd={handleDragEnd}
                 className={`absolute ${widthClass} rounded-[18px] outline-none ${isFocus ? '' : RING}`}
-                // z-index follows the slot, so a flicked card drops behind the
-                // others the instant it is released and slides under them as it
-                // travels to the rear (no late, visible z-index swap).
                 style={{ cursor: isFocus ? 'grab' : 'pointer', zIndex: slot.zIndex }}
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.5, y: 60 }}
                 animate={{ x: slot.x, y: slot.y, rotate: slot.rotate, scale: slot.scale, opacity: 1 }}
                 transition={transition}
                 whileTap={isFocus ? { cursor: 'grabbing' } : undefined}
               >
-                {/* Middle layer owns the breathing loop AND the polaroid
-                    chrome, so frame, shadow, title, and image move as one unit. */}
+                {}
                 <motion.div
                   className="relative flex w-full flex-col rounded-[18px] ring-1 ring-black/[0.08] dark:ring-white/[0.12]"
                   style={{ backgroundColor: '#FFFFFF', padding: '10px', boxShadow: isFocus ? SHADOW_FOCUS : SHADOW_REST }}
@@ -337,7 +303,7 @@ export default function InteractiveCardStack() {
                       : { duration: 7 + card.id * 0.6, repeat: Infinity, ease: 'easeInOut' }
                   }
                 >
-                  {/* Dark-mode paper colour overlay, pinned inside the frame. */}
+                  {}
                   <span
                     aria-hidden
                     className="pointer-events-none absolute inset-0 rounded-[18px] dark:bg-[#F5F5F0]"
@@ -347,12 +313,7 @@ export default function InteractiveCardStack() {
                     <div style={{ position: 'relative', padding: '14px 12px 8px 12px' }}>
                       <p style={TITLE_STYLE}>{card.title}</p>
 
-                      {/* Top-right chip, rendered ONLY on the focused card (so
-                          there are never hidden, focusable controls behind the
-                          front). When card.href is set it is a real link that
-                          opens in a new tab; otherwise it is a decorative
-                          affordance with no action, hidden from assistive tech.
-                          Set href per card to wire your own link. */}
+                      {/* customize: set href on a card to enable the open link */}
                       {isFocus &&
                         (card.href ? (
                           <motion.a
@@ -389,9 +350,7 @@ export default function InteractiveCardStack() {
                     </div>
                   )}
 
-                  {/* Image well: rounded, clipped, aspect-locked. The focused
-                      image loads eagerly at high priority (it is the LCP hero);
-                      the rest defer. */}
+                  {}
                   <div
                     className={`relative w-full overflow-hidden ${isLandscape ? 'aspect-[16/10]' : 'aspect-[4/5]'}`}
                     style={{ borderRadius: 10 }}
@@ -411,12 +370,12 @@ export default function InteractiveCardStack() {
           })}
         </div>
 
-        {/* Announce the front-card change to assistive tech. */}
+        {}
         <p className="sr-only" aria-live="polite">
           {frontTitle ? `${frontTitle} in focus` : ''}
         </p>
 
-        {/* Dot indicator + hint */}
+        {}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-1.5">
             {CARDS.map((card) => {
@@ -428,7 +387,6 @@ export default function InteractiveCardStack() {
                   aria-label={`Show ${card.title ?? `card ${card.id + 1}`}`}
                   aria-current={isCurrent ? true : undefined}
                   onClick={() => focusCard(card.id)}
-                  // 24px hit box (WCAG 2.5.8) around the small visible pill.
                   className={`flex items-center justify-center rounded-full outline-none ${RING}`}
                   style={{ width: 24, height: 24 }}
                 >
