@@ -1,6 +1,6 @@
 'use client'
 
-// npm install @phosphor-icons/react framer-motion
+// npm install @phosphor-icons/react framer-motion react-dom
 /**
  * Presents a token swap card with live quotes, token pickers, and configurable slippage.
  * Selecting a duplicate token flips the pair, while submission animates confirmation.
