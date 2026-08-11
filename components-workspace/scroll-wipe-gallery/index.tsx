@@ -1,5 +1,9 @@
 'use client'
-// npm install framer-motion @phosphor-icons/react
+// npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a full-frame photo gallery driven by scroll progress.
+ * Each section wipes over the previous image while updating its title.
+ */
 
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import {
@@ -12,6 +16,7 @@ import {
 } from 'framer-motion'
 import { CaretDown } from '@phosphor-icons/react'
 
+// customize: replace the gallery images and titles below
 const PHOTOS = [
   {
     src: 'https://images.unsplash.com/photo-1634573826817-27d9e8da08df?w=1920&h=1080&fit=crop&crop=center&auto=format',
@@ -40,22 +45,23 @@ const PHOTOS = [
   },
 ] as const
 
-// Pinned on the section root so the type looks the same wherever this is
-// pasted instead of inheriting whatever the host page happens to use. Manrope
-// first because that is what it was designed against; the rest is a grotesque
-// fallback chain that keeps the same wide, flat-sided feel.
+
+
+
+
 const TYPEFACE =
   "'Manrope', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif"
 
-// Pacing knob. Every wipe and hold is a fraction of this height, so raising it
-// slows the whole sequence without changing the rhythm between wipes.
+
+
+// tune: lower to shorten the scroll sequence
 const SECTION_HEIGHT = '1100vh'
 
-// Each transition reveals from a different edge. The key names the direction
-// the reveal travels, and the value is the fully hidden starting clip.
-// Every inset slot carries an explicit percentage: Framer Motion cannot
-// interpolate an inset() that mixes unitless 0 with 0%, and silently emits an
-// invalid value the browser drops to clip-path: none (fully unclipped).
+
+
+
+
+
 const HIDDEN_CLIP = {
   down: 'inset(0% 0% 100% 0%)',
   right: 'inset(0% 100% 0% 0%)',
@@ -68,9 +74,9 @@ const DIRECTIONS = ['down', 'right', 'up', 'left'] as const
 
 type Direction = (typeof DIRECTIONS)[number]
 
-// Photo 0 is the base layer and is always visible. Every later photo gets an
-// equal slice of the scroll, wiping in over the middle of its slice so the
-// composition holds still before and after the cut.
+
+
+
 const WIPE_SEQUENCE = PHOTOS.slice(1).map((photo, index) => {
   const segment = 1 / (PHOTOS.length - 1)
   const segmentStart = index * segment
@@ -82,26 +88,28 @@ const WIPE_SEQUENCE = PHOTOS.slice(1).map((photo, index) => {
     direction: DIRECTIONS[index % DIRECTIONS.length],
     from,
     to,
-    // The type keeps moving a beat past its own wipe, so the frame lands first
-    // and the headline resolves into it instead of arriving pre-set.
+    
+    
     settled: to + (to - from) * 0.45,
   }
 })
 
 const TOTAL_LABEL = String(PHOTOS.length).padStart(2, '0')
 
-// Type arrival, driven by each frame's own wipe. The headline enters loose and
-// pushed along the direction the wipe travels, then tightens and locks. Tracking
-// is in em so the arrival reads the same at any size. The old version ticked one
-// shared spacing value on every cut, which twitched every title at once,
-// including the ones nothing was happening to.
+
+
+
+
+
+// tune: raise to spread incoming title letters farther apart
 const ENTER_TRACKING = 0.16
 const SETTLED_TRACKING = 0.02
+// tune: raise to increase title entrance travel
 const ENTER_OFFSET = 48
 const ENTER_EASE = cubicBezier(0.16, 1, 0.3, 1)
 
-// Which way the headline is pushed before it settles: with the wipe, never
-// against it, so the type and the reveal read as one gesture.
+
+
 const ENTER_FROM = {
   down: { axis: 'y', sign: -1 },
   right: { axis: 'x', sign: -1 },
@@ -109,10 +117,10 @@ const ENTER_FROM = {
   left: { axis: 'x', sign: 1 },
 } as const
 
-// Two answers from one walk: what actually scrolls, and what merely crops.
-// The scroller drives progress. The cropper matters when nothing scrolls, for
-// example inside a fixed-height preview box or a card: sizing the panel to the
-// window there hangs half the composition below the crop.
+
+
+
+
 function findScrollContext(element: HTMLElement): {
   scroller: HTMLElement | null
   clipper: HTMLElement | null
@@ -126,17 +134,17 @@ function findScrollContext(element: HTMLElement): {
     if (overflowY !== 'visible') {
       if (!clipper) clipper = ancestor
 
-      // The overflow check alone is not enough: an element with
-      // `overflow-x: hidden` computes overflowY to `auto` even though it never
-      // scrolls, and `body { overflow-x: hidden }` is on half the pages this
-      // could be pasted into. Requiring real overflow keeps the walk going.
+      
+      
+      
+      
       if (
         (overflowY === 'auto' || overflowY === 'scroll') &&
         ancestor.scrollHeight > ancestor.clientHeight
       ) {
-        // Keep the nearer clipper if the walk already passed one: a
-        // fixed-height box inside a scrolling shell bounds us, the shell does
-        // not.
+        
+        
+        
         return { scroller: ancestor, clipper: clipper ?? ancestor }
       }
     }
@@ -147,22 +155,22 @@ function findScrollContext(element: HTMLElement): {
   return { scroller: null, clipper }
 }
 
-// Progress is measured from the wrapper's own viewport rect rather than through
-// Framer Motion's container option, which requires the scrolling ancestor to be
-// non-static. Reading getBoundingClientRect keeps this correct inside an app
-// shell that scrolls an inner div and on a page that scrolls the window.
+
+
+
+
 function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
   progress: MotionValue<number>
   viewportHeight: number | null
 } {
   const progress = useMotionValue(0)
-  // The height of whatever actually scrolls. The sticky panel sizes off this
-  // instead of 100vh, which is only correct when the scroller IS the viewport:
-  // inside an app shell with a fixed header, in a fullscreen overlay panel, or
-  // on iOS where 100vh is the large viewport, a 100vh panel hangs below the
-  // visible area and clips its own bottom chrome. State, not a MotionValue:
-  // this changes on mount and on resize, not per frame, and it has to survive
-  // a re-render. null means not measured yet, and falls back to 100vh.
+  
+  
+  
+  
+  
+  
+  
   const [viewportHeight, setViewportHeight] = useState<number | null>(null)
 
   useEffect(() => {
@@ -179,12 +187,12 @@ function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
       const containerTop = scrollContainer
         ? scrollContainer.getBoundingClientRect().top
         : 0
-      // Never taller than what is actually visible. Start from the scroller,
-      // or the window when nothing scrolls, then cap by anything nearer that
-      // crops us: a fixed-height preview box inside a scrolling page bounds
-      // this block even though the page is what scrolls. A page-level clipper
-      // (body with overflow-x hidden) is taller than the window, so the cap is
-      // a no-op there and only real crops shrink the panel.
+      
+      
+      
+      
+      
+      
       const availableHeight = scrollContainer
         ? scrollContainer.clientHeight
         : window.innerHeight
@@ -192,11 +200,11 @@ function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
         clipper && clipper !== scrollContainer
           ? Math.min(availableHeight, clipper.clientHeight)
           : availableHeight
-      // Cropped and unscrollable: something shorter than the section clips us,
-      // and it is not the thing that scrolls, so that crop moves as one piece
-      // and the viewer can never travel through the sequence inside it. Hold
-      // the first frame rather than let an outer scroll drive a counter and a
-      // set of wipes nobody can control. This is the preview-box case.
+      
+      
+      
+      
+      
       const cropped =
         !!clipper &&
         clipper !== scrollContainer &&
@@ -217,18 +225,18 @@ function useElementScrollProgress(targetRef: RefObject<HTMLElement | null>): {
     }
 
     updateProgress()
-    // Both, always: the container listener covers an app shell that scrolls an
-    // inner div, and window covers a plain page. Scroll events do not bubble
-    // from an inner scroller to window, so neither one alone is enough.
+    
+    
+    
     scrollContainer?.addEventListener('scroll', requestUpdate, { passive: true })
     window.addEventListener('scroll', requestUpdate, { passive: true })
     window.addEventListener('resize', requestUpdate)
 
-    // The scroll container can change size without the window resizing: an
-    // overlay opening, a panel animating, a phone toolbar collapsing.
+    
+    
     const observer = new ResizeObserver(requestUpdate)
-    // Both when they differ: the scroller drives progress, the clipper caps the
-    // panel height, and either can resize without the other.
+    
+    
     observer.observe(scrollContainer ?? clipper ?? document.documentElement)
     if (clipper && clipper !== scrollContainer) observer.observe(clipper)
 
@@ -290,7 +298,7 @@ function PhotoLayer({
       className="absolute inset-0 isolate"
       style={{ clipPath, willChange: 'clip-path' }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {}
       <img
         src={step.photo.src}
         alt={step.photo.alt}
@@ -306,24 +314,24 @@ function PhotoLayer({
   )
 }
 
-// The title lives inside its own photo layer rather than above the whole
-// stack. Text has a transparent background, so a shared layer would let every
-// title accumulate on screen at once. Nested here, the next opaque photo
-// covers the previous title for free and exactly one title is ever visible.
-// `isolate` on the layer keeps the difference blend scoped to its own photo.
-//
-// Each word is its own line rather than a natural wrap: the animated letter
-// spacing changes the measured text width, so a short title reflowed from two
-// lines to one halfway through its own cut. Stacking the words makes the line
-// count a property of the copy, not of the current spacing or viewport width.
+
+
+
+
+
+
+
+
+
+
 function FrameTitle({
   title,
   enter,
   direction,
 }: {
   title: string
-  // Absent for the frame that is already on screen at rest, and whenever the
-  // viewer asked for reduced motion: the title just sits at its settled state.
+  
+  
   enter?: MotionValue<number>
   direction?: Direction
 }) {
@@ -337,9 +345,9 @@ function FrameTitle({
     [ENTER_TRACKING, SETTLED_TRACKING],
   )
   const letterSpacing = useTransform(tracking, (value) => `${value}em`)
-  // Letter spacing also lands after the last letter, so wide tracking drags the
-  // word off centre. Cancelling it on the trailing edge keeps every line
-  // optically centred while it tightens.
+  
+  
+  
   const trailing = useTransform(tracking, (value) => `${-value}em`)
   const offset = useTransform(
     arrival,
@@ -374,15 +382,15 @@ export default function ScrollWipeGallery() {
   const { progress: scrollYProgress, viewportHeight } =
     useElementScrollProgress(wrapperRef)
 
-  // 100vh until the real scroller has been measured, so the server render and
-  // the first client render agree.
+  
+  
   const panelHeight = viewportHeight ? `${viewportHeight}px` : '100vh'
 
-  // The scroll cue has done its job the moment the first cut starts moving.
+  
   const cueOpacity = useTransform(scrollYProgress, [0, 0.03], [1, 0])
 
-  // Counts the cuts that have passed their midpoint, so the label flips with
-  // the frame the viewer is actually looking at.
+  
+  
   const frameLabel = useTransform(scrollYProgress, (value) => {
     const passed = WIPE_SEQUENCE.filter(
       (step) => value >= (step.from + step.to) / 2,
@@ -402,16 +410,13 @@ export default function ScrollWipeGallery() {
         className="sticky top-0 w-full overflow-hidden bg-[#0A0A0A] dark:bg-[#0A0A0A]"
         style={{ height: panelHeight }}
       >
-        {/* The visible titles are decorative duplicates of this one heading, so
-            the sequence reads as a single headline to a screen reader. h2, not
-            h1: this is a section pasted into someone else's page, which already
-            has its own top-level heading. */}
+        {}
         <h2 className="sr-only">
           {PHOTOS.map((photo) => photo.title).join('. ')}
         </h2>
 
         <div className="absolute inset-0 isolate">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {}
           <img
             src={PHOTOS[0].src}
             alt={PHOTOS[0].alt}
@@ -430,9 +435,7 @@ export default function ScrollWipeGallery() {
           />
         ))}
 
-        {/* Orientation chrome. White on difference blend inverts against
-            whatever frame is underneath, so it stays legible without a scrim
-            and reads as part of the same typographic system as the headline. */}
+        {}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-20 text-[#FFFFFF] dark:text-[#FFFFFF]"
@@ -447,9 +450,7 @@ export default function ScrollWipeGallery() {
             </span>
           </div>
 
-          {/* Bottom right, not top right. Host pages put their own chrome in
-              the top right corner often enough (a close button, a toolbar)
-              that a counter parked there gets covered. */}
+          {}
           <div className="absolute bottom-6 right-4 text-[12px] font-semibold uppercase tracking-[0.18em] md:bottom-8 md:right-8">
             <motion.span>{frameLabel}</motion.span>
             <span className="opacity-70"> / {TOTAL_LABEL}</span>

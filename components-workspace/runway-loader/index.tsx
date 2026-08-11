@@ -1,16 +1,20 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays an airplane loader moving along a runway timeline.
+ * Progress advances through staged labels before the sequence restarts.
+ */
 
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 
-// ─── Airplane SVG — top-down view, pointing right ─────────────────────────────
+
 
 function Airplane({ isDark }: { isDark: boolean }) {
-  // Light mode uses darker greys so the plane reads against sand-100
+  
   const bodyTop    = isDark ? '#ececec' : '#c8c8c8'
   const bodyMid    = isDark ? '#ffffff' : '#dedede'
   const bodyBot    = isDark ? '#d0d0d0' : '#b4b4b4'
@@ -46,31 +50,31 @@ function Airplane({ isDark }: { isDark: boolean }) {
         </linearGradient>
       </defs>
 
-      {/* Top wing — root centred on body, thicker chord */}
+      {}
       <path d="M44,21 L28,21 L8,2 L18,0 Z" fill="url(#rl-wing-t)" />
-      {/* Bottom wing */}
+      {}
       <path d="M44,25 L28,25 L8,44 L18,46 Z" fill="url(#rl-wing-b)" />
 
-      {/* Horizontal tail stabilisers */}
+      {}
       <path d="M8,21 L2,14 L6,14 L12,21 Z" fill={tail} />
       <path d="M8,25 L2,32 L6,32 L12,25 Z" fill={tail} />
 
-      {/* Fuselage */}
+      {}
       <ellipse cx="34" cy="23" rx="29" ry="7" fill="url(#rl-body)" />
 
-      {/* Nose taper */}
+      {}
       <path
         d="M61,19.5 C66,21.5 67.5,23 67,23 C67.5,23 66,24.5 61,26.5 L58,23 Z"
         fill={nose}
       />
 
-      {/* Cockpit window */}
+      {}
       <ellipse cx="57" cy="23" rx="4" ry="3" fill="#7ec8e8" opacity="0.9" />
     </svg>
   )
 }
 
-// ─── RunwayLoader ─────────────────────────────────────────────────────────────
+
 
 type Phase = 'taxiing' | 'takeoff' | 'resetting'
 
@@ -102,7 +106,8 @@ export default function RunwayLoader() {
   const aliveRef       = useRef(true)
   const disappearedRef = useRef(false)
 
-  // Nose tip touches the right wall when the plane centre reaches this %
+  
+  // tune: lower to shorten the runway travel
   const WALL_PCT = 91
 
   useEffect(() => {
@@ -114,14 +119,14 @@ export default function RunwayLoader() {
       if (!aliveRef.current) return
       if (!startRef.current) startRef.current = ts
       const t = Math.min((ts - startRef.current) / TAXI_MS, 1)
-      // Realistic curve: fast to ~82% in first 75% of time, then slows
+      
       const eased = t <= 0.75
         ? (t / 0.75) * 82
         : 82 + (1 - Math.pow(1 - (t - 0.75) / 0.25, 2)) * 18
       const p = Math.min(eased, 100)
       setProgress(p)
 
-      // Trigger disappear exactly when nose tip hits the right wall
+      
       if (p >= WALL_PCT && !disappearedRef.current) {
         disappearedRef.current = true
         setPhase('takeoff')
@@ -130,7 +135,7 @@ export default function RunwayLoader() {
       if (p < 100) {
         rafRef.current = requestAnimationFrame(tick)
       } else {
-        // Bar is full — wait for disappear animation then reset
+        
         setTimeout(() => {
           if (!aliveRef.current) return
           setPhase('resetting')
@@ -155,10 +160,10 @@ export default function RunwayLoader() {
   }, [])
 
 
-  // Plane sits at the fill boundary, clamped so nose tip doesn't pass the right wall
+  
   const planePct = Math.min(progress, WALL_PCT)
 
-  // Theme-responsive track colours
+  
   const trackBg = isDark
     ? 'linear-gradient(to bottom, #404040, #252525)'
     : 'linear-gradient(to bottom, #bab7b2, #a09d98)'
@@ -173,13 +178,13 @@ export default function RunwayLoader() {
     <div ref={containerRef} className="flex h-full w-full items-center justify-center" style={{ background: isDark ? '#110F0C' : '#F5F1EA' }}>
       <div className="flex w-full max-w-[440px] flex-col items-center gap-4 px-4 sm:gap-6 sm:px-6">
 
-        {/* ── Runway track ── */}
+        {}
         <div
           className="relative h-11 w-full overflow-visible rounded-full sm:h-14"
           style={{ background: trackBg, boxShadow: trackShadow }}
         >
 
-          {/* Runway centreline dashes — static full-width, sits behind the fill */}
+          {}
           <div
             className="pointer-events-none absolute top-1/2 -translate-y-px"
             style={{
@@ -190,7 +195,7 @@ export default function RunwayLoader() {
             }}
           />
 
-          {/* Red fill — painted on top of dashes, revealing only the right portion */}
+          {}
           <div
             className="absolute inset-y-0 left-0 rounded-full"
             style={{
@@ -200,7 +205,7 @@ export default function RunwayLoader() {
             }}
           />
 
-          {/* Heat-shimmer exhaust behind the engines */}
+          {}
           {phase === 'taxiing' && progress > 30 && (
             <motion.div
               className="pointer-events-none absolute top-1/2 -translate-y-1/2 rounded-full"
@@ -217,7 +222,7 @@ export default function RunwayLoader() {
             />
           )}
 
-          {/* ── Airplane ── */}
+          {}
           <AnimatePresence>
             {phase !== 'resetting' && (
               <div
@@ -231,7 +236,7 @@ export default function RunwayLoader() {
                 {phase === 'taxiing' ? (
                   <Airplane isDark={isDark} />
                 ) : (
-                  // Liftoff: grows and slides right past the edge, then fades
+                  
                   <motion.div
                     initial={{ opacity: 1, x: 0, scale: 1 }}
                     animate={{ opacity: 0, x: 120, scale: 1.8 }}
@@ -245,7 +250,7 @@ export default function RunwayLoader() {
           </AnimatePresence>
         </div>
 
-        {/* ── Progress readout ── */}
+        {}
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-baseline gap-1">
             <span

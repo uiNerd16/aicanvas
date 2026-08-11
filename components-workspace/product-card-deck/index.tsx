@@ -1,6 +1,10 @@
 'use client'
 
 // npm install framer-motion
+/**
+ * Displays a looping deck of product cards with a focused front item.
+ * Dragging or using the controls cycles cards through the animated stack.
+ */
 
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -13,8 +17,8 @@ import {
   type PanInfo,
 } from 'framer-motion'
 
-// ─── Data ───────────────────────────────────────────────────────────────────
-// Swap these for any images — the deck loops endlessly through them.
+
+
 
 interface CardData {
   title: string
@@ -22,9 +26,10 @@ interface CardData {
   label?: string
 }
 
+// customize: replace the deck images and labels below
 const CARDS: CardData[] = [
   {
-    // Mural card — image only, no caption. The deck opens on this one.
+    
     title: '',
     image: 'https://ik.imagekit.io/aitoolkit/product-card-deck/mural.jpg?tr=w-600',
   },
@@ -50,18 +55,20 @@ const CARDS: CardData[] = [
   },
 ]
 
-// ─── Stack geometry ─────────────────────────────────────────────────────────
-// Slot 0 is the active (draggable) card; slots 1-3 peek behind it as a straight
-// stack — the only rotation is the live drag-tilt below.
 
+
+
+
+// tune: change to control the number of rendered deck slots
 const VISIBLE = 4
+// tune: adjust these arrays to change the depth spacing
 const SLOT_Y = [0, 12, 24, 36]
 const SLOT_SCALE = [1, 0.95, 0.9, 0.86]
 const SLOT_OPACITY = [1, 1, 0.92, 0.82]
 
 const SPRING = { type: 'spring' as const, stiffness: 300, damping: 30 }
 
-// ─── Card face ───────────────────────────────────────────────────────────────
+
 
 function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
   return (
@@ -75,7 +82,7 @@ function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
           : '0 14px 30px rgba(0,0,0,0.18)',
       }}
     >
-      {/* Container 1 — the picture. Fills the whole card on the textless mural. */}
+      {}
       <div className="relative w-full" style={{ flex: 1, minHeight: 0 }}>
         <img
           src={card.image}
@@ -86,7 +93,7 @@ function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
         />
       </div>
 
-      {/* Container 2 — name + button, on a clean strip below the picture. */}
+      {}
       {card.title && (
         <div
           className="flex items-center justify-between"
@@ -124,7 +131,7 @@ function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
                 cursor: 'pointer',
                 backgroundColor: '#141312',
                 color: '#F5F1E8',
-                // Fully rounded (pill) corners.
+                
                 borderRadius: 9999,
                 padding: '8px 16px',
                 fontFamily: 'var(--font-sans, sans-serif)',
@@ -142,11 +149,11 @@ function CardFace({ card, isTop }: { card: CardData; isTop: boolean }) {
   )
 }
 
-// ─── One card in the deck ─────────────────────────────────────────────────────
-// Owns its OWN motion values, so the top card can be dragged + tilted while the
-// rest sit in their slots. When the deck advances, the card behind becomes the
-// same element at slot 0 (no hand-off). When flicked it animates itself off via
-// usePresence before unmounting.
+
+
+
+
+
 
 function FlickCard({
   card,
@@ -164,12 +171,12 @@ function FlickCard({
   const y = useMotionValue(SLOT_Y[slot])
   const scale = useMotionValue(SLOT_SCALE[slot])
   const opacity = useMotionValue(0)
-  // Drag-tilt: lean toward the horizontal drag, clamped to a gentle ±18°.
+  
   const rotate = useTransform(x, [-200, 200], [-18, 18], { clamp: true })
   const flickVel = useRef({ x: 0, y: 0 })
 
-  // Settle into the current slot whenever it changes (the deck advancing). The
-  // background cards re-center horizontally; the top card leaves x to the drag.
+  
+  
   useEffect(() => {
     if (!isPresent) return
     const controls = [
@@ -181,7 +188,7 @@ function FlickCard({
     return () => controls.forEach((c) => c.stop())
   }, [slot, isTop, isPresent, x, y, scale, opacity])
 
-  // Removed from the deck -> sail off in the flick direction, then unmount.
+  
   useEffect(() => {
     if (isPresent) return
     const v = flickVel.current
@@ -201,15 +208,15 @@ function FlickCard({
     const speed = Math.hypot(info.velocity.x, info.velocity.y)
     const dist = Math.hypot(info.offset.x, info.offset.y)
     if (speed > 500 || dist > 130) {
-      // On a far-but-slow drag the velocity is tiny — fall back to the drag
-      // direction so the card still flies the way it was pushed.
+      
+      
       flickVel.current =
         speed > 220
           ? { x: info.velocity.x, y: info.velocity.y }
           : { x: info.offset.x * 9, y: info.offset.y * 9 }
       onFlick()
     } else {
-      // Weak release: spring back to the top slot.
+      
       animate(x, 0, SPRING)
       animate(y, SLOT_Y[0], SPRING)
     }
@@ -227,7 +234,7 @@ function FlickCard({
         inset: 0,
         zIndex: 100 - slot,
         cursor: isTop ? 'grab' : 'auto',
-        // Only the draggable top card blocks touch-scroll; peeking cards don't.
+        
         touchAction: isTop ? 'none' : 'auto',
       }}
       drag={isTop}
@@ -239,7 +246,7 @@ function FlickCard({
   )
 }
 
-// ─── ProductCardDeck ──────────────────────────────────────────────────────────
+
 
 interface DeckCard {
   key: number
@@ -252,7 +259,7 @@ export default function ProductCardDeck() {
   )
   const nextKey = useRef(VISIBLE)
 
-  // Drop the top card and append a fresh one at the back so the deck never ends.
+  
   const handleFlick = () => {
     setDeck((prev) => {
       const rest = prev.slice(1)
@@ -271,8 +278,8 @@ export default function ProductCardDeck() {
         <div
           className="relative"
           style={{
-            // Card = a (roughly square) picture container on top + a clean
-            // caption strip below it.
+            
+            
             width: 'clamp(220px, 72vw, 300px)',
             height: 'calc(clamp(220px, 72vw, 300px) + 56px)',
           }}

@@ -1,5 +1,9 @@
 'use client'
-// npm install framer-motion @phosphor-icons/react
+// npm install @phosphor-icons/react framer-motion
+/**
+ * Presents a signature modal with a velocity-sensitive drawing canvas.
+ * Pointer strokes can be erased, canceled, or confirmed into the trigger pill.
+ */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,6 +13,7 @@ type Pt = { x: number; y: number; t: number }
 type Stroke = Pt[]
 type ButtonRect = { x: number; y: number; w: number; h: number }
 
+// tune: adjust these bounds to change stroke-width variation
 const MIN_W = 1.1
 const MAX_W = 2.6
 const MORPH = { type: 'spring' as const, stiffness: 320, damping: 30, mass: 1 }
@@ -20,8 +25,8 @@ function widthForVelocity(prev: Pt, curr: Pt) {
   return Math.max(MIN_W, MAX_W - v * 0.55)
 }
 
-// Pill inverts with the page background (dark pill on light page, light pill
-// on dark page). Modal stays cream-light in both themes.
+
+
 function buildPillPalette(isDark: boolean) {
   if (isDark) {
     return {
@@ -192,7 +197,7 @@ function ModalCard({
     )
   }, [])
 
-  // Dialog semantics: dismiss on Escape and move focus into the modal on open.
+  
   useEffect(() => {
     surfaceRef.current?.focus()
     const onKeyDown = (e: KeyboardEvent) => {
@@ -416,7 +421,7 @@ function ModalCard({
           animate="show"
           exit="exit"
         >
-          {/* Header */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: -6 },
@@ -463,7 +468,7 @@ function ModalCard({
             </motion.button>
           </motion.div>
 
-          {/* Canvas */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 8 },
@@ -536,7 +541,7 @@ function ModalCard({
             </div>
           </motion.div>
 
-          {/* Footer */}
+          {}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 8 },
