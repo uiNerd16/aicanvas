@@ -33,6 +33,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'curious-ai': ['Motion', 'Three.js', 'Tailwind CSS'],
   'danger-stripes': ['Motion', 'Tailwind CSS'],
   'delete-button': ['Motion', 'Tailwind CSS'],
+  'diamond-grid': ['Canvas', 'Tailwind CSS'],
   'distortion-grid': ['Canvas', 'Tailwind CSS'],
   'dot-grid': ['Canvas', 'Tailwind CSS'],
   'emoji-burst': ['Motion', 'Tailwind CSS'],
@@ -170,6 +171,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Hero section', 'Editorial', 'Marketing site'],
     about:
       'Noise Field draws a regular grid of small arrows pointing in directions sampled from layered sine-wave noise, so the field looks like wind mapped across a weather chart. The pattern drifts continuously, and bringing your cursor into the canvas creates a swirling vortex centered on it that the surrounding arrows curl around. It is a pure 2D canvas component with Tailwind chrome, so it stays light despite the dense visual texture. Drop it as a hero backdrop, an editorial section break, or behind a marketing-page CTA where you want quiet ambient motion.',
+  },
+  'diamond-grid': {
+    useCases: ['Hero section', 'Landing page', 'Section divider'],
+    about:
+      'Diamond Grid is a full-bleed canvas background built from a near-invisible square grid, rotated forty-five degrees so it reads as diamonds. Thirty-four seeded ignition points fire in sequence, lighting up as four-point stars and sending light outward along the four grid axes with one continuous ease-out, until opposing fronts meet and reveal the pattern. A broad top-left-to-bottom-right mask keeps the center bright while the other two corners fade away. The 64-second loop is seamless and deterministic from a seed prop, replaying on reload. Built on plain canvas with zero dependencies beyond React, it suits hero sections, landing pages, and section dividers that want ambient motion without competing with foreground copy.',
   },
 
   // ─── Buttons & Toggles ───────────────────────────────────────────────────

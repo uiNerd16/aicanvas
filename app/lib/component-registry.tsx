@@ -1425,9 +1425,8 @@ Requirements:
   {
     slug: 'diamond-grid',
     name: 'Diamond Grid',
-    description:
-      'A near-invisible lattice breathes into view as seeded sparks send slow light along the lines and meeting fronts reveal the pattern.',
-    image: '',
+    description: 'A faint canvas grid of diamonds. Seeded sparks send light outward until fronts meet.',
+    image: 'https://ik.imagekit.io/aitoolkit/diamond-grid.png',
     tags: [
       { label: 'Backgrounds', accent: true },
       { label: 'Canvas' },

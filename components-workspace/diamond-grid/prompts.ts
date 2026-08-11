@@ -21,8 +21,8 @@ Use these values exactly:
   TAU = Math.PI * 2
   GRID_COS = Math.SQRT1_2
 
-  DARK = { ground: '#000000', ink: '255,255,255', line: 0.3, lineHot: 0.1, lineFar: 0.8, pulse: 0.7, comp: 'lighter' }
-  LIGHT = { ground: '#FAF8F5', ink: '14,14,16', line: 0.34, lineHot: 0.12, lineFar: 0.82, pulse: 0.5, comp: 'source-over' }
+  DARK = { ground: '#000000', ink: '255,255,255', line: 0.3, pulse: 0.7, comp: 'lighter' }
+  LIGHT = { ground: '#FAF8F5', ink: '14,14,16', line: 0.34, pulse: 0.5, comp: 'source-over' }
 
 Precompute 256 rgba strings for each ink, indexed by a clamped alpha rounded after multiplication by 255. Use the palette compositing mode for stars, resting geometry and live light. Dark mode therefore adds overlapping light with lighter, while light mode uses source-over.
 
@@ -94,7 +94,7 @@ Compute wrapped age as time - start, adding LOOP_MS when negative. Return no lig
 
 ## Continuous travelling rays
 
-Each live ignition sends rays left, right, up and down, clamped by its distance to the corresponding grid edge. Travel must be one continuous cubic ease-out over the whole event, not a separate smoothstep within each cell. The older per-cell easing froze the front at every crossing. This version continuously decelerates and never stalls at a cell crossing.
+Each live ignition sends rays left, right, up and down, clamped by its distance to the corresponding grid edge. Travel must be one continuous cubic ease-out over the whole event, not a separate smoothstep within each cell. Per-cell easing has zero velocity at both ends, so it freezes the front at every crossing. A single ease-out continuously decelerates and never stalls.
 
 Use:
 
@@ -120,7 +120,7 @@ Use a ResizeObserver on the host, debounce rebuilds by 120 ms, and skip when wid
 
 Listen to prefers-reduced-motion: reduce. When enabled, stop RAF and render a populated still at STATIC_TIME_MS. When the preference changes, stop, redraw the correct idle frame and conditionally restart.
 
-For dark-mode detection, first read the closest ancestor with data-card-theme. Explicit light means light and explicit dark means dark. Only when that attribute gives neither, fall back to document.documentElement.classList.contains('dark'). Observe the html class with a MutationObserver. On a theme change, rebuild the mask, star sprite and resting layer, then redraw immediately when RAF is stopped.
+For dark-mode detection, first read the closest ancestor with data-card-theme. Explicit light means light and explicit dark means dark. Only when that attribute gives neither, fall back to document.documentElement.classList.contains('dark'). With one MutationObserver, watch the html class AND, when a data-card-theme ancestor exists, that wrapper's class and data-card-theme attributes. Watching html alone is a real bug: a host that themes a wrapper rather than the document never fires the observer, so the canvas keeps painting the stale palette. On a theme change, rebuild the mask, star sprite and resting layer, then redraw immediately when RAF is stopped.
 
 On teardown, cancel RAF, clear the resize debounce, disconnect ResizeObserver, IntersectionObserver and MutationObserver, remove the visibility and motion listeners, set every offscreen canvas width and height to 0, and release the field reference.
 
