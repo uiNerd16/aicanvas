@@ -245,8 +245,15 @@ export default function ComponentPageView({
   useEffect(() => {
     if (enforcing && activeTab === 'code' && codeState.status === 'idle') void openCode()
   }, [enforcing, activeTab, codeState.status, openCode])
-  // Reset when switching components so the next open re-fetches.
-  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug])
+  // Reset when switching components — or when the VIEWER changes — so the next
+  // open re-fetches. The user id is load-bearing: signing in from the auth
+  // modal calls router.refresh(), which merges the new RSC payload but
+  // deliberately keeps client state (Next docs: "without losing unaffected
+  // client-side React"), so a subscriber who signs in on this page would keep
+  // the logged-out 402 lock until they navigated away and back. Sign-out is the
+  // same bug in reverse. Safe on mount: `user` starts from the server-provided
+  // initialUser, so a normal load never fires a second fetch.
+  useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug, user?.id])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
   // staticPreview blocks paint their screenshot first, then hand over to the
   // real component on the first sign the visitor cares: hovering the box, or
