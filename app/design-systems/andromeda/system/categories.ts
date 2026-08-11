@@ -62,12 +62,12 @@ export const CATEGORY: Record<string, string> = {
   'media-card': 'Media',
   'music-player': 'Media',
 
-  // Backdrops — page- and section-scale substrate. Structural (grid, horizon,
-  // contour) plus one falloff (void); one structural per surface.
-  'grid-backdrop': 'Backdrops',
-  'void-backdrop': 'Backdrops',
-  'horizon-backdrop': 'Backdrops',
-  'contour-backdrop': 'Backdrops',
+  // Dynamic element — page- and section-scale substrate. WIP: named and
+  // grouped so they can be reviewed in the catalog, not because they are settled.
+  'grid-backdrop': 'Dynamic element',
+  'void-backdrop': 'Dynamic element',
+  'horizon-backdrop': 'Dynamic element',
+  'contour-backdrop': 'Dynamic element',
 
   // Visualization
   planet: 'Visualization',
