@@ -54,19 +54,22 @@ const PANEL_DURATION = ms(tokens.motion.duration.slow);
 const EASE_OUT = easingArray(tokens.motion.easing.out);
 const EASE_IN  = easingArray(tokens.motion.easing.in);
 
+// Vertical edges only. A drawer slides in from the LEFT or the RIGHT — the
+// top/bottom sides were removed 2026-08-11: a full-width sheet dropping from
+// the top is a different component with different rules (it competes with the
+// template top bar), not a fourth value of this prop. Every side here is on
+// the x axis, which is why nothing below branches on an axis any more.
 const SIDE_MAP = {
-  right:  { axis: 'x', sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
-  left:   { axis: 'x', sign: -1, position: 'left-0 top-0 bottom-0 h-full'  },
-  top:    { axis: 'y', sign: -1, position: 'top-0 left-0 right-0 w-full'   },
-  bottom: { axis: 'y', sign:  1, position: 'bottom-0 left-0 right-0 w-full' },
+  right: { sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
+  left:  { sign: -1, position: 'left-0 top-0 bottom-0 h-full'  },
 };
 
 /**
  * @typedef {object} DrawerProps
  * @property {boolean} open Whether the drawer is open.
  * @property {(next: boolean) => void} [onOpenChange] Handler called with the next open state when the drawer requests to close (ESC or backdrop click).
- * @property {'left'|'right'|'top'|'bottom'} [side='right'] Screen edge the panel slides in from.
- * @property {number|string} [size=420] Width (left/right) or height (top/bottom). Number → px, string passed through.
+ * @property {'left'|'right'} [side='right'] Screen edge the panel slides in from.
+ * @property {number|string} [size=420] Panel width. Number → px, string passed through.
  * @property {React.ReactNode} [children] Panel content, typically the Drawer compound parts (Header, Body, Footer).
  * @property {string} [className] Extra classes merged onto the panel element.
  * @property {React.CSSProperties} [style] Inline styles merged onto the panel element.
@@ -182,18 +185,15 @@ export const Drawer = forwardRef(function Drawer(
   const cfg = SIDE_MAP[side] ?? SIDE_MAP.right;
   const closedOffset = cfg.sign * 100;
   const sizeValue = typeof size === 'number' ? `${size}px` : size;
-  // Cap the panel to the viewport on phones: a left/right drawer wider than
+  // Cap the panel to the viewport on phones: a drawer wider than
   // the screen (size=420 on a 320px phone) must never exceed the viewport and
   // force horizontal page scroll. min() keeps the desktop size on wide screens
   // and clamps to a token-sized inset from the edge below it. tokens.spacing[6]
   // (24px) leaves the backdrop peeking so the drawer still reads as an overlay.
-  const sizeStyle =
-    cfg.axis === 'x'
-      ? { width: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` }
-      : { height: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` };
-  const panelInitial = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
-  const panelAnimate = { [cfg.axis]: 0, opacity: 1 };
-  const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
+  const sizeStyle = { width: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` };
+  const panelInitial = { x: `${closedOffset}%`, opacity: 1 };
+  const panelAnimate = { x: 0, opacity: 1 };
+  const panelExit    = { x: `${closedOffset}%`, opacity: 1 };
 
   return createPortal(
     <DrawerContext.Provider value={{ titleId, descId }}>
@@ -322,7 +322,9 @@ export const DrawerDescription = forwardRef(function DrawerDescription(
       data-slot="drawer-description"
       className={cn(
         '[font-family:var(--andromeda-font-sans)]',
-        'text-[length:var(--andromeda-text-xs)]',
+        // text.md, not xs: at 10px this was under the legibility floor and the
+        // hardest line in the panel to read. Same call CardDescription took.
+        'text-[length:var(--andromeda-text-md)]',
         'text-[color:var(--andromeda-text-secondary)]',
         className,
       )}
@@ -362,7 +364,10 @@ export const DrawerFooter = forwardRef(function DrawerFooter(
       ref={ref}
       data-slot="drawer-footer"
       className={cn(
-        'flex items-center justify-end gap-[var(--andromeda-3)]',
+        // Actions fill the footer, splitting it evenly: a drawer is a
+        // committed, focus-trapping surface, so its actions are the width of
+        // the decision, not buttons huddled in a corner.
+        'flex items-center gap-[var(--andromeda-3)] [&>*]:flex-1',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
         'border-t-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-subtle)]',
         className,

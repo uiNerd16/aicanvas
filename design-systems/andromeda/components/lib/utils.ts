@@ -66,29 +66,32 @@ export function andromedaVars() {
     '--andromeda-border-base':   t.color.border.base,
     '--andromeda-border-bright': t.color.border.bright,
     '--andromeda-border-strong': t.color.border.strong,
-    // Accent (turquoise) — 5 stops + 1 alpha + on-fill foreground
+    // Accent (turquoise) — 5 stops + 2 alphas + on-fill foreground
     '--andromeda-accent-100':   t.color.accent[100],
     '--andromeda-accent-200':   t.color.accent[200],
     '--andromeda-accent-300':   t.color.accent[300],
     '--andromeda-accent-400':   t.color.accent[400],
     '--andromeda-accent-500':   t.color.accent[500],
-    '--andromeda-accent-alpha': t.color.accent.alpha,
+    '--andromeda-accent-alpha':        t.color.accent.alpha,
+    '--andromeda-accent-alpha-strong': t.color.accent.alphaStrong,
     '--andromeda-accent-on':    t.color.accent.on,
-    // Red — 5 stops + 1 alpha + on-fill foreground
+    // Red — 5 stops + 2 alphas + on-fill foreground
     '--andromeda-red-100':   t.color.red[100],
     '--andromeda-red-200':   t.color.red[200],
     '--andromeda-red-300':   t.color.red[300],
     '--andromeda-red-400':   t.color.red[400],
     '--andromeda-red-500':   t.color.red[500],
-    '--andromeda-red-alpha': t.color.red.alpha,
+    '--andromeda-red-alpha':        t.color.red.alpha,
+    '--andromeda-red-alpha-strong': t.color.red.alphaStrong,
     '--andromeda-red-on':    t.color.red.on,
-    // Orange — 5 stops + 1 alpha + on-fill foreground
+    // Orange — 5 stops + 2 alphas + on-fill foreground
     '--andromeda-orange-100':   t.color.orange[100],
     '--andromeda-orange-200':   t.color.orange[200],
     '--andromeda-orange-300':   t.color.orange[300],
     '--andromeda-orange-400':   t.color.orange[400],
     '--andromeda-orange-500':   t.color.orange[500],
-    '--andromeda-orange-alpha': t.color.orange.alpha,
+    '--andromeda-orange-alpha':        t.color.orange.alpha,
+    '--andromeda-orange-alpha-strong': t.color.orange.alphaStrong,
     '--andromeda-orange-on':    t.color.orange.on,
     // Gradients
     '--andromeda-gradient-accent-fade':  t.color.gradient.accentFade,

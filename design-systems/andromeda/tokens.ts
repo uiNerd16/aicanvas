@@ -48,16 +48,20 @@ export const tokens = {
       bright: '#5B5B5C',
       strong: '#939393',
     },
-    // Accent — turquoise. 5 stops + 1 alpha (translucent overlay
-    // derived from the 300 base, 0.25). The 100 stop pairs with
-    // the 500 stop for body text (≥6:1 ratio).
+    // Accent — turquoise. 5 stops + 2 alphas, both derived from the
+    // 300 base: `alpha` 0.1 is the surface tint, `alphaStrong` 0.5 is
+    // the translucent MARK fill (2026-08-11 — added for the Gauge's
+    // completion run; see color-philosophy.md, it is not a second
+    // surface tint). The 100 stop pairs with the 500 stop for body
+    // text (≥6:1 ratio).
     accent: {
       100:   '#BAF8EC',
       200:   '#56F0D6',
       300:   '#0FCFB2',
       400:   '#109380',
       500:   '#126059',
-      alpha: 'rgba(15, 207, 178, 0.1)',
+      alpha:       'rgba(15, 207, 178, 0.1)',
+      alphaStrong: 'rgba(15, 207, 178, 0.5)',
       // Text/icon ON an accent-filled surface. The one guaranteed-contrast
       // pairing token — every accent fill takes its foreground from here so
       // a theme retuning the family keeps labels legible. Defaults to the
@@ -71,7 +75,8 @@ export const tokens = {
       300:   '#FF3939',
       400:   '#B82424',
       500:   '#5A1818',
-      alpha: 'rgba(255, 57, 57, 0.1)',
+      alpha:       'rgba(255, 57, 57, 0.1)',
+      alphaStrong: 'rgba(255, 57, 57, 0.5)',
       on:    '#FFCFCF',
     },
     // Orange — 5 stops + 1 alpha. Use 100 for body text on 500 (≥8:1).
@@ -81,7 +86,8 @@ export const tokens = {
       300:   '#FFA000',
       400:   '#B57009',
       500:   '#4D3712',
-      alpha: 'rgba(255, 160, 0, 0.1)',
+      alpha:       'rgba(255, 160, 0, 0.1)',
+      alphaStrong: 'rgba(255, 160, 0, 0.5)',
       on:    '#FFE5B5',
     },
     // Gradients fade to solid colors (no transparent stops).

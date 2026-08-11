@@ -17,9 +17,9 @@ import { Toggle } from '../../../../design-systems/andromeda/components/Toggle'
 import type { MatrixSpec } from './types'
 
 // The one component whose open state cannot be a static cell: an open drawer is
-// a full-viewport portal, so four of them pinned open would bury the page. Each
+// a full-viewport portal, so a pair of them pinned open would bury the page. Each
 // case is therefore its own trigger — the honest inline representation, and the
-// only one that lets the reviewer see all four sides without leaving the page.
+// only one that lets the reviewer see both sides without leaving the page.
 function DrawerCase({ side }: { side: string }) {
   const [open, setOpen] = useState(false)
   return (
@@ -58,8 +58,6 @@ export const drawer: MatrixSpec = {
   variants: [
     { label: 'Right', props: { side: 'right' } },
     { label: 'Left', props: { side: 'left' } },
-    { label: 'Top', props: { side: 'top' } },
-    { label: 'Bottom', props: { side: 'bottom' } },
   ],
   states: [],
   gaps: {

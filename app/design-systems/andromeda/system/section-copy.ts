@@ -170,7 +170,7 @@ export const SECTION_COPY: Record<string, SectionCopy> = {
   },
   'drawer': {
     title: "Drawer",
-    description: "Modal panel that slides in from a screen edge: settings, filters, and detail views that need to take over focus. Portal-rendered with a scrim, focus trap, focus return, ESC to close and a body scroll lock, composed from `DrawerHeader`, `DrawerTitle`, `DrawerDescription`, `DrawerBody` and `DrawerFooter`. 4 sides, and `size` sets the width or height in px, clamped to the viewport.",
+    description: "Modal panel that slides in from a screen edge: settings, filters, and detail views that need to take over focus. Portal-rendered with a scrim, focus trap, focus return, ESC to close and a body scroll lock, composed from `DrawerHeader`, `DrawerTitle`, `DrawerDescription`, `DrawerBody` and `DrawerFooter`. Left or right edge, and `size` sets the panel width in px, clamped to the viewport.",
   },
   'user-menu': {
     title: "User Menu",

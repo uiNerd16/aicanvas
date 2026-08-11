@@ -80,7 +80,7 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     slug: 'drawer',
     name: 'Drawer',
     description:
-      'Slide-in panel on any side (left, right, top, or bottom), with focus trap and a size prop. Backdrop, ESC to close, body scroll lock, and the bracket motif. Portaled.',
+      'Slide-in panel from the left or right edge, with focus trap and a size prop. Backdrop, ESC to close, body scroll lock, and the bracket motif. Portaled.',
     sourceFile: 'Drawer.tsx',
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/drawer.png?v=3',
   },
