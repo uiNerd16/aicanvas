@@ -11,7 +11,7 @@
 
 'use client';
 
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
@@ -71,7 +71,10 @@ const MENU_PANEL_STYLE = {
   background: tokens.color.surface.overlay,
   border: `${tokens.border.thin} ${tokens.color.border.bright}`,
   borderRadius: tokens.radius.frame,
-  padding: tokens.spacing[1],
+  // Rows already supply spacing[3] on the inline axis. The panel supplies the
+  // remaining spacing[1] there and the full spacing[4] on the block axis so
+  // icon-and-label rows sit in the same 16px frame on all four edges.
+  padding: `${tokens.spacing[4]} ${tokens.spacing[1]}`,
   zIndex: 1000,
   boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
 };
@@ -114,7 +117,7 @@ function handleMenuKeyDown(e) {
   }
 }
 
-function MenuItem({ item, onClose }) {
+function MenuItem({ item, onClose, menuOwnerId }) {
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const itemRef = useRef(null);
   const buttonRef = useRef(null);
@@ -141,7 +144,10 @@ function MenuItem({ item, onClose }) {
   // below `md` just moves the overflow to the opposite edge — off the LEFT edge
   // when the parent menu is clamped near x=0 on a phone. Mirrors the parent
   // menu's reposition clamp; runs before paint, re-measures on resize/scroll.
-  const [flipLeft, setFlipLeft] = useState(false);
+  // The percentages above describe the same edge geometry the portal expresses
+  // in fixed viewport coordinates; fixed placement is what escapes the panel's
+  // intentional tall-menu scrollport.
+  const [submenuCoords, setSubmenuCoords] = useState(null);
   useIsomorphicLayoutEffect(() => {
     if (!submenuOpen) return;
     const decide = () => {
@@ -151,10 +157,19 @@ function MenuItem({ item, onClose }) {
       const margin = parseInt(tokens.spacing[2], 10) || 8;
       const gap = parseInt(tokens.spacing[1], 10) || 4;
       const ir = itemEl.getBoundingClientRect();
-      const w = sub.getBoundingClientRect().width;
-      const rightOverflows = ir.right + gap + w > window.innerWidth - margin;
-      const leftFits = ir.left - gap - w >= margin;
-      setFlipLeft(rightOverflows && leftFits);
+      const sr = sub.getBoundingClientRect();
+      const rightLeft = ir.right + gap;
+      const leftLeft = ir.left - gap - sr.width;
+      const rightOverflows = rightLeft + sr.width > window.innerWidth - margin;
+      const leftFits = leftLeft >= margin;
+      let left = rightOverflows && leftFits ? leftLeft : rightLeft;
+      let top = ir.top;
+      // The submenu is portaled out of the scrolling parent below. Clamp its
+      // fixed coordinates here so escaping that clip cannot trade it for
+      // viewport overflow at either edge.
+      left = Math.max(margin, Math.min(left, window.innerWidth - sr.width - margin));
+      top = Math.max(margin, Math.min(top, window.innerHeight - sr.height - margin));
+      setSubmenuCoords({ top, left });
     };
     decide();
     window.addEventListener('resize', decide);
@@ -171,7 +186,9 @@ function MenuItem({ item, onClose }) {
         role="separator"
         style={{
           height: '1px',
-          margin: `${tokens.spacing[1]} 0`,
+          // The panel contributes 4px; spacing[2] supplies the remaining 8px
+          // required by the system's 12px divider inset.
+          margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
           background: tokens.color.border.base,
         }}
       />
@@ -274,30 +291,35 @@ function MenuItem({ item, onClose }) {
         {hasSub ? <CaretRight size={10} weight="bold" /> : null}
       </button>
 
-      {/* Right-flyout submenu */}
-      {hasSub && submenuOpen ? (
+      {/* Right-flyout submenu — portaled so the parent's deliberate tall-menu
+          scroll cannot turn the sideways flyout into scrollable overflow. */}
+      {hasSub && submenuOpen ? createPortal(
         <div
           ref={submenuRef}
           role="menu"
           className="andro-submenu"
+          data-panel-menu-owner={menuOwnerId}
+          onMouseEnter={handleEnter}
+          onMouseLeave={handleLeave}
           onKeyDown={(e) => {
             handleSubmenuKeyDown(e);
             handleMenuKeyDown(e);
           }}
           style={{
+            ...andromedaVars(),
             ...MENU_PANEL_STYLE,
-            position: 'absolute',
-            top: 0,
-            ...(flipLeft
-              ? { right: '100%', marginRight: tokens.spacing[1] }
-              : { left: '100%', marginLeft: tokens.spacing[1] }),
+            position: 'fixed',
+            top: submenuCoords ? submenuCoords.top : 0,
+            left: submenuCoords ? submenuCoords.left : 0,
+            visibility: submenuCoords ? 'visible' : 'hidden',
             zIndex: 1001,
           }}
         >
           {item.submenu.map((sub, i) => (
-            <MenuItem key={i} item={sub} onClose={onClose} />
+            <MenuItem key={i} item={sub} onClose={onClose} menuOwnerId={menuOwnerId} />
           ))}
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </div>
   );
@@ -318,6 +340,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
   const [mounted, setMounted] = useState(false);
   const wrapperRef = useRef(null);
   const menuRef = useRef(null);
+  const menuOwnerId = useId();
   useEffect(() => setMounted(true), []);
   // The element to return focus to when the menu closes — captured at the
   // moment the trigger toggles the menu open (interactive open only).
@@ -350,7 +373,14 @@ export const PanelMenu = forwardRef(function PanelMenu(
       // the item fires.
       const inWrapper = wrapperRef.current && wrapperRef.current.contains(e.target);
       const inMenu = menuRef.current && menuRef.current.contains(e.target);
-      if (!inWrapper && !inMenu) setOpen(false);
+      // Submenus are portaled to <body> to escape the parent scrollport, so
+      // DOM containment cannot identify them as part of this menu. The stable
+      // owner marker keeps a submenu click from dismissing before its item can
+      // receive the corresponding click event.
+      const inSubmenu = typeof e.composedPath === 'function' && e.composedPath().some(
+        (node) => node instanceof HTMLElement && node.dataset.panelMenuOwner === menuOwnerId,
+      );
+      if (!inWrapper && !inMenu && !inSubmenu) setOpen(false);
     }
     function onKey(e) {
       if (e.key === 'Escape') setOpen(false);
@@ -361,7 +391,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
       document.removeEventListener('mousedown', onClick);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, staticOpen]);
+  }, [open, staticOpen, menuOwnerId]);
 
   // Position the portaled (interactive) menu in viewport coords, flipping above
   // the trigger when a downward menu wouldn't fit. Measured in a layout effect
@@ -453,7 +483,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
             }}
           >
             {items.map((item, i) => (
-              <MenuItem key={i} item={item} onClose={() => setOpen(false)} />
+              <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} />
             ))}
           </div>
         ) : mounted ? (
@@ -473,7 +503,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
               }}
             >
               {items.map((item, i) => (
-                <MenuItem key={i} item={item} onClose={() => setOpen(false)} />
+                <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} />
               ))}
             </div>,
             document.body,
