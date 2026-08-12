@@ -3,7 +3,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeSlash, LockKey, MagnifyingGlass } from '@phosphor-icons/react'
+import { Eye, EyeSlash, Lock, MagnifyingGlass } from '@phosphor-icons/react'
 import { Input } from '../../../../design-systems/andromeda/components/Input'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
@@ -29,6 +29,9 @@ export const input: MatrixSpec = {
   slug: 'input',
   Component: Input,
   sizes: ['sm', 'md', 'lg'],
+  // A field is w-full by design; without this it renders at its intrinsic
+  // width in the middle of a case that already owns the room.
+  fill: true,
   baseProps: BASE_PROPS,
   // A custom renderer keeps the password toggle live in every rung. A `node`
   // would bypass the size ramp, while the ordinary cases still need the same
@@ -48,7 +51,7 @@ export const input: MatrixSpec = {
         label: 'Password',
         type: 'password',
         defaultValue: 'ORBITAL-7742',
-        icon: LockKey,
+        icon: Lock,
       },
     },
     // error is a STRING prop; the cva `state` axis is DERIVED from it
