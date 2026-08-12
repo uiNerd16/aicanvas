@@ -172,7 +172,9 @@ function UserMenuItemRow({ item, onClose }) {
         role="separator"
         style={{
           height: '1px',
-          margin: `${tokens.spacing[1]} 0`,
+          // The panel contributes 4px; spacing[2] supplies the remaining 8px
+          // required by the system's 12px divider inset, matching PanelMenu.
+          margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
           background: tokens.color.border.subtle,
         }}
       />
@@ -263,7 +265,10 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         background: tokens.color.surface.raised,
         border: `${tokens.border.thin} ${tokens.color.border.base}`,
         borderRadius: tokens.radius.frame,
-        padding: tokens.spacing[1],
+        // Rows already supply spacing[2] vertically and spacing[3] horizontally.
+        // This remainder puts their icon-and-label content in the same 16px
+        // frame on all four edges as PanelMenu.
+        padding: `${tokens.spacing[2]} ${tokens.spacing[1]}`,
         zIndex: 1000,
         boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
       }}

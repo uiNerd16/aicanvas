@@ -435,20 +435,24 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
 
            The two numbers are ARITHMETIC — summed from tokens.ts and the
            explicit px each component states, never measured off a screen — so
-           re-add them if a token or an item list moves. Each is just the PANEL
-           plus its spacing[2] 8px offset from the trigger. Both dwarf the
-           body's own spacing[6] 24px padding, which is the floor they replace.
+           re-add them if a token or an item list moves. The dialog reserve is
+           its PANEL plus the spacing[2] 8px trigger offset; the menu reserve's
+           historical constraint is called out below. Both dwarf the body's own
+           spacing[6] 24px padding, which is the floor they replace.
            Too tall is dead space; too short puts the panel outside the card.
 
-           MENU 155 = 147 + 8. The tallest mounted [role="menu"] is
+           MENU 155 is the existing reserve. The tallest mounted [role="menu"] is
            UserMenuPanel at the longest list any case declares, 4 items + 1
            separator, in BOTH user-menu and user-card (PanelMenu builds its own
-           panel: 123, or 145 counting its open submenu, so it never governs):
+           147px panel for the same 4-item + separator shape; its submenu is
+           portaled and therefore does not add to the mounted parent panel):
              row   = iconSize.sm 16 + 2 x spacing[2] 8                    = 32
                      (the size.xs label's line box is shorter than the icon,
                      so the icon is what sets the row height)
              panel = 4 x 32 + sep (1 + 2 x spacing[1] 4)
-                     + 2 x spacing[1] padding + 2 x 1px border            = 147
+                     + 2 x spacing[2] padding + 2 x 1px border            = 155
+           Its spacing[2] 8px trigger offset now sits beyond that historical
+           reserve; the reserve behaviour is intentionally unchanged here.
 
            DIALOG 317 = 309 + 8. The only [role="dialog"] a case can mount is
            DateRangePicker's calendar (Drawer portals to <body>, where :has()
