@@ -18,6 +18,16 @@ import type { MatrixSpec } from './types'
 const PORTRAIT =
   'https://images.unsplash.com/photo-1669287731461-bd8ce3126710?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
 
+// Three astronauts under the Unsplash licence, each a different suit and
+// backdrop so a stack of them reads as three people rather than one repeated
+// silhouette. Requested at 160w: the avatars render at lg, and a stacked group
+// is the one place an oversized source would be paid for three times over.
+const CREW = [
+  'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?q=80&w=160&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1447433909565-04bfc496fe73?q=80&w=160&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1768005419000-d53e45851b50?q=80&w=160&auto=format&fit=crop',
+]
+
 export const emptyState: MatrixSpec = {
   slug: 'empty-state',
   Component: EmptyState,
@@ -97,9 +107,9 @@ export const emptyState: MatrixSpec = {
         <>
           <EmptyStateMedia>
             <div className="flex [&>*+*]:-ml-[var(--andromeda-2)]">
-              <Avatar name="Mira Voss" size="lg" />
-              <Avatar name="Kai Ortiz" size="lg" />
-              <Avatar name="June Park" size="lg" />
+              <Avatar name="Mira Voss" src={CREW[0]} size="lg" />
+              <Avatar name="Kai Ortiz" src={CREW[1]} size="lg" />
+              <Avatar name="June Park" src={CREW[2]} size="lg" />
             </div>
           </EmptyStateMedia>
           <EmptyStateTitle>No crew linked</EmptyStateTitle>
