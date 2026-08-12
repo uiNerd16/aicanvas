@@ -3,7 +3,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeSlash, Lock, MagnifyingGlass } from '@phosphor-icons/react'
+import { Envelope, Eye, EyeSlash, Lock } from '@phosphor-icons/react'
 import { Input } from '../../../../design-systems/andromeda/components/Input'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
@@ -53,7 +53,11 @@ export const input: MatrixSpec = {
     ),
   variants: [
     { label: 'Default', props: {} },
-    { label: 'With icon', props: { icon: MagnifyingGlass } },
+    // Label + placeholder override here, not just the icon: BASE_PROPS is
+    // "Node ID" / "ND-4471", and an envelope glyph next to a node ID reads as
+    // a mismatch — the field's own copy has to agree with what the icon says
+    // it's for, same reasoning as the Password case below.
+    { label: 'With icon', props: { icon: Envelope, label: 'Email', placeholder: 'you@node.dev' } },
     {
       label: 'Password',
       props: {
