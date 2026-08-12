@@ -50,15 +50,46 @@ export const choiceCard: MatrixSpec = {
   },
   variants: [
     { label: 'Radio group', node: <LiveRadioChoiceCards /> },
-    { label: 'Checkbox', props: {} },
+    // Every configuration shows a PAIR, because one card alone cannot show
+    // what a choice card is for: the selected and unselected states have to
+    // sit beside each other to be read against one another. The trade is the
+    // size ramp — an authored case spans the size axis — and the states below
+    // still exercise md and lg.
+    {
+      label: 'Checkbox',
+      node: (
+        <div className="grid w-full grid-cols-2 gap-[var(--andromeda-3)]">
+          <ChoiceCard
+            control="checkbox"
+            title="Retain telemetry"
+            description="Archive the sensor stream."
+            defaultChecked
+          />
+          <ChoiceCard
+            control="checkbox"
+            title="Relay diagnostics"
+            description="Forward fault codes home."
+          />
+        </div>
+      ),
+    },
     {
       label: 'Toggle',
-      props: {
-        control: 'toggle',
-        title: 'Beacon uplink',
-        description: 'Transmit status to the relay.',
-        defaultChecked: true,
-      },
+      node: (
+        <div className="grid w-full grid-cols-2 gap-[var(--andromeda-3)]">
+          <ChoiceCard
+            control="toggle"
+            title="Beacon uplink"
+            description="Transmit status to the relay."
+            defaultChecked
+          />
+          <ChoiceCard
+            control="toggle"
+            title="Night watch"
+            description="Dim the deck between shifts."
+          />
+        </div>
+      ),
     },
   ],
   states: [
