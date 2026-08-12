@@ -99,7 +99,7 @@ export const SECTION_COPY: Record<string, SectionCopy> = {
   },
   'slider': {
     title: "Slider",
-    description: "Single-value horizontal range control: drag the thumb, or use the arrows, PageUp and PageDown, Home and End to set one continuous number. The accent fill is the reading, so reach for `ProgressBar` when the level is read-only and cannot be dragged. 3 sizes.",
+    description: "Single-value horizontal range control: drag the thumb, or use the arrows, PageUp and PageDown, Home and End to set one continuous number. The accent fill is the reading, so reach for `ProgressBar` when the level is read-only and cannot be dragged. 2 sizes: the ladder starts at md here, since an sm thumb is too small a drag target.",
   },
   'textarea': {
     title: "Textarea",
@@ -182,6 +182,6 @@ export const SECTION_COPY: Record<string, SectionCopy> = {
   },
   'user-card': {
     title: "User Card",
-    description: "Wide identity trigger for the foot of a sidebar: avatar, name, role, and a caret that opens the same popover as `UserMenu`, with rows from the `items` prop. Choose it when there is room to name the user and `UserMenu` when the slot is a tight top bar; it opens upward and stretches to the trigger width by default. 3 sizes.",
+    description: "Wide identity trigger for the foot of a sidebar: avatar, name, role, and a caret that opens the same popover as `UserMenu`, with rows from the `items` prop. Choose it when there is room to name the user and `UserMenu` when the slot is a tight top bar; it opens upward and stretches to the trigger width by default. 2 sizes: the ladder stops at md, since a sidebar rail never has room for an lg card.",
   },
 }

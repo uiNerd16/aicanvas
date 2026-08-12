@@ -199,7 +199,11 @@ function CaseCard({
           // control (a four-segment SegmentedControl at lg) spent the extra room
           // on a scrollbar instead of on the components. The rungs still read as
           // separate — each carries its own caption underneath.
-          gap: tokens.spacing[2],
+          // A `fill` rung runs edge to edge in its column, so the gap is the ONLY
+          // thing between two of them — spacing[6] keeps them from touching.
+          // Content-width rungs carry their own whitespace, and there spacing[2]
+          // is what stops three of them overflowing the row.
+          gap: spec.fill ? tokens.spacing[6] : tokens.spacing[2],
           padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
           // A popover paints OUT of flow, and `auto` on one axis computes the
           // other to `auto` as well — so this box became a scroll container and
