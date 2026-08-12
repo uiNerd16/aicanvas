@@ -145,7 +145,7 @@ export function Planet({
 
     const sprite = makeSprite();
     const geometries: THREE.BufferGeometry[] = [];
-    const materials: THREE.PointsMaterial[] = [];
+    const materials: THREE.Material[] = [];
     let renderPlanet: (time: number, moving: boolean) => void;
 
     if (variant === 'shell') {
@@ -227,10 +227,11 @@ export function Planet({
         colors: Float32Array;
       };
 
-      // Most particles stay on the shell so its silhouette remains a body;
-      // the smaller surface needs fewer to reach a comparable apparent density.
+      // The shell keeps its established Mantle population. The core deliberately
+      // leaves most of its former allocation unused so its surrounding volume
+      // reads as space, rather than transferring density to the silhouette.
       const outerCount = Math.round(particleCount * 0.68);
-      const innerCount = particleCount - outerCount;
+      const innerCount = Math.round(particleCount * 0.14);
       const outerAxis = new THREE.Vector3(0.18, 0.97, 0.12).normalize();
       const innerAxis = new THREE.Vector3(0.25, 0.95, 0.17).normalize();
       const outerStillAngle = -0.38;
@@ -333,8 +334,6 @@ export function Planet({
       })();
       const travellerCount = Math.max(8, Math.min(18, Math.round(particleCount / 420)));
       const travellers: Traveller[] = [];
-      const travellerPositions = new Float32Array(travellerCount * 3);
-      const travellerColors = new Float32Array(travellerCount * 3);
       for (let i = 0; i < travellerCount; i++) {
         const y = seeded() * 2 - 1;
         const phi = seeded() * Math.PI * 2;
@@ -350,29 +349,36 @@ export function Planet({
           // lights are always caught crossing the otherwise empty interior.
           still: i < 6 ? 0.16 + seeded() * 0.68 : -1,
         });
-        travellerColors[i * 3] = cLit.r;
-        travellerColors[i * 3 + 1] = cLit.g;
-        travellerColors[i * 3 + 2] = cLit.b;
       }
 
-      const travellerGeometry = new THREE.BufferGeometry();
-      travellerGeometry.setAttribute('position', new THREE.BufferAttribute(travellerPositions, 3));
-      travellerGeometry.setAttribute('color', new THREE.BufferAttribute(travellerColors, 3));
-      geometries.push(travellerGeometry);
-      // No sprite and no additive blend: these are brief pieces of lit matter,
-      // not comets with painted bloom or endpoint halos.
-      const travellerMaterial = new THREE.PointsMaterial({
-        size: particleSize * 0.58,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.92,
-        depthTest: true,
-        depthWrite: true,
-        blending: THREE.NormalBlending,
-      });
-      materials.push(travellerMaterial);
-      const travellerPoints = new THREE.Points(travellerGeometry, travellerMaterial);
-      scene.add(travellerPoints);
+      const trailSteps = 8;
+      const trailPositions: Float32Array[] = [];
+      const trailGeometries: THREE.BufferGeometry[] = [];
+      for (let step = 0; step < trailSteps; step++) {
+        const positions = new Float32Array(travellerCount * 6);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometries.push(geometry);
+        trailPositions.push(positions);
+        trailGeometries.push(geometry);
+
+        // Several collinear hairline segments form one long alpha ramp. Native
+        // lines keep the ray thin at every scale and avoid a sprite-shaped halo.
+        const material = new THREE.LineBasicMaterial({
+          color: cLit,
+          transparent: true,
+          opacity: 0.06 + Math.pow((step + 1) / trailSteps, 1.7) * 0.82,
+          depthTest: true,
+          depthWrite: false,
+          blending: THREE.NormalBlending,
+        });
+        materials.push(material);
+        const segments = new THREE.LineSegments(geometry, material);
+        // Surfaces establish the depth field first; rays then disappear wherever
+        // the shell or centred core is nearer to the camera.
+        segments.renderOrder = 1;
+        scene.add(segments);
+      }
 
       const rotatedNormal = new THREE.Vector3();
       const paintSurface = (surface: MantleSurface) => {
@@ -417,14 +423,28 @@ export function Planet({
           const progress = moving
             ? (elapsed <= traveller.duration ? elapsed / traveller.duration : -1)
             : traveller.still;
-          const radius = progress < 0
+          const head = progress < 0
             ? 100
             : travelStart + (travelEnd - travelStart) * progress * progress * (3 - 2 * progress);
-          travellerPositions[i * 3] = traveller.direction.x * radius;
-          travellerPositions[i * 3 + 1] = traveller.direction.y * radius;
-          travellerPositions[i * 3 + 2] = traveller.direction.z * radius;
+          // Forty-two percent of the crossing is long enough to read as a ray,
+          // while clamping at the core prevents a trail being painted inside it.
+          const tail = progress < 0 ? 100 : Math.max(travelStart, head - (travelEnd - travelStart) * 0.42);
+          for (let step = 0; step < trailSteps; step++) {
+            const a = tail + (head - tail) * (step / trailSteps);
+            const b = tail + (head - tail) * ((step + 1) / trailSteps);
+            const positions = trailPositions[step];
+            const offset = i * 6;
+            positions[offset] = traveller.direction.x * a;
+            positions[offset + 1] = traveller.direction.y * a;
+            positions[offset + 2] = traveller.direction.z * a;
+            positions[offset + 3] = traveller.direction.x * b;
+            positions[offset + 4] = traveller.direction.y * b;
+            positions[offset + 5] = traveller.direction.z * b;
+          }
         }
-        travellerGeometry.attributes.position.needsUpdate = true;
+        trailGeometries.forEach((geometry) => {
+          geometry.attributes.position.needsUpdate = true;
+        });
       };
     }
 
