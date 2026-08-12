@@ -378,6 +378,14 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
       })()
     : { start: value?.start ?? null, end: value?.end ?? null };
 
+  // Preset labels are known before the first paint and render in mono, so the
+  // widest label can reserve every shorter state in `ch`. The date slot keeps
+  // the longest chip shape too; together they freeze the shrink-wrapped root
+  // (and its edge-pinned panel) while a preset label appears or clears.
+  const widestPresetLabel = presets?.length
+    ? Math.max(...presets.map((preset) => Array.from(preset.label).length))
+    : null;
+
   return (
     <div
       ref={(node) => {
@@ -414,8 +422,27 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
         }}
       >
         <CalendarBlank weight="regular" size={13} />
-        {presetLabel ? `${presetLabel} · ` : ''}
-        {formatRangeChip(value)}
+        {widestPresetLabel !== null ? (
+          <>
+            <span
+              style={{
+                width: `${widestPresetLabel + 3}ch`,
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {presetLabel ? `${presetLabel} · ` : ''}
+            </span>
+            <span style={{ width: '15ch', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              {formatRangeChip(value)}
+            </span>
+          </>
+        ) : (
+          <>
+            {presetLabel ? `${presetLabel} · ` : ''}
+            {formatRangeChip(value)}
+          </>
+        )}
         <CaretDown
           weight="bold"
           size={10}
