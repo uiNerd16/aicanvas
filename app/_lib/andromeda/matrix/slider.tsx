@@ -26,16 +26,23 @@ function LiveSlider() {
 export const slider: MatrixSpec = {
   slug: 'slider',
   Component: Slider,
-  sizes: ['sm', 'md', 'lg'],
+  // The ladder starts at md for this control: see the SIZES note in Slider.tsx.
+  sizes: ['md', 'lg'],
   // A slider is w-full by design, and a hard 300px here made every rung the
   // same width as the sm one no matter how much room its case owned.
   fill: true,
+  // The other half of `fill`, same pairing Input and Textarea use: one card per
+  // row. Sharing a row with a second card leaves each rung about a sixth of the
+  // page, where a label and its readout collide instead of sitting on one line.
+  wide: true,
+  // wide's equal columns would otherwise stack the Rest/forced pair vertically,
+  // reading as two examples rather than one comparison.
+  statePairColumns: true,
   baseProps: { value: 64 },
   variants: [
     { label: 'Live', node: <LiveSlider /> },
     { label: 'Default', props: { showValue: false } },
     { label: 'Labelled', props: { label: 'Throttle', unit: '%' } },
-    { label: 'Signed range', props: { label: 'Thrust vector', unit: '°', min: -30, max: 30, value: 12 } },
     { label: 'At minimum', props: { value: 0, showValue: false } },
     // A tuple enters two-thumb mode. Worth its own case at every rung: the pair
     // anchors by its inner edges, and sm is where a 6px thumb makes that read.

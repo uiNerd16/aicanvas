@@ -885,6 +885,8 @@ function SliderDemo() {
       <Row label="Sizes">
         <SizeRamp
           direction="column"
+          // Slider's ladder starts at md; sm would index an entry that is gone.
+          sizes={['md', 'lg']}
           render={(s) => <Slider size={s} value={64} showValue={false} style={{ width: 300 }} />}
         />
       </Row>

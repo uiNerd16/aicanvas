@@ -57,8 +57,11 @@ function formatValue(value, step) {
 // thumbW repeats the width in the `thumb` class as a number, because the RANGE
 // pair anchors by its inner edges and CSS has to subtract a real px value to
 // do it. Keep the two in step.
+// No sm rung. A 14px row on a 6px thumb is a small target for a control whose
+// whole job is to be dragged, and a range pair on that thumb read as one slider
+// rather than two marks. The ladder starts at md here — the one departure, kept
+// in step with Slider.rules.md.
 const SIZES = {
-  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  thumbW: 6,  text: 'text-[length:var(--andromeda-text-sm)]' },
   md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  thumbW: 8,  text: 'text-[length:var(--andromeda-text-md)]' },
   lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', thumbW: 10, text: 'text-[length:var(--andromeda-text-lg)]' },
 };
@@ -72,8 +75,9 @@ const SIZES = {
  * @property {number} [step=1]               Increment the value snaps to.
  * @property {(next: number) => void} [onValueChange]  Handler called with the new value on drag or keyboard change.
  * @property {string} [label]                  Optional uppercase mono label.
- * @property {'sm'|'md'|'lg'} [size='md']      Rung on the shared control ladder. Scales the track row, thumb and readout together; md is today's slider.
+ * @property {'md'|'lg'} [size='md']           Rung on the shared control ladder, which starts at md here — an sm slider is too small a drag target. Scales the track row, thumb and readout together.
  * @property {boolean} [showValue=true]        Render the numeric readout next to the label.
+ * @property {boolean} [showScale=true]        Print `min` and `max` under the track ends, the domain the fill is a proportion of. Turn it off for a slider whose range is already obvious from its surroundings.
  * @property {string} [unit]                   Optional unit suffix (e.g. "%", "KM").
  * @property {boolean} [disabled=false]      Disables interaction and dims the slider.
  * @property {string} [className]            Additional classes for the root wrapper.
@@ -99,8 +103,9 @@ type SliderSharedProps = {
   max?: number;
   step?: number;
   label?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'md' | 'lg';
   showValue?: boolean;
+  showScale?: boolean;
   unit?: string;
   disabled?: boolean;
   className?: string;
@@ -141,6 +146,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
     label,
     size = 'md',
     showValue = true,
+    showScale = true,
     unit,
     disabled = false,
     id: idProp,
@@ -433,7 +439,11 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
             SIZES[size].line,
             'border-[length:var(--andromeda-border-width,1px)] border-solid',
             'bg-[color:var(--andromeda-surface-overlay)]',
-            'border-[color:var(--andromeda-border-subtle)]',
+            // border.base, not border.subtle: at subtle the empty remainder sank
+            // into the panel and the control had no readable LENGTH — a slider
+            // near its minimum read as a lone mark floating on nothing. The fill
+            // needs a track to be measured against.
+            'border-[color:var(--andromeda-border-base)]',
           )}
         />
         {/* Filled portion — the accent gradient IS the measurement; no resting
@@ -469,8 +479,8 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
               // endpoint marks the BOUNDARY of a span, so each thumb anchors by
               // its INNER edge: the low thumb sits to the left of its value, the
               // high thumb to the right. Two consequences, both wanted. The pair
-              // can meet and touch but never merge into one blob, which at sm
-              // (a 6px thumb) was the whole defect. And the accent fill now runs
+              // can meet and touch but never merge into one blob, which on a
+              // narrow thumb was the whole defect. And the accent fill now runs
               // exactly between the two thumbs instead of under them, so the
               // measurement and the marks agree.
               // max()/min() keep a thumb inside the track at the ends, where the
@@ -509,6 +519,26 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
           />
         )}
       </div>
+
+      {/* Scale — the domain the fill is a proportion OF. Without it a filled
+          track is a picture: 64% of what, from where. Reference text, so it
+          takes text.faint at a fixed 12px like the system's other reference
+          labels rather than following the size ladder the reading uses. */}
+      {showScale ? (
+        <div
+          aria-hidden="true"
+          className={cn(
+            'flex justify-between',
+            '[font-family:var(--andromeda-font-mono)]',
+            'text-[length:var(--andromeda-text-sm)]',
+            'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
+            'text-[color:var(--andromeda-text-faint)]',
+          )}
+        >
+          <span>{formatValue(min, step)}{unit ?? ''}</span>
+          <span>{formatValue(max, step)}{unit ?? ''}</span>
+        </div>
+      ) : null}
 
       {/* Touch-target growth (the Andromeda responsive rules). Mirror Button/IconButton:
           a centered transparent ::before overlay grows the *hit area* toward
