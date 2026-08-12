@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Planet
 // Particle-sphere rendered with Three.js — a slowly-rotating
@@ -24,14 +23,14 @@ import { useReducedMotion } from './lib/motion';
 import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
-/** Soft radial sprite. Multiplied by vertex color and blended additively
- *  so each particle reads as a tiny glow on the dark void. */
+/** Soft radial sprite. Multiplied by vertex color; each variant chooses the
+ *  blend and depth behavior that makes its particle surfaces read correctly. */
 function makeSprite(): THREE.CanvasTexture {
   const size = 64;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) throw new Error('Planet particle sprite requires a 2D canvas context.');
   const half = size / 2;
   const grad = ctx.createRadialGradient(half, half, 0, half, half, half);
   // andromeda-allow: an interpolated alpha ramp for the canvas particle sprite.
@@ -55,6 +54,7 @@ function makeSprite(): THREE.CanvasTexture {
  * @property {number} [particleCount=6000] Number of surface particles; 6000 reads dense at 320 to 480px.
  * @property {number} [particleSize=0.028] Per-particle point size in world units.
  * @property {number} [rotationSpeed=0.0035] Auto-rotation speed in radians per frame (assumes about 60fps).
+ * @property {'shell' | 'mantle'} [variant='shell'] Surface construction; Mantle divides the particles between a porous shell and an eccentric inner body.
  * @property {boolean} [paused=false] When true, the planet does not auto-rotate.
  * @property {string} [color] Lit-body colour, any CSS colour syntax; defaults to `var(--andromeda-text-secondary, #A3A3A3)`. The terminator and the highlight specks are derived from this and `shadowColor`, so one value recolours the whole planet.
  * @property {string} [shadowColor] Unlit-side colour, any CSS colour syntax; defaults to `var(--andromeda-border-base, #3E3E3F)`.
@@ -68,6 +68,8 @@ export function Planet({
   particleSize = 0.028,
   /** Rotation speed (radians per frame, ~60fps assumed). */
   rotationSpeed = 0.0035,
+  /** Surface construction. Shell remains the original Planet. */
+  variant = 'shell',
   /** When true, the planet doesn't auto-rotate. */
   paused = false,
   /** Lit-body colour. The var default keeps the planet monochrome and
@@ -81,6 +83,7 @@ export function Planet({
   particleCount?: number;
   particleSize?: number;
   rotationSpeed?: number;
+  variant?: 'shell' | 'mantle';
   paused?: boolean;
   color?: string;
   shadowColor?: string;
@@ -115,7 +118,7 @@ export function Planet({
     // the computed value back, then clear it. Any syntax a caller or a retheme
     // uses resolves for free. Mount-time read only; var changes after mount
     // don't re-tint.
-    const resolve = (value) => {
+    const resolve = (value: string) => {
       container.style.color = value;
       const out = getComputedStyle(container).color;
       container.style.color = '';
@@ -140,68 +143,211 @@ export function Planet({
     // that's NOT axis-aligned so the rotating planet shows a moving terminator.
     const lightDir = new THREE.Vector3(0.55, 0.30, 0.78).normalize();
 
-    // ── Buffer geometry: positions + per-vertex colors ──────────────────────
-    const positions = new Float32Array(particleCount * 3);
-    const colors    = new Float32Array(particleCount * 3);
+    const sprite = makeSprite();
+    const geometries: THREE.BufferGeometry[] = [];
+    const materials: THREE.PointsMaterial[] = [];
+    let renderPlanet: (time: number, moving: boolean) => void;
 
-    for (let i = 0; i < particleCount; i++) {
-      // Uniform-on-sphere sampling
-      const theta = Math.acos(2 * Math.random() - 1);
-      const phi   = 2 * Math.PI * Math.random();
-      // Tiny radius jitter so the surface reads as "atmosphere" not a hard shell.
-      const r = 1.0 + (Math.random() - 0.5) * 0.06;
+    if (variant === 'shell') {
+      // ── Original shell: its distribution and paint remain untouched. ─────
+      const positions = new Float32Array(particleCount * 3);
+      const colors    = new Float32Array(particleCount * 3);
 
-      const x = r * Math.sin(theta) * Math.cos(phi);
-      const y = r * Math.cos(theta);
-      const z = r * Math.sin(theta) * Math.sin(phi);
+      for (let i = 0; i < particleCount; i++) {
+        // Uniform-on-sphere sampling
+        const theta = Math.acos(2 * Math.random() - 1);
+        const phi   = 2 * Math.PI * Math.random();
+        // Tiny radius jitter so the surface reads as "atmosphere" not a hard shell.
+        const r = 1.0 + (Math.random() - 0.5) * 0.06;
 
-      positions[i * 3]     = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+        const x = r * Math.sin(theta) * Math.cos(phi);
+        const y = r * Math.cos(theta);
+        const z = r * Math.sin(theta) * Math.sin(phi);
 
-      // Lambert-style: dot(normal, lightDir) ∈ [-1, 1] → [0, 1]
-      const dot = (x * lightDir.x + y * lightDir.y + z * lightDir.z) / r;
-      const lit = (dot + 1) * 0.5;
+        positions[i * 3]     = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
 
-      // Two-stop ramp: shadow → mid (lit ∈ [0, 0.5]), then mid → lit (lit ∈ [0.5, 1]).
-      const c = new THREE.Color();
-      if (lit < 0.5) c.lerpColors(cShd, cMid, lit * 2);
-      else           c.lerpColors(cMid, cLit, (lit - 0.5) * 2);
+        // Lambert-style: dot(normal, lightDir) ∈ [-1, 1] → [0, 1]
+        const dot = (x * lightDir.x + y * lightDir.y + z * lightDir.z) / r;
+        const lit = (dot + 1) * 0.5;
 
-      // Equator emphasis — particles near the equator ride a tiny bit brighter,
-      // suggesting cloud bands without a literal texture.
-      const equator = 1 - Math.abs(y / r) * 0.18;
+        // Two-stop ramp: shadow → mid (lit ∈ [0, 0.5]), then mid → lit (lit ∈ [0.5, 1]).
+        const c = new THREE.Color();
+        if (lit < 0.5) c.lerpColors(cShd, cMid, lit * 2);
+        else           c.lerpColors(cMid, cLit, (lit - 0.5) * 2);
 
-      // 1% of well-lit particles become highlight specks — adds tiny "city
-      // light" / atmospheric sparkle on the lit hemisphere.
-      let cr = c.r * equator, cg = c.g * equator, cb = c.b * equator;
-      if (Math.random() < 0.012 && lit > 0.62) {
-        cr = cHi.r; cg = cHi.g; cb = cHi.b;
+        // Equator emphasis — particles near the equator ride a tiny bit brighter,
+        // suggesting cloud bands without a literal texture.
+        const equator = 1 - Math.abs(y / r) * 0.18;
+
+        // 1% of well-lit particles become highlight specks — adds tiny "city
+        // light" / atmospheric sparkle on the lit hemisphere.
+        let cr = c.r * equator, cg = c.g * equator, cb = c.b * equator;
+        if (Math.random() < 0.012 && lit > 0.62) {
+          cr = cHi.r; cg = cHi.g; cb = cHi.b;
+        }
+
+        colors[i * 3]     = cr;
+        colors[i * 3 + 1] = cg;
+        colors[i * 3 + 2] = cb;
       }
 
-      colors[i * 3]     = cr;
-      colors[i * 3 + 1] = cg;
-      colors[i * 3 + 2] = cb;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+      geometries.push(geo);
+
+      const mat = new THREE.PointsMaterial({
+        size:         particleSize,
+        map:          sprite,
+        vertexColors: true,
+        transparent:  true,
+        depthWrite:   false,
+        blending:     THREE.AdditiveBlending,
+      });
+      materials.push(mat);
+
+      const mesh = new THREE.Points(geo, mat);
+      mesh.rotation.x = 0.22;
+      mesh.rotation.z = 0.06;
+      scene.add(mesh);
+
+      renderPlanet = (time, moving) => {
+        if (!moving) return;
+        mesh.rotation.y = time;
+        // Gentle Z wobble — keeps the rotation from feeling mechanical.
+        mesh.rotation.z = 0.06 + Math.sin(time * 0.4) * 0.035;
+      };
+    } else {
+      type MantleSurface = {
+        points: THREE.Points;
+        geometry: THREE.BufferGeometry;
+        normals: Float32Array;
+        colors: Float32Array;
+      };
+
+      // Most particles stay on the shell so its silhouette remains a body;
+      // the smaller surface needs fewer to reach a comparable apparent density.
+      const outerCount = Math.round(particleCount * 0.68);
+      const innerCount = particleCount - outerCount;
+      const outerAxis = new THREE.Vector3(0.18, 0.97, 0.12).normalize();
+      const innerAxis = new THREE.Vector3(0.25, 0.95, 0.17).normalize();
+      const outerStillAngle = -0.38;
+      const innerStillAngle = 0.54;
+      const outerStillQ = new THREE.Quaternion().setFromAxisAngle(outerAxis, outerStillAngle);
+      const innerStillQ = new THREE.Quaternion().setFromAxisAngle(innerAxis, innerStillAngle);
+
+      // Aim a soft, irregularly thinned patch toward the viewer in the composed
+      // still. It is not a cut-out: every part retains particles, avoiding the
+      // clean aperture that would turn Mantle into a technical cross-section.
+      const apertureDir = new THREE.Vector3(0.10, -0.06, 1)
+        .normalize()
+        .applyQuaternion(outerStillQ.clone().invert());
+
+      const makeSurface = (
+        count: number,
+        radius: number,
+        porous: boolean,
+      ): MantleSurface => {
+        const positions = new Float32Array(count * 3);
+        const normals = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+
+        let i = 0;
+        while (i < count) {
+          const theta = Math.acos(2 * Math.random() - 1);
+          const phi = 2 * Math.PI * Math.random();
+          const nx = Math.sin(theta) * Math.cos(phi);
+          const ny = Math.cos(theta);
+          const nz = Math.sin(theta) * Math.sin(phi);
+
+          if (porous) {
+            const facing = Math.max(0, nx * apertureDir.x + ny * apertureDir.y + nz * apertureDir.z);
+            const brokenEdge = 0.5 + 0.5 * Math.sin(nx * 8.3 + ny * 5.7 - nz * 6.1);
+            const keep = 0.78 - Math.pow(facing, 2.4) * (0.28 + brokenEdge * 0.22);
+            if (Math.random() > keep) continue;
+          }
+
+          // Independent radial jitter keeps the two surfaces bodily rather than
+          // diagram-perfect, while leaving a real volume of empty space between.
+          const r = radius + (Math.random() - 0.5) * (porous ? 0.06 : 0.045);
+          positions[i * 3] = nx * r;
+          positions[i * 3 + 1] = ny * r;
+          positions[i * 3 + 2] = nz * r;
+          normals[i * 3] = nx;
+          normals[i * 3 + 1] = ny;
+          normals[i * 3 + 2] = nz;
+          i += 1;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometries.push(geometry);
+
+        const points = new THREE.Points(geometry, mantleMaterial);
+        scene.add(points);
+        return { points, geometry, normals, colors };
+      };
+
+      // Normal blending plus a cutout threshold lets the depth buffer, rather
+      // than additive accumulation, decide which surface is visible. That is
+      // the guardrail against the inner body collapsing into a glowing orb.
+      const mantleMaterial = new THREE.PointsMaterial({
+        size: particleSize,
+        map: sprite,
+        vertexColors: true,
+        transparent: true,
+        alphaTest: 0.12,
+        depthTest: true,
+        depthWrite: true,
+        blending: THREE.NormalBlending,
+      });
+      materials.push(mantleMaterial);
+
+      const outer = makeSurface(outerCount, 1, true);
+      const inner = makeSurface(innerCount, 0.64, false);
+      // The offset is large enough to survive a frozen frame, but the inner
+      // radius plus offset remains well inside the shell in every direction.
+      inner.points.position.set(-0.10, 0.065, -0.055);
+
+      const rotatedNormal = new THREE.Vector3();
+      const paintSurface = (surface: MantleSurface) => {
+        const q = surface.points.quaternion;
+        for (let i = 0; i < surface.normals.length; i += 3) {
+          rotatedNormal
+            .set(surface.normals[i], surface.normals[i + 1], surface.normals[i + 2])
+            .applyQuaternion(q);
+          const lit = (rotatedNormal.dot(lightDir) + 1) * 0.5;
+          const from = lit < 0.5 ? cShd : cMid;
+          const to = lit < 0.5 ? cMid : cLit;
+          const mix = lit < 0.5 ? lit * 2 : (lit - 0.5) * 2;
+          surface.colors[i] = from.r + (to.r - from.r) * mix;
+          surface.colors[i + 1] = from.g + (to.g - from.g) * mix;
+          surface.colors[i + 2] = from.b + (to.b - from.b) * mix;
+        }
+        surface.geometry.attributes.color.needsUpdate = true;
+      };
+
+      renderPlanet = (time, moving) => {
+        if (moving) {
+          // Nearby axes and close speeds keep the layers related; their small
+          // disagreement supplies parallax without reading as an exploded view.
+          const outerAngle = outerStillAngle + time + Math.sin(time * 0.43) * 0.025;
+          const innerAngle = innerStillAngle + time * 0.86 + Math.sin(time * 0.51 + 0.7) * 0.032;
+          outer.points.quaternion.setFromAxisAngle(outerAxis, outerAngle);
+          inner.points.quaternion.setFromAxisAngle(innerAxis, innerAngle);
+        } else {
+          outer.points.quaternion.copy(outerStillQ);
+          inner.points.quaternion.copy(innerStillQ);
+        }
+        // Repaint after rotation so both surfaces meet one fixed world-space
+        // side light instead of carrying a highlight painted onto local space.
+        paintSurface(outer);
+        paintSurface(inner);
+      };
     }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
-
-    const sprite = makeSprite();
-    const mat = new THREE.PointsMaterial({
-      size:         particleSize,
-      map:          sprite,
-      vertexColors: true,
-      transparent:  true,
-      depthWrite:   false,
-      blending:     THREE.AdditiveBlending,
-    });
-
-    const mesh = new THREE.Points(geo, mat);
-    mesh.rotation.x = 0.22;
-    mesh.rotation.z = 0.06;
-    scene.add(mesh);
 
     // ── Resize handling ─────────────────────────────────────────────────────
     const ro = new ResizeObserver(() => {
@@ -212,6 +358,8 @@ export function Planet({
       renderer.setSize(W, H);
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
+      // A frozen Planet has no RAF to repaint the resized drawing buffer.
+      renderer.render(scene, camera);
     });
     ro.observe(container);
 
@@ -219,33 +367,64 @@ export function Planet({
     let raf = 0;
     let t = 0;
     let alive = true;
+    let pageVisible = !document.hidden;
+    let intersecting = true;
+
     function tick() {
-      if (!alive) return;
-      raf = requestAnimationFrame(tick);
-      // Reduced motion: render the scene once with no rotation/wobble.
-      if (!paused && !reducedMotion) {
+      raf = 0;
+      if (!alive || !pageVisible || !intersecting) return;
+      const moving = !paused && !reducedMotion;
+      if (moving) {
         t += rotationSpeed;
-        mesh.rotation.y = t;
-        // Gentle Z wobble — keeps the rotation from feeling mechanical.
-        mesh.rotation.z = 0.06 + Math.sin(t * 0.4) * 0.035;
       }
+      renderPlanet(t, moving);
       renderer.render(scene, camera);
+      if (moving) raf = requestAnimationFrame(tick);
     }
-    tick();
+
+    const wake = () => {
+      if (!alive || raf || !pageVisible || !intersecting) return;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onVisibilityChange = () => {
+      pageVisible = !document.hidden;
+      if (!pageVisible) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        wake();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    const io = new IntersectionObserver(([entry]) => {
+      intersecting = entry?.isIntersecting ?? true;
+      if (!intersecting) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        wake();
+      }
+    });
+    io.observe(container);
+    wake();
 
     return () => {
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      geo.dispose();
-      mat.dispose();
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      geometries.forEach((geometry) => geometry.dispose());
+      materials.forEach((material) => material.dispose());
       sprite.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [particleCount, particleSize, rotationSpeed, paused, color, shadowColor, reducedMotion]);
+  }, [particleCount, particleSize, rotationSpeed, variant, paused, color, shadowColor, reducedMotion]);
 
   return (
     <>

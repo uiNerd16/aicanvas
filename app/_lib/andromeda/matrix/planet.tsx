@@ -14,13 +14,19 @@ export const planet: MatrixSpec = {
     </div>
   ),
   wide: true,
-  // ONE canonical look (2026-08-11 ruling): default particle count, in motion.
-  // Count, pause and colour are props a caller reaches for; the in-surface
-  // composition is the demo's job, not a variant cell's.
+  // Two sanctioned faces, both shown: a shell of particles, and a porous shell
+  // around an eccentric inner body. Count, pause and colour stay props a caller
+  // reaches for, never variant cells — the 2026-08-11 ruling still holds for
+  // those; only the face is a look worth showing twice.
   variants: [
     {
-      label: 'The Planet',
+      label: 'Shell',
       props: {},
+      clientOnly: 'the particle field is built in an effect against a canvas; SSR emits an empty container',
+    },
+    {
+      label: 'Mantle',
+      props: { variant: 'mantle' },
       clientOnly: 'the particle field is built in an effect against a canvas; SSR emits an empty container',
     },
   ],
