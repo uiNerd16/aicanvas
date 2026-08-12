@@ -14,9 +14,13 @@ export const burst: MatrixSpec = {
     </div>
   ),
   wide: true,
-  // ONE canonical look (2026-08-11 ruling): default density. How much of the
-  // endpoint lattice wires back to the focus is a prop, not a look to shop for.
-  variants: [{ label: 'The convergence', props: {} }],
+  // TWO sanctioned faces (2026-08-12 ruling, supersedes the one-canonical-look
+  // ruling of 08-11 for this Object): the field is either gathered around a low
+  // focus or mirrored about the frame centre. Density stays a prop, not a look.
+  variants: [
+    { label: 'Irregular', props: { variant: 'irregular' } },
+    { label: 'Symmetry', props: { variant: 'symmetry' } },
+  ],
   states: [],
   gaps: {
     'Reduced motion':
