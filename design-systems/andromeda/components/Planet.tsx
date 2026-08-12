@@ -54,7 +54,7 @@ function makeSprite(): THREE.CanvasTexture {
  * @property {number} [particleCount=6000] Number of surface particles; 6000 reads dense at 320 to 480px.
  * @property {number} [particleSize=0.028] Per-particle point size in world units.
  * @property {number} [rotationSpeed=0.0035] Auto-rotation speed in radians per frame (assumes about 60fps).
- * @property {'shell' | 'mantle'} [variant='shell'] Surface construction; Mantle divides the particles between a porous shell and an eccentric inner body.
+ * @property {'shell' | 'mantle'} [variant='shell'] Surface construction; Mantle divides the particles between a porous shell and a smaller inner body.
  * @property {boolean} [paused=false] When true, the planet does not auto-rotate.
  * @property {string} [color] Lit-body colour, any CSS colour syntax; defaults to `var(--andromeda-text-secondary, #A3A3A3)`. The terminator and the highlight specks are derived from this and `shadowColor`, so one value recolours the whole planet.
  * @property {string} [shadowColor] Unlit-side colour, any CSS colour syntax; defaults to `var(--andromeda-border-base, #3E3E3F)`.
@@ -307,10 +307,72 @@ export function Planet({
       materials.push(mantleMaterial);
 
       const outer = makeSurface(outerCount, 1, true);
-      const inner = makeSurface(innerCount, 0.64, false);
-      // The offset is large enough to survive a frozen frame, but the inner
-      // radius plus offset remains well inside the shell in every direction.
-      inner.points.position.set(-0.10, 0.065, -0.055);
+      // A compact, dead-centred core leaves enough empty volume for outward
+      // travellers to make the distance between the two surfaces tangible.
+      const inner = makeSurface(innerCount, 0.43, false);
+
+      type Traveller = {
+        direction: THREE.Vector3;
+        duration: number;
+        cycle: number;
+        phase: number;
+        still: number;
+      };
+
+      // Burst's seeded, phase-offset pool is the house vocabulary for sparse
+      // travel: populated on frame zero, but with no shared clock to beat.
+      const seeded = (() => {
+        let seed = 0x4d414e54;
+        return () => {
+          seed |= 0;
+          seed = (seed + 0x6d2b79f5) | 0;
+          let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value;
+          return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+        };
+      })();
+      const travellerCount = Math.max(8, Math.min(18, Math.round(particleCount / 420)));
+      const travellers: Traveller[] = [];
+      const travellerPositions = new Float32Array(travellerCount * 3);
+      const travellerColors = new Float32Array(travellerCount * 3);
+      for (let i = 0; i < travellerCount; i++) {
+        const y = seeded() * 2 - 1;
+        const phi = seeded() * Math.PI * 2;
+        const radial = Math.sqrt(1 - y * y);
+        const duration = 0.72 + seeded() * 0.72;
+        const cycle = duration + 0.55 + seeded() * 1.65;
+        travellers.push({
+          direction: new THREE.Vector3(radial * Math.cos(phi), y, radial * Math.sin(phi)),
+          duration,
+          cycle,
+          phase: seeded() * cycle,
+          // The still is composed independently of the live phase so several
+          // lights are always caught crossing the otherwise empty interior.
+          still: i < 6 ? 0.16 + seeded() * 0.68 : -1,
+        });
+        travellerColors[i * 3] = cLit.r;
+        travellerColors[i * 3 + 1] = cLit.g;
+        travellerColors[i * 3 + 2] = cLit.b;
+      }
+
+      const travellerGeometry = new THREE.BufferGeometry();
+      travellerGeometry.setAttribute('position', new THREE.BufferAttribute(travellerPositions, 3));
+      travellerGeometry.setAttribute('color', new THREE.BufferAttribute(travellerColors, 3));
+      geometries.push(travellerGeometry);
+      // No sprite and no additive blend: these are brief pieces of lit matter,
+      // not comets with painted bloom or endpoint halos.
+      const travellerMaterial = new THREE.PointsMaterial({
+        size: particleSize * 0.58,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.92,
+        depthTest: true,
+        depthWrite: true,
+        blending: THREE.NormalBlending,
+      });
+      materials.push(travellerMaterial);
+      const travellerPoints = new THREE.Points(travellerGeometry, travellerMaterial);
+      scene.add(travellerPoints);
 
       const rotatedNormal = new THREE.Vector3();
       const paintSurface = (surface: MantleSurface) => {
@@ -346,6 +408,23 @@ export function Planet({
         // side light instead of carrying a highlight painted onto local space.
         paintSurface(outer);
         paintSurface(inner);
+
+        const travelStart = 0.46;
+        const travelEnd = 0.97;
+        for (let i = 0; i < travellers.length; i++) {
+          const traveller = travellers[i];
+          const elapsed = (time + traveller.phase) % traveller.cycle;
+          const progress = moving
+            ? (elapsed <= traveller.duration ? elapsed / traveller.duration : -1)
+            : traveller.still;
+          const radius = progress < 0
+            ? 100
+            : travelStart + (travelEnd - travelStart) * progress * progress * (3 - 2 * progress);
+          travellerPositions[i * 3] = traveller.direction.x * radius;
+          travellerPositions[i * 3 + 1] = traveller.direction.y * radius;
+          travellerPositions[i * 3 + 2] = traveller.direction.z * radius;
+        }
+        travellerGeometry.attributes.position.needsUpdate = true;
       };
     }
 
