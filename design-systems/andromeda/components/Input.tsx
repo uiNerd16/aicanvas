@@ -80,6 +80,10 @@ const inputVariants = cva(
         ],
         error: [
           'border-[color:var(--andromeda-red-300)]',
+          // The typed value carries the fault with the border and the label.
+          // The message below stays neutral: red marks WHAT is wrong, the
+          // message only explains it, and two reds compete for the same job.
+          'text-[color:var(--andromeda-red-300)]',
           'focus:border-[color:var(--andromeda-red-300)]',
           'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-300),0_0_8px_var(--andromeda-red-400)]',
         ],
@@ -156,7 +160,9 @@ export const Input = forwardRef(function Input(
             'text-[length:var(--andromeda-text-sm)]',
             'font-[number:var(--andromeda-weight-medium)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
-            'text-[color:var(--andromeda-text-secondary)]',
+            error
+              ? 'text-[color:var(--andromeda-red-300)]'
+              : 'text-[color:var(--andromeda-text-secondary)]',
           )}
         >
           {label}
@@ -250,7 +256,10 @@ export const Input = forwardRef(function Input(
             // 12px, same floor as the label: an error message is the most
             // important text in the field, never the smallest.
             'text-[length:var(--andromeda-text-sm)]',
-            'text-[color:var(--andromeda-red-300)]',
+            // Neutral on purpose. The label, border and value already carry the
+            // fault in red; this line is the explanation, and painting it red
+            // too made the whole field one undifferentiated alarm.
+            'text-[color:var(--andromeda-text-secondary)]',
             'uppercase [letter-spacing:var(--andromeda-tracking-wide)]',
           )}
         >
