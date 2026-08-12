@@ -169,6 +169,21 @@ function CaseCard({
                 gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                 alignItems: 'center',
               }
+            : sizes
+            ? // The size ladder is "how big can it be" — one glance across
+              // sm/md/lg — and CaseCard says so above. Wrapping it breaks that:
+              // a narrow card orphans lg onto its own centred second row, which
+              // reads as a fourth case, not the last rung. NOWRAP + horizontal
+              // scroll keeps the row intact and is the system's own answer for
+              // fixed-geometry content that cannot shrink (responsive.md,
+              // "fixed-geometry primitives ... scroll horizontally"), the same
+              // pattern SegmentedControl and Table already use.
+              {
+                display: 'flex',
+                flexWrap: 'nowrap',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }
             : {
                 display: 'flex',
                 flexWrap: 'wrap',
