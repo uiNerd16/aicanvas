@@ -32,6 +32,10 @@ export const input: MatrixSpec = {
   // A field is w-full by design; without this it renders at its intrinsic
   // width in the middle of a case that already owns the room.
   fill: true,
+  // One card per row instead of two across. A w-full field halves its room
+  // the moment it shares a row with a second card, which fights `fill`
+  // immediately after granting it.
+  wide: true,
   baseProps: BASE_PROPS,
   // A custom renderer keeps the password toggle live in every rung. A `node`
   // would bypass the size ramp, while the ordinary cases still need the same
