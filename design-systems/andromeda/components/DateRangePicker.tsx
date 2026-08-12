@@ -507,9 +507,11 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               // Fluid columns over a 32px floor: they fill whatever width the
               // panel took from the trigger, and the floor is what the panel's
               // own `min-content` minimum resolves to. Fixed 7×32px tracks
-              // would leave a gap under a wide trigger.
+              // would leave a gap under a wide trigger. Keep columns touching
+              // so weekday centres align with the continuous range band below.
               gridTemplateColumns: `repeat(7, minmax(var(--andromeda-8, 32px), 1fr))`,
-              gap: tokens.spacing[1],
+              columnGap: 0,
+              rowGap: tokens.spacing[1],
             }}
           >
             {DOW.map((d, i) => (
@@ -535,7 +537,9 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             style={{
               display: 'grid',
               gridTemplateColumns: `repeat(7, minmax(var(--andromeda-8, 32px), 1fr))`,
-              gap: tokens.spacing[1],
+              // Touching columns let adjacent cell layers form one unbroken band.
+              columnGap: 0,
+              rowGap: tokens.spacing[1],
             }}
             onMouseLeave={() => { if (anchor) setHover(anchor); }}
           >
@@ -550,10 +554,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               const selected = isStart || isEnd;
               const hasRangeBand = drawRange.start && drawRange.end
                 && !isSameDay(drawRange.start, drawRange.end)
-                && (selected || inRange);
-              const column = i % 7;
-              const bandStarts = isStart || column === 0;
-              const bandEnds   = isEnd || column === 6;
+                && inRange;
 
               const dataState = selected ? 'selected' : inRange ? 'inrange' : 'default';
 
@@ -618,15 +619,11 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                       style={{
                         position: 'absolute',
                         zIndex: 0,
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: bandEnds ? 0 : `-${tokens.spacing[1]}`,
+                        // Cover the button's transparent border so touching
+                        // range cells cannot reveal a one-pixel seam.
+                        inset: '-1px',
                         background: V.accentAlpha,
-                        borderTopLeftRadius: bandStarts ? tokens.radius.md : 0,
-                        borderBottomLeftRadius: bandStarts ? tokens.radius.md : 0,
-                        borderTopRightRadius: bandEnds ? tokens.radius.md : 0,
-                        borderBottomRightRadius: bandEnds ? tokens.radius.md : 0,
+                        borderRadius: tokens.radius.frame,
                         pointerEvents: 'none',
                       }}
                     />
@@ -638,7 +635,9 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                       style={{
                         position: 'absolute',
                         zIndex: 1,
-                        inset: 0,
+                        // Cover the button's transparent border so no range
+                        // tint can show around either solid endpoint.
+                        inset: '-1px',
                         background: V.accent500,
                         border: `${tokens.border.thin} transparent`,
                         borderRadius: tokens.radius.frame,
