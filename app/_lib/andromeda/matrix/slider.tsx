@@ -15,7 +15,7 @@ function LiveSlider() {
   const [vector, setVector] = useState(12)
   const [budget, setBudget] = useState<[number, number]>([190, 800])
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: 300 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: '100%' }}>
       <Slider label="Throttle" unit="%" value={throttle} onValueChange={setThrottle} />
       <Slider label="Thrust vector" unit="°" min={-30} max={30} value={vector} onValueChange={setVector} />
       <Slider label="Mission budget" unit=" CR" min={0} max={1000} step={10} value={budget} onValueChange={setBudget} />
@@ -27,7 +27,10 @@ export const slider: MatrixSpec = {
   slug: 'slider',
   Component: Slider,
   sizes: ['sm', 'md', 'lg'],
-  baseProps: { value: 64, style: { width: 300 } },
+  // A slider is w-full by design, and a hard 300px here made every rung the
+  // same width as the sm one no matter how much room its case owned.
+  fill: true,
+  baseProps: { value: 64 },
   variants: [
     { label: 'Live', node: <LiveSlider /> },
     { label: 'Default', props: { showValue: false } },
