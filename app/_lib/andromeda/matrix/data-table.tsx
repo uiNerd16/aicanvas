@@ -25,7 +25,8 @@ function PeakBar({ value }) {
     <div
       style={{
         position: 'relative',
-        height: '4px',
+        // 6px border-box = a 4px fill between the two hairlines.
+        height: '6px',
         width: '88px',
         background: tokens.color.surface.overlay,
         border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
