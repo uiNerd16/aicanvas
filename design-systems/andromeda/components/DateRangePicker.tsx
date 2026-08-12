@@ -36,6 +36,7 @@ import { mq } from './lib/responsive';
 // by any runtime rewrite the way component classes can, so wire them as vars.)
 const V = {
   accent100:     `var(--andromeda-accent-100, ${tokens.color.accent[100]})`,
+  accentAlpha:   `var(--andromeda-accent-alpha, ${tokens.color.accent.alpha})`,
   accent400:     `var(--andromeda-accent-400, ${tokens.color.accent[400]})`,
   accent500:     `var(--andromeda-accent-500, ${tokens.color.accent[500]})`,
   borderBase:    `var(--andromeda-border-base, ${tokens.color.border.base})`,
@@ -155,14 +156,18 @@ function PickerStyles() {
         color: var(--andromeda-text-primary) !important;
       }
       .adp-day[data-state="inrange"]:hover {
-        background: var(--andromeda-surface-hover) !important;
+        background: transparent !important;
         color: var(--andromeda-text-primary) !important;
       }
-      .adp-day[data-state="selected"]:hover {
+      .adp-day[data-state="selected"]:hover .adp-endpoint-mark {
         border-color: var(--andromeda-accent-300) !important;
       }
       .adp-day:focus-visible {
+        z-index: 2;
         box-shadow: 0 0 0 1px var(--andromeda-accent-400);
+      }
+      .adp-day[data-state="inrange"]:focus-visible {
+        background: transparent !important;
       }
       /* Phone fit — the panel spans the trigger at every width now (see its
          own left/right pin), so this block is only what phones need ON TOP of
@@ -543,6 +548,12 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 && compareDays(day, drawRange.end)   < 0;
               const isToday  = today !== null && isSameDay(day, today);
               const selected = isStart || isEnd;
+              const hasRangeBand = drawRange.start && drawRange.end
+                && !isSameDay(drawRange.start, drawRange.end)
+                && (selected || inRange);
+              const column = i % 7;
+              const bandStarts = isStart || column === 0;
+              const bandEnds   = isEnd || column === 6;
 
               const dataState = selected ? 'selected' : inRange ? 'inrange' : 'default';
 
@@ -557,11 +568,12 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: selected ? V.accent500 : 'transparent',
+                isolation: 'isolate',
+                background: 'transparent',
                 border: selected
                   ? `${tokens.border.thin} transparent`
                   : inRange
-                    ? `${tokens.border.thin} ${V.accent400}`
+                    ? `${tokens.border.thin} transparent`
                     : isToday
                       ? `${tokens.border.thin} ${V.borderBright}`
                       : `${tokens.border.thin} transparent`,
@@ -599,7 +611,43 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                   aria-label={day.toDateString()}
                   style={cellStyle}
                 >
-                  {day.getDate()}
+                  {hasRangeBand ? (
+                    <span
+                      aria-hidden="true"
+                      className="adp-range-band"
+                      style={{
+                        position: 'absolute',
+                        zIndex: 0,
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: bandEnds ? 0 : `-${tokens.spacing[1]}`,
+                        background: V.accentAlpha,
+                        borderTopLeftRadius: bandStarts ? tokens.radius.md : 0,
+                        borderBottomLeftRadius: bandStarts ? tokens.radius.md : 0,
+                        borderTopRightRadius: bandEnds ? tokens.radius.md : 0,
+                        borderBottomRightRadius: bandEnds ? tokens.radius.md : 0,
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  ) : null}
+                  {selected ? (
+                    <span
+                      aria-hidden="true"
+                      className="adp-endpoint-mark"
+                      style={{
+                        position: 'absolute',
+                        zIndex: 1,
+                        inset: 0,
+                        background: V.accent500,
+                        border: `${tokens.border.thin} transparent`,
+                        borderRadius: tokens.radius.frame,
+                        boxSizing: 'border-box',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  ) : null}
+                  <span style={{ position: 'relative', zIndex: 2 }}>{day.getDate()}</span>
                 </button>
               );
             })}
