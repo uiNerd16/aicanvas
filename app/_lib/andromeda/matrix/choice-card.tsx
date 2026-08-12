@@ -7,6 +7,7 @@ import {
   ChoiceCard,
   ChoiceCardGroup,
 } from '../../../../design-systems/andromeda/components/ChoiceCard'
+import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
 function LiveRadioChoiceCards() {
@@ -63,10 +64,11 @@ export const choiceCard: MatrixSpec = {
             display: 'grid',
             width: '100%',
             gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            // Inline, not a Tailwind arbitrary class: the utility is not
-            // generated for this file, which is why the pair sat flush
-            // while the radio group (spaced by RadioGroup itself) did not.
-            gap: 'var(--andromeda-3)',
+            // Read from tokens, not var(--andromeda-3): andromedaVars() emits
+            // that custom property on each component ROOT, which here are this
+            // wrapper's children, and a custom property inherits down rather
+            // than up. The wrapper's own gap resolved to nothing.
+            gap: tokens.spacing[3],
           }}
         >
           <ChoiceCard
@@ -91,10 +93,11 @@ export const choiceCard: MatrixSpec = {
             display: 'grid',
             width: '100%',
             gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            // Inline, not a Tailwind arbitrary class: the utility is not
-            // generated for this file, which is why the pair sat flush
-            // while the radio group (spaced by RadioGroup itself) did not.
-            gap: 'var(--andromeda-3)',
+            // Read from tokens, not var(--andromeda-3): andromedaVars() emits
+            // that custom property on each component ROOT, which here are this
+            // wrapper's children, and a custom property inherits down rather
+            // than up. The wrapper's own gap resolved to nothing.
+            gap: tokens.spacing[3],
           }}
         >
           <ChoiceCard
