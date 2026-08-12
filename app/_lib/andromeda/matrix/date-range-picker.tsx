@@ -11,6 +11,7 @@ import type { MatrixSpec } from './types'
 // each case seeds its own state from these and moves from there.
 const RANGE = { start: new Date(2026, 6, 20), end: new Date(2026, 7, 20) }
 const SHORT = { start: new Date(2026, 7, 1), end: new Date(2026, 7, 14) }
+const SINGLE_DAY = { start: new Date(2026, 7, 20), end: new Date(2026, 7, 20) }
 
 // Anchor-then-confirm is a two-click behaviour with a hover preview in between,
 // and it only reads if the pick STICKS: the component is controlled-only, so a
@@ -44,9 +45,9 @@ export const dateRangePicker: MatrixSpec = {
   overflow: true,
   render: (_size, props) => <LiveDateRangePicker {...props} />,
   variants: [
-    { label: 'Live', props: { presetLabel: 'Last month' } },
-    { label: 'With preset', props: { presetLabel: 'Last month' } },
-    { label: 'No preset', props: { value: SHORT } },
+    { label: 'Live' },
+    { label: 'With preset', props: { value: SHORT, presetLabel: 'Sprint 34' } },
+    { label: 'Single day', props: { value: SINGLE_DAY } },
     { label: 'Open', props: { staticOpen: true } },
   ],
   states: [
