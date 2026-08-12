@@ -1,6 +1,6 @@
 // @ts-nocheck — this spec AUTHORS JSX against untyped design-system
 // components. Data-only specs in this directory need no such line.
-import { ArrowClockwise } from '@phosphor-icons/react'
+import { CornersOut } from '@phosphor-icons/react'
 import { PanelHeader } from '../../../../design-systems/andromeda/components/PanelHeader'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
 import { CornerMarkers } from '../../../../design-systems/andromeda/components/CornerMarkers'
@@ -19,6 +19,11 @@ const panel = (size: string | undefined, props: Record<string, unknown>) => (
 export const panelHeader: MatrixSpec = {
   slug: 'panel-header',
   sizes: ['sm', 'md', 'lg'],
+  // One card per row, the same shape Input and Textarea use. Two cards across
+  // leaves each 320px panel about half its room, and three rungs sharing that
+  // half truncate the title to "Reques…" — a width artefact reading as a
+  // component behaviour.
+  wide: true,
   render: panel,
   variants: [
     { label: 'Title only', props: {} },
@@ -26,7 +31,7 @@ export const panelHeader: MatrixSpec = {
       label: 'With actions',
       // The actions control matches the header rung by name, which is the
       // pairing the component's own JSDoc prescribes.
-      props: { actions: <IconButton size="md" variant="ghost" aria-label="Refresh" icon={ArrowClockwise} /> },
+      props: { actions: <IconButton size="md" variant="ghost" aria-label="Expand" icon={CornersOut} /> },
     },
   ],
   // The header itself is chrome; any interaction belongs to whatever control

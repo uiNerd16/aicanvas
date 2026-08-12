@@ -36,6 +36,13 @@ export const panelMenu: MatrixSpec = {
   slug: 'panel-menu',
   sizes: ['sm', 'md', 'lg'],
   overflow: true,
+  // One card per row. Two cards across leaves three 220px boxes fighting over
+  // half a row: they shrink, and the open menus — which keep their own width —
+  // slide over each other and past the card. A full row fits all three.
+  wide: true,
+  // wide's '1 1 100%' would otherwise stack the Rest/selected pair vertically,
+  // reading as two examples instead of one comparison.
+  statePairColumns: true,
   // A kebab is narrower than the menu it opens, so this box supplies the
   // horizontal room. HEIGHT is not reserved here any more: the renderer takes
   // it from the mounted panel, and a hardcoded minHeight on top of that reserve
