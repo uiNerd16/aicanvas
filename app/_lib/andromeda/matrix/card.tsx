@@ -37,6 +37,12 @@ export const card: MatrixSpec = {
   Component: Card,
   sizes: null,
   wide: true,
+  // wide gives the demo the full row (one card per line instead of two
+  // squeezed side by side), but the Card itself has no width class of its
+  // own, so a block box with no constraint fills 100% of that row — a card
+  // stretched edge to edge instead of reading as a card. Cap it and centre
+  // it inside the room `wide` granted.
+  baseProps: { style: { maxWidth: 480, margin: '0 auto' } },
   variants: [
     {
       label: 'Default',
