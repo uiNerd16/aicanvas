@@ -165,9 +165,14 @@ function CaseCard({
           // equal columns instead of leaving it to intrinsic width.
           ...(withBaseline && spec.statePairColumns
             ? {
+                // start, not center: Rest and the forced instance rarely match
+                // height (an error message, an open panel), and centering
+                // pulled the shorter one's label down to split the difference —
+                // Rest's "NOTES" no longer lined up with Error focus's "NOTES".
+                // Both anchor to the same top edge instead.
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                alignItems: 'center',
+                alignItems: 'start',
               }
             : sizes
             ? // The size ladder is "how big can it be" — one glance across
