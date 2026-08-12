@@ -159,10 +159,22 @@ function CaseCard({
         className="andromeda-matrix-body"
         style={{
           flex: 1,
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'center',
+          // A component that fills its container makes every instance claim a
+          // whole line, so the flex row wraps the rest/forced pair into a stack
+          // and the comparison stops reading as one. Those specs ask for two
+          // equal columns instead of leaving it to intrinsic width.
+          ...(withBaseline && spec.statePairColumns
+            ? {
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                alignItems: 'center',
+              }
+            : {
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }),
           gap: tokens.spacing[6],
           padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
           // A popover paints OUT of flow, and `auto` on one axis computes the

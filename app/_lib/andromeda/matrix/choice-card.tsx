@@ -44,15 +44,13 @@ export const choiceCard: MatrixSpec = {
   Component: ChoiceCard,
   sizes: ['md', 'lg'],
   wide: true,
+  // Rest and forced side by side: a choice card fills its container, so
+  // left to the flex row the pair stacks and stops reading as one comparison.
+  statePairColumns: true,
   baseProps: {
     control: 'checkbox',
     title: 'Retain telemetry',
     description: 'Archive the sensor stream.',
-    // A choice card fills its container, so in a state case the rest and
-    // forced instances each claimed a full line and wrapped into a stack.
-    // Capping the card lets the pair sit side by side, the way the
-    // configurations above already read.
-    style: { maxWidth: '42ch' },
   },
   variants: [
     { label: 'Radio group', node: <LiveRadioChoiceCards /> },

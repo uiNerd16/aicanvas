@@ -61,6 +61,11 @@ export type MatrixSpec = {
   /** Required true when any case passes staticOpen (inline open popover), because
       content-visibility implies contain:paint and would clip it. Enforced by the test. */
   overflow?: boolean
+  /** Lay a state case's rest/forced pair as two equal columns instead of letting
+      the flex row decide. For components that FILL their container (a choice
+      card, a row), where each instance claims a whole line and the pair wraps
+      into a stack, which reads as two examples rather than one comparison. */
+  statePairColumns?: boolean
 }
 
 export const matrixId = (slug: string, kind: 'variant' | 'state', label: string) =>
