@@ -8,7 +8,18 @@ export const searchField: MatrixSpec = {
   // A field is w-full by design; without this it renders at its intrinsic
   // width in the middle of a case that already owns the room.
   fill: true,
-  baseProps: { placeholder: 'Search anything', style: { width: 320 } },
+  // One card per row instead of two across — same reasoning as Input/Textarea:
+  // a w-full field halves its room the moment it shares a row with a second
+  // card, fighting `fill` immediately after granting it.
+  wide: true,
+  // Without this, wide's Instance flex ('1 1 100%') stacks the Rest/forced
+  // pair in a state card instead of sitting them side by side.
+  statePairColumns: true,
+  // The 320px pin landed on the outer wrapper div (SearchField spreads `style`
+  // last onto that div, SearchField.tsx:176, the same div that owns
+  // `width: '100%'`), so it capped the whole field regardless of how much
+  // room `fill`/`wide` granted it — same trap Textarea's had.
+  baseProps: { placeholder: 'Search anything' },
   variants: [
     { label: 'Default', props: {} },
     { label: 'Custom shortcut', props: { shortcut: '⌘ F' } },
