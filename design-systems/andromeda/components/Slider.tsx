@@ -54,10 +54,13 @@ function formatValue(value, step) {
 // ponytail: identity constants — the slider's shape is a ratio, not a token.
 // Each rung keeps the thumb twice as tall as it is wide and the row tall enough
 // to contain it, so md is exactly today's 18px row with an 8x16 thumb.
+// thumbW repeats the width in the `thumb` class as a number, because the RANGE
+// pair anchors by its inner edges and CSS has to subtract a real px value to
+// do it. Keep the two in step.
 const SIZES = {
-  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  text: 'text-[length:var(--andromeda-text-sm)]' },
-  md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  text: 'text-[length:var(--andromeda-text-md)]' },
-  lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', text: 'text-[length:var(--andromeda-text-lg)]' },
+  sm: { row: 'h-[14px]', line: 'h-[2px]', thumb: 'w-[6px] h-[12px]',  thumbW: 6,  text: 'text-[length:var(--andromeda-text-sm)]' },
+  md: { row: 'h-[18px]', line: 'h-[3px]', thumb: 'w-[8px] h-[16px]',  thumbW: 8,  text: 'text-[length:var(--andromeda-text-md)]' },
+  lg: { row: 'h-[22px]', line: 'h-[4px]', thumb: 'w-[10px] h-[20px]', thumbW: 10, text: 'text-[length:var(--andromeda-text-lg)]' },
 };
 
 /**
@@ -462,7 +465,17 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
             data-range-thumb={thumb === 0 ? 'minimum' : 'maximum'}
             onKeyDown={(e) => handleRangeKeyDown(e, thumb)}
             className={cn(
-              'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
+              // NOT centred on its value like the single thumb below. A range
+              // endpoint marks the BOUNDARY of a span, so each thumb anchors by
+              // its INNER edge: the low thumb sits to the left of its value, the
+              // high thumb to the right. Two consequences, both wanted. The pair
+              // can meet and touch but never merge into one blob, which at sm
+              // (a 6px thumb) was the whole defect. And the accent fill now runs
+              // exactly between the two thumbs instead of under them, so the
+              // measurement and the marks agree.
+              // max()/min() keep a thumb inside the track at the ends, where the
+              // inner-edge anchor would otherwise push it fully off.
+              'absolute top-1/2 -translate-y-1/2',
               SIZES[size].thumb,
               'bg-[color:var(--andromeda-accent-300)]',
               'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
@@ -473,7 +486,11 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
               'focus-visible:z-10 focus-visible:outline-none',
               'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
             )}
-            style={{ left: `${thumb === 0 ? lowPercent : highPercent}%` }}
+            style={{
+              left: thumb === 0
+                ? `max(0px, calc(${lowPercent}% - ${SIZES[size].thumbW}px))`
+                : `min(calc(100% - ${SIZES[size].thumbW}px), ${highPercent}%)`,
+            }}
           />
         )) : (
           <div

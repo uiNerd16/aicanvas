@@ -37,6 +37,9 @@ export const slider: MatrixSpec = {
     { label: 'Labelled', props: { label: 'Throttle', unit: '%' } },
     { label: 'Signed range', props: { label: 'Thrust vector', unit: '°', min: -30, max: 30, value: 12 } },
     { label: 'At minimum', props: { value: 0, showValue: false } },
+    // A tuple enters two-thumb mode. Worth its own case at every rung: the pair
+    // anchors by its inner edges, and sm is where a 6px thumb makes that read.
+    { label: 'Two thumbs', props: { label: 'Mission budget', unit: ' CR', min: 0, max: 1000, step: 10, value: [190, 800] } },
   ],
   states: [
     // Both live on the thumb: a 1.25 scale on hover and an accent ring on
