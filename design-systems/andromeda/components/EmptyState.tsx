@@ -135,9 +135,12 @@ export const EmptyStateDescription = forwardRef(function EmptyStateDescription(
       ref={ref}
       data-slot="empty-state-description"
       className={cn(
+        // 44ch at the sm rung is about two lines of the copy this slot is for.
+        // An empty state states an absence; past two lines it starts
+        // explaining itself, which is what the action slot exists for.
         'm-0 max-w-[44ch]',
         '[font-family:var(--andromeda-font-sans)]',
-        'text-[length:var(--andromeda-text-xs)]',
+        'text-[length:var(--andromeda-text-sm)]',
         'text-[color:var(--andromeda-text-secondary)]',
         'leading-[1.6]',
         className,

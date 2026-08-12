@@ -42,7 +42,10 @@ export const choiceCard: MatrixSpec = {
   slug: 'choice-card',
   Component: ChoiceCard,
   sizes: ['md', 'lg'],
-  wide: true,
+  // Half-row, so every case on the page sits two-up: the configurations show
+  // their pair side by side, and the states below stop running the full width
+  // one card at a time. A choice card is a compact control, not a panel.
+  wide: false,
   baseProps: {
     control: 'checkbox',
     title: 'Retain telemetry',

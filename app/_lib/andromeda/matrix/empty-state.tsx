@@ -22,9 +22,12 @@ export const emptyState: MatrixSpec = {
   slug: 'empty-state',
   Component: EmptyState,
   sizes: null,
-  wide: true,
+  // Half-row, not wide. An EmptyState fills whatever region resolved to
+  // nothing, so across a full row its corner markers end up a screen away
+  // from the centred content they are meant to frame.
+  wide: false,
   // The configurations keep the original action and message-only choices,
-  // then show the outline frame and both media substitution patterns.
+  // then show the outline frame and the media substitution pattern.
   variants: [
     {
       label: 'With actions',
@@ -36,7 +39,7 @@ export const emptyState: MatrixSpec = {
           </EmptyStateIcon>
           <EmptyStateTitle>No activity</EmptyStateTitle>
           <EmptyStateDescription>
-            Awaiting signal from the deep-space array. The next pass is in approximately 14 minutes.
+            Awaiting signal. The next pass is in about 14 minutes.
           </EmptyStateDescription>
           <EmptyStateAction>
             <Button size="sm">Open log</Button>
@@ -70,7 +73,7 @@ export const emptyState: MatrixSpec = {
           </EmptyStateIcon>
           <EmptyStateTitle>No payload detected</EmptyStateTitle>
           <EmptyStateDescription>
-            Drop a mission file here to begin the first deep-space transmission.
+            Drop a mission file here to begin.
           </EmptyStateDescription>
         </>
       ),
@@ -85,7 +88,7 @@ export const emptyState: MatrixSpec = {
           </EmptyStateMedia>
           <EmptyStateTitle>No watch assigned</EmptyStateTitle>
           <EmptyStateDescription>
-            Reza Quinn is awaiting a telemetry window from the deep-space array.
+            Reza Quinn is awaiting a telemetry window.
           </EmptyStateDescription>
         </>
       ),
