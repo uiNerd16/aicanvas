@@ -36,6 +36,11 @@ export const input: MatrixSpec = {
   // the moment it shares a row with a second card, which fights `fill`
   // immediately after granting it.
   wide: true,
+  // Without this, wide's Instance flex ('1 1 100%') stacks the Rest/forced
+  // pair in a state card instead of sitting them side by side — each demands
+  // the whole row and wraps onto its own line. Two grid columns instead, so a
+  // state card reads the same as a variant card: one row, full width used.
+  statePairColumns: true,
   baseProps: BASE_PROPS,
   // A custom renderer keeps the password toggle live in every rung. A `node`
   // would bypass the size ramp, while the ordinary cases still need the same
