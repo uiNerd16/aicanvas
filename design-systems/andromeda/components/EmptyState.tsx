@@ -22,6 +22,7 @@ import { Card, CardContent } from './Card';
 
 /**
  * @typedef {object} EmptyStateProps
+ * @property {'default'|'outline'} [variant='default']
  * @property {React.ReactNode} [children]
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
@@ -29,14 +30,18 @@ import { Card, CardContent } from './Card';
 
 /** @type {React.ForwardRefExoticComponent<EmptyStateProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const EmptyState = forwardRef(function EmptyState(
-  { className, children, style, ...props },
+  { className, children, style, variant = 'default', ...props },
   ref,
 ) {
+  const outlined = variant === 'outline';
+
   return (
     <Card
       ref={ref}
       data-slot="empty-state"
-      className={cn(className)}
+      data-variant={variant}
+      bordered={outlined}
+      className={cn(outlined && 'border-dashed', className)}
       style={style}
       {...props}
     >
@@ -49,6 +54,26 @@ export const EmptyState = forwardRef(function EmptyState(
         {children}
       </CardContent>
     </Card>
+  );
+});
+
+export const EmptyStateMedia = forwardRef(function EmptyStateMedia(
+  { className, children, ...props },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      data-slot="empty-state-media"
+      aria-hidden="true"
+      className={cn(
+        'inline-flex items-center justify-center mb-[var(--andromeda-2)]',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 });
 
