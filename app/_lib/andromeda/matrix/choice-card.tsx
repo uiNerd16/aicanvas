@@ -13,22 +13,26 @@ function LiveRadioChoiceCards() {
   const [value, setValue] = useState('autonomous')
 
   return (
+    // Two columns: a choice group is a comparison, and side by side is how
+    // two options get compared. One short line each keeps the pair scannable
+    // at a glance instead of turning the row into a paragraph.
     <ChoiceCardGroup
       aria-label="Flight control mode"
       value={value}
       onValueChange={setValue}
+      className="grid grid-cols-2 gap-[var(--andromeda-3)]"
     >
       <ChoiceCard
         control="radio"
         value="autonomous"
         title="Autonomous flight"
-        description="Guidance applies approved vectors as telemetry arrives."
+        description="Applies approved vectors."
       />
       <ChoiceCard
         control="radio"
         value="crew"
         title="Crew-directed flight"
-        description="Flight crew confirms each vector before execution."
+        description="Crew confirms each vector."
       />
     </ChoiceCardGroup>
   )
@@ -42,7 +46,7 @@ export const choiceCard: MatrixSpec = {
   baseProps: {
     control: 'checkbox',
     title: 'Retain telemetry',
-    description: "Archive this flight's sensor stream after debrief.",
+    description: 'Archive the sensor stream.',
   },
   variants: [
     { label: 'Radio group', node: <LiveRadioChoiceCards /> },
@@ -52,7 +56,7 @@ export const choiceCard: MatrixSpec = {
       props: {
         control: 'toggle',
         title: 'Beacon uplink',
-        description: 'Transmit vessel status through the deep-space relay.',
+        description: 'Transmit status to the relay.',
         defaultChecked: true,
       },
     },

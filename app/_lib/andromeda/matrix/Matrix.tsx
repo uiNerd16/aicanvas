@@ -454,7 +454,7 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
            Its spacing[2] 8px trigger offset now sits beyond that historical
            reserve; the reserve behaviour is intentionally unchanged here.
 
-           DIALOG 317 = 309 + 8. The only [role="dialog"] a case can mount is
+           DIALOG 402 = 394 + 8. The only [role="dialog"] a case can mount is
            DateRangePicker's calendar (Drawer portals to <body>, where :has()
            cannot see it):
              panel = 2 x 1px border + 2 x spacing[3] 12 padding
@@ -462,6 +462,15 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
                      + weekday row (size.xs 10 x 1.5 + 2 x spacing[1] 4) 23
                      + day grid (6 rows x 32 + 5 x spacing[1] 4) 212
                      + 2 x spacing[3] 12 column gap                       = 309
+                     + preset footer                                        85
+                                                                          = 394
+             footer= 1px border-top + spacing[3] 12 padding-top
+                     + 2 chip rows (2 x spacing[8] 32 + spacing[2] 8 gap) =  85
+           The footer exists only when a case passes `presets`, and its height
+           is a WRAP rather than a constant: the four presets the spec declares
+           fold onto two rows at the card's width. A fifth preset, or a longer
+           label, buys a third row and this number goes short again, which is
+           why the sum is written out instead of measured.
            That 1.5 is the line-box factor, and its source is Tailwind
            preflight's html { line-height: 1.5 } — NOT an Andromeda token.
            Nothing in this chain sets one. */
@@ -469,7 +478,7 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
           padding-bottom: 155px !important;
         }
         /* A month grid is taller than a menu. */
-        .andromeda-matrix-body:has([role="dialog"]) { padding-bottom: 317px !important; }
+        .andromeda-matrix-body:has([role="dialog"]) { padding-bottom: 402px !important; }
         /* WHICH WAY the room goes. Padding-bottom is right only for a panel
            that opens down; one that opens up would paint over the card header
            with its room sitting unused underneath. So an upward panel MOVES
