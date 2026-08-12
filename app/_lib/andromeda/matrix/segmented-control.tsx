@@ -13,6 +13,12 @@ const ICONS = [
   { value: 'line', icon: ChartLine, ariaLabel: 'Line chart' },
   { value: 'bars', icon: ChartBar, ariaLabel: 'Bar chart' },
 ]
+// Both slots at once. A segment carrying words is padded and free-width, so
+// this case is also what proves the icon-only square cell has not swallowed it.
+const ICON_LABELS = [
+  { value: 'line', icon: ChartLine, label: 'Line' },
+  { value: 'bars', icon: ChartBar, label: 'Bars' },
+]
 const PERIODS = [
   { value: '1d', label: '1D' },
   { value: '1w', label: '1W' },
@@ -55,6 +61,7 @@ export const segmentedControl: MatrixSpec = {
     { label: 'Live', node: <LiveSegmentedControl /> },
     { label: 'Labels', props: {} },
     { label: 'Icons', props: { options: ICONS, value: 'line' } },
+    { label: 'Icon and label', props: { options: ICON_LABELS, value: 'line' } },
     // Selection is a prop, so it costs nothing to show it selected somewhere
     // other than the first segment — which is where the indicator's position
     // actually becomes informative.

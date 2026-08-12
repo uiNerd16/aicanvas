@@ -2,7 +2,8 @@
 // ============================================================
 // COMPONENT: SegmentedControl
 // shadcn/ui-aligned API: controlled `value` / `onChange`, options
-// array, sized variants. A row of icon-or-label buttons with a
+// array, sized variants. A row of buttons carrying an icon, a label,
+// or both, with a
 // `surface.active` fill that slides between segments via framer's
 // `layoutId` — no manual measurement, no ResizeObserver, no raw
 // timing strings. Token-driven duration + easing throughout.
@@ -131,7 +132,11 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       {options.map((opt, i) => {
         const Icon = opt.icon;
         const active = opt.value === value;
-        const showLabel = !Icon && opt.label;
+        // Geometry follows the LABEL, not the absence of an icon. This used to
+        // ask `!Icon && opt.label`, so an icon+label segment fell through to
+        // the icon-only branch and rendered its label inside a square cell with
+        // zero side padding. A segment is square only when it has no words.
+        const hasLabel = Boolean(opt.label);
         return (
           <button
             key={opt.value}
@@ -148,12 +153,12 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               alignItems: 'center',
               justifyContent: 'center',
               gap: tokens.spacing[2],
-              minWidth: showLabel ? undefined : `var(${cellVar}, ${rung.height})`,
+              minWidth: hasLabel ? undefined : `var(${cellVar}, ${rung.height})`,
               height: '100%',
               // A labelled segment is a centred-label button, so it takes the
               // rung's padX like Button does. A flat spacing[3] left an lg
               // strip padded like an sm one next to an lg Button.
-              padding: showLabel ? `0 ${rung.padX}` : 0,
+              padding: hasLabel ? `0 ${rung.padX}` : 0,
               background: 'transparent',
               border: 'none',
               borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${tokens.color.border.base}`,
@@ -195,8 +200,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
             ) : null}
             <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[2] }}>
               {Icon ? <Icon size={iconSize} weight="regular" /> : null}
-              {opt.label && Icon ? <span>{opt.label}</span> : null}
-              {showLabel ? opt.label : null}
+              {hasLabel ? <span>{opt.label}</span> : null}
             </span>
           </button>
         );

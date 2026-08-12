@@ -38,7 +38,7 @@ export const COMPONENT_COUNTS: Record<string, { variants: number; states: number
   'radar-chart': { variants: 2, states: 0 },
   'radio': { variants: 2, states: 6 },
   'search-field': { variants: 4, states: 1 },
-  'segmented-control': { variants: 4, states: 0 },
+  'segmented-control': { variants: 5, states: 0 },
   'slider': { variants: 5, states: 3 },
   'spinner': { variants: 4, states: 0 },
   'stat-tile': { variants: 5, states: 0 },
