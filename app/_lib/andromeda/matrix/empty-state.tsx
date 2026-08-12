@@ -22,10 +22,13 @@ export const emptyState: MatrixSpec = {
   slug: 'empty-state',
   Component: EmptyState,
   sizes: null,
-  // Half-row, not wide. An EmptyState fills whatever region resolved to
-  // nothing, so across a full row its corner markers end up a screen away
-  // from the centred content they are meant to frame.
-  wide: false,
+  // One case per row, with the empty state itself centred inside it rather
+  // than stretched across it: an EmptyState fills whatever region resolved to
+  // nothing, and at full row width its corner markers end up a screen away
+  // from the content they are meant to frame. The ch cap keeps the frame
+  // close to the copy, the same unit the description already measures in.
+  wide: true,
+  baseProps: { className: 'mx-auto max-w-[52ch]' },
   // The configurations keep the original action and message-only choices,
   // then show the outline frame and the media substitution pattern.
   variants: [
