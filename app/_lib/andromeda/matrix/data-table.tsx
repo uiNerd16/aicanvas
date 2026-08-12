@@ -1,12 +1,120 @@
+// @ts-nocheck — this spec AUTHORS JSX against untyped design-system
+// components. Data-only specs in this directory need no such line.
+import { Play } from '@phosphor-icons/react'
 // v2 component: imported through the build-time shim.
 import { DataTable } from '../../../lib/andromeda-v2.generated'
+import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
+import { tokens } from '../../../../design-systems/andromeda/tokens'
 import type { MatrixSpec } from './types'
+
+// The component ships DEFAULT_COLUMNS/DEFAULT_ROWS so it renders from bare
+// props, and this page used to lean on them. That taught the wrong lesson: five
+// plain text columns is the one shape a config-driven grid does NOT need to be
+// configured for, and the component's only real consumer (the signal-room
+// template's Recent transmissions) looks nothing like it. The columns below
+// mirror that consumer's SHAPE — a `render` cell, a two-line primary, a visual
+// cell that folds to text — without importing its data or its player state.
+const ROWS = [
+  { id: 'track-01', track: 'Signal Drift',  artist: 'Vela Array',    duration: '03:42', plays: '128.4K', peak: 62, last: 'T-02m' },
+  { id: 'track-02', track: 'Night Transit', artist: 'Polar Relay',   duration: '04:18', plays: '96.8K',  peak: 91, last: 'T-17m' },
+  { id: 'track-03', track: 'Low Orbit',     artist: 'Kepler Static', duration: '02:56', plays: '74.2K',  peak: 48, last: 'T-41m' },
+]
+
+function PeakBar({ value }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        height: '4px',
+        width: '88px',
+        background: tokens.color.surface.overlay,
+        border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        borderRadius: tokens.radius.frame,
+        display: 'inline-block',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: `${value}%`,
+          // Solid mark, not a tint: a meter fill is a MARK. Over 85 reads hot.
+          background: value > 85 ? tokens.color.orange[300] : tokens.color.text.primary,
+        }}
+      />
+    </div>
+  )
+}
+
+const COLUMNS = [
+  {
+    key: 'play',
+    header: '',
+    // Same derivation as the signal-room consumer: the cell adds spacing[3]
+    // either side, and the cell style carries text-overflow:ellipsis, so a
+    // column narrower than control + that padding paints a phantom "..."
+    // under the button. Never a magic number — the ladder moved once already.
+    width: `calc(var(--andromeda-control-sm, 28px) + ${tokens.spacing[3]} * 2)`,
+    render: () => <IconButton variant="ghost" size="sm" icon={Play} aria-label="Play" />,
+  },
+  { key: 'id', header: 'ID', width: '96px', hideBelow: 'md', fold: 'none', color: tokens.color.text.faint },
+  {
+    key: 'track',
+    header: 'Track',
+    primary: true,
+    render: (r) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
+        <span
+          style={{
+            fontFamily: tokens.typography.fontSans,
+            fontSize: tokens.typography.size.sm,
+            color: tokens.color.text.primary,
+            fontWeight: tokens.typography.weight.medium,
+            letterSpacing: tokens.typography.tracking.tight,
+            lineHeight: 'var(--andromeda-leading-none, 1)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {r.track}
+        </span>
+        <span
+          style={{
+            fontFamily: tokens.typography.fontMono,
+            fontSize: tokens.typography.size.sm,
+            color: tokens.color.text.muted,
+            textTransform: 'uppercase',
+            letterSpacing: tokens.typography.tracking.widest,
+            lineHeight: 'var(--andromeda-leading-none, 1)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {r.artist}
+        </span>
+      </div>
+    ),
+  },
+  { key: 'duration', header: 'Duration', width: '110px', hideBelow: 'md', fold: 'meta', color: tokens.color.text.primary },
+  { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r) => `${r.plays} plays`, color: tokens.color.text.primary },
+  // The meter is the reason `infoValue` exists: a visual cell cannot fold into
+  // a text bubble, so it hands over a string instead of its `render`.
+  { key: 'peak', header: 'Peak', width: '124px', hideBelow: 'md', infoValue: (r) => `${r.peak}%`, render: (r) => <PeakBar value={r.peak} /> },
+  { key: 'last', header: 'Last', width: '84px', hideBelow: 'md', color: tokens.color.text.faint },
+]
 
 export const dataTable: MatrixSpec = {
   slug: 'data-table',
   Component: DataTable,
   sizes: null,
   wide: true,
+  // Row ids are kept as track-0N so the component's own `selectedRowKey`
+  // default ('track-02') still lands on a row and the accent edge shows.
+  baseProps: { columns: COLUMNS, rows: ROWS },
   // The per-row info bubble is position:absolute with no portal, so it needs the
   // same two escapes a popover case needs: the body must not become a scroll
   // container, and the showcase section must not sit in a paint-contained box.
@@ -16,27 +124,24 @@ export const dataTable: MatrixSpec = {
   // data-tooltip-placement.
   //
   // The horizontal scroll it gives up was never doing anything, at EITHER width.
-  // The table is width:100% with table-layout:fixed, so its floor is whichever
-  // explicit column widths are being DISPLAYED, and that is two different
-  // numbers: 192 above md (duration + plays + last), 40 below it (the info
-  // column alone, since those three go display:none there). The narrowest body
-  // either page produces is ~590 above md, and below md the table is down to two
-  // columns, so neither floor is ever reached. No box of our own to shrink
+  // The table is width:100% with table-layout:fixed, so explicit widths that
+  // overrun get scaled down rather than overflowing; and below md every
+  // hideBelow column goes display:none, leaving the play cell, the primary and
+  // the info column. Neither width overflows. No box of our own to shrink
   // either, so this needs no minWidth:0 companion.
   //
-  // The 33px reserve does NOT hold this bubble on its own — it is the last 33 of
-  // 71, and the sum is worth writing down because the margin is 1px. Room above
-  // the FIRST row's trigger, the tightest one:
+  // The 33px reserve does NOT hold this bubble on its own; it is one term of
+  // three. Room above the FIRST row's trigger, the tightest one:
   //   reserve 33 + thead row 26 + the cell's spacing[3] 12 padding-top   = 71
-  // Bubble, at the four folded columns this spec renders (artist, duration,
-  // plays, last):
-  //   4 x size.xs 10 line box + 3 x spacing[1] 4 grid gap
-  //     + 2 x spacing[1] 4 padding + 2 x 1px border                      = 62
-  //   + its spacing[2] 8 offset from the trigger                         = 70
-  // Matrix.tsx's 33 is derived for a ONE-LINE label, so it never covered this by
-  // itself; the thead row and the cell padding are what make it fit. A FIFTH
-  // folded column adds 14 (row + gap) and puts the bubble 13px short. Re-derive
-  // it here, not there, if a token or the column list moves.
+  // Bubble, at the TWO columns that fold to `info` here (peak, last — id is
+  // fold:'none', duration and plays are fold:'meta' and ride the primary
+  // column's sub-line instead):
+  //   2 x size.xs 10 line box + 1 x spacing[1] 4 grid gap
+  //     + 2 x spacing[1] 4 padding + 2 x 1px border                      = 34
+  //   + its spacing[2] 8 offset from the trigger                         = 42
+  // 29px of margin. Each further `info` column costs 14 (row + gap), so this
+  // takes two more before it is tight. Re-derive it HERE, not in Matrix.tsx,
+  // if a token or the column list moves.
   overflow: true,
   variants: [
     { label: 'Defaults', props: {} },
