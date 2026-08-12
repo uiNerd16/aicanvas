@@ -351,7 +351,7 @@ export const RadarChart = forwardRef(function RadarChart(
                 stroke={s.color ?? tokens.color.accent[300]}
                 strokeWidth={tokens.chart.lineWidth}
                 fill={s.color ?? tokens.color.accent[300]}
-                fillOpacity={i === 0 ? 0.12 : 0.06}
+                fillOpacity={i === 0 ? tokens.chart.fillOpacity : tokens.chart.fillOpacityFaint}
                 dot={false}
                 activeDot={{
                   r: 3,
