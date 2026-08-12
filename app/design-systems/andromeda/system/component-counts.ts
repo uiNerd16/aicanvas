@@ -25,7 +25,7 @@ export const COMPONENT_COUNTS: Record<string, { variants: number; states: number
   'horizon-backdrop': { variants: 4, states: 0 },
   'icon-button': { variants: 4, states: 6 },
   'input': { variants: 4, states: 5 },
-  'media-card': { variants: 4, states: 0 },
+  'media-card': { variants: 5, states: 0 },
   'metric-chart': { variants: 5, states: 0 },
   'music-player': { variants: 5, states: 0 },
   'nav-item': { variants: 4, states: 5 },

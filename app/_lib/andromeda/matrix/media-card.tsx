@@ -21,6 +21,19 @@ export const mediaCard: MatrixSpec = {
     },
     { label: 'No action', props: { code: 'CH-09', title: 'Static art', meta: 'Cover only', action: 'none' } },
     { label: 'Playing', props: { code: 'MIX-01', title: 'Your mix', meta: 'Now playing', playing: true } },
+    // stacked is a structurally different render path (image block + plain-surface caption block, no scrim) — worth its own case, not just a prop tweak
+    {
+      label: 'Stacked',
+      props: {
+        layout: 'stacked',
+        code: 'CH-12',
+        title: 'Reactor telemetry',
+        meta: 'Live feed',
+        action: 'cta',
+        ctaLabel: 'Open',
+        image: 'https://ik.imagekit.io/aitoolkit/andromeda/signal-room/mix-02.webp',
+      },
+    },
   ],
   states: [],
   gaps: {
