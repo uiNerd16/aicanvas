@@ -18,8 +18,13 @@ const SRC =
 
 export const userCard: MatrixSpec = {
   slug: 'user-card',
-  sizes: ['sm', 'md', 'lg'],
+  // Two rungs: the ladder stops at md for this card (see UserCard.tsx).
+  sizes: ['sm', 'md'],
   overflow: true,
+  // One card per row. Three 300px rails do not fit half a row: they shrank to
+  // about half each, which put the name and role back in truncation and slid
+  // the open panels — which keep their own width — over one another.
+  wide: true,
   // A user card fills the foot of a rail, so it needs a rail-width box to sit
   // in. Room for the open panel is NOT reserved here any more: the renderer
   // takes it from the mounted panel, which also covers a case you open by
@@ -34,7 +39,11 @@ export const userCard: MatrixSpec = {
     // The card is width:100% and takes whatever it is given; the real rail is
     // still narrower, and truncation there is correct behaviour, just not the
     // thing this case exists to show.
-    <div style={{ width: 300, minWidth: 0, background: tokens.color.surface.raised }}>
+    // 360, not 300: the open panel stretches to the card and then grows to fit
+    // its widest row, so a box narrower than the panel let the panel of one rung
+    // slide over its neighbour. The box has to be at least as wide as what it
+    // opens.
+    <div style={{ width: 360, minWidth: 0, background: tokens.color.surface.raised }}>
       <UserCard
         name="Reza Quinn"
         role="Flight Director"

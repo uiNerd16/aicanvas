@@ -54,14 +54,28 @@ const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 // DIRECTOR" at 14px no longer fits the text column of a 224px card, so the role
 // wrapped to two lines and the name truncated. A rung of separation also gives
 // the lockup the hierarchy it was missing.
-// Avatar rung per card rung. sm borrows md's 32px square: see the note at the
-// Avatar call below.
-const AVATAR_FOR_SIZE = { sm: 'md', md: 'md', lg: 'lg' };
+// Avatar rung per card rung, one to one. sm used to borrow md's 32px square on
+// the argument that a 24px avatar reads undersized beside a two-line lockup —
+// but with lg gone there are only two rungs, and a shared avatar left them
+// looking like the same card at two type sizes. The avatar is the biggest thing
+// in the lockup: if it does not move, the rung does not read.
+//
+// The square is then sized to the CARD, not to Avatar's own 24/32/40 ladder:
+// 30px at sm and 36px at md, a 6px step tuned against the two-line name/role
+// lockup beside it. Avatar's rung still sets the type and the status bar; only
+// the box is overridden.
+// ponytail: two identity constants, no token — this pairing is the lockup's,
+// not the system's.
+const AVATAR_FOR_SIZE = { sm: 'sm', md: 'md' };
+const AVATAR_BOX_FOR_SIZE = { sm: 'w-[30px] h-[30px]', md: 'w-[36px] h-[36px]' };
 
+// Two rungs, no lg. This card fills the foot of a sidebar rail, and a rail is
+// never generous: lg was a rung nothing would ask for, and it dragged a popover
+// wider than the rail behind it. sm is the tight rail, md the roomy one. The
+// one departure from the shared sm/md/lg ladder — see UserCard.rules.md.
 const CARD_FOR_SIZE = {
   sm: { pad: tokens.spacing[2], gap: tokens.spacing[2], text: tokens.typography.size.sm, roleText: tokens.typography.size.sm },
   md: { pad: tokens.spacing[3], gap: tokens.spacing[3], text: tokens.typography.size.md, roleText: tokens.typography.size.sm },
-  lg: { pad: tokens.spacing[4], gap: tokens.spacing[4], text: tokens.typography.size.lg, roleText: tokens.typography.size.md },
 };
 
 /**
@@ -70,7 +84,7 @@ const CARD_FOR_SIZE = {
  * @property {string} [role]           Subtitle under the name (e.g. "Flight Director").
  * @property {string} [src] Optional avatar image URL; falls back to initials when absent.
  * @property {'online'|'caution'|'fault'|'offline'} [status] Presence status shown as a dot on the avatar. Passed verbatim to Avatar, whose enum this is; any other value renders no dot.
- * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole card: avatar (24/32/40), inset, gap, name/role type and chevron. The popover rows are unaffected. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
+ * @property {'sm'|'md'} [size='md'] Scales the card: avatar (30/36), inset, gap, and name/role type. No lg rung — a sidebar rail never has the room for one. The popover rows follow the same rung (capped to UserMenuPanel's own sm/md/lg ladder). Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
  * @property {UserMenuItem[]} items Entries rendered in the popover menu.
  * @property {'top'|'bottom'} [placement='top'] Which side of the card the menu opens toward.
  * @property {'start'|'end'|'stretch'} [align='stretch'] How the panel aligns to the card; stretch matches its width.
@@ -149,12 +163,16 @@ export const UserCard = forwardRef(function UserCard(
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
-        {/* The avatar is sized to the LOCKUP, not to the rung name. An sm card
-            stacks a 12px name over a 12px role, so its block of text is around
-            34px tall and a 24px avatar reads undersized beside it; md's 32px
-            carries it. md and lg keep their own rungs, where the pairing
-            already works. */}
-        <Avatar name={name} src={src} status={status} size={AVATAR_FOR_SIZE[sizeKey]} />
+        {/* One avatar rung per card rung, boxed to the card: 30px at sm, 36px
+            at md. twMerge keeps the later width/height, so the class below wins
+            over the rung's own square. */}
+        <Avatar
+          name={name}
+          src={src}
+          status={status}
+          size={AVATAR_FOR_SIZE[sizeKey]}
+          className={AVATAR_BOX_FOR_SIZE[sizeKey]}
+        />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -213,6 +231,7 @@ export const UserCard = forwardRef(function UserCard(
       <UserMenuPanel
         open={open}
         items={items}
+        size={sizeKey}
         placement={placement}
         align={align}
         ariaLabel={ariaLabel}

@@ -58,6 +58,18 @@ const TRIGGER_FOR_SIZE = {
   lg: { padY: tokens.spacing[2], padX: tokens.spacing[3], gap: tokens.spacing[3] },
 };
 
+// Row geometry per rung — kept IDENTICAL to PanelMenu's copy of this const;
+// change one, change both. The panel is the trigger's continuation, so its
+// rows step with the same control ladder the trigger itself sits on.
+// The icon rung runs one stop AHEAD of the label's: a menu row is scanned by
+// its glyph first, and at 16px beside 14px type the glyph read as the smaller
+// of the two.
+const ROW_FOR_SIZE = {
+  sm: { height: tokens.control.sm.height, text: tokens.typography.size.sm, icon: tokens.iconSize.sm },
+  md: { height: tokens.control.md.height, text: tokens.typography.size.md, icon: tokens.iconSize.lg },
+  lg: { height: tokens.control.lg.height, text: tokens.typography.size.lg, icon: tokens.iconSize.xl },
+};
+
 // Roving arrow-key navigation for the `role="menu"` panel. Queries the
 // menuitem buttons, finds the focused one, and moves focus up/down with
 // wrap-around; Home/End jump to first/last. Separators are ignored because
@@ -165,7 +177,10 @@ export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
   return { open, toggle, close, wrapperRef, triggerProps };
 }
 
-function UserMenuItemRow({ item, onClose }) {
+function UserMenuItemRow({ item, onClose, size = 'md' }) {
+  // Falls back to md on an unrecognised size instead of throwing on
+  // `rung.height` — same guard as UserMenu's own sizeKey resolution.
+  const rung = ROW_FOR_SIZE[size] ?? ROW_FOR_SIZE.md;
   if (item.type === 'separator') {
     return (
       <div
@@ -194,12 +209,18 @@ function UserMenuItemRow({ item, onClose }) {
         alignItems: 'center',
         gap: tokens.spacing[3],
         width: '100%',
-        padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
+        // Stated height, not padding — the row rides the same control ladder
+        // as its trigger, so the vertical rhythm is the rung, not the box's
+        // own top/bottom padding.
+        height: rung.height,
+        padding: `0 ${tokens.spacing[3]}`,
         background: 'transparent',
         border: 'none',
         cursor: 'pointer',
         fontFamily: tokens.typography.fontMono,
-        fontSize: tokens.typography.size.xs,
+        // Rung text, not a flat xs — the old 10px also sat under the 12px
+        // legibility floor for interactive text (this row is a button).
+        fontSize: rung.text,
         fontWeight: tokens.typography.weight.medium,
         color: baseColor,
         textAlign: 'left',
@@ -209,10 +230,10 @@ function UserMenuItemRow({ item, onClose }) {
         transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
       }}
     >
-      {/* Row icons ride tokens.iconSize.sm, same scale as PanelMenu. */}
+      {/* Row icons ride the rung's icon size, same ladder as PanelMenu. */}
       {Icon
-        ? <Icon size={tokens.iconSize.sm} weight="regular" />
-        : <span style={{ width: `${tokens.iconSize.sm}px` }} />}
+        ? <Icon size={rung.icon} weight="regular" />
+        : <span style={{ width: `${rung.icon}px` }} />}
       <span style={{ flex: 1 }}>{item.label}</span>
     </button>
   );
@@ -223,13 +244,13 @@ function UserMenuItemRow({ item, onClose }) {
  * Visibility, placement, and alignment are controlled by props so
  * each trigger component can pick its own canonical defaults.
  *
- * The rows deliberately do NOT take the trigger's `size`. A trigger is chrome
- * fitted to the slot it sits in (a top-bar cluster, a sidebar footer); the
- * panel is a floating reading surface, and one product rendering the same
- * action list at three row heights reads as a bug. PanelMenu already settled
- * this: its trigger takes a size, its rows keep one height.
+ * The panel is the trigger's continuation, not a separate surface with its
+ * own opinion — so it takes the trigger's `size` and its rows step with it.
+ * A fixed row height meant an sm trigger opened a menu built for a
+ * different control; the popover should read like part of the same control,
+ * not a fresh one bolted on.
  */
-export function UserMenuPanel({ open, items, placement = 'bottom', align = 'start', panelMinWidth = 200, ariaLabel = 'User menu', onClose }) {
+export function UserMenuPanel({ open, items, size = 'md', placement = 'bottom', align = 'start', panelMinWidth = 200, ariaLabel = 'User menu', onClose }) {
   if (!open) return null;
   const vertical =
     placement === 'top'
@@ -256,6 +277,12 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         position: 'absolute',
         ...vertical,
         ...horizontal,
+        // Rows are separated, not stacked flush: 4px of ground between them so
+        // the highlight of a hovered row reads as one object rather than a
+        // block sliced out of a column.
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacing[1],
         minWidth: `${panelMinWidth}px`,
         // Cap to a token-inset of the viewport so the absolutely-positioned
         // panel can never push past the screen and force horizontal page
@@ -274,7 +301,7 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
       }}
     >
       {items.map((item, i) => (
-        <UserMenuItemRow key={item.id ?? i} item={item} onClose={onClose} />
+        <UserMenuItemRow key={item.id ?? i} item={item} onClose={onClose} size={size} />
       ))}
     </div>
   );
@@ -327,7 +354,7 @@ export { UserMenuStyles };
  * @property {string} name             Display name; passed to Avatar for the initial fallback.
  * @property {string} [src]            Avatar image URL.
  * @property {'online'|'busy'|'away'|'offline'} [status] Presence state; passed to Avatar for the status dot.
- * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole trigger: avatar (24/32/40), padding, gap and chevron. The popover rows are unaffected. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
+ * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole trigger: avatar (24/32/40), padding, gap and chevron. The popover rows follow the same rung. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
  * @property {UserMenuItem[]} items The menu rows to render, including separators.
  * @property {'top'|'bottom'} [placement='bottom'] Whether the panel opens below or above the trigger.
  * @property {'start'|'end'} [align='end'] Which trigger edge the panel aligns to horizontally.
@@ -424,6 +451,7 @@ export const UserMenu = forwardRef(function UserMenu(
       <UserMenuPanel
         open={open}
         items={items}
+        size={sizeKey}
         placement={placement}
         align={align}
         ariaLabel={ariaLabel}

@@ -36,7 +36,7 @@ import { andromedaVars } from './lib/utils';
  * @property {'sm'|'md'|'lg'} [size='md'] Trigger size, forwarded straight to
  *   IconButton. `md` is the panel-header default. Drop to `sm` when the menu is
  *   a per-row overflow inside a dense table, where a 34px square would set the
- *   row height. The menu panel itself never changes size.
+ *   row height. The rows follow the same rung as the trigger.
  * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
  *   showcases / docs so the consumer can see the menu contents without first
@@ -50,7 +50,17 @@ import { andromedaVars } from './lib/utils';
  * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
  */
 
-const ITEM_HEIGHT = 26; // ponytail: identity constant, no token
+// Row geometry per rung — kept IDENTICAL to UserMenu's copy of this const;
+// change one, change both. The panel is the trigger's continuation, so its
+// rows step with the same control ladder the trigger itself sits on.
+// The icon rung runs one stop AHEAD of the label's: a menu row is scanned by
+// its glyph first, and at 16px beside 14px type the glyph read as the smaller
+// of the two.
+const ROW_FOR_SIZE = {
+  sm: { height: tokens.control.sm.height, text: tokens.typography.size.sm, icon: tokens.iconSize.sm },
+  md: { height: tokens.control.md.height, text: tokens.typography.size.md, icon: tokens.iconSize.lg },
+  lg: { height: tokens.control.lg.height, text: tokens.typography.size.lg, icon: tokens.iconSize.xl },
+};
 
 // Layout effect on the client (runs before paint so the flip lands without a
 // flash), plain effect on the server (avoids the useLayoutEffect SSR warning
@@ -63,6 +73,12 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 // scrolls internally instead of spilling off the bottom edge. boxSizing keeps
 // the border inside that cap.
 const MENU_PANEL_STYLE = {
+  // Rows are separated, not stacked flush: 4px of ground between them so the
+  // highlight of a hovered row reads as one object rather than a block sliced
+  // out of a column. Same gap as UserMenu's panel.
+  display: 'flex',
+  flexDirection: 'column',
+  gap: tokens.spacing[1],
   minWidth: '160px', // ponytail: identity constant, no token
   maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
@@ -73,10 +89,10 @@ const MENU_PANEL_STYLE = {
   borderRadius: tokens.radius.frame,
   // A 16px frame measured to the row INK, not to the row box. Inline: rows
   // supply spacing[3] and the panel the remaining spacing[1]. Block: a row is
-  // ITEM_HEIGHT tall with its label centred, so it already carries ~5px of
-  // leading above the first label and below the last — spacing[4] on top of
-  // that read as a top and bottom margin twice the sides. spacing[3] lands the
-  // ink at the same 16px.
+  // ROW_FOR_SIZE[rung].height tall with its label centred, so it already
+  // carries its own leading above the first label and below the last —
+  // spacing[4] on top of that read as a top and bottom margin twice the
+  // sides. spacing[3] lands the ink at the same 16px.
   padding: `${tokens.spacing[3]} ${tokens.spacing[1]}`,
   zIndex: 1000,
   boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
@@ -120,7 +136,10 @@ function handleMenuKeyDown(e) {
   }
 }
 
-function MenuItem({ item, onClose, menuOwnerId }) {
+function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
+  // Falls back to md on an unrecognised size instead of throwing on
+  // `rung.height` — same guard as PanelMenu's own size resolution.
+  const rung = ROW_FOR_SIZE[size] ?? ROW_FOR_SIZE.md;
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const itemRef = useRef(null);
   const buttonRef = useRef(null);
@@ -270,13 +289,13 @@ function MenuItem({ item, onClose, menuOwnerId }) {
           alignItems: 'center',
           gap: tokens.spacing[2],
           width: '100%',
-          height: `${ITEM_HEIGHT}px`,
+          height: rung.height,
           padding: `0 ${tokens.spacing[3]}`,
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
           fontFamily: tokens.typography.fontMono,
-          fontSize: tokens.typography.size.sm,
+          fontSize: rung.text,
           fontWeight: item.selected ? tokens.typography.weight.medium : tokens.typography.weight.regular,
           color,
           textAlign: 'left',
@@ -286,10 +305,10 @@ function MenuItem({ item, onClose, menuOwnerId }) {
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}, color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >
-        {/* Row icons ride tokens.iconSize.sm. The old 14 was off-scale (12/16/18/20/22). */}
+        {/* Row icons ride the rung's icon size, same ladder as UserMenu. */}
         {Icon
-          ? <Icon size={tokens.iconSize.sm} weight="regular" />
-          : <span style={{ width: `${tokens.iconSize.sm}px` }} />}
+          ? <Icon size={rung.icon} weight="regular" />
+          : <span style={{ width: `${rung.icon}px` }} />}
         <span style={{ flex: 1 }}>{item.label}</span>
         {hasSub ? <CaretRight size={10} weight="bold" /> : null}
       </button>
@@ -319,7 +338,7 @@ function MenuItem({ item, onClose, menuOwnerId }) {
           }}
         >
           {item.submenu.map((sub, i) => (
-            <MenuItem key={i} item={sub} onClose={onClose} menuOwnerId={menuOwnerId} />
+            <MenuItem key={i} item={sub} onClose={onClose} menuOwnerId={menuOwnerId} size={size} />
           ))}
         </div>,
         document.body,
@@ -333,6 +352,10 @@ export const PanelMenu = forwardRef(function PanelMenu(
   { items, align = 'right', size = 'md', ariaLabel = 'Panel options', defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
+  // Resolve once for the rows below — an unrecognised size must fall back to
+  // md instead of throwing when MenuItem indexes ROW_FOR_SIZE. IconButton
+  // already defends its own size prop, so only the rows need this guard.
+  const rowSize = ROW_FOR_SIZE[size] ? size : 'md';
   const [open, setOpen] = useState(defaultOpen || staticOpen);
   // Interactive menus portal to <body> and position with `fixed` coords, so they
   // sit in the top layer — never clipped by an `overflow` container, never
@@ -486,7 +509,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
             }}
           >
             {items.map((item, i) => (
-              <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} />
+              <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} size={rowSize} />
             ))}
           </div>
         ) : mounted ? (
@@ -506,7 +529,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
               }}
             >
               {items.map((item, i) => (
-                <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} />
+                <MenuItem key={i} item={item} onClose={() => setOpen(false)} menuOwnerId={menuOwnerId} size={rowSize} />
               ))}
             </div>,
             document.body,
