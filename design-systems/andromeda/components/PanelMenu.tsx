@@ -71,10 +71,13 @@ const MENU_PANEL_STYLE = {
   background: tokens.color.surface.overlay,
   border: `${tokens.border.thin} ${tokens.color.border.bright}`,
   borderRadius: tokens.radius.frame,
-  // Rows already supply spacing[3] on the inline axis. The panel supplies the
-  // remaining spacing[1] there and the full spacing[4] on the block axis so
-  // icon-and-label rows sit in the same 16px frame on all four edges.
-  padding: `${tokens.spacing[4]} ${tokens.spacing[1]}`,
+  // A 16px frame measured to the row INK, not to the row box. Inline: rows
+  // supply spacing[3] and the panel the remaining spacing[1]. Block: a row is
+  // ITEM_HEIGHT tall with its label centred, so it already carries ~5px of
+  // leading above the first label and below the last — spacing[4] on top of
+  // that read as a top and bottom margin twice the sides. spacing[3] lands the
+  // ink at the same 16px.
+  padding: `${tokens.spacing[3]} ${tokens.spacing[1]}`,
   zIndex: 1000,
   boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
 };
