@@ -3,6 +3,7 @@
 // COMPONENT: Input
 // shadcn/ui-aligned API: className, ref, ...props passthrough.
 // label + optional left icon + error state.
+// Optional trailing icon mirrors the left slot and can become an input action.
 // Border transitions border.base → border.bright on focus.
 // Error state recolors border + ring + helper text in fault.
 // ============================================================
@@ -96,6 +97,9 @@ const inputVariants = cva(
  * @property {string} [label] Uppercase mono label rendered above the field.
  * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder: 28, 34 or 40px tall. Matches Button and IconButton at the same value, so a field and a button in one row align without further styling.
  * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [icon] Optional left icon. Its glyph scales with `size` (16, 18, 20px).
+ * @property {React.ComponentType<{ size?: number, strokeWidth?: number }>} [trailingIcon] Optional right icon. Its glyph follows the same scale as `icon`.
+ * @property {string} [trailingIconLabel] Accessible name for the trailing control. Required when `onTrailingIconClick` is set.
+ * @property {(event: React.MouseEvent<HTMLButtonElement>) => void} [onTrailingIconClick] Turns `trailingIcon` into a focusable button rendered after the input in the tab order.
  * @property {string} [error] When set, switches the field into the error state and renders the message.
  * @property {string} [className] Class name forwarded to the <input> element.
  * @property {string} [wrapperClassName] Class name forwarded to the outer wrapper.
@@ -109,6 +113,9 @@ export const Input = forwardRef(function Input(
     label,
     size = 'md',
     icon: Icon,
+    trailingIcon: TrailingIcon,
+    trailingIconLabel,
+    onTrailingIconClick,
     error,
     id: idProp,
     style,
@@ -124,6 +131,14 @@ export const Input = forwardRef(function Input(
   const sizeKey = SIZES[size] ? size : 'md';
   const padInset = tokens.control[sizeKey].padInset;
   const iconPx = ICON_FOR_SIZE[sizeKey];
+  // Each occupied edge owns the same clearance independently, so two icons do
+  // not overwrite one another. The trailing formula is the leading formula
+  // reflected: two rung insets plus the glyph keeps text out from under the
+  // slot without introducing a second spacing scale.
+  const inputStyle = {
+    ...(Icon ? { paddingLeft: `calc(${padInset} * 2 + ${iconPx}px)` } : {}),
+    ...(TrailingIcon ? { paddingRight: `calc(${padInset} * 2 + ${iconPx}px)` } : {}),
+  };
 
   return (
     <div
@@ -172,10 +187,58 @@ export const Input = forwardRef(function Input(
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={errorId}
           disabled={disabled}
-          style={Icon ? { paddingLeft: `calc(${padInset} * 2 + ${iconPx}px)` } : undefined}
+          style={Icon || TrailingIcon ? inputStyle : undefined}
           className={cn(inputVariants({ size: sizeKey, state }), className)}
           {...props}
         />
+
+        {TrailingIcon ? (
+          onTrailingIconClick ? (
+            <button
+              type="button"
+              aria-label={trailingIconLabel}
+              aria-controls={id}
+              disabled={disabled}
+              // Keep a pointer press from transferring focus out of the editor,
+              // which preserves its caret while the action runs. The native
+              // button remains keyboard-focusable after the input because only
+              // the mouse focus step is cancelled, never its tab stop or click.
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onTrailingIconClick}
+              style={{ right: `calc(var(--andromeda-border-width, 1px) + ${padInset})` }}
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2',
+                'inline-flex items-center justify-center',
+                'm-0 border-0 p-0',
+                'rounded-[var(--andromeda-radius-frame,0px)]',
+                'bg-transparent text-[color:var(--andromeda-text-muted)]',
+                'cursor-pointer',
+                'transition-[color,box-shadow] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
+                'motion-reduce:transition-none',
+                'hover:text-[color:var(--andromeda-text-primary)]',
+                'focus-visible:outline-none focus-visible:text-[color:var(--andromeda-text-primary)]',
+                'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-border-bright)]',
+                'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-[var(--andromeda-opacity-disabled)]',
+              )}
+            >
+              <TrailingIcon size={iconPx} weight="regular" />
+            </button>
+          ) : (
+            <div
+              aria-hidden="true"
+              // Same border-box correction as the left slot, reflected onto
+              // the right edge so both glyphs sit on one inset line.
+              style={{ right: `calc(var(--andromeda-border-width, 1px) + ${padInset})` }}
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2',
+                'flex items-center pointer-events-none',
+                'text-[color:var(--andromeda-text-muted)]',
+              )}
+            >
+              <TrailingIcon size={iconPx} weight="regular" />
+            </div>
+          )
+        ) : null}
       </div>
 
       {error ? (
