@@ -76,7 +76,17 @@ function MatrixCell({
       data-case-kind={kind}
       data-case-label={c.label}
       data-force={c.force && !c.forceSelf ? c.force : undefined}
-      style={{ display: spec.wide ? 'block' : 'inline-flex', minWidth: 0 }}
+      // A definite canvas is what lets a block-scale component honour the
+      // room its card already owns. Left content-sized, this flex item made a
+      // child's 100% resolve through its own intrinsic width, so `wide` grew
+      // the card around a chart or player without growing the thing inside it.
+      // Non-wide controls keep their old centred position inside the canvas.
+      style={{
+        display: spec.wide ? 'block' : 'inline-flex',
+        justifyContent: 'center',
+        width: '100%',
+        minWidth: 0,
+      }}
     >
       {c.node ?? render(size, c.props ?? {}, c)}
     </span>
