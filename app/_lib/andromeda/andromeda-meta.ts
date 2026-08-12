@@ -61,6 +61,14 @@ export const ANDROMEDA_COMPONENT_META: AndromedaComponentMeta[] = [
     image: 'https://ik.imagekit.io/aitoolkit/andromeda/checkbox.png?v=3',
   },
   {
+    slug: 'choice-card',
+    name: 'Choice Card',
+    description:
+      'Selectable whole-surface card with a title, optional supporting text, and a Radio, Checkbox, or Toggle state mark. Controlled or uncontrolled; ChoiceCardGroup adds one-value selection, radiogroup semantics, and arrow-key roving focus.',
+    sourceFile: 'ChoiceCard.tsx',
+    image: 'https://ik.imagekit.io/aitoolkit/andromeda/choice-card.png?v=1',
+  },
+  {
     slug: 'corner-markers',
     name: 'Corner Markers',
     description:

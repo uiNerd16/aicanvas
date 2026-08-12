@@ -12,6 +12,7 @@ export const CATEGORY: Record<string, string> = {
   checkbox: 'Forms',
   radio: 'Forms',
   toggle: 'Forms',
+  'choice-card': 'Forms',
   slider: 'Forms',
   'segmented-control': 'Forms',
   'date-range-picker': 'Forms',

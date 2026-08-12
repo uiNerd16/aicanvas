@@ -9,6 +9,7 @@ import { burst } from './burst'
 import { button } from './button'
 import { card } from './card'
 import { checkbox } from './checkbox'
+import { choiceCard } from './choice-card'
 import { contourBackdrop } from './contour-backdrop'
 import { cornerMarkers } from './corner-markers'
 import { dataTable } from './data-table'
@@ -51,7 +52,7 @@ import { voidBackdrop } from './void-backdrop'
 import { waveform } from './waveform'
 
 export const SPECS: readonly MatrixSpec[] = [
-  alert, avatar, badge, burst, button, card, checkbox, contourBackdrop,
+  alert, avatar, badge, burst, button, card, checkbox, choiceCard, contourBackdrop,
   cornerMarkers, dataTable, dateRangePicker, drawer, emptyState, funnelChart,
   gauge, gridBackdrop, heatGrid, horizonBackdrop, iconButton, input, mediaCard,
   metricChart, musicPlayer, navItem, nodes, orb, panelHeader, panelMenu, planet,

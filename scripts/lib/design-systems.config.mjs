@@ -73,6 +73,7 @@ export const DESIGN_SYSTEMS = [
       'components/Button.tsx',
       'components/Card.tsx',
       'components/Checkbox.tsx',
+      'components/ChoiceCard.tsx',
       'components/CornerMarkers.tsx',
       'components/DateRangePicker.tsx',
       'components/Drawer.tsx',

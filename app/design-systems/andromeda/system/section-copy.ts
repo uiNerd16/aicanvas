@@ -73,6 +73,10 @@ export const SECTION_COPY: Record<string, SectionCopy> = {
     title: "Checkbox",
     description: "Square boolean control for multi-select sets: filters, table row selection, single opt-ins. Controlled with `checked` and `onCheckedChange`, or uncontrolled with `defaultChecked`; use Radio for one choice out of several and Toggle for a setting that applies with no submit step. 2 states \u00d7 3 sizes, plus a disabled form of each.",
   },
+  'choice-card': {
+    title: "Choice Card",
+    description: "Whole-surface selection control for options that need a title and supporting line. Use `control=\"radio\"` inside `ChoiceCardGroup` for one selected value with arrow-key roving focus, or use independent checkbox and toggle cards for boolean choices; a short inline label stays a bare `Radio`, `Checkbox`, or `Toggle`. Cards support `checked`, `defaultChecked`, and `onCheckedChange`; the group uses `value`, `defaultValue`, and `onValueChange`.",
+  },
   'radio': {
     title: "Radio \u00b7 Choicebox",
     description: "Square radio for one mutually exclusive choice from a small set that stays visible, such as a mode or a filter. Wrap the options in `RadioGroup` to share a `name` and drive selection through `value` and `onValueChange`; use `Checkbox` when more than one option can be picked at once. 2 states x 3 sizes.",
