@@ -138,12 +138,15 @@ export const ChoiceCard = forwardRef(function ChoiceCard(
     <Card
       data-slot="choice-card"
       data-control={controlKind}
+      // A continuous edge is what maps the hit area, and the system never
+      // wears a border and corner markers at once: two frames around one
+      // object read as a mistake, not as emphasis. The edge wins here
+      // because the whole card is clickable and must show where it ends.
+      markers={false}
       className={cn(
         'andromeda-choice-card',
         'relative w-full flex-row items-center gap-[var(--andromeda-3)]',
         'bg-transparent',
-        // ChoiceCard needs a continuous edge to map the hit area, while the
-        // Card markers keep the family frame. `bordered` would suppress them.
         'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-border-base)]',
         'rounded-[var(--andromeda-radius-frame,0px)]',
         'px-[var(--andromeda-3)] py-[var(--andromeda-3)]',
