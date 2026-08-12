@@ -82,7 +82,7 @@ function MatrixCell({
       // the card around a chart or player without growing the thing inside it.
       // Non-wide controls keep their old centred position inside the canvas.
       style={{
-        display: spec.wide ? 'block' : 'inline-flex',
+        display: spec.wide || spec.fill ? 'block' : 'inline-flex',
         justifyContent: 'center',
         width: '100%',
         minWidth: 0,

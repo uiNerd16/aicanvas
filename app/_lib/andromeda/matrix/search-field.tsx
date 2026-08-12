@@ -5,6 +5,9 @@ export const searchField: MatrixSpec = {
   slug: 'search-field',
   Component: SearchField,
   sizes: ['sm', 'md', 'lg'],
+  // A field is w-full by design; without this it renders at its intrinsic
+  // width in the middle of a case that already owns the room.
+  fill: true,
   baseProps: { placeholder: 'Search anything', style: { width: 320 } },
   variants: [
     { label: 'Default', props: {} },

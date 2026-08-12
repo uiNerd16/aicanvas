@@ -58,6 +58,12 @@ export type MatrixSpec = {
   gaps?: Record<string, string>
   /** Cells stretch instead of hugging their content (charts, tables). */
   wide?: boolean
+  /** The component fills the case canvas edge to edge, without `wide`'s
+      one-case-per-row grid. For fields that are `w-full` by design: the
+      centred inline-flex canvas resolves their 100% against their own
+      intrinsic width, so a textarea rendered at the size of an empty
+      textarea instead of the room its case actually owns. */
+  fill?: boolean
   /** Required true when any case passes staticOpen (inline open popover), because
       content-visibility implies contain:paint and would clip it. Enforced by the test. */
   overflow?: boolean

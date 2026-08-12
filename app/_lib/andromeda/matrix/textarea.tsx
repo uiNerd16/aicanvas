@@ -5,6 +5,9 @@ export const textarea: MatrixSpec = {
   slug: 'textarea',
   Component: Textarea,
   sizes: ['sm', 'md', 'lg'],
+  // A field is w-full by design; without this it renders at its intrinsic
+  // width in the middle of a case that already owns the room.
+  fill: true,
   baseProps: { label: 'Notes', placeholder: 'ADD A NOTE…', rows: 3, style: { width: 260 } },
   variants: [
     { label: 'Default', props: {} },
