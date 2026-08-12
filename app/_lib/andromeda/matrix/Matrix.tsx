@@ -466,7 +466,7 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
                                                                           = 394
              footer= 1px border-top + spacing[3] 12 padding-top
                      + 2 chip rows (2 x spacing[8] 32 + spacing[2] 8 gap) =  85
-           The footer exists only when a case passes `presets`, and its height
+           The footer exists only when a case passes presets, and its height
            is a WRAP rather than a constant: the four presets the spec declares
            fold onto two rows at the card's width. A fifth preset, or a longer
            label, buys a third row and this number goes short again, which is
