@@ -5,6 +5,8 @@
 // uncontrolled (`defaultValue`), onValueChange. Single-value
 // horizontal range slider with a sharp rectangular thumb and
 // a glowing accent fill — sci-fi telemetry vibe.
+// A two-number tuple keeps the same visual language while adding
+// a second endpoint and filling only the measured span between them.
 //
 // Built without a native <input type="range"> so the chrome
 // is fully consistent across browsers. ARIA-compliant via
@@ -21,6 +23,12 @@ import {
   useRef,
   useState,
 } from 'react';
+import type {
+  CSSProperties,
+  ForwardRefExoticComponent,
+  HTMLAttributes,
+  RefAttributes,
+} from 'react';
 import { cn, andromedaVars } from './lib/utils';
 import { mq } from './lib/responsive';
 
@@ -31,6 +39,16 @@ function clamp(n, min, max) {
 function snap(n, step) {
   if (!step || step <= 0) return n;
   return Math.round(n / step) * step;
+}
+
+function normalizeRange(range, min, max) {
+  const first = clamp(range[0], min, max);
+  const second = clamp(range[1], min, max);
+  return first <= second ? [first, second] : [second, first];
+}
+
+function formatValue(value, step) {
+  return Number.isInteger(step) ? Math.round(value) : value.toFixed(2);
 }
 
 // ponytail: identity constants — the slider's shape is a ratio, not a token.
@@ -60,8 +78,55 @@ const SIZES = {
  * @property {string} [id]                   Id for the slider track; auto-generated when omitted.
  */
 
-/** @type {React.ForwardRefExoticComponent<SliderProps & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>>} */
-export const Slider = forwardRef(function Slider(
+/** @typedef {readonly [number, number]} SliderRangeValue */
+
+/**
+ * @typedef {Omit<SliderProps, 'value' | 'defaultValue' | 'onValueChange'> & (
+ *   { value: SliderRangeValue, defaultValue?: SliderRangeValue } |
+ *   { value?: undefined, defaultValue: SliderRangeValue }
+ * ) & {
+ *   onValueChange?: (next: [number, number]) => void
+ * }} RangeSliderProps
+ */
+
+/** @typedef {Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> & React.RefAttributes<HTMLDivElement>} SliderNativeProps */
+
+type SliderSharedProps = {
+  min?: number;
+  max?: number;
+  step?: number;
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
+  showValue?: boolean;
+  unit?: string;
+  disabled?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  id?: string;
+};
+
+type SliderNativeAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'>;
+
+type SingleSliderComponentProps = SliderSharedProps & SliderNativeAttributes & {
+  value?: number;
+  defaultValue?: number;
+  onValueChange?: (next: number) => void;
+};
+
+type RangeSliderComponentProps = SliderSharedProps & SliderNativeAttributes & (
+  { value: readonly [number, number]; defaultValue?: readonly [number, number] } |
+  { value?: undefined; defaultValue: readonly [number, number] }
+) & {
+  onValueChange?: (next: [number, number]) => void;
+};
+
+type SliderComponent =
+  & ForwardRefExoticComponent<SingleSliderComponentProps & RefAttributes<HTMLDivElement>>
+  & ForwardRefExoticComponent<RangeSliderComponentProps & RefAttributes<HTMLDivElement>>
+  & ForwardRefExoticComponent<(SingleSliderComponentProps | RangeSliderComponentProps) & RefAttributes<HTMLDivElement>>;
+
+/** @type {React.ForwardRefExoticComponent<SliderProps & SliderNativeProps> & React.ForwardRefExoticComponent<RangeSliderProps & SliderNativeProps>} */
+export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | RangeSliderComponentProps>(function Slider(
   {
     className,
     value: controlledValue,
@@ -87,10 +152,18 @@ export const Slider = forwardRef(function Slider(
   const [internal, setInternal] = useState(
     defaultValue ?? min,
   );
-  const value = clamp(isControlled ? controlledValue : internal, min, max);
+  const rawValue = isControlled ? controlledValue : internal;
+  const isRange = Array.isArray(rawValue);
+  const rangeValue = isRange ? normalizeRange(rawValue, min, max) : [min, min];
+  const value = isRange ? min : clamp(rawValue, min, max);
 
   const trackRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const rangeThumbRefs = useRef(/** @type {(HTMLDivElement|null)[]} */ ([null, null]));
+  const rangeValueRef = useRef(rangeValue);
   const draggingRef = useRef(false);
+  const activeThumbRef = useRef(/** @type {0|1|null} */ (null));
+  const pointerIdRef = useRef(/** @type {number|null} */ (null));
+  rangeValueRef.current = rangeValue;
 
   const setValue = useCallback(
     (next) => {
@@ -102,11 +175,34 @@ export const Slider = forwardRef(function Slider(
     [isControlled, max, min, onValueChange, step, value],
   );
 
+  const setRangeThumb = useCallback(
+    (thumb, next, shouldSnap = true) => {
+      const current = rangeValueRef.current;
+      const lowerLimit = thumb === 0 ? min : current[0];
+      const upperLimit = thumb === 0 ? current[1] : max;
+      // Each endpoint uses its sibling as a live bound, keeping thumb identity
+      // and keyboard focus stable while snap rounding stays inside the clamp.
+      const bounded = clamp(shouldSnap ? snap(next, step) : next, lowerLimit, upperLimit);
+      if (bounded === current[thumb]) return;
+
+      const nextRange = thumb === 0
+        ? [bounded, current[1]]
+        : [current[0], bounded];
+      if (!isControlled) {
+        rangeValueRef.current = nextRange;
+        setInternal(nextRange);
+      }
+      onValueChange?.(nextRange);
+    },
+    [isControlled, max, min, onValueChange, step],
+  );
+
   const valueFromClientX = useCallback(
     (clientX) => {
       const track = trackRef.current;
       if (!track) return value;
       const rect = track.getBoundingClientRect();
+      if (rect.width <= 0) return min;
       const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
       return min + ratio * (max - min);
     },
@@ -119,10 +215,19 @@ export const Slider = forwardRef(function Slider(
 
     const onPointerMove = (e) => {
       if (!draggingRef.current) return;
+      if (isRange) {
+        if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+        if (activeThumbRef.current === null) return;
+        setRangeThumb(activeThumbRef.current, valueFromClientX(e.clientX));
+        return;
+      }
       setValue(valueFromClientX(e.clientX));
     };
-    const onPointerUp = () => {
+    const onPointerUp = (e) => {
+      if (isRange && pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
       draggingRef.current = false;
+      activeThumbRef.current = null;
+      pointerIdRef.current = null;
     };
 
     window.addEventListener('pointermove', onPointerMove);
@@ -133,13 +238,35 @@ export const Slider = forwardRef(function Slider(
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
     };
-  }, [disabled, setValue, valueFromClientX]);
+  }, [disabled, isRange, setRangeThumb, setValue, valueFromClientX]);
 
   function handlePointerDown(e) {
     if (disabled) return;
     e.currentTarget.setPointerCapture?.(e.pointerId);
     draggingRef.current = true;
-    setValue(valueFromClientX(e.clientX));
+    const next = valueFromClientX(e.clientX);
+    if (!isRange) {
+      setValue(next);
+      return;
+    }
+
+    const [low, high] = rangeValueRef.current;
+    const lowDistance = Math.abs(next - low);
+    const highDistance = Math.abs(next - high);
+    let nearest;
+    if (lowDistance < highDistance) nearest = 0;
+    else if (highDistance < lowDistance) nearest = 1;
+    else if (e.target === rangeThumbRefs.current[0]) nearest = 0;
+    else if (e.target === rangeThumbRefs.current[1]) nearest = 1;
+    else if (low === high && next !== low) nearest = next < low ? 0 : 1;
+    else nearest = 0;
+
+    // Pick by value-distance before moving anything; otherwise a track press
+    // can make the far endpoint jump and drag the wrong side of the span.
+    activeThumbRef.current = nearest;
+    pointerIdRef.current = e.pointerId;
+    rangeThumbRefs.current[nearest]?.focus({ preventScroll: true });
+    setRangeThumb(nearest, next);
   }
 
   function handleKeyDown(e) {
@@ -177,7 +304,51 @@ export const Slider = forwardRef(function Slider(
     }
   }
 
+  function handleRangeKeyDown(e, thumb) {
+    if (disabled) return;
+    const current = rangeValueRef.current;
+    const big = (max - min) / 10;
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        e.preventDefault();
+        setRangeThumb(thumb, current[thumb] - step, false);
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        e.preventDefault();
+        setRangeThumb(thumb, current[thumb] + step, false);
+        break;
+      case 'PageDown':
+        e.preventDefault();
+        setRangeThumb(thumb, current[thumb] - big, false);
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        setRangeThumb(thumb, current[thumb] + big, false);
+        break;
+      case 'Home':
+        e.preventDefault();
+        setRangeThumb(thumb, thumb === 0 ? min : current[0], false);
+        break;
+      case 'End':
+        e.preventDefault();
+        setRangeThumb(thumb, thumb === 0 ? current[1] : max, false);
+        break;
+      default:
+        break;
+    }
+  }
+
   const percent = ((value - min) / (max - min)) * 100;
+  const rangeSpan = max - min;
+  const lowPercent = rangeSpan === 0 ? 0 : ((rangeValue[0] - min) / rangeSpan) * 100;
+  const highPercent = rangeSpan === 0 ? 0 : ((rangeValue[1] - min) / rangeSpan) * 100;
+  const rootAriaLabel = typeof props['aria-label'] === 'string' ? props['aria-label'] : undefined;
+  const rangeAccessibleLabel = typeof label === 'string' && label ? label : rootAriaLabel;
+  const rangeThumbLabels = rangeAccessibleLabel
+    ? [`${rangeAccessibleLabel} minimum`, `${rangeAccessibleLabel} maximum`]
+    : ['Minimum value', 'Maximum value'];
 
   return (
     <div
@@ -211,8 +382,18 @@ export const Slider = forwardRef(function Slider(
                 'text-[color:var(--andromeda-text-primary)]',
               )}
             >
-              {Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}
-              {unit ?? ''}
+              {isRange ? (
+                <>
+                  {formatValue(rangeValue[0], step)}{unit ?? ''}
+                  {' → '}
+                  {formatValue(rangeValue[1], step)}{unit ?? ''}
+                </>
+              ) : (
+                <>
+                  {Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}
+                  {unit ?? ''}
+                </>
+              )}
             </span>
           ) : null}
         </div>
@@ -222,16 +403,16 @@ export const Slider = forwardRef(function Slider(
       <div
         ref={trackRef}
         id={id}
-        role="slider"
-        tabIndex={disabled ? -1 : 0}
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={value}
-        aria-valuetext={`${Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}${unit ?? ''}`}
-        aria-label={typeof label === 'string' ? label : undefined}
-        aria-disabled={disabled || undefined}
+        role={isRange ? undefined : 'slider'}
+        tabIndex={isRange ? undefined : (disabled ? -1 : 0)}
+        aria-valuemin={isRange ? undefined : min}
+        aria-valuemax={isRange ? undefined : max}
+        aria-valuenow={isRange ? undefined : value}
+        aria-valuetext={isRange ? undefined : `${Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}${unit ?? ''}`}
+        aria-label={isRange ? undefined : (typeof label === 'string' ? label : undefined)}
+        aria-disabled={isRange ? undefined : (disabled || undefined)}
         onPointerDown={handlePointerDown}
-        onKeyDown={handleKeyDown}
+        onKeyDown={isRange ? undefined : handleKeyDown}
         className={cn(
           'andromeda-slider-track',
           'relative w-full select-none touch-none',
@@ -260,23 +441,56 @@ export const Slider = forwardRef(function Slider(
             SIZES[size].line,
             '[background:linear-gradient(90deg,var(--andromeda-accent-400)_0%,var(--andromeda-accent-300)_100%)]',
           )}
-          style={{ width: `${percent}%` }}
+          style={isRange
+            ? { left: `${lowPercent}%`, width: `${highPercent - lowPercent}%` }
+            : { width: `${percent}%` }}
         />
         {/* Thumb */}
-        <div
-          aria-hidden="true"
-          className={cn(
-            'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
-            SIZES[size].thumb,
-            'bg-[color:var(--andromeda-accent-300)]',
-            'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
-            // No resting glow; the focus-visible state sets --slider-thumb-shadow.
-            'shadow-[var(--slider-thumb-shadow,none)]',
-            'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
-            'hover:scale-[1.25]',
-          )}
-          style={{ left: `${percent}%` }}
-        />
+        {isRange ? rangeValue.map((thumbValue, thumb) => (
+          <div
+            key={thumb}
+            ref={(node) => { rangeThumbRefs.current[thumb] = node; }}
+            role="slider"
+            tabIndex={disabled ? -1 : 0}
+            aria-orientation="horizontal"
+            aria-valuemin={thumb === 0 ? min : rangeValue[0]}
+            aria-valuemax={thumb === 0 ? rangeValue[1] : max}
+            aria-valuenow={thumbValue}
+            aria-valuetext={`${formatValue(thumbValue, step)}${unit ?? ''}`}
+            aria-label={rangeThumbLabels[thumb]}
+            aria-disabled={disabled || undefined}
+            data-range-thumb={thumb === 0 ? 'minimum' : 'maximum'}
+            onKeyDown={(e) => handleRangeKeyDown(e, thumb)}
+            className={cn(
+              'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
+              SIZES[size].thumb,
+              'bg-[color:var(--andromeda-accent-300)]',
+              'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
+              // No resting glow; the focus-visible state sets --slider-thumb-shadow.
+              'shadow-[var(--slider-thumb-shadow,none)]',
+              'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
+              'hover:scale-[1.25]',
+              'focus-visible:z-10 focus-visible:outline-none',
+              'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
+            )}
+            style={{ left: `${thumb === 0 ? lowPercent : highPercent}%` }}
+          />
+        )) : (
+          <div
+            aria-hidden="true"
+            className={cn(
+              'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
+              SIZES[size].thumb,
+              'bg-[color:var(--andromeda-accent-300)]',
+              'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
+              // No resting glow; the focus-visible state sets --slider-thumb-shadow.
+              'shadow-[var(--slider-thumb-shadow,none)]',
+              'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
+              'hover:scale-[1.25]',
+            )}
+            style={{ left: `${percent}%` }}
+          />
+        )}
       </div>
 
       {/* Touch-target growth (the Andromeda responsive rules). Mirror Button/IconButton:
@@ -303,4 +517,4 @@ export const Slider = forwardRef(function Slider(
       `}</style>
     </div>
   );
-});
+}) as SliderComponent;

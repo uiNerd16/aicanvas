@@ -13,10 +13,12 @@ import type { MatrixSpec } from './types'
 function LiveSlider() {
   const [throttle, setThrottle] = useState(64)
   const [vector, setVector] = useState(12)
+  const [budget, setBudget] = useState<[number, number]>([190, 800])
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[5], width: 300 }}>
       <Slider label="Throttle" unit="%" value={throttle} onValueChange={setThrottle} />
       <Slider label="Thrust vector" unit="°" min={-30} max={30} value={vector} onValueChange={setVector} />
+      <Slider label="Mission budget" unit=" CR" min={0} max={1000} step={10} value={budget} onValueChange={setBudget} />
     </div>
   )
 }
