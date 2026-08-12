@@ -1,4 +1,4 @@
-import { Gear } from '@phosphor-icons/react'
+import { Lightning } from '@phosphor-icons/react'
 import { IconButton } from '../../../../design-systems/andromeda/components/IconButton'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
@@ -6,7 +6,9 @@ export const iconButton: MatrixSpec = {
   slug: 'icon-button',
   Component: IconButton,
   sizes: ['sm', 'md', 'lg'],
-  baseProps: { icon: Gear, 'aria-label': 'Settings' },
+  // IconButton is label-less, so aria-label IS the accessible name — it has
+  // to describe the icon actually shown, not a leftover from a prior one.
+  baseProps: { icon: Lightning, 'aria-label': 'Quick action' },
   variants: [
     { label: 'Default', props: { variant: 'default' } },
     { label: 'Outline', props: { variant: 'outline' } },
