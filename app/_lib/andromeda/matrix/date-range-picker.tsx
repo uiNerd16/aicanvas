@@ -12,6 +12,15 @@ import type { MatrixSpec } from './types'
 const RANGE = { start: new Date(2026, 6, 20), end: new Date(2026, 7, 20) }
 const SHORT = { start: new Date(2026, 7, 1), end: new Date(2026, 7, 14) }
 const SINGLE_DAY = { start: new Date(2026, 7, 20), end: new Date(2026, 7, 20) }
+const LAST_7_DAYS = { start: new Date(2026, 7, 14), end: new Date(2026, 7, 20) }
+const LAST_30_DAYS = { start: new Date(2026, 6, 22), end: new Date(2026, 7, 20) }
+const Q3_2026 = { start: new Date(2026, 6, 1), end: new Date(2026, 8, 30) }
+const PRESETS = [
+  { label: 'Sprint 34', range: SHORT },
+  { label: 'Last 7 days', range: LAST_7_DAYS },
+  { label: 'Last 30 days', range: LAST_30_DAYS },
+  { label: 'Q3 2026', range: Q3_2026 },
+]
 
 // Anchor-then-confirm is a two-click behaviour with a hover preview in between,
 // and it only reads if the pick STICKS: the component is controlled-only, so a
@@ -27,9 +36,9 @@ function LiveDateRangePicker({ value = RANGE, presetLabel = null, ...props }) {
     <DateRangePicker
       value={range}
       presetLabel={preset}
-      onChange={(next) => {
+      onChange={(next, nextPreset) => {
         setRange(next)
-        setPreset(null)
+        setPreset(nextPreset ?? null)
       }}
       {...props}
     />
@@ -46,7 +55,7 @@ export const dateRangePicker: MatrixSpec = {
   render: (_size, props) => <LiveDateRangePicker {...props} />,
   variants: [
     { label: 'Live' },
-    { label: 'With preset', props: { value: SHORT, presetLabel: 'Sprint 34' } },
+    { label: 'With preset', props: { value: LAST_30_DAYS, presetLabel: 'Last 30 days', presets: PRESETS, staticOpen: true } },
     { label: 'Single day', props: { value: SINGLE_DAY } },
     { label: 'Open', props: { staticOpen: true } },
   ],

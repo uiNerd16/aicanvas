@@ -10,6 +10,7 @@
 //     value={{ start: Date, end: Date | null }}
 //     onChange={(next) => setRange(next)}
 //     presetLabel="Last month"      // optional chip prefix
+//     presets={[{ label: 'Last month', range: { start, end } }]}
 //     defaultOpen                   // calendar pre-opened (showcases / docs);
 //                                   // ESC + click-outside still dismiss
 //     staticOpen                    // pre-opened AND pinned — ESC + click-
@@ -53,7 +54,6 @@ const V = {
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG  = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const DOW = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
 function startOfDay(d) {
   if (!d) return null;
   const x = new Date(d);
@@ -169,6 +169,21 @@ function PickerStyles() {
       .adp-day[data-state="inrange"]:focus-visible {
         background: transparent !important;
       }
+      .adp-preset { transition: background var(--andromeda-duration-normal) var(--andromeda-easing-standard), border-color var(--andromeda-duration-normal) var(--andromeda-easing-standard), color var(--andromeda-duration-normal) var(--andromeda-easing-standard); outline: none; }
+      .adp-preset:hover {
+        background: var(--andromeda-surface-hover) !important;
+        border-color: var(--andromeda-border-bright) !important;
+      }
+      /* A committed preset keeps its measurement tint through hover; the
+         brighter neutral edge still supplies the hover acknowledgement. */
+      .adp-preset[aria-pressed="true"] {
+        background: var(--andromeda-accent-alpha) !important;
+      }
+      .adp-preset:focus-visible {
+        border-color: var(--andromeda-border-bright) !important;
+        outline: var(--andromeda-border-width, 1px) solid var(--andromeda-border-bright);
+        outline-offset: var(--andromeda-1, 4px);
+      }
       /* Phone fit — the panel spans the trigger at every width now (see its
          own left/right pin), so this block is only what phones need ON TOP of
          that: below sm a popover anchored to a narrow trigger near a screen
@@ -197,29 +212,30 @@ function PickerStyles() {
 /**
  * @typedef {object} DateRangePickerProps
  * @property {{ start: Date, end: Date }} [value] Selected date range; controlled.
- * @property {(range: { start: Date, end: Date }) => void} [onChange] Called with the new range once both endpoints are chosen.
+ * @property {(range: { start: Date, end: Date }, presetLabel?: string) => void} [onChange] Called with the new range and, for preset picks, the label that produced it.
  * @property {string} [presetLabel] Label for the active preset shown in the trigger (for example "Last month").
+ * @property {{ label: string, range: { start: Date, end: Date } }[]} [presets] Deterministic preset ranges shown below the day grid.
  * @property {boolean} [defaultOpen=false] Whether the calendar panel starts open (uncontrolled).
  * @property {boolean} [staticOpen=false] Pins the panel open and disables the dismissers; for showcases and docs.
  * @property {string} [className] Additional CSS classes applied to the root element.
  * @property {React.CSSProperties} [style] Inline styles applied to the root element.
  */
 export const DateRangePicker = forwardRef(function DateRangePicker(
-  { value, onChange, presetLabel, defaultOpen = false, staticOpen = false, className, style, ...props },
+  { value, onChange, presetLabel, presets, defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
   const [open, setOpen]         = useState(defaultOpen || staticOpen);
   const [anchor, setAnchor]     = useState(null);
   const [hover, setHover]       = useState(null);
   const [viewDate, setViewDate] = useState(() => {
-    const seed = value?.start ?? new Date();
+    const seed = value?.start ?? presets?.[0]?.range?.start ?? new Date();
     return new Date(seed.getFullYear(), seed.getMonth(), 1);
   });
   // Roving-tabindex focus target for keyboard nav across the day grid.
   // Initialised to the range start (if it lands in the visible month),
   // else today (if visible), else the 1st of the visible month.
   const [focusedDay, setFocusedDay] = useState(() => {
-    const seed = value?.start ?? new Date();
+    const seed = value?.start ?? presets?.[0]?.range?.start ?? new Date();
     const vd   = new Date(seed.getFullYear(), seed.getMonth(), 1);
     if (value?.start && value.start.getMonth() === vd.getMonth() && value.start.getFullYear() === vd.getFullYear()) {
       return startOfDay(value.start);
@@ -296,6 +312,14 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     // Stay open. Reset the anchor so a follow-up click starts a fresh range
     // rather than extending the one that was just committed. The panel
     // dismisses only on click-outside or ESC.
+    setAnchor(null);
+    setHover(null);
+  }
+
+  function handlePresetClick(preset) {
+    // One callback carries the inseparable controlled update. Omitting the
+    // second argument in handleDayClick is how a manual pick clears the label.
+    onChange?.(preset.range, preset.label);
     setAnchor(null);
     setHover(null);
   }
@@ -651,6 +675,58 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               );
             })}
           </div>
+
+          {presets?.length ? (
+            <div
+              className="adp-presets"
+              style={{
+                width: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box',
+                borderTop: `${tokens.border.thin} ${V.borderBase}`,
+                paddingTop: tokens.spacing[3],
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: tokens.spacing[2],
+              }}
+            >
+              {presets.map((preset, i) => {
+                const isApplied = isSameDay(value?.start, preset.range.start)
+                  && isSameDay(value?.end, preset.range.end);
+
+                return (
+                  <button
+                    key={`${preset.label}-${i}`}
+                    type="button"
+                    className="adp-preset"
+                    aria-pressed={isApplied}
+                    onClick={() => handlePresetClick(preset)}
+                    style={{
+                      minWidth: 0,
+                      maxWidth: '100%',
+                      minHeight: tokens.spacing[8],
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
+                      background: isApplied ? V.accentAlpha : V.surfaceActive,
+                      border: `${tokens.border.thin} ${V.borderBase}`,
+                      borderRadius: tokens.radius.frame,
+                      color: isApplied ? V.textPrimary : V.textSecondary,
+                      fontFamily: tokens.typography.fontMono,
+                      fontSize: tokens.typography.size.sm,
+                      lineHeight: tokens.typography.lineHeight.normal,
+                      letterSpacing: tokens.typography.tracking.wide,
+                      overflowWrap: 'anywhere',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
