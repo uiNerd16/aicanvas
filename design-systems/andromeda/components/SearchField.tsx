@@ -13,15 +13,13 @@ import { forwardRef, useState } from 'react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 
-// Leading glyph per rung, off tokens.iconSize. Was a hardcoded 14, which is on
-// neither the icon scale nor the control ladder. NOTE: this map is 12/16/20,
-// while Input and Button moved to the 16/18/20 control-icon ladder (2026-08-11),
-// so a SearchField beside an Input now shows a smaller glyph at every rung. Left
-// as-is here: matching it is a styling call, not a stale number. The glyph rides
-// into the TEXT inset (padInset 7/9/11 against the 7/8/9 of clearance it leaves
-// in the 26/32/38 content box) by 0 / 1 / 2px, which is how every Andromeda
-// field icon behaves.
-const ICON_FOR_SIZE = { sm: tokens.iconSize.xs, md: tokens.iconSize.sm, lg: tokens.iconSize.lg };
+// Leading glyph per rung, off tokens.iconSize. This is the shared 16/18/20
+// control-icon ladder Input, Button and IconButton all read, so a SearchField
+// beside an Input shows the same glyph at the same rung. (It was 12/16/20 until
+// 2026-08-12; the other three moved on 08-11 and this one was left behind.)
+// The glyph rides into the TEXT inset by a flat 2px at every rung: padInset
+// 7/9/11 against the 5/7/9 of clearance it leaves in the 26/32/38 content box.
+const ICON_FOR_SIZE = { sm: tokens.iconSize.sm, md: tokens.iconSize.md, lg: tokens.iconSize.lg };
 
 // Which characters get the symbol treatment. The stack and the optical step-up
 // that go with them live in tokens.typography.fontSymbol / symbolScale.
@@ -96,15 +94,22 @@ export const SearchField = forwardRef(function SearchField(
   // State cascade: focus (selected) > hover > idle. Var-with-fallback so a
   // theme override (e.g. a blue accent) reaches the focus border, matching
   // the focus ring below — not a baked literal that stays the old accent.
+  // At rest this field is RECESSED, one step below the raised surfaces around
+  // it: search is chrome you reach for from anywhere, not a form field you fill
+  // in. That is the whole visual split from Input, which stays raised on
+  // border.base. Engaging lifts it: hover and focus climb back to the raised
+  // ladder so the cascade still reads focus > hover > idle.
   const borderColor = isFocus
     ? 'var(--andromeda-accent-400, #109380)'
     : isHover
     ? 'var(--andromeda-border-bright, #5B5B5C)'
-    : 'var(--andromeda-border-base, #3E3E3F)';
+    : 'var(--andromeda-border-subtle, #212122)';
 
-  const background = isHover && !isFocus
+  const background = isFocus
+    ? 'var(--andromeda-surface-raised, #141415)'
+    : isHover
     ? 'var(--andromeda-surface-hover, #1C1C1D)'
-    : 'var(--andromeda-surface-raised, #141415)';
+    : 'var(--andromeda-surface-base, #0E0E0F)';
 
   const boxShadow = isFocus
     ? '0 0 0 var(--andromeda-border-width, 1px) var(--andromeda-accent-400, #109380), 0 0 var(--andromeda-glow, 8px) var(--andromeda-accent-500, #126059)'
