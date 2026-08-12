@@ -44,6 +44,10 @@ function LiveSegmentedControl() {
 export const segmentedControl: MatrixSpec = {
   slug: 'segmented-control',
   sizes: ['sm', 'md', 'lg'],
+  // One card per row. Three rungs of a four-segment control do not fit half a
+  // row, and the control shrinks while its segments keep their text width — so
+  // the labels bleed over the neighbouring rung and the case reads as broken.
+  wide: true,
   // The sliding indicator is a shared framer layoutId, so every instance on the
   // page needs its own group or they fight over one marker. A matrix renders
   // the same control many times over, which makes this mandatory, not optional.

@@ -195,7 +195,11 @@ function CaseCard({
                 alignItems: 'center',
                 justifyContent: 'center',
               }),
-          gap: tokens.spacing[6],
+          // spacing[3] between rungs, not spacing[6]: three rungs of a wide
+          // control (a four-segment SegmentedControl at lg) spent the extra room
+          // on a scrollbar instead of on the components. The rungs still read as
+          // separate — each carries its own caption underneath.
+          gap: tokens.spacing[2],
           padding: `${tokens.spacing[6]} ${tokens.spacing[4]}`,
           // A popover paints OUT of flow, and `auto` on one axis computes the
           // other to `auto` as well — so this box became a scroll container and
@@ -247,7 +251,11 @@ function Instance({
         alignItems: 'center',
         gap: tokens.spacing[3],
         minWidth: 0,
-        flex: spec.wide ? '1 1 100%' : '0 1 auto',
+        // Equal columns are for `fill` specs, whose component IS the column (a
+        // w-full field). A merely `wide` spec holds fixed-geometry rungs that
+        // grow with the size axis: thirds of the row clipped lg while sm sat in
+        // dead space. Content width lets each rung take what it needs.
+        flex: spec.fill ? '1 1 100%' : '0 1 auto',
       }}
     >
       <MatrixCell spec={spec} kind={kind} c={c} size={size} render={render} />
