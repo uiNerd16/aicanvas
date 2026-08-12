@@ -347,11 +347,11 @@ export function Planet({
           phase: seeded() * cycle,
           // The still is composed independently of the live phase so several
           // lights are always caught crossing the otherwise empty interior.
-          still: i < 6 ? 0.16 + seeded() * 0.68 : -1,
+          still: i < 6 ? 0.58 + seeded() * 0.30 : -1,
         });
       }
 
-      const trailSteps = 8;
+      const trailSteps = 16;
       const trailPositions: Float32Array[] = [];
       const trailGeometries: THREE.BufferGeometry[] = [];
       for (let step = 0; step < trailSteps; step++) {
@@ -362,12 +362,13 @@ export function Planet({
         trailPositions.push(positions);
         trailGeometries.push(geometry);
 
-        // Several collinear hairline segments form one long alpha ramp. Native
-        // lines keep the ray thin at every scale and avoid a sprite-shaped halo.
+        // More short segments make the longitudinal fade read as continuous:
+        // zero ink at the tail, then a smooth rise to the lit head itself.
+        const along = step / (trailSteps - 1);
         const material = new THREE.LineBasicMaterial({
           color: cLit,
           transparent: true,
-          opacity: 0.06 + Math.pow((step + 1) / trailSteps, 1.7) * 0.82,
+          opacity: Math.pow(along, 1.15),
           depthTest: true,
           depthWrite: false,
           blending: THREE.NormalBlending,
@@ -426,9 +427,10 @@ export function Planet({
           const head = progress < 0
             ? 100
             : travelStart + (travelEnd - travelStart) * progress * progress * (3 - 2 * progress);
-          // Forty-two percent of the crossing is long enough to read as a ray,
-          // while clamping at the core prevents a trail being painted inside it.
-          const tail = progress < 0 ? 100 : Math.max(travelStart, head - (travelEnd - travelStart) * 0.42);
+          // Nearly the whole crossing can remain behind the head. The core-side
+          // clamp lets a young ray grow naturally without ever drawing through
+          // the body it emerged from.
+          const tail = progress < 0 ? 100 : Math.max(travelStart, head - (travelEnd - travelStart) * 0.92);
           for (let step = 0; step < trailSteps; step++) {
             const a = tail + (head - tail) * (step / trailSteps);
             const b = tail + (head - tail) * ((step + 1) / trailSteps);
