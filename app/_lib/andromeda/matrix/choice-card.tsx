@@ -48,6 +48,11 @@ export const choiceCard: MatrixSpec = {
     control: 'checkbox',
     title: 'Retain telemetry',
     description: 'Archive the sensor stream.',
+    // A choice card fills its container, so in a state case the rest and
+    // forced instances each claimed a full line and wrapped into a stack.
+    // Capping the card lets the pair sit side by side, the way the
+    // configurations above already read.
+    style: { maxWidth: '42ch' },
   },
   variants: [
     { label: 'Radio group', node: <LiveRadioChoiceCards /> },
