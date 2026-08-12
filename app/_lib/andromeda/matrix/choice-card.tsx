@@ -58,7 +58,17 @@ export const choiceCard: MatrixSpec = {
     {
       label: 'Checkbox',
       node: (
-        <div className="grid w-full grid-cols-2 gap-[var(--andromeda-3)]">
+        <div
+          style={{
+            display: 'grid',
+            width: '100%',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            // Inline, not a Tailwind arbitrary class: the utility is not
+            // generated for this file, which is why the pair sat flush
+            // while the radio group (spaced by RadioGroup itself) did not.
+            gap: 'var(--andromeda-3)',
+          }}
+        >
           <ChoiceCard
             control="checkbox"
             title="Retain telemetry"
@@ -76,7 +86,17 @@ export const choiceCard: MatrixSpec = {
     {
       label: 'Toggle',
       node: (
-        <div className="grid w-full grid-cols-2 gap-[var(--andromeda-3)]">
+        <div
+          style={{
+            display: 'grid',
+            width: '100%',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            // Inline, not a Tailwind arbitrary class: the utility is not
+            // generated for this file, which is why the pair sat flush
+            // while the radio group (spaced by RadioGroup itself) did not.
+            gap: 'var(--andromeda-3)',
+          }}
+        >
           <ChoiceCard
             control="toggle"
             title="Beacon uplink"
