@@ -4,8 +4,8 @@
 // shadcn/ui-aligned API: className, ref, ...props passthrough.
 // label + optional left icon + error state.
 // Optional trailing icon mirrors the left slot and can become an input action.
-// Border transitions border.base → border.bright on focus.
-// Error state recolors border + ring + helper text in fault.
+// Focus transitions the border to accent and adds the accent ring.
+// Error state recolors the border, ring and value; helper text stays neutral.
 // ============================================================
 
 'use client';
@@ -76,7 +76,7 @@ const inputVariants = cva(
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
           'focus:border-[color:var(--andromeda-accent-400)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+          'focus-visible:shadow-[0_0_0_var(--andromeda-border-width)_var(--andromeda-accent-400),0_0_var(--andromeda-glow)_var(--andromeda-accent-500)]',
         ],
         error: [
           'border-[color:var(--andromeda-red-300)]',
@@ -85,7 +85,7 @@ const inputVariants = cva(
           // message only explains it, and two reds compete for the same job.
           'text-[color:var(--andromeda-red-300)]',
           'focus:border-[color:var(--andromeda-red-300)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-300),0_0_8px_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_var(--andromeda-border-width)_var(--andromeda-red-300),0_0_var(--andromeda-glow)_var(--andromeda-red-400)]',
         ],
       },
     },
@@ -148,7 +148,7 @@ export const Input = forwardRef(function Input(
     <div
       data-size={sizeKey}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', wrapperClassName)}
-      style={{ ...andromedaVars(), ...style }}
+      style={andromedaVars()}
     >
       {label ? (
         <label
@@ -190,12 +190,12 @@ export const Input = forwardRef(function Input(
         <input
           ref={ref}
           id={id}
+          {...props}
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={errorId}
           disabled={disabled}
-          style={Icon || TrailingIcon ? inputStyle : undefined}
+          style={{ ...inputStyle, ...style }}
           className={cn(inputVariants({ size: sizeKey, state }), className)}
-          {...props}
         />
 
         {TrailingIcon ? (

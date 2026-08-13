@@ -16,6 +16,7 @@ import { motion } from 'framer-motion';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
+import { useReducedMotion } from './lib/motion';
 
 // Narrow-width overflow guard — a multi-segment strip can be wider than a phone
 // viewport. Faithful-stack rule (mirrors the Table): the strip scrolls
@@ -81,6 +82,7 @@ const INDICATOR_TX = {
  * @property {string} value Value of the currently selected segment.
  * @property {(next: string) => void} onChange Handler called with the value of the newly selected segment.
  * @property {SegmentOption[]} options Segments to render, in display order.
+ * @property {string} ariaLabel Accessible name for the tablist; required when no surrounding label names the control.
  * @property {'sm'|'md'|'lg'} [size='md'] Height and icon-size preset for the control.
  * @property {string} [layoutGroupId]
  *   Override the auto-generated per-instance id only when you explicitly want
@@ -94,7 +96,7 @@ const INDICATOR_TX = {
 
 /** @type {React.ForwardRefExoticComponent<SegmentedControlProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const SegmentedControl = forwardRef(function SegmentedControl(
-  { className, value, onChange, options, size = 'md', layoutGroupId, style, ...props },
+  { className, value, onChange, options, size = 'md', layoutGroupId, ariaLabel, style, ...props },
   ref,
 ) {
   // Auto-scope the indicator's layoutId to this instance so multiple
@@ -102,6 +104,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
   // via `layoutGroupId` only when you explicitly want cross-instance
   // animation (rare).
   const generatedId = useId();
+  const reducedMotion = useReducedMotion();
   const indicatorId = layoutGroupId ?? `andromeda-segmented-${generatedId}`;
   // Resolve the rung ONCE. Three separate ?? fallbacks meant an out-of-ladder
   // value rendered md geometry while data-size still published the raw string,
@@ -112,10 +115,24 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
   const cellVar = SIZE_VAR[sizeKey];
   const iconSize = ICON_PX[sizeKey];
 
+  function handleKeyDown(event, index) {
+    let nextIndex;
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % options.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + options.length) % options.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = options.length - 1;
+    else return;
+    event.preventDefault();
+    const tabs = event.currentTarget.closest('[role="tablist"]')?.querySelectorAll('[role="tab"]');
+    tabs?.[nextIndex]?.focus();
+    onChange(options[nextIndex].value);
+  }
+
   return (
     <div
       ref={ref}
       role="tablist"
+      aria-label={ariaLabel}
       data-size={sizeKey}
       data-slot="segmented-control"
       className={cn('andromeda-segmented inline-flex relative select-none', className)}
@@ -144,7 +161,9 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
             role="tab"
             aria-selected={active}
             aria-label={opt.ariaLabel ?? opt.label}
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(opt.value)}
+            onKeyDown={(event) => handleKeyDown(event, i)}
             data-active={active}
             className="andromeda-segmented-item"
             style={{
@@ -186,7 +205,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
                 one and animates the layout change between siblings. */}
             {active ? (
               <motion.span
-                layoutId={indicatorId}
+                layoutId={reducedMotion ? undefined : indicatorId}
                 aria-hidden="true"
                 transition={INDICATOR_TX}
                 style={{
@@ -214,7 +233,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
         }
         .andromeda-segmented-item:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
+          box-shadow: inset 0 0 0 ${tokens.border.width[1]} var(--andromeda-accent-400);
         }
         ${RESPONSIVE_STYLE}
       `}</style>

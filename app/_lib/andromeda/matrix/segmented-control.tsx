@@ -33,7 +33,7 @@ function LiveSegmentedControl() {
   const [period, setPeriod] = useState('1w')
   return (
     <SegmentedControl
-      layoutGroupId="andromeda-matrix-segmented-live"
+      ariaLabel="Chart period"
       options={PERIODS}
       value={period}
       onChange={setPeriod}
@@ -48,13 +48,12 @@ export const segmentedControl: MatrixSpec = {
   // row, and the control shrinks while its segments keep their text width — so
   // the labels bleed over the neighbouring rung and the case reads as broken.
   wide: true,
-  // The sliding indicator is a shared framer layoutId, so every instance on the
-  // page needs its own group or they fight over one marker. A matrix renders
-  // the same control many times over, which makes this mandatory, not optional.
+  // Each instance auto-scopes its sliding indicator with useId, including the
+  // repeated controls this matrix renders.
   render: (size, props, c) => (
     <SegmentedControl
       size={size}
-      layoutGroupId={`andromeda-matrix-segmented-${c?.label ?? 'x'}-${size}`.replace(/\s+/g, '-')}
+      ariaLabel="Chart display"
       options={PERIODS}
       value="1w"
       onChange={noop}

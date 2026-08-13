@@ -56,7 +56,7 @@ export const trendChart: MatrixSpec = {
       props: {
         title: 'Actual throughput',
         yLabel: 'Requests / sec',
-        series: [{ key: 'actual', label: 'Actual' }],
+        series: [{ key: 'actual', label: 'Actual', role: 'live' }],
       },
     },
     {

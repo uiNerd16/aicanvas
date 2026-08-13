@@ -83,6 +83,11 @@ function addDays(d, n) {
   return x;
 }
 
+function clampedDayInMonth(year, month, day) {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  return startOfDay(new Date(year, month, Math.min(day, lastDay)));
+}
+
 // Monday-first weekday index: Mon=0 … Sun=6
 function weekdayIndex(d) {
   return (d.getDay() + 6) % 7;
@@ -245,6 +250,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     return startOfDay(vd);
   });
   const wrapRef = useRef(null);
+  const triggerRef = useRef(null);
   // Map of day-key → button node, used to move real DOM focus after a
   // keyboard move flushes focusedDay state.
   const dayRefs = useRef(new Map());
@@ -263,7 +269,10 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
       if (wrapRef.current && !wrapRef.current.contains(e.target)) close();
     };
     const handleKey = (e) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        close();
+        triggerRef.current?.focus();
+      }
     };
     document.addEventListener('mousedown', handleDown);
     document.addEventListener('keydown', handleKey);
@@ -301,6 +310,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
 
   function handleDayClick(day) {
     if (!anchor) {
+      if (presetLabel && value) onChange?.(value, undefined);
       setAnchor(day);
       setHover(day);
       return;
@@ -335,6 +345,14 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
     setFocusedDay(next);
   }
 
+  function moveMonth(delta) {
+    const nextView = new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1);
+    const nextFocus = clampedDayInMonth(nextView.getFullYear(), nextView.getMonth(), focusedDay.getDate());
+    keyboardMoveRef.current = false;
+    setViewDate(nextView);
+    setFocusedDay(nextFocus);
+  }
+
   function handleGridKeyDown(e) {
     const f = focusedDay;
     switch (e.key) {
@@ -344,8 +362,8 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
       case 'ArrowDown':  e.preventDefault(); moveFocus(addDays(f,  7)); break;
       case 'Home':       e.preventDefault(); moveFocus(addDays(f, -weekdayIndex(f)));     break;
       case 'End':        e.preventDefault(); moveFocus(addDays(f,  6 - weekdayIndex(f))); break;
-      case 'PageUp':     e.preventDefault(); moveFocus(startOfDay(new Date(f.getFullYear(), f.getMonth() - 1, f.getDate()))); break;
-      case 'PageDown':   e.preventDefault(); moveFocus(startOfDay(new Date(f.getFullYear(), f.getMonth() + 1, f.getDate()))); break;
+      case 'PageUp':     e.preventDefault(); moveFocus(clampedDayInMonth(f.getFullYear(), f.getMonth() - 1, f.getDate())); break;
+      case 'PageDown':   e.preventDefault(); moveFocus(clampedDayInMonth(f.getFullYear(), f.getMonth() + 1, f.getDate())); break;
       case 'Enter':
       case ' ':
         e.preventDefault();
@@ -400,12 +418,13 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
       <PickerStyles />
 
       <button
+        ref={triggerRef}
         type="button"
         className="adp-trigger"
         data-state={open ? 'open' : 'closed'}
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => { if (!staticOpen) setOpen((o) => !o); }}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -480,7 +499,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             background: V.surfaceRaised,
             border: `${tokens.border.thin} ${V.borderBase}`,
             padding: tokens.spacing[3],
-            boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
+            boxShadow: tokens.effect.shadowMd,
             display: 'flex',
             flexDirection: 'column',
             gap: tokens.spacing[3],
@@ -498,7 +517,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             <button
               type="button"
               className="adp-nav"
-              onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+              onClick={() => moveMonth(-1)}
               aria-label="Previous month"
               style={{
                 width: `var(--andromeda-6, 24px)`,
@@ -513,7 +532,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 borderRadius: tokens.radius.frame,
               }}
             >
-              <CaretLeft weight="bold" size={12} />
+              <CaretLeft weight="bold" size={tokens.iconSize.xs} />
             </button>
 
             <span
@@ -532,7 +551,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             <button
               type="button"
               className="adp-nav"
-              onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+              onClick={() => moveMonth(1)}
               aria-label="Next month"
               style={{
                 width: `var(--andromeda-6, 24px)`,
@@ -547,7 +566,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                 borderRadius: tokens.radius.frame,
               }}
             >
-              <CaretRight weight="bold" size={12} />
+              <CaretRight weight="bold" size={tokens.iconSize.xs} />
             </button>
           </div>
 
@@ -672,7 +691,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                         zIndex: 0,
                         // Cover the button's transparent border so touching
                         // range cells cannot reveal a one-pixel seam.
-                        inset: '-1px',
+                        inset: `calc(-1 * ${tokens.border.width[1]})`,
                         background: V.accentAlpha,
                         borderRadius: tokens.radius.frame,
                         pointerEvents: 'none',
@@ -688,7 +707,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                         zIndex: 1,
                         // Cover the button's transparent border so no range
                         // tint can show around either solid endpoint.
-                        inset: '-1px',
+                        inset: `calc(-1 * ${tokens.border.width[1]})`,
                         background: V.accent500,
                         border: `${tokens.border.thin} transparent`,
                         borderRadius: tokens.radius.frame,
@@ -718,8 +737,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
               }}
             >
               {presets.map((preset, i) => {
-                const isApplied = isSameDay(value?.start, preset.range.start)
-                  && isSameDay(value?.end, preset.range.end);
+                const isApplied = presetLabel === preset.label;
 
                 return (
                   <button

@@ -284,12 +284,7 @@ function CaseSection({
   // already said, so the lone case renders bare, straight into the page.
   const solo = cases.length === 1
 
-  // "Variants" only when the component actually HAS a variant prop. Everything
-  // else on this axis is a set of prop combinations — an open menu, a missing
-  // role — and calling those variants taught readers the wrong word for the
-  // one word the system uses precisely.
-  const isVariantAxis = kind === 'variant' && cases.some((c) => c.props && 'variant' in c.props)
-  const heading = kind === 'state' ? 'States' : isVariantAxis ? 'Variants' : 'Configurations'
+  const heading = matrixSectionHeading(kind, cases)
 
   return (
     <section>
@@ -330,6 +325,15 @@ function CaseSection({
       </div>
     </section>
   )
+}
+
+// "Variants" only when the component actually HAS a variant prop. Everything
+// else on this axis is a set of prop combinations — an open menu, a missing
+// role — and calling those variants taught readers the wrong word for the
+// one word the system uses precisely.
+export function matrixSectionHeading(kind: 'variant' | 'state', cases: readonly MatrixCase[]) {
+  const isVariantAxis = kind === 'variant' && cases.some((c) => c.props && 'variant' in c.props)
+  return kind === 'state' ? 'States' : isVariantAxis ? 'Variants' : 'Configurations'
 }
 
 // The preview surface for a single component, gated so its forced states can

@@ -29,15 +29,17 @@ import { motion } from 'framer-motion';
 import { CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
+import { useReducedMotion } from './lib/motion';
 
 // Motion locals — framer-motion takes seconds + a 4-tuple bezier, but
 // `tokens.motion` exposes ms strings and CSS cubic-bezier() strings.
 // These two helpers keep every value traceable to a token while
 // adapting to framer's shape (same convention as Drawer.tsx).
 const toSeconds = (ms) => parseInt(ms, 10) / 1000;
-const EASE_STANDARD = [0.4, 0, 0.2, 1]; // tokens.motion.easing.standard
+// framer boundary: array form derived from tokens.motion.easing.standard
+const EASE_STANDARD = easingArray(tokens.motion.easing.standard);
 
 // Chevron per rung, at half the avatar's box (24/32/40 gives 12/16/20) so the
 // indicator holds the same weight against the face at every size. Same ramp
@@ -117,7 +119,7 @@ function handleMenuKeyDown(e) {
  * `staticOpen` pins the panel open: the outside-click + Escape dismissers
  * are not attached, so it survives clicks elsewhere on the page. For
  * showcases / docs where several popovers are shown open at once and one
- * must not close the others. The trigger can still toggle it.
+ * must not close the others. The trigger cannot toggle it.
  */
 export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
   const [open, setOpen] = useState(initialOpen || staticOpen);
@@ -160,6 +162,7 @@ export function useUserMenuPanel(initialOpen = false, staticOpen = false) {
   }, [open, staticOpen]);
 
   const toggle = (e) => {
+    if (staticOpen) return;
     // Capture the trigger as the focus-return target before opening.
     if (!open && !staticOpen) {
       returnFocusRef.current = e?.currentTarget ?? document.activeElement;
@@ -186,7 +189,7 @@ function UserMenuItemRow({ item, onClose, size = 'md' }) {
       <div
         role="separator"
         style={{
-          height: '1px',
+          height: tokens.border.width[1],
           // The panel contributes 4px; spacing[2] supplies the remaining 8px
           // required by the system's 12px divider inset, matching PanelMenu.
           margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
@@ -297,7 +300,7 @@ export function UserMenuPanel({ open, items, size = 'md', placement = 'bottom', 
         // frame on all four edges as PanelMenu.
         padding: `${tokens.spacing[2]} ${tokens.spacing[1]}`,
         zIndex: 1000,
-        boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
+        boxShadow: tokens.effect.shadowMd,
       }}
     >
       {items.map((item, i) => (
@@ -327,7 +330,11 @@ function UserMenuStyles() {
       }
       .andromeda-user-menu-item:focus-visible {
         outline: none;
-        box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
+        box-shadow: inset 0 0 0 ${tokens.border.width[1]} var(--andromeda-accent-400);
+      }
+      .andromeda-user-menu-trigger:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 ${tokens.border.width[1]} var(--andromeda-accent-400), 0 0 ${tokens.effect.glow} var(--andromeda-accent-500);
       }
       /* Phone fit — a start-aligned (left:0) panel anchored to a trigger that
          sits in the right half of a phone would open off the right edge. Below
@@ -353,7 +360,7 @@ export { UserMenuStyles };
  * @typedef {object} UserMenuProps
  * @property {string} name             Display name; passed to Avatar for the initial fallback.
  * @property {string} [src]            Avatar image URL.
- * @property {'online'|'busy'|'away'|'offline'} [status] Presence state; passed to Avatar for the status dot.
+ * @property {'online'|'caution'|'fault'|'offline'} [status] Presence state; passed to Avatar for the status dot.
  * @property {'sm'|'md'|'lg'} [size='md'] Scales the whole trigger: avatar (24/32/40), padding, gap and chevron. The popover rows follow the same rung. Replaces the older `avatarSize` prop, which scaled only the avatar; a copy still passing `avatarSize` renders md.
  * @property {UserMenuItem[]} items The menu rows to render, including separators.
  * @property {'top'|'bottom'} [placement='bottom'] Whether the panel opens below or above the trigger.
@@ -391,6 +398,7 @@ export const UserMenu = forwardRef(function UserMenu(
   const sizeKey = TRIGGER_FOR_SIZE[size] ? size : 'md';
   const rung = TRIGGER_FOR_SIZE[sizeKey];
   const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
+  const reducedMotion = useReducedMotion();
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
 
@@ -412,6 +420,7 @@ export const UserMenu = forwardRef(function UserMenu(
     >
       <button
         type="button"
+        className="andromeda-user-menu-trigger"
         aria-label={ariaLabel}
         {...triggerProps}
         onMouseEnter={() => setHover(true)}
@@ -434,7 +443,7 @@ export const UserMenu = forwardRef(function UserMenu(
         <motion.span
           aria-hidden
           animate={{ rotate: open ? 180 : 0 }}
-          transition={{
+          transition={reducedMotion ? { duration: 0 } : {
             duration: toSeconds(tokens.motion.duration.normal),
             ease: EASE_STANDARD,
           }}

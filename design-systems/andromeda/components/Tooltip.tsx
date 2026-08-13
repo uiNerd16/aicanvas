@@ -10,9 +10,10 @@
 
 'use client';
 
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { cloneElement, forwardRef, isValidElement, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../tokens';
+import { useReducedMotion } from './lib/motion';
 
 // Layout effect on the client (measure + correct before paint, no flash),
 // plain effect on the server (avoids the useLayoutEffect SSR warning).
@@ -36,10 +37,24 @@ const EXIT_TX  = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1
 
 /** @type {React.ForwardRefExoticComponent<TooltipProps & React.HTMLAttributes<HTMLDivElement>>} */
 export const Tooltip = forwardRef(function Tooltip(
-  { label, position = 'top', children, className, style, ...props },
+  {
+    label,
+    position = 'top',
+    children,
+    className,
+    style,
+    onMouseEnter,
+    onMouseLeave,
+    onFocus,
+    onBlur,
+    'aria-describedby': ariaDescribedBy,
+    ...props
+  },
   ref,
 ) {
   const [visible, setVisible] = useState(false);
+  const tooltipId = useId();
+  const reducedMotion = useReducedMotion();
   // Horizontal correction (px) applied on top of the -50% centre transform so a
   // centred-but-clamped label on a trigger near a screen edge stays inside the
   // viewport instead of overflowing it and forcing horizontal page scroll. 0 in
@@ -76,10 +91,18 @@ export const Tooltip = forwardRef(function Tooltip(
       };
 
   // 4px of travel on whichever axis the tooltip is NOT centred on.
-  const enterFrom = side
-    ? { x: position === 'right' ? -4 : 4 }
-    : { y: position === 'bottom' ? -4 : 4 };
-  const enterTo = side ? { x: 0 } : { y: 0 };
+  const enterFrom = reducedMotion
+    ? {}
+    : side
+      ? { x: position === 'right' ? -4 : 4 }
+      : { y: position === 'bottom' ? -4 : 4 };
+  const enterTo = reducedMotion ? {} : side ? { x: 0 } : { y: 0 };
+  const describedBy = [ariaDescribedBy, visible && label ? tooltipId : null].filter(Boolean).join(' ') || undefined;
+  const trigger = isValidElement(children)
+    ? cloneElement(children, {
+        'aria-describedby': [children.props['aria-describedby'], describedBy].filter(Boolean).join(' ') || undefined,
+      })
+    : children;
 
   // Edge-clamp: work out where a centred label WOULD sit, and if that lands
   // past a viewport inset, fold the correction into framer's `x` (framer owns
@@ -138,6 +161,7 @@ export const Tooltip = forwardRef(function Tooltip(
       ref={ref}
       className={className}
       style={{ position: 'relative', display: 'inline-flex', ...style }}
+      {...props}
       // The bubble is out of flow and its side is an inline offset no ancestor
       // rule can read — and it exists only while hovered or focused, so nothing
       // outside can key off the bubble itself at rest. The WRAPPER states the
@@ -146,18 +170,19 @@ export const Tooltip = forwardRef(function Tooltip(
       // anything mounts. Its own attribute name, because a tooltip and a menu
       // ask for very different amounts of room. Paints nothing.
       data-tooltip-placement={position}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
-      onBlur={() => setVisible(false)}
-      {...props}
+      aria-describedby={describedBy}
+      onMouseEnter={(event) => { setVisible(true); onMouseEnter?.(event); }}
+      onMouseLeave={(event) => { setVisible(false); onMouseLeave?.(event); }}
+      onFocus={(event) => { setVisible(true); onFocus?.(event); }}
+      onBlur={(event) => { setVisible(false); onBlur?.(event); }}
     >
-      {children}
+      {trigger}
 
       <AnimatePresence>
         {visible && label ? (
           <motion.div
             ref={floatRef}
+            id={tooltipId}
             role="tooltip"
             initial={{ opacity: 0, ...enterFrom }}
             animate={{ opacity: 1, ...enterTo, transition: ENTER_TX }}

@@ -52,7 +52,7 @@ export const card: MatrixSpec = {
     {
       label: 'Glow',
       props: { variant: 'glow' },
-      children: body('Highlight card', 'Tinted accent gradient surface with an accent border.', 'Live', 'accent'),
+      children: body('Highlight card', 'Tinted accent gradient surface with a glow shadow and corner markers.', 'Live', 'accent'),
     },
     {
       label: 'Flare',

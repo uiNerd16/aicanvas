@@ -27,6 +27,7 @@ import { CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
 import { andromedaVars, easingArray } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 import {
   CHEVRON_FOR_SIZE,
   UserMenuPanel,
@@ -122,6 +123,7 @@ export const UserCard = forwardRef(function UserCard(
   const sizeKey = CARD_FOR_SIZE[size] ? size : 'md';
   const rung = CARD_FOR_SIZE[sizeKey];
   const { open, wrapperRef, triggerProps, close } = useUserMenuPanel(defaultOpen, staticOpen);
+  const reducedMotion = useReducedMotion();
   const [hover, setHover] = useState(false);
   const highlight = open || hover;
 
@@ -143,6 +145,7 @@ export const UserCard = forwardRef(function UserCard(
     >
       <button
         type="button"
+        className="andromeda-user-menu-trigger"
         aria-label={ariaLabel}
         {...triggerProps}
         onMouseEnter={() => setHover(true)}
@@ -214,7 +217,7 @@ export const UserCard = forwardRef(function UserCard(
         <motion.span
           aria-hidden
           animate={{ rotate: open ? 180 : 0 }}
-          transition={{
+          transition={reducedMotion ? { duration: 0 } : {
             duration: toSeconds(tokens.motion.duration.normal),
             ease: EASE_STANDARD,
           }}

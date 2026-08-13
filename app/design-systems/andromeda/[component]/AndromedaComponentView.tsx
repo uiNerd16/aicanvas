@@ -24,7 +24,7 @@ import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 // This replaced a hand-written per-slug demo whose size ramp had no state axis,
 // which is why this page could not show Destructive at lg while the system page
 // could.
-import { MatrixPreview } from '../../../_lib/andromeda/matrix/Matrix'
+import { MatrixPreview, matrixSectionHeading } from '../../../_lib/andromeda/matrix/Matrix'
 import { SPEC_BY_SLUG, matrixId } from '../../../_lib/andromeda/matrix'
 import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
@@ -385,7 +385,7 @@ export function AndromedaComponentView({
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {spec.variants.length > 0 && (
             <section className={coveragePanel}>
-              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">Variants</h2>
+              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">{matrixSectionHeading('variant', spec.variants)}</h2>
               <p className="mt-1.5 mb-4 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
                 Supported configurations for this component.
               </p>
@@ -401,7 +401,7 @@ export function AndromedaComponentView({
 
           {spec.states.length > 0 && (
             <section className={coveragePanel}>
-              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">States</h2>
+              <h2 className="text-sm font-semibold text-sand-900 dark:text-sand-50">{matrixSectionHeading('state', spec.states)}</h2>
               <p className="mt-1.5 mb-4 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
                 Interaction states covered by the API and the style contract.
               </p>

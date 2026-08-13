@@ -35,14 +35,13 @@ const MODIFIER_GLYPHS = /([⌘⌥⇧⌃⏎⌫⎋])/;
 // The chip stays on xs where the field text does not: it is aria-hidden
 // decoration, and the 12px floor governs text that is read or clicked.
 const CHIP_FOR_SIZE = {
-  sm: { text: tokens.typography.size.xs, padY: '2px', padX: '4px' },
-  md: { text: tokens.typography.size.xs, padY: '3px', padX: '6px' },
-  lg: { text: tokens.typography.size.sm, padY: '4px', padX: '8px' },
+  sm: { text: tokens.typography.size.xs, padY: '2px', padX: tokens.spacing[1] },
+  md: { text: tokens.typography.size.xs, padY: '3px', padX: tokens.spacing['1.5'] },
+  lg: { text: tokens.typography.size.sm, padY: '4px', padX: tokens.spacing[2] },
 };
 
-// Guard the rung lookups: `size` arrives from a caller and both maps are read
-// straight into style values, so an unrecognised string would throw and take
-// the subtree down rather than degrade.
+// Guard the rung lookups: `size` arrives from a caller, so an unrecognised
+// string falls back to md across every size-indexed value.
 const SIZES = { sm: true, md: true, lg: true };
 
 /**
@@ -112,7 +111,7 @@ export const SearchField = forwardRef(function SearchField(
     : 'var(--andromeda-surface-base, #0E0E0F)';
 
   const boxShadow = isFocus
-    ? '0 0 0 var(--andromeda-border-width, 1px) var(--andromeda-accent-400, #109380), 0 0 var(--andromeda-glow, 8px) var(--andromeda-accent-500, #126059)'
+    ? `0 0 0 var(--andromeda-border-width, ${tokens.border.width[1]}) var(--andromeda-accent-400, #109380), 0 0 var(--andromeda-glow, ${tokens.effect.glow}) var(--andromeda-accent-500, #126059)`
     : 'none';
 
   // Icon brightens when the user engages — focus or typed.
@@ -124,6 +123,7 @@ export const SearchField = forwardRef(function SearchField(
     const next = e.target.value;
     if (!isControlled) setUncontrolledValue(next);
     onValueChange?.(next);
+    rest.onChange?.(e);
   };
 
   return (
@@ -178,7 +178,7 @@ export const SearchField = forwardRef(function SearchField(
     >
       {Icon ? (
         <Icon
-          size={ICON_FOR_SIZE[size]}
+          size={ICON_FOR_SIZE[sizeKey]}
           weight="regular"
           style={{
             flexShrink: 0,
@@ -229,15 +229,19 @@ export const SearchField = forwardRef(function SearchField(
           ref={ref}
           type="text"
           value={value}
+          {...rest}
           onChange={handleChange}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => {
+          onFocus={(event) => {
+            setIsFocus(true);
+            rest.onFocus?.(event);
+          }}
+          onBlur={(event) => {
             setIsFocus(false);
             setIsHover(false);
+            rest.onBlur?.(event);
           }}
           aria-label={ariaLabel ?? placeholder}
           disabled={disabled}
-          {...rest}
           style={{
             display: 'block',
             width: '100%',

@@ -31,14 +31,16 @@ import type {
 } from 'react';
 import { cn, andromedaVars } from './lib/utils';
 import { mq } from './lib/responsive';
+import { useReducedMotion } from './lib/motion';
+import { tokens } from '../tokens';
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
-function snap(n, step) {
+function snap(n, step, min) {
   if (!step || step <= 0) return n;
-  return Math.round(n / step) * step;
+  return min + Math.round((n - min) / step) * step;
 }
 
 function normalizeRange(range, min, max) {
@@ -151,11 +153,13 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
     disabled = false,
     id: idProp,
     style,
+    'aria-label': ariaLabel,
     ...props
   },
   ref,
 ) {
   const reactId = useId();
+  const reducedMotion = useReducedMotion();
   const id = idProp ?? `andromeda-slider-${reactId}`;
   const isControlled = controlledValue !== undefined;
   const [internal, setInternal] = useState(
@@ -176,7 +180,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
 
   const setValue = useCallback(
     (next) => {
-      const snapped = clamp(snap(next, step), min, max);
+      const snapped = clamp(snap(next, step, min), min, max);
       if (snapped === value) return;
       if (!isControlled) setInternal(snapped);
       onValueChange?.(snapped);
@@ -191,7 +195,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
       const upperLimit = thumb === 0 ? current[1] : max;
       // Each endpoint uses its sibling as a live bound, keeping thumb identity
       // and keyboard focus stable while snap rounding stays inside the clamp.
-      const bounded = clamp(shouldSnap ? snap(next, step) : next, lowerLimit, upperLimit);
+      const bounded = clamp(shouldSnap ? snap(next, step, min) : next, lowerLimit, upperLimit);
       if (bounded === current[thumb]) return;
 
       const nextRange = thumb === 0
@@ -349,12 +353,11 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
     }
   }
 
-  const percent = ((value - min) / (max - min)) * 100;
   const rangeSpan = max - min;
+  const percent = rangeSpan === 0 ? 0 : ((value - min) / rangeSpan) * 100;
   const lowPercent = rangeSpan === 0 ? 0 : ((rangeValue[0] - min) / rangeSpan) * 100;
   const highPercent = rangeSpan === 0 ? 0 : ((rangeValue[1] - min) / rangeSpan) * 100;
-  const rootAriaLabel = typeof props['aria-label'] === 'string' ? props['aria-label'] : undefined;
-  const rangeAccessibleLabel = typeof label === 'string' && label ? label : rootAriaLabel;
+  const rangeAccessibleLabel = typeof label === 'string' && label ? label : ariaLabel;
   const rangeThumbLabels = rangeAccessibleLabel
     ? [`${rangeAccessibleLabel} minimum`, `${rangeAccessibleLabel} maximum`]
     : ['Minimum value', 'Maximum value'];
@@ -364,7 +367,12 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
       ref={ref}
       data-size={size}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', className)}
-      style={{ ...andromedaVars(), ...style }}
+      style={{
+        ...andromedaVars(),
+        // The focused thumb deliberately glows 2px beyond the system glow.
+        '--slider-focus-shadow': `0 0 0 ${tokens.border.width[1]} var(--andromeda-accent-100), 0 0 calc(${tokens.effect.glow} + 2px) var(--andromeda-accent-500)`,
+        ...style,
+      }}
       {...props}
     >
       {(label || showValue) ? (
@@ -418,7 +426,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
         aria-valuemax={isRange ? undefined : max}
         aria-valuenow={isRange ? undefined : value}
         aria-valuetext={isRange ? undefined : `${Number.isInteger(step) ? Math.round(value) : value.toFixed(2)}${unit ?? ''}`}
-        aria-label={isRange ? undefined : (typeof label === 'string' ? label : undefined)}
+        aria-label={isRange ? undefined : (typeof label === 'string' && label ? label : ariaLabel)}
         aria-disabled={isRange ? undefined : (disabled || undefined)}
         onPointerDown={handlePointerDown}
         onKeyDown={isRange ? undefined : handleKeyDown}
@@ -429,7 +437,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
           'cursor-pointer',
           disabled && 'opacity-[var(--andromeda-opacity-disabled)] cursor-not-allowed pointer-events-none',
           'focus-visible:outline-none',
-          'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
+          'focus-visible:[--slider-thumb-shadow:var(--slider-focus-shadow)]',
         )}
       >
         {/* Track line */}
@@ -491,10 +499,10 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
               'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
               // No resting glow; the focus-visible state sets --slider-thumb-shadow.
               'shadow-[var(--slider-thumb-shadow,none)]',
-              'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
-              'hover:scale-[1.25]',
+              !reducedMotion && 'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
+              !reducedMotion && 'hover:scale-[1.25]',
               'focus-visible:z-10 focus-visible:outline-none',
-              'focus-visible:[--slider-thumb-shadow:0_0_0_1px_var(--andromeda-accent-100),0_0_10px_var(--andromeda-accent-500)]',
+              'focus-visible:[--slider-thumb-shadow:var(--slider-focus-shadow)]',
             )}
             style={{
               left: thumb === 0
@@ -512,8 +520,8 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
               'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
               // No resting glow; the focus-visible state sets --slider-thumb-shadow.
               'shadow-[var(--slider-thumb-shadow,none)]',
-              'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
-              'hover:scale-[1.25]',
+              !reducedMotion && 'transition-[box-shadow,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
+              !reducedMotion && 'hover:scale-[1.25]',
             )}
             style={{ left: `${percent}%` }}
           />

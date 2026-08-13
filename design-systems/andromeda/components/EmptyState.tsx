@@ -142,7 +142,7 @@ export const EmptyStateDescription = forwardRef(function EmptyStateDescription(
         '[font-family:var(--andromeda-font-sans)]',
         'text-[length:var(--andromeda-text-sm)]',
         'text-[color:var(--andromeda-text-secondary)]',
-        'leading-[1.6]',
+        '[line-height:var(--andromeda-leading-relaxed)]',
         className,
       )}
       {...props}

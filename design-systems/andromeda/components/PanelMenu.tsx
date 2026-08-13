@@ -37,7 +37,7 @@ import { andromedaVars } from './lib/utils';
  *   IconButton. `md` is the panel-header default. Drop to `sm` when the menu is
  *   a per-row overflow inside a dense table, where a 34px square would set the
  *   row height. The rows follow the same rung as the trigger.
- * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button.
+ * @property {string} [ariaLabel='Panel options'] Accessible label for the kebab trigger button and menu.
  * @property {boolean} [defaultOpen=false] Render the menu pre-opened. Useful in
  *   showcases / docs so the consumer can see the menu contents without first
  *   having to click the trigger. Click-outside and Escape still dismiss it.
@@ -45,7 +45,7 @@ import { andromedaVars } from './lib/utils';
  *   open: the click-outside and Escape dismissers are not attached. For
  *   showcases / docs where the menu must remain visible as the reader scrolls
  *   past, so the component reads as a menu without any interaction. The trigger
- *   can still toggle it. Not for product UI; a real overflow menu must dismiss.
+ *   cannot toggle it. Not for product UI; a real overflow menu must dismiss.
  * @property {string} [className] Extra class applied to the wrapper element.
  * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
  */
@@ -95,7 +95,7 @@ const MENU_PANEL_STYLE = {
   // sides. spacing[3] lands the ink at the same 16px.
   padding: `${tokens.spacing[3]} ${tokens.spacing[1]}`,
   zIndex: 1000,
-  boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
+  boxShadow: tokens.effect.shadowMd,
 };
 
 // Roving arrow-key navigation for a `role="menu"` container. Queries the
@@ -207,7 +207,7 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
       <div
         role="separator"
         style={{
-          height: '1px',
+          height: tokens.border.width[1],
           // The panel contributes 4px; spacing[2] supplies the remaining 8px
           // required by the system's 12px divider inset.
           margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
@@ -228,7 +228,8 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
   }
   function handleLeave() {
     if (hasSub) {
-      closeTimer.current = setTimeout(() => setSubmenuOpen(false), 120);
+      // Nearest system duration to the former 120ms grace period.
+      closeTimer.current = setTimeout(() => setSubmenuOpen(false), parseInt(tokens.motion.duration.normal, 10));
     }
   }
 
@@ -319,6 +320,7 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
         <div
           ref={submenuRef}
           role="menu"
+          aria-label={`${item.label} submenu`}
           className="andro-submenu"
           data-panel-menu-owner={menuOwnerId}
           onMouseEnter={handleEnter}
@@ -378,7 +380,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
     if (!open || staticOpen) return;
     const first = menuRef.current?.querySelector('button[role="menuitem"]');
     if (first) first.focus();
-  }, [open, staticOpen]);
+  }, [open, staticOpen, mounted]);
 
   // Return focus to the trigger when the menu closes after an interactive
   // open. Skipped in staticOpen mode (no focus stealing on showcase pages).
@@ -466,7 +468,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
       data-slot="panel-menu"
       // The rung that actually rendered — the default never appears in props,
       // so <PanelMenu /> is otherwise un-inspectable.
-      data-size={size}
+      data-size={rowSize}
       className={className}
       style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       {...props}
@@ -483,6 +485,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
         size={size}
         icon={DotsThreeVertical}
         onClick={(e) => {
+          if (staticOpen) return;
           // Capture the trigger as the focus-return target before opening.
           if (!open && !staticOpen) returnFocusRef.current = e.currentTarget;
           setOpen((o) => !o);
@@ -500,6 +503,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
           <div
             ref={menuRef}
             role="menu"
+            aria-label={ariaLabel}
             onKeyDown={handleMenuKeyDown}
             style={{
               position: 'absolute',
@@ -518,6 +522,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
             <div
               ref={menuRef}
               role="menu"
+              aria-label={ariaLabel}
               onKeyDown={handleMenuKeyDown}
               style={{
                 ...andromedaVars(),
@@ -556,7 +561,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
         }
         .andromeda-panel-menu-item:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 1px var(--andromeda-accent-400);
+          box-shadow: inset 0 0 0 ${tokens.border.width[1]} var(--andromeda-accent-400);
         }
       `}</style>
     </div>

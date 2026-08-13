@@ -9,7 +9,7 @@
 
 'use client';
 
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
@@ -32,6 +32,7 @@ const avatarVariants = cva(
     '[letter-spacing:var(--andromeda-tracking-normal)]',
     'transition-transform [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
     'hover:scale-[1.05]',
+    'motion-reduce:transition-none motion-reduce:hover:scale-100',
   ],
   {
     variants: {
@@ -96,6 +97,7 @@ export const Avatar = forwardRef(function Avatar(
 ) {
   const initials = deriveInitials(name);
   const [imgFailed, setImgFailed] = useState(false);
+  useEffect(() => setImgFailed(false), [src]);
   const showImage = src && !imgFailed;
 
   return (

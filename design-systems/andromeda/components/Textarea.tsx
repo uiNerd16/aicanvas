@@ -3,7 +3,7 @@
 // COMPONENT: Textarea
 // shadcn/ui-aligned API: forwardRef, label, error, ...props.
 // Multi-line counterpart to <Input>. Same border / focus / error
-// behavior; resizes vertically; min-height controlled via `rows`.
+// behavior; resizes vertically; initial height controlled via `rows`.
 // ============================================================
 
 'use client';
@@ -11,6 +11,7 @@
 import { forwardRef, useId } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 
 const textareaVariants = cva(
   [
@@ -65,7 +66,7 @@ const textareaVariants = cva(
           'border-[color:var(--andromeda-border-base)]',
           'hover:border-[color:var(--andromeda-border-bright)]',
           'focus:border-[color:var(--andromeda-accent-400)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+          'focus-visible:shadow-[0_0_0_var(--andromeda-border-width)_var(--andromeda-accent-400),0_0_var(--andromeda-glow)_var(--andromeda-accent-500)]',
         ],
         error: [
           'border-[color:var(--andromeda-red-300)]',
@@ -74,7 +75,7 @@ const textareaVariants = cva(
           // message only explains it, and two reds compete for the same job.
           'text-[color:var(--andromeda-red-300)]',
           'focus:border-[color:var(--andromeda-red-300)]',
-          'focus-visible:shadow-[0_0_0_1px_var(--andromeda-red-300),0_0_8px_var(--andromeda-red-400)]',
+          'focus-visible:shadow-[0_0_0_var(--andromeda-border-width)_var(--andromeda-red-300),0_0_var(--andromeda-glow)_var(--andromeda-red-400)]',
         ],
       },
     },
@@ -87,7 +88,7 @@ const textareaVariants = cva(
  * @property {string} [label]            Uppercase mono label rendered above the field.
  * @property {'sm'|'md'|'lg'} [size='md'] Rung on the shared control ladder. Sets padding and text size to match an Input of the same size; the height still comes from `rows`.
  * @property {string} [error]            When set, switches the field into the error state.
- * @property {number} [rows=4]           Number of visible text lines; sets the field's initial and minimum height.
+ * @property {number} [rows=4]           Number of visible text lines; sets the field's initial height.
  * @property {string} [className]        Forwarded to the <textarea>.
  * @property {string} [wrapperClassName] Forwarded to the outer wrapper.
  */
@@ -112,12 +113,13 @@ export const Textarea = forwardRef(function Textarea(
   const id = idProp ?? `andromeda-textarea-${reactId}`;
   const errorId = error ? `${id}-error` : undefined;
   const state = error ? 'error' : 'default';
+  const reducedMotion = useReducedMotion();
 
   return (
     <div
       data-size={size}
       className={cn('flex flex-col gap-[var(--andromeda-2)]', wrapperClassName)}
-      style={{ ...andromedaVars(), ...style }}
+      style={andromedaVars()}
     >
       {label ? (
         <label
@@ -141,12 +143,13 @@ export const Textarea = forwardRef(function Textarea(
       <textarea
         ref={ref}
         id={id}
+        {...props}
         rows={rows}
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={errorId}
         disabled={disabled}
         className={cn(textareaVariants({ size, state }), className)}
-        {...props}
+        style={{ ...style, transitionDuration: reducedMotion ? '0ms' : style?.transitionDuration }}
       />
 
       {error ? (

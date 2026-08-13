@@ -2,6 +2,7 @@
 // components. Data-only specs in this directory need no such line.
 import { Compass } from '@phosphor-icons/react'
 import { NavItem } from '../../../../design-systems/andromeda/components/NavItem'
+import { Tooltip } from '../../../../design-systems/andromeda/components/Tooltip'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
 import { CONTROL_STATES, type MatrixSpec } from './types'
 
@@ -9,7 +10,13 @@ import { CONTROL_STATES, type MatrixSpec } from './types'
 // shrink-wraps to its label and the hover fill reads as a chip, not a row.
 const rail = (props: Record<string, unknown>) => (
   <div style={{ width: props.collapsed ? 56 : 220, background: tokens.color.surface.raised }}>
-    <NavItem icon={Compass} label="Overview" {...props} />
+    {props.collapsed ? (
+      <Tooltip label="Overview" position="right" style={{ width: '100%' }}>
+        <NavItem icon={Compass} label="Overview" {...props} />
+      </Tooltip>
+    ) : (
+      <NavItem icon={Compass} label="Overview" {...props} />
+    )}
   </div>
 )
 
