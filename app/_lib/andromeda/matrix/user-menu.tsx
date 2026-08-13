@@ -28,9 +28,29 @@ export const userMenu: MatrixSpec = {
   ),
   variants: [
     { label: 'Closed', props: {} },
-    { label: 'Open down', props: { staticOpen: true, placement: 'bottom', align: 'end' } },
-    { label: 'Open up', props: { staticOpen: true, placement: 'top', align: 'end' } },
-    { label: 'Align start', props: { staticOpen: true, placement: 'bottom', align: 'start' } },
+    // The open cases are node cases pinned to md: since size became a
+    // whole-trigger axis, a laddered staticOpen case mounted three open
+    // panels in one card and they slid over one another and their
+    // neighbours. One rung shows the placement/align behaviour; the Closed
+    // case still walks the ladder.
+    {
+      label: 'Open down',
+      node: (
+        <UserMenu name="OPS-01" src={SRC} status="online" size="md" items={ITEMS} staticOpen placement="bottom" align="end" />
+      ),
+    },
+    {
+      label: 'Open up',
+      node: (
+        <UserMenu name="OPS-01" src={SRC} status="online" size="md" items={ITEMS} staticOpen placement="top" align="end" />
+      ),
+    },
+    {
+      label: 'Align start',
+      node: (
+        <UserMenu name="OPS-01" src={SRC} status="online" size="md" items={ITEMS} staticOpen placement="bottom" align="start" />
+      ),
+    },
   ],
   states: [],
   gaps: {

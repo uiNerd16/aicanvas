@@ -58,8 +58,25 @@ export const userCard: MatrixSpec = {
   ),
   variants: [
     { label: 'Closed', props: {} },
-    { label: 'Open up', props: { staticOpen: true, placement: 'top' } },
-    { label: 'Open down', props: { staticOpen: true, placement: 'bottom' } },
+    // Open cases pin md as node cases — a laddered staticOpen case mounts
+    // one open panel per rung and they slide over one another (same cure as
+    // user-menu). Closed and No role still walk the sm|md ladder.
+    {
+      label: 'Open up',
+      node: (
+        <div style={{ width: 360, minWidth: 0, background: tokens.color.surface.raised }}>
+          <UserCard name="Reza Quinn" role="Flight Director" src={SRC} status="online" size="md" items={ITEMS} align="stretch" staticOpen placement="top" />
+        </div>
+      ),
+    },
+    {
+      label: 'Open down',
+      node: (
+        <div style={{ width: 360, minWidth: 0, background: tokens.color.surface.raised }}>
+          <UserCard name="Reza Quinn" role="Flight Director" src={SRC} status="online" size="md" items={ITEMS} align="stretch" staticOpen placement="bottom" />
+        </div>
+      ),
+    },
     { label: 'No role', props: { role: undefined } },
   ],
   states: [],

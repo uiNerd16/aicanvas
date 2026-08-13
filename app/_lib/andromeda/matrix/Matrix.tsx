@@ -487,18 +487,19 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
            spacing[6] 24px padding, which is the floor they replace.
            Too tall is dead space; too short puts the panel outside the card.
 
-           MENU 155 is the existing reserve. The tallest mounted [role="menu"] is
+           MENU 171 = 163 + 8, re-summed 2026-08-13 for the rows-follow-rung
+           law: menu rows now ride tokens.control[size].height, and every
+           pinned-open case pins md (the open cases are node cases — a
+           laddered staticOpen case mounted one open panel per rung and they
+           slid over one another). The tallest mounted [role="menu"] is
            UserMenuPanel at the longest list any case declares, 4 items + 1
-           separator, in BOTH user-menu and user-card (PanelMenu builds its own
-           147px panel for the same 4-item + separator shape; its submenu is
-           portaled and therefore does not add to the mounted parent panel):
-             row   = iconSize.sm 16 + 2 x spacing[2] 8                    = 32
-                     (the size.xs label's line box is shorter than the icon,
-                     so the icon is what sets the row height)
-             panel = 4 x 32 + sep (1 + 2 x spacing[1] 4)
-                     + 2 x spacing[2] padding + 2 x 1px border            = 155
-           Its spacing[2] 8px trigger offset now sits beyond that historical
-           reserve; the reserve behaviour is intentionally unchanged here.
+           separator, in BOTH user-menu and user-card (PanelMenu portals, so
+           its panel never adds to a mounted card):
+             row   = control.md.height                                    = 34
+             panel = 4 x 34 + sep (1 + 2 x spacing[1] 4)
+                     + 2 x spacing[2] padding + 2 x 1px border            = 163
+             offset= the panel's spacing[2] 8px gap from its trigger       =  8
+           A case that ever pins lg re-sums to 195 (4 x 40 + 9 + 16 + 2 + 8).
 
            DIALOG 414 = 406 + 8. The only [role="dialog"] a case can mount is
            DateRangePicker's calendar (Drawer portals to <body>, where :has()
@@ -524,7 +525,7 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
            preflight's html { line-height: 1.5 } — NOT an Andromeda token.
            Nothing in this chain sets one. */
         .andromeda-matrix-body:has([role="dialog"], [role="menu"]) {
-          padding-bottom: 155px !important;
+          padding-bottom: 171px !important;
         }
         /* A month grid is taller than a menu. */
         .andromeda-matrix-body:has([role="dialog"]) { padding-bottom: 414px !important; }
@@ -548,7 +549,7 @@ export function MatrixBlock({ spec }: { spec: MatrixSpec }) {
            both, and the coverage test fails the day one does — a tripwire is
            cheaper than machinery for a case that does not exist. */
         .andromeda-matrix-body:has([data-placement="top"]) {
-          padding-top: 155px !important;
+          padding-top: 171px !important;
           padding-bottom: ${tokens.spacing[6]} !important;
         }
         @media (min-width: 768px) {
