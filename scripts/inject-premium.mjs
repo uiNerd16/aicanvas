@@ -294,7 +294,7 @@ function writeV2Shim(injectedNames, manifest) {
 // structure. UPDATE when the brain grows (mirror of the vault's
 // design-systems/andromeda/ brain folder), same contract as V2_FALLBACK_NAMES.
 const BRAIN_TEASER_FALLBACK = {
-  totalFiles: 56,
+  totalFiles: 66,
   sections: [
     {
       id: 'index',
@@ -307,21 +307,22 @@ const BRAIN_TEASER_FALLBACK = {
       files: [
         'anti-patterns', 'build-workflow', 'charts', 'color-philosophy',
         'composition-recipes', 'defaults', 'interaction-states', 'layout',
-        'motion', 'responsive', 'spacing', 'voice-and-copy',
+        'motion', 'responsive', 'spacing', 'typography', 'voice-and-copy',
       ],
     },
     {
       id: 'component-rules',
       label: 'Component Rules',
       files: [
-        'Alert', 'Avatar', 'Badge', 'Button', 'Card', 'Checkbox',
-        'CornerMarkers', 'DataTable', 'DateRangePicker', 'Drawer',
-        'EmptyState', 'Gauge', 'HeatGrid', 'IconButton', 'Input', 'MediaCard',
-        'MetricChart', 'MusicPlayer', 'NavItem', 'PanelHeader', 'PanelMenu',
-        'Planet', 'ProgressBar', 'RadarChart', 'Radio', 'SearchField',
-        'SegmentedControl', 'Slider', 'Spinner', 'StatTile', 'Table', 'Tag',
-        'Textarea', 'Toggle', 'Tooltip', 'TrendChart', 'UserCard', 'UserMenu',
-        'Waveform',
+        'Alert', 'Avatar', 'Badge', 'Burst', 'Button', 'Card', 'Checkbox',
+        'ChoiceCard', 'ContourBackdrop', 'CornerMarkers', 'DataTable',
+        'DateRangePicker', 'Drawer', 'EmptyState', 'FunnelChart', 'Gauge',
+        'GridBackdrop', 'HeatGrid', 'HorizonBackdrop', 'IconButton', 'Input',
+        'MediaCard', 'MetricChart', 'MusicPlayer', 'NavItem', 'Nodes', 'Orb',
+        'PanelHeader', 'PanelMenu', 'Planet', 'ProgressBar', 'RadarChart',
+        'Radio', 'SearchField', 'SegmentedControl', 'Slider', 'Spinner',
+        'StatTile', 'Table', 'Tag', 'Textarea', 'Toggle', 'Tooltip',
+        'TrendChart', 'UserCard', 'UserMenu', 'VoidBackdrop', 'Waveform',
       ],
     },
     {
