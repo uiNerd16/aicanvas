@@ -27,6 +27,7 @@
 
 import {
   forwardRef,
+  useCallback,
   useContext,
   useEffect,
   useId,
@@ -38,11 +39,17 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
+import { useReducedMotion } from './lib/motion';
 import { tokens } from '../tokens';
 
 // Shares the dialog's accessible-name / description ids from the Drawer root
 // down to DrawerTitle / DrawerDescription so they can wire `id` ↔ `aria-*`.
-const DrawerContext = createContext({ titleId: undefined, descId: undefined });
+const DrawerContext = createContext({
+  titleId: undefined,
+  descId: undefined,
+  registerTitle: undefined,
+  registerDescription: undefined,
+});
 
 // Focusable-element selector for the focus trap + initial focus move-in.
 const FOCUSABLE_SELECTOR =
@@ -97,6 +104,17 @@ export const Drawer = forwardRef(function Drawer(
   const reactId = useId();
   const titleId = `${reactId}-title`;
   const descId = `${reactId}-desc`;
+  const [renderedTitleId, setRenderedTitleId] = useState(undefined);
+  const [renderedDescId, setRenderedDescId] = useState(undefined);
+  const registerTitle = useCallback((id) => {
+    setRenderedTitleId(id);
+    return () => setRenderedTitleId((current) => current === id ? undefined : current);
+  }, []);
+  const registerDescription = useCallback((id) => {
+    setRenderedDescId(id);
+    return () => setRenderedDescId((current) => current === id ? undefined : current);
+  }, []);
+  const reducedMotion = useReducedMotion();
 
   // Panel node + the element focused before opening (to restore focus on close).
   const panelRef = useRef(null);
@@ -191,12 +209,14 @@ export const Drawer = forwardRef(function Drawer(
   // and clamps to a token-sized inset from the edge below it. tokens.spacing[6]
   // (24px) leaves the backdrop peeking so the drawer still reads as an overlay.
   const sizeStyle = { width: `min(${sizeValue}, calc(100% - var(--andromeda-6, 24px)))` };
-  const panelInitial = { x: `${closedOffset}%`, opacity: 1 };
+  const panelInitial = reducedMotion ? false : { x: `${closedOffset}%`, opacity: 1 };
   const panelAnimate = { x: 0, opacity: 1 };
-  const panelExit    = { x: `${closedOffset}%`, opacity: 1 };
+  const panelExit = reducedMotion
+    ? { x: 0, opacity: 1, transition: { duration: 0 } }
+    : { x: `${closedOffset}%`, opacity: 1, transition: { duration: PANEL_DURATION, ease: EASE_IN } };
 
   return createPortal(
-    <DrawerContext.Provider value={{ titleId, descId }}>
+    <DrawerContext.Provider value={{ titleId, descId, registerTitle, registerDescription }}>
       <AnimatePresence>
         {open ? (
           <div
@@ -209,13 +229,13 @@ export const Drawer = forwardRef(function Drawer(
             <motion.div
               aria-hidden="true"
               onClick={() => onOpenChange?.(false)}
-              initial={{ opacity: 0 }}
+              initial={reducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
+              exit={reducedMotion ? { opacity: 1 } : { opacity: 0 }}
+              transition={reducedMotion ? { duration: 0 } : { duration: PANEL_DURATION, ease: EASE_OUT }}
               className={cn(
                 'absolute inset-0 bg-[color:var(--andromeda-surface-alpha)]',
-                '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+                '[backdrop-filter:blur(var(--andromeda-blur-sm,2px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-sm,2px))]',
               )}
             />
             {/* Panel */}
@@ -227,21 +247,21 @@ export const Drawer = forwardRef(function Drawer(
               }}
               role="dialog"
               aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descId}
+              aria-labelledby={renderedTitleId}
+              aria-describedby={renderedDescId}
               tabIndex={-1}
               onKeyDown={onPanelKeyDown}
               data-slot="drawer-panel"
               initial={panelInitial}
               animate={panelAnimate}
-              exit={{ ...panelExit, transition: { duration: PANEL_DURATION, ease: EASE_IN } }}
-              transition={{ duration: PANEL_DURATION, ease: EASE_OUT }}
+              exit={panelExit}
+              transition={reducedMotion ? { duration: 0 } : { duration: PANEL_DURATION, ease: EASE_OUT }}
               className={cn(
                 'absolute',
                 cfg.position,
                 'flex flex-col',
                 'bg-[color:var(--andromeda-surface-raised)]',
-                '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
+                '[backdrop-filter:blur(var(--andromeda-blur-lg,8px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-lg,8px))]',
                 'rounded-[var(--andromeda-radius-frame,0px)]',
                 'shadow-[0_0_60px_var(--andromeda-surface-base)]',
                 'outline-none',
@@ -289,11 +309,13 @@ export const DrawerTitle = forwardRef(function DrawerTitle(
   { className, children, id, ...props },
   ref,
 ) {
-  const { titleId } = useContext(DrawerContext);
+  const { titleId, registerTitle } = useContext(DrawerContext);
+  const resolvedId = id ?? titleId;
+  useEffect(() => registerTitle?.(resolvedId), [registerTitle, resolvedId]);
   return (
     <div
       ref={ref}
-      id={id ?? titleId}
+      id={resolvedId}
       data-slot="drawer-title"
       className={cn(
         '[font-family:var(--andromeda-font-mono)]',
@@ -314,11 +336,13 @@ export const DrawerDescription = forwardRef(function DrawerDescription(
   { className, children, id, ...props },
   ref,
 ) {
-  const { descId } = useContext(DrawerContext);
+  const { descId, registerDescription } = useContext(DrawerContext);
+  const resolvedId = id ?? descId;
+  useEffect(() => registerDescription?.(resolvedId), [registerDescription, resolvedId]);
   return (
     <div
       ref={ref}
-      id={id ?? descId}
+      id={resolvedId}
       data-slot="drawer-description"
       className={cn(
         '[font-family:var(--andromeda-font-sans)]',

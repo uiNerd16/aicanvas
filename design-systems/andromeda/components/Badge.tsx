@@ -32,7 +32,7 @@ const BLINK_OFF_MS = parseFloat(tokens.motion.duration.slow); // 200ms
 function useBlink() {
   const reducedMotion = useReducedMotion();
   const [opacity, setOpacity] = useState(1);
-  const timerRef = useRef(null);
+  const timerRef = useRef({ outer: null, inner: null });
 
   useEffect(() => {
     if (reducedMotion) {
@@ -40,9 +40,9 @@ function useBlink() {
       return;
     }
     function schedule() {
-      timerRef.current = setTimeout(() => {
+      timerRef.current.outer = setTimeout(() => {
         setOpacity(0.12);
-        setTimeout(() => {
+        timerRef.current.inner = setTimeout(() => {
           setOpacity(1);
           schedule();
         }, BLINK_OFF_MS);
@@ -50,7 +50,10 @@ function useBlink() {
       }, 1800 + Math.random() * 800);
     }
     schedule();
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      clearTimeout(timerRef.current.outer);
+      clearTimeout(timerRef.current.inner);
+    };
   }, [reducedMotion]);
 
   return opacity;
@@ -61,8 +64,7 @@ const badgeVariants = cva(
     // max-w-full + min-w-0 keep a long label from forcing horizontal scroll
     // when the Badge sits in a stacked (single-column) layout; the label
     // span truncates instead (see render below).
-    // ponytail: 5px gap is an identity constant, no token
-    'inline-flex items-center gap-[5px] select-none whitespace-nowrap',
+    'inline-flex items-center gap-[var(--andromeda-1-5)] select-none whitespace-nowrap',
     'max-w-full min-w-0 box-border',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     '[font-family:var(--andromeda-font-mono)]',

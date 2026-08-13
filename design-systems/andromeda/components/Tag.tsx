@@ -12,6 +12,7 @@ import { forwardRef } from 'react';
 import { X } from '@phosphor-icons/react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
+import { tokens } from '../tokens';
 
 const tagVariants = cva(
   [
@@ -31,7 +32,7 @@ const tagVariants = cva(
     // the weight axis belongs to the controls.
     'font-[number:var(--andromeda-weight-regular)]',
     'uppercase [letter-spacing:var(--andromeda-tracking-wider)]',
-    'transition-colors duration-150 ease-out',
+    'transition-colors [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
   ],
   {
     variants: {
@@ -100,7 +101,7 @@ const closeButtonClass = cn(
   // Inherit the variant's text color so contrast against the variant
   // bg always matches the tag label (text-100 on bg-500 → ≥7:1).
   'text-[color:currentColor]',
-  'opacity-70 transition-[opacity,transform] duration-150 ease-out',
+  'opacity-70 transition-[opacity,transform] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
   'hover:opacity-100',
   'active:scale-[0.80]',
   'focus-visible:outline-none focus-visible:opacity-100',
@@ -140,7 +141,7 @@ export const Tag = forwardRef(function Tag(
           onClick={onClose}
           className={closeButtonClass}
         >
-          <X size={12} weight="regular" />
+          <X size={tokens.iconSize.xs} weight="regular" />
         </button>
       ) : null}
     </span>

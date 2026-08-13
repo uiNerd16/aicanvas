@@ -26,7 +26,7 @@ function PeakBar({ value }) {
       style={{
         position: 'relative',
         // 6px border-box = a 4px fill between the two hairlines.
-        height: '6px',
+        height: tokens.spacing[1.5],
         width: '88px',
         background: tokens.color.surface.overlay,
         border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
@@ -57,8 +57,16 @@ const COLUMNS = [
     // either side, and the cell style carries text-overflow:ellipsis, so a
     // column narrower than control + that padding paints a phantom "..."
     // under the button. Never a magic number — the ladder moved once already.
-    width: `calc(var(--andromeda-control-sm, 28px) + ${tokens.spacing[3]} * 2)`,
-    render: () => <IconButton variant="ghost" size="sm" icon={Play} aria-label="Play" />,
+    width: `calc(var(--andromeda-control-sm, ${tokens.control.sm.height}) + ${tokens.spacing[3]} * 2)`,
+    render: () => (
+      <IconButton
+        variant="ghost"
+        size="sm"
+        icon={Play}
+        aria-label="Play"
+        onClick={(event) => event.stopPropagation()}
+      />
+    ),
   },
   { key: 'id', header: 'ID', width: '96px', hideBelow: 'md', fold: 'none', color: tokens.color.text.faint },
   {

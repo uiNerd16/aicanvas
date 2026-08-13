@@ -12,6 +12,7 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 import { tokens } from '../tokens';
 
 const BARS       = 30;  // number of columns
@@ -35,15 +36,12 @@ const STRIP_W    = BARS * SQUARE_W + (BARS - 1) * GAP_COL;
 const variantConfig = {
   default: {
     activeColor:  'var(--andromeda-accent-500)',
-    activeBorder: 'var(--andromeda-accent-400)',
   },
   warning: {
     activeColor:  'var(--andromeda-orange-500)',
-    activeBorder: 'var(--andromeda-orange-400)',
   },
   fault: {
     activeColor:  'var(--andromeda-red-500)',
-    activeBorder: 'var(--andromeda-red-400)',
   },
 };
 
@@ -100,12 +98,17 @@ export const ProgressBar = forwardRef(function ProgressBar(
     else if (outerRef) outerRef.current = node;
   };
   const inView = useInView(internalRef, { once: true, amount: 0.3 });
+  const reducedMotion = useReducedMotion();
   const [displayed, setDisplayed] = useState(0);
   useEffect(() => {
+    if (reducedMotion) {
+      setDisplayed(activeCount);
+      return;
+    }
     if (!inView) return;
     const id = requestAnimationFrame(() => setDisplayed(activeCount));
     return () => cancelAnimationFrame(id);
-  }, [inView, activeCount]);
+  }, [inView, activeCount, reducedMotion]);
 
   return (
     <div
@@ -139,7 +142,7 @@ export const ProgressBar = forwardRef(function ProgressBar(
         }}
       >
         {Array.from({ length: BARS }, (_, barIndex) => {
-          const active = barIndex < displayed;
+          const active = barIndex < (reducedMotion ? activeCount : displayed);
 
           return (
             <div
@@ -166,8 +169,12 @@ export const ProgressBar = forwardRef(function ProgressBar(
                       : 'var(--andromeda-surface-hover)',
                     border: 'none',
                     boxShadow: 'none',
-                    transition: 'background var(--andromeda-duration-cascade) var(--andromeda-easing-out), box-shadow var(--andromeda-duration-cascade) var(--andromeda-easing-out), border-color var(--andromeda-duration-cascade) var(--andromeda-easing-out)',
-                    transitionDelay: `calc(${Math.floor(barIndex / 3)} * var(--andromeda-stagger-progressbar))`,
+                    transition: reducedMotion
+                      ? 'none'
+                      : 'background var(--andromeda-duration-cascade) var(--andromeda-easing-out), box-shadow var(--andromeda-duration-cascade) var(--andromeda-easing-out), border-color var(--andromeda-duration-cascade) var(--andromeda-easing-out)',
+                    transitionDelay: reducedMotion
+                      ? '0ms'
+                      : `calc(${Math.floor(barIndex / 3)} * var(--andromeda-stagger-progressbar))`,
                   }}
                 />
               ))}

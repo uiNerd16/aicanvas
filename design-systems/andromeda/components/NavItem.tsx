@@ -182,7 +182,7 @@ export const NavItem = forwardRef(function NavItem(
             }}
           />
         ) : null}
-        {Icon ? <Icon size={20} weight="regular" /> : null}
+        {Icon ? <Icon size={tokens.iconSize.lg} weight="regular" /> : null}
         {/* Collapsed keeps the label in the accessibility tree and takes it
             out of the picture. Hiding it outright would leave a button whose
             only content is a decorative glyph, so the row would announce as

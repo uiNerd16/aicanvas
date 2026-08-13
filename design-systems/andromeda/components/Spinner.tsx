@@ -17,6 +17,7 @@
 import { forwardRef, useEffect } from 'react';
 import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 
 const STYLE_ID = 'andromeda-spinner-keyframes';
 // 0-37.5% bright, 37.5-100% dim. The 37.6% stop snaps the colour change so
@@ -78,7 +79,10 @@ export const Spinner = forwardRef(function Spinner(
   { className, variant = 'default', size = 'md', label = 'Loading', style, ...props },
   ref,
 ) {
-  useEffect(() => { ensureKeyframesInjected(); }, []);
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    if (!reducedMotion) ensureKeyframesInjected();
+  }, [reducedMotion]);
 
   // Resolve both rungs once: the same keys feed the geometry, the colour and
   // the data-* attributes, so an unknown prop value can never be reflected.
@@ -104,8 +108,8 @@ export const Spinner = forwardRef(function Spinner(
           style={{
             width:  `${sz.cell}px`,
             height: `${sz.cell}px`,
-            background: dim,
-            ...(isCenter ? null : {
+            background: isCenter || !reducedMotion ? dim : bright,
+            ...(isCenter || reducedMotion ? null : {
               animation: `andromeda-spinner-snake ${DURATION_MS}ms linear infinite`,
               animationDelay: `${delayMs}ms`,
             }),

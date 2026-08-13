@@ -58,7 +58,7 @@ const DEFAULT_SERIES = [
 ];
 
 // ── Custom tooltip ───────────────────────────────────────────────────────────
-function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
+function SpaceTooltip({ active, payload, label, series, onFirstActive, reducedMotion }) {
   useEffect(() => {
     if (active && payload?.length) onFirstActive?.();
   }, [active]);
@@ -78,7 +78,7 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
       WebkitBackdropFilter: 'blur(12px)',
       position: 'relative',
       // Slide-in from slightly above, fade in — triggered on every mount
-      animation: 'andromeda-tooltip-in var(--andromeda-duration-normal, 140ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1)) both',
+      animation: `${reducedMotion ? 'andromeda-tooltip-fade-in' : 'andromeda-tooltip-in'} var(--andromeda-duration-normal, 140ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1)) both`,
       minWidth: 120,
     }}>
       <div style={{
@@ -258,7 +258,7 @@ export const RadarChart = forwardRef(function RadarChart(
           left: tokens.spacing[3],
           right: tokens.spacing[3],
           bottom: 0,
-          height: '1px',
+          height: tokens.border.width[1],
           background: tokens.color.border.subtle,
           pointerEvents: 'none',
         }} />
@@ -333,7 +333,7 @@ export const RadarChart = forwardRef(function RadarChart(
             <Tooltip
               cursor={false}
               isAnimationActive={false}
-              content={<SpaceTooltip series={series} onFirstActive={onFirstActivation} />}
+              content={<SpaceTooltip series={series} onFirstActive={onFirstActivation} reducedMotion={reducedMotion} />}
               wrapperStyle={{
                 outline: 'none',
                 transition: shown
@@ -377,7 +377,7 @@ export const RadarChart = forwardRef(function RadarChart(
           left: tokens.spacing[3],
           right: tokens.spacing[3],
           top: 0,
-          height: '1px',
+          height: tokens.border.width[1],
           background: tokens.color.border.subtle,
           pointerEvents: 'none',
         }} />
@@ -389,7 +389,7 @@ export const RadarChart = forwardRef(function RadarChart(
           }}>
             <span style={{
               display: 'inline-block',
-              width: 8,
+              width: tokens.chart.swatch,
               height: 2,
               background: s.color ?? 'var(--andromeda-accent-300, #0FCFB2)',
               flexShrink: 0,
@@ -411,6 +411,10 @@ export const RadarChart = forwardRef(function RadarChart(
         @keyframes andromeda-tooltip-in {
           from { opacity: 0; transform: translateY(-6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+        @keyframes andromeda-tooltip-fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
       `}</style>
     </div>

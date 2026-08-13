@@ -21,11 +21,10 @@ import { mq } from './lib/responsive';
 
 // ── Global hover stylesheet ────────────────────────────────────────
 // Inject once per page. Class-based rules beat inline styles so the
-// hover lift fires correctly even when rows carry an inline background.
+// background hover step fires correctly even when rows carry an inline background.
 const TABLE_STYLE_ID = 'andromeda-table-styles';
 const TABLE_STYLES = `
-      /* off-token 100ms ease, deliberate — no matching duration/easing token */
-      .andro-tr         { transition: background-color 100ms ease; cursor: default; }
+      .andro-tr         { transition: background-color var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard}); cursor: default; }
       .andro-tr-hover   { cursor: pointer; }
       .andro-tr-hover:hover { background-color: var(--andromeda-surface-hover) !important; }
       /* Companion for documentation surfaces that show hover at rest: the same
@@ -119,7 +118,7 @@ export const TableBody = forwardRef(function TableBody({ children, ...props }, r
 /**
  * @typedef {object} TableRowProps
  * @property {boolean} [selected=false]  Applies surface.active bg + accent-300 left edge.
- * @property {boolean} [hoverable=true] Adds the hover-lift class (default true).
+ * @property {boolean} [hoverable=true] Adds the background-hover class (default true).
  */
 export const TableRow = forwardRef(function TableRow(
   { selected = false, hoverable = true, className = '', style, children, ...props },
@@ -132,7 +131,7 @@ export const TableRow = forwardRef(function TableRow(
       style={{
         backgroundColor: selected ? tokens.color.surface.active : 'transparent',
         backgroundImage: ROW_INSET_LINE,
-        backgroundSize: '100% 1px',
+        backgroundSize: `100% ${tokens.border.width[1]}`,
         backgroundPosition: 'bottom',
         backgroundRepeat: 'no-repeat',
         boxShadow: selected ? `inset 2px 0 0 0 var(--andromeda-accent-300, ${tokens.color.accent[300]})` : undefined,

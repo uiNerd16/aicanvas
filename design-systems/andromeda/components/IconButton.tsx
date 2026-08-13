@@ -4,7 +4,7 @@
 // Square, label-less companion to Button. Same variant + size
 // vocabulary so the two compose into a single coherent toolbar.
 // Variants: default | outline | ghost | destructive
-// Sizes:    sm (24px) | md (32px) | lg (40px)
+// Sizes:    sm (28px) | md (34px) | lg (40px)
 // ============================================================
 
 'use client';
@@ -19,7 +19,7 @@ import { tokens } from '../tokens';
 
 // Touch-target expander — the visible square stays its desktop size token; on
 // coarse pointers a centered, transparent ::before overlay grows the *hit area*
-// toward spacing[10] (40px). The sm/md squares (24/32px) sit below a comfortable
+// toward spacing[10] (40px). The sm/md squares (28/34px) sit below a comfortable
 // touch minimum; this enlarges only what the finger lands on. Scoped className,
 // !important to out-specify the cva/inline base. the Andromeda responsive rules.
 const TOUCH_TARGET_STYLE = `
@@ -35,11 +35,11 @@ const TOUCH_TARGET_STYLE = `
       min-height: ${tokens.spacing[10]} !important;
       min-width: ${tokens.spacing[10]} !important;
     }
-    /* Dense 'sm' clusters: a 40px overlay on a 24px square overflows 8px/side,
+    /* Dense 'sm' clusters: a 40px overlay on a 28px square overflows 6px/side,
        so two adjacent sm IconButtons at the system's standard gaps (spacing[2]–
        [3]) would overlap and a seam tap could hit the wrong button. Cap the sm
-       floor at spacing[8] (32px → 4px/side) so adjacent sm buttons never overlap
-       at gap >= spacing[2]. Still a meaningful bump from the 24px chrome. */
+       floor at spacing[8] (32px → 2px/side) so adjacent sm buttons never overlap
+       at gap >= spacing[2]. Still a meaningful bump from the 28px chrome. */
     .andromeda-iconbtn-touch[data-size="sm"]::before {
       min-height: ${tokens.spacing[8]} !important;
       min-width: ${tokens.spacing[8]} !important;
@@ -144,7 +144,7 @@ const ICON_SIZE = { sm: tokens.iconSize.sm, md: tokens.iconSize.md, lg: tokens.i
  * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon]
  *   Phosphor / Lucide icon. Pass either `icon` OR `children` for custom glyphs.
  * @property {React.ReactNode} [children] Custom icon content (SVG, bars, etc.)
- * @property {string} [aria-label]  Required for accessibility (no visible text).
+ * @property {string} aria-label REQUIRED for accessibility (no visible text).
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  * @property {'button'|'submit'|'reset'} [type='button'] HTML button type; defaults to 'button' so the control does not submit an enclosing form.
@@ -168,6 +168,9 @@ export const IconButton = forwardRef(function IconButton(
   ref,
 ) {
   const reducedMotion = useReducedMotion();
+  if (process.env.NODE_ENV !== 'production' && !props['aria-label']) {
+    console.warn('Andromeda IconButton: `aria-label` is required because the control has no visible text.');
+  }
   return (
     <>
       <motion.button

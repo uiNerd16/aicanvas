@@ -21,7 +21,7 @@ import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
 // Size ramp. PanelHeader is a block header, not an inline control, so it does
-// NOT pin to the 24/32/40 control ladder: a panel title sets the panel's weight
+// NOT pin to the 28/34/40 control ladder: a panel title sets the panel's weight
 // in the page, and a fixed row height would cap the type. It steps the type
 // scale instead (lg 16 / xl 18 / 2xl 20, one rung either side of today's xl)
 // with the padding moving one spacing step alongside, which keeps the
@@ -43,7 +43,7 @@ const SIZES = {
  * @property {React.ReactNode} [actions]         Right-aligned slot (PanelMenu, IconButton, Button, etc.).
  * @property {'sm'|'md'|'lg'}  [size='md']       Header weight: title type + padding.
  *   The actions child keeps its OWN size prop (the header never forces it), so
- *   pair them by name: sm header + `size="sm"` control (24px), md + `md` (32px),
+ *   pair them by name: sm header + `size="sm"` control (28px), md + `md` (34px),
  *   lg + `lg` (40px). A mismatched pair is legal and occasionally right (a dense
  *   sm kebab on an md header), just make it deliberate.
  * @property {string}          [className]

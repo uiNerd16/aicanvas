@@ -31,6 +31,12 @@ const TOUCH_TARGET_STYLE = `
       height: var(--andromeda-10) !important;
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .andromeda-toggle-track,
+    .andromeda-toggle-thumb {
+      transition: none !important;
+    }
+  }
 `;
 
 const trackVariants = cva(
@@ -194,9 +200,9 @@ export const Toggle = forwardRef(function Toggle(
         />
         <span
           aria-hidden="true"
-          className={cn(trackVariants({ size, state, disabled }), className)}
+          className={cn(trackVariants({ size, state, disabled }), 'andromeda-toggle-track', className)}
         >
-          <span className={thumbVariants({ size, state })} />
+          <span className={cn(thumbVariants({ size, state }), 'andromeda-toggle-thumb')} />
         </span>
       </span>
       {label ? (

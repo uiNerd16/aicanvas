@@ -19,7 +19,7 @@
 
 'use client';
 
-import { forwardRef, useId, useRef, useState } from 'react';
+import { forwardRef, useEffect, useId, useRef, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -241,6 +241,18 @@ export const TrendChart = forwardRef(function TrendChart(
   const [visible, setVisible] = useState(() =>
     Object.fromEntries(series.map((s) => [s.key, true])),
   );
+  useEffect(() => {
+    setVisible((current) => {
+      const next = Object.fromEntries(
+        series.map((s) => [s.key, current[s.key] ?? true]),
+      );
+      const currentKeys = Object.keys(current);
+      return currentKeys.length === series.length
+        && series.every((s) => next[s.key] === current[s.key])
+        ? current
+        : next;
+    });
+  }, [series]);
   // Stable chart id. Without one, recharts derives its internal clipPath id
   // from a module-level counter (`uniqueId('recharts')`), which cannot agree
   // between the server render and hydration — React then reports a mismatch on
@@ -338,7 +350,7 @@ export const TrendChart = forwardRef(function TrendChart(
       <AreaChart id={chartId} data={data} margin={chartMargin}>
         <defs>
           {shown.map((s) => (
-            <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient key={s.key} id={`${chartId}-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={colorOf(s)} style={{ stopOpacity: Filled ? 'var(--andromeda-chart-fill-opacity, 0.12)' : 0 }} />
               <stop offset="100%" stopColor={colorOf(s)} stopOpacity={0} />
             </linearGradient>
@@ -364,7 +376,7 @@ export const TrendChart = forwardRef(function TrendChart(
             strokeWidth={tokens.chart.lineWidth}
             // RAW: recharts attribute sink — '4 4' threshold dash stays literal, var() cannot resolve
             strokeDasharray={isThreshold(s) ? '4 4' : undefined}
-            fill={`url(#tc-fill-${s.key})`}
+            fill={`url(#${chartId}-fill-${s.key})`}
             dot={false}
             activeDot={{ r: 4, fill: colorOf(s), stroke: tokens.color.surface.raised, strokeWidth: parseInt(tokens.border.width[1], 10) }}
             isAnimationActive={false}
@@ -411,7 +423,11 @@ export const TrendChart = forwardRef(function TrendChart(
       ) : null}
 
       {/* Plot */}
-      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+      <div
+        role="img"
+        aria-label={title ? `${title} chart` : yLabel ? `${yLabel} chart` : 'Trend chart'}
+        style={{ position: 'relative', flex: 1, minHeight: 0 }}
+      >
         {/* No z-index here: the plot wrapper below is a stacking context (its
             clip-path reveal), so a raised label would paint OVER the tooltip
             pinned to the plot top — the label text bleeding through the

@@ -123,6 +123,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
   // Cascade base-first, centre-out — token-driven tempo.
   const rowStaggerMs = msNum(tokens.motion.stagger.progressBar);
   const colStaggerMs = Math.round(rowStaggerMs * 0.18);
+  const cascadeBufferMs = msNum(tokens.motion.stagger.cascade);
 
   // The staggered cascade plays ONCE on entrance. After it finishes the gauge
   // goes "live": subsequent `value` changes crossfade uniformly (delay 0) so a
@@ -135,9 +136,9 @@ export const HeatGrid = forwardRef(function HeatGrid(
     if (!revealed) return undefined;
     const cascadeMs =
       (rows - 1) * rowStaggerMs + center * colStaggerMs + msNum(tokens.motion.duration.cascade);
-    const t = setTimeout(() => setEntered(true), cascadeMs + 60);
+    const t = setTimeout(() => setEntered(true), cascadeMs + cascadeBufferMs);
     return () => clearTimeout(t);
-  }, [revealed, entered, reducedMotion, rows, rowStaggerMs, colStaggerMs, center]);
+  }, [revealed, entered, reducedMotion, rows, rowStaggerMs, colStaggerMs, center, cascadeBufferMs]);
 
   // Stagger only during the one-shot entrance; live updates crossfade together.
   const inEntrance = revealed && !entered && !reducedMotion;

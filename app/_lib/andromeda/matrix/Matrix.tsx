@@ -223,7 +223,7 @@ function CaseCard({
             <Instance key={s} caption={s} spec={spec} kind={kind} c={c} size={s} render={render} />
           ))
         ) : (
-          <MatrixCell spec={spec} kind={kind} c={c} size="md" render={render} />
+          <MatrixCell spec={spec} kind={kind} c={c} render={render} />
         )}
       </div>
     </div>

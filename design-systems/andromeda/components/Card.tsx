@@ -21,7 +21,7 @@ const cardVariants = cva(
     // footer. Unstretched cards are unaffected — the column is still auto-height.
     'relative flex flex-col',
     'rounded-[var(--andromeda-radius-frame,0px)]',
-    '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+    '[backdrop-filter:blur(var(--andromeda-blur-sm,2px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-sm,2px))]',
   ],
   {
     variants: {
@@ -54,7 +54,7 @@ const cardVariants = cva(
 
 /**
  * @typedef {object} CardProps
- * @property {'default'|'glow'} [variant='default']
+ * @property {'default'|'glow'|'flare'} [variant='default']
  * @property {boolean} [bordered=false] Toggle a continuous 1px border. Off by default. Andromeda cards rely on corner brackets, not perimeter strokes.
  * @property {boolean} [markers=true] Toggle the corner markers motif.
  * @property {import('./CornerMarkers').CornerMarkersProps} [markerProps] Pass-through overrides for the inner CornerMarkers.

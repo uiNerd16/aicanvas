@@ -89,7 +89,7 @@ const buttonVariants = cva(
     // (press) per `tokens.motion`.
     'cursor-pointer',
     'transition-[background-color,border-color,box-shadow,color] [transition-duration:var(--andromeda-duration-normal)] [transition-timing-function:var(--andromeda-easing-out)]',
-    '[backdrop-filter:blur(2px)] [-webkit-backdrop-filter:blur(2px)]',
+    '[backdrop-filter:blur(var(--andromeda-blur-sm,2px))] [-webkit-backdrop-filter:blur(var(--andromeda-blur-sm,2px))]',
     // focus & disabled
     'focus-visible:outline-none',
     'focus-visible:shadow-[0_0_0_var(--andromeda-border-width,1px)_var(--andromeda-accent-400),0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-500)]',

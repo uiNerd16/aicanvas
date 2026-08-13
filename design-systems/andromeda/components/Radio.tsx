@@ -20,7 +20,15 @@ function useSpacePopIn() {
     if (document.querySelector('#andromeda-pop-in-style')) return;
     const style = document.createElement('style');
     style.id = 'andromeda-pop-in-style';
-    style.textContent = `@keyframes andromeda-pop-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}`;
+    style.textContent = `
+      @keyframes andromeda-pop-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+      @media (prefers-reduced-motion: reduce) {
+        .andromeda-checkbox-box { transition: none !important; transform: none !important; }
+        .andromeda-checkbox-mark { animation: none !important; }
+        .andromeda-radio-box { transition: none !important; transform: none !important; }
+        .andromeda-radio-mark { animation: none !important; }
+      }
+    `;
     document.head.appendChild(style);
   }, []);
 }
@@ -213,6 +221,10 @@ export const Radio = forwardRef(function Radio(
   const id = idProp ?? `andromeda-radio-${reactId}`;
   const group = useContext(RadioGroupContext);
 
+  if (process.env.NODE_ENV !== 'production' && group && value === undefined) {
+    console.warn('Andromeda Radio: `value` is required when used inside RadioGroup.');
+  }
+
   // Standalone fallback state when this Radio is rendered outside a group.
   const [internal, setInternal] = useState(defaultChecked);
 
@@ -222,7 +234,7 @@ export const Radio = forwardRef(function Radio(
   let onChange;
 
   if (group) {
-    checked = group.value === value;
+    checked = value !== undefined && group.value === value;
     disabled = disabled || group.disabled;
     name = name ?? group.name;
     onChange = () => { group.onValueChange(value); onCheckedChange?.(true); };
@@ -268,13 +280,14 @@ export const Radio = forwardRef(function Radio(
               state: checked ? 'checked' : 'unchecked',
               disabled,
             }),
+            'andromeda-radio-box',
             className,
           )}
         >
           {checked ? (
             <span
               // Mark geometry tracks the box so the ring around it stays even.
-              className={MARK_FOR_SIZE[size]}
+              className={cn(MARK_FOR_SIZE[size], 'andromeda-radio-mark')}
               style={{
                 background: 'var(--andromeda-accent-300)',
                 boxShadow: '0 0 6px var(--andromeda-accent-500)',

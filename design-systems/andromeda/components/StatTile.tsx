@@ -137,25 +137,58 @@ function easeOutExpo(t) {
 // gates the animation so tiles below the fold don't burn their reveal
 // off-screen. Templates with multi-screen height get the count-up at
 // the moment the user actually sees the value.
-function useCountUp(rawValue, duration = COUNTUP_MS, live = false, inView = true) {
+function useCountUp(rawValue, duration = COUNTUP_MS, live = false, inView = true, skip = false, reducedMotion = false) {
   const num = parseFloat(rawValue);
   const isNumeric = !isNaN(num);
   const decimals = isNumeric
     ? (String(rawValue).split('.')[1] ?? '').length
     : 0;
+  const formattedTarget = isNumeric
+    ? (decimals > 0 ? num.toFixed(decimals) : String(Math.round(num)))
+    : rawValue;
 
   const [display, setDisplay] = useState(isNumeric ? '0' : rawValue);
   const rafRef = useRef(null);
+  const timeoutRef = useRef(null);
   const startRef = useRef(null);
   const hasMountedRef = useRef(false);
+  const tweeningRef = useRef(false);
+  const targetRef = useRef({ num, decimals });
+  targetRef.current = { num, decimals };
+
+  function stopWork() {
+    clearTimeout(timeoutRef.current);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    timeoutRef.current = null;
+    rafRef.current = null;
+    tweeningRef.current = false;
+  }
+
+  useEffect(() => () => stopWork(), []);
 
   useEffect(() => {
-    if (!isNumeric) { setDisplay(rawValue); return; }
+    if (skip || reducedMotion) {
+      stopWork();
+      return;
+    }
+
+    if (!isNumeric) {
+      stopWork();
+      setDisplay(rawValue);
+      return;
+    }
 
     // After first reveal, in `live` mode, snap to the new value without
     // animating. Live data updates are signal, not a chance to re-reveal.
     if (live && hasMountedRef.current) {
-      setDisplay(decimals > 0 ? num.toFixed(decimals) : String(Math.round(num)));
+      setDisplay(formattedTarget);
+      return;
+    }
+
+    // A live update received during the initial reveal retargets that same
+    // tween. The running tick reads targetRef, so it keeps its elapsed time
+    // instead of cancelling and starting over from zero.
+    if (live && tweeningRef.current) {
       return;
     }
 
@@ -166,30 +199,32 @@ function useCountUp(rawValue, duration = COUNTUP_MS, live = false, inView = true
 
     // First reveal: run the count-up. Small delay so the card's outer
     // entrance (cascade slide-in) is visible first, then the value tweens.
-    const timeout = setTimeout(() => {
+    stopWork();
+    tweeningRef.current = true;
+    timeoutRef.current = setTimeout(() => {
       startRef.current = null;
 
       function tick(now) {
         if (!startRef.current) startRef.current = now;
         const elapsed = now - startRef.current;
         const t = Math.min(elapsed / duration, 1);
-        const current = num * easeOutExpo(t);
-        setDisplay(decimals > 0 ? current.toFixed(decimals) : String(Math.round(current)));
+        const target = targetRef.current;
+        const current = target.num * easeOutExpo(t);
+        setDisplay(target.decimals > 0 ? current.toFixed(target.decimals) : String(Math.round(current)));
         if (t < 1) rafRef.current = requestAnimationFrame(tick);
-        else hasMountedRef.current = true;
+        else {
+          hasMountedRef.current = true;
+          tweeningRef.current = false;
+          rafRef.current = null;
+        }
       }
 
       rafRef.current = requestAnimationFrame(tick);
     }, 120);
-
-    return () => {
-      clearTimeout(timeout);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawValue, inView]);
+  }, [rawValue, inView, live, duration, skip, reducedMotion]);
 
-  return display;
+  return skip || reducedMotion ? formattedTarget : display;
 }
 
 
@@ -293,7 +328,7 @@ export const StatTile = forwardRef(function StatTile(
   // animate per-position on change — count-up is suppressed entirely so
   // the user reads the *value*, not a tween. The first paint still fades
   // in via the `andromeda-value-in` keyframe on the value wrapper below.
-  const countUpDisplay = useCountUp(value, COUNTUP_MS, live, inView);
+  const countUpDisplay = useCountUp(value, COUNTUP_MS, live, inView, liveRoll, reducedMotion);
   const displayValue = liveRoll ? String(value) : countUpDisplay;
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   const isFlat = hasDelta && delta === 0;
@@ -328,7 +363,9 @@ export const StatTile = forwardRef(function StatTile(
         {/* Value + unit. ponytail: 0.4s + ease-out are identity constants for the reveal, no token */}
         <div
           className="flex items-baseline gap-[var(--andromeda-2)]"
-          style={{ animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: 'var(--andromeda-duration-fast, 80ms)' }}
+          style={reducedMotion
+            ? { animation: 'none' }
+            : { animation: 'andromeda-value-in 0.4s ease-out both', animationDelay: 'var(--andromeda-duration-fast, 80ms)' }}
         >
           {liveRoll
             ? <DigitRoller value={displayValue} className={valueClass} reduced={reducedMotion} />

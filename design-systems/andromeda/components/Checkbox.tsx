@@ -17,7 +17,15 @@ function useSpacePopIn() {
     if (document.querySelector('#andromeda-pop-in-style')) return;
     const style = document.createElement('style');
     style.id = 'andromeda-pop-in-style';
-    style.textContent = `@keyframes andromeda-pop-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}`;
+    style.textContent = `
+      @keyframes andromeda-pop-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+      @media (prefers-reduced-motion: reduce) {
+        .andromeda-checkbox-box { transition: none !important; transform: none !important; }
+        .andromeda-checkbox-mark { animation: none !important; }
+        .andromeda-radio-box { transition: none !important; transform: none !important; }
+        .andromeda-radio-mark { animation: none !important; }
+      }
+    `;
     document.head.appendChild(style);
   }, []);
 }
@@ -194,11 +202,13 @@ export const Checkbox = forwardRef(function Checkbox(
             }),
             // Sync focus ring with the hidden native input.
             'peer-focus-visible:shadow-[0_0_0_1px_var(--andromeda-accent-400),0_0_8px_var(--andromeda-accent-500)]',
+            'andromeda-checkbox-box',
             className,
           )}
         >
           {checked ? (
             <Check
+              className="andromeda-checkbox-mark"
               size={TICK_FOR_SIZE[size]}
               weight="light"
               style={{
