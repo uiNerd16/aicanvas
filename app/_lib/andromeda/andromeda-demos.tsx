@@ -47,6 +47,7 @@ import { Badge } from '../../../design-systems/andromeda/components/Badge'
 import { Button } from '../../../design-systems/andromeda/components/Button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../design-systems/andromeda/components/Card'
 import { Checkbox } from '../../../design-systems/andromeda/components/Checkbox'
+import { ChoiceCard } from '../../../design-systems/andromeda/components/ChoiceCard'
 import { CornerMarkers } from '../../../design-systems/andromeda/components/CornerMarkers'
 import { DateRangePicker } from '../../../design-systems/andromeda/components/DateRangePicker'
 import { Drawer, DrawerBody, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '../../../design-systems/andromeda/components/Drawer'
@@ -750,6 +751,18 @@ function CheckboxDemo() {
   )
 }
 
+function ChoiceCardDemo() {
+  // Capture scene: the selection moment — one committed card between two
+  // resting siblings, the approved matrix look at md.
+  return (
+    <div style={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <ChoiceCard control="radio" title="Standard orbit" description="Default trajectory, lowest fuel cost" value="standard" />
+      <ChoiceCard control="radio" title="Transfer window" description="Faster arrival, single burn commitment" value="transfer" defaultChecked />
+      <ChoiceCard control="radio" title="Manual approach" description="Full control, all corrections yours" value="manual" />
+    </div>
+  )
+}
+
 function RadioDemo() {
   const [value, setValue] = useState('default')
   return (
@@ -1431,6 +1444,7 @@ const DEMOS: Record<string, () => React.ReactElement> = {
   button: ButtonDemo,
   card: CardDemo,
   checkbox: CheckboxDemo,
+  'choice-card': ChoiceCardDemo,
   'corner-markers': CornerMarkersDemo,
   'date-range-picker': DateRangePickerDemo,
   drawer: DrawerDemo,
