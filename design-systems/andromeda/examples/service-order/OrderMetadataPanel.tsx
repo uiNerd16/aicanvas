@@ -259,11 +259,12 @@ function HeaderStrip() {
       <div className="so-meta-header-spacer" style={{ flex: 1 }} />
 
       <div className="so-meta-actions" style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3] }}>
-        <Button variant="outline" size="sm" icon={Pencil}>
-          Edit
-        </Button>
+        {/* Primary goes first — composition-recipes.md CTA-order must. */}
         <Button variant="default" size="sm" icon={FileText}>
           Generate Report
+        </Button>
+        <Button variant="outline" size="sm" icon={Pencil}>
+          Edit
         </Button>
       </div>
 
