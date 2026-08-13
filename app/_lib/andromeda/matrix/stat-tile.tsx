@@ -29,7 +29,7 @@ export const statTile: MatrixSpec = {
       props: { label: 'Uptime', code: 'UP-04', value: '99.1', unit: '%', delta: -0.4, deltaLabel: 'vs prior period' },
     },
     { label: 'No delta', props: { label: 'Errors', code: 'ERR-03', value: '1.04', unit: '%', polarity: 'lower-is-better' } },
-    { label: 'Live', props: { label: 'Signal', code: 'SIG-05', value: '48.2', unit: 'dB', live: true } },
+    { label: 'Live drift', props: { label: 'Signal', code: 'SIG-05', value: '48.2', unit: 'dB', live: true } },
   ],
   states: [],
 }

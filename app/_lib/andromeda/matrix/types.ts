@@ -6,6 +6,16 @@
 // Nothing here is shared with Lumen's showcase system — not a type, not a
 // name. `Matrix` is Andromeda's own word for this (it named the size × state
 // helper on the old showcase page).
+//
+// PRESENTATION GRAMMAR (ruled 2026-08-13):
+// - Section headings are MECHANICAL: 'States' for state rows; 'Variants' when
+//   at least one case sets the `variant` prop; otherwise 'Configurations'.
+//   A single-case component renders under 'Default'. The Coverage chips reuse
+//   the same helper - the two surfaces can never disagree.
+// - The label 'Live' is RESERVED: a case may carry it only when the rendered
+//   case is genuinely interactive on the page (a `node`/`render` demo).
+//   Interactive cases MAY instead be named by their configuration; a 'Live'
+//   label that lies is a defect to fix on sight.
 import type { ComponentType, ReactNode } from 'react'
 
 export type MatrixCase = {

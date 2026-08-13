@@ -279,16 +279,14 @@ function CaseSection({
   cases: readonly MatrixCase[]
   render: ReturnType<typeof defaultRender>
 }) {
-  // One case is not a matrix. A "Variants / 1 example" header over a single
-  // labelled card is a frame inside a frame saying nothing the page has not
-  // already said, so the lone case renders bare, straight into the page.
+  // One case is not a matrix, so its card remains bare; the section heading
+  // still renders through the shared presentation-grammar helper.
   const solo = cases.length === 1
 
   const heading = matrixSectionHeading(kind, cases)
 
   return (
     <section>
-      {solo ? null : (
       <div
         style={{
           display: 'flex',
@@ -314,7 +312,6 @@ function CaseSection({
           {cases.length} {cases.length === 1 ? 'example' : 'examples'}
         </span>
       </div>
-      )}
       <div
         className={`andromeda-matrix-grid${spec.wide ? ' is-wide' : ''}`}
         style={{ display: 'grid', gap: tokens.spacing[3] }}
@@ -332,6 +329,7 @@ function CaseSection({
 // role — and calling those variants taught readers the wrong word for the
 // one word the system uses precisely.
 export function matrixSectionHeading(kind: 'variant' | 'state', cases: readonly MatrixCase[]) {
+  if (cases.length === 1) return 'Default'
   const isVariantAxis = kind === 'variant' && cases.some((c) => c.props && 'variant' in c.props)
   return kind === 'state' ? 'States' : isVariantAxis ? 'Variants' : 'Configurations'
 }

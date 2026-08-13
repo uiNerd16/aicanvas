@@ -23,7 +23,6 @@ export const cornerMarkers: MatrixSpec = {
     { label: 'Default', props: {} },
     { label: 'Larger', props: { size: 18 } },
     { label: 'Inset', props: { offset: 6 } },
-    { label: 'Accent', props: { color: tokens.color.accent[300] } },
     { label: 'Heavy', props: { borderWidth: 2 } },
   ],
   states: [],

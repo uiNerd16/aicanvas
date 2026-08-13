@@ -435,7 +435,11 @@ export const UserMenu = forwardRef(function UserMenu(
           gap: rung.gap,
           padding: `${rung.padY} ${rung.padX}`,
           cursor: 'pointer',
-          background: highlight ? tokens.color.surface.hover : 'transparent',
+          background: open
+            ? tokens.color.surface.active
+            : hover
+              ? tokens.color.surface.hover
+              : 'transparent',
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >

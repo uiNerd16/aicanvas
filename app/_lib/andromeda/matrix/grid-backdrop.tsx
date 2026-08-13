@@ -17,7 +17,8 @@ export const gridBackdrop: MatrixSpec = {
   variants: [
     { label: 'Default', props: {} },
     { label: 'Fine', props: { cell: 24, major: 4 } },
-    { label: 'Coarse', props: { cell: 80, major: 3 } },
+    // 2x the spacing[12] pitch - backdrop pitches are scale values or whole multiples of it
+    { label: 'Coarse', props: { cell: 96, major: 3 } },
     { label: 'No major', props: { major: 0 } },
     // The section case: no mask, because a boxed region carries its own edge.
     { label: 'Section', props: { cell: 32, major: 0, fade: 'none' } },

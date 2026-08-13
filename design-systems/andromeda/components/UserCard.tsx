@@ -162,7 +162,11 @@ export const UserCard = forwardRef(function UserCard(
           alignItems: 'center',
           gap: rung.gap,
           cursor: 'pointer',
-          background: highlight ? tokens.color.surface.hover : 'transparent',
+          background: open
+            ? tokens.color.surface.active
+            : hover
+              ? tokens.color.surface.hover
+              : 'transparent',
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
