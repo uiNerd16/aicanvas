@@ -37,8 +37,11 @@ export const CornerMarkers = forwardRef(function CornerMarkers(
   { size, offset, borderWidth, color, radius, className, ...props },
   ref,
 ) {
-  const s  = size        ?? tokens.marker.size;
-  const o  = offset      ?? tokens.marker.offset;
+  // Same explicit-prop-beats-var rule as the stroke width below: an explicit
+  // size/offset prop wins; without one, the theme var (with the token default
+  // as fallback) drives geometry.
+  const s  = size   != null ? `${size}px`   : `var(--andromeda-marker-size, ${tokens.marker.size}px)`;
+  const o  = offset != null ? `${offset}px` : `var(--andromeda-marker-offset, ${tokens.marker.offset}px)`;
   // Explicit prop beats the theme var; without the prop, the theme var (with
   // the token default as fallback) drives the stroke. An ancestor always
   // defines --andromeda-marker-width via andromedaVars(), so the var form
@@ -48,8 +51,9 @@ export const CornerMarkers = forwardRef(function CornerMarkers(
   // the explicit color prop still wins (var only when no prop given).
   const c  = color       ?? `var(--andromeda-border-bright, ${tokens.color.border.bright})`;
   // Corner curve. Same explicit-prop-wins-over-var rule as the stroke width.
-  // The bracket is `s` px square, so the browser clamps the curve to that box
-  // — a large frame radius just fills the bracket into a quarter-round.
+  // The bracket is `s` square (s already carries its own unit), so the
+  // browser clamps the curve to that box — a large frame radius just fills
+  // the bracket into a quarter-round.
   const r  = radius != null ? `${radius}px` : `var(--andromeda-radius-frame, 0px)`;
 
   // Each marker is an L-shape: only the two borders that meet at its corner,
@@ -74,8 +78,8 @@ export const CornerMarkers = forwardRef(function CornerMarkers(
           key={key}
           className="absolute pointer-events-none"
           style={{
-            width:             `${s}px`,
-            height:            `${s}px`,
+            width:             s,
+            height:            s,
             borderStyle:       'solid',
             borderColor:       c,
             borderTopWidth:    key.startsWith('t') ? bw : 0,

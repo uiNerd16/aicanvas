@@ -274,9 +274,16 @@ export const tokens = {
     thin: 'var(--andromeda-border-width, 1px) solid',
   },
   marker: {
-    // Corner marker geometry — L-shaped brackets that hug each corner.
-    size:        12,    // px square the bracket lives inside
-    offset:      0,     // px inset from the corner (0 = flush)
+    // Corner marker geometry — L-shaped brackets that hug each corner. All
+    // three values below are theme-tunable, same explicit-prop-beats-var
+    // contract as everywhere else: CornerMarkers reads a passed prop first,
+    // else the CSS var (this token as its fallback), so a theme can resize,
+    // inset, or thicken the bracket without a prop ever being passed.
+    size:        12,    // px square the bracket lives inside; rendered through
+                        // --andromeda-marker-size so themes can resize it
+    offset:      0,     // px inset from the corner (0 = flush); rendered
+                        // through --andromeda-marker-offset so themes can
+                        // inset it
     borderWidth: 1,     // px stroke thickness of the L; rendered through
                         // --andromeda-marker-width so themes can thicken it
   },
