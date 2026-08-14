@@ -94,7 +94,13 @@ const trackVariants = cva(
 
 const thumbVariants = cva(
   [
-    'absolute top-[2px]',
+    // Vertically centered via top-1/2 + -translate-y-1/2 instead of a fixed
+    // top-[2px]: an absolutely positioned child is offset from the PADDING
+    // box (inside the border), so a pixel literal drifts off-centre as
+    // --andromeda-border-width grows. 50% of the padding box minus half the
+    // thumb's own height re-centres at any border width, and resolves to
+    // the same 2px inset as before at the 1px default (see compoundVariants).
+    'absolute top-1/2 -translate-y-1/2',
     'rounded-[var(--andromeda-radius-frame,0px)]',
     'transition-[left,background-color,transform] [transition-duration:var(--andromeda-duration-slow)] [transition-timing-function:var(--andromeda-easing-out)]',
   ],
@@ -109,12 +115,19 @@ const thumbVariants = cva(
         on:  'bg-[color:var(--andromeda-accent-300)] shadow-[0_0_8px_var(--andromeda-accent-500)]',
       },
     },
-    // The on-position is per rung: track width minus thumb minus the 2px inset
-    // on each side. Splitting it out of `state` is what keeps the thumb landing
-    // flush at every size instead of only at md.
+    // The on-position is measured from the RIGHT edge of the track's padding
+    // box (100%, which for an absolutely positioned child of a `relative`
+    // ancestor is the padding-box width and already shrinks with border
+    // width on its own) minus the thumb minus the same 2px inset used on
+    // the left in the off state. That keeps the thumb flush at any
+    // --andromeda-border-width instead of only at the 1px default.
+    //   md: calc(100% - 12px - 2px) → at 1px border, 100% = 34 - 2*1 = 32px,
+    //       so 32 - 12 - 2 = 18px  (identical to the old left-[18px])
+    //   lg: calc(100% - 16px - 2px) → at 1px border, 100% = 42 - 2*1 = 40px,
+    //       so 40 - 16 - 2 = 22px  (identical to the old left-[22px])
     compoundVariants: [
-      { size: 'md', state: 'on', class: 'left-[18px]' },
-      { size: 'lg', state: 'on', class: 'left-[22px]' },
+      { size: 'md', state: 'on', class: 'left-[calc(100%_-_12px_-_2px)]' },
+      { size: 'lg', state: 'on', class: 'left-[calc(100%_-_16px_-_2px)]' },
     ],
     defaultVariants: { size: 'md', state: 'off' },
   },

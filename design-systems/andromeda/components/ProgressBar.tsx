@@ -27,21 +27,33 @@ const GAP_COL    = 3;   // gap between columns
 // far to the right of where the bar actually ends.
 const STRIP_W    = BARS * SQUARE_W + (BARS - 1) * GAP_COL;
 
-// A lit segment is the family's DEEPEST solid stop, -500, with no border
-// (2026-08-10). The route here was: -400 solid (too loud) -> the 0.1 tint
-// (1.09:1 against the track, effectively invisible once the border came off)
-// -> -500. A bar is data and has no ink of its own, so the fill has to carry
-// the whole reading; -500 is the quietest fill that still does. It is the same
-// stop the primary button uses.
+// MAINTAINER RULING 2026-08-14 — supersedes the 2026-08-10 "-500 lit" rule
+// below. A bar is now ONE HUE AT TWO DEPTHS: the lit run takes the family's
+// identity stop -300, the unlit rail takes the family's deepest stop -500.
+//
+// Why the change: -500 lit (#5A1818 for fault) on a near-black surface read as
+// washed-out and, against a surface.hover rail, the lit and unlit runs sat only
+// a few values apart. It looked translucent even though nothing here has ever
+// used alpha, and translucency is what the maintainer called "very hard to
+// control". Both runs are now solid stops off the same ladder, so the reading
+// is carried by DEPTH within one hue rather than by a colour against a grey.
+//
+// Superseded rule, kept for the record: "A lit segment is the family's DEEPEST
+// solid stop, -500 (2026-08-10). The route here was -400 solid (too loud) ->
+// the 0.1 tint (1.09:1 against the track, effectively invisible once the border
+// came off) -> -500. -500 is the quietest fill that still carries the reading."
 const variantConfig = {
   default: {
-    activeColor:  'var(--andromeda-accent-500)',
+    activeColor: 'var(--andromeda-accent-300)',
+    railColor:   'var(--andromeda-accent-500)',
   },
   warning: {
-    activeColor:  'var(--andromeda-orange-500)',
+    activeColor: 'var(--andromeda-orange-300)',
+    railColor:   'var(--andromeda-orange-500)',
   },
   fault: {
-    activeColor:  'var(--andromeda-red-500)',
+    activeColor: 'var(--andromeda-red-300)',
+    railColor:   'var(--andromeda-red-500)',
   },
 };
 
@@ -160,13 +172,16 @@ export const ProgressBar = forwardRef(function ProgressBar(
                     width:  `${SQUARE_W}px`,
                     height: `${SQUARE_H}px`,
                     flexShrink: 0,
+                    borderRadius: tokens.radius.frame,
                     // ponytail: identity constant
                     transform: 'skewX(-12deg)',
                     background: active
                       ? cfg.activeColor
-                      // one step up from surface.overlay, so the unlit track
-                      // reads as a rail rather than a hole in the card
-                      : 'var(--andromeda-surface-hover)',
+                      // The unlit rail is the SAME family at its deepest stop,
+                      // not a neutral grey: one hue at two depths reads as a
+                      // filled and unfilled portion of one bar, where a colour
+                      // against a grey read as a translucent overlay.
+                      : cfg.railColor,
                     border: 'none',
                     boxShadow: 'none',
                     transition: reducedMotion

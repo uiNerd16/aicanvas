@@ -84,8 +84,8 @@ const MENU_PANEL_STYLE = {
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
   overflowY: 'auto',
   boxSizing: 'border-box',
-  background: tokens.color.surface.overlay,
-  border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+  background: `var(--andromeda-surface-overlay, ${tokens.color.surface.overlay})`,
+  border: `${tokens.border.thin} var(--andromeda-border-bright, ${tokens.color.border.bright})`,
   borderRadius: tokens.radius.frame,
   // A 16px frame measured to the row INK, not to the row box. Inline: rows
   // supply spacing[3] and the panel the remaining spacing[1]. Block: a row is
@@ -211,7 +211,7 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
           // The panel contributes 4px; spacing[2] supplies the remaining 8px
           // required by the system's 12px divider inset.
           margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-          background: tokens.color.border.base,
+          background: `var(--andromeda-border-base, ${tokens.color.border.base})`,
         }}
       />
     );
@@ -263,10 +263,10 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
   }
 
   const color = item.destructive
-    ? tokens.color.red[300]
+    ? `var(--andromeda-red-300, ${tokens.color.red[300]})`
     : item.selected
-      ? tokens.color.text.primary
-      : tokens.color.text.secondary;
+      ? `var(--andromeda-text-primary, ${tokens.color.text.primary})`
+      : `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`;
 
   return (
     <div
@@ -293,6 +293,7 @@ function MenuItem({ item, onClose, menuOwnerId, size = 'md' }) {
           height: rung.height,
           padding: `0 ${tokens.spacing[3]}`,
           background: 'transparent',
+          borderRadius: tokens.radius.frame,
           border: 'none',
           cursor: 'pointer',
           fontFamily: tokens.typography.fontMono,
@@ -492,8 +493,8 @@ export const PanelMenu = forwardRef(function PanelMenu(
         }}
         data-state={open ? 'open' : 'closed'}
         style={open ? {
-          background: tokens.color.surface.active,
-          color: tokens.color.text.primary,
+          background: `var(--andromeda-surface-active, ${tokens.color.surface.active})`,
+          color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
         } : undefined}
       />
 

@@ -498,6 +498,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
             boxSizing: 'border-box',
             background: V.surfaceRaised,
             border: `${tokens.border.thin} ${V.borderBase}`,
+            borderRadius: tokens.radius.frame,
             padding: tokens.spacing[3],
             boxShadow: tokens.effect.shadowMd,
             display: 'flex',
@@ -628,6 +629,20 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
 
               const dataState = selected ? 'selected' : inRange ? 'inrange' : 'default';
 
+              // A multi-day range reads as ONE continuous band that rounds only at
+              // its two ends, not as a row of separately-rounded pills — so the
+              // radius is a function of where in the range this cell sits, not a
+              // flat per-cell constant. Single-day selections and cells outside any
+              // range keep the full radius (bandRole falls through to 'solo').
+              const R = tokens.radius.frame;
+              const multiDay = drawRange.start && drawRange.end && !isSameDay(drawRange.start, drawRange.end);
+              const bandRole = !multiDay ? 'solo' : isStart ? 'start' : isEnd ? 'end' : inRange ? 'middle' : 'solo';
+              const bandRadius =
+                  bandRole === 'start'  ? `${R} 0 0 ${R}`
+                : bandRole === 'end'    ? `0 ${R} ${R} 0`
+                : bandRole === 'middle' ? '0'
+                :                         R;
+
               const cellStyle = {
                 position: 'relative',
                 // Fills its column (the track carries the 32px minimum now);
@@ -648,7 +663,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                     : isToday
                       ? `${tokens.border.thin} ${V.borderBright}`
                       : `${tokens.border.thin} transparent`,
-                borderRadius: tokens.radius.frame,
+                borderRadius: bandRadius,
                 color: selected
                   ? V.accent100
                   : inMonth
@@ -693,7 +708,10 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                         // range cells cannot reveal a one-pixel seam.
                         inset: `calc(-1 * ${tokens.border.width[1]})`,
                         background: V.accentAlpha,
-                        borderRadius: tokens.radius.frame,
+                        // hasRangeBand only ever fires on strictly-between days
+                        // (inRange, never isStart/isEnd), so bandRole here is
+                        // always 'middle' — this is always zero, on purpose.
+                        borderRadius: bandRadius,
                         pointerEvents: 'none',
                       }}
                     />
@@ -710,7 +728,7 @@ export const DateRangePicker = forwardRef(function DateRangePicker(
                         inset: `calc(-1 * ${tokens.border.width[1]})`,
                         background: V.accent500,
                         border: `${tokens.border.thin} transparent`,
-                        borderRadius: tokens.radius.frame,
+                        borderRadius: bandRadius,
                         boxSizing: 'border-box',
                         pointerEvents: 'none',
                       }}

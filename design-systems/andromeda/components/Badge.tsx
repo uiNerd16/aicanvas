@@ -183,6 +183,7 @@ export const Badge = forwardRef(function Badge(
           width: 'var(--andromeda-1, 4px)',
           height: 'var(--andromeda-1, 4px)',
           flexShrink: 0,
+          borderRadius: tokens.radius.frame,
           background: dotColor[variant],
           opacity: dotOpacity,
           transition: 'opacity var(--andromeda-duration-fast, 80ms) var(--andromeda-easing-out, cubic-bezier(0, 0, 0.2, 1))',

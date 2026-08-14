@@ -92,6 +92,7 @@ export const EmptyStateIcon = forwardRef(function EmptyStateIcon(
         'border-[length:var(--andromeda-border-width,1px)] border-solid',
         'border-[color:var(--andromeda-border-base)]',
         'bg-[color:var(--andromeda-surface-overlay)]',
+        'rounded-[var(--andromeda-radius-frame,0px)]',
         '[&>svg]:w-[var(--andromeda-icon-xl,22px)] [&>svg]:h-[var(--andromeda-icon-xl,22px)]',
         'text-[color:var(--andromeda-text-muted)] [&>svg]:stroke-current',
         className,

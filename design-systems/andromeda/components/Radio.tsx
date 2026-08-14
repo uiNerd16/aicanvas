@@ -290,6 +290,7 @@ export const Radio = forwardRef(function Radio(
               className={cn(MARK_FOR_SIZE[size], 'andromeda-radio-mark')}
               style={{
                 background: 'var(--andromeda-accent-300)',
+                borderRadius: tokens.radius.frame,
                 boxShadow: '0 0 6px var(--andromeda-accent-500)',
                 animation:
                   'andromeda-pop-in var(--andromeda-duration-normal) var(--andromeda-easing-out)',

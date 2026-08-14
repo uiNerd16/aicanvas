@@ -215,7 +215,7 @@ export const SearchField = forwardRef(function SearchField(
               // padInset only equals the vertical gap while the line box is the
               // text itself; a leading of `normal` would eat the difference.
               lineHeight: tokens.typography.lineHeight.none,
-              color: tokens.color.text.muted,
+              color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
               letterSpacing: tokens.typography.tracking.wide,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -259,7 +259,7 @@ export const SearchField = forwardRef(function SearchField(
             // The browser clips the inner editor to that box, so the tails of
             // g y p q j get cut off the moment anyone types them. The overlay
             // can be pinned because it is absolutely positioned and centred.
-            color: tokens.color.text.primary,
+            color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
             letterSpacing: tokens.typography.tracking.wide,
             caretColor: 'var(--andromeda-accent-400, #109380)',
           }}
@@ -287,8 +287,8 @@ export const SearchField = forwardRef(function SearchField(
             lineHeight: tokens.typography.lineHeight.none,
             padding: `${chip.padY} ${chip.padX}`,
             fontFamily: tokens.typography.fontMono,
-            color: tokens.color.text.faint,
-            border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+            color: `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
+            border: `${tokens.border.thin} var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
             borderRadius: tokens.radius.frame,
             textTransform: 'uppercase',
             // wider, not widest: two glyphs at 0.22em read as two unrelated

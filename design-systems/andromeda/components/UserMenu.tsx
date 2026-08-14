@@ -193,13 +193,15 @@ function UserMenuItemRow({ item, onClose, size = 'md' }) {
           // The panel contributes 4px; spacing[2] supplies the remaining 8px
           // required by the system's 12px divider inset, matching PanelMenu.
           margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-          background: tokens.color.border.subtle,
+          background: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
         }}
       />
     );
   }
   const Icon = item.icon;
-  const baseColor = item.destructive ? tokens.color.red[300] : tokens.color.text.secondary;
+  const baseColor = item.destructive
+    ? `var(--andromeda-red-300, ${tokens.color.red[300]})`
+    : `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`;
   return (
     <button
       type="button"
@@ -219,6 +221,9 @@ function UserMenuItemRow({ item, onClose, size = 'md' }) {
         padding: `0 ${tokens.spacing[3]}`,
         background: 'transparent',
         border: 'none',
+        // Hover/active paint a highlight fill (see UserMenuStyles below), which
+        // makes this a framed surface, so it takes the frame radius.
+        borderRadius: tokens.radius.frame,
         cursor: 'pointer',
         fontFamily: tokens.typography.fontMono,
         // Rung text, not a flat xs — the old 10px also sat under the 12px
@@ -292,8 +297,8 @@ export function UserMenuPanel({ open, items, size = 'md', placement = 'bottom', 
         // scroll on a phone. box-sizing keeps the border inside that cap.
         maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
         boxSizing: 'border-box',
-        background: tokens.color.surface.raised,
-        border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        background: `var(--andromeda-surface-raised, ${tokens.color.surface.raised})`,
+        border: `${tokens.border.thin} var(--andromeda-border-base, ${tokens.color.border.base})`,
         borderRadius: tokens.radius.frame,
         // Rows already supply spacing[2] vertically and spacing[3] horizontally.
         // This remainder puts their icon-and-label content in the same 16px
@@ -435,10 +440,13 @@ export const UserMenu = forwardRef(function UserMenu(
           gap: rung.gap,
           padding: `${rung.padY} ${rung.padX}`,
           cursor: 'pointer',
+          // The trigger paints its own hover/active fill, which makes it a
+          // framed surface, so it takes the frame radius (mirrors UserCard).
+          borderRadius: tokens.radius.frame,
           background: open
-            ? tokens.color.surface.active
+            ? `var(--andromeda-surface-active, ${tokens.color.surface.active})`
             : hover
-              ? tokens.color.surface.hover
+              ? `var(--andromeda-surface-hover, ${tokens.color.surface.hover})`
               : 'transparent',
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
@@ -453,7 +461,9 @@ export const UserMenu = forwardRef(function UserMenu(
           }}
           style={{
             display: 'inline-flex',
-            color: highlight ? tokens.color.text.secondary : tokens.color.text.faint,
+            color: highlight
+              ? `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`
+              : `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
             transition: `color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
           }}
         >

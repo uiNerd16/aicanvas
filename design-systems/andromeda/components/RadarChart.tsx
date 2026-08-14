@@ -68,11 +68,12 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive, reducedMo
   return (
     <div style={{
       // Solid raised surface so text is always legible against any chart color
-      background: tokens.color.surface.raised,
+      background: `var(--andromeda-surface-raised, ${tokens.color.surface.raised})`,
       // tokens.border.thin === 'var(--andromeda-border-width, 1px) solid'; keep
       // color.border.base to stay pixel-identical (siblings use bright, but
       // switching here would change default rendering — hard rule 1).
-      border: `${tokens.border.thin} ${tokens.color.border.base}`,
+      border: `${tokens.border.thin} var(--andromeda-border-base, ${tokens.color.border.base})`,
+      borderRadius: tokens.radius.frame,
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
@@ -84,7 +85,7 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive, reducedMo
       <div style={{
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.muted,
+        color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
         marginBottom: tokens.spacing[1],
@@ -106,12 +107,13 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive, reducedMo
               width: 6,
               height: 6,
               background: entry.color,
+              borderRadius: tokens.radius.frame,
               flexShrink: 0,
             }} />
-            <span style={{ color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>
+            <span style={{ color: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>
               {s?.label ?? entry.dataKey}
             </span>
-            <span style={{ color: tokens.color.text.primary, marginLeft: 'auto', paddingLeft: tokens.spacing[3] }}>
+            <span style={{ color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`, marginLeft: 'auto', paddingLeft: tokens.spacing[3] }}>
               {entry.value}
             </span>
           </div>
@@ -140,7 +142,7 @@ function SpaceTick({ x, y, payload, cx, cy }) {
         fontFamily: tokens.typography.fontMono,
         // ponytail: identity constant — 9px polar tick is off the text scale
         fontSize: '9px' /* andromeda-allow: chart tick below text.xs; spacing.md category 6 names this exact case */,
-        fill: tokens.color.text.muted,
+        fill: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
       }}
@@ -239,6 +241,7 @@ export const RadarChart = forwardRef(function RadarChart(
       style={{
         ...andromedaVars(),
         background: 'var(--andromeda-surface-raised, #141415)',
+        borderRadius: tokens.radius.frame,
         ...style,
       }}
       {...props}
@@ -259,13 +262,13 @@ export const RadarChart = forwardRef(function RadarChart(
           right: tokens.spacing[3],
           bottom: 0,
           height: tokens.border.width[1],
-          background: tokens.color.border.subtle,
+          background: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
           pointerEvents: 'none',
         }} />
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}>
@@ -275,7 +278,7 @@ export const RadarChart = forwardRef(function RadarChart(
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.md,
           fontWeight: tokens.typography.weight.medium,
-          color: tokens.color.text.primary,
+          color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
         }}>
@@ -285,7 +288,7 @@ export const RadarChart = forwardRef(function RadarChart(
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wide,
             marginTop: '2px' /* andromeda-allow: sub-grid optical nudge below spacing[1] — spacing.md, sanctioned raw-px category 3 */,
@@ -378,7 +381,7 @@ export const RadarChart = forwardRef(function RadarChart(
           right: tokens.spacing[3],
           top: 0,
           height: tokens.border.width[1],
-          background: tokens.color.border.subtle,
+          background: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
           pointerEvents: 'none',
         }} />
         {series.map(s => (
@@ -397,7 +400,7 @@ export const RadarChart = forwardRef(function RadarChart(
             <span style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
             }}>

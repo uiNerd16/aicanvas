@@ -21,8 +21,8 @@ import { useReducedMotion } from './lib/motion';
 // Narrow-width overflow guard — a multi-segment strip can be wider than a phone
 // viewport. Faithful-stack rule (mirrors the Table): the strip scrolls
 // HORIZONTALLY inside its own box, never wraps (wrapping would break the
-// fixed-height row, the borderLeft dividers, and the sliding indicator) and
-// never forces page scroll. Below `md` the control is capped at max-width:100%
+// fixed-height row and the sliding indicator) and never forces page scroll.
+// Below `md` the control is capped at max-width:100%
 // and its segments scroll within. The buttons are flex-shrink:0 so they keep
 // their tap size while scrolling. !important to beat the inline-styled root.
 // the Andromeda responsive rules (faithful stack, no horizontal PAGE scroll).
@@ -139,9 +139,9 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
       style={{
         ...andromedaVars(),
         height: `var(${cellVar}, ${rung.height})`,
-        border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        border: `${tokens.border.thin} var(--andromeda-border-base, ${tokens.color.border.base})`,
         borderRadius: tokens.radius.frame,
-        background: tokens.color.surface.raised,
+        background: `var(--andromeda-surface-raised, ${tokens.color.surface.raised})`,
         ...style,
       }}
       {...props}
@@ -180,21 +180,20 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
               padding: hasLabel ? `0 ${rung.padX}` : 0,
               background: 'transparent',
               border: 'none',
-              borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${tokens.color.border.base}`,
               cursor: 'pointer',
               flexShrink: 0,
               // A segment never wraps its label — a wrapped label breaks the
-              // fixed-height row, the borderLeft dividers and the sliding
-              // indicator (the strip scrolls horizontally instead, see
-              // RESPONSIVE_STYLE). Without this a label squeezed in a narrow
-              // container ("View all") drops to a second line.
+              // fixed-height row and the sliding indicator (the strip scrolls
+              // horizontally instead, see RESPONSIVE_STYLE). Without this a
+              // label squeezed in a narrow container ("View all") drops to a
+              // second line.
               whiteSpace: 'nowrap',
               fontFamily: tokens.typography.fontMono,
               // Label type steps with the rung. Pinned at size.sm the sm strip
               // read as a shrunken md and the lg strip as an inflated one.
               fontSize: rung.text,
               fontWeight: active ? tokens.typography.weight.medium : tokens.typography.weight.regular,
-              color: active ? tokens.color.text.primary : tokens.color.text.muted,
+              color: active ? `var(--andromeda-text-primary, ${tokens.color.text.primary})` : `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
               transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
@@ -202,7 +201,15 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
           >
             {/* Sliding indicator — only the active button renders it.
                 Framer's `layoutId` matches the new instance to the previous
-                one and animates the layout change between siblings. */}
+                one and animates the layout change between siblings.
+                Maintainer ruling 2026-08-14: no more edge-to-edge fill — the
+                indicator floats inside the segment on a spacing[1] inset (the
+                smallest step on the grid; still leaves 18px of indicator
+                height under a 12px label at the sm rung, the tightest case).
+                Its radius is the track radius MINUS that inset so the two
+                stay CONCENTRIC — an inset box keeping the track's own outer
+                radius would run square into the rounded corner, which was
+                the whole complaint. */}
             {active ? (
               <motion.span
                 layoutId={reducedMotion ? undefined : indicatorId}
@@ -210,8 +217,9 @@ export const SegmentedControl = forwardRef(function SegmentedControl(
                 transition={INDICATOR_TX}
                 style={{
                   position: 'absolute',
-                  inset: 0,
-                  background: tokens.color.surface.active,
+                  inset: tokens.spacing[1],
+                  background: `var(--andromeda-surface-active, ${tokens.color.surface.active})`,
+                  borderRadius: `max(0px, calc(${tokens.radius.frame} - ${tokens.spacing[1]}))`,
                   zIndex: 0,
                   pointerEvents: 'none',
                 }}

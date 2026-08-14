@@ -15,7 +15,7 @@ import { cn, andromedaVars } from './lib/utils';
 
 const avatarVariants = cva(
   [
-    'inline-flex items-center justify-center select-none shrink-0',
+    'inline-flex items-center justify-center select-none shrink-0 overflow-hidden',
     // leading-none: the initials had no line-height at all, so they took the
     // browser default (~1.2) and centred against a fractional box. At 1 the
     // text box is the font size and the clearance is 6 / 9 / 12px. Avatar sits
@@ -53,6 +53,7 @@ const statusDotVariants = cva(
     'absolute -right-[2px] block w-[2px]',
     'top-[15%] h-[70%]',
     'border-0',
+    'rounded-[var(--andromeda-radius-frame,0px)]',
   ],
   {
     variants: {

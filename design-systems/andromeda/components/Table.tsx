@@ -129,7 +129,11 @@ export const TableRow = forwardRef(function TableRow(
       ref={ref}
       className={`andro-tr${hoverable ? ' andro-tr-hover' : ''}${className ? ` ${className}` : ''}`}
       style={{
-        backgroundColor: selected ? tokens.color.surface.active : 'transparent',
+        backgroundColor: selected ? `var(--andromeda-surface-active, ${tokens.color.surface.active})` : 'transparent',
+        // No borderRadius here — same caveat as the TR border above: corner
+        // rounding doesn't render on a TR under border-collapse:collapse
+        // (see rules.md's table section). A wrapped var() default is inert
+        // dead weight, not coverage, so the row stays square on purpose.
         backgroundImage: ROW_INSET_LINE,
         backgroundSize: `100% ${tokens.border.width[1]}`,
         backgroundPosition: 'bottom',
@@ -182,7 +186,7 @@ export const TableHeader = forwardRef(function TableHeader(
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
         fontWeight: tokens.typography.weight.medium,
-        color: sorted ? tokens.color.text.primary : tokens.color.text.muted,
+        color: sorted ? `var(--andromeda-text-primary, ${tokens.color.text.primary})` : `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
         lineHeight: 'var(--andromeda-leading-none, 1)',
@@ -194,7 +198,7 @@ export const TableHeader = forwardRef(function TableHeader(
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: tokens.spacing[1] }}>
         {children}
         {sortIcon ? (
-          <span style={{ color: sorted ? tokens.color.text.primary : tokens.color.text.faint, display: 'inline-flex' }}>
+          <span style={{ color: sorted ? `var(--andromeda-text-primary, ${tokens.color.text.primary})` : `var(--andromeda-text-faint, ${tokens.color.text.faint})`, display: 'inline-flex' }}>
             {sortIcon}
           </span>
         ) : null}
@@ -227,7 +231,7 @@ export const TableCell = forwardRef(function TableCell(
         padding: `${tokens.spacing[3]} ${tokens.spacing[5]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
-        color: muted ? tokens.color.text.secondary : tokens.color.text.primary,
+        color: muted ? `var(--andromeda-text-secondary, ${tokens.color.text.secondary})` : `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
         letterSpacing: tokens.typography.tracking.wide,
         whiteSpace: nowrap ? 'nowrap' : 'normal',
         lineHeight: tokens.typography.lineHeight.none,

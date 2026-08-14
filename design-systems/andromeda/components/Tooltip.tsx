@@ -202,11 +202,13 @@ export const Tooltip = forwardRef(function Tooltip(
               textAlign: 'center',
               zIndex: 100,
               padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-              background: tokens.color.surface.overlay,
-              border: `${tokens.border.thin} ${tokens.color.border.base}`,
+              background: `var(--andromeda-surface-overlay, ${tokens.color.surface.overlay})`,
+              border: `${tokens.border.thin} var(--andromeda-border-base, ${tokens.color.border.base})`,
+              // The bubble is a filled, bordered surface, so it takes the frame radius.
+              borderRadius: tokens.radius.frame,
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.secondary,
+              color: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
               letterSpacing: tokens.typography.tracking.wider,
               textTransform: 'uppercase',
             }}

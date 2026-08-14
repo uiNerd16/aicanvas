@@ -199,6 +199,7 @@ export const HeatGrid = forwardRef(function HeatGrid(
                 style={{
                   background: bg,
                   border: `${tokens.border.thin} ${border}`,
+                  borderRadius: tokens.radius.frame,
                   transition: reducedMotion
                     ? undefined
                     : `background var(--andromeda-duration-cascade, ${tokens.motion.duration.cascade}) var(--andromeda-easing-out, ${tokens.motion.easing.out}), border-color var(--andromeda-duration-cascade, ${tokens.motion.duration.cascade}) var(--andromeda-easing-out, ${tokens.motion.easing.out})`,

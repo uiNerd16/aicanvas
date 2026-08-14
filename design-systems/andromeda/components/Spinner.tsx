@@ -108,6 +108,7 @@ export const Spinner = forwardRef(function Spinner(
           style={{
             width:  `${sz.cell}px`,
             height: `${sz.cell}px`,
+            borderRadius: tokens.radius.frame,
             background: isCenter || !reducedMotion ? dim : bright,
             ...(isCenter || reducedMotion ? null : {
               animation: `andromeda-spinner-snake ${DURATION_MS}ms linear infinite`,

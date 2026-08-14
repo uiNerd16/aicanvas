@@ -3,8 +3,10 @@
 // COMPONENT: Slider
 // shadcn/ui-aligned API: forwardRef, controlled (`value`) /
 // uncontrolled (`defaultValue`), onValueChange. Single-value
-// horizontal range slider with a sharp rectangular thumb and
-// a glowing accent fill — sci-fi telemetry vibe.
+// horizontal range slider with a rectangular thumb — sharp by
+// default, since --andromeda-radius-frame defaults to 0px, and
+// rounded in step with the rest of the frame when that's tuned —
+// plus a glowing accent fill — sci-fi telemetry vibe.
 // A two-number tuple keeps the same visual language while adding
 // a second endpoint and filling only the measured span between them.
 //
@@ -445,6 +447,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
           className={cn(
             'absolute left-0 right-0 top-1/2 -translate-y-1/2',
             SIZES[size].line,
+            'rounded-[var(--andromeda-radius-frame,0px)]',
             'border-[length:var(--andromeda-border-width,1px)] border-solid',
             'bg-[color:var(--andromeda-surface-overlay)]',
             // border.base, not border.subtle: at subtle the empty remainder sank
@@ -460,6 +463,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
           className={cn(
             'absolute left-0 top-1/2 -translate-y-1/2',
             SIZES[size].line,
+            'rounded-[var(--andromeda-radius-frame,0px)]',
             '[background:linear-gradient(90deg,var(--andromeda-accent-400)_0%,var(--andromeda-accent-300)_100%)]',
           )}
           style={isRange
@@ -495,6 +499,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
               // inner-edge anchor would otherwise push it fully off.
               'absolute top-1/2 -translate-y-1/2',
               SIZES[size].thumb,
+              'rounded-[var(--andromeda-radius-frame,0px)]',
               'bg-[color:var(--andromeda-accent-300)]',
               'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
               // No resting glow; the focus-visible state sets --slider-thumb-shadow.
@@ -516,6 +521,7 @@ export const Slider = forwardRef<HTMLDivElement, SingleSliderComponentProps | Ra
             className={cn(
               'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
               SIZES[size].thumb,
+              'rounded-[var(--andromeda-radius-frame,0px)]',
               'bg-[color:var(--andromeda-accent-300)]',
               'border-[length:var(--andromeda-border-width,1px)] border-solid border-[color:var(--andromeda-accent-100)]',
               // No resting glow; the focus-visible state sets --slider-thumb-shadow.

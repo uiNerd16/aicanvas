@@ -162,10 +162,14 @@ export const UserCard = forwardRef(function UserCard(
           alignItems: 'center',
           gap: rung.gap,
           cursor: 'pointer',
+          // The row paints its own hover/active fill, which makes it a framed
+          // surface, so it takes the frame radius. Without this the highlight
+          // rendered as a hard square block inside a rounded card.
+          borderRadius: tokens.radius.frame,
           background: open
-            ? tokens.color.surface.active
+            ? `var(--andromeda-surface-active, ${tokens.color.surface.active})`
             : hover
-              ? tokens.color.surface.hover
+              ? `var(--andromeda-surface-hover, ${tokens.color.surface.hover})`
               : 'transparent',
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
@@ -186,7 +190,7 @@ export const UserCard = forwardRef(function UserCard(
               fontFamily: tokens.typography.fontMono,
               fontSize: rung.text,
               fontWeight: tokens.typography.weight.semibold,
-              color: tokens.color.text.primary,
+              color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
               overflow: 'hidden',
@@ -203,7 +207,7 @@ export const UserCard = forwardRef(function UserCard(
                 fontSize: rung.roleText,
                 // secondary, not muted: the floor forbids muted at 12px, and
                 // this line sits inside a button.
-                color: tokens.color.text.secondary,
+                color: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.wide,
                 // Truncate like the name above. A role is one line of metadata;
@@ -227,7 +231,9 @@ export const UserCard = forwardRef(function UserCard(
           }}
           style={{
             display: 'inline-flex',
-            color: highlight ? tokens.color.text.secondary : tokens.color.text.faint,
+            color: highlight
+              ? `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`
+              : `var(--andromeda-text-faint, ${tokens.color.text.faint})`,
             transition: `color var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
           }}
         >

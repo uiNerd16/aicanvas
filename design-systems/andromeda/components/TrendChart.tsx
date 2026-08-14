@@ -59,7 +59,7 @@ function InsetDivider({ side }) {
         right: tokens.spacing[3],
         [side]: 0,
         height: 'var(--andromeda-border-width, 1px)',
-        background: tokens.color.border.subtle,
+        background: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
         pointerEvents: 'none',
       }}
     />
@@ -76,8 +76,10 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
     return (
       <div
         style={{
-          background: tokens.color.surface.overlay,
-          border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+          background: `var(--andromeda-surface-overlay, ${tokens.color.surface.overlay})`,
+          border: `${tokens.border.thin} var(--andromeda-border-bright, ${tokens.color.border.bright})`,
+          // Filled, bordered readout — takes the frame radius.
+          borderRadius: tokens.radius.frame,
           padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
           fontFamily: tokens.typography.fontMono,
           maxWidth: '220px',
@@ -93,7 +95,7 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
         <div
           style={{
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
             marginBottom: tokens.spacing[2],
@@ -113,17 +115,17 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
                   alignItems: 'center',
                   gap: tokens.spacing[2],
                   fontSize: tokens.typography.size.sm,
-                  color: tokens.color.text.muted,
+                  color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
                   letterSpacing: tokens.typography.tracking.wide,
                 }}
               >
-                <span aria-hidden style={{ width: '6px', height: '6px', background: colorOf(s), flexShrink: 0 }} />
+                <span aria-hidden style={{ width: '6px', height: '6px', background: colorOf(s), borderRadius: tokens.radius.frame, flexShrink: 0 }} />
                 {s.label}
               </span>
               <span
                 style={{
                   fontSize: tokens.typography.size.sm,
-                  color: tokens.color.text.primary,
+                  color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
                   fontWeight: tokens.typography.weight.medium,
                   letterSpacing: tokens.typography.tracking.wide,
                 }}
@@ -156,11 +158,11 @@ function LegendChip({ color, label, active, onClick }) {
         opacity: active ? 1 : 0.4,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
-        color: tokens.color.text.secondary,
+        color: `var(--andromeda-text-secondary, ${tokens.color.text.secondary})`,
         letterSpacing: tokens.typography.tracking.wide,
       }}
     >
-      <span aria-hidden style={{ width: '10px', height: '10px', background: color, flexShrink: 0 }} />
+      <span aria-hidden style={{ width: '10px', height: '10px', background: color, borderRadius: tokens.radius.frame, flexShrink: 0 }} />
       {label}
     </button>
   );
@@ -403,7 +405,7 @@ export const TrendChart = forwardRef(function TrendChart(
                 fontFamily: tokens.typography.fontSans,
                 fontSize: tokens.typography.size.xl,
                 fontWeight: tokens.typography.weight.semibold,
-                color: tokens.color.text.primary,
+                color: `var(--andromeda-text-primary, ${tokens.color.text.primary})`,
                 letterSpacing: tokens.typography.tracking.tight,
               }}
             >
@@ -442,7 +444,7 @@ export const TrendChart = forwardRef(function TrendChart(
               left: tokens.spacing[1],
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: `var(--andromeda-text-muted, ${tokens.color.text.muted})`,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
             }}

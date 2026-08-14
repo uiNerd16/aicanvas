@@ -116,7 +116,7 @@ export const PanelHeader = forwardRef(function PanelHeader(
           right: tokens.spacing[3],
           bottom: 0,
           height: 'var(--andromeda-border-width, 1px)',
-          background: tokens.color.border.subtle,
+          background: `var(--andromeda-border-subtle, ${tokens.color.border.subtle})`,
           pointerEvents: 'none',
         }}
       />
