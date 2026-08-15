@@ -1,4 +1,4 @@
 {
-  "sha": "fe7c33240d689eca7e200d6af4e8f4bf64d20d00",
+  "sha": "5ad143fe1fca2c43d575c796c1933c49a8d3a92a",
   "note": "The EXACT aicanvas-premium commit this public tree builds against. Production (the Vercel/PAT build) checks out THIS sha, never floating main, so every deploy is reproducible and an unrelated public push can't drag in a different premium version. Bump it only via `npm run publish-premium` (which pushes premium, writes the new sha here, and pushes public to deploy). The value is just a commit id, never premium source, so it is safe in the public repo."
 }
