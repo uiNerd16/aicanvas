@@ -262,10 +262,12 @@ export function Sidebar({
           const isDisabled = section.disabled === true
           // Promoted landing view shows only the first 4 categories so the
           // Design Systems pole rises into view; the rest sit behind Show more.
-          const catLabels =
-            isComponents && promoteDS && !showAllCats
-              ? section.labels.slice(0, 4)
-              : section.labels
+          // Every label is still RENDERED and only visually hidden, so all 11
+          // category links ship in the server HTML. Slicing the array instead
+          // left 7 category pages with no crawlable link into them.
+          const catLabels = section.labels
+          const hideCatsFrom =
+            isComponents && promoteDS && !showAllCats ? 4 : Infinity
           const hasHiddenCats =
             isComponents && promoteDS && section.labels.length > 4
 
@@ -332,14 +334,14 @@ export function Sidebar({
                       </Link>
                     </li>
                   )}
-                  {catLabels.map((label) => {
+                  {catLabels.map((label, i) => {
                     const isActive = label === activeCategory
                     const cat = getCategoryByLabel(label)
                     const href = cat
                       ? `/components/category/${cat.slug}`
                       : `/components?category=${encodeURIComponent(label)}`
                     return (
-                      <li key={label}>
+                      <li key={label} className={i >= hideCatsFrom ? 'hidden' : undefined}>
                         <Link
                           href={href}
                           className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${

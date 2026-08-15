@@ -22,6 +22,7 @@ export type ComponentCopy = {
 // `meet-the-crew` aliases the `avatar-picker` source; `traveldeck` aliases
 // the `floating-cards` source.
 export const ACCURATE_STACKS: Record<string, string[]> = {
+  '3d-gem-pricing-section': ['Three.js', 'Canvas', 'Tailwind CSS'],
   '3d-product-card': ['Three.js', 'Tailwind CSS'],
   'ai-job-cards': ['Motion', 'Tailwind CSS'],
   'andromeda-button': ['Tailwind CSS'],
@@ -31,6 +32,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'crypto-swap': ['Motion', 'Tailwind CSS'],
   'cube-carousel': ['Motion', 'Tailwind CSS'],
   'curious-ai': ['Motion', 'Three.js', 'Tailwind CSS'],
+  'curved-frame-carousel': ['Motion', 'Tailwind CSS'],
   'danger-stripes': ['Motion', 'Tailwind CSS'],
   'delete-button': ['Motion', 'Tailwind CSS'],
   'diamond-grid': ['Canvas', 'Tailwind CSS'],
@@ -38,7 +40,9 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'dot-grid': ['Canvas', 'Tailwind CSS'],
   'emoji-burst': ['Motion', 'Tailwind CSS'],
   'expanding-tabs': ['Motion', 'Tailwind CSS'],
+  'filter-menu': ['Motion', 'Tailwind CSS'],
   'flip-calendar': ['Motion', 'Tailwind CSS'],
+  'fluid-simulation-hero': ['WebGL', 'Tailwind CSS'],
   'glass-ai-compose': ['Motion', 'Tailwind CSS'],
   'glass-card': ['Motion', 'Tailwind CSS'],
   'glass-dock': ['Motion', 'Tailwind CSS'],
@@ -75,6 +79,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'particle-constellation': ['Canvas', 'Tailwind CSS'],
   'particle-sphere': ['Three.js', 'Canvas', 'Tailwind CSS'],
   'peel-corner-reveal': ['Motion', 'Tailwind CSS'],
+  'perspective-showcase-hero': ['Motion', 'Tailwind CSS'],
   'pill-toggle': ['Motion', 'Tailwind CSS'],
   'playful': ['Motion', 'Tailwind CSS'],
   'polaroid-stack': ['Motion', 'Tailwind CSS'],
@@ -398,6 +403,12 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
       'Glass AI Composer is an AI chat input with everything modern conversation interfaces tend to bolt on: an image-upload slot, a web-search toggle that visibly engages, and a segmented pill switcher for picking between fast and frontier models. The whole thing sits inside a glassmorphism surface with Motion-driven focus and toggle states, so the composer feels like part of the product rather than a third-party widget. Drop it into AI products, SaaS support consoles, editor command surfaces, and any chat-style entry point.',
   },
 
+  'filter-menu': {
+    useCases: ['Search results', 'Product catalog', 'Job listings'],
+    about:
+      'Filter Menu is a skeuomorphic pill that expands into a rounded multi-select panel: six labelled rows, each with an icon and a circular checkmark that fills when selected, above an Apply button carrying a live count. Pressing Apply collapses everything back into the pill and slides a badge out from behind it showing how many filters are live, with a small clear button attached. Motion drives the layout morph, the row springs, and the staggered reveal, while a click anywhere outside quietly dismisses the panel. Rows, defaults, and the apply callback are all props, and the control ships with listbox roles, visible focus rings, and a matching dark theme. It suits catalogue pages, search result headers, and job listings that need more than a plain dropdown.',
+  },
+
   // ─── Notifications ───────────────────────────────────────────────────────
   'glass-tags': {
     useCases: ['Forms', 'Settings', 'Onboarding'],
@@ -492,6 +503,28 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Image gallery', 'Moodboard', 'Portfolio'],
     about:
       'Interactive Card Stack is a loose pile of five photo cards scattered around a focused center, each a polaroid-style print that breathes gently on its own slow loop. Click any card to pull it to the front, drag the front card sideways to cycle, or use the arrow keys, and the rest spring into a new arrangement around it. Motion drives the scatter, the breathing, and the focus shuffle; Tailwind covers the layout, and it honours reduced-motion settings. Drop in your own photos and titles, and set an optional link per card. It suits image galleries, moodboards, and portfolio sections where the photo itself is the point.',
+  },
+
+  // ─── Blocks ─────────────────────────────────────────────────────────────
+  '3d-gem-pricing-section': {
+    useCases: ['SaaS pricing page', 'Subscription plans', 'Plan comparison'],
+    about:
+      '3D Gem Pricing Section is a three-tier plan table where every card carries its own crystal. At rest the gem reads as a flat constellation of dots and lines in the card\'s top corner, and on hover, focus, or a tap it swells into a faceted solid that tilts, turns slowly, and casts a soft contact shadow. A pyramid, a cube, and an octahedron separate the tiers. One shared Three.js layer sits over the section and tracks the cards as they reflow, so the markup underneath stays plain: a monthly-to-yearly billing switch with an animated price swap, a feature checklist, and a seats-and-storage footer. The palette is a warm orange that holds up in both light and dark. It suits a SaaS pricing page, a subscription upgrade screen, or a plan comparison.',
+  },
+  'curved-frame-carousel': {
+    useCases: ['Studio homepage', 'Agency landing page', 'Photo showcase'],
+    about:
+      'Curved Frame Carousel is a full-bleed hero band where a fixed frame with flared, curving edges masks an endless track of photos drifting quietly behind it. Flick it, throw it with a drag, nudge it with a sideways scroll, or step through with the arrow keys, and the deck carries on with momentum while every panel that reaches the flare hinges away in perspective as though the wall itself were bending. A caption and an index counter sit beneath the frame and update as each photo takes the centre slot. Motion drives the track and the per-panel transforms, Tailwind covers the chrome, and a per-image focal point keeps subjects in view at every width. Swap in your own photos, headline, and call to action for a studio homepage or an agency landing page.',
+  },
+  'fluid-simulation-hero': {
+    useCases: ['Hero section', 'Product launch page', 'Creative studio site'],
+    about:
+      'Fluid Simulation Hero is a full-bleed landing section running a real-time Navier-Stokes solver on the GPU: velocity and dye advect through curl, vorticity, and Jacobi pressure passes, then a surface-normal pass lays an iridescent thin film along the filaments. Drag or touch anywhere and the pointer stirs the dye directly, and left alone a seeded spawner keeps the mass slowly turning in the upper right, clear of the headline block. It is raw WebGL2 with a WebGL1 fallback and a painted CSS wash for machines that cannot run either, no shader library and no 3D engine. Headline, nav, wordmark, and call-to-action pill sit above the canvas as real DOM text, and reduced-motion visitors get a settled still frame.',
+  },
+  'perspective-showcase-hero': {
+    useCases: ['Photography portfolio', 'Editorial header', 'Lookbook intro'],
+    about:
+      'Perspective Showcase Hero pairs a split editorial header with an endless row of photo cards that curve away from the centre on CSS 3D perspective, no WebGL involved. The card in the middle sits flat and zooms inside its frame while its neighbours rotate toward the vanishing point and wrap around at the edges. The row drifts on its own until you take over by dragging, scrolling sideways, or pressing the arrow keys, and one velocity loop drives all four inputs so releasing a flick coasts back into the drift. Motion handles the track, Tailwind covers the chrome, and captions, a slot counter, and reduced-motion support are built in. Swap in your own photos for a photography portfolio, an editorial cover, or a lookbook intro.',
   },
 
   // ─── UI (uncategorized) ──────────────────────────────────────────────────

@@ -571,7 +571,12 @@ export default function ComponentPageView({
               // Use cases (e.g. "Hero section", "Portfolio") capture the
               // intent queries users actually type. Stack tags live in the
               // "Built with" row further down the page, next to About.
-              const categoryTags = tags.filter((t) => t.accent)
+              // Premium blocks carry both block signals, so the pill below already
+              // reads "Premium block" and their Blocks category chip repeats it.
+              // Free blocks keep the chip: with no pill, it is their only block label.
+              const categoryTags = tags.filter(
+                (t) => t.accent && !(premium && isBlock && t.label === 'Blocks'),
+              )
               const useCaseChips = (useCases ?? []).slice(0, 3)
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
