@@ -1340,6 +1340,41 @@ console.log(`Generated app/lib/component-nav.generated.ts (${Object.keys(categor
     return entry
   })
 
+  // Every slug needs a row in BOTH maps in component-copy.ts. A missing row is
+  // silent at runtime but not harmless: with no ACCURATE_STACKS entry the page
+  // keeps its authored secondary tags and publishes them as the "built with"
+  // answer in its FAQPage JSON-LD, and with no COMPONENT_COPY entry it loses
+  // its use-case chips and About section. fluid-simulation-hero shipped that
+  // way, telling search engines it was built with "Hero" and "Interactive".
+  // The accent check catches the sibling bug: an accent tag that is not a
+  // categories.ts label makes a category with no page, and the component drops
+  // out of every category listing.
+  const copyStart = copySrc.indexOf('export const COMPONENT_COPY')
+  if (copyStart === -1) throw new Error('generate-registry: COMPONENT_COPY not found in component-copy.ts')
+  const copyKeys = new Set(
+    [...copySrc.slice(copyStart).matchAll(/^  '([^']+)':/gm)].map((m) => m[1]),
+  )
+  const catLabels = new Set(
+    [...readFileSync('app/lib/categories.ts', 'utf-8').matchAll(/^\s*label: '([^']+)'/gm)].map((m) => m[1]),
+  )
+  const copyProblems = []
+  for (const m of [...freeMetaList, ...premiumMetaList]) {
+    const gaps = [!stacks[m.slug] && 'ACCURATE_STACKS', !copyKeys.has(m.slug) && 'COMPONENT_COPY'].filter(Boolean)
+    if (gaps.length > 0) copyProblems.push(`${m.slug}: missing from ${gaps.join(' + ')}`)
+    for (const t of m.tags) {
+      if (t.accent && !catLabels.has(t.label)) {
+        copyProblems.push(`${m.slug}: accent tag "${t.label}" is not a label in app/lib/categories.ts`)
+      }
+    }
+  }
+  if (copyProblems.length > 0) {
+    throw new Error(
+      `generate-registry: ${copyProblems.length} tag/copy problem(s):\n  ` +
+        copyProblems.join('\n  ') +
+        '\nSee .claude/skills/component-pipeline/references/seo-naming.md for what to write.',
+    )
+  }
+
   // Grid order = the committed order ledger (component-order.json), reversed to
   // newest-first so the newest push (free OR premium) sits on top. See
   // scripts/lib/order-ledger.mjs for why it's committed and only ever appended,
