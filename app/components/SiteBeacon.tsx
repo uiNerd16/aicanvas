@@ -24,11 +24,19 @@ const MAX_ERRORS_PER_LOAD = 10
 const EMAIL = /[^\s@]+(?:@|%40)[^\s@]+\.[^\s@]+/gi
 const scrub = (s: string) => s.replace(EMAIL, '[email]')
 
+// The block previews on a component page embed a route of this same site in an
+// iframe, so this component mounts a second time inside it. That copy is part
+// of the page around it, not a visit or a session of its own: its pageviews
+// would double the count and its errors would be reported twice. The proxy
+// drops the framed document request for the same reason.
+const isFramed = () => typeof window !== 'undefined' && window.self !== window.top
+
 export function SiteBeacon() {
   const pathname = usePathname()
   const prevPath = useRef<string | null>(null)
 
   useEffect(() => {
+    if (isFramed()) return
     if (prevPath.current !== null && prevPath.current !== pathname) {
       beacon('$pageview', {
         $current_url: location.origin + pathname,
@@ -41,6 +49,7 @@ export function SiteBeacon() {
   }, [pathname])
 
   useEffect(() => {
+    if (isFramed()) return
     const seen = new Set<string>()
 
     function report(message: string, source: string) {
