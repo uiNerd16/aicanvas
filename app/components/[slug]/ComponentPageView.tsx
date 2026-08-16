@@ -395,12 +395,8 @@ export default function ComponentPageView({
     ? `"https://aicanvas.me/r/${installSlug}.json?token=${userToken}"`
     : `@aicanvas/${installSlug}`
   const cliCommand = `npx shadcn@latest add ${installReference}`
-  // Displayed form masks the token so it never appears on screen or in
-  // screenshots. The copy buttons still write the REAL command to the
-  // clipboard, so the install works when pasted.
-  const installReferenceMasked = userToken
-    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
-    : `@aicanvas/${installSlug}`
+  // The displayed form is built further down, once the install gates it has to
+  // answer to are in scope.
 
   async function copyCode() {
     // When enforcing, source only exists after the gated fetch resolves.
@@ -430,6 +426,33 @@ export default function ComponentPageView({
   const premiumStatus = usePremiumStatus()
   const needsPremium = premium && premiumStatus === 'not-premium'
   const { open: openPaywallModal } = usePaywallModal()
+
+  // Displayed form of the install reference. Masks the token so it never
+  // appears on screen or in screenshots; the copy actions still write the REAL
+  // command to the clipboard, so a permitted install works when pasted.
+  //
+  // It also masks the SLUG for anyone this command would not actually serve.
+  // /r never refuses: signed out, or premium content without a subscription,
+  // it answers 200 with a placeholder file titled "(free account required)" or
+  // "(Premium, locked)". A visitor who reads the command off the screen and
+  // types it themselves therefore gets a SUCCESSFUL install of a stub, sitting
+  // in their project with no error to explain it. Dots are the honest thing to
+  // show: there is a real command here and it is not yours yet. Nothing is
+  // secret — the slug is in the address bar — so this is an affordance, not a
+  // gate. The gate is server-side at /r, and llms.txt still publishes the real
+  // command for agents, along with what the placeholder response means.
+  //
+  // Deliberately stricter than `needsPremium`, which stays open while
+  // entitlement loads so a subscriber's click is never swallowed. That is right
+  // for an action and wrong for text on screen: it would print the real command
+  // and mask it a moment later, flashing an install that may not work. Dots
+  // first, revealed once the viewer is known to be entitled.
+  const installMasked = needsFreeAccount || (premium && premiumStatus !== 'premium')
+  const installReferenceMasked = installMasked
+    ? `@aicanvas/${'•'.repeat(12)}`
+    : userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${installSlug}`
 
   // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
   // returning the visitor here after they create their free account. The install
