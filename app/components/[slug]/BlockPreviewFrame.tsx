@@ -6,9 +6,19 @@ import { useEffect, useRef, useState } from 'react'
 // breakpoints are VIEWPORT-based, so this is the whole point of the iframe: a
 // section-scale block mounted directly in the ~848px preview box resolves its
 // md: rules and squeezes to min-content, while inside a frame of its own it
-// lays out exactly the way it will on the buyer's desktop. 1440 is the width
-// these blocks are designed against.
-const FRAME_WIDTH = 1440
+// lays out exactly the way it will on the buyer's screen. 1440 is the width
+// these blocks are designed against; 390 matches the phone width the template
+// previews already call the honest one (iPhone 14).
+const DESKTOP_FRAME_WIDTH = 1440
+const PHONE_FRAME_WIDTH = 390
+
+// Below this the visitor is on a phone, so the block should be laid out at a
+// phone viewport and show the mobile composition it will actually ship on.
+// Framing a 1440px desktop layout into a ~350px box instead would be legible
+// only in the sense that a thumbnail is: about a quarter scale, nothing
+// readable. Measured against the BOX, which is the width the frame has to
+// cover; it tracks the viewport closely enough at these sizes.
+const PHONE_BOX_WIDTH = 640
 
 /**
  * The detail page's preview box for a full-width block.
@@ -48,11 +58,13 @@ export function BlockPreviewFrame({
     return () => observer.disconnect()
   }, [])
 
-  const scale = box ? box.width / FRAME_WIDTH : 0
+  const frameWidth =
+    box && box.width < PHONE_BOX_WIDTH ? PHONE_FRAME_WIDTH : DESKTOP_FRAME_WIDTH
+  const scale = box ? box.width / frameWidth : 0
   // Frame-space height. Deriving it from the box aspect rather than fixing it
   // means no letterboxing at any window width, and the block still gets to pick
   // its own layout for the shape it is actually given.
-  const frameHeight = box ? (box.height * FRAME_WIDTH) / box.width : 0
+  const frameHeight = box ? (box.height * frameWidth) / box.width : 0
 
   return (
     <div ref={hostRef} className="absolute inset-0 overflow-hidden">
@@ -64,9 +76,14 @@ export function BlockPreviewFrame({
           src={`/preview/${slug}?frame=1&theme=${theme}`}
           title={`${name} preview`}
           loading="lazy"
-          className="absolute top-0 left-0 border-0"
+          // Live and interactive on a pointer device, deliberately inert on
+          // touch: a finger dragged across a block that answers drags would
+          // stir it instead of scrolling the page past it, and the visitor
+          // would be stuck on the preview. Touch gets the whole box as a way
+          // into full view instead, where the block is interactive again.
+          className="absolute top-0 left-0 border-0 [@media(hover:none)]:pointer-events-none"
           style={{
-            width: FRAME_WIDTH,
+            width: frameWidth,
             height: frameHeight,
             transform: `scale(${scale})`,
             transformOrigin: 'top left',

@@ -735,22 +735,27 @@ export default function ComponentPageView({
                       />
                       {/* The frame shows the whole block, but at a fraction of
                           its real size, so the way through to full size has to
-                          stay on the box. pointer-events-none on the layer and
-                          auto on the pill alone: everything around the pill is
-                          live block, and the visitor should be able to reach it. */}
-                      <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            track('Fullscreen Open', { component: slug })
-                            setFullscreen(true)
-                          }}
-                          className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900"
-                        >
+                          stay on the box.
+
+                          A pointer device keeps the block itself live: the
+                          layer takes no pointer events, only the pill does, and
+                          the pill waits for hover. Touch has neither hover nor
+                          a live block underneath, so the pill is always up and
+                          the whole box is the target. */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          track('Fullscreen Open', { component: slug })
+                          setFullscreen(true)
+                        }}
+                        className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/preview:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
+                      >
+                        <span className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900">
                           <CornersOut weight="regular" size={14} />
-                          Click for full view
-                        </button>
-                      </div>
+                          <span className="[@media(hover:none)]:hidden">Click for full view</span>
+                          <span className="[@media(hover:hover)]:hidden">Tap for full view</span>
+                        </span>
+                      </button>
                     </>
                   ) : (
                     <div key={previewKey} className="contents">
