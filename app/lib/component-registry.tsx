@@ -45,6 +45,8 @@ import SphereLines from '../../components-workspace/sphere-lines'
 import { prompts as sphereLinesPrompts } from '../../components-workspace/sphere-lines/prompts'
 import MagneticDots from '../../components-workspace/magnetic-dots'
 import { prompts as magneticDotsPrompts } from '../../components-workspace/magnetic-dots/prompts'
+import MagneticLogoCluster from '../../components-workspace/magnetic-logo-cluster'
+import { prompts as magneticLogoClusterPrompts } from '../../components-workspace/magnetic-logo-cluster/prompts'
 import ParticleConstellation from '../../components-workspace/particle-constellation'
 import { prompts as particleConstellationPrompts } from '../../components-workspace/particle-constellation/prompts'
 import ScrambleText from '../../components-workspace/scramble-text'
@@ -603,6 +605,22 @@ Requirements:
     PreviewComponent: MagneticDots,
     code: componentCodes['magnetic-dots'],
     prompts: magneticDotsPrompts,
+  },
+  {
+    slug: 'magnetic-logo-cluster',
+    image: 'https://ik.imagekit.io/aitoolkit/magnetic-logo-cluster.png',
+    name: 'Magnetic Logo Cluster',
+    description:
+      'An interactive swarm of your logo. Marks fly in from off-screen, drift endlessly, and bend toward the cursor.',
+    tags: [
+      { label: 'Backgrounds', accent: true },
+      { label: 'Interactive' },
+      { label: 'Motion' },
+    ],
+    dualTheme: true,
+    PreviewComponent: MagneticLogoCluster,
+    code: componentCodes['magnetic-logo-cluster'],
+    prompts: magneticLogoClusterPrompts,
   },
   {
     slug: 'particle-constellation',
