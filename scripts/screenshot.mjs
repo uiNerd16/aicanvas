@@ -134,20 +134,13 @@ const SETTLE_MS        = 2500
 // `preview` is the Playwright Locator for [data-card-theme].
 
 const INTERACTIONS = {
-  // Scroll Wipe Gallery — staticPreview block, needs the poster handover.
+  // Scroll Wipe Gallery — framed block. The box loads the block in an iframe of
+  // its own now, so the wait is for a second document to boot and its photos to
+  // arrive, not for a poster to hand over. Deliberately no hover: the pointer
+  // anywhere on the box raises the "Click for full view" pill, and it bakes
+  // straight into the shot.
   'scroll-wipe-gallery': async (preview, page) => {
-    // The box paints the PREVIOUS poster until a mouse enters it and the live
-    // block takes over, so a re-shoot without this hover just re-uploads the
-    // old image forever. The handover is one-way, so move the pointer back off
-    // the box afterwards or the "Click for full view" pill bakes into the
-    // poster.
-    // Past the handover's own budget: the poster now holds until the block's
-    // images have loaded (2.5s backstop) and then fades for 300ms, so a shorter
-    // wait bakes a half-faded OLD poster into the new one.
-    await hoverCenter(preview, page)
     await page.waitForTimeout(3400)
-    await page.mouse.move(0, 0)
-    await page.waitForTimeout(400)
   },
 
   // 3D Product Card — wait for the .glb to load + reveal in, then hover the

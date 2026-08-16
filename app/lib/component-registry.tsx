@@ -171,10 +171,13 @@ export interface ComponentEntry {
   image?: string
   badge?: string
   dualTheme?: boolean
-  // Opt-in for busy/complex previews (e.g. multi-card blocks with heavy
-  // canvas/WebGL scenes): show `image` as a static preview instead of
-  // live-mounting PreviewComponent; click expands to the real live render in
-  // the existing fullscreen overlay. Off by default (live preview as today).
+  // Opt-in for section-scale blocks that a preview box cannot fit: the detail
+  // page loads this component's own /preview route in an iframe pinned to a
+  // desktop viewport and scales it down, rather than mounting it inline where
+  // it would squeeze to min-content. Off by default (inline live preview).
+  // The name is historical — this used to serve `image` as a still — and is
+  // kept only because renaming it means shipping the public repo and the vault
+  // in lockstep. `image` is still the grid card and OG shot for every entry.
   staticPreview?: boolean
   // Label-only: shows "Premium block" instead of "Premium component" on the
   // detail page. Does not change `badge` (other surfaces key off badge ===

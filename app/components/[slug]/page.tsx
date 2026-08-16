@@ -377,8 +377,7 @@ export default async function Page({
         dualTheme={entry.dualTheme ?? false}
         designSystem={entry.designSystem}
         premium={contentType === 'premium-standalone'}
-        staticPreview={entry.staticPreview}
-        previewImage={entry.image}
+        framedPreview={entry.staticPreview}
         isBlock={isBlockEntry(entry)}
         related={related}
         highlightedCode={withholdSource ? undefined : <HighlightedCode code={entry.code} />}
