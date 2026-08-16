@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Lightning, Key, ShieldCheck } from '@phosphor-icons/react'
 import { premiumEnabled } from '../../../../lib/flags'
 import { buttonClasses } from '../../../components/buttonClasses'
+import { track } from '../../../lib/analytics'
 import { usePaywallModal } from '../../../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../../../components/billing/usePremiumStatus'
 
@@ -59,6 +60,9 @@ export function AccountBilling() {
   const startDate = sub?.startedAt ? fmtDate(sub.startedAt) : ''
 
   async function manageSubscription() {
+    // Churn early-warning: the portal is where cancel/pause lives. Anonymous
+    // count only; the actual cancellation is counted by the Paddle webhook.
+    track('Manage Subscription Open', {})
     setPortalLoading(true)
     setNoPortal(false)
     // Open the portal in a NEW tab so AI Canvas stays open. The blank tab is

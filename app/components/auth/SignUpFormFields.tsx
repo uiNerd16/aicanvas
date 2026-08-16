@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '../../lib/supabase/client'
 import { formatAuthError } from '../../lib/auth-errors'
+import { track } from '../../lib/analytics'
 import { GoogleSignInButton } from '../../account/GoogleSignInButton'
 import { PasswordInput } from '../../account/PasswordInput'
 import { Button } from '../Button'
@@ -57,6 +58,9 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
       setExisting(true)
       return
     }
+    // Anonymous count of genuine new sign-ups (existing-email dead ends
+    // returned above). No email or id is sent — just the event.
+    track('Sign Up', {})
     setSent(true)
   }
 

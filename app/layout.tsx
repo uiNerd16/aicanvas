@@ -13,6 +13,7 @@ import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { PaywallModalProvider } from './components/billing/PaywallModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { SiteBeacon } from './components/SiteBeacon'
 import { PaddlePaymentLink } from './components/billing/PaddlePaymentLink'
 // Registry-free nav counts (generated) — keeps the heavy component-registry,
 // and the three.js/matter-js it references, out of the shared client bundle.
@@ -199,8 +200,13 @@ export default async function RootLayout({
             </AuthModalProvider>
           </SessionProvider>
         </ThemeProvider>
+        {/* Two deliberate systems: Vercel Analytics keeps the visitors count
+            and dashboard (per-day hash, disclosed in /privacy); SiteBeacon +
+            the /api/e relay add what it can't do — funnel events, checkout
+            steps, search queries, js_errors — as identifier-free counts. */}
         <Analytics />
         <SpeedInsights />
+        <SiteBeacon />
         <DevBranchBadge />
         {/* Resumes checkout when the URL carries a Paddle payment link (?_ptxn=) */}
         <PaddlePaymentLink />
