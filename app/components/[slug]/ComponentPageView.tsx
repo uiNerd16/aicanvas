@@ -447,7 +447,14 @@ export default function ComponentPageView({
   // for an action and wrong for text on screen: it would print the real command
   // and mask it a moment later, flashing an install that may not work. Dots
   // first, revealed once the viewer is known to be entitled.
-  const installMasked = needsFreeAccount || (premium && premiumStatus !== 'premium')
+  //
+  // PREMIUM ONLY. The account gate on free components hits the same placeholder
+  // response, but masking there costs more than it saves: the command is the
+  // page's most searched string and a crawler is always signed out, so every
+  // free component page would lose it from its indexed HTML, and a first-time
+  // visitor would meet dots on MIT content. Free says so in words instead, just
+  // below, which warns the hand-typer without hiding anything.
+  const installMasked = premium && premiumStatus !== 'premium'
   const installReferenceMasked = installMasked
     ? `@aicanvas/${'•'.repeat(12)}`
     : userToken
@@ -1029,6 +1036,17 @@ export default function ComponentPageView({
                                   ? `yarn dlx shadcn@latest add ${installReferenceMasked}`
                                   : `npx shadcn@latest add ${installReferenceMasked}`}
                               </code>
+                              {/* The command stays readable for free content,
+                                  so the warning has to be in words: run it
+                                  signed out and it succeeds, writing a
+                                  placeholder rather than the component. */}
+                              {needsFreeAccount && (
+                                <p className="mt-2 text-xs text-sand-500">
+                                  Free account required. Signed out, this
+                                  installs a placeholder file instead of the
+                                  component.
+                                </p>
+                              )}
                             </div>
                           </div>
                       </Step>
@@ -1808,6 +1826,14 @@ export default function ComponentPageView({
                   {cliCopied ? 'Copied!' : 'Copy CLI'}
                 </Button>
               </div>
+              {/* Same warning as the install step: the command above is real
+                  and runnable, and signed out it installs a placeholder. */}
+              {needsFreeAccount && (
+                <p className="mt-2.5 text-xs text-sand-600 dark:text-sand-400">
+                  Free account required. Signed out, this installs a placeholder
+                  file instead of the component.
+                </p>
+              )}
             </div>
 
             {/* The prompt */}
