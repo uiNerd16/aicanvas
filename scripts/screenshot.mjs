@@ -450,6 +450,19 @@ const INTERACTIONS = {
   'magnetic-logo-cluster': async (preview, page) => {
     await page.waitForTimeout(3900 - SETTLE_MS)
   },
+
+  // Fluid Simulation Hero — a timing wait, not an interaction. The arrival
+  // ignites the fluid from a point and blooms it into the resting composition
+  // over intro.duration = 2.4s, while the type staggers in until ~1.72s (last
+  // delay ~1.1s + 620ms fade). SETTLE_MS alone fires mid-bloom and bakes a
+  // half-formed surface into the card, so wait out the full bloom plus a
+  // margin for the mass to settle into its steady filament-rich state. If
+  // intro.duration changes, change this number with it.
+  // Deliberately no hover: the hero hides the system cursor and draws its own
+  // lens wherever the pointer is, so any pointer position bakes the lens in.
+  'fluid-simulation-hero': async (preview, page) => {
+    await page.waitForTimeout(5600 - SETTLE_MS)
+  },
 }
 
 async function hoverCenter(preview, page) {

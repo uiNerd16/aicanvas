@@ -150,6 +150,29 @@ export default function CreditsPage() {
           </p>
         </section>
 
+        {/* ── Code inside components ── */}
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-sand-50">Code inside components</h2>
+          <p className="mt-3 leading-relaxed text-sand-400">
+            Everything above is about assets used to build this site. A few
+            components we distribute also adapt open-source code from other
+            authors. Their original licenses travel with the component source
+            and are credited here.
+          </p>
+          <ul className="mt-3 space-y-3 leading-relaxed text-sand-400">
+            <li>
+              <a href="https://github.com/PavelDoGreat/WebGL-Fluid-Simulation" target="_blank" rel="noopener noreferrer" className={extLink}>WebGL-Fluid-Simulation</a>{' '}
+              by Pavel Dobryakov, licensed{' '}
+              <a href="https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/LICENSE" target="_blank" rel="noopener noreferrer" className={extLink}>MIT</a>
+              , Copyright 2017 Pavel Dobryakov. Used in the{' '}
+              <span className="text-sand-200">Fluid Simulation Hero</span>{' '}
+              component, whose Navier-Stokes solver passes (advect, divergence,
+              curl, vorticity confinement, Jacobi pressure, gradient subtract)
+              are adapted from it.
+            </li>
+          </ul>
+        </section>
+
         <SiteFooter />
       </main>
     </div>
