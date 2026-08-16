@@ -1816,7 +1816,11 @@ export default function ComponentPageView({
                 project, done.
               </p>
               <div className="mt-4 flex items-start gap-2.5">
-                <code className="min-w-0 flex-1 break-all rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
+                {/* One line, clipped. A signed-in install is a tokenized URL
+                    that wraps to two lines and turns a tidy card into a wall of
+                    monospace. Nothing is lost by cutting it: the visible form
+                    is masked anyway, and the button copies the real command. */}
+                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
                 {/* copyCli already sends a non-subscriber to the paywall
