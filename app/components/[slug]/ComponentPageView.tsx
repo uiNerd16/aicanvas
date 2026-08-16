@@ -1819,11 +1819,19 @@ export default function ComponentPageView({
                 <code className="min-w-0 flex-1 break-all rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
+                {/* copyCli already sends a non-subscriber to the paywall
+                    instead of copying, so only the label was lying: it offered
+                    a clipboard action beside a command that is already dots.
+                    Same treatment as the locked prompt below. */}
                 <Button variant="primary" size="sm" onClick={copyCli}>
-                  {cliCopied
+                  {needsPremium
+                    ? <LockSimple weight="regular" size={15} />
+                    : cliCopied
                     ? <Check weight="regular" size={15} />
                     : <Terminal weight="regular" size={15} />}
-                  {cliCopied ? 'Copied!' : 'Copy CLI'}
+                  {needsPremium
+                    ? 'Unlock to install'
+                    : cliCopied ? 'Copied!' : 'Copy CLI'}
                 </Button>
               </div>
               {/* Same warning as the install step: the command above is real
