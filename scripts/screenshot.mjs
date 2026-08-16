@@ -440,6 +440,16 @@ const INTERACTIONS = {
   'diamond-grid': async (preview, page) => {
     await page.waitForTimeout(27000 - SETTLE_MS)
   },
+
+  // Magnetic Logo Cluster — the pack's own entry (150 icons * 12ms stagger +
+  // spring settle) finishes at ~2700ms, so a plain SETTLE_MS shot lands mid
+  // fly-in at best and never reaches the scripted "ghost cursor" sweep that
+  // starts 400ms later and demonstrates the actual magnet/curl interaction.
+  // Wait past entry + into the sweep's midpoint, where the invisible cursor
+  // is near center and the most icons are visibly bent and trailing.
+  'magnetic-logo-cluster': async (preview, page) => {
+    await page.waitForTimeout(3900 - SETTLE_MS)
+  },
 }
 
 async function hoverCenter(preview, page) {
