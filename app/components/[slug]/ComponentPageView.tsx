@@ -39,7 +39,7 @@ import type { ComponentMeta } from '../../lib/component-registry'
 import { getDesignSystemMeta, type DesignSystemSlug } from '../../lib/design-system-meta'
 import { track } from '../../lib/analytics'
 import { trackInstall } from '../../lib/track-install'
-import { optimizeImageKitUrl } from '../../lib/imagekit'
+import { BlockPreviewFrame } from './BlockPreviewFrame'
 import { useSession } from '../auth/SessionProvider'
 import { useAuthModal } from '../auth/AuthModalProvider'
 import { Button } from '../Button'
@@ -91,11 +91,14 @@ interface ComponentPageViewProps {
   designSystem?: DesignSystemSlug
   /** Premium standalone component — shows a "Premium component" label by the title. */
   premium?: boolean
-  // Opt-in for busy/complex previews: show `previewImage` as a static image
-  // instead of live-mounting `children`; clicking it opens the existing
-  // fullscreen overlay, which still renders the real live component.
-  staticPreview?: boolean
-  previewImage?: string
+  // Opt-in for section-scale blocks: instead of live-mounting `children` in the
+  // preview box, load the block's own /preview route in an iframe pinned to a
+  // desktop viewport and scale it down to fit. See BlockPreviewFrame.
+  // Fed from the registry's `staticPreview` field, which kept its name from the
+  // screenshot era; the mechanism behind it is live now. Rename the field when
+  // the vault's meta.json files are next touched anyway, so the two repos don't
+  // have to ship in lockstep for it.
+  framedPreview?: boolean
   // Label-only: "Premium block" instead of "Premium component" by the title
   // and above the install section. See ComponentEntry.isBlock.
   isBlock?: boolean
@@ -129,14 +132,6 @@ interface ComponentPageViewProps {
 
 const RELATED_PAGE_SIZE = 3
 
-// Live preview width for staticPreview blocks. Multi-card blocks need a pinned
-// width so the box cannot squeeze them to min-content; full-bleed blocks need
-// the box itself, because anything wider crops their own corner chrome off.
-// Filling the box is the default, pinning is opt-in per slug.
-const PINNED_PREVIEW_WIDTH: Record<string, string> = {
-  '3d-gem-pricing-section': 'lg:w-[1200px]',
-}
-
 export default function ComponentPageView({
   slug,
   propTables = [],
@@ -150,8 +145,7 @@ export default function ComponentPageView({
   dualTheme,
   designSystem,
   premium = false,
-  staticPreview = false,
-  previewImage,
+  framedPreview = false,
   isBlock = false,
   related,
   highlightedCode,
@@ -255,46 +249,6 @@ export default function ComponentPageView({
   // initialUser, so a normal load never fires a second fetch.
   useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug, user?.id])
   const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
-  // staticPreview blocks paint their screenshot first, then hand over to the
-  // real component on the first sign the visitor cares: hovering the box, or
-  // pressing the theme toggle, which a one-theme screenshot physically cannot
-  // answer. Nobody who scrolls past pays for the block's WebGL scene.
-  const [posterLive, setPosterLive] = useState(false)
-  // The live block mounts UNDER the poster and only takes the box once it has
-  // something to show. Without this the poster is dropped the instant the block
-  // mounts, so the first hover crossfades into a bare background while the
-  // block's photos / textures are still downloading.
-  const [liveReady, setLiveReady] = useState(false)
-  const liveRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!posterLive || liveReady) return
-    let alive = true
-    // Poll, don't snapshot: premium blocks are dynamic() chunks, so at mount
-    // the wrapper is still empty and a one-shot image check would find nothing
-    // to wait for and hand over instantly. Ready = the block rendered
-    // something AND every image in it has loaded. Zero images (canvas / WebGL)
-    // passes as soon as the chunk paints.
-    // ponytail: img.complete is close enough to "painted"; swap for decode()
-    // if a block ever lands mid-decode.
-    const ready = () => {
-      const el = liveRef.current
-      if (!el?.firstElementChild) return false
-      return Array.from(el.querySelectorAll('img')).every((img) => img.complete)
-    }
-    const finish = () => {
-      // Two frames so the block's first paint is on screen before the poster
-      // starts fading, not racing it.
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => { if (alive) setLiveReady(true) }),
-      )
-    }
-    const poll = setInterval(() => { if (ready()) { clearInterval(poll); finish() } }, 100)
-    // Backstop: a chunk that fails, or a lazy image outside the crop that never
-    // loads, must not leave the poster up forever.
-    const timer = setTimeout(() => { clearInterval(poll); finish() }, 2500)
-    if (ready()) { clearInterval(poll); clearTimeout(timer); finish() }
-    return () => { alive = false; clearInterval(poll); clearTimeout(timer) }
-  }, [posterLive, liveReady])
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
@@ -369,12 +323,6 @@ export default function ComponentPageView({
   // which restarts any animations / effects / canvas inits inside the
   // children component.
   const [previewKey, setPreviewKey] = useState(0)
-  // Refresh remounts the block, so the poster has to cover it again instead of
-  // sitting invisible over a box that is reloading. Slug-to-slug navigation
-  // reuses this component without a remount, so the next block starts from its
-  // own poster rather than inheriting this one's handover.
-  useEffect(() => { setLiveReady(false) }, [previewKey])
-  useEffect(() => { setPosterLive(false); setLiveReady(false) }, [slug])
 
   // Remix panel — ONE general prompt per component. The Claude Code lane is
   // the comprehensive one and doubles as the platform-agnostic prompt; other
@@ -447,12 +395,8 @@ export default function ComponentPageView({
     ? `"https://aicanvas.me/r/${installSlug}.json?token=${userToken}"`
     : `@aicanvas/${installSlug}`
   const cliCommand = `npx shadcn@latest add ${installReference}`
-  // Displayed form masks the token so it never appears on screen or in
-  // screenshots. The copy buttons still write the REAL command to the
-  // clipboard, so the install works when pasted.
-  const installReferenceMasked = userToken
-    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
-    : `@aicanvas/${installSlug}`
+  // The displayed form is built further down, once the install gates it has to
+  // answer to are in scope.
 
   async function copyCode() {
     // When enforcing, source only exists after the gated fetch resolves.
@@ -482,6 +426,40 @@ export default function ComponentPageView({
   const premiumStatus = usePremiumStatus()
   const needsPremium = premium && premiumStatus === 'not-premium'
   const { open: openPaywallModal } = usePaywallModal()
+
+  // Displayed form of the install reference. Masks the token so it never
+  // appears on screen or in screenshots; the copy actions still write the REAL
+  // command to the clipboard, so a permitted install works when pasted.
+  //
+  // It also masks the SLUG for anyone this command would not actually serve.
+  // /r never refuses: signed out, or premium content without a subscription,
+  // it answers 200 with a placeholder file titled "(free account required)" or
+  // "(Premium, locked)". A visitor who reads the command off the screen and
+  // types it themselves therefore gets a SUCCESSFUL install of a stub, sitting
+  // in their project with no error to explain it. Dots are the honest thing to
+  // show: there is a real command here and it is not yours yet. Nothing is
+  // secret — the slug is in the address bar — so this is an affordance, not a
+  // gate. The gate is server-side at /r, and llms.txt still publishes the real
+  // command for agents, along with what the placeholder response means.
+  //
+  // Deliberately stricter than `needsPremium`, which stays open while
+  // entitlement loads so a subscriber's click is never swallowed. That is right
+  // for an action and wrong for text on screen: it would print the real command
+  // and mask it a moment later, flashing an install that may not work. Dots
+  // first, revealed once the viewer is known to be entitled.
+  //
+  // PREMIUM ONLY. The account gate on free components hits the same placeholder
+  // response, but masking there costs more than it saves: the command is the
+  // page's most searched string and a crawler is always signed out, so every
+  // free component page would lose it from its indexed HTML, and a first-time
+  // visitor would meet dots on MIT content. Free says so in words instead, just
+  // below, which warns the hand-typer without hiding anything.
+  const installMasked = premium && premiumStatus !== 'premium'
+  const installReferenceMasked = installMasked
+    ? `@aicanvas/${'•'.repeat(12)}`
+    : userToken
+    ? `"https://aicanvas.me/r/${installSlug}.json?token=aic_••••••••"`
+    : `@aicanvas/${installSlug}`
 
   // Open the Lab-style gate modal (two-button pitch, then sign-in / sign-up),
   // returning the visitor here after they create their free account. The install
@@ -665,13 +643,6 @@ export default function ComponentPageView({
                     disabled={!dualTheme}
                     onClick={() => {
                       if (!dualTheme) return
-                      // A screenshot cannot answer a theme change — this is the
-                      // one press that always earns the live block. It also
-                      // retires the poster on the spot: it is a shot of the
-                      // theme being left behind, so holding it over the block
-                      // would answer the press with the wrong picture.
-                      setPosterLive(true)
-                      setLiveReady(true)
                       setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))
                     }}
                     className="overflow-hidden"
@@ -784,106 +755,37 @@ export default function ComponentPageView({
                     fullscreen instance and tanks framerate (especially for
                     canvas / three.js / heavy framer-motion components). */}
                 {!fullscreen && (
-                  staticPreview && previewImage ? (
+                  framedPreview ? (
                     <>
-                      {/* The poster stays mounted OVER the live block until the
-                          block has painted, then fades out. Underneath it would
-                          be covered the moment the block mounts, which is the
-                          moment the block has the least to show. */}
-                      <img
-                        src={optimizeImageKitUrl(previewImage, 'detail')}
-                        alt={name}
-                        aria-hidden={posterLive}
-                        // pointer-events-none throughout: while the poster is
-                        // holding, the full-box CTA has already unmounted, so a
-                        // poster that took clicks would swallow every press
-                        // meant for the block underneath.
-                        // Only the fade-OUT animates. Re-holding the poster (a
-                        // refresh press, a new slug) has to snap back to opaque,
-                        // or the box shows through while the poster fades in.
-                        className={`pointer-events-none absolute inset-0 z-20 h-full w-full object-cover object-top ${
-                          liveReady ? 'opacity-0 transition-opacity duration-300' : 'opacity-100'
-                        }`}
+                      <BlockPreviewFrame
+                        slug={slug}
+                        name={name}
+                        theme={cardTheme}
+                        reloadKey={previewKey}
                       />
-                      {posterLive && (
-                        // Multi-card blocks are laid out at a pinned width, not
-                        // at the box's ~848px: the box would squeeze a
-                        // section-scale block to its min-content width and crop
-                        // the outer cards at a random-looking point. Pinned
-                        // width + justify-center gives the same symmetric crop
-                        // every time. 1:1 scale on purpose, no zoom: the crystal
-                        // overlay turns screen px into world units off
-                        // getBoundingClientRect, so a CSS scale would keep the
-                        // gems in place but size them wrong against their cards.
-                        // Full-bleed blocks want the opposite: pinning them
-                        // wider than the box crops their own corner chrome off,
-                        // so they fill the box instead (the default).
-                        <motion.div
-                          key={previewKey}
-                          ref={liveRef}
-                          // No fade of its own: the poster on top is what
-                          // crossfades, and fading the block in as well made the
-                          // half-loaded state visible through it.
-                          // Pinned width only from lg up. Tailwind breakpoints are
-                          // viewport-based, so pinning 1200px on a 700px window
-                          // would lay the block out at its two-column breakpoint
-                          // and then crop that to a sliver. Below lg the block
-                          // just fills the box and picks its own layout.
-                          // relative z-10: the poster is absolutely positioned,
-                          // so without a stacking rung of its own the in-flow
-                          // live block paints UNDER it (CSS painting order puts
-                          // positioned boxes last) and disappears the moment the
-                          // fade ends and opacity:1 stops making a layer.
-                          className={`relative z-10 w-full shrink-0 ${PINNED_PREVIEW_WIDTH[slug] ?? ''}`}
-                        >
-                          {children}
-                        </motion.div>
-                      )}
-                      {posterLive && (
-                        // Same centre pill as the poster carries, kept once the
-                        // block is live so the crop still reads as "there is more
-                        // of this, open it". No dim and no full-box hit area this
-                        // time: the block underneath is interactive now, so only
-                        // the pill itself takes the pointer.
-                        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/preview:opacity-100">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              track('Fullscreen Open', { component: slug })
-                              setFullscreen(true)
-                            }}
-                            className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900"
-                          >
-                            <CornersOut weight="regular" size={14} />
-                            Click for full view
-                          </button>
-                        </div>
-                      )}
-                      {!posterLive && (
-                        <button
-                          type="button"
-                          // Hover is the handover. Touch has no hover, so a tap
-                          // keeps the old behaviour and opens fullscreen.
-                          onPointerEnter={(e) => {
-                            if (e.pointerType === 'mouse') setPosterLive(true)
-                          }}
-                          onClick={() => {
-                            track('Fullscreen Open', { component: slug })
-                            setFullscreen(true)
-                          }}
-                          // z-30: the poster now sits at z-20, so the hover CTA
-                          // and its dim have to clear it.
-                          className="group/static absolute inset-0 z-30 cursor-pointer"
-                          aria-label={`Expand ${name} preview`}
-                        >
-                          <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-150 group-hover/static:bg-black/30">
-                            <span className="flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 opacity-0 shadow-lg transition-opacity duration-150 group-hover/static:opacity-100">
-                              <CornersOut weight="regular" size={14} />
-                              Click to view live
-                            </span>
-                          </span>
-                        </button>
-                      )}
+                      {/* The frame shows the whole block, but at a fraction of
+                          its real size, so the way through to full size has to
+                          stay on the box.
+
+                          A pointer device keeps the block itself live: the
+                          layer takes no pointer events, only the pill does, and
+                          the pill waits for hover. Touch has neither hover nor
+                          a live block underneath, so the pill is always up and
+                          the whole box is the target. */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          track('Fullscreen Open', { component: slug })
+                          setFullscreen(true)
+                        }}
+                        className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/preview:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
+                      >
+                        <span className="pointer-events-auto flex items-center gap-2 rounded-lg border border-sand-100/0 bg-sand-950/90 px-3 py-2 text-xs font-semibold text-sand-100 shadow-lg transition-colors duration-150 hover:bg-sand-900">
+                          <CornersOut weight="regular" size={14} />
+                          <span className="[@media(hover:none)]:hidden">Click for full view</span>
+                          <span className="[@media(hover:hover)]:hidden">Tap for full view</span>
+                        </span>
+                      </button>
                     </>
                   ) : (
                     <div key={previewKey} className="contents">
@@ -1134,6 +1036,17 @@ export default function ComponentPageView({
                                   ? `yarn dlx shadcn@latest add ${installReferenceMasked}`
                                   : `npx shadcn@latest add ${installReferenceMasked}`}
                               </code>
+                              {/* The command stays readable for free content,
+                                  so the warning has to be in words: run it
+                                  signed out and it succeeds, writing a
+                                  placeholder rather than the component. */}
+                              {needsFreeAccount && (
+                                <p className="mt-2 text-xs text-sand-500">
+                                  Free account required. Signed out, this
+                                  installs a placeholder file instead of the
+                                  component.
+                                </p>
+                              )}
                             </div>
                           </div>
                       </Step>
@@ -1903,16 +1816,36 @@ export default function ComponentPageView({
                 project, done.
               </p>
               <div className="mt-4 flex items-start gap-2.5">
-                <code className="min-w-0 flex-1 break-all rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
+                {/* One line, clipped. A signed-in install is a tokenized URL
+                    that wraps to two lines and turns a tidy card into a wall of
+                    monospace. Nothing is lost by cutting it: the visible form
+                    is masked anyway, and the button copies the real command. */}
+                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
+                {/* copyCli already sends a non-subscriber to the paywall
+                    instead of copying, so only the label was lying: it offered
+                    a clipboard action beside a command that is already dots.
+                    Same treatment as the locked prompt below. */}
                 <Button variant="primary" size="sm" onClick={copyCli}>
-                  {cliCopied
+                  {needsPremium
+                    ? <LockSimple weight="regular" size={15} />
+                    : cliCopied
                     ? <Check weight="regular" size={15} />
                     : <Terminal weight="regular" size={15} />}
-                  {cliCopied ? 'Copied!' : 'Copy CLI'}
+                  {needsPremium
+                    ? 'Unlock to install'
+                    : cliCopied ? 'Copied!' : 'Copy CLI'}
                 </Button>
               </div>
+              {/* Same warning as the install step: the command above is real
+                  and runnable, and signed out it installs a placeholder. */}
+              {needsFreeAccount && (
+                <p className="mt-2.5 text-xs text-sand-600 dark:text-sand-400">
+                  Free account required. Signed out, this installs a placeholder
+                  file instead of the component.
+                </p>
+              )}
             </div>
 
             {/* The prompt */}

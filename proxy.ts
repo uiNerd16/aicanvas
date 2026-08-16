@@ -78,8 +78,13 @@ const BOT_UA = /bot|crawl|spider|slurp|headless|preview|scrape|python|curl|wget/
  */
 function isPageview(request: NextRequest): boolean {
   if (request.method !== 'GET') return false
-  const { pathname } = request.nextUrl
+  const { pathname, searchParams } = request.nextUrl
   if (pathname.startsWith('/api/') || pathname.includes('.')) return false
+  // A framed preview is a piece of the page that embeds it, not a visit of its
+  // own. Its document request is otherwise indistinguishable from a real one —
+  // same method, same accept, the visitor's own user agent — so without this
+  // every block detail page would count twice.
+  if (searchParams.get('frame') === '1') return false
   const ua = request.headers.get('user-agent') ?? ''
   if (!ua || BOT_UA.test(ua)) return false
   if (

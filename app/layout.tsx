@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Manrope, Geist_Mono } from 'next/font/google'
 import { GeistPixelCircle } from 'geist/font/pixel'
 import { Suspense } from 'react'
@@ -125,6 +126,34 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Two documents share this layout: the site, and the previews the site
+  // embeds in itself (block previews on a component page, the mobile template
+  // previews). An embedded one paints a single composition over the whole
+  // viewport, so every piece below — the auth round trip, the four providers,
+  // both nav components, the modal, both analytics scripts — is work nobody
+  // can see. Sec-Fetch-Dest is the browser's own answer to "is this document
+  // being framed", sent on the document request itself; a browser too old to
+  // send it just gets the full shell, which is slower but never wrong.
+  if ((await headers()).get('sec-fetch-dest') === 'iframe') {
+    return (
+      <html
+        lang="en"
+        suppressHydrationWarning
+        // The attribute the head script below would otherwise set from
+        // ?frame=1. Resolved here instead: this branch only renders for an
+        // embedded document, so globals.css pins the preview surface from the
+        // first paint with no script to wait for.
+        data-frame=""
+        className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} h-full antialiased`}
+      >
+        {/* No overflow-hidden and no scroll column: a framed template preview
+            pans its own document, and the site's chrome is what owns that
+            scroller on the full page. */}
+        <body className="h-full">{children}</body>
+      </html>
+    )
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
