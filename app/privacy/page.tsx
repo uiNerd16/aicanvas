@@ -46,7 +46,7 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="mt-3 text-sm text-sand-500">
-          Last updated: 2026-06-21. This policy describes how AI Canvas processes
+          Last updated: 2026-08-16. This policy describes how AI Canvas processes
           personal data, in line with the EU General Data Protection Regulation
           (GDPR / DSGVO) and the German Bundesdatenschutzgesetz (BDSG).
         </p>
@@ -138,10 +138,13 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed text-sand-400">
             When you create an account we store your email address and a salted,
             bcrypt-hashed version of your password. If you sign in with Google we
-            store the Google account identifier and email returned by Google&apos;s
-            OAuth flow instead of a password. We never see or store your Google
-            password. Account data lives in our authentication database operated
-            by Supabase (see Section 5).
+            store the Google account identifier, email, and name returned by
+            Google&apos;s OAuth flow instead of a password. We never see or store
+            your Google password. Account data lives in our authentication
+            database operated by Supabase (see Section 5). If you buy Premium
+            without an account, we create one for you from the email address you
+            enter at Paddle checkout, so your purchase has an account to attach
+            to; you claim it by signing in with that email.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -154,7 +157,11 @@ export default function PrivacyPage() {
             preferences (preferred package manager, preferred AI platform). This
             data is private to you, protected by row-level security, and only
             used to power features such as your saved list, your install history
-            tab, and pre-selected defaults in the install drawer.
+            tab, and pre-selected defaults in the install drawer. If you save a
+            preset in a Lab tool, we store its name and the tool settings it
+            contains, including any image you uploaded into the tool, so the
+            preset can be restored later. Presets are private to your account
+            and deleted with it.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -215,7 +222,15 @@ export default function PrivacyPage() {
             service. Vercel Web Analytics produces aggregated, cookieless traffic
             statistics. Visitors are identified only by a per-day hash of the
             request and the hash is discarded after 24 hours. No personal
-            identifier is created and no cross-site tracking is possible.
+            identifier is created and no cross-site tracking is possible. We
+            also measure site usage ourselves, without cookies: our own server
+            collects page views (path, referrer, country and region), clicks on
+            key buttons (for example copying an install command), searches on
+            the site (the typed query and its result count), and script errors,
+            and stores them as anonymous events in our analytics tool. Every
+            such event carries at most a country and region. Nothing is stored
+            on or read from your device for this, no visitor identifier is
+            created, and your IP address never reaches the analytics store.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -226,28 +241,33 @@ export default function PrivacyPage() {
             <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">/r/</code>
             ) are made by the shadcn CLI and the AI Canvas MCP. If you are signed
             in, the command you copied carries your account API token so the pull
-            unlocks any premium content you are entitled to. We do not count or
-            log per-install activity for anonymous requests. Abuse is handled at
-            signup instead, through email confirmation and a Cloudflare Turnstile
-            challenge, so these registry paths read no account cookies and keep no
-            per-install counters.
+            unlocks any premium content you are entitled to. We count these
+            requests as anonymous events (component name, requesting tool and its
+            user-agent string, country and region) to see which components are
+            used. The count contains no account data and no per-user identifier;
+            requests are grouped under a shared bucket derived from the tool&apos;s
+            user-agent string, which many users share. Requests from a signed-in
+            browser session may read your session cookie solely to check what
+            your account is entitled to; anonymous CLI and MCP requests carry no
+            cookies. Signup abuse is limited through email confirmation.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
             Marketing communications preference
           </h3>
           <p className="mt-2 leading-relaxed text-sand-400">
-            We store a boolean opt-in flag on your account (default: enabled
-            on sign-up, per the notice on the sign-up form) plus the timestamp
-            of your last change. We send marketing emails only to accounts
-            with the flag enabled. Toggling it off in{' '}
+            Accounts receive our occasional product newsletter until they
+            unsubscribe. We store your subscription status (subscribed, not
+            yet decided, or unsubscribed) plus the timestamp of your last
+            change. Unsubscribing, via the link in any newsletter or the
+            toggle in{' '}
             <code className="rounded bg-sand-900 px-1 py-0.5 text-xs text-sand-300">
               /account/settings
-            </code>{' '}
-            takes effect immediately. Transactional emails (sign-up
-            confirmation, magic links, password reset) are not affected by
-            this flag. They are necessary to provide the account
-            service.
+            </code>
+            , takes effect immediately and is permanent: an unsubscribed
+            address is never mailed again. Transactional emails (sign-up
+            confirmation, magic links, password reset) are separate. They are
+            necessary to provide the account service.
           </p>
 
           <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-sand-300">
@@ -275,23 +295,23 @@ export default function PrivacyPage() {
               Canvas account service you signed up for.
             </li>
             <li>
-              <strong className="text-sand-200">Server logs &amp; aggregate analytics:</strong>{' '}
+              <strong className="text-sand-200">Server logs &amp; anonymous analytics:</strong>{' '}
               Art. 6 (1)(f) GDPR. Legitimate interest in operating, securing,
               and understanding usage of the service. We balance this against
-              your interests by using only cookieless, aggregate analytics with
-              no cross-site tracking.
+              your interests by using only cookieless, anonymous event counting
+              with no visitor identifier and no cross-site tracking.
             </li>
             <li>
               <strong className="text-sand-200">Anonymous registry
               hits:</strong>{' '}
               Art. 6 (1)(f) GDPR. Legitimate interest in operating the service.
-              We do not count or log per-install activity for anonymous
-              requests, and keep no per-install counter. Signed-in pulls are
-              tied to your account.
+              Anonymous requests are counted as anonymous events with no
+              per-user identifier, as described in Section 2. Signed-in pulls
+              are tied to your account.
             </li>
             <li>
               <strong className="text-sand-200">Contact form:</strong>{' '}
-              Art. 6 (1)(f) GDPR — legitimate interest in answering an enquiry you
+              Art. 6 (1)(f) GDPR: legitimate interest in answering an enquiry you
               chose to send us. We process only the name, email, subject, and
               message you provide, and keep them no longer than needed to deal
               with the matter.
@@ -331,10 +351,11 @@ export default function PrivacyPage() {
           <p className="mt-3 leading-relaxed text-sand-400">
             Providing your email and password (or a Google account, if you sign
             in with Google) is necessary to create and use an AI Canvas account.
-            If you do not provide them, you cannot create an account, but the
-            public site (component browsing, copying source, downloading
-            registry items via the CLI) remains fully usable without
-            signing in. There is no statutory obligation to provide any data.
+            If you do not provide them, you cannot create an account, but
+            browsing the site and copying component source remain fully usable
+            without signing in. Installing components through the CLI requires
+            a free account. There is no statutory obligation to provide any
+            data.
           </p>
           <p className="mt-3 leading-relaxed text-sand-400">
             We do not use automated decision-making, including profiling, in the
@@ -355,17 +376,18 @@ export default function PrivacyPage() {
           <ul className="mt-4 space-y-3 leading-relaxed text-sand-400">
             <li>
               <strong className="text-sand-200">Vercel Inc.</strong> (USA):
-              hosting, request logs, cookieless Web Analytics. Edge serving
-              from Frankfurt where possible.
+              hosting, request logs, cookieless Web Analytics, performance
+              measurement (Speed Insights). Edge serving from Frankfurt where
+              possible.
             </li>
             <li>
-              <strong className="text-sand-200">Supabase Inc.</strong> (USA) —
+              <strong className="text-sand-200">Supabase Inc.</strong> (USA):
               authentication and account database. It also generates the account
               emails (sign-up confirmation, magic links, password reset), which
               are delivered via Resend (below). EU-region project where available.
             </li>
             <li>
-              <strong className="text-sand-200">Resend (Resend, Inc.)</strong> (USA) —
+              <strong className="text-sand-200">Resend (Resend, Inc.)</strong> (USA):
               delivers our outbound email: the account emails above and any
               message you send through the contact form. Mail is sent via Amazon
               SES in the EU region (Ireland) and authenticated with SPF/DKIM; we
@@ -374,14 +396,23 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
               Google LLC (USA): only if you choose &ldquo;Sign in with Google.&rdquo;
-              Google authenticates you and returns your email and profile
+              Google authenticates you and returns your email, name, and profile
               identifier to us. Google&apos;s own privacy policy applies to their
               processing.
             </li>
             <li>
               <strong className="text-sand-200">ImageKit (Raw Engineering Inc.)</strong>:{' '}
-              delivers component preview screenshots. No user data is sent;
-              ImageKit only serves public image URLs.
+              delivers component preview screenshots from its image CDN. Your
+              browser loads these images directly, so ImageKit technically
+              receives your IP address and browser type, like any image host.
+              We send it no account data; it serves only public image URLs.
+            </li>
+            <li>
+              <strong className="text-sand-200">Brevo (Sendinblue GmbH)</strong> (EU,
+              Germany): our newsletter platform. It stores the email address
+              (and, for Google sign-ins, the name) of newsletter recipients and
+              delivers the newsletter. Unsubscribes are synced back to us
+              automatically.
             </li>
             <li>
               <strong className="text-sand-200">Paddle.com Market Ltd</strong> (UK) /{' '}
@@ -423,8 +454,8 @@ export default function PrivacyPage() {
               weeks).
             </li>
             <li>
-              <strong className="text-sand-200">Aggregate analytics</strong> are
-              not tied to your identity and are kept indefinitely as aggregates.
+              <strong className="text-sand-200">Anonymous analytics events</strong>{' '}
+              are not tied to your identity and are kept indefinitely.
             </li>
             <li>
               <strong className="text-sand-200">Billing and accounting records</strong>{' '}
@@ -481,9 +512,11 @@ export default function PrivacyPage() {
               expiry.
             </li>
             <li>
-              <strong className="text-sand-200">Theme preference</strong>{' '}
-              (localStorage): stores your light/dark theme choice on your device.
-              Never sent to our servers.
+              <strong className="text-sand-200">Lab work-in-progress snapshot</strong>{' '}
+              (localStorage): if you use a Lab tool while signed out and hit an
+              action that needs an account, your current tool settings are
+              briefly saved on your device so nothing is lost while you sign in,
+              then removed.
             </li>
           </ul>
           <p className="mt-3 leading-relaxed text-sand-400">

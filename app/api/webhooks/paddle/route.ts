@@ -5,6 +5,7 @@ import { mapSubscriptionFields } from '@/lib/identity/sub-mapping'
 import { welcomeToPremiumEmail, claimPremiumAccountEmail } from '@/app/lib/email/messages'
 import { NOREPLY_FROM, SITE_URL } from '@/app/lib/config'
 import { paddleApiBase } from '@/app/lib/paddle/server'
+import { phCapture } from '@/app/lib/analytics-server'
 
 export const runtime = 'nodejs'
 
@@ -238,6 +239,21 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error('[paddle webhook] upsert failed:', error)
     return NextResponse.json({ error: 'write failed' }, { status: 500 })
+  }
+
+  // Anonymous conversion/churn counters (no user id, no email — just a
+  // count plus the prior status so dashboards can split new signups from
+  // dunning recoveries, and count past_due -> canceled churn). Placed after
+  // the successful upsert; the stale-guard absorbs sequential Paddle
+  // retries (a same-instant concurrent double delivery could still count
+  // twice — accepted, it is an analytics counter, not billing state).
+  // phCapture never throws and carries a 3s network timeout, so it cannot
+  // fail or stall the webhook.
+  const prior = existing?.status ?? 'none'
+  if (fields.status === 'active' && !wasActive) {
+    await phCapture('Subscription Activated', { prior })
+  } else if (fields.status === 'canceled' && prior !== 'canceled') {
+    await phCapture('Subscription Canceled', { prior })
   }
 
   // First-activation email. Fires once, only on a genuine non-active -> active

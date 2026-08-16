@@ -2,6 +2,7 @@
 
 import { getPaddle, PRICES, type BillingCycle } from '../../lib/paddle/client'
 import { useSession } from '../auth/SessionProvider'
+import { track } from '../../lib/analytics'
 import { checkoutComingSoon } from '../../../lib/flags'
 
 /**
@@ -30,6 +31,7 @@ export function UpgradeButton({
 
   async function onClick() {
     if (comingSoon) return
+    track('Subscribe Click', { cycle })
     const paddle = await getPaddle()
     // showAddDiscounts:false hides the public "Add discount" box, so promos are
     // never offered to every visitor (protects conversion against coupon-fishing).

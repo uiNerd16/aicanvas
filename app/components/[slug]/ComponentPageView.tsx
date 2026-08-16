@@ -487,6 +487,8 @@ export default function ComponentPageView({
   // returning the visitor here after they create their free account. The install
   // UI stays fully visible; only the COPY actions route here when signed out.
   function promptFreeAccount() {
+    // Anonymous count — the beacon's path property names the component.
+    track('Install Gate Shown', {})
     openAuthModal({
       mode: 'gate',
       next: '/components/' + slug,

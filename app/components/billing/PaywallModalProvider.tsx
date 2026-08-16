@@ -11,6 +11,7 @@ import {
 import { X } from '@phosphor-icons/react'
 import { PremiumCards } from './PremiumCards'
 import { PaymentMethods } from './PaymentMethods'
+import { track } from '../../lib/analytics'
 
 // ─── PaywallModalProvider ───────────────────────────────────────────────────
 // Global, full-screen upgrade modal — the paywall equivalent of AuthModal.
@@ -41,7 +42,12 @@ export function usePaywallModal(): PaywallModalContextValue {
 
 export function PaywallModalProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<PaywallState | null>(null)
-  const open = useCallback((next: PaywallState) => setState(next), [])
+  const open = useCallback((next: PaywallState) => {
+    // Anonymous count; the beacon carries the current path, which names the
+    // component whose lock triggered the modal.
+    track('Paywall Shown', { reason: next.reason })
+    setState(next)
+  }, [])
   const close = useCallback(() => setState(null), [])
 
   return (

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { MagnifyingGlass, Sparkle, Ghost, Question } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ComponentCard } from './ComponentCard'
 import { HeaderSocials } from './HeaderSocials'
+import { track } from '../lib/analytics'
 import { Breadcrumbs } from './Breadcrumbs'
 import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
@@ -163,6 +164,19 @@ export function HomeClient({
   useEffect(() => {
     setVisibleCount(INITIAL_LOAD)
   }, [q])
+
+  // Log settled searches (1.5s after the last keystroke) with their result
+  // count — zero-result queries are the roadmap signal. Anonymous, capped.
+  // The mount-time query is skipped: a reload or shared ?q= link is not a
+  // typed search and would inflate per-query counts.
+  const initialQ = useRef(q)
+  useEffect(() => {
+    if (!q || q === initialQ.current) return
+    const timer = setTimeout(() => {
+      track('Search', { query: q.slice(0, 100), results: totalResults })
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [q, totalResults])
 
   function handleLoadMore() {
     setVisibleCount((v) => Math.min(v + LOAD_MORE_SIZE, filtered.length))

@@ -104,7 +104,40 @@ async function unsuppressContact(r) {
   }
 }
 
+// Deleted accounts: delete_my_account() removes the DB row (migration 0017),
+// but nothing removes the contact from Brevo list 3 — the import above only
+// adds/updates. Reconcile: any list member whose email no longer exists in
+// the DB is pulled off the list, so a deleted account can never be mailed.
+// This script runs before every send, so it also heals past deletions.
+async function removeStrayListMembers() {
+  const dbEmails = new Set(data.map(r => r.email.toLowerCase()))
+  const stray = []
+  for (let offset = 0; ; offset += 500) {
+    const res = await fetch(
+      `https://api.brevo.com/v3/contacts/lists/${BREVO_LIST_ID}/contacts?limit=500&offset=${offset}`,
+      { headers: { 'api-key': BREVO_API_KEY } },
+    )
+    if (!res.ok) { console.error('brevo list read:', res.status, await res.text()); process.exit(1) }
+    const { contacts } = await res.json()
+    stray.push(...contacts.map(c => c.email).filter(e => !dbEmails.has(e.toLowerCase())))
+    if (contacts.length < 500) break
+  }
+  for (let i = 0; i < stray.length; i += 100) {
+    const res = await fetch(
+      `https://api.brevo.com/v3/contacts/lists/${BREVO_LIST_ID}/contacts/remove`,
+      {
+        method: 'POST',
+        headers: { 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ emails: stray.slice(i, i + 100) }),
+      },
+    )
+    if (!res.ok) { console.error('brevo list remove:', res.status, await res.text()); process.exit(1) }
+  }
+  if (stray.length) console.log(`removed ${stray.length} deleted-account contact(s) from list ${BREVO_LIST_ID}`)
+}
+
 await importMailable(mailable)
+await removeStrayListMembers()
 for (const r of optedIn) await unsuppressContact(r)
 for (const r of suppressed) await suppressContact(r)
 console.log(`done: ${mailable.length} mailable, ${suppressed.length} suppressed, ${data.length} total`)

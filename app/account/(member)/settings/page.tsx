@@ -21,8 +21,9 @@ export default async function SettingsPage() {
     .maybeSingle()
 
   // Newsletter state lives in newsletter_subscribers (migration 0015) — the
-  // toggle is ON only for an explicit 'subscribed'; 'soft' and 'unsubscribed'
-  // both render as off. user_preferences.newsletter_opt_in is deprecated.
+  // toggle shows the MAILABLE truth: 'subscribed' and 'soft' render as on
+  // (matching who a campaign actually mails); only 'unsubscribed' or no row
+  // is off. user_preferences.newsletter_opt_in is deprecated.
   const { data: sub } = await supabase
     .from('newsletter_subscribers')
     .select('status')
@@ -31,7 +32,7 @@ export default async function SettingsPage() {
 
   const initial = {
     package_manager: (data?.package_manager ?? null) as PackageManager | null,
-    newsletter_opt_in: sub?.status === 'subscribed',
+    newsletter_opt_in: sub != null && sub.status !== 'unsubscribed',
   }
 
   // change vs set mode = whether the account has a usable password. Providers

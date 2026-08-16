@@ -1,7 +1,19 @@
 'use client'
 import { initializePaddle, type Paddle } from '@paddle/paddle-js'
+import { beacon } from '../analytics'
 
 let paddlePromise: Promise<Paddle | undefined> | null = null
+
+// Overlay lifecycle steps counted anonymously (event name only, no checkout
+// data) — makes abandonment and card failures visible next to completions.
+const CHECKOUT_STEPS = new Set([
+  'checkout.loaded',
+  'checkout.payment.selected',
+  'checkout.payment.failed',
+  'checkout.error',
+  'checkout.closed',
+  'checkout.completed',
+])
 
 /** Lazily initialize Paddle.js once (overlay checkout). */
 export function getPaddle(): Promise<Paddle | undefined> {
@@ -15,6 +27,9 @@ export function getPaddle(): Promise<Paddle | undefined> {
       // activation; otherwise tell the user the webhook will finish it —
       // a blind reload would silently dump a paying user back on a Free view.
       eventCallback: (e) => {
+        if (e?.name && CHECKOUT_STEPS.has(e.name)) {
+          beacon('Checkout Step', { step: e.name })
+        }
         if (e?.name === 'checkout.completed') {
           const transactionId = (e.data as { transaction_id?: string } | undefined)?.transaction_id
           fetch('/api/checkout/completed', {

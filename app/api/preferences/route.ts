@@ -24,8 +24,11 @@ export async function GET() {
   }
 
   // Newsletter state lives in newsletter_subscribers (migration 0015); the old
-  // user_preferences.newsletter_opt_in column is deprecated. Only an explicit
-  // 'subscribed' reads as true — 'soft' and 'unsubscribed' are both false here.
+  // user_preferences.newsletter_opt_in column is deprecated. The toggle shows
+  // the MAILABLE truth: 'subscribed' and 'soft' (on the list since sign-up,
+  // never opted out) both read as on — the settings page must never show OFF
+  // to an address the next campaign will mail. Only 'unsubscribed' (or no row
+  // at all) is off.
   const { data: sub } = await supabase
     .from('newsletter_subscribers')
     .select('status')
@@ -36,7 +39,7 @@ export async function GET() {
     preferences: {
       package_manager: data?.package_manager ?? null,
       ai_platform: data?.ai_platform ?? null,
-      newsletter_opt_in: sub?.status === 'subscribed',
+      newsletter_opt_in: sub != null && sub.status !== 'unsubscribed',
     },
   })
 }
