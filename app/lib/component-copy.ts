@@ -68,6 +68,7 @@ export const ACCURATE_STACKS: Record<string, string[]> = {
   'jar-of-emotions': ['Motion', 'Matter.js', 'Tailwind CSS'],
   'label-cards': ['Motion', 'Tailwind CSS'],
   'magnetic-dots': ['Canvas', 'Tailwind CSS'],
+  'magnetic-logo-cluster': ['Motion', 'Tailwind CSS'],
   'mark-toggle': ['Motion', 'Tailwind CSS'],
   'meet-the-crew': ['Motion', 'Tailwind CSS'],
   'mood-tracker': ['Motion', 'Tailwind CSS'],
@@ -181,6 +182,11 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
     useCases: ['Hero section', 'Landing page', 'Section divider'],
     about:
       'Diamond Grid is a full-bleed canvas background built from a near-invisible square grid, rotated forty-five degrees so it reads as diamonds. Thirty-four seeded ignition points fire in sequence, lighting up as four-point stars and sending light outward along the four grid axes with one continuous ease-out, until opposing fronts meet and reveal the pattern. A broad top-left-to-bottom-right mask keeps the center bright while the other two corners fade away. The 64-second loop is seamless and deterministic from a seed prop, replaying on reload. Built on plain canvas with zero dependencies beyond React, it suits hero sections, landing pages, and section dividers that want ambient motion without competing with foreground copy.',
+  },
+  'magnetic-logo-cluster': {
+    useCases: ['Startup landing page', 'Product launch page', 'Conference website'],
+    about:
+      'Magnetic Logo Cluster fills the screen with about 150 copies of your own logo, flying in from every direction before settling into an overlapping diamond pack. Once at rest the pack drifts forever on a GPU-driven CSS loop, and the cursor pulls nearby marks toward it with a soft magnetic tug plus a tangential swirl, so the whole field bends and trails as you move. Any artwork works as the icon: inline SVG, an image, or a component, and tints recolor monochrome marks. It suits a startup landing page, a product launch page, or a conference website built entirely around one brand mark.',
   },
 
   // ─── Buttons & Toggles ───────────────────────────────────────────────────
