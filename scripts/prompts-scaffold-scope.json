@@ -3,6 +3,7 @@
   "slugs": [
     "task-cards",
     "avatar-picker",
-    "scroll-wipe-gallery"
+    "scroll-wipe-gallery",
+    "fluid-simulation-hero"
   ]
 }
