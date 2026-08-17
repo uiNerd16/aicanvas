@@ -528,6 +528,23 @@ async function main() {
         waitUntil: 'load',
         timeout: 60_000,
       })
+      // Dev-only chrome pinned to the viewport lands INSIDE the preview box we
+      // crop, so it bakes into the corner of the card. Two of them: the branch
+      // pill (which carries data-dev-overlay for this) and Next's own dev-tools
+      // button. Framed block previews load a route of this same site in an
+      // iframe, so the badge renders a second time in there and the iframe is
+      // what we are shooting. Dev is the only thing we ever shoot, so this can
+      // never be a production concern, only a poster one.
+      const hideDevChrome = '[data-dev-overlay], nextjs-portal { display: none !important }'
+      await page.addStyleTag({ content: hideDevChrome })
+      page.on('frameattached', async (f) => {
+        try { await f.addStyleTag({ content: hideDevChrome }) } catch {}
+      })
+      for (const f of page.frames()) {
+        if (f !== page.mainFrame()) {
+          try { await f.addStyleTag({ content: hideDevChrome }) } catch {}
+        }
+      }
       await page.waitForTimeout(SETTLE_MS)
 
       const preview = page.locator('[data-card-theme]').first()
