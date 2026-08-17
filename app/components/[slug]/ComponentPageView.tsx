@@ -99,8 +99,10 @@ interface ComponentPageViewProps {
   // the vault's meta.json files are next touched anyway, so the two repos don't
   // have to ship in lockstep for it.
   framedPreview?: boolean
-  // Label-only: "Premium block" instead of "Premium component" by the title
-  // and above the install section. See ComponentEntry.isBlock.
+  // Label-only: names the type above the install section, "Premium block"
+  // rather than "Premium component". The chip row by the title states the tier
+  // alone, so the category chip beside it carries the type there instead.
+  // See ComponentEntry.isBlock.
   isBlock?: boolean
   // Prop tables parsed from the component's @typedef JSDoc at build time. Empty
   // for self-contained (propless) components, in which case the section hides.
@@ -551,12 +553,15 @@ export default function ComponentPageView({
               // Use cases (e.g. "Hero section", "Portfolio") capture the
               // intent queries users actually type. Stack tags live in the
               // "Built with" row further down the page, next to About.
-              // Premium blocks carry both block signals, so the pill below already
-              // reads "Premium block" and their Blocks category chip repeats it.
-              // Free blocks keep the chip: with no pill, it is their only block label.
-              const categoryTags = tags.filter(
-                (t) => t.accent && !(premium && isBlock && t.label === 'Blocks'),
-              )
+              // Every component keeps its category chip, premium blocks included.
+              // They used to lose it, because the pill beside it read "Premium
+              // block" and the Blocks chip repeated the noun. Dropping the chip
+              // was the wrong half to cut: it left premium blocks as the only
+              // things on the site with no category at all, while the noun they
+              // were losing it to is repeated again above the install section.
+              // The pill states the TIER here and the type noun lives further
+              // down, so the two chips now read "Premium" then "Blocks".
+              const categoryTags = tags.filter((t) => t.accent)
               const useCaseChips = (useCases ?? []).slice(0, 3)
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -565,7 +570,7 @@ export default function ComponentPageView({
                   {premium && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                       <Lightning weight="regular" size={12} />
-                      {isBlock ? 'Premium block' : 'Premium component'}
+                      Premium
                     </span>
                   )}
                   {categoryTags.map((tag) => (
