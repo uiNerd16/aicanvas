@@ -96,6 +96,14 @@ html.dark {
   /* Deep end of the olive ramp. Dark enough to carry sand-50 text at about
      6:1, which is what the selection highlight needs to stay readable. */
   --color-olive-700: #56631F;
+  /* Light-mode accent. The ramp above was drawn to glow on sand-950, so its
+     brightest four steps all land between 1.1:1 and 2.6:1 on a light page and
+     an accent link painted with them is effectively invisible. This step is the
+     one that survives: 5.2:1 on the darkest light surface we would consider and
+     7.4:1 on the lightest, while still reading olive rather than near-black.
+     Light mode uses olive-700 for accent text and this for its hover; dark mode
+     never touches it. */
+  --color-olive-800: #4A551A;
 
   /* ── Ember accent — secondary (attention, rhythm) ── */
   --color-ember-400: #FFB574;

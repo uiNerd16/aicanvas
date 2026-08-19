@@ -19,7 +19,7 @@ const SAND = [
   ['800', '#2D2D2E'], ['900', '#1B1B1C'], ['950', '#0E0E0F'],
 ] as const
 
-const OLIVE = [['400', '#DAE4A0'], ['500', '#A8B94D'], ['600', '#869631'], ['700', '#56631F']] as const
+const OLIVE = [['400', '#DAE4A0'], ['500', '#A8B94D'], ['600', '#869631'], ['700', '#56631F'], ['800', '#4A551A']] as const
 
 type Roles = {
   page: number; card: number; raised: number; border: number; borderStrong: number
@@ -33,7 +33,7 @@ const PRESETS: Record<string, Roles> = {
   Declared:  { page: 2, card: 1, raised: 0, border: 3, borderStrong: 4, textPrimary: 9, textBody: 6, textMuted: 5, accent: 1 },
   Airy:      { page: 1, card: 0, raised: 0, border: 2, borderStrong: 3, textPrimary: 9, textBody: 6, textMuted: 5, accent: 3 },
   Paper:     { page: 0, card: 0, raised: 0, border: 2, borderStrong: 3, textPrimary: 9, textBody: 6, textMuted: 5, accent: 3 },
-  Contrast:  { page: 1, card: 0, raised: 0, border: 3, borderStrong: 4, textPrimary: 10, textBody: 7, textMuted: 6, accent: 3 },
+  Contrast:  { page: 1, card: 0, raised: 0, border: 3, borderStrong: 4, textPrimary: 10, textBody: 7, textMuted: 6, accent: 4 },
 }
 
 function lin(c: number) { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }

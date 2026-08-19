@@ -555,7 +555,7 @@ function TemplateSwitcher({
         aria-haspopup="true"
         aria-expanded={open}
         aria-label="Switch template"
-        className="flex min-w-0 items-center gap-1 rounded-md text-olive-700 transition-colors hover:text-olive-600 dark:text-olive-400 dark:hover:text-olive-300"
+        className="flex min-w-0 items-center gap-1 rounded-md text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
       >
         <span className="truncate">{templateName}</span>
         <CaretUpDown weight="regular" size={14} className="shrink-0 opacity-70" />
@@ -580,13 +580,13 @@ function TemplateSwitcher({
                 onClick={() => setOpen(false)}
                 className={`flex items-center justify-between gap-3 px-3 py-2 text-sm transition-colors ${
                   active
-                    ? 'font-semibold text-olive-600 dark:text-olive-400'
+                    ? 'font-semibold text-olive-700 dark:text-olive-400'
                     : 'text-sand-700 hover:bg-sand-200/70 dark:text-sand-300 dark:hover:bg-sand-800/70'
                 }`}
               >
                 <span className="truncate">{t.name}</span>
                 {active && (
-                  <Check weight="bold" size={14} className="shrink-0 text-olive-500 dark:text-olive-400" />
+                  <Check weight="bold" size={14} className="shrink-0 text-olive-700 dark:text-olive-400" />
                 )}
               </Link>
             )
@@ -747,7 +747,7 @@ function InstallButton({
                 <span className="text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
                   CLI install
                 </span>
-                <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
+                <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-700 dark:text-olive-400">
                   One command
                 </span>
               </div>
@@ -759,7 +759,7 @@ function InstallButton({
               >
                 {copied ? (
                   <>
-                    <Check weight="regular" size={13} className="text-olive-500 dark:text-olive-400" />
+                    <Check weight="regular" size={13} className="text-olive-700 dark:text-olive-400" />
                     Copied
                   </>
                 ) : (
@@ -776,7 +776,7 @@ function InstallButton({
             <div className="space-y-1.5">
               {bullets.map((line, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <Check weight="bold" size={12} className="shrink-0 text-olive-500 dark:text-olive-400" />
+                  <Check weight="bold" size={12} className="shrink-0 text-olive-700 dark:text-olive-400" />
                   <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-400">{line}</p>
                 </div>
               ))}

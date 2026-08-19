@@ -108,7 +108,7 @@ function KuendigenForm() {
     <div className="min-h-full bg-sand-200 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 dark:border-sand-800 bg-sand-200 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/kuendigen" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-600 dark:hover:text-olive-400">
+        <Link href="/kuendigen" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-800">
           /Kündigen
         </Link>
         <div className="flex items-center justify-end">

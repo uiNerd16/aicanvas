@@ -170,7 +170,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
                 size={18}
                 className={`mt-0.5 shrink-0 ${
                   plan.featured
-                    ? 'text-olive-600 dark:text-olive-400'
+                    ? 'text-olive-700 dark:text-olive-400'
                     : 'text-sand-400 dark:text-sand-300'
                 }`}
               />
@@ -221,7 +221,7 @@ export default function PricingPage() {
         <div />
         <Link
           href="/pricing"
-          className="text-sm font-semibold text-olive-700 transition-colors dark:text-olive-400 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-700 transition-colors dark:text-olive-400 dark:hover:text-olive-800"
         >
           /Pricing
         </Link>

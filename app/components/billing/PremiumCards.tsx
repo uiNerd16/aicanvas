@@ -192,7 +192,7 @@ export function PremiumCards({
             </span>
             <span className="text-sm font-medium text-sand-600 dark:text-sand-400">/ {suffix}</span>
             {perMonthHint && (
-              <span className="text-sm font-semibold text-olive-600 dark:text-olive-400">
+              <span className="text-sm font-semibold text-olive-700 dark:text-olive-400">
                 ({perMonthHint})
               </span>
             )}
@@ -233,7 +233,7 @@ export function PremiumCards({
           <ul className={showFree ? 'mt-4 space-y-3' : 'space-y-3'}>
             {PREMIUM_FEATURES.map((feature) => (
               <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
-                <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
+                <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-olive-700 dark:text-olive-400" />
                 <span>{feature}</span>
               </li>
             ))}
@@ -265,11 +265,11 @@ function TrustStrip() {
     <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sand-300 bg-sand-100/60 px-6 py-4 dark:border-sand-800 dark:bg-sand-900/50 sm:flex-row">
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-sand-700 dark:text-sand-200">
         <span className="flex items-center gap-1.5">
-          <Lock weight="regular" size={16} className="text-olive-600 dark:text-olive-400" />
+          <Lock weight="regular" size={16} className="text-olive-700 dark:text-olive-400" />
           Secure payment encryption
         </span>
         <span className="flex items-center gap-1.5">
-          <Lightning weight="regular" size={16} className="text-olive-600 dark:text-olive-400" />
+          <Lightning weight="regular" size={16} className="text-olive-700 dark:text-olive-400" />
           Instant access
         </span>
       </div>

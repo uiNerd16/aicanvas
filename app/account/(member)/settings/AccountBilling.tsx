@@ -201,7 +201,7 @@ export function AccountBilling() {
         </div>
 
         {rotateState === 'done' && (
-          <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
+          <p className="mt-3 text-xs text-olive-700 dark:text-olive-400">
             Done. The old token is now disabled. Grab a fresh install command from any component page.
           </p>
         )}

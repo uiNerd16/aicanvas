@@ -69,7 +69,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
         <div />
         <Link
           href="/components"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
         >
           /FAQ
         </Link>

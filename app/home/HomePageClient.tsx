@@ -522,7 +522,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
               </p>
               <Link
                 href="/faq"
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
               >
                 See all FAQs
                 <CaretRight weight="regular" size={14} />

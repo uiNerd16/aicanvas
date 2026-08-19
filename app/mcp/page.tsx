@@ -44,7 +44,7 @@ export default function McpPage() {
         <div />
         <Link
           href="/mcp"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
         >
           /MCP
         </Link>

@@ -411,7 +411,7 @@ export function HomeClient({
                     <button
                       key={word}
                       onClick={() => applySuggestion(word)}
-                      className="group flex items-center gap-1.5 rounded-full border border-olive-500/30 bg-olive-500/10 px-3.5 py-1.5 text-sm font-semibold text-olive-600 transition-all hover:border-olive-500/60 hover:bg-olive-500/20 active:scale-95 dark:text-olive-400"
+                      className="group flex items-center gap-1.5 rounded-full border border-olive-500/30 bg-olive-500/10 px-3.5 py-1.5 text-sm font-semibold text-olive-700 transition-all hover:border-olive-500/60 hover:bg-olive-500/20 active:scale-95 dark:text-olive-400"
                     >
                       <Sparkle weight="regular" size={13} className="opacity-60 transition-opacity group-hover:opacity-100" />
                       {word}
