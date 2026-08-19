@@ -72,14 +72,15 @@ const TYPOGRAPHY = [
 // ─── Semantic mappings ───────────────────────────────────────────────────────
 
 const SEMANTIC_ROLES = [
-  { role: 'Page background', light: 'bg-sand-200', dark: 'bg-sand-950' },
-  { role: 'Card / surface', light: 'bg-sand-100', dark: 'bg-sand-900' },
-  { role: 'Elevated (navbar)', light: 'bg-sand-200/90', dark: 'bg-sand-950/90' },
+  { role: 'Page background', light: 'bg-sand-100', dark: 'bg-sand-950' },
+  { role: 'Card / surface', light: 'bg-sand-50', dark: 'bg-sand-900' },
+  { role: 'Elevated (navbar)', light: 'bg-sand-100/90', dark: 'bg-sand-950/90' },
   { role: 'Primary text', light: 'text-sand-900', dark: 'text-sand-50' },
+  { role: 'Body text', light: 'text-sand-700', dark: 'text-sand-300' },
   { role: 'Secondary text', light: 'text-sand-600', dark: 'text-sand-400' },
-  { role: 'Border default', light: 'border-sand-300', dark: 'border-sand-800' },
-  { role: 'Border hover', light: 'border-sand-400', dark: 'border-sand-700' },
-  { role: 'Accent', light: 'text-olive-500', dark: 'text-olive-400' },
+  { role: 'Border default', light: 'border-sand-200', dark: 'border-sand-800' },
+  { role: 'Border hover', light: 'border-sand-300', dark: 'border-sand-700' },
+  { role: 'Accent', light: 'text-olive-700', dark: 'text-olive-400' },
   { role: 'Secondary accent', light: 'text-ember-500', dark: 'text-ember-400' },
   { role: 'Highlight (occasional)', light: 'text-cyan-600', dark: 'text-cyan-400' },
 ]

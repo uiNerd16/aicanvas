@@ -12,10 +12,10 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 | Token | Hex | Use in components |
 |---|---|---|
-| `sand-50` | `#F4F4FA` | Elevated surfaces, hover fills |
-| `sand-100` | `#E3E3E8` | Light card surfaces |
-| `sand-200` | `#D0D0D4` | Light page background |
-| `sand-300` | `#B7B7BA` | Borders (light) |
+| `sand-50` | `#F4F4FA` | **Light card / panel surfaces**, dark-mode primary text |
+| `sand-100` | `#E3E3E8` | **Light page background** |
+| `sand-200` | `#D0D0D4` | Light borders, hover fills |
+| `sand-300` | `#B7B7BA` | Light border hover, outline buttons |
 | `sand-400` | `#9B9B9E` | Muted icons, placeholders |
 | `sand-500` | `#7B7B7D` | Secondary text |
 | `sand-600` | `#575759` | Body text |
@@ -28,11 +28,54 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 | Token | Hex | Use |
 |---|---|---|
-| `olive-400` | `#DAE4A0` | Hover state, gradient end |
-| `olive-500` | `#A8B94D` | **Primary accent** — buttons, badges, highlights |
+| `olive-400` | `#DAE4A0` | Dark-mode accent text, hover state, gradient end |
+| `olive-500` | `#A8B94D` | **Accent fill** — buttons, badges, highlights. On DARK surfaces it is also accent text |
 | `olive-600` | `#869631` | Pressed / active state |
+| `olive-700` | `#56631F` | **Light-mode accent text**, and the selection highlight |
+| `olive-800` | `#4A551A` | Light-mode accent hover |
 
 > Olive buttons must use `text-sand-950` — NOT white. Olive has insufficient contrast with white.
+>
+> The top of the ramp is for dark surfaces only. On a light page olive-400/500/600
+> measure 1.1, 1.4 and 2.1 against the background, so an accent link painted with
+> them is invisible. Light mode uses the bottom two steps.
+
+## Light mode
+
+The site ships light and dark. Dark is the default; the toggle at the bottom of the
+left rail writes a `theme` cookie that `app/layout.tsx` reads server-side, so the
+first paint is already correct. A component or block preview keeps its OWN theme in
+a `[data-card-theme]` wrapper and never touches the site's; the `@variant dark`
+selector at the top of `app/globals.css` is what keeps the two scopes apart, and it
+is the thing to read before changing anything here.
+
+| Role | Light | Dark |
+|---|---|---|
+| Page background | `bg-sand-100` | `dark:bg-sand-950` |
+| Card / panel | `bg-sand-50` | `dark:bg-sand-900` |
+| Raised (menu, input, active row) | `bg-sand-50` + border | `dark:bg-sand-800` |
+| Hover fill | `bg-sand-200/50` | `dark:bg-sand-800/60` |
+| Border, divider | `border-sand-200` | `dark:border-sand-800` |
+| Border hover / outline button | `border-sand-300` | `dark:border-sand-700` |
+| Primary text, headings | `text-sand-900` | `dark:text-sand-50` |
+| Body text | `text-sand-700` | `dark:text-sand-300` |
+| Secondary, muted, helper | `text-sand-600` | `dark:text-sand-400` |
+| Accent text | `text-olive-700` | `dark:text-olive-400` |
+| Accent hover | `text-olive-800` | `dark:text-olive-300` |
+
+Three traps, all of them measured rather than guessed:
+
+- **The olive ramp does not work on light.** olive-400/500/600 land at 1.1, 1.4 and
+  2.1 against a light page. Accent TEXT on light is `olive-700` (5.1) or `olive-800`
+  (6.3). `bg-olive-500` remains the accent FILL in both themes, always carrying
+  `text-sand-950`.
+- **`text-sand-500` is not a text colour in light mode** (2.75 on the page). Use
+  `sand-600` for anything a reader reads; `sand-500` is fine only on a decorative
+  glyph such as a separator dot or a chevron.
+- **Some surfaces stay dark in both themes** and must not be paired: the component
+  preview stage, code and install slabs (the syntax theme is github-dark), modal
+  scrims, and the `/design-systems`, `/lab` and `/ideation` subtrees, which pin
+  themselves with a scoped `dark` class rather than by writing `<html>`.
 
 ## Text colors in dark preview context
 
