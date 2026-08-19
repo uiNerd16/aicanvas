@@ -72,6 +72,11 @@ Three traps, all of them measured rather than guessed:
 - **`text-sand-500` is not a text colour in light mode** (2.75 on the page). Use
   `sand-600` for anything a reader reads; `sand-500` is fine only on a decorative
   glyph such as a separator dot or a chevron.
+- **Never change an element's DARK value while adding its light half.** Dark is the
+  default theme; a sweep that pairs `text-sand-500` to `dark:text-sand-400` because
+  the table says so has just restyled the site for every existing visitor. Keep the
+  value that was there and change only the light base. The table above is for code
+  being written from scratch.
 - **Some surfaces stay dark in both themes** and must not be paired: the component
   preview stage, code and install slabs (the syntax theme is github-dark), modal
   scrims, and the `/design-systems`, `/lab` and `/ideation` subtrees, which pin

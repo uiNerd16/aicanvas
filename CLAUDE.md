@@ -41,7 +41,7 @@ This repository is public. A leaked secret is exposed the moment it is committed
 ## Design system (site chrome)
 
 - **Default theme**: dark. The toggle lives at the bottom of the left rail and persists to a `theme` cookie, read server-side in `app/layout.tsx` so the first byte carries the right class and there is no flash. Dark is class-based (`.dark` on `<html>`, Tailwind v4 `@variant dark`). Aesthetic: Phosphor-inspired — neutral cool-gray surfaces, editorial typography, olive accent.
-- **Site theme and preview theme are separate scopes.** `ThemeProvider` is the only writer of `<html>` and the cookie; a component or block preview owns its own `[data-card-theme]` wrapper and never touches either. The `@variant dark` selector at the top of `app/globals.css` is what keeps them apart, and its comment explains both directions. Do not make a preview call into `ThemeProvider`: that is the exact bug that got the first site toggle deleted.
+- **Site theme and preview theme are separate scopes, and the relationship is one-directional.** `ThemeProvider` is the only writer of `<html>` and the cookie; a component or block preview owns its own `[data-card-theme]` wrapper and never touches either. The site SEEDS a preview (a preview opens in whatever the site is set to) until the visitor uses the preview's own toggle, after which that preview is pinned. So the site can move a preview; a preview can never move the site. The `@variant dark` selector at the top of `app/globals.css` is what keeps them apart, and its comment explains both directions. Do not make a preview call into `ThemeProvider`: that is the exact bug that got the first site toggle deleted.
 - **Full token reference** (sand + olive scales, hex values, typography table, spacing grid): `supervisor/skills/site-design-tokens.md` — the single source of truth for site-chrome styling.
 
 Semantic quick reference:
@@ -59,6 +59,8 @@ Semantic quick reference:
 | Accent hover | `text-olive-800` | `dark:text-olive-300` |
 
 The olive ramp was drawn to glow on `sand-950`, so olive-400 through olive-600 all land under 3:1 on a light page and cannot carry accent text there. `olive-700` and `olive-800` are the light-mode pair. `bg-olive-500` stays the accent FILL in both themes, always with `text-sand-950` on it. `text-sand-500` is not a text colour in light mode (2.75:1); it survives only on a decorative glyph.
+
+This table is for NEW code. When adding a light half to an element that already had only a dark value, keep that element's existing dark value exactly and change only the light base: dark is the default theme and must not shift. `lib/theme/scope.test.ts` guards the scope contract itself.
 
 - Olive buttons use `text-sand-950`, never white (contrast). Component preview backgrounds are always `bg-sand-950` regardless of theme. Typography weights: 800 hero h1, 700 section headings, 600 UI labels/buttons, 400 body.
 
