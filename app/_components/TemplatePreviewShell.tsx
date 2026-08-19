@@ -224,31 +224,31 @@ function FramePayload({ children }: { children: ReactNode }) {
   return (
     <div className="mc-frame-viewport relative h-full w-full">
       <style>{`
-        /* Kill the "cream flash": the framed document is ALWAYS the dark
-           Andromeda surface. The app paints body via background:var(--background),
-           which is a warm cream (#EDEAE5) in the LIGHT theme, and body carries a
-           0.2s background-color transition. During the iframe's load+hydration the
-           'dark' class can blip off for a frame (the root layout documents this),
-           and the transition stretches that blip into a visible 200ms cream fade
-           across the whole phone screen before the dashboard covers it. Force the
-           frame's html/body to the surface color with NO transition so no cream
-           can ever show, and set color-scheme:dark so the browser's own default
-           canvas is dark while this document is still loading. Scoped to the
-           iframe — the main site's theme-toggle transition is untouched. */
+        /* Kill the light flash: the framed document is ALWAYS the dark
+           Andromeda surface, whatever theme the visitor has chosen. The app
+           paints body via background:var(--background) with a 0.2s transition,
+           and this document's own <html> carries no theme class at all (the
+           root layout's iframe branch ships none), so without this the phone
+           screen fades through the light page colour before the dashboard
+           covers it. Force html/body to the surface with NO transition, and set
+           color-scheme:dark so the browser's default canvas is dark while the
+           document is still loading. Scoped to the iframe — the site's own
+           theme transition is untouched. */
         html { color-scheme: dark; }
         html, body {
           background: #0E0E0F !important;
           transition: none !important;
         }
-        /* html/body alone is NOT enough: the root layout also paints theme
-           backgrounds on inner wrapper divs (body's flex column, the content
-           column's bg-sand-200 dark:bg-sand-950). The SSR HTML ships with the
-           'dark' class, but for a LIGHT-theme visitor ThemeProvider strips it
-           after hydration — those wrappers flip to light sand while the
-           composition's entrance animation is still fading in, which reads as
-           a cream/yellow flash filling the phone screen. Force every ancestor
-           of the frame viewport to the dark surface too; :has() matches
-           ancestors only, so the composition's own surfaces are untouched. */
+        /* html/body alone is NOT enough on the fallback path. A browser that
+           does not send Sec-Fetch-Dest gets the full site shell instead of the
+           iframe branch, and that shell paints theme backgrounds on inner
+           wrapper divs (body's flex column, the content column's
+           bg-sand-100 dark:bg-sand-950). For a light-theme visitor those
+           wrappers are light sand while the composition's entrance animation is
+           still fading in, which reads as a flash filling the phone screen.
+           Force every ancestor of the frame viewport to the dark surface too;
+           :has() matches ancestors only, so the composition's own surfaces are
+           untouched. */
         body *:has(.mc-frame-viewport) {
           background: #0E0E0F !important;
           transition: none !important;
@@ -453,7 +453,7 @@ function TopBar({
           >
             {systemName}
           </Link>
-          <span className="mx-1 shrink-0 text-sand-400 dark:text-sand-600">/</span>
+          <span className="mx-1 shrink-0 text-sand-600 dark:text-sand-600">/</span>
           <TemplateSwitcher templateSlug={templateSlug} templateName={templateName} />
         </nav>
 
@@ -582,7 +582,7 @@ function TemplateSwitcher({
                   active
                     ? 'font-semibold text-olive-700 dark:text-olive-400'
                     : 'text-sand-700 hover:bg-sand-100/70 dark:text-sand-300 dark:hover:bg-sand-800/70'
-                } dark:hover:bg-sand-200/70`}
+                }`}
               >
                 <span className="truncate">{t.name}</span>
                 {active && (

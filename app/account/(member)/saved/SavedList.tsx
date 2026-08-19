@@ -153,7 +153,7 @@ export function SavedList({ initial }: { initial: SavedRow[] }) {
                     {row.name}
                   </div>
                   {row.system && (
-                    <div className="mt-0.5 truncate text-xs text-sand-500 dark:text-sand-400">
+                    <div className="mt-0.5 truncate text-xs text-sand-600 dark:text-sand-400">
                       {row.system} system
                     </div>
                   )}
@@ -467,7 +467,7 @@ function CollectionPicker({
         className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors ${
           value
             ? 'border-olive-500/40 bg-olive-500/10 text-olive-700 dark:text-olive-400'
-            : 'border-dashed border-sand-200 bg-transparent text-sand-500 hover:border-sand-300 hover:text-sand-700 dark:border-sand-700 dark:text-sand-500 dark:hover:border-sand-600 dark:hover:text-sand-300'
+            : 'border-dashed border-sand-200 bg-transparent text-sand-600 hover:border-sand-300 hover:text-sand-700 dark:border-sand-700 dark:text-sand-500 dark:hover:border-sand-600 dark:hover:text-sand-300'
         }`}
       >
         {value ?? 'Add to collection'}

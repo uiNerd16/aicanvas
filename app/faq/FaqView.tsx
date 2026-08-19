@@ -159,7 +159,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
                           weight="regular"
                           size={16}
                           className={`shrink-0 transition-transform duration-200 ${
-                            isOpen ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-500'
+                            isOpen ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-600'
                           }`}
                         />
                       </button>

@@ -232,7 +232,7 @@ export function HomeClient({
         {q && !category ? (
           <p className="min-w-0 truncate text-sm font-semibold text-sand-600 dark:text-sand-400">
             {totalResults} {totalResults === 1 ? 'result' : 'results'}
-            <span className="text-sand-400 dark:text-sand-500"> for </span>
+            <span className="text-sand-600 dark:text-sand-500"> for </span>
             <span className="text-sand-900 dark:text-sand-50">&ldquo;{query}&rdquo;</span>
           </p>
         ) : (
@@ -403,7 +403,7 @@ export function HomeClient({
             {/* "Did you mean?" chips */}
             {suggestions.length > 0 && (
               <div className="mt-6 w-full">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-sand-400 dark:text-sand-600">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-600">
                   Did you mean
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2">

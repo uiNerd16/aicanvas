@@ -267,7 +267,7 @@ export default function FeedbackPage() {
                       How has AI Canvas been so far?
                     </label>
                     <span
-                      className={`text-xs font-semibold tabular-nums ${rated ? 'text-olive-700 dark:text-olive-400' : 'text-sand-600 dark:text-sand-400'}`}
+                      className={`text-xs font-semibold tabular-nums ${rated ? 'text-olive-700 dark:text-olive-400' : 'text-sand-600 dark:text-sand-500'}`}
                     >
                       {rated ? `${score} / 10` : 'optional'}
                     </span>

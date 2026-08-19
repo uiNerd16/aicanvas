@@ -337,7 +337,7 @@ export function InstallCards() {
                     active
                       ? 'text-sand-900 dark:text-sand-50'
                       : 'text-sand-600 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
-                  } dark:hover:text-sand-600`}
+                  }`}
                 >
                   {s.label}
                   {active && (

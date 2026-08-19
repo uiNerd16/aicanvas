@@ -126,7 +126,7 @@ export function PremiumCards({
             <ul className="mt-4 space-y-3">
               {FREE_FEATURES.map((feature) => (
                 <li key={feature} className="flex items-start gap-3 text-sm leading-relaxed text-sand-700 dark:text-sand-200">
-                  <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-400 dark:text-sand-300" />
+                  <CheckCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-600 dark:text-sand-300" />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -161,7 +161,7 @@ export function PremiumCards({
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'monthly'
                   ? 'bg-sand-50 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-900 dark:hover:text-sand-300'
+                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
               }`}
             >
               Monthly
@@ -172,7 +172,7 @@ export function PremiumCards({
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'yearly'
                   ? 'bg-olive-500 text-sand-950'
-                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
+                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
               }`}
             >
               Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 54%</span>
@@ -180,7 +180,7 @@ export function PremiumCards({
           </div>
           {/* Yearly anchor: 12 x $8.99 monthly, struck through so the saving reads in money. */}
           {cycle === 'yearly' && (
-            <span className="text-sm font-medium text-sand-400 line-through dark:text-sand-500">
+            <span className="text-sm font-medium text-sand-600 line-through dark:text-sand-500">
               $107.88
             </span>
           )}

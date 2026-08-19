@@ -578,7 +578,7 @@ export default function ComponentPageView({
               const useCaseChips = (useCases ?? []).slice(0, 3)
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
+                  <TagIcon weight="regular" size={14} className="shrink-0 text-sand-600 dark:text-sand-500" />
                   {designSystem && <PremiumBadge />}
                   {premium && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-700 dark:text-olive-400">
@@ -630,7 +630,7 @@ export default function ComponentPageView({
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'preview'
                       ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                      : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
                   <Eye weight="regular" size={15} />
@@ -641,7 +641,7 @@ export default function ComponentPageView({
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'code'
                       ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                      : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
                   <Code weight="regular" size={15} />
@@ -933,7 +933,7 @@ export default function ComponentPageView({
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'cli'
                         ? 'text-sand-900 dark:text-sand-50'
-                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                        : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                     }`}
                   >
                     CLI
@@ -949,7 +949,7 @@ export default function ComponentPageView({
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'manual'
                         ? 'text-sand-900 dark:text-sand-50'
-                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                        : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                     }`}
                   >
                     Manual
@@ -1078,7 +1078,7 @@ export default function ComponentPageView({
                             <p className="text-sm text-sand-600 dark:text-sand-400">
                               For dark mode, add the <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
                           <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
@@ -1104,7 +1104,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="overflow-hidden rounded-lg bg-sand-950">
                               <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
@@ -1144,7 +1144,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className={`flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 ${FONT_PKG_SNIPPET ? 'mb-2' : ''}`}>
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
@@ -1259,7 +1259,7 @@ export default function ComponentPageView({
                             <p className="text-sm text-sand-600 dark:text-sand-400">
                               For dark mode, add the <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
                           <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
@@ -1285,7 +1285,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="overflow-hidden rounded-lg bg-sand-950">
                               <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
@@ -1325,7 +1325,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
@@ -1485,7 +1485,7 @@ export default function ComponentPageView({
                                 height={iconHeight}
                                 fill="currentColor"
                                 aria-hidden="true"
-                                className="shrink-0 text-sand-500 dark:text-sand-400"
+                                className="shrink-0 text-sand-600 dark:text-sand-400"
                               >
                                 <path d={icon.path} />
                               </svg>

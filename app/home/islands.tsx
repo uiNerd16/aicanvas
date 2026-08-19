@@ -119,7 +119,7 @@ export function StackedCards() {
                 (isFront || isExiting) ? 'text-olive-700 dark:text-olive-400'
                 : relPos === 1         ? 'text-sand-700 dark:text-sand-300'
                 : relPos === 2         ? 'text-sand-600 dark:text-sand-400'
-                : relPos === 3         ? 'text-sand-500'
+                : relPos === 3         ? 'text-sand-600'
                 :                        'text-sand-600'
               }`}>
                 {text}
@@ -610,7 +610,7 @@ export function FaqAccordion() {
               <CaretRight
                 weight="regular"
                 size={16}
-                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-500'}`}
+                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-600'}`}
               />
             </button>
             {/* Answer stays in the DOM (SEO); grid-rows trick animates the collapse */}

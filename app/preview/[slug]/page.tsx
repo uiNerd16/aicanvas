@@ -44,7 +44,7 @@ export default async function FullScreenPreview({
   return (
     <div
       data-card-theme={light ? 'light' : 'dark'}
-      className={`fixed inset-0 z-50 ${light ? 'bg-sand-100' : 'dark bg-sand-950'}`}
+      className={`fixed inset-0 z-50 ${light ? 'bg-sand-50' : 'dark bg-sand-950'}`}
       style={{ contain: 'strict' }}
     >
       <PreviewComponent />

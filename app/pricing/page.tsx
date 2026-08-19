@@ -171,7 +171,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
                 className={`mt-0.5 shrink-0 ${
                   plan.featured
                     ? 'text-olive-700 dark:text-olive-400'
-                    : 'text-sand-400 dark:text-sand-300'
+                    : 'text-sand-600 dark:text-sand-300'
                 }`}
               />
               <span>{feature}</span>

@@ -214,7 +214,7 @@ export function Sidebar({
           <MagnifyingGlass
             weight="regular"
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sand-400 dark:text-sand-500"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sand-600 dark:text-sand-500"
           />
           <input
             ref={searchInputRef}
@@ -222,14 +222,14 @@ export function Sidebar({
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search…"
-            className="w-full rounded-lg border border-sand-200 bg-sand-50 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-400 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
+            className="w-full rounded-lg border border-sand-200 bg-sand-50 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-600 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
           />
           {searchValue && (
             <button
               type="button"
               onClick={clearSearch}
               aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-sand-400 transition-colors hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-sand-600 transition-colors hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300"
             >
               <X weight="regular" size={13} />
             </button>
@@ -303,14 +303,14 @@ export function Sidebar({
                   disabled={isDisabled}
                   className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors ${
                     isDisabled
-                      ? 'cursor-not-allowed text-sand-400/60 dark:text-sand-600/60'
+                      ? 'cursor-not-allowed text-sand-600/60 dark:text-sand-600/60'
                       : 'text-sand-700 hover:bg-sand-200/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                   }`}
                 >
                   <span className={isDisabled ? 'opacity-40' : ''}>{section.icon}</span>
                   <span className="flex-1 text-left">
                     {section.title}
-                    {isDisabled && <span className="ml-1 text-xs font-normal text-sand-400 dark:text-sand-700">· soon</span>}
+                    {isDisabled && <span className="ml-1 text-xs font-normal text-sand-600 dark:text-sand-700">· soon</span>}
                   </span>
                   {!isDisabled && <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />}
                 </button>

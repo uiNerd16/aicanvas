@@ -54,7 +54,7 @@ export default function WelcomePage() {
         </Link>
 
         <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400">
-          <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
+          <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-600 dark:text-sand-500" />
           We also emailed you a sign-in link. No email? You can still sign in above.
         </div>
       </main>

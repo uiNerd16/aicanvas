@@ -49,6 +49,17 @@ html {
 html.dark {
   color-scheme: dark;
 }
+/* The same two scopes as the dark variant, and for the same reason. color-scheme
+   is what the browser draws its own controls and scrollbars from, and it is
+   inherited, so a preview wrapper has to restate it or a light preview on a dark
+   site gets dark native controls inside it. This is not covered by @variant dark:
+   that only governs Tailwind `dark:` utilities, not hand-written CSS. */
+[data-card-theme="light"] {
+  color-scheme: light;
+}
+[data-card-theme="dark"] {
+  color-scheme: dark;
+}
 
 /* No scrollbar-gutter on html/body on purpose. body is overflow-hidden
    (app/layout.tsx), so its overflow propagates to the viewport and there is
@@ -59,8 +70,8 @@ html.dark {
    in, on .app-scroll-column, by the element that actually scrolls. */
 
 .dark {
-  --background: #1A1712;
-  --foreground: #F0EBE3;
+  --background: #0E0E0F;
+  --foreground: #F4F4FA;
 }
 
 @theme inline {
@@ -138,6 +149,18 @@ html[data-frame],
 html[data-frame] body {
   background: #0e0e0f !important;
   transition: none !important;
+}
+/* ...unless the framed document is a LIGHT preview. The overlay inside it paints
+   light either way, but without this the html behind it stays #0e0e0f and, worse,
+   color-scheme stays dark, so every native control in a light block composition
+   is drawn dark. The wrapper is server-rendered from ?theme=, so :has() matches
+   on the first paint and no flash is introduced. */
+html[data-frame]:has([data-card-theme="light"]),
+html[data-frame]:has([data-card-theme="light"]) body {
+  background: var(--color-sand-50) !important;
+}
+html[data-frame]:has([data-card-theme="light"]) {
+  color-scheme: light;
 }
 
 /* ── Text selection ── */
@@ -233,7 +256,15 @@ html[data-frame] body {
   .dark * {
     scrollbar-color: var(--color-sand-800) transparent;
   }
-  /* Must come after `.dark *` — same specificity, so source order decides. */
+  /* Preview scope beats site scope, matching the dark variant. Equal specificity
+     to `.dark *`, so these have to sit after it. */
+  [data-card-theme="light"] * {
+    scrollbar-color: var(--color-sand-300) transparent;
+  }
+  [data-card-theme="dark"] * {
+    scrollbar-color: var(--color-sand-800) transparent;
+  }
+  /* Must come after the rules above — same specificity, so source order decides. */
   .aic-page-scroll {
     scrollbar-width: auto;
     scrollbar-color: auto;

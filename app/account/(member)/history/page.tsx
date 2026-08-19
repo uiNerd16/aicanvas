@@ -82,7 +82,7 @@ export default async function HistoryPage() {
           transparent border mirrors the row card's 1px border so the inner
           content sits at the same x-position in both. */}
       <div
-        className={`${ROW_GRID} border border-transparent px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400`}
+        className={`${ROW_GRID} border border-transparent px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400`}
       >
         {/* Component label spans the thumbnail column + name column so it
             sits at the far left, above where the thumbnail starts. */}
@@ -119,7 +119,7 @@ export default async function HistoryPage() {
                 </div>
                 <time
                   dateTime={row.copied_at}
-                  className="shrink-0 whitespace-nowrap text-right text-xs font-medium text-sand-500 dark:text-sand-400"
+                  className="shrink-0 whitespace-nowrap text-right text-xs font-medium text-sand-600 dark:text-sand-400"
                 >
                   {formatTimestamp(row.copied_at)}
                 </time>

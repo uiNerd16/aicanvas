@@ -36,7 +36,7 @@ export function AccountTabs() {
               className={`relative flex flex-1 items-center justify-center gap-2 whitespace-nowrap px-2 py-2.5 text-sm font-semibold transition-colors sm:px-4 ${
                 active
                   ? 'text-sand-900 dark:text-sand-50'
-                  : 'text-sand-500 hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-50'
+                  : 'text-sand-600 hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-50'
               }`}
             >
               <Icon size={16} weight="regular" />

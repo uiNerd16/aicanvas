@@ -30,7 +30,7 @@ type Status = 'idle' | 'submitting'
 const inputCls =
   'w-full rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-sm text-sand-900 placeholder:text-sand-400 focus:border-olive-500 focus:outline-none dark:border-sand-800 dark:bg-sand-900 dark:text-sand-50'
 const labelCls = 'block text-sm font-semibold text-sand-900 dark:text-sand-50'
-const helpCls = 'mt-1 text-xs text-sand-600 dark:text-sand-400'
+const helpCls = 'mt-1 text-xs text-sand-600 dark:text-sand-500'
 
 function KuendigenForm() {
   const router = useRouter()

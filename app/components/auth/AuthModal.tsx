@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { X } from '@phosphor-icons/react'
 import { Button } from '../Button'
 import { useAuthModal } from './AuthModalProvider'
+import { isPinnedDarkRoute } from '../../lib/pinned-dark'
 import { AuthGateScreen } from './AuthGateScreen'
 import { SignInFormFields } from './SignInFormFields'
 import { SignUpFormFields } from './SignUpFormFields'
@@ -108,7 +109,13 @@ export function AuthModal() {
             ? 'Sign in'
             : 'Create your account'
       }
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6"
+      // Opened from a route that pins itself dark, this dialog is rendered by
+      // the root layout and so sits outside that route's scoped `dark` wrapper.
+      // Without this a light-theme visitor gets a light sand dialog over a dark
+      // console. Match the page it is covering.
+      className={`fixed inset-0 z-[100] flex items-center justify-center px-4 py-6 ${
+        isPinnedDarkRoute(pathname) ? 'dark' : ''
+      }`}
     >
       {/* Backdrop — visual only; clicks do NOT dismiss the modal. The X
           button is the sole exit so users don't fall out of the auth flow

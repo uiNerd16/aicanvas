@@ -393,7 +393,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 audience: 'Developers',
                 description: 'Drop finished, typed components into your project with one command. No boilerplate, no screenshot to rebuild, and no tokens spent generating what already works.',
                 badges: ['TypeScript', 'Motion', 'Tailwind CSS'],
-                badgeStyle: 'text-sand-600 ring-sand-300 dark:text-sand-400 dark:ring-sand-800',
+                badgeStyle: 'text-sand-600 ring-sand-300 dark:text-sand-500 dark:ring-sand-800',
               },
               {
                 icon: <Palette weight="regular" size={18} />,

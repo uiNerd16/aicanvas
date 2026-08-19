@@ -85,7 +85,7 @@ export function FaqAccordion({
               isOpen
                 ? 'border-sand-300 bg-sand-50 dark:border-sand-700 dark:bg-sand-900'
                 : 'border-sand-200 bg-sand-50/60 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
-            } dark:hover:border-sand-400`}
+            }`}
           >
             {/* Row div toggles (so the question can hold a real anchor);
                 the caret button carries the accessible expand/collapse. */}
@@ -95,7 +95,7 @@ export function FaqAccordion({
             >
               <span
                 className={`w-7 shrink-0 text-sm font-bold tabular-nums ${
-                  isOpen ? 'text-olive-700 dark:text-olive-400' : 'text-sand-400 dark:text-sand-600'
+                  isOpen ? 'text-olive-700 dark:text-olive-400' : 'text-sand-600 dark:text-sand-600'
                 }`}
               >
                 {String(i + 1).padStart(2, '0')}
@@ -114,8 +114,8 @@ export function FaqAccordion({
                   weight="regular"
                   size={16}
                   className={`transition-transform duration-200 ${
-                    isOpen ? 'rotate-90 text-olive-700 dark:text-olive-400' : 'text-sand-400 dark:text-sand-600'
-                  } dark:text-olive-600`}
+                    isOpen ? 'rotate-90 text-olive-700 dark:text-olive-400' : 'text-sand-600 dark:text-sand-600'
+                  }`}
                 />
               </button>
             </div>
