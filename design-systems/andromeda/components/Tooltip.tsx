@@ -52,36 +52,52 @@ export const Tooltip = forwardRef(function Tooltip(
       ? { top: `calc(100% + ${tokens.spacing[2]})` }
       : { bottom: `calc(100% + ${tokens.spacing[2]})` };
 
-  // Edge-clamp: once the centred tooltip is in the DOM, measure its rect and
-  // nudge it back on-screen if either edge has crossed the viewport inset.
-  // The correction is folded into framer's `x` (so framer owns the transform —
-  // we never mutate node.style.transform out from under it) and computed
-  // INCREMENTALLY from the rect as currently rendered: the new shift is the
-  // current shift adjusted by however far the box still pokes past an edge.
-  // `shiftX` is a dep, so after each correction the effect re-measures the
-  // now-shifted box; once it's in-bounds `next === shiftX` and the loop stops
-  // (one reflow in practice). resize re-measures too.
+  // Edge-clamp: a tooltip centred on a trigger near a screen edge would
+  // overflow it and force horizontal page scroll, so it is nudged back inside
+  // by a viewport inset. The correction is folded into framer's `x` (framer
+  // owns the transform, we never mutate node.style.transform out from under
+  // it), which means it lands on framer's own render frame, not synchronously.
+  //
+  // So the correction must NEVER be measured off the floating box's own rect.
+  // A layout effect that sets state re-renders before the browser yields a
+  // frame, so the shift is still unpainted on the next pass: the box measures
+  // exactly where it did before, the same correction is added again, and it
+  // compounds until React kills the tree at its update-depth limit. That is a
+  // hard crash, and it fires on every hover of a trigger that needs a clamp.
+  //
+  // The host wrapper's rect is never transformed, and offsetWidth is a layout
+  // box that transforms cannot touch. Centre plus half-width is all a centred
+  // box's edges are, so the result reads only layout, comes out identical on
+  // every pass, and keeps `shiftX` out of the deps. resize re-measures too.
   useIsomorphicLayoutEffect(() => {
     if (!visible || !label) {
-      if (shiftX !== 0) setShiftX(0);
+      setShiftX(0);
       return undefined;
     }
     const measure = () => {
       const node = floatRef.current;
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      let next = shiftX;
-      if (rect.left < EDGE_INSET) {
-        next = shiftX + (EDGE_INSET - rect.left); // push right
-      } else if (rect.right > window.innerWidth - EDGE_INSET) {
-        next = shiftX - (rect.right - (window.innerWidth - EDGE_INSET)); // push left
-      }
-      if (next !== shiftX) setShiftX(next);
+      // The float is rendered directly inside the relative wrapper, so its
+      // parent IS the element `left: 50%` is resolved against.
+      const host = node?.parentElement;
+      if (!node || !host) return;
+
+      const hostRect = host.getBoundingClientRect();
+      const centre = hostRect.left + hostRect.width / 2;
+      const half = node.offsetWidth / 2;
+      const limit = window.innerWidth - EDGE_INSET;
+
+      let next = 0;
+      if (centre - half < EDGE_INSET) next = EDGE_INSET - (centre - half);
+      else if (centre + half > limit) next = limit - (centre + half);
+
+      // React bails out of the re-render when the rounded value is unchanged,
+      // which is what ends the pass.
+      setShiftX(Math.round(next));
     };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [visible, label, position, shiftX]);
+  }, [visible, label, position]);
 
   return (
     <div
