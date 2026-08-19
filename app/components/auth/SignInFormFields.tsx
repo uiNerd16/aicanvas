@@ -136,7 +136,7 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
         <GoogleSignInButton next={next} label="Sign in with Google" />
         <div className="flex items-center gap-3" aria-hidden="true">
           <span className="h-px flex-1 bg-sand-200 dark:bg-sand-800" />
-          <span className="text-xs uppercase tracking-wider text-sand-600 dark:text-sand-400">
+          <span className="text-xs uppercase tracking-wider text-sand-600 dark:text-sand-500">
             or
           </span>
           <span className="h-px flex-1 bg-sand-200 dark:bg-sand-800" />
@@ -243,7 +243,7 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
           paths above. Lighter than the sign-up footer because the user
           already accepted the Terms / Privacy / marketing notice when they
           first created the account. */}
-      <p className="mt-6 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+      <p className="mt-6 text-xs leading-relaxed text-sand-600 dark:text-sand-500">
         By continuing, you agree to our{' '}
         <Link
           href="/terms"

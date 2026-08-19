@@ -17,7 +17,7 @@ export default function RefundPage() {
     <div className="min-h-full bg-sand-100 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/refund" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-800">
+        <Link href="/refund" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Refund
         </Link>
         <div className="flex items-center justify-end">
@@ -33,7 +33,7 @@ export default function RefundPage() {
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
           Refund &amp; Cancellation Policy
         </h1>
-        <p className="mt-3 text-sm text-sand-600 dark:text-sand-400">
+        <p className="mt-3 text-sm text-sand-600 dark:text-sand-500">
           Last updated: 2026-06-14. This policy applies to the AI Canvas Premium subscription.
         </p>
 

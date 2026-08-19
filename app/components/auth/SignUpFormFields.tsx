@@ -105,7 +105,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
             <GoogleSignInButton next={next} label="Sign up with Google" />
             <div className="flex items-center gap-3" aria-hidden="true">
               <span className="h-px flex-1 bg-sand-200 dark:bg-sand-800" />
-              <span className="text-xs uppercase tracking-wider text-sand-600 dark:text-sand-400">
+              <span className="text-xs uppercase tracking-wider text-sand-600 dark:text-sand-500">
                 or
               </span>
               <span className="h-px flex-1 bg-sand-200 dark:bg-sand-800" />
@@ -199,7 +199,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               separate marketing notice is required. The Art. 8 age-16
               confirmation was also dropped — developer-tool audience with
               negligible under-16 risk. */}
-          <p className="mt-6 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-6 text-xs leading-relaxed text-sand-600 dark:text-sand-500">
             By creating an account you agree to our{' '}
             <Link
               href="/terms"

@@ -110,7 +110,7 @@ export function PremiumCards({
               <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
                 $0
               </span>
-              <span className="text-sm font-medium text-sand-600 dark:text-sand-400">/ forever</span>
+              <span className="text-sm font-medium text-sand-600 dark:text-sand-500">/ forever</span>
             </div>
             <Link
               href={user ? '/components' : '/account/sign-up'}
@@ -120,7 +120,7 @@ export function PremiumCards({
             </Link>
           </div>
           <div className={`flex-1 rounded-2xl bg-sand-100/70 dark:bg-sand-950 ${listPad}`}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-500">
               ALWAYS INCLUDED
             </p>
             <ul className="mt-4 space-y-3">
@@ -161,7 +161,7 @@ export function PremiumCards({
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'monthly'
                   ? 'bg-sand-50 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
+                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-900 dark:hover:text-sand-300'
               }`}
             >
               Monthly
@@ -190,7 +190,7 @@ export function PremiumCards({
             <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
               {price}
             </span>
-            <span className="text-sm font-medium text-sand-600 dark:text-sand-400">/ {suffix}</span>
+            <span className="text-sm font-medium text-sand-600 dark:text-sand-500">/ {suffix}</span>
             {perMonthHint && (
               <span className="text-sm font-semibold text-olive-700 dark:text-olive-400">
                 ({perMonthHint})
@@ -226,7 +226,7 @@ export function PremiumCards({
           {/* The comparison label only makes sense next to the Free card;
               the premium-only modal renders the list without it. */}
           {showFree && (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-500">
               EVERYTHING IN FREE, PLUS
             </p>
           )}

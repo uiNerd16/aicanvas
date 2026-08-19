@@ -108,7 +108,7 @@ function KuendigenForm() {
     <div className="min-h-full bg-sand-100 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/kuendigen" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-800">
+        <Link href="/kuendigen" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Kündigen
         </Link>
         <div className="flex items-center justify-end">
@@ -124,7 +124,7 @@ function KuendigenForm() {
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">Verträge kündigen</h1>
         <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
           Kündige hier deine AI Canvas Premium-Mitgliedschaft. Kein Login nötig.{' '}
-          <span className="text-sand-600 dark:text-sand-400">
+          <span className="text-sand-600 dark:text-sand-500">
             Cancel your AI Canvas Premium subscription here. No login required. You can also{' '}
             <Link href="/account/settings" className="text-olive-700 dark:text-olive-400 hover:underline">
               sign in
@@ -183,7 +183,7 @@ function KuendigenForm() {
               Falls für diese Adresse ein aktives Premium-Abo besteht, haben wir dir eine E-Mail mit einem
               Bestätigungslink geschickt. Klicke ihn an, um die Kündigung abzuschließen.
             </p>
-            <p className="mt-2 leading-relaxed text-sand-600 dark:text-sand-400">
+            <p className="mt-2 leading-relaxed text-sand-600 dark:text-sand-500">
               If a matching Premium subscription exists for this address, we&apos;ve emailed you a confirmation
               link. Click it to complete the cancellation.
             </p>
@@ -241,7 +241,7 @@ function KuendigenForm() {
             {/* Identity — §312k Abs. 2 Nr. 2 */}
             <div>
               <label htmlFor="name" className={labelCls}>
-                Name <span className="font-normal text-sand-600 dark:text-sand-400">(optional)</span>
+                Name <span className="font-normal text-sand-600 dark:text-sand-500">(optional)</span>
               </label>
               <input
                 id="name"

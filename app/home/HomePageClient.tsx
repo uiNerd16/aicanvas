@@ -239,7 +239,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                   {/* Hairline separating the headline stat from its breakdown.
                       border-t rather than an <hr>: it is decoration, not a
                       thematic break, so it stays out of the a11y tree. */}
-                  <p className="mt-3 border-t border-sand-200/70 pt-3 text-[13px] leading-relaxed text-sand-600 dark:border-sand-800/70 dark:text-sand-400">
+                  <p className="mt-3 border-t border-sand-200/70 pt-3 text-[13px] leading-relaxed text-sand-600 dark:border-sand-800/70 dark:text-sand-500">
                     Every component, block &amp; design system install.
                     <br />
                     Every AI agent fetching source.
@@ -501,7 +501,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                     <span className="text-base font-bold tabular-nums text-olive-700 dark:text-olive-500">{step.num}</span>
                     <h3 className="text-base font-bold text-sand-900 dark:text-sand-50">{step.title}</h3>
                   </div>
-                  <p className="mt-1.5 text-base leading-relaxed text-sand-600 dark:text-sand-400">{step.desc}</p>
+                  <p className="mt-1.5 text-base leading-relaxed text-sand-600 dark:text-sand-500">{step.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -522,7 +522,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
               </p>
               <Link
                 href="/faq"
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
               >
                 See all FAQs
                 <CaretRight weight="regular" size={14} />
@@ -549,7 +549,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
             <h2 className="relative mt-2 text-xl font-bold text-sand-900 dark:text-sand-50">
               One command from your next screen.
             </h2>
-            <p className="relative mt-2 text-base text-sand-600 dark:text-sand-400">
+            <p className="relative mt-2 text-base text-sand-600 dark:text-sand-500">
               {componentTotal}+ components and design systems, each one command away. Copy it
               yourself, or tell your agent to install it. No tokens spent generating what
               already works.

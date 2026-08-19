@@ -114,7 +114,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
               <button
                 type="button"
                 onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
-                className="flex w-full items-center gap-2 border-b border-sand-200 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-olive-400 dark:hover:bg-sand-800"
+                className="flex w-full items-center gap-2 border-b border-sand-200 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-olive-500 dark:hover:bg-sand-800"
               >
                 <Lightning size={14} weight="regular" />
                 Upgrade to Premium

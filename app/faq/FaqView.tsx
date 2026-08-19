@@ -69,7 +69,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
         <div />
         <Link
           href="/components"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
+          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /FAQ
         </Link>
@@ -195,7 +195,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
             <h2 className="relative mt-2 text-xl font-bold text-sand-900 dark:text-sand-50">
               Start free, build now.
             </h2>
-            <p className="relative mx-auto mt-2 max-w-xl text-base text-sand-600 dark:text-sand-400">
+            <p className="relative mx-auto mt-2 max-w-xl text-base text-sand-600 dark:text-sand-500">
               Browse the registry, install with one command, and remix the free
               library with AI at no cost. Go Premium for the premium components
               and blocks, their full prompts, and complete design systems.

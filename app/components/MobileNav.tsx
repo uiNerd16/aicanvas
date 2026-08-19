@@ -329,7 +329,7 @@ export function MobileNav({
                               <button
                                 type="button"
                                 onClick={() => setShowAllCats((v) => !v)}
-                                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-sand-600 transition-colors hover:bg-sand-200/50 hover:text-sand-700 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-300"
+                                className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-sand-600 transition-colors hover:bg-sand-200/50 hover:text-sand-700 dark:text-sand-500 dark:hover:bg-sand-800/60 dark:hover:text-sand-300"
                               >
                                 <CaretDown
                                   size={12}

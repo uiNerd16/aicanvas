@@ -62,7 +62,7 @@ export default async function MadeInLabPage() {
             <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">
               {TOOL_NAMES[tool] ?? tool}
             </h2>
-            <span className="text-xs text-sand-600 dark:text-sand-400">{rows.length} preset{rows.length === 1 ? '' : 's'}</span>
+            <span className="text-xs text-sand-600 dark:text-sand-500">{rows.length} preset{rows.length === 1 ? '' : 's'}</span>
           </header>
           <ul className="grid gap-3 sm:grid-cols-2">
             {rows.map((p) => (

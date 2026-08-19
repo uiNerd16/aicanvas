@@ -178,7 +178,7 @@ export default function FeedbackPage() {
         <div />
         <Link
           href="/feedback"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
+          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /Feedback
         </Link>
@@ -303,7 +303,7 @@ export default function FeedbackPage() {
                     />
                   </div>
 
-                  <div className="mt-1 flex justify-between text-xs text-sand-600 dark:text-sand-400">
+                  <div className="mt-1 flex justify-between text-xs text-sand-600 dark:text-sand-500">
                     <span>Rough</span>
                     <span>Great</span>
                   </div>
@@ -395,7 +395,7 @@ export default function FeedbackPage() {
                 {/* Only true while the route uses the address for reply_to and
                     nothing else: no Brevo call, no list. If the form is ever
                     wired to the newsletter, this line has to change. */}
-                <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+                <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-500">
                   We only use your email to reply.{' '}
                   <Link href="/privacy" className="underline underline-offset-2 hover:text-sand-900 dark:hover:text-sand-300">
                     Privacy policy

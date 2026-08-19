@@ -222,7 +222,7 @@ function FilteredEmptyState({ onReset }: { onReset: () => void }) {
       <p className="text-sm text-sand-600 dark:text-sand-400">
         This collection is empty.
       </p>
-      <p className="mt-2 text-xs text-sand-600 dark:text-sand-400">
+      <p className="mt-2 text-xs text-sand-600 dark:text-sand-500">
         Save more components, or move an existing save in from its per-row dropdown.
       </p>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -345,7 +345,7 @@ function FolderTabs({
               maxLength={40}
               className="w-full rounded-md border border-olive-500 bg-sand-50 px-2 py-1 text-base text-sand-900 outline-none md:text-xs dark:bg-sand-900 dark:text-sand-50"
             />
-            <p className="text-center text-[10px] text-sand-600 dark:text-sand-400">Enter to create · Esc to cancel</p>
+            <p className="text-center text-[10px] text-sand-600 dark:text-sand-500">Enter to create · Esc to cancel</p>
           </form>
         ) : (
           hasAnySaves && (
@@ -418,7 +418,7 @@ function Folder({
           >
             {label}
           </span>
-          <span className="text-[10px] leading-none text-sand-600 dark:text-sand-400">({count})</span>
+          <span className="text-[10px] leading-none text-sand-600 dark:text-sand-500">({count})</span>
         </div>
       </button>
       {onDelete && (

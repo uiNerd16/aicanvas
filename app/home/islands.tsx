@@ -248,7 +248,7 @@ export function WireIcons() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.2 }}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sand-600 dark:text-sand-400"
+                className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sand-600 dark:text-sand-500"
               >
                 {WIRE_LABELS[idx]}
               </motion.span>
@@ -304,7 +304,7 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
       <div className="flex items-center justify-between px-4 py-5">
         <div>
           <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">{entry.name}</p>
-          <p className="text-xs text-sand-600 dark:text-sand-400">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
+          <p className="text-xs text-sand-600 dark:text-sand-500">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
         </div>
         <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
       </div>
@@ -482,7 +482,7 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                   <div className="flex items-center justify-between px-4 py-5">
                     <div>
                       <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">{current.name}</p>
-                      <p className="text-xs text-sand-600 dark:text-sand-400">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
+                      <p className="text-xs text-sand-600 dark:text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
                     </div>
                     <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
                   </div>

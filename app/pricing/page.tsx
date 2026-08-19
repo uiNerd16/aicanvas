@@ -137,7 +137,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
           <span className="text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-5xl">
             {plan.priceLabel}
           </span>
-          <span className="text-sm font-medium text-sand-600 dark:text-sand-400">
+          <span className="text-sm font-medium text-sand-600 dark:text-sand-500">
             / {plan.priceSuffix}
           </span>
         </div>
@@ -156,7 +156,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
 
       {/* Bottom — features inset */}
       <div className="flex-1 rounded-2xl bg-sand-100/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-400">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-500">
           {plan.listLabel}
         </p>
         <ul className="mt-4 space-y-3">
@@ -221,7 +221,7 @@ export default function PricingPage() {
         <div />
         <Link
           href="/pricing"
-          className="text-sm font-semibold text-olive-700 transition-colors dark:text-olive-400 dark:hover:text-olive-800"
+          className="text-sm font-semibold text-olive-700 transition-colors dark:text-olive-500 dark:hover:text-olive-400"
         >
           /Pricing
         </Link>
@@ -233,7 +233,7 @@ export default function PricingPage() {
       <main className="relative mx-auto w-full max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-400">/Pricing</span>
+          <span className="text-olive-700 dark:text-olive-500">/Pricing</span>
         </p>
 
         {/* ── Hero ── */}

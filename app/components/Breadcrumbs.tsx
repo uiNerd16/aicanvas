@@ -29,7 +29,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
               </span>
             )}
             {isLast ? (
-              <span aria-current="page" className="truncate text-olive-700 dark:text-olive-400">
+              <span aria-current="page" className="truncate text-olive-700 dark:text-olive-500">
                 {c.label}
               </span>
             ) : c.href ? (

@@ -129,7 +129,7 @@ function ColorSwatch({ hex, token, usage }: Swatch) {
       <div className="min-w-0">
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-sm font-semibold text-sand-900 dark:text-sand-100">{token}</span>
-          <span className="font-mono text-xs text-sand-600 dark:text-sand-400">{hex}</span>
+          <span className="font-mono text-xs text-sand-600 dark:text-sand-500">{hex}</span>
         </div>
         <p className="text-xs text-sand-600 dark:text-sand-400">{usage}</p>
       </div>
@@ -263,7 +263,7 @@ export default function DesignSystemPage() {
               <div className="mb-2 flex items-baseline gap-3">
                 <span className="font-mono text-xs text-olive-700 dark:text-olive-500">{t.weight}</span>
                 <span className="text-sm font-semibold text-sand-700 dark:text-sand-300">{t.name}</span>
-                <span className="text-xs text-sand-600 dark:text-sand-400">{t.usage}</span>
+                <span className="text-xs text-sand-600 dark:text-sand-500">{t.usage}</span>
               </div>
               <p
                 className="text-sand-900 dark:text-sand-50"
@@ -286,7 +286,7 @@ export default function DesignSystemPage() {
                 className="rounded-lg bg-olive-500"
                 style={{ width: s, height: s }}
               />
-              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-400">{s}px</span>
+              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-500">{s}px</span>
             </div>
           ))}
         </div>
@@ -303,7 +303,7 @@ export default function DesignSystemPage() {
                 style={{ borderRadius: r.value }}
               />
               <span className="font-mono text-xs font-semibold text-sand-700 dark:text-sand-300">{r.name}</span>
-              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-400">{r.value}</span>
+              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-500">{r.value}</span>
             </div>
           ))}
         </div>

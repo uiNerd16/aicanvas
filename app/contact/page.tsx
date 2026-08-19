@@ -65,7 +65,7 @@ export default function ContactPage() {
         <div />
         <Link
           href="/contact"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-800"
+          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /Contact
         </Link>
@@ -204,7 +204,7 @@ export default function ContactPage() {
 
               {/* Matches /feedback. Only true while the route uses the address
                   for reply_to and nothing else: no Brevo call, no list. */}
-              <p className="text-center text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+              <p className="text-center text-xs leading-relaxed text-sand-600 dark:text-sand-500">
                 We only use your email to reply.{' '}
                 <Link href="/privacy" className="underline underline-offset-2 hover:text-sand-900 dark:hover:text-sand-300">
                   Privacy policy
