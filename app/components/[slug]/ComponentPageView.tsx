@@ -43,6 +43,7 @@ import { BlockPreviewFrame } from './BlockPreviewFrame'
 import { useSession } from '../auth/SessionProvider'
 import { useAuthModal } from '../auth/AuthModalProvider'
 import { Button } from '../Button'
+import { useTheme } from '../ThemeProvider'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
 import { HighlightedCodeView } from '../HighlightedCodeView'
@@ -250,7 +251,19 @@ export default function ComponentPageView({
   // same bug in reverse. Safe on mount: `user` starts from the server-provided
   // initialUser, so a normal load never fires a second fetch.
   useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug, user?.id])
-  const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
+  // The preview starts on whatever the site is set to, so a visitor browsing in
+  // light does not get slapped with a dark box, then pins to their own choice
+  // the moment they touch the toggle. Derived rather than synced with an
+  // effect: the site theme is already correct during SSR (ThemeProvider is
+  // seeded from the cookie), so there is nothing to reconcile and no frame of
+  // the wrong theme. It reads the site and never writes it, which is the whole
+  // point — the previous version of this toggle wrote <html> and dragged the
+  // entire site dark with it.
+  //
+  // A dark-only component ignores both: it has no light rendering to show.
+  const { theme: siteTheme } = useTheme()
+  const [themeOverride, setThemeOverride] = useState<'dark' | 'light' | null>(null)
+  const cardTheme: 'dark' | 'light' = dualTheme ? (themeOverride ?? siteTheme) : 'dark'
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
@@ -648,7 +661,7 @@ export default function ComponentPageView({
                     disabled={!dualTheme}
                     onClick={() => {
                       if (!dualTheme) return
-                      setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+                      setThemeOverride(cardTheme === 'dark' ? 'light' : 'dark')
                     }}
                     className="overflow-hidden"
                   >

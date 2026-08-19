@@ -7,8 +7,32 @@
    explicitly — Tailwind tolerates the dir being absent (free-only builds). */
 @source "../components-workspace-premium";
 
-/* Class-based dark mode — toggle .dark on <html> instead of OS preference */
-@variant dark (&:where(.dark, .dark *):not([data-card-theme="light"] *));
+/* ── Theme scope contract ──────────────────────────────────────────────────
+   Two independent scopes decide what "dark" means, and the nearest one wins.
+
+   1. SITE scope — `.dark` on <html>, written only by ThemeProvider and mirrored
+      into the `theme` cookie. Owns the chrome: nav, pages, cards, footer.
+   2. PREVIEW scope — `[data-card-theme]` plus a matching `dark` class on the
+      SAME element, written only by the local state of a component or block
+      preview. Owns everything inside that preview box and nothing else.
+
+   Both directions have to hold, and both are in the selector below:
+
+     site dark  + preview light → the wrapper AND its subtree drop out of dark
+     site light + preview dark  → the wrapper's own `dark` class turns it back on
+
+   The second one is why this cannot just key off <html>. The site had a theme
+   toggle once and it was deleted, because it and the preview toggles both wrote
+   <html>: flipping one component to dark took the whole site with it. Keeping
+   the two scopes apart is the entire fix, so if this selector is ever edited,
+   check both directions before believing it.
+
+   The JS side of the same contract lives in the components themselves: they
+   read `closest('[data-card-theme]')` first and only fall back to <html> when
+   there is no preview wrapper above them. That fallback is what makes a
+   copy-pasted component work in someone else's project, so keep the attribute
+   and the class on one element or the two halves disagree. */
+@variant dark (&:where(.dark, .dark *):not([data-card-theme="light"], [data-card-theme="light"] *));
 
 :root {
   --background: #EDEAE5;

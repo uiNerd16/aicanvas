@@ -26,6 +26,7 @@ import type { ReactNode } from 'react'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { DesignSystemsPole, TEMPLATE_LEAF_RE } from '../_components/DesignSystemsPole'
 import { Button, buttonClasses } from './Button'
+import { ThemeToggle } from './ThemeToggle'
 import { SignedIn } from './auth/SignedIn'
 import { SignedOut } from './auth/SignedOut'
 import { UserMenu } from './auth/UserMenu'
@@ -456,6 +457,8 @@ export function MobileNav({
                 >
                   <XLogo weight="regular" size={20} />
                 </a>
+                {/* Far edge: a site setting, not a third social link. */}
+                <ThemeToggle className="ml-auto" />
               </div>
 
               {/* Auth row */}
