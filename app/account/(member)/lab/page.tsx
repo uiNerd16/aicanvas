@@ -85,7 +85,7 @@ export default async function MadeInLabPage() {
 
 function EmptyState() {
   return (
-    <div className="rounded-xl border border-dashed border-sand-300 bg-sand-100/40 p-10 text-center dark:border-sand-800 dark:bg-sand-900/40">
+    <div className="rounded-xl border border-dashed border-sand-200 bg-sand-50/40 p-10 text-center dark:border-sand-800 dark:bg-sand-900/40">
       <Flask size={40} weight="regular" className="mx-auto text-sand-600 dark:text-sand-400" />
       <h2 className="mt-4 text-lg font-bold text-sand-900 dark:text-sand-50">Nothing saved yet</h2>
       <p className="mt-1 text-sm text-sand-600 dark:text-sand-400">

@@ -24,7 +24,7 @@ export function AccountTabs() {
     // Five tabs split the full row evenly (flex-1). No horizontal scroll —
     // labels collapse to icon-only below `sm:` so all five always fit on
     // mobile; on desktop the label rides alongside.
-    <nav className="border-b border-sand-300 dark:border-sand-800">
+    <nav className="border-b border-sand-200 dark:border-sand-800">
       <div className="flex">
         {TABS.map(({ href, label, Icon }) => {
           const active = pathname === href

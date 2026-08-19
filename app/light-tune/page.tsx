@@ -26,12 +26,13 @@ type Roles = {
   textPrimary: number; textBody: number; textMuted: number; accent: number
 }
 
-// Change-isolating presets. "Declared" is what CLAUDE.md has claimed the light
-// theme was all along, and it is the one that fails contrast; it is here as the
-// baseline to compare against, not as a recommendation.
+// Change-isolating presets. "Airy" is what the chrome actually ships, so opening
+// this page shows the live palette. "Declared" is what CLAUDE.md claimed the
+// light theme was for months; it is kept only as the failing baseline to
+// compare against.
 const PRESETS: Record<string, Roles> = {
   Declared:  { page: 2, card: 1, raised: 0, border: 3, borderStrong: 4, textPrimary: 9, textBody: 6, textMuted: 5, accent: 1 },
-  Airy:      { page: 1, card: 0, raised: 0, border: 2, borderStrong: 3, textPrimary: 9, textBody: 6, textMuted: 5, accent: 3 },
+  Airy:      { page: 1, card: 0, raised: 0, border: 2, borderStrong: 3, textPrimary: 9, textBody: 7, textMuted: 6, accent: 3 },
   Paper:     { page: 0, card: 0, raised: 0, border: 2, borderStrong: 3, textPrimary: 9, textBody: 6, textMuted: 5, accent: 3 },
   Contrast:  { page: 1, card: 0, raised: 0, border: 3, borderStrong: 4, textPrimary: 10, textBody: 7, textMuted: 6, accent: 4 },
 }

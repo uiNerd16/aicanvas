@@ -35,8 +35,8 @@
 @variant dark (&:where(.dark, .dark *):not([data-card-theme="light"], [data-card-theme="light"] *));
 
 :root {
-  --background: #EDEAE5;
-  --foreground: #1C1916;
+  --background: #E3E3E8;
+  --foreground: #1B1B1C;
 }
 
 /* Tell the browser which way the page leans, so every control it draws for us

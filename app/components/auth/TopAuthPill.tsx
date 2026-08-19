@@ -106,15 +106,15 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
           <CaretDown size={10} weight="regular" className={`transition-transform ${open ? '-rotate-180' : ''}`} />
         </Button>
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-48 overflow-hidden rounded-lg border border-sand-300 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
-            <div className="border-b border-sand-300 px-3 py-2 text-xs text-sand-600 dark:border-sand-800 dark:text-sand-400">
+          <div className="absolute right-0 top-full mt-1 w-48 overflow-hidden rounded-lg border border-sand-200 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
+            <div className="border-b border-sand-200 px-3 py-2 text-xs text-sand-600 dark:border-sand-800 dark:text-sand-400">
               <span className="block truncate">{email}</span>
             </div>
             {status === 'not-premium' && (
               <button
                 type="button"
                 onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
-                className="flex w-full items-center gap-2 border-b border-sand-300 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:text-olive-400 dark:hover:bg-sand-800"
+                className="flex w-full items-center gap-2 border-b border-sand-200 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-olive-400 dark:hover:bg-sand-800"
               >
                 <Lightning size={14} weight="regular" />
                 Upgrade to Premium
@@ -126,7 +126,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <Link
               href="/account/saved"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <Heart size={14} weight="regular" />
               Saved
@@ -134,7 +134,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <Link
               href="/account/lab"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <Flask size={14} weight="regular" />
               Made in Lab
@@ -142,7 +142,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <Link
               href="/account/history"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <ClockClockwise size={14} weight="regular" />
               Activity
@@ -150,7 +150,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <Link
               href="/account/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <Gear size={14} weight="regular" />
               Settings
@@ -158,7 +158,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <Link
               href="/account"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <User size={14} weight="regular" />
               Profile
@@ -166,7 +166,7 @@ export function TopAuthPill({ showStatusPill = true }: { showStatusPill?: boolea
             <button
               type="button"
               onClick={signOut}
-              className="flex w-full items-center gap-2 border-t border-sand-300 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-200 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
+              className="flex w-full items-center gap-2 border-t border-sand-200 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
             >
               <SignOut size={14} weight="regular" />
               Sign out

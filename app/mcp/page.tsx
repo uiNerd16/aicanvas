@@ -40,7 +40,7 @@ export default function McpPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* ── Sticky top bar — h-14 (56px) matches the sidebar logo block ── */}
-      <header className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+      <header className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link
           href="/mcp"
@@ -101,7 +101,7 @@ export default function McpPage() {
           ].map((card, i) => (
             <div
               key={card.title}
-              className="relative overflow-hidden rounded-xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900"
+              className="relative overflow-hidden rounded-xl border border-sand-200 bg-sand-50 p-5 dark:border-sand-800 dark:bg-sand-900"
             >
               {i === 1 && (
                 <div
@@ -134,7 +134,7 @@ export default function McpPage() {
           ].map((prompt) => (
             <li
               key={prompt}
-              className="flex items-start gap-2.5 rounded-lg border border-sand-300 bg-sand-100 px-4 py-3 text-sm text-sand-700 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300"
+              className="flex items-start gap-2.5 rounded-lg border border-sand-200 bg-sand-50 px-4 py-3 text-sm text-sand-700 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300"
             >
               <Sparkle
                 weight="regular"

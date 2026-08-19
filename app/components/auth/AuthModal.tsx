@@ -121,7 +121,7 @@ export function AuthModal() {
       {/* Dialog */}
       <div
         ref={dialogRef}
-        className="relative z-10 w-full max-w-md rounded-xl border border-sand-300 bg-sand-100 p-8 shadow-2xl dark:border-sand-800 dark:bg-sand-900"
+        className="relative z-10 w-full max-w-md rounded-xl border border-sand-200 bg-sand-50 p-8 shadow-2xl dark:border-sand-800 dark:bg-sand-900"
       >
         <Button
           variant="icon"

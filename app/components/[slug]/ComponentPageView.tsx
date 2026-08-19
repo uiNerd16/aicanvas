@@ -528,12 +528,12 @@ export default function ComponentPageView({
   return (
     <>
       {/* Top stripe — sticky (desktop only; mobile uses MobileNav) */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
         <Breadcrumbs crumbs={[{ label: 'Components & Blocks', href: '/components' }, { label: name }]} />
         <HeaderSocials />
       </div>
 
-      <main className="bg-sand-200 dark:bg-sand-950">
+      <main className="bg-sand-100 dark:bg-sand-950">
         <div className="relative mx-auto max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
 
           {/* Mobile back button */}
@@ -599,7 +599,7 @@ export default function ComponentPageView({
                     </span>
                   ))}
                   {useCaseChips.map((label) => (
-                    <span key={label} className="rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
+                    <span key={label} className="rounded-full border border-sand-200 bg-sand-100 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
                       {label}
                     </span>
                   ))}
@@ -618,10 +618,10 @@ export default function ComponentPageView({
           </div>
 
           {/* Main card */}
-          <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm dark:border-sand-800 dark:bg-sand-900 dark:shadow-none">
+          <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-200 bg-sand-50 shadow-sm dark:border-sand-800 dark:bg-sand-900 dark:shadow-none">
 
             {/* Tab bar — tabs left, card theme toggle right */}
-            <div className="flex items-center justify-between border-b border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-between border-b border-sand-200 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Preview / Code tabs */}
               <div className="flex items-center gap-0.5">
@@ -629,7 +629,7 @@ export default function ComponentPageView({
                   onClick={() => setActiveTab('preview')}
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'preview'
-                      ? 'bg-sand-200 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                       : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
@@ -640,7 +640,7 @@ export default function ComponentPageView({
                   onClick={() => setActiveTab('code')}
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'code'
-                      ? 'bg-sand-200 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                       : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
@@ -689,7 +689,7 @@ export default function ComponentPageView({
                       )}
                     </AnimatePresence>
                   </Button>
-                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/toggle:block">
+                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/toggle:block">
                     {dualTheme
                       ? cardTheme === 'dark' ? 'Switch to light' : 'Switch to dark'
                       : 'Dark mode only'}
@@ -708,7 +708,7 @@ export default function ComponentPageView({
                     >
                       <ArrowClockwise weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/refresh:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/refresh:block">
                       Refresh
                     </div>
                   </div>
@@ -732,7 +732,7 @@ export default function ComponentPageView({
                     >
                       <CornersOut weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/fullscreen:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/fullscreen:block">
                       Full screen
                     </div>
                   </div>
@@ -753,7 +753,7 @@ export default function ComponentPageView({
                 e.currentTarget.scrollTop = 0
               }}
               className={`relative isolate h-[320px] overflow-hidden transition-colors duration-300 sm:h-[480px] ${
-                cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-100'
+                cardTheme === 'dark' ? 'dark bg-sand-950' : 'bg-sand-50'
               }`}
             >
               {/* Both tabs stay mounted so the syntax-highlighted code is in the
@@ -852,7 +852,7 @@ export default function ComponentPageView({
             </div>
 
             {/* Action bar */}
-            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-end gap-2 border-t border-sand-200 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Save — signed out, opens the same soft-gate modal as Copy CLI. */}
               <SaveButton slug={slug} system={designSystem ?? null} />
@@ -923,8 +923,8 @@ export default function ComponentPageView({
               </p>
 
               {/* CLI / Manual tabs */}
-              <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
-                <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+              <div className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-800">
+                <div className="flex border-b border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
                   <button
                     onClick={() => {
                       if (installTab !== 'cli') track('Install Tab Switch', { component: slug, tab: 'cli' })
@@ -959,7 +959,7 @@ export default function ComponentPageView({
                   </button>
                 </div>
 
-                <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
+                <div className="bg-sand-50 px-5 py-6 dark:bg-sand-900">
                   {installTab === 'cli' ? (
                     <div className="space-y-6">
                       {/* Step 1 — shadcn add. The command + package-manager row
@@ -968,7 +968,7 @@ export default function ComponentPageView({
                           button opens the auth modal instead of copying. */}
                       <Step number={1}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                            Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
+                            Run the following command. New project? Run <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
                           <div className="overflow-hidden rounded-lg bg-sand-950">
                             {/* Package manager switcher */}
@@ -1076,9 +1076,9 @@ export default function ComponentPageView({
                       >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
-                              For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                              For dark mode, add the <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
                           <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
@@ -1104,7 +1104,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="overflow-hidden rounded-lg bg-sand-950">
                               <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
@@ -1142,9 +1142,9 @@ export default function ComponentPageView({
                         <Step number={3} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
-                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className={`flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 ${FONT_PKG_SNIPPET ? 'mb-2' : ''}`}>
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
@@ -1257,9 +1257,9 @@ export default function ComponentPageView({
                       >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
-                              For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                              For dark mode, add the <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
                           <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
@@ -1285,7 +1285,7 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="overflow-hidden rounded-lg bg-sand-950">
                               <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
@@ -1323,9 +1323,9 @@ export default function ComponentPageView({
                         <Step number={manualStep.font} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
-                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
                             <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
@@ -1475,7 +1475,7 @@ export default function ComponentPageView({
                             {i > 0 && (
                               <span
                                 aria-hidden="true"
-                                className="h-3 w-px bg-sand-300 dark:bg-sand-700"
+                                className="h-3 w-px bg-sand-200 dark:bg-sand-700"
                               />
                             )}
                             <span className="flex items-center gap-1.5">
@@ -1536,7 +1536,7 @@ export default function ComponentPageView({
                   <Link
                     key={col.slug}
                     href={`/components/collection/${col.slug}`}
-                    className="rounded-full border border-sand-300 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
+                    className="rounded-full border border-sand-200 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
                   >
                     {col.title}
                   </Link>
@@ -1614,7 +1614,7 @@ export default function ComponentPageView({
                         <Link
                           href={`/components/${c.slug}`}
                           onClick={() => track('Component Card Click', { component: c.slug, position: relatedStart + i, source: 'related' })}
-                          className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+                          className="group flex flex-col overflow-hidden rounded-xl border border-sand-200 bg-sand-50 transition-colors duration-200 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                         >
                           <div className="relative aspect-video overflow-hidden bg-sand-950">
                             {c.image ? (
@@ -1686,7 +1686,7 @@ export default function ComponentPageView({
               className={`absolute inset-0 isolate overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl [&::-webkit-scrollbar]:hidden ${
                 cardTheme === 'dark'
                   ? 'dark bg-sand-950 sm:border-sand-800'
-                  : 'bg-sand-100 sm:border-sand-300'
+                  : 'bg-sand-50 sm:border-sand-200'
               }`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1724,7 +1724,7 @@ export default function ComponentPageView({
                 : '50%',
             }}
           >
-            <div className="flex items-center gap-3 rounded-xl border border-sand-300 bg-sand-50 px-4 py-3 shadow-lg dark:border-sand-700 dark:bg-sand-800">
+            <div className="flex items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 shadow-lg dark:border-sand-700 dark:bg-sand-800">
               <Check weight="regular" size={16} className="shrink-0 text-olive-500" />
               <div>
                 <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
@@ -1769,7 +1769,7 @@ export default function ComponentPageView({
           initial={false}
           animate={{ x: remixOpen ? '0%' : '105%' }}
           transition={{ type: 'spring', stiffness: 380, damping: 40 }}
-          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-200 bg-sand-50 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-5 px-6 py-5 sm:px-8">
@@ -1808,7 +1808,7 @@ export default function ComponentPageView({
           </div>
 
           {/* Divider — inset to match the content padding on both sides */}
-          <div className="mx-6 border-t border-sand-300 dark:border-sand-800 sm:mx-8" />
+          <div className="mx-6 border-t border-sand-200 dark:border-sand-800 sm:mx-8" />
 
           {/* Body */}
           <div

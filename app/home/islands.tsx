@@ -105,7 +105,7 @@ export function StackedCards() {
                 handleClick()
               }
             } : undefined}
-            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-400 bg-sand-50 transition-[border-color,box-shadow] duration-200 hover:border-sand-500 hover:shadow-lg hover:shadow-black/20 dark:border-sand-700 dark:bg-sand-800 dark:hover:border-sand-600 ${isFront ? 'touch-none' : ''}`}
+            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-300 bg-sand-50 transition-[border-color,box-shadow] duration-200 hover:border-sand-500 hover:shadow-lg hover:shadow-black/20 dark:border-sand-700 dark:bg-sand-800 dark:hover:border-sand-600 ${isFront ? 'touch-none' : ''}`}
             style={{
               zIndex: isExiting ? 11 : pos.zIndex,
               transformOrigin: 'bottom center',
@@ -276,7 +276,7 @@ const CAROUSEL_SPRING = { type: 'spring' as const, stiffness: 240, damping: 28 }
 
 function CarouselCard({ entry }: { entry: ComponentMeta }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-sand-300/60 bg-sand-100 dark:border-sand-800/60 dark:bg-sand-900">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-sand-200/60 bg-sand-50 dark:border-sand-800/60 dark:bg-sand-900">
       <div className="relative h-56 overflow-hidden bg-sand-900">
         {entry.badge && (
           <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-sand-950/85 px-2.5 py-1 text-[11px] font-semibold text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
@@ -456,7 +456,7 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                   animate="center"
                   exit="exit"
                   transition={CAROUSEL_SPRING}
-                  className="flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900"
+                  className="flex flex-col overflow-hidden rounded-xl border border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-900"
                 >
                   <div className="relative h-64 overflow-hidden">
                     {current.badge && (
@@ -525,14 +525,14 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
         <button
           onClick={goPrev}
           aria-label="Previous"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-400 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-300 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
         >
           <CaretLeft weight="regular" size={14} />
         </button>
         <button
           onClick={goNext}
           aria-label="Next"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-400 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-300 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
         >
           <CaretRight weight="regular" size={14} />
         </button>
@@ -593,8 +593,8 @@ export function FaqAccordion() {
             delay={i * 0.04}
             className={`rounded-xl border transition-colors ${
               open
-                ? 'border-sand-400 bg-sand-100 dark:border-sand-700 dark:bg-sand-900'
-                : 'border-sand-300 bg-sand-100/50 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
+                ? 'border-sand-300 bg-sand-50 dark:border-sand-700 dark:bg-sand-900'
+                : 'border-sand-200 bg-sand-50/50 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
             }`}
           >
             <button

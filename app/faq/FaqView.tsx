@@ -63,9 +63,9 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
     })
 
   return (
-    <div className="min-h-full bg-sand-200 dark:bg-sand-950">
+    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
       {/* ── Top bar ── */}
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link
           href="/components"
@@ -105,7 +105,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
             <a
               key={c.slug}
               href={`#${c.slug}`}
-              className="rounded-full border border-sand-300 bg-sand-100/50 px-3 py-1.5 text-sm font-medium text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:bg-sand-900/50 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
+              className="rounded-full border border-sand-200 bg-sand-50/50 px-3 py-1.5 text-sm font-medium text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 dark:border-sand-800 dark:bg-sand-900/50 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
             >
               {c.category}
             </a>
@@ -135,8 +135,8 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
                       transition={{ duration: 0.3 }}
                       className={`rounded-xl border transition-colors ${
                         isOpen
-                          ? 'border-sand-400 bg-sand-100 dark:border-sand-700 dark:bg-sand-900'
-                          : 'border-sand-300 bg-sand-100/50 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
+                          ? 'border-sand-300 bg-sand-50 dark:border-sand-700 dark:bg-sand-900'
+                          : 'border-sand-200 bg-sand-50/50 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
                       }`}
                     >
                       <button

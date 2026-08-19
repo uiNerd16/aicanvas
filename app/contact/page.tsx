@@ -60,8 +60,8 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-sand-200 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+    <div className="flex min-h-full flex-col bg-sand-100 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link
           href="/contact"
@@ -106,7 +106,7 @@ export default function ContactPage() {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="mx-auto mt-8 w-full max-w-xl space-y-4 rounded-2xl border border-sand-300 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900 sm:p-8"
+              className="mx-auto mt-8 w-full max-w-xl space-y-4 rounded-2xl border border-sand-200 bg-sand-50 p-6 dark:border-sand-800 dark:bg-sand-900 sm:p-8"
             >
               {/* Honeypot: off-screen, hidden from humans and assistive tech. */}
               <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden">

@@ -123,7 +123,7 @@ const SCOPES: { id: Scope; label: string; desc: React.ReactNode }[] = [
     desc: (
       <>
         Run this in your project root. Saved to{' '}
-        <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+        <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
           .mcp.json
         </code>{' '}
         and shared through git, so everyone on the project gets it. Best for
@@ -164,7 +164,7 @@ function Toast({ message }: { message: string | null }) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 12, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-          className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-full border border-sand-300 bg-sand-50/95 px-4 py-2.5 text-sm font-semibold text-sand-900 shadow-xl backdrop-blur dark:border-sand-700 dark:bg-sand-800/95 dark:text-sand-50"
+          className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-full border border-sand-200 bg-sand-50/95 px-4 py-2.5 text-sm font-semibold text-sand-900 shadow-xl backdrop-blur dark:border-sand-700 dark:bg-sand-800/95 dark:text-sand-50"
           role="status"
         >
           <Check weight="regular" size={15} className="text-olive-700 dark:text-olive-500" />
@@ -285,9 +285,9 @@ export function InstallCards() {
         How to install the MCP
       </h2>
       {/* Tabbed install widget — matches the per-component "Add to your project" */}
-      <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
+      <div className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-800">
         {/* Tool toggle — Claude Code / Codex / Cursor */}
-        <div className="flex gap-1.5 border-b border-sand-300 bg-sand-100 p-1.5 dark:border-sand-800 dark:bg-sand-900">
+        <div className="flex gap-1.5 border-b border-sand-200 bg-sand-50 p-1.5 dark:border-sand-800 dark:bg-sand-900">
           {TOOLS.map((t) => {
             const active = tool === t.id
             return (
@@ -309,7 +309,7 @@ export function InstallCards() {
                 {active && (
                   <motion.span
                     layoutId="mcpToolHighlight"
-                    className="absolute inset-0 rounded-lg bg-sand-50 shadow-sm ring-1 ring-sand-300 dark:bg-sand-800 dark:ring-sand-700"
+                    className="absolute inset-0 rounded-lg bg-sand-50 shadow-sm ring-1 ring-sand-200 dark:bg-sand-800 dark:ring-sand-700"
                     transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 )}
@@ -324,7 +324,7 @@ export function InstallCards() {
 
         {/* Scope tabs — Claude Code only (Codex/Cursor have no --scope) */}
         {tool === 'claude' && (
-          <div className="flex overflow-x-auto border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+          <div className="flex overflow-x-auto border-b border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
             {SCOPES.map((s) => {
               const active = scope === s.id
               return (
@@ -354,7 +354,7 @@ export function InstallCards() {
         )}
 
         {/* Steps */}
-        <div className="space-y-6 bg-sand-100 px-5 py-6 dark:bg-sand-900">
+        <div className="space-y-6 bg-sand-50 px-5 py-6 dark:bg-sand-900">
           <Step number={1}>
             {isCursor ? (
               <>
@@ -371,11 +371,11 @@ export function InstallCards() {
                 </a>
                 <p className="mb-2.5 mt-5 text-sm text-sand-600 dark:text-sand-400">
                   Or paste this into{' '}
-                  <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                  <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
                     ~/.cursor/mcp.json
                   </code>{' '}
                   (global) or{' '}
-                  <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                  <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
                     .cursor/mcp.json
                   </code>{' '}
                   (one project):
@@ -448,7 +448,7 @@ export function InstallCards() {
             <p className="text-sm text-sand-600 dark:text-sand-400">
               {isCursor ? 'Reload the Cursor window.' : `Restart ${toolLabel}.`}{' '}
               The{' '}
-              <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+              <code className="rounded bg-sand-100 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
                 aicanvas
               </code>{' '}
               MCP loads automatically.
@@ -460,7 +460,7 @@ export function InstallCards() {
               <p className="text-sm text-sand-600 dark:text-sand-400">
                 Test it. Ask {askLabel}:
               </p>
-              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">
+              <span className="ml-auto shrink-0 rounded-full bg-sand-100 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">
                 Optional
               </span>
             </div>

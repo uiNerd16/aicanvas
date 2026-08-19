@@ -46,7 +46,7 @@ export default async function MemberLayout({ children }: { children: ReactNode }
                     Premium
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full border border-sand-300 px-2 py-0.5 text-[11px] font-semibold text-sand-600 dark:border-sand-700 dark:text-sand-400">
+                  <span className="inline-flex items-center rounded-full border border-sand-200 px-2 py-0.5 text-[11px] font-semibold text-sand-600 dark:border-sand-700 dark:text-sand-400">
                     Free
                   </span>
                 )

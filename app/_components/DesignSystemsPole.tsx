@@ -92,7 +92,7 @@ export function DesignSystemsPole({
       <button
         type="button"
         onClick={onToggle}
-        className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100`}
+        className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold transition-colors text-sand-700 hover:bg-sand-200/50 hover:text-sand-900 dark:text-sand-300 dark:hover:bg-sand-800/60 dark:hover:text-sand-100`}
       >
         <Cube weight="regular" size={16} />
         <span className="flex-1 text-left">Design Systems</span>
@@ -114,8 +114,8 @@ export function DesignSystemsPole({
                   onClick={onNavigate}
                   className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
                     systemActive
-                      ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                      ? 'bg-sand-200/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      : 'text-sand-700 hover:bg-sand-200/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                   }`}
                 >
                   {/* Arrow at px-2 lines up exactly with the parent Design
@@ -139,7 +139,7 @@ export function DesignSystemsPole({
                     {/* Nesting rail — groups System / Brain / Templates / Components under Andromeda */}
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute bottom-1 left-[15px] top-1 w-px bg-sand-300 dark:bg-sand-800"
+                      className="pointer-events-none absolute bottom-1 left-[15px] top-1 w-px bg-sand-200 dark:bg-sand-800"
                     />
                     <ul className="mt-0.5 space-y-0.5">
                     {/* ── System (the full component gallery + install) ───── */}
@@ -206,8 +206,8 @@ export function DesignSystemsPole({
                                 onClick={onNavigate}
                                 className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                                    : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                                    ? 'bg-sand-200/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                                    : 'text-sand-700 hover:bg-sand-200/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                 }`}
                               >
                                 <span className="flex-1 truncate">{t.name}</span>
@@ -248,8 +248,8 @@ export function DesignSystemsPole({
                                 onClick={onNavigate}
                                 className={`flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-[13px] font-medium transition-colors ${
                                   isActive
-                                    ? 'bg-sand-300/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                                    : 'text-sand-700 hover:bg-sand-300/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
+                                    ? 'bg-sand-200/60 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                                    : 'text-sand-700 hover:bg-sand-200/50 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800/60 dark:hover:text-sand-100'
                                 }`}
                               >
                                 {c.name}

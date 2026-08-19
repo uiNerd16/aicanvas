@@ -203,7 +203,7 @@ export default async function RootLayout({
         {process.env.NODE_ENV === 'development' && <script src="/pufi.js" defer />}
         {process.env.NODE_ENV === 'development' && <script src="/koko.js" defer />}
       </head>
-      <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
+      <body className="flex h-full flex-col overflow-hidden bg-sand-100 dark:bg-sand-950 md:flex-row">
         <ThemeProvider initial={theme}>
           <SessionProvider initialUser={user}>
             <AuthModalProvider>
@@ -226,7 +226,7 @@ export default async function RootLayout({
                   full-height strip it can never paint a bar in. In CSS rather
                   than an inline style so the :has() release can out-specify
                   it; an inline declaration would always win. */}
-              <div className="app-scroll-column aic-page-scroll flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950">
+              <div className="app-scroll-column aic-page-scroll flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-100 dark:bg-sand-950">
                 {children}
               </div>
               {/* Global auth dialog — toggles between sign-in and sign-up modes */}

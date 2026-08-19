@@ -16,8 +16,8 @@ import { HeaderSocials } from '../components/HeaderSocials'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-full bg-sand-200 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 dark:border-sand-800 bg-sand-200 dark:bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/privacy" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-800">
           /Privacy
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
           <p className="mt-2 leading-relaxed text-sand-600 dark:text-sand-400">
             When you have an account we issue a per-user install token (a key that
             begins with{' '}
-            <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">aic_</code>
+            <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">aic_</code>
             ). The CLI and the AI Canvas MCP send this token when you install a
             component so we can recognise your account and unlock any Premium
             content you are entitled to. The token is tied to your identity, so we
@@ -228,7 +228,7 @@ export default function PrivacyPage() {
           </h3>
           <p className="mt-2 leading-relaxed text-sand-600 dark:text-sand-400">
             Requests to the public component registry endpoints (paths under{' '}
-            <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">/r/</code>
+            <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">/r/</code>
             ) are made by the shadcn CLI and the AI Canvas MCP. If you are signed
             in, the command you copied carries your account API token so the pull
             unlocks any premium content you are entitled to. We count these
@@ -251,7 +251,7 @@ export default function PrivacyPage() {
             yet decided, or unsubscribed) plus the timestamp of your last
             change. Unsubscribing, via the link in any newsletter or the
             toggle in{' '}
-            <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
+            <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
               /account/settings
             </code>
             , takes effect immediately and is permanent: an unsubscribed

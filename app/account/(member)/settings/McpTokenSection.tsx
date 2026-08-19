@@ -28,7 +28,7 @@ export function McpTokenSection({ token }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
+    <section className="rounded-2xl border border-sand-200 bg-sand-50 p-5 dark:border-sand-800 dark:bg-sand-900">
       <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">API token</h2>
       <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
         Copy this token into your MCP server config or CLI install so AI Canvas
@@ -65,7 +65,7 @@ export function McpTokenSection({ token }: Props) {
           </div>
         </div>
       ) : (
-        <div className="mt-4 rounded-lg border border-sand-300 bg-sand-50 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-950 dark:text-sand-400">
+        <div className="mt-4 rounded-lg border border-sand-200 bg-sand-50 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-950 dark:text-sand-400">
           Your token isn&rsquo;t set up yet. Install the AI Canvas MCP once, or
           reach out to support if this persists.
         </div>

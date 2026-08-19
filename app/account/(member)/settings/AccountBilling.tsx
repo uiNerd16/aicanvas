@@ -101,7 +101,7 @@ export function AccountBilling() {
   return (
     <>
       {/* ── Subscription ──────────────────────────────────────────────── */}
-      <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
+      <section className="rounded-2xl border border-sand-200 bg-sand-50 p-5 dark:border-sand-800 dark:bg-sand-900">
         <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">Subscription</h2>
         <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
           {status === 'premium'
@@ -169,7 +169,7 @@ export function AccountBilling() {
           </p>
         )}
 
-        <p className="mt-4 flex items-start gap-2 border-t border-sand-300 pt-4 text-xs leading-relaxed text-sand-500 dark:border-sand-800 dark:text-sand-400">
+        <p className="mt-4 flex items-start gap-2 border-t border-sand-200 pt-4 text-xs leading-relaxed text-sand-500 dark:border-sand-800 dark:text-sand-400">
           <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-700 dark:text-olive-500" />
           <span>
             Billing is securely handled by{' '}
@@ -181,7 +181,7 @@ export function AccountBilling() {
       </section>
 
       {/* ── API access ────────────────────────────────────────────────── */}
-      <section className="rounded-2xl border border-sand-300 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900">
+      <section className="rounded-2xl border border-sand-200 bg-sand-50 p-5 dark:border-sand-800 dark:bg-sand-900">
         <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">API access</h2>
         <p className="mt-1 text-sm text-sand-500 dark:text-sand-400">
           Your API token authorizes CLI and MCP installs from your account. Rotate it if it&rsquo;s

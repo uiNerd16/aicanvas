@@ -11,8 +11,8 @@ import { HeaderSocials } from '../components/HeaderSocials'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-full bg-sand-200 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 dark:border-sand-800 bg-sand-200 dark:bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/terms" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-800">
           /Terms
@@ -175,7 +175,7 @@ export default function TermsPage() {
             </li>
             <li>
               Scrape, mirror, or republish the registry endpoints under{' '}
-              <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">/r/</code>{' '}
+              <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">/r/</code>{' '}
               in a way that materially impairs the service for others.
             </li>
             <li>
@@ -293,7 +293,7 @@ export default function TermsPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             You can delete your account at any time from{' '}
-            <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
+            <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
               /account/settings
             </code>
             . Deletion is immediate and removes your account row, saved

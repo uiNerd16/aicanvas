@@ -122,7 +122,7 @@ function ColorSwatch({ hex, token, usage }: Swatch) {
   return (
     <div className="flex items-center gap-4">
       <div
-        className="h-12 w-12 shrink-0 rounded-xl border border-sand-300 dark:border-sand-700"
+        className="h-12 w-12 shrink-0 rounded-xl border border-sand-200 dark:border-sand-700"
         style={{ background: hex }}
       />
       <div className="min-w-0">
@@ -145,7 +145,7 @@ export default function DesignSystemPage() {
           Design System
         </h1>
         <p className="max-w-2xl text-lg text-sand-600 dark:text-sand-400">
-          AI Canvas global design tokens: colors, typography, spacing, and semantic mappings used across the entire website. Hex values are read live from <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-sm dark:bg-sand-800">app/globals.css</code>, so they always match the site.
+          AI Canvas global design tokens: colors, typography, spacing, and semantic mappings used across the entire website. Hex values are read live from <code className="rounded bg-sand-50 px-1.5 py-0.5 font-mono text-sm dark:bg-sand-800">app/globals.css</code>, so they always match the site.
         </p>
       </div>
 
@@ -222,10 +222,10 @@ export default function DesignSystemPage() {
       {/* ── Semantic Mappings ── */}
       <section className="mb-16">
         <SectionTitle>Semantic Mappings</SectionTitle>
-        <div className="overflow-hidden rounded-2xl border border-sand-300 dark:border-sand-800">
+        <div className="overflow-hidden rounded-2xl border border-sand-200 dark:border-sand-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-sand-100 dark:bg-sand-900">
+              <tr className="bg-sand-50 dark:bg-sand-900">
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Role</th>
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Light</th>
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Dark</th>
@@ -251,13 +251,13 @@ export default function DesignSystemPage() {
       <section className="mb-16">
         <SectionTitle>Typography</SectionTitle>
         <p className="mb-6 text-sm text-sand-600 dark:text-sand-400">
-          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
+          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-50 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
         </p>
         <div className="flex flex-col gap-6">
           {TYPOGRAPHY.map((t) => (
             <div
               key={t.weight}
-              className="rounded-2xl border border-sand-300 p-6 dark:border-sand-800"
+              className="rounded-2xl border border-sand-200 p-6 dark:border-sand-800"
             >
               <div className="mb-2 flex items-baseline gap-3">
                 <span className="font-mono text-xs text-olive-700 dark:text-olive-500">{t.weight}</span>
@@ -321,7 +321,7 @@ export default function DesignSystemPage() {
           ].map((asset) => (
             <div
               key={asset.name}
-              className="overflow-hidden rounded-2xl border border-sand-300 dark:border-sand-800"
+              className="overflow-hidden rounded-2xl border border-sand-200 dark:border-sand-800"
             >
               <div className="flex h-44 items-center justify-center bg-sand-50 dark:bg-sand-100">
                 <img
@@ -330,7 +330,7 @@ export default function DesignSystemPage() {
                   className={`${asset.height} w-auto`}
                 />
               </div>
-              <div className="flex items-center justify-between gap-3 border-t border-sand-300 px-5 py-4 dark:border-sand-800">
+              <div className="flex items-center justify-between gap-3 border-t border-sand-200 px-5 py-4 dark:border-sand-800">
                 <span className="text-sm font-semibold text-sand-900 dark:text-sand-100">{asset.name}</span>
                 <div className="flex gap-2">
                   <a
@@ -343,7 +343,7 @@ export default function DesignSystemPage() {
                   <a
                     href={asset.png}
                     download
-                    className="rounded-lg border border-sand-300 px-3.5 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
+                    className="rounded-lg border border-sand-200 px-3.5 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:bg-sand-50 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
                   >
                     PNG
                   </a>
@@ -368,7 +368,7 @@ export default function DesignSystemPage() {
           ].map((tech) => (
             <div
               key={tech.name}
-              className="rounded-2xl border border-sand-300 px-5 py-4 dark:border-sand-800"
+              className="rounded-2xl border border-sand-200 px-5 py-4 dark:border-sand-800"
             >
               <p className="text-sm font-semibold text-sand-900 dark:text-sand-100">{tech.name}</p>
               <p className="text-xs text-sand-600 dark:text-sand-400">{tech.detail}</p>
