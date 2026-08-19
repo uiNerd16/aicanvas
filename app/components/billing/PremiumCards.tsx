@@ -110,7 +110,7 @@ export function PremiumCards({
               <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
                 $0
               </span>
-              <span className="text-sm font-medium text-sand-500">/ forever</span>
+              <span className="text-sm font-medium text-sand-600 dark:text-sand-400">/ forever</span>
             </div>
             <Link
               href={user ? '/components' : '/account/sign-up'}
@@ -120,7 +120,7 @@ export function PremiumCards({
             </Link>
           </div>
           <div className={`flex-1 rounded-2xl bg-sand-200/70 dark:bg-sand-950 ${listPad}`}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-400">
               ALWAYS INCLUDED
             </p>
             <ul className="mt-4 space-y-3">
@@ -144,7 +144,7 @@ export function PremiumCards({
             </div>
             <h2 className={`flex items-center gap-2 ${heading} font-bold tracking-tight text-sand-900 dark:text-sand-50`}>
               Premium
-              <Lightning weight="regular" size={22} className="text-olive-500 dark:text-olive-400" />
+              <Lightning weight="regular" size={22} className="text-olive-700 dark:text-olive-400" />
             </h2>
           </div>
           <p className="mt-4 min-h-12 text-sm leading-relaxed text-sand-600 dark:text-sand-400">
@@ -161,7 +161,7 @@ export function PremiumCards({
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'monthly'
                   ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
               }`}
             >
               Monthly
@@ -172,7 +172,7 @@ export function PremiumCards({
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'yearly'
                   ? 'bg-olive-500 text-sand-950'
-                  : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+                  : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
               }`}
             >
               Yearly <span className={cycle === 'yearly' ? 'opacity-80' : 'text-olive-600 dark:text-olive-400'}>· save 54%</span>
@@ -190,7 +190,7 @@ export function PremiumCards({
             <span className={`${priceText} font-extrabold tracking-tight text-sand-900 dark:text-sand-50`}>
               {price}
             </span>
-            <span className="text-sm font-medium text-sand-500">/ {suffix}</span>
+            <span className="text-sm font-medium text-sand-600 dark:text-sand-400">/ {suffix}</span>
             {perMonthHint && (
               <span className="text-sm font-semibold text-olive-600 dark:text-olive-400">
                 ({perMonthHint})
@@ -226,7 +226,7 @@ export function PremiumCards({
           {/* The comparison label only makes sense next to the Free card;
               the premium-only modal renders the list without it. */}
           {showFree && (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-400">
               EVERYTHING IN FREE, PLUS
             </p>
           )}
@@ -284,7 +284,7 @@ function TrustStrip() {
           href="https://www.paddle.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-1 text-xs text-sand-500 underline-offset-2 hover:underline dark:text-sand-400"
+          className="ml-1 text-xs text-sand-600 underline-offset-2 hover:underline dark:text-sand-400"
         >
           powered by Paddle
         </a>

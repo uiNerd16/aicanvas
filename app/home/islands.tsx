@@ -105,7 +105,7 @@ export function StackedCards() {
                 handleClick()
               }
             } : undefined}
-            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-700 bg-sand-800 transition-[border-color,box-shadow] duration-200 hover:border-sand-600 hover:shadow-lg hover:shadow-black/20 ${isFront ? 'touch-none' : ''}`}
+            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-400 bg-sand-50 transition-[border-color,box-shadow] duration-200 hover:border-sand-500 hover:shadow-lg hover:shadow-black/20 dark:border-sand-700 dark:bg-sand-800 dark:hover:border-sand-600 ${isFront ? 'touch-none' : ''}`}
             style={{
               zIndex: isExiting ? 11 : pos.zIndex,
               transformOrigin: 'bottom center',
@@ -116,9 +116,9 @@ export function StackedCards() {
           >
             {(relPos < 6 || isExiting) && (
               <span className={`text-sm font-bold leading-none ${
-                (isFront || isExiting) ? 'text-olive-400'
-                : relPos === 1         ? 'text-sand-300'
-                : relPos === 2         ? 'text-sand-400'
+                (isFront || isExiting) ? 'text-olive-700 dark:text-olive-400'
+                : relPos === 1         ? 'text-sand-700 dark:text-sand-300'
+                : relPos === 2         ? 'text-sand-600 dark:text-sand-400'
                 : relPos === 3         ? 'text-sand-500'
                 :                        'text-sand-600'
               }`}>
@@ -248,7 +248,7 @@ export function WireIcons() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.2 }}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sand-500"
+                className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sand-600 dark:text-sand-400"
               >
                 {WIRE_LABELS[idx]}
               </motion.span>
@@ -276,7 +276,7 @@ const CAROUSEL_SPRING = { type: 'spring' as const, stiffness: 240, damping: 28 }
 
 function CarouselCard({ entry }: { entry: ComponentMeta }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-sand-800/60 bg-sand-900">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-sand-300/60 bg-sand-100 dark:border-sand-800/60 dark:bg-sand-900">
       <div className="relative h-56 overflow-hidden bg-sand-900">
         {entry.badge && (
           <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-sand-950/85 px-2.5 py-1 text-[11px] font-semibold text-olive-400 ring-1 ring-olive-500/40 backdrop-blur-sm">
@@ -303,8 +303,8 @@ function CarouselCard({ entry }: { entry: ComponentMeta }) {
       </div>
       <div className="flex items-center justify-between px-4 py-5">
         <div>
-          <p className="text-sm font-semibold text-sand-50">{entry.name}</p>
-          <p className="text-xs text-sand-500">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
+          <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">{entry.name}</p>
+          <p className="text-xs text-sand-600 dark:text-sand-400">{entry.tags.find((t) => t.accent)?.label ?? ''}</p>
         </div>
         <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
       </div>
@@ -383,10 +383,10 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
       {/* Header */}
       <Reveal className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-sand-600">The library</p>
-        <h2 className="mt-1 text-xl font-bold text-sand-50">Components and blocks, one command away.</h2>
+        <h2 className="mt-1 text-xl font-bold text-sand-900 dark:text-sand-50">Components and blocks, one command away.</h2>
       </Reveal>
       <Reveal delay={0.05} className="mb-8 max-w-2xl">
-        <p className="text-base leading-relaxed text-sand-400">
+        <p className="text-base leading-relaxed text-sand-600 dark:text-sand-400">
           Copy one CLI command and a finished, animated React piece lands in your project, no
           tokens spent generating it.
         </p>
@@ -456,7 +456,7 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                   animate="center"
                   exit="exit"
                   transition={CAROUSEL_SPRING}
-                  className="flex flex-col overflow-hidden rounded-xl border border-sand-800 bg-sand-900"
+                  className="flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900"
                 >
                   <div className="relative h-64 overflow-hidden">
                     {current.badge && (
@@ -481,8 +481,8 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
                   </div>
                   <div className="flex items-center justify-between px-4 py-5">
                     <div>
-                      <p className="text-sm font-semibold text-sand-50">{current.name}</p>
-                      <p className="text-xs text-sand-500">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
+                      <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">{current.name}</p>
+                      <p className="text-xs text-sand-600 dark:text-sand-400">{current.tags.find((t) => t.accent)?.label ?? ''}</p>
                     </div>
                     <ArrowRight weight="regular" size={16} className="shrink-0 text-sand-500" />
                   </div>
@@ -525,14 +525,14 @@ export function FeaturedCarousel({ items }: { items: ComponentMeta[] }) {
         <button
           onClick={goPrev}
           aria-label="Previous"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-400 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
         >
           <CaretLeft weight="regular" size={14} />
         </button>
         <button
           onClick={goNext}
           aria-label="Next"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-700 text-sand-400 transition-colors hover:border-sand-500 hover:text-sand-200"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-400 text-sand-600 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-400 dark:hover:border-sand-500 dark:hover:text-sand-200"
         >
           <CaretRight weight="regular" size={14} />
         </button>
@@ -593,8 +593,8 @@ export function FaqAccordion() {
             delay={i * 0.04}
             className={`rounded-xl border transition-colors ${
               open
-                ? 'border-sand-700 bg-sand-900'
-                : 'border-sand-800 bg-sand-900/50 hover:border-sand-700'
+                ? 'border-sand-400 bg-sand-100 dark:border-sand-700 dark:bg-sand-900'
+                : 'border-sand-300 bg-sand-100/50 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
             }`}
           >
             <button
@@ -603,14 +603,14 @@ export function FaqAccordion() {
               aria-expanded={open}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
             >
-              <span className={`w-7 shrink-0 text-sm font-bold tabular-nums ${open ? 'text-olive-500' : 'text-sand-600'}`}>
+              <span className={`w-7 shrink-0 text-sm font-bold tabular-nums ${open ? 'text-olive-700 dark:text-olive-500' : 'text-sand-600'}`}>
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <h3 className="flex-1 text-base font-semibold text-sand-50">{q}</h3>
+              <h3 className="flex-1 text-base font-semibold text-sand-900 dark:text-sand-50">{q}</h3>
               <CaretRight
                 weight="regular"
                 size={16}
-                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-500' : 'text-sand-500'}`}
+                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-500'}`}
               />
             </button>
             {/* Answer stays in the DOM (SEO); grid-rows trick animates the collapse */}
@@ -620,7 +620,7 @@ export function FaqAccordion() {
               {/* visibility rides the same 300ms as the grid collapse, so the
                   answer leaves the a11y tree when closed without a visual pop */}
               <div className={`overflow-hidden transition-[visibility] duration-300 ${open ? 'visible' : 'invisible'}`}>
-                <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-400">{a}</p>
+                <p className="px-4 pb-4 pl-14 pr-8 text-base leading-relaxed text-sand-600 dark:text-sand-400">{a}</p>
               </div>
             </div>
           </Reveal>

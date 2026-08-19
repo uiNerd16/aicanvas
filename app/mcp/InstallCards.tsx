@@ -167,7 +167,7 @@ function Toast({ message }: { message: string | null }) {
           className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-full border border-sand-300 bg-sand-50/95 px-4 py-2.5 text-sm font-semibold text-sand-900 shadow-xl backdrop-blur dark:border-sand-700 dark:bg-sand-800/95 dark:text-sand-50"
           role="status"
         >
-          <Check weight="regular" size={15} className="text-olive-500" />
+          <Check weight="regular" size={15} className="text-olive-700 dark:text-olive-500" />
           {message}
         </motion.div>
       ) : null}
@@ -303,7 +303,7 @@ export function InstallCards() {
                 className={`relative flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 text-xs font-semibold transition-colors sm:gap-2 sm:px-4 sm:text-sm ${
                   active
                     ? 'text-sand-900 dark:text-sand-50'
-                    : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
+                    : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
                 }`}
               >
                 {active && (
@@ -336,7 +336,7 @@ export function InstallCards() {
                   className={`relative whitespace-nowrap px-4 py-2.5 text-sm font-semibold transition-colors ${
                     active
                       ? 'text-sand-900 dark:text-sand-50'
-                      : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                      : 'text-sand-600 hover:text-sand-700 dark:text-sand-400 dark:hover:text-sand-300'
                   }`}
                 >
                   {s.label}
@@ -418,7 +418,7 @@ export function InstallCards() {
               </>
             )}
             {tokenLoaded && (userToken ? (
-              <p className="mt-3 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mt-3 text-sm text-sand-600 dark:text-sand-400">
                 Your token is baked into the command above, so installs can pull
                 source. View or rotate it in your{' '}
                 <Link
@@ -430,7 +430,7 @@ export function InstallCards() {
                 .
               </p>
             ) : (
-              <p className="mt-3 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mt-3 text-sm text-sand-600 dark:text-sand-400">
                 <Link
                   href="/account/settings"
                   className="font-medium text-sand-700 underline underline-offset-2 hover:text-sand-900 dark:text-sand-300 dark:hover:text-sand-50"
@@ -460,7 +460,7 @@ export function InstallCards() {
               <p className="text-sm text-sand-600 dark:text-sand-400">
                 Test it. Ask {askLabel}:
               </p>
-              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">
+              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">
                 Optional
               </span>
             </div>

@@ -128,9 +128,9 @@ function ColorSwatch({ hex, token, usage }: Swatch) {
       <div className="min-w-0">
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-sm font-semibold text-sand-900 dark:text-sand-100">{token}</span>
-          <span className="font-mono text-xs text-sand-500">{hex}</span>
+          <span className="font-mono text-xs text-sand-600 dark:text-sand-400">{hex}</span>
         </div>
-        <p className="text-xs text-sand-500 dark:text-sand-400">{usage}</p>
+        <p className="text-xs text-sand-600 dark:text-sand-400">{usage}</p>
       </div>
     </div>
   )
@@ -250,7 +250,7 @@ export default function DesignSystemPage() {
       {/* ── Typography ── */}
       <section className="mb-16">
         <SectionTitle>Typography</SectionTitle>
-        <p className="mb-6 text-sm text-sand-500 dark:text-sand-400">
+        <p className="mb-6 text-sm text-sand-600 dark:text-sand-400">
           Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
         </p>
         <div className="flex flex-col gap-6">
@@ -260,9 +260,9 @@ export default function DesignSystemPage() {
               className="rounded-2xl border border-sand-300 p-6 dark:border-sand-800"
             >
               <div className="mb-2 flex items-baseline gap-3">
-                <span className="font-mono text-xs text-olive-500">{t.weight}</span>
+                <span className="font-mono text-xs text-olive-700 dark:text-olive-500">{t.weight}</span>
                 <span className="text-sm font-semibold text-sand-700 dark:text-sand-300">{t.name}</span>
-                <span className="text-xs text-sand-500">{t.usage}</span>
+                <span className="text-xs text-sand-600 dark:text-sand-400">{t.usage}</span>
               </div>
               <p
                 className="text-sand-900 dark:text-sand-50"
@@ -285,7 +285,7 @@ export default function DesignSystemPage() {
                 className="rounded-lg bg-olive-500"
                 style={{ width: s, height: s }}
               />
-              <span className="font-mono text-[10px] text-sand-500">{s}px</span>
+              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-400">{s}px</span>
             </div>
           ))}
         </div>
@@ -302,7 +302,7 @@ export default function DesignSystemPage() {
                 style={{ borderRadius: r.value }}
               />
               <span className="font-mono text-xs font-semibold text-sand-700 dark:text-sand-300">{r.name}</span>
-              <span className="font-mono text-[10px] text-sand-500">{r.value}</span>
+              <span className="font-mono text-[10px] text-sand-600 dark:text-sand-400">{r.value}</span>
             </div>
           ))}
         </div>
@@ -311,7 +311,7 @@ export default function DesignSystemPage() {
       {/* ── Brand Assets ── */}
       <section className="mb-16">
         <SectionTitle>Brand Assets</SectionTitle>
-        <p className="mb-6 text-sm text-sand-500 dark:text-sand-400">
+        <p className="mb-6 text-sm text-sand-600 dark:text-sand-400">
           Download the AI Canvas logo and icon. SVG scales cleanly for any size; PNG is ready to drop in. Please keep the proportions and do not recolor the mark.
         </p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -371,7 +371,7 @@ export default function DesignSystemPage() {
               className="rounded-2xl border border-sand-300 px-5 py-4 dark:border-sand-800"
             >
               <p className="text-sm font-semibold text-sand-900 dark:text-sand-100">{tech.name}</p>
-              <p className="text-xs text-sand-500 dark:text-sand-400">{tech.detail}</p>
+              <p className="text-xs text-sand-600 dark:text-sand-400">{tech.detail}</p>
             </div>
           ))}
         </div>

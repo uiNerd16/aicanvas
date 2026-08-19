@@ -56,7 +56,7 @@ export function ForgotPasswordForm() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
+                className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400"
               >
                 Email
               </label>
@@ -95,7 +95,7 @@ export function ForgotPasswordForm() {
         Remembered it?{' '}
         <Link
           href="/account/sign-in"
-          className="font-semibold text-olive-500 hover:underline dark:text-olive-400"
+          className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
         >
           Sign in
         </Link>

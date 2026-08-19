@@ -159,7 +159,7 @@ export function DesignSystemsPole({
                           weight="regular"
                           size={13}
                           aria-hidden
-                          className="ml-auto shrink-0 text-sand-500 dark:text-sand-500"
+                          className="ml-auto shrink-0 text-sand-600 dark:text-sand-400"
                         />
                         <span className="sr-only">Premium</span>
                       </Link>
@@ -184,7 +184,7 @@ export function DesignSystemsPole({
                             weight="regular"
                             size={13}
                             aria-hidden
-                            className="ml-auto shrink-0 text-sand-500 dark:text-sand-500"
+                            className="ml-auto shrink-0 text-sand-600 dark:text-sand-400"
                           />
                           <span className="sr-only">Premium</span>
                         </Link>
@@ -193,7 +193,7 @@ export function DesignSystemsPole({
 
                     {/* ── Templates (label + flat list) ──────────── */}
                     <li className="mt-1">
-                      <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
+                      <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-600 dark:text-sand-400">
                         Templates
                       </div>
                       <ul className="space-y-0.5">
@@ -220,7 +220,7 @@ export function DesignSystemsPole({
                                   weight="regular"
                                   size={13}
                                   aria-hidden
-                                  className="ml-auto shrink-0 text-sand-500 dark:text-sand-500"
+                                  className="ml-auto shrink-0 text-sand-600 dark:text-sand-400"
                                 />
                                 <span className="sr-only">Premium</span>
                               </Link>
@@ -235,7 +235,7 @@ export function DesignSystemsPole({
                         so it overflows into the sidebar's own scroll (peeks on
                         tall screens, scroll for the rest). */}
                     <li className="mt-1">
-                      <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-500">
+                      <div className="pt-1.5 pb-0.5 pl-8 pr-2 text-xxs uppercase tracking-wider text-sand-600 dark:text-sand-400">
                         Components
                       </div>
                       <ul className="space-y-0.5">

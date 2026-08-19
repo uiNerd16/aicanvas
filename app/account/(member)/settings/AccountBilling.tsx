@@ -170,7 +170,7 @@ export function AccountBilling() {
         )}
 
         <p className="mt-4 flex items-start gap-2 border-t border-sand-300 pt-4 text-xs leading-relaxed text-sand-500 dark:border-sand-800 dark:text-sand-400">
-          <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-500" />
+          <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-700 dark:text-olive-500" />
           <span>
             Billing is securely handled by{' '}
             <span className="font-semibold text-sand-700 dark:text-sand-300">Paddle</span>, our
@@ -206,7 +206,7 @@ export function AccountBilling() {
           </p>
         )}
         {rotateState === 'error' && (
-          <p className="mt-3 text-xs text-red-500">Could not rotate the token. Try again.</p>
+          <p className="mt-3 text-xs text-red-700 dark:text-red-500">Could not rotate the token. Try again.</p>
         )}
       </section>
     </>

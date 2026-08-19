@@ -609,7 +609,7 @@ export default function ComponentPageView({
             {systemMeta && (
               <Link
                 href={`/design-systems/${systemMeta.slug}`}
-                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-sand-500 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-sand-600 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
               >
                 Part of {systemMeta.name} design system
                 <ArrowRight weight="regular" size={12} />
@@ -689,7 +689,7 @@ export default function ComponentPageView({
                       )}
                     </AnimatePresence>
                   </Button>
-                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/toggle:block">
+                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/toggle:block">
                     {dualTheme
                       ? cardTheme === 'dark' ? 'Switch to light' : 'Switch to dark'
                       : 'Dark mode only'}
@@ -708,7 +708,7 @@ export default function ComponentPageView({
                     >
                       <ArrowClockwise weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/refresh:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/refresh:block">
                       Refresh
                     </div>
                   </div>
@@ -732,7 +732,7 @@ export default function ComponentPageView({
                     >
                       <CornersOut weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-400 bg-sand-50 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/fullscreen:block">
                       Full screen
                     </div>
                   </div>
@@ -918,7 +918,7 @@ export default function ComponentPageView({
                   </span>
                 )}
               </h2>
-              <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mb-4 mt-1 text-sm text-sand-600 dark:text-sand-400">
                 One command adds this component to your project.
               </p>
 
@@ -1366,7 +1366,7 @@ export default function ComponentPageView({
               <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
                 Install with AI Canvas MCP
               </h2>
-              <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mb-4 mt-1 text-sm text-sand-600 dark:text-sand-400">
                 With AI Canvas MCP, your AI knows every component we ship. Ask
                 for one inside Claude Code, Codex, or Cursor and it installs the
                 component you pick. Works with any AI Canvas account, free or
@@ -1724,13 +1724,13 @@ export default function ComponentPageView({
                 : '50%',
             }}
           >
-            <div className="flex items-center gap-3 rounded-xl border border-sand-700 bg-sand-800 px-4 py-3 shadow-lg">
+            <div className="flex items-center gap-3 rounded-xl border border-sand-300 bg-sand-50 px-4 py-3 shadow-lg dark:border-sand-700 dark:bg-sand-800">
               <Check weight="regular" size={16} className="shrink-0 text-olive-500" />
               <div>
-                <p className="text-sm font-semibold text-sand-50">
+                <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
                   Install command copied
                 </p>
-                <p className="mt-0.5 text-xs text-sand-400">
+                <p className="mt-0.5 text-xs text-sand-600 dark:text-sand-400">
                   Paste into your terminal to install this component.
                 </p>
               </div>

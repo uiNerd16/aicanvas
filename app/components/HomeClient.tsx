@@ -261,7 +261,7 @@ export function HomeClient({
           ) : (
             <>
               <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components &amp; Blocks</Link>
-              {category && <span className="text-olive-500">/{category}</span>}
+              {category && <span className="text-olive-700 dark:text-olive-400">/{category}</span>}
             </>
           )}
         </p>
@@ -281,7 +281,7 @@ export function HomeClient({
                 ("Components & blocks" + "Design systems & templates") read as a
                 consistent pair. Browsing shows no title (the top bar names it). */}
             {q && !category && (
-              <h2 className="mx-auto mb-4 w-full max-w-[1800px] text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+              <h2 className="mx-auto mb-4 w-full max-w-[1800px] text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
                 Components &amp; blocks
               </h2>
             )}
@@ -323,7 +323,7 @@ export function HomeClient({
             item's own page. ── */}
         {extras.length > 0 && (
           <div className="mx-auto mt-10 w-full max-w-[1800px]">
-            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
               Design systems &amp; templates
             </h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -371,7 +371,7 @@ export function HomeClient({
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="flex items-center justify-center"
                 >
-                  <EmptyIcon weight="thin" size={48} className="text-olive-500" />
+                  <EmptyIcon weight="thin" size={48} className="text-olive-700 dark:text-olive-400" />
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -387,7 +387,7 @@ export function HomeClient({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-sm leading-relaxed text-sand-500 dark:text-sand-400"
+                  className="text-sm leading-relaxed text-sand-600 dark:text-sand-400"
                 >
                   {emptyPhrase}
                 </motion.p>

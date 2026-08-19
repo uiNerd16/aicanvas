@@ -20,10 +20,10 @@ export const metadata: Metadata = {
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-full bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-200 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
-        <Link href="/welcome" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
+        <Link href="/welcome" className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400">
           /Welcome
         </Link>
         <div className="flex items-center justify-end">
@@ -32,15 +32,15 @@ export default function WelcomePage() {
       </header>
 
       <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
-        <span className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-olive-500/15 text-olive-400 ring-1 ring-olive-500/30">
+        <span className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-olive-500/15 text-olive-700 ring-1 ring-olive-500/30 dark:text-olive-400">
           <Lightning weight="fill" size={26} />
         </span>
 
-        <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
           Payment received. You&rsquo;re Premium.
         </h1>
 
-        <p className="mt-4 text-base leading-relaxed text-sand-300">
+        <p className="mt-4 text-base leading-relaxed text-sand-700 dark:text-sand-300">
           Your account is ready under the email you used at checkout. Sign in with
           that email to access it, no password needed, just choose &ldquo;Email me a
           sign-in link.&rdquo; Premium is already active.
@@ -53,7 +53,7 @@ export default function WelcomePage() {
           Sign in to access Premium
         </Link>
 
-        <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-800 bg-sand-900 px-4 py-3 text-sm text-sand-400">
+        <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-300 bg-sand-100 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400">
           <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
           We also emailed you a sign-in link. No email? You can still sign in above.
         </div>

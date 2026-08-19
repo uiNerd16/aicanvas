@@ -105,7 +105,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
             <GoogleSignInButton next={next} label="Sign up with Google" />
             <div className="flex items-center gap-3" aria-hidden="true">
               <span className="h-px flex-1 bg-sand-300 dark:bg-sand-800" />
-              <span className="text-xs uppercase tracking-wider text-sand-500 dark:text-sand-500">
+              <span className="text-xs uppercase tracking-wider text-sand-600 dark:text-sand-400">
                 or
               </span>
               <span className="h-px flex-1 bg-sand-300 dark:bg-sand-800" />
@@ -117,7 +117,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
+                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400"
                 >
                   Email
                 </label>
@@ -137,7 +137,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400"
+                  className="mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400"
                 >
                   Password
                 </label>
@@ -177,14 +177,14 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               <button
                 type="button"
                 onClick={onSwitchToSignIn}
-                className="font-semibold text-olive-500 hover:underline dark:text-olive-400"
+                className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
               >
                 Sign in
               </button>
             ) : (
               <Link
                 href={`/account/sign-in?next=${encodeURIComponent(next)}`}
-                className="font-semibold text-olive-500 hover:underline dark:text-olive-400"
+                className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
               >
                 Sign in
               </Link>
@@ -199,7 +199,7 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               separate marketing notice is required. The Art. 8 age-16
               confirmation was also dropped — developer-tool audience with
               negligible under-16 risk. */}
-          <p className="mt-6 text-xs leading-relaxed text-sand-500 dark:text-sand-500">
+          <p className="mt-6 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
             By creating an account you agree to our{' '}
             <Link
               href="/terms"

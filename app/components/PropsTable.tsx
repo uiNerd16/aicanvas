@@ -23,7 +23,7 @@ export function PropsTable({ propTables }: { propTables: PropTable[] }) {
   return (
     <section className="mt-12">
       <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">Props</h2>
-      <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+      <p className="mb-4 mt-1 text-sm text-sand-600 dark:text-sand-400">
         Every prop this component accepts. Any other prop is forwarded to the
         underlying element.
       </p>
@@ -31,7 +31,7 @@ export function PropsTable({ propTables }: { propTables: PropTable[] }) {
         {propTables.map((t) => (
           <div key={t.table}>
             {propTables.length > 1 && (
-              <h3 className="mb-2 font-mono text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+              <h3 className="mb-2 font-mono text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
                 {t.table}
               </h3>
             )}
@@ -76,7 +76,7 @@ export function PropsTable({ propTables }: { propTables: PropTable[] }) {
                           {p.type}
                         </code>
                       </td>
-                      <td className="break-words px-4 py-3 align-top font-mono text-xs text-sand-500 dark:text-sand-400">
+                      <td className="break-words px-4 py-3 align-top font-mono text-xs text-sand-600 dark:text-sand-400">
                         {p.default || '-'}
                       </td>
                       <td className="px-4 py-3 align-top text-sm text-sand-600 dark:text-sand-400">

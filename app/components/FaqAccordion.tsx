@@ -51,10 +51,9 @@ function QuestionText({ item }: { item: FaqItem }) {
   )
 }
 
-// Reusable numbered FAQ accordion — the same card style as /faq, but theme-
-// adaptive (light + dark) so it fits surfaces like /pricing. Self-contained open
-// state; the first item opens by default. /faq keeps its own multi-category
-// renderer in FaqView (always-dark), so that page is unaffected.
+// Reusable numbered FAQ accordion — the same card style as /faq. Self-contained
+// open state; the first item opens by default. /faq keeps its own multi-category
+// renderer in FaqView, so that page is unaffected.
 export function FaqAccordion({
   items,
   idPrefix = 'faq',

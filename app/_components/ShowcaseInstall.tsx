@@ -153,7 +153,7 @@ function ShowcaseInstallButtons({ installs }: { installs: InstallAction[] }) {
           <div className="space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
                   {active.label}
                 </span>
                 <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">

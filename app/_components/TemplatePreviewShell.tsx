@@ -473,7 +473,7 @@ function TopBar({
                 className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
                   active
                     ? 'bg-sand-50 text-sand-900 shadow-sm dark:bg-sand-800 dark:text-sand-50'
-                    : 'text-sand-500 hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100'
+                    : 'text-sand-600 hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100'
                 }`}
               >
                 <Icon weight="regular" size={16} />
@@ -486,7 +486,7 @@ function TopBar({
             onClick={onReload}
             aria-label="Replay animation"
             title="Replay animation"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-sand-500 transition-colors hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-sand-600 transition-colors hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100"
           >
             <ArrowClockwise weight="regular" size={15} />
           </button>
@@ -544,7 +544,7 @@ function TemplateSwitcher({
 
   // Nothing to switch to → keep the original static olive crumb.
   if (!systemSlug || siblings.length < 2) {
-    return <span className="text-olive-500">{templateName}</span>
+    return <span className="text-olive-700 dark:text-olive-400">{templateName}</span>
   }
 
   return (
@@ -555,7 +555,7 @@ function TemplateSwitcher({
         aria-haspopup="true"
         aria-expanded={open}
         aria-label="Switch template"
-        className="flex min-w-0 items-center gap-1 rounded-md text-olive-500 transition-colors hover:text-olive-600 dark:hover:text-olive-300"
+        className="flex min-w-0 items-center gap-1 rounded-md text-olive-700 transition-colors hover:text-olive-600 dark:text-olive-400 dark:hover:text-olive-300"
       >
         <span className="truncate">{templateName}</span>
         <CaretUpDown weight="regular" size={14} className="shrink-0 opacity-70" />
@@ -744,7 +744,7 @@ function InstallButton({
           <div className="space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400">
                   CLI install
                 </span>
                 <span className="rounded-md border border-olive-500/30 bg-olive-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
