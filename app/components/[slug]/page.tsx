@@ -115,7 +115,7 @@ export async function generateMetadata({
             images: [
               {
                 url: entry.image,
-                alt: `${entry.name}: ${firstSentenceOf(entry.description)}`,
+                alt: `${entry.name}. ${firstSentenceOf(entry.description)}`,
               },
             ],
           }

@@ -4,7 +4,7 @@ export const prompts: Partial<Record<Platform, string>> = {
   'Claude Code': `// npm install class-variance-authority clsx tailwind-merge @carbon/icons-react
 
 Root element must use min-h-screen.
-The source ships h-full because AI Canvas renders it inside a sized preview frame. A standalone paste needs min-h-screen, or an ancestor with a real height, or the root collapses and takes its absolute layers with it.
+The root ships full height with min-h-screen and the CLI install delivers it exactly as shown, so a standalone paste needs no change. Drop it into a container of your own and that container needs a real height, or the root collapses and takes its absolute layers with it.
 
 Before building, verify your project has the following setup:
 - React / Next.js

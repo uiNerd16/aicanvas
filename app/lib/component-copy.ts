@@ -446,7 +446,7 @@ export const COMPONENT_COPY: Record<string, ComponentCopy> = {
   'responsive-letters': {
     useCases: ['Hero section', 'Editorial', 'Type specimen'],
     about:
-      'Responsive Letters is interactive variable-font typography where each letter responds to cursor proximity by morphing its weight, width, italic angle, letter-spacing, and skew: together, a deformation-under-pressure effect that makes the headline feel like an elastic material. Motion drives the per-letter property animation, and the variable-font axes do the rendering, so the cost stays in CSS rather than canvas. It is built for hero headlines, type specimens, and editorial covers where the typeface itself is the protagonist.',
+      'Responsive Letters is interactive variable-font typography where each letter responds to cursor proximity by morphing its weight, width, italic angle, letter-spacing, and skew. Together they read as a deformation-under-pressure effect that makes the headline feel like an elastic material. Motion drives the per-letter property animation, and the variable-font axes do the rendering, so the cost stays in CSS rather than canvas. It is built for hero headlines, type specimens, and editorial covers where the typeface itself is the protagonist.',
   },
   'good-vibes': {
     useCases: ['Hero section', 'Portfolio', 'Marketing site'],

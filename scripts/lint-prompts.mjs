@@ -110,6 +110,10 @@ const ROOT_NOTE =
   'The source ships h-full because AI Canvas renders it inside a sized preview frame. ' +
   'A standalone paste needs min-h-screen, or an ancestor with a real height, or the root ' +
   'collapses and takes its absolute layers with it.'
+const ROOT_NOTE_FULL_HEIGHT =
+  'The root ships full height with min-h-screen and the CLI install delivers it exactly as shown, ' +
+  'so a standalone paste needs no change. Drop it into a container of your own and that container ' +
+  'needs a real height, or the root collapses and takes its absolute layers with it.'
 
 // These three are copied from lint-components.mjs rather than extracted to lib/:
 // that script sits in the build path and this is a lint, so a shared module is not
@@ -661,8 +665,10 @@ async function runFix(slug) {
   if (undeclared.length) inject.push(`// npm install ${pkgs.join(' ')}`)
   if (!f.prompt.includes('min-h-screen')) {
     const swapped = root.value && !root.dynamic ? root.value.replace(/\bh-full\b/g, 'min-h-screen') : null
+    // The note describes the source: only when h-full was swapped does it ship h-full.
+    const note = swapped && swapped === root.value ? ROOT_NOTE_FULL_HEIGHT : ROOT_NOTE
     inject.push(
-      (swapped ? `Root element: className="${swapped}"\n` : `Root element must use min-h-screen.\n`) + ROOT_NOTE
+      (swapped ? `Root element: className="${swapped}"\n` : `Root element must use min-h-screen.\n`) + note
     )
   }
 
@@ -842,6 +848,8 @@ if (flag === '--strict') {
       const { issues } = strictCheck(f.source, f.prompt)
       if (issues.length) { console.log(`✗ ${f.slug}: ${issues.length} strict violation(s)`); failures++ }
     }
+    const dashes = emDashHits(f.prompt).length
+    if (dashes) { console.log(`✗ ${f.slug}: ${dashes} em-dash(es) in prose`); failures++ }
   }
   console.log(failures === 0 ? '\n✓ every prompt evaluates; every scoped and new-format prompt passes\n' : `\n✗ ${failures} component(s) failing\n`)
   process.exit(failures === 0 && !process.exitCode ? 0 : 1)

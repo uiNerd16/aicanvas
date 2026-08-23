@@ -28,7 +28,8 @@ export function useDialogFocus(ref: RefObject<HTMLElement | null>, open: boolean
       const first = focusables[0]
       const last = focusables[focusables.length - 1]
       const active = document.activeElement as HTMLElement | null
-      if (e.shiftKey && (active === first || !dialog.contains(active))) {
+      // active === dialog: the panel itself holds focus on open (tabIndex -1).
+      if (e.shiftKey && (active === first || active === dialog || !dialog.contains(active))) {
         e.preventDefault()
         last.focus()
       } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {

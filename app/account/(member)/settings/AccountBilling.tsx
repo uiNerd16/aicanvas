@@ -198,11 +198,11 @@ export function AccountBilling() {
           <button
             type="button"
             onClick={rotateToken}
-            disabled={rotateState === 'rotating'}
+            disabled={rotateState === 'rotating' || refreshing}
             className={buttonClasses({ variant: 'outline', size: 'sm' })}
           >
             <Key weight="regular" size={15} />
-            {rotateState === 'rotating' ? 'Rotating…' : 'Rotate API token'}
+            {rotateState === 'rotating' || refreshing ? 'Rotating…' : 'Rotate API token'}
           </button>
         </div>
 

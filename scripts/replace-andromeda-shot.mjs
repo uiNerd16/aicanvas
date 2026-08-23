@@ -3,8 +3,8 @@
 // slug (case and space insensitive) is resized to 1280px wide as PNG and
 // overwrites andromeda/<slug>.png; the card's ?v cache-bust is bumped in
 // andromeda-meta.ts so it refreshes.
-// Usage: node scripts/replace-andromeda-shot.mjs          # every matching file
-//        node scripts/replace-andromeda-shot.mjs <slug>   # one component
+// Usage: node scripts/replace-andromeda-shot.mjs <slug>   # one component
+//        node scripts/replace-andromeda-shot.mjs --all    # every matching file
 import { readFileSync, writeFileSync } from 'fs'
 
 try {
@@ -16,7 +16,9 @@ const auth = Buffer.from(key + ':').toString('base64')
 const SRC_FOLDER = '/andromeda/New Screenshoots'
 const WIDTH = 1280
 const META_PATH = 'app/_lib/andromeda/andromeda-meta.ts'
-const only = process.argv[2]
+const arg = process.argv[2]
+if (!arg) { console.error('usage: node scripts/replace-andromeda-shot.mjs <slug> | --all'); process.exit(1) }
+const only = arg === '--all' ? undefined : arg
 
 let meta = readFileSync(META_PATH, 'utf8')
 const known = new Set([...meta.matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]))
@@ -68,3 +70,4 @@ if (bumped) writeFileSync(META_PATH, meta)
 console.log(`\nreplaced ${replaced.length}: ${replaced.join(', ') || '(none)'}`)
 console.log(`cache-bumped ${bumped} entries in andromeda-meta.ts`)
 if (skipped.length) console.log(`\nskipped ${skipped.length}:\n  ${skipped.join('\n  ')}`)
+if (only && replaced.length === 0) process.exit(1)
