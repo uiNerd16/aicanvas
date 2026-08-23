@@ -25,6 +25,7 @@ async function fetchPaddleCustomerEmail(customerId: string): Promise<EmailLookup
   try {
     const res = await fetch(`${paddleApiBase()}/customers/${customerId}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10_000), // a hang is transient too: Paddle retries
     })
     // 429/5xx = transient. A 404 right after subscription.activated is usually
     // the customer record not yet being queryable (eventual consistency), so

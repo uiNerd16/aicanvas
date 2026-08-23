@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
+import { ipFromHeaders } from '@/app/lib/quota'
 import { emailShell, emailText } from '@/app/lib/email/shell'
 import { createClient } from '@/app/lib/supabase/server'
 
@@ -129,10 +130,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Feedback form is not configured yet.' }, { status: 503 })
   }
 
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown'
+  const ip = ipFromHeaders(req.headers) ?? 'unknown'
   if (rateLimited(ip)) {
     return NextResponse.json(
       { error: 'Too many messages from here. Please try again in a few minutes.' },
@@ -198,6 +196,7 @@ export async function POST(req: NextRequest) {
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
+    signal: AbortSignal.timeout(10_000),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
@@ -221,11 +220,11 @@ export async function POST(req: NextRequest) {
         .filter(Boolean)
         .join('\n'),
     }),
-  })
+  }).catch(() => null)
 
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '')
-    console.error('[api/feedback] Resend send failed:', res.status, detail)
+  if (!res?.ok) {
+    const detail = res ? await res.text().catch(() => '') : 'no response within 10s'
+    console.error('[api/feedback] Resend send failed:', res?.status ?? 0, detail)
     return NextResponse.json(
       { error: 'Could not send your feedback right now. Please try again shortly.' },
       { status: 502 },

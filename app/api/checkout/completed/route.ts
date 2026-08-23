@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
   // Server-to-server: fetch the transaction and verify it is real, paid, ours.
   const res = await fetch(`${paddleApiBase()}/transactions/${transactionId}`, {
     headers: { Authorization: `Bearer ${apiKey}` },
-  })
+    signal: AbortSignal.timeout(10_000),
+  }).catch(() => null)
+  // No answer is not "unknown": the webhook still provisions, the overlay may retry.
+  if (!res) return NextResponse.json({ error: 'paddle unavailable' }, { status: 503 })
   if (!res.ok) return NextResponse.json({ error: 'unknown transaction' }, { status: 403 })
   const { data: txn } = await res.json()
 
