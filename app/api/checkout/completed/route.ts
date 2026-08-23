@@ -91,6 +91,10 @@ export async function POST(req: NextRequest) {
   else if (interval === 'month') patch.plan = 'monthly'
   if (txn?.customer_id) patch.paddle_customer_id = txn.customer_id
   if (txn?.subscription_id) patch.paddle_subscription_id = txn.subscription_id
+  // Period end from the transaction's billing period, so a row the webhook
+  // never reaches still expires on its own instead of staying premium forever.
+  const periodEnd: unknown = txn?.billing_period?.ends_at
+  if (typeof periodEnd === 'string' && periodEnd) patch.current_period_end = periodEnd
 
   const { error } = await admin
     .from('user_subscriptions')
