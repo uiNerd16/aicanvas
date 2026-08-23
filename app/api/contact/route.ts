@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
 import { ipFromHeaders } from '@/app/lib/quota'
-import { emailShell, emailText } from '@/app/lib/email/shell'
+import { emailShell, emailText, escapeHtml } from '@/app/lib/email/shell'
 
 export const runtime = 'nodejs'
 
@@ -40,15 +40,6 @@ function rateLimited(ip: string): boolean {
     }
   }
   return recent.length > MAX_PER_WINDOW
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 function emailHtml({ name, email, subject, message }: { name: string; email: string; subject: string; message: string }): string {
