@@ -303,7 +303,7 @@ server.registerTool(
   {
     title: 'List AI Canvas categories',
     description:
-      'Return every category in the AI Canvas standalone component library, with the number of components in each. Use to orient before listing or searching — e.g. "what kinds of components are available?"',
+      'Return every category in the AI Canvas standalone component library, with the number of components in each. Use to orient before listing or searching, e.g. "what kinds of components are available?"',
     inputSchema: {},
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
@@ -337,7 +337,7 @@ server.registerTool(
   {
     title: 'List AI Canvas components',
     description:
-      'Return AI Canvas components, optionally filtered by category. Use after `list_categories` to drill into one, or pass no filter to browse everything. Each result includes slug, name, description, categories, screenshot URL, install command, and homepage URL — enough to evaluate without a separate `get_component` call. Pagination via `limit` and `offset`.',
+      'Return AI Canvas components, optionally filtered by category. Use after `list_categories` to drill into one, or pass no filter to browse everything. Each result includes slug, name, description, categories, screenshot URL, install command, and homepage URL, enough to evaluate without a separate `get_component` call. Pagination via `limit` and `offset`.',
     inputSchema: {
       category: z
         .string()
@@ -407,7 +407,7 @@ server.registerTool(
   {
     title: 'Search AI Canvas components',
     description:
-      'Fuzzy keyword search across standalone components, design-system components, AND ready-made templates (whole example screens). Matches on slug, name, description, categories, and tags; returns best matches ranked by relevance. Use when the user describes what they want in their own words, e.g. "an animated card stack", "background with waves", "a mission control dashboard". Results include screenshot URLs and install commands for immediate evaluation. A result tagged `"kind": "template"` is a full screen — fetch it with `get_template`, not `get_component`.',
+      'Fuzzy keyword search across standalone components, design-system components, AND ready-made templates (whole example screens). Matches on slug, name, description, categories, and tags; returns best matches ranked by relevance. Use when the user describes what they want in their own words, e.g. "an animated card stack", "background with waves", "a mission control dashboard". Results include screenshot URLs and install commands for immediate evaluation. A result tagged `"kind": "template"` is a full screen. Fetch it with `get_template`, not `get_component`.',
     inputSchema: {
       query: z
         .string()
@@ -577,7 +577,7 @@ server.registerTool(
   {
     title: 'Get the AI Canvas install command for a component',
     description:
-      'Return the shadcn CLI command to install a single component into the user\'s project. After calling this, suggest the user run the command (or run it yourself if you have shell access). Requires shadcn-aware setup (Tailwind v4, components.json) — for projects without that, fall back to `get_component` and write the file manually.',
+      'Return the shadcn CLI command to install a single component into the user\'s project. After calling this, suggest the user run the command (or run it yourself if you have shell access). Requires shadcn-aware setup (Tailwind v4, components.json). For projects without that, fall back to `get_component` and write the file manually.',
     inputSchema: {
       slug: z
         .string()
@@ -648,7 +648,7 @@ server.registerTool(
   {
     title: 'List AI Canvas design systems',
     description:
-      'Return every design system available on AI Canvas. A design system is a coordinated set of components plus shared tokens and utilities — installable in one CLI command. Use when the user asks about "themes", "design systems", or wants more than a single component.',
+      'Return every design system available on AI Canvas. A design system is a coordinated set of components plus shared tokens and utilities, installable in one CLI command. Use when the user asks about "themes", "design systems", or wants more than a single component.',
     inputSchema: {},
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
   },
@@ -688,7 +688,7 @@ server.registerTool(
   {
     title: 'Get a complete AI Canvas design system (every file)',
     description:
-      'Return all files for a design system in a single response — every component, plus shared tokens and utilities — ready to write into the user\'s project. Use when the user wants to adopt a whole system rather than pick individual components.',
+      'Return all files for a design system in a single response (every component, plus shared tokens and utilities), ready to write into the user\'s project. Use when the user wants to adopt a whole system rather than pick individual components.',
     inputSchema: {
       slug: z
         .string()
@@ -761,7 +761,7 @@ server.registerTool(
   {
     title: 'List AI Canvas design-system templates',
     description:
-      'Return every ready-made template on AI Canvas. A template is a complete example screen built from one design system — a dashboard, a console, a control room — installable in one CLI command. Use to discover what full screens exist before fetching one with `get_template`, or when the user asks for "a dashboard" / "an admin screen" rather than a single component.',
+      'Return every ready-made template on AI Canvas. A template is a complete example screen built from one design system (a dashboard, a console, a control room), installable in one CLI command. Use to discover what full screens exist before fetching one with `get_template`, or when the user asks for "a dashboard" / "an admin screen" rather than a single component.',
     inputSchema: {
       system: z
         .string()
@@ -820,7 +820,7 @@ server.registerTool(
   {
     title: 'Get a complete AI Canvas design-system template (every file)',
     description:
-      'Return all files for a single template — the example composition plus every component it uses plus shared tokens. Use for "I want exactly this dashboard" / "give me the entire mission-control screen". One CLI command installs all files.',
+      'Return all files for a single template: the example composition plus every component it uses plus shared tokens. Use for "I want exactly this dashboard" / "give me the entire mission-control screen". One CLI command installs all files.',
     inputSchema: {
       slug: z
         .string()

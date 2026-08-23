@@ -45,7 +45,7 @@ function computeTitle(entry: ComponentEntry): string {
   const accentTag = entry.tags.find((t) => t.accent)
   const category = accentTag?.label ?? ''
   const descriptor = DESCRIPTOR_PREFIXES[category] ?? 'Animated'
-  return `${entry.name} — ${descriptor} React Component`
+  return `${entry.name} - ${descriptor} React Component`
 }
 
 function computeMetaDescription(entry: ComponentEntry, isPremium: boolean): string {
@@ -115,7 +115,7 @@ export async function generateMetadata({
             images: [
               {
                 url: entry.image,
-                alt: `${entry.name} — ${firstSentenceOf(entry.description)}`,
+                alt: `${entry.name}: ${firstSentenceOf(entry.description)}`,
               },
             ],
           }
