@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Alert
 // shadcn/ui-aligned API: forwardRef, variant, cva, compound parts.

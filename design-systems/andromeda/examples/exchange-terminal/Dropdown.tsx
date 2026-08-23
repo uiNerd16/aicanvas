@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL · Dropdown
 // Lightweight chevron-menu primitive used by every "▾" trigger

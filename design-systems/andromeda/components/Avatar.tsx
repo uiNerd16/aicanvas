@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Avatar
 // shadcn/ui-aligned API: variant/size, cva, forwardRef.

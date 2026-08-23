@@ -1,4 +1,3 @@
-// @ts-nocheck — consumes the JSDoc-typed Andromeda config/meta (no TS prop types).
 //
 // Andromeda OVERVIEW — the product landing for the system: hero → system
 // showcase → the brain → templates grid → components grid. This IS the system

@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: PanelHeader
 // Title row that sits at the top of a panel — sentence-case mono

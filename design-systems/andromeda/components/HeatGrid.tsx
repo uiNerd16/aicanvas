@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: HeatGrid
 // A 2-D matrix fill gauge — the cousin of ProgressBar. A grid of

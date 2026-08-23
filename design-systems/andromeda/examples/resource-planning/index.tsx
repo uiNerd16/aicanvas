@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // RESOURCE PLANNING
 // Composition shell. Top bar (brand + nav + actions), status bar

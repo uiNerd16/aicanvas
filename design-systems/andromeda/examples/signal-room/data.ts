@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM DEMO DATA
 // A music app re-interpreted as an audio transmission control

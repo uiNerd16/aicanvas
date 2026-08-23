@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Routines
 // Replaces the Spotify "Made for you" row of glossy artwork tiles.

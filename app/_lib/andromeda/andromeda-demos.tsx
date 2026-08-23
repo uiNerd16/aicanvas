@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems components are not type-checked yet
 // (see design-systems/CLAUDE.md). Demos consume those components, so this
 // file inherits the same posture.
 'use client'

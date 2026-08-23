@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL — sample data
 // All numbers are static and deterministic so the screenshot stays

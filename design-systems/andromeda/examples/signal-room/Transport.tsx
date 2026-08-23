@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Transport (layout wrapper)
 // NOT a player — the player is the shared <MusicPlayer> design-system

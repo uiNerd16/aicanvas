@@ -1,4 +1,3 @@
-// @ts-nocheck — consumes Andromeda tokens which are not type-checked yet.
 import MissionControl from '../../../../../design-systems/andromeda/examples/mission-control'
 import { tokens } from '../../../../../design-systems/andromeda/tokens'
 import { TemplatePreviewShell } from '../../../../_components/TemplatePreviewShell'

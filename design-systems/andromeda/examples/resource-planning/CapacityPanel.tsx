@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // RESOURCE PLANNING · CapacityPanel
 // Top-left card. Three KPI cells separated by 1px borders, each with

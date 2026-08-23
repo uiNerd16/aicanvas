@@ -1,4 +1,3 @@
-// @ts-nocheck — consumes untyped design-system tokens + uses JS-style block
 // helpers (no prop types), same posture as its source AndromedaOverview.tsx
 // and andromeda-demos.tsx. Strip after a proper typing pass on design-systems/.
 'use client'

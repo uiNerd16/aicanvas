@@ -1,4 +1,3 @@
-// @ts-nocheck — consumes Andromeda tokens which are not type-checked yet.
 import SignalRoom from '../../../../../design-systems/andromeda/examples/signal-room'
 import { tokens } from '../../../../../design-systems/andromeda/tokens'
 import { TemplatePreviewShell } from '../../../../_components/TemplatePreviewShell'

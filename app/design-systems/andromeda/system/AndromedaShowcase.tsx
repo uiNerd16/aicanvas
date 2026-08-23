@@ -1,4 +1,3 @@
-// @ts-nocheck — showcase consumes JSX design-system components whose
 // forwardRef wrappers lack TypeScript prop types in a .tsx context.
 //
 // Sibling component (NOT a route file). Both the showcase route and

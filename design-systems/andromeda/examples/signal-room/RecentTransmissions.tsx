@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Recent transmissions
 // Replaces the Spotify "Jump back in" row. Renders the shared
