@@ -570,8 +570,8 @@ export function BrainStoryV4() {
       // one-time, mount-only constrained-device/connection check — a lower
       // static pixel-ratio cap for slow connections or low core counts. Not a
       // live watchdog: decided once here and never revisited.
-      const conn = (navigator as any).connection
-      const isConstrained = conn?.saveData || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType) || (navigator.hardwareConcurrency ?? 8) <= 4
+      const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+      const isConstrained = conn?.saveData || ['slow-2g', '2g', '3g'].includes(conn?.effectiveType ?? '') || (navigator.hardwareConcurrency ?? 8) <= 4
 
       let W = host.clientWidth || 800, H = host.clientHeight || 600
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })

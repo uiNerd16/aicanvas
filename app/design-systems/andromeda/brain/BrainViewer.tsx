@@ -6,6 +6,7 @@ import { Check, Copy, DownloadSimple, Terminal } from '@phosphor-icons/react'
 import { zipSync, strToU8 } from 'fflate'
 import { Button } from '../../../components/Button'
 import { BrainRender } from './BrainRender'
+import { useCopied } from '@/app/components/useCopied'
 
 // AI Canvas site tokens: sand neutrals + olive accent, Manrope UI + Geist mono for code.
 const C = {
@@ -575,17 +576,9 @@ function BrainInstallButton({
   onDownloadZip: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const { cliCommand, cliCommandMasked } = useBrainInstallCommand()
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(cliCommand)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {}
-  }
+  const { copied, copy: handleCopy, reset: resetCopied } = useCopied(cliCommand)
 
   useEffect(() => {
     if (!open) return
@@ -614,7 +607,7 @@ function BrainInstallButton({
         variant="primary"
         size="xs"
         onClick={() => {
-          setCopied(false)
+          resetCopied()
           setOpen((o) => !o)
         }}
       >
@@ -685,15 +678,8 @@ function BrainInstallCard({
   sizeKb: number | undefined
   onDownloadZip: () => void
 }) {
-  const [copied, setCopied] = useState(false)
   const { cliCommand, cliCommandMasked } = useBrainInstallCommand()
-  const copy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(cliCommand)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {}
-  }, [cliCommand])
+  const { copied, copy } = useCopied(cliCommand)
 
   const bullets = [
     `All ${fileCount} rule files${sizeKb ? ` (~${sizeKb} KB)` : ''} into design-systems/andromeda/ in your project.`,
