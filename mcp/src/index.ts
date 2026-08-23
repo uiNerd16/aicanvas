@@ -208,29 +208,21 @@ function normalize(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
-function scoreMatch(query: string, c: ComponentMeta): number {
+type ScoredField = { text: string; weight: number }
+
+// Token scoring shared by standalone and design-system search: whole-word
+// hits count double, substrings count once. Tokens of two characters or fewer
+// are dropped because they match inside unrelated words ("no" hits
+// "notification").
+function scoreFields(query: string, fields: ScoredField[]): number {
   const q = normalize(query)
   if (!q) return 0
-  // Drop tokens of <=2 chars — they cause false positives via substring
-  // matches in unrelated words (e.g. "no" hits "notification").
   const tokens = q.split(/\s+/).filter((t) => t.length > 2)
   if (tokens.length === 0) return 0
-
-  // Searchable surface — slug carries the most weight, then name, then
-  // description, then categories/tags.
-  const fields = [
-    { text: normalize(c.slug), weight: 5 },
-    { text: normalize(c.name), weight: 4 },
-    { text: normalize(c.description), weight: 1 },
-    { text: normalize(c.categories.join(' ')), weight: 2 },
-    { text: normalize(c.tags.join(' ')), weight: 1 },
-  ]
-
   let score = 0
   for (const tok of tokens) {
     for (const f of fields) {
       if (!f.text) continue
-      // Whole-word match scores higher than substring.
       if (new RegExp(`\\b${escapeRegExp(tok)}\\b`).test(f.text)) {
         score += f.weight * 2
       } else if (f.text.includes(tok)) {
@@ -239,40 +231,33 @@ function scoreMatch(query: string, c: ComponentMeta): number {
     }
   }
   return score
+}
+
+// Searchable surface of a standalone: slug carries the most weight, then name,
+// then categories, then description and tags.
+function scoreMatch(query: string, c: ComponentMeta): number {
+  return scoreFields(query, [
+    { text: normalize(c.slug), weight: 5 },
+    { text: normalize(c.name), weight: 4 },
+    { text: normalize(c.description), weight: 1 },
+    { text: normalize(c.categories.join(' ')), weight: 2 },
+    { text: normalize(c.tags.join(' ')), weight: 1 },
+  ])
 }
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-// Minimal searchable surface for design-system components — slug, name,
-// description, and the system name. Mirrors scoreMatch's token logic so DS
-// components rank alongside standalones in search results.
+// Searchable surface of a design-system component: slug, name, description
+// and the system name, so they rank alongside standalones.
 function scoreSystemComponent(query: string, c: SystemComponentMeta): number {
-  const q = normalize(query)
-  if (!q) return 0
-  const tokens = q.split(/\s+/).filter((t) => t.length > 2)
-  if (tokens.length === 0) return 0
-
-  const fields = [
+  return scoreFields(query, [
     { text: normalize(c.slug), weight: 5 },
     { text: normalize(c.name), weight: 4 },
     { text: normalize(c.description), weight: 1 },
     { text: normalize(c.system), weight: 2 },
-  ]
-
-  let score = 0
-  for (const tok of tokens) {
-    for (const f of fields) {
-      if (!f.text) continue
-      if (new RegExp(`\\b${escapeRegExp(tok)}\\b`).test(f.text)) {
-        score += f.weight * 2
-      } else if (f.text.includes(tok)) {
-        score += f.weight
-      }
-    }
-  }
-  return score
+  ])
 }
 
 function asTextContent(value: unknown): { type: 'text'; text: string } {
