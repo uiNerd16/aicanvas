@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Lightning, Key, ShieldCheck } from '@phosphor-icons/react'
 import { premiumEnabled } from '../../../../lib/flags'
 import { buttonClasses } from '../../../components/buttonClasses'
@@ -34,6 +35,7 @@ export function AccountBilling() {
   const status = usePremiumStatus()
   const [portalLoading, setPortalLoading] = useState(false)
   const [noPortal, setNoPortal] = useState(false)
+  const router = useRouter()
   const [rotateState, setRotateState] = useState<'idle' | 'rotating' | 'done' | 'error'>('idle')
   const [sub, setSub] = useState<SubDetails | null>(null)
 
@@ -93,6 +95,8 @@ export function AccountBilling() {
     try {
       const res = await fetch('/api/me/token/rotate', { method: 'POST' })
       setRotateState(res.ok ? 'done' : 'error')
+      // The token card below is server-rendered; re-read it so it shows the new value.
+      if (res.ok) router.refresh()
     } catch {
       setRotateState('error')
     }
@@ -202,7 +206,7 @@ export function AccountBilling() {
 
         {rotateState === 'done' && (
           <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
-            Done. The old token is now disabled. Grab a fresh install command from any component page.
+            Done. The old token is disabled; the token shown below is the new one.
           </p>
         )}
         {rotateState === 'error' && (

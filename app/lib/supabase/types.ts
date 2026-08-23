@@ -30,7 +30,7 @@ export type UserApiKey = {
   user_id: string
   token: string
   created_at: string
-  expires_at: string
+  expires_at: string | null
   last_used_at: string | null
   revoked: boolean
 }
