@@ -368,8 +368,8 @@ function BrainFlow() {
 // (index, inventory, tool) arrives as a count with no names. These are the
 // three at the current pin. The moment inject-premium ships its index and tools
 // sections the names come from the data and this list stops being read.
-// ponytail: hand-listed until then, sliced to REMAINDER so it can never claim
-// more files than the brain actually has.
+// Hand-listed until then, sliced to REMAINDER so it can never claim more
+// files than the brain actually has.
 const ENTRY_FILES = ['rules.md', 'INVENTORY.md', 'check-colors']
 
 // The explorer's rail: every section, plus the entry layer the sections do not

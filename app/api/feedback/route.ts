@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONTACT_INBOX, CONTACT_FROM } from '@/app/lib/config'
 import { ipFromHeaders } from '@/app/lib/quota'
-import { emailShell, emailText } from '@/app/lib/email/shell'
+import { emailShell, emailText, escapeHtml } from '@/app/lib/email/shell'
 import { createClient } from '@/app/lib/supabase/server'
 
 export const runtime = 'nodejs'
@@ -26,8 +26,8 @@ export const runtime = 'nodejs'
 // + strict validation + a best-effort per-instance throttle. Serverless instances
 // are ephemeral and unshared, so the throttle is a speed bump, not a guarantee.
 // This form is linked more widely than /contact, so it will attract more bots.
-// ponytail: add Cloudflare Turnstile or a shared KV counter if spam actually
-// shows up — not before.
+// Add Cloudflare Turnstile or a shared KV counter if spam actually shows up,
+// not before.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -65,15 +65,6 @@ function rateLimited(ip: string): boolean {
     }
   }
   return recent.length > MAX_PER_WINDOW
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 /** Trim, coerce to string, and cap length. Guards every free-text field. */

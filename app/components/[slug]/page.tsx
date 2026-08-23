@@ -266,8 +266,8 @@ export default async function Page({
     }
     if (!viewerIsPremium) {
       const split = splitPromptAtPaywall(fullPrompt)
-      // ponytail: no recognisable scaffold → withhold the prompt whole, which
-      // hides the Remix panel entirely. Deliberate: unredactable is not the
+      // No recognisable scaffold, so withhold the prompt whole, which hides
+      // the Remix panel entirely. Deliberate: unredactable is not the
       // same as harmless. Add a fallback teaser only if a premium prompt ever
       // legitimately ships without the scaffold.
       prompts = split ? { 'Claude Code': split.head } : {}

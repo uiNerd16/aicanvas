@@ -126,8 +126,8 @@ function renderMd(raw: string): string {
   }
 
   // GFM tables: a row line (`| a | b |`) immediately followed by a separator
-  // (`|---|---|`). ponytail: splits on bare `|`, so an escaped `\|` inside a
-  // cell would break — the brain's tables don't use them.
+  // (`|---|---|`). The split is on a bare `|`, so an escaped `\|` inside a
+  // cell would break. The brain's tables don't use them.
   const isTableSep = (l?: string) =>
     !!l && /^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)+\|?\s*$/.test(l)
   const isTableRow = (l?: string) => !!l && l.trim() !== '' && l.includes('|')

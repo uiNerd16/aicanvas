@@ -61,17 +61,17 @@ const SCOPE = new Set(
 )
 
 /**
- * TIER — premium runs the SAME verbatim scaffold as free, plus two accident guards.
+ * TIER: premium runs the SAME verbatim scaffold as free, plus two accident guards.
  *
- * Maintainer decision (2026-07-28), made with the numbers in hand: verbatim blocks 2-4 on
- * the real 3d-product-card (635 lines / 29,221 chars) reproduce the large majority of the
- * paywalled source, and that is accepted. The tier sells polished source files, CLI, MCP
- * and support, not secrecy, so the strongest possible prompt is on-strategy on both tiers.
+ * Verbatim blocks 2-4 of a large premium component reproduce most of the paywalled
+ * source, and that is accepted. The tier sells polished source files, CLI, MCP and
+ * support, not secrecy, so the strongest possible prompt is on-strategy on both tiers.
+ * There is no weaker or inverted rule set for premium prompts.
  *
- * An earlier draft inverted the rules for premium. That inversion is deliberately gone.
- * What remains (see premiumGuards) is orthogonal to fidelity: the source marker must never
- * reach public prompt text, and private asset URLs must not be pasted, because buyers
- * rebuilding against them bill the maintainer's account.
+ * The only premium-specific checks (see premiumGuards) are orthogonal to fidelity: the
+ * source marker must never reach public prompt text, and private asset URLs must not be
+ * pasted, because buyers rebuilding against them run up charges on an account that is
+ * not theirs.
  */
 // Assembled, never written as a literal: scripts/check-no-premium-leak.mjs content-scans
 // every tracked public file for this exact string and would (correctly) refuse the commit.
@@ -111,14 +111,31 @@ const ROOT_NOTE =
   'A standalone paste needs min-h-screen, or an ancestor with a real height, or the root ' +
   'collapses and takes its absolute layers with it.'
 
-// ponytail: these three are copied from lint-components.mjs rather than extracted to
-// lib/ — that script sits in the build path and this is a lint; a shared module is not
+// These three are copied from lint-components.mjs rather than extracted to lib/:
+// that script sits in the build path and this is a lint, so a shared module is not
 // worth the blast radius. Keep them in sync if the package rules change.
 const ALWAYS_AVAILABLE = new Set(['react', 'react-dom', 'next', 'typescript'])
 const ALWAYS_AVAILABLE_PREFIXES = ['react/', 'next/', '@types/']
 const isAlwaysAvailable = pkg =>
   ALWAYS_AVAILABLE.has(pkg) || ALWAYS_AVAILABLE_PREFIXES.some(p => pkg.startsWith(p))
 const getPackageName = p => (p.startsWith('@') ? p.split('/').slice(0, 2).join('/') : p.split('/')[0])
+
+/**
+ * Em-dashes in prompt prose. House style is a comma, colon or period, and a prompt is
+ * copy a buyer reads. Fenced code blocks are exempt: those are verbatim source, so a
+ * dash inside one belongs to the component, not to the prose.
+ */
+const EM_DASH = '\u2014'
+function emDashHits(prompt) {
+  const hits = []
+  let inFence = false
+  const lines = prompt.split('\n')
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*```/.test(lines[i])) { inFence = !inFence; continue }
+    if (!inFence && lines[i].includes(EM_DASH)) hits.push(`line ${i + 1}: ${lines[i].trim().slice(0, 90)}`)
+  }
+  return hits
+}
 
 // ─── Text normalisers ─────────────────────────────────────────────────────────
 const lower = s => s.toLowerCase()
@@ -398,18 +415,17 @@ function strictCheck(source, prompt) {
 }
 
 /**
- * PREMIUM guards — accident guards only, NOT a fidelity policy.
+ * PREMIUM guards: accident guards only, NOT a fidelity policy.
  *
- * Maintainer decision (2026-07-28): premium prompts use the SAME verbatim scaffold as free.
- * The tier sells polished source files, CLI, MCP and support, not secrecy, so a
- * high-fidelity prompt is on-strategy. An earlier draft inverted the rules for premium and
- * that inversion is deliberately gone.
+ * Premium prompts use the SAME verbatim scaffold as free. The tier sells polished source
+ * files, CLI, MCP and support, not secrecy, so a high-fidelity prompt is on-strategy.
+ * There is no weaker or inverted rule set for premium.
  *
- * What survives is orthogonal to fidelity and protects against accidents rather than policy:
+ * What remains is orthogonal to fidelity and protects against accidents rather than policy:
  *   P1  the source marker must never appear in prompt text, which ships publicly.
  *   P2  private asset URLs must not be pasted. This is a bandwidth and account concern, not
- *       a leak one: buyers rebuilding against ik.imagekit.io hit the maintainer's account.
- *       Describe the asset and let the buyer supply their own.
+ *       a leak one: buyers rebuilding against ik.imagekit.io run up charges on an account
+ *       that is not theirs. Describe the asset and let the buyer supply their own.
  */
 function premiumGuards(prompt, source = '') {
   const issues = []
@@ -507,6 +523,14 @@ async function runStrict(slug) {
     process.exit(1)
   }
 
+  const dashes = emDashHits(f.prompt)
+  if (dashes.length) {
+    console.log(`\u2717 ${dashes.length} em-dash(es) in the 'Claude Code' lane. Use a comma, colon or period:\n`)
+    for (const d of dashes) console.log(`    \u2192 ${d}`)
+    console.log()
+    process.exit(1)
+  }
+
   if (f.premium) console.log(`premium component — same verbatim scaffold as free, plus the marker and asset guards\n`)
 
   if (!f.isNew) {
@@ -555,6 +579,7 @@ async function runAdvisory() {
   const rows = []
   let newFormat = 0, legacy = 0, broken = 0, skippedTotal = 0
   const strictFails = []
+  const emDashed = []
 
   for (const c of comps) {
     const f = await load(c)
@@ -564,6 +589,8 @@ async function runAdvisory() {
       continue
     }
     const a = advise(f.source, f.prompt)
+    const dashes = emDashHits(f.prompt).length
+    if (dashes) emDashed.push(`${f.slug}(${dashes})`)
     skippedTotal += scanClassNames(f.source).dynamic.length + scanColors(f.source).composed.length
     if (f.isNew) {
       newFormat++
@@ -602,6 +629,8 @@ async function runAdvisory() {
   row('zero hex drift', `${clean.length}/${scored.length}`)
   row('mean hex miss rate', pct(avg))
   row('runtime-composed classNames + colors skipped', skippedTotal)
+  row('prompts with em-dashes in prose', emDashed.length)
+  if (emDashed.length) console.log(`\n  em-dashes (hard fail under --strict): ${emDashed.join(', ')}`)
   if (strictFails.length) {
     console.log(`\n  new-format files failing strict: ${strictFails.map(f => `${f.slug}(${f.n})`).join(', ')}`)
     console.log(`  run: node scripts/lint-prompts.mjs --strict <slug>`)
