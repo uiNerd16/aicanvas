@@ -21,6 +21,12 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About AI Canvas',
+    description,
+    images: ['/og-aug2026-aicanvas.me.png'],
+  },
 }
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

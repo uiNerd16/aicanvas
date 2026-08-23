@@ -665,8 +665,8 @@ async function runFix(slug) {
   if (undeclared.length) inject.push(`// npm install ${pkgs.join(' ')}`)
   if (!f.prompt.includes('min-h-screen')) {
     const swapped = root.value && !root.dynamic ? root.value.replace(/\bh-full\b/g, 'min-h-screen') : null
-    // The note describes the source: only when h-full was swapped does it ship h-full.
-    const note = swapped && swapped === root.value ? ROOT_NOTE_FULL_HEIGHT : ROOT_NOTE
+    // The note describes the source as shipped, so decide from the source itself.
+    const note = root.value?.includes('min-h-screen') ? ROOT_NOTE_FULL_HEIGHT : ROOT_NOTE
     inject.push(
       (swapped ? `Root element: className="${swapped}"\n` : `Root element must use min-h-screen.\n`) + note
     )
