@@ -16,6 +16,8 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Group, Mesh, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Rotate3d } from 'lucide-react'
@@ -61,7 +63,7 @@ const SECTION_ZONES: { dir: [number, number, number]; hex: string }[] = [
 // light. toneMapped false because this scene renders through ACES filmic at 1.1
 // exposure, which compresses and desaturates what it touches, while the premium
 // reader has no tone mapping. Opting out is what makes the two brains match.
-const makeBrainMaterial = (T: any) =>
+const makeBrainMaterial = (T: typeof import('three')) =>
   new T.MeshBasicMaterial({ wireframe: true, vertexColors: true, toneMapped: false })
 
 // ── editorial copy helpers ──────────────────────────────────────────────────
@@ -554,7 +556,7 @@ export function BrainStoryV4() {
     const host = hostRef.current
     if (!host) return
     let alive = true, raf = 0
-    let renderer: any, scene: any, camera: any
+    let renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera
     let onResize = () => {}
     let cleanupInput = () => {}
 
@@ -597,14 +599,15 @@ export function BrainStoryV4() {
       // scene exists (onLoad only needs scene.add(model) + THREE + the state
       // below), BEFORE the GPU-bound PMREM/env-map generation and lights/camera
       // setup that used to run first and delay the fetch for no reason.
-      let brainRoot: any = null, radius = 1, ready = false
-      const brainMeshes: any[] = []
+      let brainRoot: Group | null = null, radius = 1, ready = false
+      const brainMeshes: Mesh[] = []
 
       const loader = new GLTFLoader()
-      loader.load(MODEL_URL, (gltf: any) => {
+      loader.load(MODEL_URL, (gltf: GLTF) => {
         if (!alive) return
         const model = gltf.scene
-        model.traverse((o: any) => { if (o.isMesh) brainMeshes.push(o) })
+        // Duck-typed on purpose: instanceof breaks when two copies of three load.
+        model.traverse((o) => { const m = o as Mesh; if (m.isMesh) brainMeshes.push(m) })
         scene.add(model)
         // Poly models are often authored off-origin and at arbitrary scale.
         // Update world matrices first, then normalize to unit radius + recenter,
@@ -640,7 +643,7 @@ export function BrainStoryV4() {
           if (!geo?.attributes?.position || geo.attributes.color) continue
           const pos = geo.attributes.position
           geo.computeBoundingBox()
-          const bb = geo.boundingBox
+          const bb = geo.boundingBox!
           const cx = (bb.min.x + bb.max.x) / 2
           const cy = (bb.min.y + bb.max.y) / 2
           const cz = (bb.min.z + bb.max.z) / 2
