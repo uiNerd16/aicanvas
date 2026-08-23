@@ -9,7 +9,6 @@ import { buttonClasses } from './Button'
 // ─── Types (also used by ComponentPageView + registry) ────────────────────────
 
 export type Platform = 'Claude Code' | 'Lovable' | 'V0'
-export const PLATFORMS: Platform[] = ['Claude Code', 'Lovable', 'V0']
 
 export interface Tag {
   label: string

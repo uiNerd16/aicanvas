@@ -993,6 +993,7 @@ export default function ComponentPageView({
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
                                 }}
+                                aria-label="Copy install command"
                                 className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
                                 {depsCopied
@@ -1075,6 +1076,7 @@ export default function ComponentPageView({
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
+                              aria-label="Copy dark mode snippet"
                               className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
@@ -1110,6 +1112,7 @@ export default function ComponentPageView({
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
+                                  aria-label="Copy font snippet"
                                   className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
@@ -1137,6 +1140,7 @@ export default function ComponentPageView({
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                aria-label="Copy install command"
                                 className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
@@ -1148,6 +1152,7 @@ export default function ComponentPageView({
                                   <span className="font-mono text-xs text-sand-500">layout.tsx</span>
                                   <button
                                     onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                    aria-label="Copy font setup snippet"
                                     className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                   >
                                     {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
@@ -1175,6 +1180,7 @@ export default function ComponentPageView({
                             </code>
                             <button
                               onClick={copyDeps}
+                              aria-label="Copy install command"
                               className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                             >
                               {depsCopied
@@ -1201,6 +1207,7 @@ export default function ComponentPageView({
                               </span>
                               <button
                                 onClick={copyCode}
+                                aria-label="Copy code"
                                 disabled={enforcing && codeState.status !== 'ready'}
                                 className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                               >
@@ -1256,6 +1263,7 @@ export default function ComponentPageView({
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
+                              aria-label="Copy dark mode snippet"
                               className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
@@ -1291,6 +1299,7 @@ export default function ComponentPageView({
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
+                                  aria-label="Copy font snippet"
                                   className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
@@ -1318,6 +1327,7 @@ export default function ComponentPageView({
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                aria-label="Copy install command"
                                 className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
@@ -1328,6 +1338,7 @@ export default function ComponentPageView({
                                 <span className="font-mono text-xs text-sand-500">layout.tsx</span>
                                 <button
                                   onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                  aria-label="Copy font setup snippet"
                                   className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                 >
                                   {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
