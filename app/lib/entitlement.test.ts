@@ -1,16 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock only the two database clients. The token parsing, the revoked filter
-// contract, and the tier derivation all run for real.
-const rows: { user_api_keys: unknown; user_subscriptions: unknown } = {
+// and the tier derivation all run for real: eq() filters are honoured against
+// the row's own columns, so a filter on a column the row carries must match.
+type Row = Record<string, unknown> | null
+const rows: { user_api_keys: Row; user_subscriptions: Row } = {
   user_api_keys: null,
   user_subscriptions: null,
 }
 function table(name: keyof typeof rows) {
+  const filters: [string, unknown][] = []
   const q = {
     select: () => q,
-    eq: () => q,
-    maybeSingle: async () => ({ data: rows[name], error: null }),
+    eq: (col: string, val: unknown) => {
+      filters.push([col, val])
+      return q
+    },
+    maybeSingle: async () => {
+      const row = rows[name]
+      const hit = row !== null && filters.every(([c, v]) => !(c in row) || row[c] === v)
+      return { data: hit ? row : null, error: null }
+    },
     update: () => ({ eq: () => ({ then: (cb: () => void) => Promise.resolve().then(cb) }) }),
   }
   return q
@@ -44,7 +54,13 @@ describe('getEntitlement (token path)', () => {
     expect(await getEntitlement(req())).toEqual({ tier: 'free', userId: 'u2' })
   })
 
-  it('an unknown or revoked token is anonymous', async () => {
+  it('an unknown token is anonymous', async () => {
+    expect(await getEntitlement(req())).toEqual({ tier: 'anonymous', userId: null })
+  })
+
+  it('a revoked token is anonymous even with an active subscription', async () => {
+    rows.user_api_keys = { user_id: 'u4', revoked: true }
+    rows.user_subscriptions = { status: 'active', current_period_end: null }
     expect(await getEntitlement(req())).toEqual({ tier: 'anonymous', userId: null })
   })
 
