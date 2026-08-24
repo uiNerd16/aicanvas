@@ -36,7 +36,7 @@ export function NextDestination() {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            /// Heading
+            {'/// Heading'}
           </span>
           <CardTitle>Next Destination</CardTitle>
         </div>

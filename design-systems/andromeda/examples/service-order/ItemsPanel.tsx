@@ -13,6 +13,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import {
   Funnel,
@@ -33,6 +34,7 @@ import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { IconButton } from '../../components/IconButton';
 import { ProgressBar } from '../../components/ProgressBar';
+import type { ProgressBarProps } from '../../components/ProgressBar';
 import { Tag } from '../../components/Tag';
 import { PanelMenu } from '../../components/PanelMenu';
 import { Tooltip } from '../../components/Tooltip';
@@ -93,7 +95,7 @@ function HoverStyles() {
 // narrow viewport (faithful stack — same treatment as the table below it,
 // never a wrap or a re-skin). The inset divider stays edge-aligned because
 // it's a sibling outside the scroll container.
-function TabStrip({ value, onChange }) {
+function TabStrip({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   return (
     <div
       style={{
@@ -165,7 +167,7 @@ function TabStrip({ value, onChange }) {
 }
 
 // ── Filter row (funnel + label + chips + kebab) ────────────────────
-function FilterRow({ chips, onRemoveChip }) {
+function FilterRow({ chips, onRemoveChip }: { chips: string[]; onRemoveChip: (label: string) => void }) {
   return (
     <div
       style={{
@@ -250,7 +252,11 @@ function FilterRow({ chips, onRemoveChip }) {
 }
 
 // ── Sortable column header ────────────────────────────────────────
-function ColHeader({ children, align = 'left', sort }) {
+function ColHeader({ children, align = 'left', sort }: {
+  children?: ReactNode;
+  align?: CSSProperties['textAlign'];
+  sort?: 'asc' | 'desc' | 'sortable';
+}) {
   // sort: 'asc' | 'desc' | 'sortable' | undefined
   const sortIcon =
     sort === 'asc'  ? <CaretUp     weight="bold" size={10} /> :
@@ -274,7 +280,6 @@ function ColHeader({ children, align = 'left', sort }) {
         letterSpacing: tokens.typography.tracking.widest,
         lineHeight: 'var(--andromeda-leading-none, 1)',
         whiteSpace: 'nowrap',
-        verticalAlign: 'middle',
       }}
     >
       <span
@@ -298,14 +303,20 @@ function ColHeader({ children, align = 'left', sort }) {
   );
 }
 
-function loadVariant(v) {
+function loadVariant(v: number): ProgressBarProps['variant'] {
   if (v >= 85) return 'fault';
   if (v >= 60) return 'warning';
   return 'default';
 }
 
 // ── Table cell helper ──────────────────────────────────────────────
-function Cell({ children, align = 'left', muted = false, mono = true, nowrap = true }) {
+function Cell({ children, align = 'left', muted = false, mono = true, nowrap = true }: {
+  children?: ReactNode;
+  align?: CSSProperties['textAlign'];
+  muted?: boolean;
+  mono?: boolean;
+  nowrap?: boolean;
+}) {
   return (
     <td
       style={{
@@ -333,11 +344,11 @@ export function ItemsPanel() {
 
   const allSelected = productRows.length > 0 && productRows.every((r) => selected.has(r.id));
 
-  function removeChip(label) {
+  function removeChip(label: string) {
     setChips((prev) => prev.filter((c) => c !== label));
   }
 
-  function toggleRow(id) {
+  function toggleRow(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -346,7 +357,7 @@ export function ItemsPanel() {
     });
   }
 
-  function toggleAll(next) {
+  function toggleAll(next: boolean) {
     setSelected(() => {
       if (next) return new Set(productRows.map((r) => r.id));
       return new Set();

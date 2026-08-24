@@ -33,19 +33,19 @@ function InsetDivider({ side = 'bottom' }) {
 
 const FOLLOW_UP_OPTIONS = ['02:00 Hours', '04:00 Hours', '12:00 Hours', '24:00 Hours'];
 
-function FollowUpDropdown({ initial = '24:00 Hours' }) {
+function FollowUpDropdown({ initial = '24:00 Hours' }: { initial?: string }) {
   const [value, setValue] = useState(initial);
   const [open, setOpen] = useState(false);
   const [custom, setCustom] = useState('');
-  const wrapperRef = useRef(null);
-  const inputRef = useRef(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    function handleDown(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+    function handleDown(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setOpen(false);
     }
-    function handleKey(e) {
+    function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
     }
     document.addEventListener('mousedown', handleDown);
@@ -177,12 +177,12 @@ function FollowUpDropdown({ initial = '24:00 Hours' }) {
 import { Button } from '../../components/Button';
 import { order, orderMetadata } from './data';
 
-function parseSeconds(hms) {
+function parseSeconds(hms: string) {
   const [h, m, s] = hms.split(':').map(Number);
   return h * 3600 + m * 60 + s;
 }
 
-function formatSeconds(total) {
+function formatSeconds(total: number) {
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
@@ -280,7 +280,7 @@ function HeaderStrip() {
 }
 
 // ── Metadata cell ──────────────────────────────────────────────────
-function MetaCell({ label, value, type }) {
+function MetaCell({ label, value, type }: { label: string; value: string; type?: string }) {
   if (type === 'spacer') return <div />;
 
   return (

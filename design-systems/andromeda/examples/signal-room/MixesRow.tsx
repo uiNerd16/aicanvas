@@ -20,8 +20,15 @@ import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
 import { MediaCard } from '../../components/MediaCard';
 import { mixes } from './data';
+import type { Mix } from './data';
 
-export function MixesRow({ onPlay, currentCode, isPlaying }) {
+type MixesRowProps = {
+  onPlay?: (mix: Mix) => void;
+  currentCode?: string;
+  isPlaying?: boolean;
+};
+
+export function MixesRow({ onPlay, currentCode, isPlaying }: MixesRowProps) {
   return (
     <Card>
       <PanelHeader

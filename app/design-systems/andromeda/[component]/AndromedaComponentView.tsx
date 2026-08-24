@@ -644,7 +644,7 @@ export function AndromedaComponentView({
                                   letterSpacing: tokens.typography.tracking.widest,
                                 }}
                               >
-                                /// {c.slug}
+                                {'/// '}{c.slug}
                               </span>
                             </div>
                           </>

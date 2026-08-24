@@ -42,6 +42,7 @@ import { Button } from '../../components/Button';
 import { NavItem } from '../../components/NavItem';
 import { DateRangePicker } from '../../components/DateRangePicker';
 import { UserMenu } from '../../components/UserMenu';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
@@ -69,7 +70,7 @@ function HoverStyles() {
 }
 
 // ─── User menu items (shared shape with mission-control / service-order) ─
-const userMenuItems = [
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
@@ -131,7 +132,7 @@ function TopNav() {
 // left Drawer below `mq.md`. Selecting a row closes the drawer. LayoutGroup
 // scopes NavItem's active-dot layoutId so the drawer copy can't fight the
 // (hidden) desktop strip for the shared animation.
-function DrawerNav({ onNavigate }) {
+function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
   return (
     <LayoutGroup id="rp-drawer-nav">
       <nav style={{ display: 'flex', flexDirection: 'column' }}>
@@ -250,7 +251,7 @@ function StatusBar() {
     start: new Date(2026, 6, 20),
     end:   new Date(2026, 7, 20),
   });
-  const [presetLabel, setPresetLabel] = useState('Last month');
+  const [presetLabel, setPresetLabel] = useState<string | null>('Last month');
 
   return (
     <div
@@ -269,7 +270,7 @@ function StatusBar() {
 
       <DateRangePicker
         value={range}
-        presetLabel={presetLabel}
+        presetLabel={presetLabel ?? undefined}
         onChange={(next) => {
           setRange(next);
           setPresetLabel(null);

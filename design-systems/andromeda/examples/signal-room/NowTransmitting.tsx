@@ -58,7 +58,7 @@ export function NowTransmitting() {
                   letterSpacing: tokens.typography.tracking.widest,
                 }}
               >
-                /// Featured stream
+                {'/// Featured stream'}
               </span>
               <h2
                 className="sr-hero-title"
@@ -120,7 +120,7 @@ export function NowTransmitting() {
                   letterSpacing: tokens.typography.tracking.widest,
                 }}
               >
-                /// Waveform
+                {'/// Waveform'}
               </span>
               <span
                 style={{

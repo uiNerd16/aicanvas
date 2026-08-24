@@ -7,6 +7,7 @@
 
 'use client';
 
+import type { ReactNode } from 'react';
 import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
@@ -21,7 +22,13 @@ import { clusterUtilisation, missionSuccessRate, activeAllocations } from './dat
 // vertical border (borderRight, set inline below) is dropped below
 // `mq.md` and replaced with a horizontal one (borderBottom) when the
 // three cells stack — see <style> in CapacityPanel.
-function Cell({ label, children, last = false }) {
+type CellProps = {
+  label: string;
+  children: ReactNode;
+  last?: boolean;
+};
+
+function Cell({ label, children, last = false }: CellProps) {
   return (
     <div
       className={last ? 'rp-cap-cell rp-cap-cell-last' : 'rp-cap-cell'}
@@ -56,7 +63,14 @@ function Cell({ label, children, last = false }) {
 // The delta speaks StatTile's language: the ▲/▼ glyph is the direction of the
 // move, the colour is the judgment of it, and `polarity` is what separates the
 // two (see color-philosophy → "delta colour is a judgment").
-function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
+type BigValueProps = {
+  value: string;
+  suffix?: string;
+  delta?: number;
+  polarity?: 'higher-is-better' | 'lower-is-better' | 'none';
+};
+
+function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }: BigValueProps) {
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta);
   // Decide neutral on the number the reader actually sees, not the raw one:
   // this panel rounds to 1dp, so a delta of 0.04 would otherwise print
@@ -126,7 +140,7 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }) {
 const VIZ_HEIGHT = 40;
 
 // ── Skewed-bar grid (cluster utilisation) ────────────────────────
-function BarGrid({ values }) {
+function BarGrid({ values }: { values: number[] }) {
   return (
     <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: `${VIZ_HEIGHT}px`, width: '100%' }}>
       {values.map((v, i) => (
@@ -149,7 +163,7 @@ function BarGrid({ values }) {
 // Renders into the same 40px slot as the other viz. The bar pins to the
 // top of the slot (so the marker sits comfortably above it) and the
 // 0% / 100% labels pin to the bottom.
-function ThresholdBar({ value }) {
+function ThresholdBar({ value }: { value: number }) {
   return (
     <div
       style={{
@@ -198,7 +212,7 @@ function ThresholdBar({ value }) {
 }
 
 // ── Sparkline (active allocations) ───────────────────────────────
-function Sparkline({ data }) {
+function Sparkline({ data }: { data: Array<{ t: number; v: number }> }) {
   return (
     <div style={{ height: `${VIZ_HEIGHT}px`, width: '100%' }}>
       {/* Fixed height (not "100%"): the wrapper is exactly VIZ_HEIGHT anyway,

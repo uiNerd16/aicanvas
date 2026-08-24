@@ -38,6 +38,7 @@ import { IconButton } from '../../components/IconButton';
 import { NavItem } from '../../components/NavItem';
 import { Tooltip } from '../../components/Tooltip';
 import { UserMenu } from '../../components/UserMenu';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
@@ -63,7 +64,7 @@ function HoverStyles() {
 // Drawer nav (mobile) — the same nav items as the desktop strip, rendered as
 // Andromeda NavItems inside the left Drawer so the drawer reads like the other
 // templates' drawers. LayoutGroup scopes NavItem's active-dot layoutId.
-function SoDrawerNav({ onNavigate }) {
+function SoDrawerNav({ onNavigate }: { onNavigate: () => void }) {
   return (
     <LayoutGroup id="so-drawer-nav">
       <nav style={{ display: 'flex', flexDirection: 'column' }}>
@@ -75,7 +76,10 @@ function SoDrawerNav({ onNavigate }) {
   );
 }
 
-function NavLinks({ orientation = 'horizontal', onNavigate }) {
+function NavLinks({ orientation = 'horizontal', onNavigate }: {
+  orientation?: 'horizontal' | 'vertical';
+  onNavigate?: () => void;
+}) {
   const vertical = orientation === 'vertical';
   return (
     <nav
@@ -144,7 +148,7 @@ function NavLinks({ orientation = 'horizontal', onNavigate }) {
 }
 
 // ── User menu items (shared shape with mission-control / resource-planning) ─
-const userMenuItems = [
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },

@@ -13,12 +13,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import type { MotionProps } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { SearchField } from '../../components/SearchField';
 
-export function Header({ sectionTitle = 'Library', motionProps }) {
+type HeaderProps = {
+  sectionTitle?: string;
+  motionProps?: MotionProps;
+};
+
+export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
   return (
     <motion.header
       {...(motionProps ?? {})}
@@ -49,7 +55,7 @@ export function Header({ sectionTitle = 'Library', motionProps }) {
             letterSpacing: tokens.typography.tracking.widest,
           }}
         >
-          /// Section
+          {'/// Section'}
         </span>
         <h1
           style={{

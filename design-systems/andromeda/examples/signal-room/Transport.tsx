@@ -14,15 +14,24 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import type { MotionProps } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
 import { MusicPlayer } from '../../components/MusicPlayer';
 import { nowPlaying } from './data';
+import type { PlayerTrack } from './data';
 
 // Client-side measure-before-paint; plain effect on the server (no SSR warning).
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
+type TransportProps = {
+  current?: PlayerTrack;
+  isPlaying?: boolean;
+  onTogglePlay?: () => void;
+  motionProps?: MotionProps;
+};
+
+export function Transport({ current, isPlaying, onTogglePlay, motionProps }: TransportProps) {
   const cur = current ?? {
     title: nowPlaying.track,
     subtitle: nowPlaying.artist,
@@ -39,7 +48,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }) {
   // the scroller already reserves (the .sr-main-col flex gap in front of it and
   // .sr-shell's bottom padding behind it), landing the last row at the reveal
   // strip: no overlap, no oversized gap.
-  const outerRef = useRef(null);
+  const outerRef = useRef<HTMLDivElement | null>(null);
   const [playerH, setPlayerH] = useState(0);
   useIsomorphicLayoutEffect(() => {
     const el = outerRef.current;

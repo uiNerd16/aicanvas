@@ -41,7 +41,7 @@ export default function MissionControl() {
 
   // Inert handler: non-overview ids are ignored, active stays on overview.
   // Selecting a nav item from the mobile drawer also closes the drawer.
-  const handleNavChange = (id) => {
+  const handleNavChange = (id: string) => {
     setNavOpen(false);
     if (id === 'overview') return;
   };

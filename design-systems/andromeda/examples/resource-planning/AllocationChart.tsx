@@ -11,13 +11,14 @@
 'use client';
 
 import { useState } from 'react';
+import type { ComponentProps } from 'react';
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Toggle } from '../../components/Toggle';
 import { TrendChart } from '../../components/TrendChart';
 import { allocationSeries } from './data';
 
-const SERIES = [
+const SERIES: ComponentProps<typeof TrendChart>['series'] = [
   { key: 'allocated', label: 'Allocated', role: 'baseline' },
   { key: 'used',      label: 'Used',      role: 'live' },
   { key: 'reserved',  label: 'Reserved',  role: 'context' },

@@ -40,20 +40,21 @@ import { RecentTransmissions } from './RecentTransmissions';
 import { LevelsPanel } from './LevelsPanel';
 import { Transport } from './Transport';
 import { nowPlaying } from './data';
+import type { Mix, PlayerTrack, Transmission } from './data';
 import { motion } from 'framer-motion';
 import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 
 // Normalize a source item (mix card / transmission row) to the shape the
 // bottom player consumes: title, subtitle, code, cover (image url or null →
 // glyph), duration in seconds.
-const parseDur = (d) => {
+const parseDur = (d: string) => {
   const [m, s] = String(d).split(':').map(Number);
   return (m || 0) * 60 + (s || 0);
 };
-const mixToNowPlaying = (mix) => ({
+const mixToNowPlaying = (mix: Mix): PlayerTrack => ({
   title: mix.name, subtitle: mix.desc, code: mix.code, cover: mix.image, duration: 221, plays: mix.plays,
 });
-const recToNowPlaying = (r) => ({
+const recToNowPlaying = (r: Transmission): PlayerTrack => ({
   title: r.track, subtitle: r.artist, code: r.id, cover: null, duration: parseDur(r.duration), plays: r.plays,
 });
 
@@ -66,7 +67,7 @@ export default function SignalRoom() {
   // The one source of truth for the player. Pressing play on a routine card or
   // a transmission row sets `current` and starts playback; the Transport bar
   // (cover + title + transport state) reflects it.
-  const [current, setCurrent] = useState(() => ({
+  const [current, setCurrent] = useState<PlayerTrack>(() => ({
     title: nowPlaying.track,
     subtitle: nowPlaying.artist,
     code: nowPlaying.code,
@@ -78,11 +79,11 @@ export default function SignalRoom() {
   const togglePlay = () => setIsPlaying((p) => !p);
   // Clicking the already-current item toggles play/pause; a different item
   // switches to it and starts playing.
-  const playMix = (mix) => {
+  const playMix = (mix: Mix) => {
     if (current.code === mix.code) togglePlay();
     else { setCurrent(mixToNowPlaying(mix)); setIsPlaying(true); }
   };
-  const playRec = (r) => {
+  const playRec = (r: Transmission) => {
     if (current.code === r.id) togglePlay();
     else { setCurrent(recToNowPlaying(r)); setIsPlaying(true); }
   };
@@ -100,7 +101,7 @@ export default function SignalRoom() {
   const transportMotion = useCascadeProps(6);
 
   // Selecting a nav item from the mobile drawer also closes the drawer.
-  const handleNavChange = (id) => { setActiveNav(id); setNavOpen(false); };
+  const handleNavChange = (id: string) => { setActiveNav(id); setNavOpen(false); };
 
   return (
     <div

@@ -20,8 +20,9 @@ import { PanelHeader } from '../../components/PanelHeader';
 import { IconButton } from '../../components/IconButton';
 import { DataTable } from '../../components/DataTable';
 import { recentTransmissions } from './data';
+import type { Transmission } from './data';
 
-function PeakBar({ value }) {
+function PeakBar({ value }: { value: number }) {
   return (
     <div
       style={{
@@ -48,13 +49,19 @@ function PeakBar({ value }) {
   );
 }
 
-export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
+type RecentTransmissionsProps = {
+  onPlay?: (r: Transmission) => void;
+  currentCode?: string;
+  isPlaying?: boolean;
+};
+
+export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTransmissionsProps) {
   const columns = [
     {
       key: 'play',
       header: '',
       width: '48px',
-      render: (r) => (
+      render: (r: Transmission) => (
         <IconButton
           variant={r.id === currentCode ? 'default' : 'ghost'}
           size="sm"
@@ -69,7 +76,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
       key: 'track',
       header: 'Track',
       primary: true,
-      render: (r) => (
+      render: (r: Transmission) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
           <span
             style={{
@@ -105,8 +112,8 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
       ),
     },
     { key: 'duration', header: 'Duration', width: '110px', hideBelow: 'md', fold: 'meta', color: tokens.color.text.primary },
-    { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r) => `${r.plays} plays`, color: tokens.color.text.primary },
-    { key: 'peak', header: 'Peak', width: '124px', hideBelow: 'md', infoValue: (r) => `${r.peak}%`, render: (r) => <PeakBar value={r.peak} /> },
+    { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r: Transmission) => `${r.plays} plays`, color: tokens.color.text.primary },
+    { key: 'peak', header: 'Peak', width: '124px', hideBelow: 'md', infoValue: (r: Transmission) => `${r.peak}%`, render: (r: Transmission) => <PeakBar value={r.peak} /> },
     { key: 'last', header: 'Last', width: '84px', hideBelow: 'md', color: tokens.color.text.faint },
   ];
 
@@ -132,8 +139,8 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }) {
       <DataTable
         columns={columns}
         rows={recentTransmissions}
-        getRowKey={(r) => r.id}
-        onRowClick={(r) => onPlay?.(r)}
+        getRowKey={(r: Transmission) => r.id}
+        onRowClick={(r: Transmission) => onPlay?.(r)}
         selectedRowKey={currentCode}
       />
     </Card>
