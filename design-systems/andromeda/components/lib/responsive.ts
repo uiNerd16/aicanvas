@@ -87,7 +87,7 @@ export const mq = {
 export function useBreakpoint() {
   // null = "not yet measured" → assume desktop (matches SSR + the
   // desktop-first CSS base). Corrected to the real width on mount.
-  const [width, setWidth] = useState(null);
+  const [width, setWidth] = useState<number | null>(null);
 
   useEffect(() => {
     const read = () => setWidth(window.innerWidth);

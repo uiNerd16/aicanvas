@@ -9,6 +9,7 @@
 'use client';
 
 import { forwardRef, useId, useState } from 'react';
+import type { ChangeEvent, ComponentPropsWithoutRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 import { mq } from './lib/responsive';
@@ -108,8 +109,18 @@ const labelClass = cn(
  * @property {string}  [id] Id for the input; falls back to a generated id and links the label.
  */
 
+type ToggleProps = Omit<
+  ComponentPropsWithoutRef<'input'>,
+  'onChange' | 'type' | 'checked' | 'defaultChecked'
+> & {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (next: boolean) => void;
+  label?: string;
+};
+
 /** @type {React.ForwardRefExoticComponent<ToggleProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'|'type'>>} */
-export const Toggle = forwardRef(function Toggle(
+export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(function Toggle(
   {
     className,
     checked: controlledChecked,
@@ -130,7 +141,7 @@ export const Toggle = forwardRef(function Toggle(
   const checked = isControlled ? controlledChecked : internal;
   const state = checked ? 'on' : 'off';
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const next = e.target.checked;
     if (!isControlled) setInternal(next);
     onCheckedChange?.(next);

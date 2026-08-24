@@ -10,7 +10,10 @@
 'use client';
 
 import { forwardRef, useId } from 'react';
+import type { ComponentPropsWithoutRef, ComponentType } from 'react';
 import { motion } from 'framer-motion';
+import type { Transition } from 'framer-motion';
+import type { IconWeight } from '@phosphor-icons/react';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
@@ -63,9 +66,9 @@ const ICON_PX = {
   lg: 18,
 };
 
-const ms = (v) => parseInt(v, 10) / 1000;
+const ms = (v: string) => parseInt(v, 10) / 1000;
 // framer boundary: derived from tokens, cannot follow runtime var overrides
-const INDICATOR_TX = {
+const INDICATOR_TX: Transition = {
   duration: ms(tokens.motion.duration.slow),
   ease: easingArray(tokens.motion.easing.standard),
 };
@@ -77,6 +80,13 @@ const INDICATOR_TX = {
  * @property {React.ComponentType<{ size?: number, weight?: string }>} [icon] Icon component rendered in the segment, optionally alongside its label.
  * @property {string} [ariaLabel] Accessible name for the segment, falling back to label when omitted.
  */
+
+type SegmentOption = {
+  value: string;
+  label?: string;
+  icon?: ComponentType<{ size?: number; weight?: IconWeight }>;
+  ariaLabel?: string;
+};
 
 /**
  * @typedef {object} SegmentedControlProps
@@ -94,8 +104,16 @@ const INDICATOR_TX = {
  * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
+type SegmentedControlProps = Omit<ComponentPropsWithoutRef<'div'>, 'onChange'> & {
+  value: string;
+  onChange: (next: string) => void;
+  options: SegmentOption[];
+  size?: 'sm' | 'md' | 'lg';
+  layoutGroupId?: string;
+};
+
 /** @type {React.ForwardRefExoticComponent<SegmentedControlProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const SegmentedControl = forwardRef(function SegmentedControl(
+export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps>(function SegmentedControl(
   { className, value, onChange, options, size = 'md', layoutGroupId, style, ...props },
   ref,
 ) {

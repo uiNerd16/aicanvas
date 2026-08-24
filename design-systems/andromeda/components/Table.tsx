@@ -13,6 +13,7 @@
 'use client';
 
 import { forwardRef, useEffect } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { andromedaVars } from './lib/utils';
@@ -67,7 +68,7 @@ export function TableStyles() {
 const ROW_INSET_LINE = `linear-gradient(to right, transparent var(--andromeda-3, ${tokens.spacing[3]}), var(--andromeda-border-subtle, ${tokens.color.border.subtle}) var(--andromeda-3, ${tokens.spacing[3]}), var(--andromeda-border-subtle, ${tokens.color.border.subtle}) calc(100% - var(--andromeda-3, ${tokens.spacing[3]})), transparent calc(100% - var(--andromeda-3, ${tokens.spacing[3]})))`;
 
 // ── Table ──────────────────────────────────────────────────────────
-export const Table = forwardRef(function Table(
+export const Table = forwardRef<HTMLTableElement, ComponentPropsWithoutRef<'table'>>(function Table(
   { className, style, children, ...props },
   ref,
 ) {
@@ -101,13 +102,17 @@ export const Table = forwardRef(function Table(
 });
 
 // ── TableHead / TableBody ──────────────────────────────────────────
-export const TableHead = forwardRef(function TableHead({ children, ...props }, ref) {
-  return <thead ref={ref} {...props}>{children}</thead>;
-});
+export const TableHead = forwardRef<HTMLTableSectionElement, ComponentPropsWithoutRef<'thead'>>(
+  function TableHead({ children, ...props }, ref) {
+    return <thead ref={ref} {...props}>{children}</thead>;
+  },
+);
 
-export const TableBody = forwardRef(function TableBody({ children, ...props }, ref) {
-  return <tbody ref={ref} {...props}>{children}</tbody>;
-});
+export const TableBody = forwardRef<HTMLTableSectionElement, ComponentPropsWithoutRef<'tbody'>>(
+  function TableBody({ children, ...props }, ref) {
+    return <tbody ref={ref} {...props}>{children}</tbody>;
+  },
+);
 
 // ── TableRow ───────────────────────────────────────────────────────
 /**
@@ -115,7 +120,12 @@ export const TableBody = forwardRef(function TableBody({ children, ...props }, r
  * @property {boolean} [selected=false]  Applies surface.active bg + accent-300 left edge.
  * @property {boolean} [hoverable=true] Adds the hover-lift class (default true).
  */
-export const TableRow = forwardRef(function TableRow(
+type TableRowProps = ComponentPropsWithoutRef<'tr'> & {
+  selected?: boolean;
+  hoverable?: boolean;
+};
+
+export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow(
   { selected = false, hoverable = true, className = '', style, children, ...props },
   ref,
 ) {
@@ -145,7 +155,12 @@ export const TableRow = forwardRef(function TableRow(
  * @property {'asc'|'desc'|'sortable'|undefined} [sort]  Column sort state; picks the matching caret and sets aria-sort.
  * @property {'left'|'right'|'center'} [align='left']  Horizontal text alignment of the header cell.
  */
-export const TableHeader = forwardRef(function TableHeader(
+type TableHeaderProps = Omit<ComponentPropsWithoutRef<'th'>, 'align'> & {
+  sort?: 'asc' | 'desc' | 'sortable';
+  align?: 'left' | 'right' | 'center';
+};
+
+export const TableHeader = forwardRef<HTMLTableCellElement, TableHeaderProps>(function TableHeader(
   { sort, align = 'left', children, style, ...props },
   ref,
 ) {
@@ -202,7 +217,13 @@ export const TableHeader = forwardRef(function TableHeader(
  * @property {boolean} [muted=false]  Uses text.secondary instead of text.primary.
  * @property {boolean} [nowrap=true]  Keeps the cell content on a single line when true.
  */
-export const TableCell = forwardRef(function TableCell(
+type TableCellProps = Omit<ComponentPropsWithoutRef<'td'>, 'align'> & {
+  align?: 'left' | 'right' | 'center';
+  muted?: boolean;
+  nowrap?: boolean;
+};
+
+export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell(
   { align = 'left', muted = false, nowrap = true, children, style, ...props },
   ref,
 ) {

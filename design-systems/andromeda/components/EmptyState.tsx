@@ -16,8 +16,10 @@
 'use client';
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from './lib/utils';
 import { Card, CardContent } from './Card';
+import type { CardProps } from './Card';
 
 /**
  * @typedef {object} EmptyStateProps
@@ -26,8 +28,10 @@ import { Card, CardContent } from './Card';
  * @property {React.CSSProperties} [style]
  */
 
+export type EmptyStateProps = CardProps;
+
 /** @type {React.ForwardRefExoticComponent<EmptyStateProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const EmptyState = forwardRef(function EmptyState(
+export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
   { className, children, style, ...props },
   ref,
 ) {
@@ -51,7 +55,7 @@ export const EmptyState = forwardRef(function EmptyState(
   );
 });
 
-export const EmptyStateIcon = forwardRef(function EmptyStateIcon(
+export const EmptyStateIcon = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function EmptyStateIcon(
   { className, children, ...props },
   ref,
 ) {
@@ -77,7 +81,7 @@ export const EmptyStateIcon = forwardRef(function EmptyStateIcon(
   );
 });
 
-export const EmptyStateTitle = forwardRef(function EmptyStateTitle(
+export const EmptyStateTitle = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function EmptyStateTitle(
   { className, children, ...props },
   ref,
 ) {
@@ -100,7 +104,7 @@ export const EmptyStateTitle = forwardRef(function EmptyStateTitle(
   );
 });
 
-export const EmptyStateDescription = forwardRef(function EmptyStateDescription(
+export const EmptyStateDescription = forwardRef<HTMLParagraphElement, ComponentPropsWithoutRef<'p'>>(function EmptyStateDescription(
   { className, children, ...props },
   ref,
 ) {
@@ -123,7 +127,7 @@ export const EmptyStateDescription = forwardRef(function EmptyStateDescription(
   );
 });
 
-export const EmptyStateAction = forwardRef(function EmptyStateAction(
+export const EmptyStateAction = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function EmptyStateAction(
   { className, children, ...props },
   ref,
 ) {
