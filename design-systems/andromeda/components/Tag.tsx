@@ -8,8 +8,10 @@
 'use client';
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 import { X } from '@phosphor-icons/react';
 import { cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
 const tagVariants = cva(
@@ -87,8 +89,18 @@ const closeButtonClass = cn(
  * @property {React.CSSProperties} [style]
  */
 
+type TagOwnProps = {
+  variant?: NonNullable<VariantProps<typeof tagVariants>['variant']>;
+  children?: ReactNode;
+  onClose?: () => void;
+  className?: string;
+  style?: CSSProperties;
+};
+
+export type TagProps = TagOwnProps & Omit<ComponentPropsWithoutRef<'span'>, keyof TagOwnProps>;
+
 /** @type {React.ForwardRefExoticComponent<TagProps & React.HTMLAttributes<HTMLSpanElement>>} */
-export const Tag = forwardRef(function Tag(
+export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
   { className, variant = 'default', children, onClose, style, ...props },
   ref,
 ) {

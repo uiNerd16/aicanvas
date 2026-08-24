@@ -9,7 +9,9 @@
 'use client';
 
 import { forwardRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import { cn, andromedaVars } from './lib/utils';
 
 const avatarVariants = cva(
@@ -61,7 +63,7 @@ const statusDotVariants = cva(
   },
 );
 
-function deriveInitials(name) {
+function deriveInitials(name?: string) {
   if (!name) return '?';
   return name
     .split(' ')
@@ -82,8 +84,19 @@ function deriveInitials(name) {
  * @property {React.CSSProperties} [style]
  */
 
+type AvatarOwnProps = {
+  name?: string;
+  src?: string;
+  size?: NonNullable<VariantProps<typeof avatarVariants>['size']>;
+  status?: NonNullable<VariantProps<typeof statusDotVariants>['status']>;
+  className?: string;
+  style?: CSSProperties;
+};
+
+export type AvatarProps = AvatarOwnProps & Omit<ComponentPropsWithoutRef<'div'>, keyof AvatarOwnProps>;
+
 /** @type {React.ForwardRefExoticComponent<AvatarProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const Avatar = forwardRef(function Avatar(
+export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(function Avatar(
   { className, name = '?', src, size = 'md', status, style, ...props },
   ref,
 ) {

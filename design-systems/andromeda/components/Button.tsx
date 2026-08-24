@@ -11,9 +11,13 @@
 'use client';
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { motion } from 'framer-motion';
+import type { HTMLMotionProps, TargetAndTransition, Transition } from 'framer-motion';
 import { cva } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
+import type { Icon } from '@phosphor-icons/react';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 import { mq } from './lib/responsive';
@@ -50,14 +54,14 @@ const TOUCH_TARGET_STYLE = `
 
 // Token-driven framer transitions. tokens.motion.duration values are
 // strings like "140ms"; framer expects seconds, so parseInt → /1000.
-const ms = (v) => parseInt(v, 10) / 1000;
+const ms = (v: string) => parseInt(v, 10) / 1000;
 // framer boundary: derived from tokens, cannot follow runtime var overrides
-const HOVER_TX = { duration: ms(tokens.motion.duration.normal), ease: easingArray(tokens.motion.easing.out) };
-const PRESS_TX = { duration: ms(tokens.motion.duration.fast),   ease: easingArray(tokens.motion.easing.in) };
+const HOVER_TX: Transition = { duration: ms(tokens.motion.duration.normal), ease: easingArray(tokens.motion.easing.out) };
+const PRESS_TX: Transition = { duration: ms(tokens.motion.duration.fast),   ease: easingArray(tokens.motion.easing.in) };
 // whileHover / whileTap targets — transitions inlined inside the variant
 // so hover uses duration.normal and press uses duration.fast independently.
-const HOVER_LIFT = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
-const PRESS_DOWN = { scale: 0.98, transition: PRESS_TX };
+const HOVER_LIFT: TargetAndTransition = { y: -1, filter: 'brightness(1.05)', transition: HOVER_TX };
+const PRESS_DOWN: TargetAndTransition = { scale: 0.98, transition: PRESS_TX };
 
 const buttonVariants = cva(
   [
@@ -150,6 +154,14 @@ const buttonVariants = cva(
   },
 );
 
+type ButtonOwnProps = VariantProps<typeof buttonVariants> & {
+  asChild?: boolean;
+  icon?: Icon;
+  style?: CSSProperties;
+};
+
+export type ButtonProps = ButtonOwnProps & Omit<HTMLMotionProps<'button'>, keyof ButtonOwnProps>;
+
 /**
  * @typedef {object} ButtonProps
  * @property {'default'|'outline'|'ghost'|'destructive'|'link'} [variant='default']
@@ -165,7 +177,7 @@ const buttonVariants = cva(
  */
 
 /** @type {React.ForwardRefExoticComponent<ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>>} */
-export const Button = forwardRef(function Button(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     className,
     variant = 'default',
@@ -199,7 +211,7 @@ export const Button = forwardRef(function Button(
   if (asChild) {
     return (
       <>
-        <Slot ref={ref} className={baseClass} data-size={size} style={baseStyle} {...props}>
+        <Slot ref={ref} className={baseClass} data-size={size} style={baseStyle} {...(props as ComponentPropsWithoutRef<'button'>)}>
           {content}
         </Slot>
         <style>{TOUCH_TARGET_STYLE}</style>

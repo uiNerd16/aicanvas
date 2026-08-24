@@ -9,6 +9,7 @@
 'use client';
 
 import { forwardRef, useEffect, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { useInView } from 'framer-motion';
 import { cn, andromedaVars } from './lib/utils';
 import { tokens } from '../tokens';
@@ -59,8 +60,19 @@ const valueClass = cn(
  * @property {React.CSSProperties} [style] Inline styles merged onto the root element.
  */
 
+type ProgressBarOwnProps = {
+  label?: string;
+  value: number;
+  variant?: keyof typeof variantConfig;
+  className?: string;
+  style?: CSSProperties;
+};
+
+export type ProgressBarProps = ProgressBarOwnProps &
+  Omit<ComponentPropsWithoutRef<'div'>, keyof ProgressBarOwnProps>;
+
 /** @type {React.ForwardRefExoticComponent<ProgressBarProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const ProgressBar = forwardRef(function ProgressBar(
+export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function ProgressBar(
   { className, label, value, variant = 'default', style, ...props },
   outerRef,
 ) {
@@ -81,8 +93,8 @@ export const ProgressBar = forwardRef(function ProgressBar(
   // `amount: 0.3` — wait until 30% of the bar is visible. Higher
   // than the cascade's 0.15 because the bar's reveal is its own
   // motion event; we want the user clearly looking at it.
-  const internalRef = useRef(null);
-  const setRefs = (node) => {
+  const internalRef = useRef<HTMLDivElement | null>(null);
+  const setRefs = (node: HTMLDivElement | null) => {
     internalRef.current = node;
     if (typeof outerRef === 'function') outerRef(node);
     else if (outerRef) outerRef.current = node;

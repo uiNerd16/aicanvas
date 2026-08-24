@@ -11,8 +11,15 @@
 'use client';
 
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  ComponentPropsWithoutRef,
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
+import type { Icon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { IconButton } from './IconButton';
 import { andromedaVars } from './lib/utils';
@@ -45,6 +52,26 @@ import { andromedaVars } from './lib/utils';
  * @property {React.CSSProperties} [style] Inline styles merged onto the wrapper element.
  */
 
+type MenuItem = {
+  label?: string;
+  icon?: Icon;
+  onSelect?: () => void;
+  submenu?: MenuItem[];
+  selected?: boolean;
+  destructive?: boolean;
+  type?: 'separator';
+};
+
+type PanelMenuProps = ComponentPropsWithoutRef<'div'> & {
+  items: MenuItem[];
+  align?: 'left' | 'right';
+  ariaLabel?: string;
+  defaultOpen?: boolean;
+  staticOpen?: boolean;
+};
+
+type Timer = ReturnType<typeof setTimeout>;
+
 const ITEM_HEIGHT = 26; // identity constant, no token
 
 // Layout effect on the client (runs before paint so the flip lands without a
@@ -57,7 +84,7 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 // or tall menu on a phone never forces page scroll; a taller-than-viewport menu
 // scrolls internally instead of spilling off the bottom edge. boxSizing keeps
 // the border inside that cap.
-const MENU_PANEL_STYLE = {
+const MENU_PANEL_STYLE: CSSProperties = {
   minWidth: '160px', // identity constant, no token
   maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
@@ -78,15 +105,15 @@ const MENU_PANEL_STYLE = {
 // menu and any open submenu — each gets its own onKeyDown bound to its own
 // container, and stopPropagation keeps an inner submenu's keys from also
 // being handled by the parent menu.
-function handleMenuKeyDown(e) {
+function handleMenuKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
   const container = e.currentTarget;
   const itemsList = Array.from(
-    container.querySelectorAll(':scope > div > button[role="menuitem"]'),
+    container.querySelectorAll<HTMLElement>(':scope > div > button[role="menuitem"]'),
   );
   if (itemsList.length === 0) return;
 
   const current = document.activeElement;
-  const idx = itemsList.indexOf(current);
+  const idx = itemsList.indexOf(current as HTMLElement);
 
   if (e.key === 'ArrowDown') {
     e.preventDefault();
@@ -109,14 +136,14 @@ function handleMenuKeyDown(e) {
   }
 }
 
-function MenuItem({ item, onClose }) {
+function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   const [submenuOpen, setSubmenuOpen] = useState(false);
-  const itemRef = useRef(null);
-  const buttonRef = useRef(null);
-  const submenuRef = useRef(null);
-  const closeTimer = useRef(null);
+  const itemRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const submenuRef = useRef<HTMLDivElement | null>(null);
+  const closeTimer = useRef<Timer | null>(null);
 
-  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  useEffect(() => () => clearTimeout(closeTimer.current as Timer), []);
 
   // When the submenu opens via keyboard (ArrowRight), move focus into its
   // first item. Guarded by the keyboard-open flag so hover-opening the
@@ -124,7 +151,7 @@ function MenuItem({ item, onClose }) {
   const submenuOpenedByKey = useRef(false);
   useEffect(() => {
     if (submenuOpen && submenuOpenedByKey.current && submenuRef.current) {
-      const first = submenuRef.current.querySelector('button[role="menuitem"]');
+      const first = submenuRef.current.querySelector<HTMLElement>('button[role="menuitem"]');
       if (first) first.focus();
     }
     if (!submenuOpen) submenuOpenedByKey.current = false;
@@ -179,7 +206,7 @@ function MenuItem({ item, onClose }) {
   // Hover-with-grace-period so the user can move the cursor across the gap
   // between the parent item and the submenu without the submenu collapsing.
   function handleEnter() {
-    clearTimeout(closeTimer.current);
+    clearTimeout(closeTimer.current as Timer);
     if (hasSub) setSubmenuOpen(true);
   }
   function handleLeave() {
@@ -199,7 +226,7 @@ function MenuItem({ item, onClose }) {
 
   // ArrowRight opens the submenu and focuses into it; ArrowLeft (handled on
   // the submenu container) closes it and returns focus to this parent button.
-  function handleButtonKeyDown(e) {
+  function handleButtonKeyDown(e: ReactKeyboardEvent<HTMLButtonElement>) {
     if (hasSub && e.key === 'ArrowRight') {
       e.preventDefault();
       e.stopPropagation();
@@ -208,7 +235,7 @@ function MenuItem({ item, onClose }) {
     }
   }
 
-  function handleSubmenuKeyDown(e) {
+  function handleSubmenuKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       e.stopPropagation();
@@ -286,7 +313,7 @@ function MenuItem({ item, onClose }) {
             zIndex: 1001,
           }}
         >
-          {item.submenu.map((sub, i) => (
+          {item.submenu!.map((sub, i) => (
             <MenuItem key={i} item={sub} onClose={onClose} />
           ))}
         </div>
@@ -296,7 +323,7 @@ function MenuItem({ item, onClose }) {
 }
 
 /** @type {React.ForwardRefExoticComponent<PanelMenuProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const PanelMenu = forwardRef(function PanelMenu(
+export const PanelMenu = forwardRef<HTMLDivElement, PanelMenuProps>(function PanelMenu(
   { items, align = 'right', ariaLabel = 'Panel options', defaultOpen = false, staticOpen = false, className, style, ...props },
   ref,
 ) {
@@ -306,20 +333,20 @@ export const PanelMenu = forwardRef(function PanelMenu(
   // stacked under sibling table rows — and flip above the trigger when a
   // downward menu would fall off the bottom of the viewport. staticOpen (docs)
   // menus stay inline in normal flow on purpose.
-  const [coords, setCoords] = useState(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const [mounted, setMounted] = useState(false);
-  const wrapperRef = useRef(null);
-  const menuRef = useRef(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => setMounted(true), []);
   // The element to return focus to when the menu closes — captured at the
   // moment the trigger toggles the menu open (interactive open only).
-  const returnFocusRef = useRef(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   // Focus the first menuitem when the panel opens — but NEVER in staticOpen
   // mode, where multiple pinned menus would fight over focus.
   useEffect(() => {
     if (!open || staticOpen) return;
-    const first = menuRef.current?.querySelector('button[role="menuitem"]');
+    const first = menuRef.current?.querySelector<HTMLElement>('button[role="menuitem"]');
     if (first) first.focus();
   }, [open, staticOpen]);
 
@@ -336,15 +363,15 @@ export const PanelMenu = forwardRef(function PanelMenu(
     // staticOpen pins the menu open (showcase/docs) — skip the dismissers so it
     // survives outside clicks and scrolling.
     if (!open || staticOpen) return;
-    function onClick(e) {
+    function onClick(e: MouseEvent) {
       // The portaled menu lives outside the wrapper, so check it too — otherwise
       // clicking a menu item would register as an outside click and close before
       // the item fires.
-      const inWrapper = wrapperRef.current && wrapperRef.current.contains(e.target);
-      const inMenu = menuRef.current && menuRef.current.contains(e.target);
+      const inWrapper = wrapperRef.current && wrapperRef.current.contains(e.target as Node);
+      const inMenu = menuRef.current && menuRef.current.contains(e.target as Node);
       if (!inWrapper && !inMenu) setOpen(false);
     }
-    function onKey(e) {
+    function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
     }
     document.addEventListener('mousedown', onClick);
@@ -411,7 +438,7 @@ export const PanelMenu = forwardRef(function PanelMenu(
         variant="ghost"
         size="sm"
         icon={DotsThreeVertical}
-        onClick={(e) => {
+        onClick={(e: ReactMouseEvent<HTMLButtonElement>) => {
           // Capture the trigger as the focus-return target before opening.
           if (!open && !staticOpen) returnFocusRef.current = e.currentTarget;
           setOpen((o) => !o);
