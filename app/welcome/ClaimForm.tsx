@@ -25,21 +25,33 @@ export function ClaimForm() {
     setError(null)
     const supabase = createClient()
     const emailRedirectTo = `${window.location.origin}/account/auth/callback?next=${encodeURIComponent('/welcome')}`
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo, shouldCreateUser: false },
-    })
-    if (otpError) {
-      const msg = (otpError.message ?? '').toLowerCase()
-      if (msg.includes('rate') || msg.includes('too many') || (otpError as { status?: number }).status === 429) {
-        setError('Too many requests. Please wait a minute and try again.')
-        setSubmitting(false)
-        return
-      }
-      // Any other error (e.g. no account for this email) stays neutral: the
-      // sent state below reads the same either way, so the form cannot be used
-      // to probe which emails are registered.
+    const attempt = () =>
+      supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo, shouldCreateUser: false },
+      })
+    const isRateLimited = (err: { message?: string; status?: number }) => {
+      const msg = (err.message ?? '').toLowerCase()
+      return msg.includes('rate') || msg.includes('too many') || err.status === 429
     }
+
+    let { error: otpError } = await attempt()
+    if (otpError && !isRateLimited(otpError)) {
+      // A buyer can reach this form seconds after paying, ahead of the webhook
+      // that provisions their account (~2s). One silent retry covers that
+      // window; the wire already told this browser the first attempt failed,
+      // so retrying reveals nothing new.
+      await new Promise((r) => setTimeout(r, 4000))
+      ;({ error: otpError } = await attempt())
+    }
+    if (otpError && isRateLimited(otpError)) {
+      setError('Too many requests. Please wait a minute and try again.')
+      setSubmitting(false)
+      return
+    }
+    // Any other error (e.g. no account for this email) stays neutral: the sent
+    // state below reads the same either way, so the form cannot be used to
+    // probe which emails are registered.
     setSent(true)
     setSubmitting(false)
   }

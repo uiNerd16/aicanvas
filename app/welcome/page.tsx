@@ -75,14 +75,16 @@ export default async function WelcomePage() {
               You&rsquo;re Premium.
             </h1>
             <p className="mt-4 text-base leading-relaxed text-sand-300">
+              Premium is live on{' '}
               {email ? (
-                <>
-                  Premium is live on <strong className="font-semibold text-sand-50">{email}</strong>.
-                  Your install command below is ready to use.
-                </>
+                <strong className="font-semibold text-sand-50">{email}</strong>
               ) : (
-                <>Premium is live on your account. Your install command below is ready to use.</>
+                <>your account</>
               )}
+              .{' '}
+              {token
+                ? 'Your install command below is ready to use.'
+                : 'Everything is unlocked.'}
             </p>
             <PremiumQuickstart token={token} />
           </>
@@ -119,7 +121,8 @@ export default async function WelcomePage() {
             <ClaimForm />
             <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-800 bg-sand-900 px-4 py-3 text-sm text-sand-400">
               <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
-              We also emailed you a sign-in link. No email? Use the form above.
+              We also emailed you a link back to this page. The form above is all
+              you need.
             </div>
           </>
         )}

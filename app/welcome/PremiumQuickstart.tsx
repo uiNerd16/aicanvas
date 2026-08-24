@@ -97,11 +97,11 @@ export function PremiumQuickstart({ token }: { token: string | null }) {
         </>
       ) : (
         <div className="rounded-2xl border border-sand-800 bg-sand-900 p-5 text-sm leading-relaxed text-sand-300">
-          Your personal install command and MCP token live in{' '}
+          Your install token isn&rsquo;t set up yet. Check{' '}
           <Link href="/account/settings" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
             account settings
-          </Link>
-          .
+          </Link>{' '}
+          in a moment, or reach out to support if it stays missing.
         </div>
       )}
 
