@@ -1,11 +1,13 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode, useRef } from 'react'
+import Link from 'next/link'
 import { X } from '@phosphor-icons/react'
 import { PremiumCards } from './PremiumCards'
 import { PaymentMethods } from './PaymentMethods'
 import { track } from '../../lib/analytics'
 import { useDialogFocus } from '../useDialogFocus'
+import { useSession } from '../auth/SessionProvider'
 
 // ─── PaywallModalProvider ───────────────────────────────────────────────────
 // Global, full-screen upgrade modal — the paywall equivalent of AuthModal.
@@ -61,6 +63,7 @@ function PaywallModalView({
   reason,
   onClose,
 }: PaywallState & { onClose: () => void }) {
+  const { user } = useSession()
   // Metering is gone, so the modal only ever pitches Premium content now.
   // Both 'premium-only' and 'upgrade' resolve to a single Premium card; the
   // reason just tunes the heading and subtitle.
@@ -137,6 +140,23 @@ function PaywallModalView({
         <div className="mx-auto mt-5 max-w-md rounded-2xl border border-sand-800 bg-sand-900/50 px-4 py-3">
           <PaymentMethods />
         </div>
+
+        {/* Wrong-account net: a signed-in FREE user staring at this paywall may
+            have PAID under a different email (real case: OAuth sign-in with a
+            gmail address after checking out with hotmail). One line, shown only
+            when signed in, pointing at the claim flow on /welcome. */}
+        {user && (
+          <p className="mx-auto mt-4 max-w-md text-center text-xs leading-relaxed text-sand-500">
+            Paid with a different email?{' '}
+            <Link
+              href="/welcome"
+              onClick={onClose}
+              className="font-medium text-olive-400 transition-colors hover:text-olive-300"
+            >
+              Sign in with the address you used at checkout
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   )
