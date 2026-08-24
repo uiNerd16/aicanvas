@@ -427,6 +427,12 @@ export default function ResourcePlanning() {
       </MobileDrawer>
 
       <style>{`
+        /* Standalone hosts (a CLI install into a fresh app): cover the full
+           viewport so the host page never shows through below the dashboard.
+           The AI Canvas preview opts out via .aic-tpl-host — there the shell
+           sizes this element and a 100dvh floor would clip under its bar. */
+        .rp-shell { min-height: 100dvh; }
+        .aic-tpl-host .rp-shell { min-height: 0; }
         ${mq.md} {
           /* Tighter shell padding + gap so the stacked panels keep their
              breathing room without crowding the viewport edge. */

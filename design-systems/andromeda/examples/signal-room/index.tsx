@@ -110,7 +110,11 @@ export default function SignalRoom() {
         display: 'flex',
         height: '100%',
         width: '100%',
-        background: 'transparent',
+        // Paint our own surface: a CLI install lands in an arbitrary host page
+        // (often white), and a transparent shell bleeds the host through every
+        // gutter. The AI Canvas preview paints this same surface behind us, so
+        // on-site rendering is unchanged.
+        background: tokens.color.surface.base,
         fontFamily: tokens.typography.fontSans,
         color: tokens.color.text.primary,
         overflow: 'hidden',
@@ -213,6 +217,12 @@ export default function SignalRoom() {
       </MobileDrawer>
 
       <style>{`
+        /* Standalone hosts (a CLI install into a fresh app): cover the full
+           viewport so the host page never shows through below the dashboard.
+           The AI Canvas preview opts out via .aic-tpl-host — there the shell
+           sizes this element and a 100dvh floor would clip under its bar. */
+        .sr-shell { min-height: 100dvh; }
+        .aic-tpl-host .sr-shell { min-height: 0; }
         ${mq.md} {
           /* Stack the shell AND release its desktop 100vh pin: below md the
              page grows to its stacked height and the route column scrolls it as

@@ -222,7 +222,7 @@ function FramePayload({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <div className="mc-frame-viewport relative h-full w-full">
+    <div className="aic-tpl-host mc-frame-viewport relative h-full w-full">
       <style>{`
         /* Kill the "cream flash": the framed document is ALWAYS the dark
            Andromeda surface. The app paints body via background:var(--background),
@@ -338,7 +338,7 @@ function PreviewChrome({
           key={desktopNonce}
           aria-hidden={device !== 'desktop'}
           inert={device !== 'desktop'}
-          className="isolate h-full w-full"
+          className="aic-tpl-host isolate h-full w-full"
         >
           {children}
         </div>
