@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { EnvelopeSimple, Lightning } from '@phosphor-icons/react/dist/ssr'
+import { Lightning } from '@phosphor-icons/react/dist/ssr'
 import { HeaderSocials } from '../components/HeaderSocials'
 import { getSessionEntitlement } from '../lib/entitlement'
 import { createClient } from '../lib/supabase/server'
@@ -119,11 +119,9 @@ export default async function WelcomePage() {
               password needed.
             </p>
             <ClaimForm />
-            <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-800 bg-sand-900 px-4 py-3 text-sm text-sand-400">
-              <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-500" />
-              We also emailed you a link back to this page. The form above is all
-              you need.
-            </div>
+            <p className="mt-6 text-sm text-sand-500">
+              You can come back to this page and claim any time.
+            </p>
           </>
         )}
       </main>

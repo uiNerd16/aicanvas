@@ -35,6 +35,7 @@ export function ClaimForm() {
       return msg.includes('rate') || msg.includes('too many') || err.status === 429
     }
 
+    const started = Date.now()
     let { error: otpError } = await attempt()
     if (otpError && !isRateLimited(otpError)) {
       // A buyer can reach this form seconds after paying, ahead of the webhook
@@ -51,7 +52,11 @@ export function ClaimForm() {
     }
     // Any other error (e.g. no account for this email) stays neutral: the sent
     // state below reads the same either way, so the form cannot be used to
-    // probe which emails are registered.
+    // probe which emails are registered. Pad every path to the same floor so
+    // the retry above is not distinguishable by timing either.
+    const FLOOR_MS = 5000
+    const elapsed = Date.now() - started
+    if (elapsed < FLOOR_MS) await new Promise((r) => setTimeout(r, FLOOR_MS - elapsed))
     setSent(true)
     setSubmitting(false)
   }
