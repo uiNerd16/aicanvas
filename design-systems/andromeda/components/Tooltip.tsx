@@ -10,7 +10,7 @@
 'use client';
 
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { ComponentPropsWithoutRef } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 import { tokens } from '../tokens';
@@ -28,7 +28,7 @@ const EXIT_TX: Transition  = { duration: ms(tokens.motion.duration.fast),   ease
 
 /**
  * @typedef {object} TooltipProps
- * @property {string} label              Text shown in the tooltip.
+ * @property {React.ReactNode} label     Content shown in the tooltip.
  * @property {'top'|'bottom'} [position='top']
  * @property {React.ReactNode} children  The trigger element.
  * @property {string} [className]
@@ -36,7 +36,7 @@ const EXIT_TX: Transition  = { duration: ms(tokens.motion.duration.fast),   ease
  */
 
 export type TooltipProps = ComponentPropsWithoutRef<'div'> & {
-  label: string;
+  label: ReactNode;
   position?: 'top' | 'bottom';
 };
 
