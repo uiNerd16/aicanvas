@@ -83,7 +83,7 @@ export default async function WelcomePage() {
               )}
               .{' '}
               {token
-                ? 'Your install command below is ready to use.'
+                ? 'Every install command on this site now carries your personal token. Copy any of them, paste in your terminal, it just works. Premium and free.'
                 : 'Everything is unlocked.'}
             </p>
             <PremiumQuickstart token={token} />
