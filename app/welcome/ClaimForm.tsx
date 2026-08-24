@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
 
 // ─── ClaimForm ────────────────────────────────────────────────────────────────
@@ -17,6 +17,13 @@ export function ClaimForm() {
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // The sent state REPLACES the form, removing the focused submit button from
+  // the DOM. Move focus onto the confirmation so keyboard users don't drop to
+  // <body>; role="status" announces it to screen readers.
+  const sentRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (sent) sentRef.current?.focus()
+  }, [sent])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -64,7 +71,12 @@ export function ClaimForm() {
   if (sent) {
     return (
       <div className="mt-8 w-full max-w-sm">
-        <div className="rounded-lg border border-olive-500/30 bg-olive-500/10 px-4 py-3 text-left text-sm leading-relaxed text-sand-200">
+        <div
+          ref={sentRef}
+          tabIndex={-1}
+          role="status"
+          className="rounded-lg border border-olive-500/30 bg-olive-500/10 px-4 py-3 text-left text-sm leading-relaxed text-sand-200 outline-none"
+        >
           Check your inbox. If an account exists for <strong className="text-sand-50">{email}</strong>,
           a one-time sign-in link is on its way. It expires in 1 hour.
         </div>
@@ -104,7 +116,11 @@ export function ClaimForm() {
       >
         {submitting ? 'Sending…' : 'Email me my sign-in link'}
       </button>
-      {error && <p className="mt-3 text-left text-sm text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-3 text-left text-sm text-red-400">
+          {error}
+        </p>
+      )}
     </form>
   )
 }

@@ -111,13 +111,15 @@ export default async function WelcomePage() {
                   All components
                 </Link>
               </div>
-              <p className="aic-hero-rise mx-auto mt-6 flex w-full max-w-2xl items-start justify-center gap-2 text-left text-xs leading-relaxed text-sand-500" style={{ animationDelay: '0.4s' }}>
-                <Info weight="regular" size={16} className="mt-0.5 shrink-0 text-olive-400" />
-                <span>
-                  Copy install commands while signed in with this account. That is
-                  what bakes your personal token into them.
-                </span>
-              </p>
+              {token && (
+                <p className="aic-hero-rise mx-auto mt-6 flex w-full max-w-2xl items-start justify-center gap-2 text-left text-xs leading-relaxed text-sand-500" style={{ animationDelay: '0.4s' }}>
+                  <Info weight="regular" size={16} className="mt-0.5 shrink-0 text-olive-400" />
+                  <span>
+                    Copy install commands while signed in with this account. That is
+                    what bakes your personal token into them.
+                  </span>
+                </p>
+              )}
               <PremiumQuickstart token={token} />
             </>
           ) : tier === 'free' ? (
@@ -128,9 +130,9 @@ export default async function WelcomePage() {
               <p className="aic-hero-rise mt-4 max-w-2xl text-base leading-relaxed text-sand-400" style={{ animationDelay: '0.26s' }}>
                 You&rsquo;re signed in{email ? (
                   <> as <strong className="font-semibold text-sand-50">{email}</strong></>
-                ) : null}, and this account has no Premium subscription. Paid with a
-                different email at checkout? Enter that address below and we&rsquo;ll
-                send a sign-in link to your Premium account.
+                ) : null}, and Premium isn&rsquo;t active on this account. Paid with
+                a different email at checkout? Enter that address below and
+                we&rsquo;ll send a sign-in link to your Premium account.
               </p>
               <ClaimForm />
               <p className="mx-auto mt-6 flex max-w-xl items-start gap-2 text-left text-xs leading-relaxed text-sand-500">
@@ -142,6 +144,10 @@ export default async function WelcomePage() {
                 No purchase yet?{' '}
                 <Link href="/pricing" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
                   See Premium plans
+                </Link>
+                {' '}&middot; Subscribed with this email?{' '}
+                <Link href="/account/settings" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
+                  Check billing
                 </Link>
               </p>
             </>
