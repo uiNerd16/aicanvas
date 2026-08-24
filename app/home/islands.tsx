@@ -34,8 +34,8 @@ const CARD_POSITIONS = [
 
 // ─── Stacked cards visual ─────────────────────────────────────────────────────
 
-export function StackedCards() {
-  const N = HELLO_CARDS.length
+export function StackedCards({ cards = HELLO_CARDS }: { cards?: string[] } = {}) {
+  const N = cards.length
   const [startIdx, setStartIdx] = useState(0)
   // Track which card is mid-exit so we can give it a bespoke keyframe animation
   const [exitingCard, setExitingCard] = useState<number | null>(null)
@@ -57,7 +57,7 @@ export function StackedCards() {
       style={{ animationDuration: '0.5s' }}
       onClick={handleClick}
     >
-      {HELLO_CARDS.map((text, cardIdx) => {
+      {cards.map((text, cardIdx) => {
         const relPos = (cardIdx - startIdx + N) % N
         const pos = CARD_POSITIONS[relPos]
         const isFront = relPos === 0

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Lightning } from '@phosphor-icons/react/dist/ssr'
+import { ArrowRight } from '@phosphor-icons/react/dist/ssr'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { buttonClasses } from '../components/buttonClasses'
+import { StackedCards } from '../home/islands'
 import { getSessionEntitlement } from '../lib/entitlement'
 import { createClient } from '../lib/supabase/server'
 import { ClaimForm } from './ClaimForm'
@@ -13,6 +15,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+// Same visual language as the homepage hero: the tactile card stack, but every
+// card says thank you — this page only exists because someone just paid.
+const THANKS_CARDS = ['Thank you', 'Merci', 'Danke', 'Gracias', 'Grazie', 'ありがとう', '谢谢', 'Tack', '♥']
+
 // ─── /welcome ─────────────────────────────────────────────────────────────────
 // THE post-purchase page — every confirmed Paddle checkout lands here (signed-in
 // fast-path and anonymous pending-claim alike; see app/lib/paddle/client.ts).
@@ -21,7 +27,8 @@ export const metadata: Metadata = {
 //     account under the checkout email; enter it, get a one-time sign-in link.
 //     Deliberately NO OAuth here — a Google login under a different address
 //     creates a fresh free account and shows a paying buyer the paywall.
-//   • session, premium → quickstart: tokened install command, MCP token, links.
+//   • session, premium → advantage first (every install command carries your
+//     token), browse CTAs, then the quiet terminal/MCP helper card.
 //   • session, free    → mismatch view: this account holds no Premium; claim
 //     the checkout-email account instead (or see plans).
 // Claiming is self-service, so a lost/delayed claim email is never a lockout.
@@ -54,7 +61,7 @@ export default async function WelcomePage() {
 
   return (
     <div className="min-h-full bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
+      <header className="sticky top-0 z-30 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/welcome" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">
           /Welcome
@@ -64,66 +71,84 @@ export default async function WelcomePage() {
         </div>
       </header>
 
-      <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
-        <span className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-olive-500/15 text-olive-400 ring-1 ring-olive-500/30">
-          <Lightning weight="fill" size={26} />
-        </span>
+      <main className="relative mx-auto w-full min-w-0 max-w-4xl px-4 pt-6 pb-16 sm:px-6 sm:pt-12">
+        <section className="flex flex-col items-center text-center">
+          <StackedCards cards={THANKS_CARDS} />
 
-        {tier === 'premium' ? (
-          <>
-            <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
-              You&rsquo;re Premium.
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-sand-300">
-              Premium is live on{' '}
-              {email ? (
-                <strong className="font-semibold text-sand-50">{email}</strong>
-              ) : (
-                <>your account</>
-              )}
-              .{' '}
-              {token
-                ? 'Every install command on this site now carries your personal token. Copy any of them, paste in your terminal, it just works. Premium and free.'
-                : 'Everything is unlocked.'}
-            </p>
-            <PremiumQuickstart token={token} />
-          </>
-        ) : tier === 'free' ? (
-          <>
-            <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
-              Almost there.
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-sand-300">
-              You&rsquo;re signed in{email ? (
-                <> as <strong className="font-semibold text-sand-50">{email}</strong></>
-              ) : null}, and this account has no Premium subscription. Paid with a
-              different email at checkout? Enter that address below and we&rsquo;ll
-              send a sign-in link to your Premium account.
-            </p>
-            <ClaimForm />
-            <p className="mt-6 text-sm text-sand-500">
-              No purchase yet?{' '}
-              <Link href="/pricing" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
-                See Premium plans
-              </Link>
-            </p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-extrabold tracking-tight text-sand-50 sm:text-4xl">
-              Payment received. You&rsquo;re Premium.
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-sand-300">
-              Your account is ready under the email you used at checkout. Enter
-              that email and we&rsquo;ll send you a one-time sign-in link. No
-              password needed.
-            </p>
-            <ClaimForm />
-            <p className="mt-6 text-sm text-sand-500">
-              You can come back to this page and claim any time.
-            </p>
-          </>
-        )}
+          {tier !== 'free' && (
+            <span className="aic-hero-rise mb-5 inline-flex items-center rounded-full border border-sand-700 bg-sand-900 px-3 py-1 text-xs font-semibold text-sand-300" style={{ animationDelay: '0.1s' }}>
+              Thank you for supporting AI Canvas
+            </span>
+          )}
+
+          {tier === 'premium' ? (
+            <>
+              <h1 className="aic-hero-slide text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl" style={{ animationDelay: '0.18s' }}>
+                You&rsquo;re <span className="text-olive-500">Premium</span>.
+              </h1>
+              <p className="aic-hero-rise mt-4 max-w-2xl text-base leading-relaxed text-sand-400" style={{ animationDelay: '0.26s' }}>
+                Premium is live on{' '}
+                {email ? (
+                  <strong className="font-semibold text-sand-50">{email}</strong>
+                ) : (
+                  <>your account</>
+                )}
+                .{' '}
+                {token
+                  ? 'Every install command on this site now carries your personal token. Copy any of them, paste in your terminal, it just works. Premium and free.'
+                  : 'Everything is unlocked.'}
+              </p>
+              <div className="aic-hero-rise mt-7 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: '0.34s' }}>
+                <Link href="/design-systems/andromeda" className={buttonClasses({ variant: 'primary', size: 'lg' })}>
+                  Browse Andromeda
+                  <ArrowRight weight="regular" size={14} />
+                </Link>
+                <Link
+                  href="/components"
+                  className="flex items-center gap-1.5 rounded-xl border border-sand-700 px-5 py-2.5 text-sm font-semibold text-sand-300 transition-colors hover:border-sand-600 hover:text-sand-100"
+                >
+                  All components
+                </Link>
+              </div>
+              <PremiumQuickstart token={token} />
+            </>
+          ) : tier === 'free' ? (
+            <>
+              <h1 className="aic-hero-slide text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl" style={{ animationDelay: '0.18s' }}>
+                Almost there.
+              </h1>
+              <p className="aic-hero-rise mt-4 max-w-2xl text-base leading-relaxed text-sand-400" style={{ animationDelay: '0.26s' }}>
+                You&rsquo;re signed in{email ? (
+                  <> as <strong className="font-semibold text-sand-50">{email}</strong></>
+                ) : null}, and this account has no Premium subscription. Paid with a
+                different email at checkout? Enter that address below and we&rsquo;ll
+                send a sign-in link to your Premium account.
+              </p>
+              <ClaimForm />
+              <p className="mt-6 text-sm text-sand-500">
+                No purchase yet?{' '}
+                <Link href="/pricing" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
+                  See Premium plans
+                </Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="aic-hero-slide text-balance text-2xl font-extrabold tracking-tight text-sand-50 sm:text-4xl" style={{ animationDelay: '0.18s' }}>
+                Payment received. You&rsquo;re <span className="text-olive-500">Premium</span>.
+              </h1>
+              <p className="aic-hero-rise mt-4 max-w-2xl text-base leading-relaxed text-sand-400" style={{ animationDelay: '0.26s' }}>
+                Your account is ready under the email you used at checkout. Enter
+                that email and we&rsquo;ll send you a one-time sign-in link. No
+                password needed.
+              </p>
+              <ClaimForm />
+              <p className="mt-6 text-sm text-sand-500">
+                You can come back to this page and claim any time.
+              </p>
+            </>
+          )}
+        </section>
       </main>
     </div>
   )
