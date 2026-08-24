@@ -156,7 +156,8 @@ export default async function WelcomePage() {
                 password needed.
               </p>
               <ClaimForm />
-              <p className="mt-6 text-sm text-sand-500">
+              <p className="mt-6 flex items-center justify-center gap-2 text-sm text-sand-500">
+                <Info weight="regular" size={16} className="shrink-0 text-olive-400" />
                 You can come back to this page and claim any time.
               </p>
             </>
