@@ -40,7 +40,7 @@ export function PremiumQuickstart({ token }: { token: string | null }) {
 
   if (!token) {
     return (
-      <div className="mx-auto mt-10 w-full max-w-xl rounded-2xl border border-sand-800 bg-sand-900 p-5 text-left text-sm leading-relaxed text-sand-300">
+      <div className="mx-auto mt-10 w-full max-w-2xl rounded-2xl border border-sand-800 bg-sand-900 p-5 text-left text-sm leading-relaxed text-sand-300">
         Your install token isn&rsquo;t set up yet. Check{' '}
         <Link href="/account/settings" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
           account settings
@@ -51,7 +51,7 @@ export function PremiumQuickstart({ token }: { token: string | null }) {
   }
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-xl rounded-2xl border border-sand-800 bg-sand-900/50 p-5 text-left">
+    <div className="mx-auto mt-10 w-full max-w-2xl rounded-2xl border border-sand-800 bg-sand-900/50 p-5 text-left">
       <h2 className="text-sm font-semibold text-sand-200">
         Already in a terminal or setting up MCP?
       </h2>

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight } from '@phosphor-icons/react/dist/ssr'
+import { ArrowRight, Info } from '@phosphor-icons/react/dist/ssr'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { SiteFooter } from '../components/SiteFooter'
 import { buttonClasses } from '../components/buttonClasses'
 import { StackedCards } from '../home/islands'
 import { getSessionEntitlement } from '../lib/entitlement'
@@ -95,7 +96,7 @@ export default async function WelcomePage() {
                 )}
                 .{' '}
                 {token
-                  ? 'Every install command on this site now carries your personal token. Copy any of them, paste in your terminal, it just works. Premium and free.'
+                  ? 'Every install command on this site now carries your personal token. Copy any of them, paste in your terminal, it just works.'
                   : 'Everything is unlocked.'}
               </p>
               <div className="aic-hero-rise mt-7 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: '0.34s' }}>
@@ -110,6 +111,13 @@ export default async function WelcomePage() {
                   All components
                 </Link>
               </div>
+              <p className="aic-hero-rise mx-auto mt-6 flex w-full max-w-2xl items-start justify-center gap-2 text-left text-xs leading-relaxed text-sand-500" style={{ animationDelay: '0.4s' }}>
+                <Info weight="regular" size={16} className="mt-0.5 shrink-0 text-olive-400" />
+                <span>
+                  Copy install commands while signed in with this account. That is
+                  what bakes your personal token into them.
+                </span>
+              </p>
               <PremiumQuickstart token={token} />
             </>
           ) : tier === 'free' ? (
@@ -125,7 +133,12 @@ export default async function WelcomePage() {
                 send a sign-in link to your Premium account.
               </p>
               <ClaimForm />
-              <p className="mt-6 text-sm text-sand-500">
+              <p className="mx-auto mt-6 flex max-w-xl items-start gap-2 text-left text-xs leading-relaxed text-sand-500">
+                <Info weight="regular" size={16} className="mt-0.5 shrink-0 text-olive-400" />
+                Install commands only carry your personal token while you are
+                signed in with your Premium account.
+              </p>
+              <p className="mt-4 text-sm text-sand-500">
                 No purchase yet?{' '}
                 <Link href="/pricing" className="font-medium text-olive-400 transition-colors hover:text-olive-300">
                   See Premium plans
@@ -149,6 +162,8 @@ export default async function WelcomePage() {
             </>
           )}
         </section>
+
+        <SiteFooter />
       </main>
     </div>
   )
