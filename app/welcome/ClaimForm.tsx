@@ -1,0 +1,93 @@
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '../lib/supabase/client'
+
+// ─── ClaimForm ────────────────────────────────────────────────────────────────
+// The one claim path on /welcome: email in, one-time sign-in link out. This is
+// deliberately the ONLY sign-in affordance on the page — no OAuth button. A
+// buyer whose Google address differs from the checkout email would land in a
+// fresh free account and see a paywall seconds after paying (it happened); the
+// magic link can only go to the address that owns the Premium account.
+// shouldCreateUser:false keeps account creation on the deliberate sign-up path,
+// and the sent-state copy stays neutral about whether the email has an account.
+
+export function ClaimForm() {
+  const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email) return
+    setSubmitting(true)
+    setError(null)
+    const supabase = createClient()
+    const emailRedirectTo = `${window.location.origin}/account/auth/callback?next=${encodeURIComponent('/welcome')}`
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo, shouldCreateUser: false },
+    })
+    if (otpError) {
+      const msg = (otpError.message ?? '').toLowerCase()
+      if (msg.includes('rate') || msg.includes('too many') || (otpError as { status?: number }).status === 429) {
+        setError('Too many requests. Please wait a minute and try again.')
+        setSubmitting(false)
+        return
+      }
+      // Any other error (e.g. no account for this email) stays neutral: the
+      // sent state below reads the same either way, so the form cannot be used
+      // to probe which emails are registered.
+    }
+    setSent(true)
+    setSubmitting(false)
+  }
+
+  if (sent) {
+    return (
+      <div className="mt-8 w-full max-w-sm">
+        <div className="rounded-lg border border-olive-500/30 bg-olive-500/10 px-4 py-3 text-left text-sm leading-relaxed text-sand-200">
+          Check your inbox. If an account exists for <strong className="text-sand-50">{email}</strong>,
+          a one-time sign-in link is on its way. It expires in 1 hour.
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setSent(false)
+            setEmail('')
+          }}
+          className="mt-3 text-xs text-sand-500 transition-colors hover:text-sand-300"
+        >
+          Use a different email
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-8 w-full max-w-sm">
+      <label htmlFor="claim-email" className="sr-only">
+        Email you used at checkout
+      </label>
+      <input
+        id="claim-email"
+        type="email"
+        required
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email you used at checkout"
+        className="h-11 w-full rounded-lg border border-sand-700 bg-sand-900 px-4 text-sm text-sand-100 placeholder:text-sand-500 focus:border-olive-500 focus:outline-none"
+      />
+      <button
+        type="submit"
+        disabled={submitting}
+        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-olive-500 px-6 text-sm font-semibold text-sand-950 transition-colors hover:bg-olive-400 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {submitting ? 'Sending…' : 'Email me my sign-in link'}
+      </button>
+      {error && <p className="mt-3 text-left text-sm text-red-400">{error}</p>}
+    </form>
+  )
+}
