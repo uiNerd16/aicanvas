@@ -221,6 +221,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     checked = group.value === value;
     disabled = disabled || group.disabled;
     name = name ?? group.name;
+    // Inside a RadioGroup, value is required by the contract above; standalone
+    // radios never reach this call.
     onChange = () => { group.onValueChange(value as string); onCheckedChange?.(true); };
   } else {
     const isControlled = controlledChecked !== undefined;

@@ -101,7 +101,7 @@ function BrainWireframePreview() {
     if (!host) return
     let alive = true
     let raf = 0
-    let renderer: WebGLRenderer
+    let renderer: WebGLRenderer | undefined
     let onResize = () => {}
 
     ;(async () => {
@@ -114,6 +114,7 @@ function BrainWireframePreview() {
       let W = host.clientWidth || 400
       let H = host.clientHeight || 300
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' })
+      const r = renderer
       renderer.setSize(W, H)
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
       host.appendChild(renderer.domElement)
@@ -132,7 +133,7 @@ function BrainWireframePreview() {
       onResize = () => {
         W = host.clientWidth || W
         H = host.clientHeight || H
-        renderer.setSize(W, H)
+        r.setSize(W, H)
         camera.aspect = W / H
         camera.updateProjectionMatrix()
       }
@@ -175,7 +176,7 @@ function BrainWireframePreview() {
         raf = requestAnimationFrame(loop)
         const dt = Math.min(clock.getDelta(), 1 / 30)
         if (brainRoot && !reduce) brainRoot.rotation.y += dt * 0.25
-        renderer.render(scene, camera)
+        r.render(scene, camera)
       }
       loop()
     })()

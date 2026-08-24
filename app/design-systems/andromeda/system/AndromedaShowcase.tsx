@@ -1,5 +1,3 @@
-// forwardRef wrappers lack TypeScript prop types in a .tsx context.
-//
 // Sibling component (NOT a route file). Both the showcase route and
 // the ideation Andromeda landing render this so the body lives in one
 // place.

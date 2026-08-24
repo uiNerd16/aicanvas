@@ -143,7 +143,7 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   const submenuRef = useRef<HTMLDivElement | null>(null);
   const closeTimer = useRef<Timer | null>(null);
 
-  useEffect(() => () => clearTimeout(closeTimer.current as Timer), []);
+  useEffect(() => () => clearTimeout(closeTimer.current ?? undefined), []);
 
   // When the submenu opens via keyboard (ArrowRight), move focus into its
   // first item. Guarded by the keyboard-open flag so hover-opening the
@@ -206,7 +206,7 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   // Hover-with-grace-period so the user can move the cursor across the gap
   // between the parent item and the submenu without the submenu collapsing.
   function handleEnter() {
-    clearTimeout(closeTimer.current as Timer);
+    clearTimeout(closeTimer.current ?? undefined);
     if (hasSub) setSubmenuOpen(true);
   }
   function handleLeave() {
