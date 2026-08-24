@@ -8,7 +8,12 @@ import { tokens } from '../../tokens';
 import { Input } from '../../components/Input';
 import { Avatar } from '../../components/Avatar';
 
-export function Header({ searchValue, onSearchChange }) {
+export type HeaderProps = {
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+};
+
+export function Header({ searchValue, onSearchChange }: HeaderProps) {
   const [notifHovered, setNotifHovered] = useState(false);
 
   return (

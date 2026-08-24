@@ -6,6 +6,15 @@
 
 import { tokens } from '../tokens';
 
+export type AvatarSize = 'sm' | 'md' | 'lg';
+export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline';
+
+export type AvatarProps = {
+  name?: string;
+  size?: AvatarSize;
+  status?: AvatarStatus;
+};
+
 const avatarColorPool = [
   { bg: tokens.color.primary[20],  color: tokens.color.primary[70]  },
   { bg: tokens.color.success[10],  color: tokens.color.success[60]  },
@@ -14,11 +23,11 @@ const avatarColorPool = [
   { bg: tokens.color.warning[10],  color: tokens.color.warning[60]  },
 ];
 
-export function pickAvatarColor(name) {
+export function pickAvatarColor(name: string) {
   return avatarColorPool[(name.charCodeAt(0) + (name.charCodeAt(1) || 0)) % avatarColorPool.length];
 }
 
-export function Avatar({ name = '?', size = 'md', status }) {
+export function Avatar({ name = '?', size = 'md', status }: AvatarProps) {
   const initials = name
     .split(' ')
     .map(part => part[0])

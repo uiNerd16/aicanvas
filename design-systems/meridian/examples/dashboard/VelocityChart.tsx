@@ -11,12 +11,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import type { TooltipContentProps } from 'recharts';
 import { tokens } from '../../tokens';
 import { Card } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { velocityData } from './data';
 
-function VelocityTooltip({ active, payload, label }) {
+function VelocityTooltip({ active, payload, label }: Partial<TooltipContentProps>) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{

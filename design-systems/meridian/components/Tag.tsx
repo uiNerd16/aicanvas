@@ -3,9 +3,15 @@
 // ============================================================
 
 import { X } from 'lucide-react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import { tokens } from '../tokens';
 
-export function Tag({ children, onClose }) {
+export type TagProps = {
+  children?: ReactNode;
+  onClose?: MouseEventHandler<HTMLButtonElement>;
+};
+
+export function Tag({ children, onClose }: TagProps) {
   return (
     <span style={{
       display: 'inline-flex',

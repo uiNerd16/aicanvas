@@ -8,7 +8,12 @@ import { Avatar } from '../../components/Avatar';
 import { NavItem } from '../../components/NavItem';
 import { navItems } from './data';
 
-export function Sidebar({ activeNav, onNavChange }) {
+export type SidebarProps = {
+  activeNav: string;
+  onNavChange: (id: string) => void;
+};
+
+export function Sidebar({ activeNav, onNavChange }: SidebarProps) {
   return (
     <aside style={{
       width: tokens.layout.sidebarWidth,

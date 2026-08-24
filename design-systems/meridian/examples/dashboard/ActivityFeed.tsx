@@ -8,7 +8,12 @@ import { Avatar } from '../../components/Avatar';
 import { Button } from '../../components/Button';
 import { activities } from './data';
 
-function ActivityItem({ activity, isLast }) {
+type ActivityItemProps = {
+  activity: (typeof activities)[number];
+  isLast: boolean;
+};
+
+function ActivityItem({ activity, isLast }: ActivityItemProps) {
   return (
     <div style={{
       display: 'flex',

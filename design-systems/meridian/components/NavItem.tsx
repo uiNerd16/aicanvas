@@ -3,9 +3,18 @@
 // ============================================================
 
 import { useState } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { tokens } from '../tokens';
 
-export function NavItem({ icon: Icon, label, active, onClick }) {
+export type NavItemProps = {
+  icon: LucideIcon;
+  label?: ReactNode;
+  active?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+};
+
+export function NavItem({ icon: Icon, label, active, onClick }: NavItemProps) {
   const [hovered, setHovered] = useState(false);
 
   return (

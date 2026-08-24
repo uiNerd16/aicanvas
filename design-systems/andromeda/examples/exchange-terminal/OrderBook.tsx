@@ -11,7 +11,7 @@ import { IconButton } from '../../components/IconButton';
 import { Dropdown } from './Dropdown';
 import { asks, bids, tape } from './data';
 
-function InsetDivider({ side = 'bottom' }) {
+function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -28,7 +28,7 @@ function InsetDivider({ side = 'bottom' }) {
   );
 }
 
-const num = (n, d = 3) =>
+const num = (n: number, d = 3) =>
   n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 // Shared text style for all data rows.
@@ -47,7 +47,7 @@ const COL_HEADER = {
   letterSpacing: tokens.typography.tracking.widest,
 };
 
-function DepthRow({ row, side, depth }) {
+function DepthRow({ row, side, depth }: { row: (typeof asks)[number]; side: 'ask' | 'bid'; depth: number }) {
   const tint = side === 'ask' ? tokens.color.red.alpha : tokens.color.accent.alpha;
   const priceColor = side === 'ask' ? tokens.color.red[200] : tokens.color.accent[200];
   return (
@@ -85,13 +85,13 @@ function DepthRow({ row, side, depth }) {
   );
 }
 
-function maxAmount(rows) {
+function maxAmount(rows: (typeof asks)[number][]) {
   return rows.reduce((m, r) => Math.max(m, r.a), 0);
 }
 
 // Two small coloured bars stacked — represents both / asks / bids view mode.
 // Used as `children` of IconButton (custom glyph, not a phosphor icon).
-function ModeIcon({ topColor, botColor }) {
+function ModeIcon({ topColor, botColor }: { topColor: string; botColor: string }) {
   return (
     <span style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
       <span style={{ width: tokens.spacing[3], height: '3px', background: topColor }} />
