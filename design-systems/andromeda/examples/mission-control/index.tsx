@@ -136,12 +136,14 @@ export default function MissionControl() {
       </MobileDrawer>
 
       <style>{`
-        /* Standalone hosts (a CLI install into a fresh app): cover the full
-           viewport so the host page never shows through below the dashboard.
-           The AI Canvas preview opts out via .aic-tpl-host — there the shell
-           sizes this element and a 100dvh floor would clip under its bar. */
-        .mc-shell { min-height: 100dvh; }
-        .aic-tpl-host .mc-shell { min-height: 0; }
+        /* Standalone hosts (a CLI install into a fresh app): pin the shell to the
+           viewport exactly like the on-site preview does — the dashboard owns the
+           screen, panels scroll internally, the sidebar stays full-height, and
+           the host page never shows through. The AI Canvas preview opts out via
+           .aic-tpl-host: there the surrounding shell sizes this element. The
+           mobile block below still releases the pin on phones. */
+        .mc-shell { height: 100dvh !important; min-height: 100dvh; }
+        .aic-tpl-host .mc-shell { height: 100% !important; min-height: 0; }
         ${mq.md} {
           /* Stack the shell top-to-bottom AND release its desktop 100vh pin:
              below md the dashboard grows to its stacked height and the route
