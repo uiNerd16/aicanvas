@@ -522,7 +522,7 @@ function OrderTabs() {
           whiteSpace: 'nowrap',
         }}
       >
-        /// Andromeda Exchange
+        {'/// Andromeda Exchange'}
       </span>
     </div>
   );
