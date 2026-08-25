@@ -463,6 +463,10 @@ export default function ServiceOrder() {
             min-height: 100dvh !important;
             overflow: visible !important;
           }
+          /* The on-site opt-out above is more specific than .so-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .so-shell { height: auto !important; }
           .so-main { overflow-y: visible !important; }
           /* Bento collapses to a single column; the two panels stack
              top-to-bottom (metadata, then SLA) in source order. */

@@ -240,6 +240,10 @@ export default function SignalRoom() {
             gap: ${tokens.spacing[3]} !important;
             padding: ${tokens.spacing[3]} !important;
           }
+          /* The on-site opt-out above is more specific than .sr-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .sr-shell { height: auto !important; }
           /* Desktop sidebar hidden — its content lives in the Drawer. */
           .sr-sidebar { display: none !important; }
           .sr-main-col { overflow: visible !important; gap: ${tokens.spacing[3]} !important; }

@@ -451,6 +451,10 @@ export default function ResourcePlanning() {
             min-height: 100dvh !important;
             overflow-y: auto !important;
           }
+          /* The on-site opt-out above is more specific than .rp-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .rp-shell { height: auto !important; }
           /* Bento grid collapses to ONE column; rows flow top-to-bottom in
              source order (Capacity → Requests → Allocation → Table). Rows
              become content-sized (auto) and the grid itself scrolls

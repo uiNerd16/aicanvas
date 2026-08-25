@@ -1,7 +1,7 @@
 // ============================================================
 // MISSION CONTROL
-// Composition shell. Background is intentionally transparent —
-// drop in any image at the page route level.
+// Composition shell. Paints its own surface and, on standalone hosts,
+// pins itself to the viewport (see the <style> block at the bottom).
 //
 // Only the Overview section is wired up. The other sidebar items
 // (Telemetry, Vehicles, Comms, Anomalies, Maintenance) remain
@@ -159,6 +159,10 @@ export default function MissionControl() {
             gap: ${tokens.spacing[3]} !important;
             padding: ${tokens.spacing[3]} !important;
           }
+          /* The on-site opt-out above is more specific than .mc-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .mc-shell { height: auto !important; }
           /* Desktop sidebar hidden — its content lives in the Drawer. */
           .mc-sidebar { display: none !important; }
           .mc-main-col { overflow: visible !important; gap: ${tokens.spacing[3]} !important; }
