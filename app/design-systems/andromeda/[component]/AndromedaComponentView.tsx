@@ -15,6 +15,7 @@ import {
   Terminal,
 } from '@phosphor-icons/react'
 import { Step } from '../../../components/Step'
+import { copyText } from '../../../components/useCopied'
 import { SiteFooter } from '../../../components/SiteFooter'
 import { Button } from '../../../components/Button'
 import { SaveButton } from '../../../components/SaveButton'
@@ -449,7 +450,7 @@ export function AndromedaComponentView({
                             : pkgManager === 'yarn'
                             ? `yarn dlx shadcn@latest add ${installReference}`
                             : `npx shadcn@latest add ${installReference}`
-                          navigator.clipboard.writeText(cmd)
+                          void copyText(cmd)
                           trackInstall(registrySlug, 'andromeda', pkgManager)
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
@@ -498,7 +499,7 @@ export function AndromedaComponentView({
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('<html class="dark">')
+                        void copyText('<html class="dark">')
                         setDarkCopied(true)
                         setTimeout(() => setDarkCopied(false), 2000)
                       }}

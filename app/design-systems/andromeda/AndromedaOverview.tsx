@@ -179,7 +179,11 @@ function BrainWireframePreview() {
         r.render(scene, camera)
       }
       loop()
-    })()
+      // Constructing the renderer above throws on a browser with no webgl2
+      // context, and an async block with nothing attached turns that into an
+      // unhandled rejection. The decoration simply does not appear; the page
+      // around it is unaffected.
+    })().catch(() => {})
 
     return () => {
       alive = false

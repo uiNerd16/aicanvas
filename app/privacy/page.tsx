@@ -226,7 +226,9 @@ export default function PrivacyPage() {
             also measure site usage ourselves, without cookies: our own server
             collects page views (path, referrer, country and region), clicks on
             key buttons (for example copying an install command), searches on
-            the site (the typed query and its result count), and script errors,
+            the site (the typed query and its result count), script errors in
+            your browser, and errors raised on our own server while handling a
+            request (the affected route, the error message and an error id),
             and stores them as anonymous events in our analytics tool. Every
             such event carries at most a country and region. Nothing is stored
             on or read from your device for this, no visitor identifier is
