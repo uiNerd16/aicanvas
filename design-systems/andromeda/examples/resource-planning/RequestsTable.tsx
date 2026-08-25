@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // RESOURCE PLANNING · RequestsTable
 // Filter tabs, search field, and the request log itself. Rows
@@ -10,6 +9,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { MagnifyingGlass, CaretUp } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
@@ -50,13 +50,20 @@ const rowSeparatorStyle = {
 // motion.span with a shared `layoutId`. Framer animates it between
 // tabs as `active` flips — the wrapping <LayoutGroup> in the parent
 // scopes the layoutId so two filter strips don't fight each other.
-const ms = (v) => parseInt(v, 10) / 1000;
+const ms = (v: string) => parseInt(v, 10) / 1000;
 const FILTER_TX = {
   duration: ms(tokens.motion.duration.slow),
   ease: easingArray(tokens.motion.easing.standard),
 };
 
-function FilterTab({ label, count, active, onClick }) {
+type FilterTabProps = {
+  label: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+};
+
+function FilterTab({ label, count, active, onClick }: FilterTabProps) {
   return (
     <button
       type="button"
@@ -115,7 +122,13 @@ function FilterTab({ label, count, active, onClick }) {
 // verticalAlign:'top' so the header label's top edge aligns with the
 // checkbox column's top edge (which also uses 'top'); padding-top
 // matches the row cells so the rhythm reads as a single grid.
-function ColHeader({ children, sorted, align = 'left' }) {
+type ColHeaderProps = {
+  children: ReactNode;
+  sorted?: boolean;
+  align?: 'left' | 'right';
+};
+
+function ColHeader({ children, sorted, align = 'left' }: ColHeaderProps) {
   return (
     <th
       style={{
@@ -144,7 +157,7 @@ function ColHeader({ children, sorted, align = 'left' }) {
 export function RequestsTable() {
   const [activeFilter, setActiveFilter] = useState('pending');
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState(() => new Set());
+  const [selected, setSelected] = useState(() => new Set<string>());
 
   const filtered = requestRows.filter((r) => {
     if (activeFilter !== 'all' && activeFilter !== 'recent' && r.status !== activeFilter) return false;
@@ -158,7 +171,7 @@ export function RequestsTable() {
   const filteredKeys = filtered.map((r) => r.team);
   const allSelected = filteredKeys.length > 0 && filteredKeys.every((k) => selected.has(k));
 
-  function toggleRow(key) {
+  function toggleRow(key: string) {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -167,7 +180,7 @@ export function RequestsTable() {
     });
   }
 
-  function toggleAll(next) {
+  function toggleAll(next: boolean) {
     setSelected((prev) => {
       const out = new Set(prev);
       if (next) filteredKeys.forEach((k) => out.add(k));

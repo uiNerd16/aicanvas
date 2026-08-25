@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Now Transmitting
 // Hero panel. Replaces the Spotify "Sound without limits"
@@ -59,7 +58,7 @@ export function NowTransmitting() {
                   letterSpacing: tokens.typography.tracking.widest,
                 }}
               >
-                /// Featured stream
+                {'/// Featured stream'}
               </span>
               <h2
                 className="sr-hero-title"
@@ -121,7 +120,7 @@ export function NowTransmitting() {
                   letterSpacing: tokens.typography.tracking.widest,
                 }}
               >
-                /// Waveform
+                {'/// Waveform'}
               </span>
               <span
                 style={{

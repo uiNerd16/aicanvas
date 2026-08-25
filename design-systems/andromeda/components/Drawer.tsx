@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Drawer
 // shadcn/ui-aligned API: controlled (`open`/`onOpenChange`),
@@ -34,27 +33,36 @@ import {
   useState,
   createContext,
 } from 'react';
+import type {
+  CSSProperties,
+  ComponentPropsWithoutRef,
+  KeyboardEvent as ReactKeyboardEvent,
+  ReactNode,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { HTMLMotionProps } from 'framer-motion';
 import { cn, andromedaVars, easingArray } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
 import { tokens } from '../tokens';
 
 // Shares the dialog's accessible-name / description ids from the Drawer root
 // down to DrawerTitle / DrawerDescription so they can wire `id` ↔ `aria-*`.
-const DrawerContext = createContext({ titleId: undefined, descId: undefined });
+const DrawerContext = createContext<{ titleId?: string; descId?: string }>({ titleId: undefined, descId: undefined });
 
 // Focusable-element selector for the focus trap + initial focus move-in.
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-const ms = (v) => parseInt(v, 10) / 1000;
+const ms = (v: string) => parseInt(v, 10) / 1000;
 const PANEL_DURATION = ms(tokens.motion.duration.slow);
 // framer boundary: derived from tokens, cannot follow runtime var overrides
 const EASE_OUT = easingArray(tokens.motion.easing.out);
 const EASE_IN  = easingArray(tokens.motion.easing.in);
 
-const SIDE_MAP = {
+type DrawerSide = 'left' | 'right' | 'top' | 'bottom';
+
+const SIDE_MAP: Record<DrawerSide, { axis: 'x' | 'y'; sign: number; position: string }> = {
   right:  { axis: 'x', sign:  1, position: 'right-0 top-0 bottom-0 h-full' },
   left:   { axis: 'x', sign: -1, position: 'left-0 top-0 bottom-0 h-full'  },
   top:    { axis: 'y', sign: -1, position: 'top-0 left-0 right-0 w-full'   },
@@ -72,8 +80,20 @@ const SIDE_MAP = {
  * @property {React.CSSProperties} [style] Inline styles merged onto the panel element.
  */
 
+type DrawerOwnProps = {
+  open: boolean;
+  onOpenChange?: (next: boolean) => void;
+  side?: DrawerSide;
+  size?: number | string;
+  children?: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+};
+
+export type DrawerProps = DrawerOwnProps & Omit<HTMLMotionProps<'div'>, keyof DrawerOwnProps>;
+
 /** @type {React.ForwardRefExoticComponent<DrawerProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const Drawer = forwardRef(function Drawer(
+export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
   {
     open,
     onOpenChange,
@@ -96,8 +116,8 @@ export const Drawer = forwardRef(function Drawer(
   const descId = `${reactId}-desc`;
 
   // Panel node + the element focused before opening (to restore focus on close).
-  const panelRef = useRef(null);
-  const previouslyFocusedRef = useRef(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   // ── Focus return — capture the trigger on open, restore it on close. ─────
   // Capturing in a layout-ish effect keyed on `open` grabs document.activeElement
@@ -106,7 +126,7 @@ export const Drawer = forwardRef(function Drawer(
   useEffect(() => {
     if (!open) return undefined;
     previouslyFocusedRef.current =
-      typeof document !== 'undefined' ? document.activeElement : null;
+      typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
     return () => {
       const el = previouslyFocusedRef.current;
       previouslyFocusedRef.current = null;
@@ -123,7 +143,7 @@ export const Drawer = forwardRef(function Drawer(
     if (!open || !canPortal) return;
     const panel = panelRef.current;
     if (!panel) return;
-    const first = panel.querySelector(FOCUSABLE_SELECTOR);
+    const first = panel.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
     if (first && typeof first.focus === 'function') {
       first.focus();
     } else if (typeof panel.focus === 'function') {
@@ -132,12 +152,12 @@ export const Drawer = forwardRef(function Drawer(
   }, [open, canPortal]);
 
   // ── Focus trap — wrap Tab / Shift+Tab so focus can't leave the panel. ────
-  const onPanelKeyDown = (e) => {
+  const onPanelKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'Tab') return;
     const panel = panelRef.current;
     if (!panel) return;
     const focusable = Array.from(
-      panel.querySelectorAll(FOCUSABLE_SELECTOR),
+      panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
     ).filter((el) => el.offsetParent !== null || el === panel);
     if (focusable.length === 0) {
       // Nothing focusable inside — keep focus pinned to the panel itself.
@@ -170,7 +190,7 @@ export const Drawer = forwardRef(function Drawer(
   // ── ESC to close ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onOpenChange?.(false);
     };
     document.addEventListener('keydown', onKey);
@@ -202,7 +222,7 @@ export const Drawer = forwardRef(function Drawer(
           <div
             key="drawer-root"
             data-slot="drawer-root"
-            style={{ ...andromedaVars() }}
+            style={{ ...andromedaVars() } as CSSProperties}
             className="fixed inset-0 z-[1000]"
           >
             {/* Backdrop */}
@@ -264,7 +284,7 @@ export const Drawer = forwardRef(function Drawer(
   );
 });
 
-export const DrawerHeader = forwardRef(function DrawerHeader(
+export const DrawerHeader = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function DrawerHeader(
   { className, children, ...props },
   ref,
 ) {
@@ -285,7 +305,7 @@ export const DrawerHeader = forwardRef(function DrawerHeader(
   );
 });
 
-export const DrawerTitle = forwardRef(function DrawerTitle(
+export const DrawerTitle = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function DrawerTitle(
   { className, children, id, ...props },
   ref,
 ) {
@@ -310,7 +330,7 @@ export const DrawerTitle = forwardRef(function DrawerTitle(
   );
 });
 
-export const DrawerDescription = forwardRef(function DrawerDescription(
+export const DrawerDescription = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function DrawerDescription(
   { className, children, id, ...props },
   ref,
 ) {
@@ -333,7 +353,7 @@ export const DrawerDescription = forwardRef(function DrawerDescription(
   );
 });
 
-export const DrawerBody = forwardRef(function DrawerBody(
+export const DrawerBody = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function DrawerBody(
   { className, children, ...props },
   ref,
 ) {
@@ -353,7 +373,7 @@ export const DrawerBody = forwardRef(function DrawerBody(
   );
 });
 
-export const DrawerFooter = forwardRef(function DrawerFooter(
+export const DrawerFooter = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(function DrawerFooter(
   { className, children, ...props },
   ref,
 ) {

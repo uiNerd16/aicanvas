@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // RESOURCE PLANNING
 // Composition shell. Top bar (brand + nav + actions), status bar
@@ -43,6 +42,7 @@ import { Button } from '../../components/Button';
 import { NavItem } from '../../components/NavItem';
 import { DateRangePicker } from '../../components/DateRangePicker';
 import { UserMenu } from '../../components/UserMenu';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
@@ -70,7 +70,7 @@ function HoverStyles() {
 }
 
 // ─── User menu items (shared shape with mission-control / service-order) ─
-const userMenuItems = [
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
@@ -132,7 +132,7 @@ function TopNav() {
 // left Drawer below `mq.md`. Selecting a row closes the drawer. LayoutGroup
 // scopes NavItem's active-dot layoutId so the drawer copy can't fight the
 // (hidden) desktop strip for the shared animation.
-function DrawerNav({ onNavigate }) {
+function DrawerNav({ onNavigate }: { onNavigate: () => void }) {
   return (
     <LayoutGroup id="rp-drawer-nav">
       <nav style={{ display: 'flex', flexDirection: 'column' }}>
@@ -251,7 +251,7 @@ function StatusBar() {
     start: new Date(2026, 6, 20),
     end:   new Date(2026, 7, 20),
   });
-  const [presetLabel, setPresetLabel] = useState('Last month');
+  const [presetLabel, setPresetLabel] = useState<string | null>('Last month');
 
   return (
     <div
@@ -270,7 +270,7 @@ function StatusBar() {
 
       <DateRangePicker
         value={range}
-        presetLabel={presetLabel}
+        presetLabel={presetLabel ?? undefined}
         onChange={(next) => {
           setRange(next);
           setPresetLabel(null);
@@ -427,6 +427,14 @@ export default function ResourcePlanning() {
       </MobileDrawer>
 
       <style>{`
+        /* Standalone hosts (a CLI install into a fresh app): pin the shell to the
+           viewport exactly like the on-site preview does — the dashboard owns the
+           screen, panels scroll internally, the sidebar stays full-height, and
+           the host page never shows through. The AI Canvas preview opts out via
+           .aic-tpl-host: there the surrounding shell sizes this element. The
+           mobile block below still releases the pin on phones. */
+        .rp-shell { height: 100dvh !important; min-height: 100dvh; }
+        .aic-tpl-host .rp-shell { height: 100% !important; min-height: 0; }
         ${mq.md} {
           /* Tighter shell padding + gap so the stacked panels keep their
              breathing room without crowding the viewport edge. */
@@ -443,6 +451,10 @@ export default function ResourcePlanning() {
             min-height: 100dvh !important;
             overflow-y: auto !important;
           }
+          /* The on-site opt-out above is more specific than .rp-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .rp-shell { height: auto !important; }
           /* Bento grid collapses to ONE column; rows flow top-to-bottom in
              source order (Capacity → Requests → Allocation → Table). Rows
              become content-sized (auto) and the grid itself scrolls

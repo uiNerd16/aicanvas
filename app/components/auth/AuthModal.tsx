@@ -4,15 +4,11 @@ import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { X } from '@phosphor-icons/react'
 import { Button } from '../Button'
+import { useDialogFocus } from '../useDialogFocus'
 import { useAuthModal } from './AuthModalProvider'
 import { AuthGateScreen } from './AuthGateScreen'
 import { SignInFormFields } from './SignInFormFields'
 import { SignUpFormFields } from './SignUpFormFields'
-
-// Focusable selector — anything keyboard users can land on. The Tab handler
-// uses this to find the first/last elements inside the dialog for wrap-around.
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 // ─── AuthModal ────────────────────────────────────────────────────────────────
 // Global auth dialog. Opens via useAuthModal().open() and closes on X click
@@ -48,43 +44,11 @@ export function AuthModal() {
     }
   }, [isOpen])
 
-  // Focus management while open:
-  //   1. Capture the element that triggered the modal so we can restore
-  //      focus to it on close (cleanup runs when `isOpen` flips false).
-  //   2. Trap Tab inside the dialog so keyboard users don't accidentally
-  //      tab into the page beneath while still in the auth flow.
-  // Initial focus is provided by the form's `autoFocus` on the email input,
-  // so we don't force-focus anything ourselves on open.
-  useEffect(() => {
-    if (!isOpen) return
-    const previouslyFocused = document.activeElement as HTMLElement | null
-
-    function onKey(e: KeyboardEvent) {
-      if (e.key !== 'Tab') return
-      const dialog = dialogRef.current
-      if (!dialog) return
-      const focusables = Array.from(
-        dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      ).filter((el) => !el.hasAttribute('aria-hidden'))
-      if (focusables.length === 0) return
-      const first = focusables[0]
-      const last = focusables[focusables.length - 1]
-      const active = document.activeElement as HTMLElement | null
-      if (e.shiftKey && (active === first || !dialog.contains(active))) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      previouslyFocused?.focus?.()
-    }
-  }, [isOpen])
+  // Focus management while open: the shared dialog contract (Tab trap with
+  // wrap-around, focus restored to the opener on close). Initial focus is
+  // provided by the form's `autoFocus` on the email input, so we don't
+  // force-focus anything ourselves on open.
+  useDialogFocus(dialogRef, isOpen)
 
   if (!isOpen) return null
 

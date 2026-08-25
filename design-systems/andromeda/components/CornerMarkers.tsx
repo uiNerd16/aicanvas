@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: CornerMarkers
 // shadcn/ui-aligned API: forwardRef, className, ...props.
@@ -19,6 +18,7 @@
 'use client';
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { cn } from './lib/utils';
 import { tokens } from '../tokens';
 
@@ -32,8 +32,30 @@ import { tokens } from '../tokens';
  * @property {string} [className]
  */
 
+export type CornerMarkersProps = ComponentPropsWithoutRef<'div'> & {
+  size?: number;
+  offset?: number;
+  borderWidth?: number;
+  color?: string;
+  radius?: number;
+};
+
+type MarkerRadiusProp = Extract<
+  keyof CSSProperties,
+  'borderTopLeftRadius' | 'borderTopRightRadius' | 'borderBottomLeftRadius' | 'borderBottomRightRadius'
+>;
+
+type MarkerPosition = {
+  key: string;
+  radiusProp: MarkerRadiusProp;
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+};
+
 /** @type {React.ForwardRefExoticComponent<CornerMarkersProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const CornerMarkers = forwardRef(function CornerMarkers(
+export const CornerMarkers = forwardRef<HTMLDivElement, CornerMarkersProps>(function CornerMarkers(
   { size, offset, borderWidth, color, radius, className, ...props },
   ref,
 ) {
@@ -54,7 +76,7 @@ export const CornerMarkers = forwardRef(function CornerMarkers(
 
   // Each marker is an L-shape: only the two borders that meet at its corner,
   // and the OUTER corner (where they meet) carries the curve.
-  const positions = [
+  const positions: MarkerPosition[] = [
     { key: 'tl', radiusProp: 'borderTopLeftRadius',     top:    o, left:  o },
     { key: 'tr', radiusProp: 'borderTopRightRadius',    top:    o, right: o },
     { key: 'bl', radiusProp: 'borderBottomLeftRadius',  bottom: o, left:  o },

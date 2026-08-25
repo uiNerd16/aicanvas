@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL · Next Destination widget
 // Full-width row that sits under the VehiclesTable + CommsLog row.
@@ -37,7 +36,7 @@ export function NextDestination() {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            /// Heading
+            {'/// Heading'}
           </span>
           <CardTitle>Next Destination</CardTitle>
         </div>

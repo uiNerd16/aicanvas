@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Row 3 right — Comms Log
 // ============================================================
@@ -46,7 +45,7 @@ const dirConfig = {
   },
 };
 
-function CommsItem({ entry, isLast }) {
+function CommsItem({ entry, isLast }: { entry: (typeof commsLog)[number]; isLast: boolean }) {
   const cfg = dirConfig[entry.dir];
   const Icon = cfg.icon;
 
@@ -130,7 +129,7 @@ export function CommsLog() {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            /// Channel
+            {'/// Channel'}
           </span>
           <span style={{
             fontFamily: tokens.typography.fontMono,

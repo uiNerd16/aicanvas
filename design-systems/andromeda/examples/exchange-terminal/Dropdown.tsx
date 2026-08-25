@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL · Dropdown
 // Lightweight chevron-menu primitive used by every "▾" trigger
@@ -9,8 +8,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+
+type DropdownProps = {
+  label: ReactNode;
+  items: string[];
+  align?: 'left' | 'right';
+  active?: boolean;
+  variant?: 'nav' | 'tab' | 'chip' | 'chunk';
+  leadingBadge?: ReactNode;
+  iconSize?: number;
+  selected?: string | null;
+  onSelect?: (item: string) => void;
+};
 
 export function Dropdown({
   label,
@@ -22,16 +34,16 @@ export function Dropdown({
   iconSize = 10,
   selected = null,  // optional: highlight the active item by label
   onSelect,
-}) {
+}: DropdownProps) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    function handleEsc(e) {
+    function handleEsc(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
     }
     document.addEventListener('mousedown', handleClick);

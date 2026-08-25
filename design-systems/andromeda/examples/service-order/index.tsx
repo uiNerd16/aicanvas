@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SERVICE ORDER
 // Composition shell. Top bar (brand + nav + connection + avatar),
@@ -39,6 +38,7 @@ import { IconButton } from '../../components/IconButton';
 import { NavItem } from '../../components/NavItem';
 import { Tooltip } from '../../components/Tooltip';
 import { UserMenu } from '../../components/UserMenu';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { MobileTopBar, MobileDrawer } from '../_shared/TemplateMobileChrome';
 import { useCascadeProps } from '../../components/lib/motion';
 import { AndromedaIcon } from '../../AndromedaIcon';
@@ -64,7 +64,7 @@ function HoverStyles() {
 // Drawer nav (mobile) — the same nav items as the desktop strip, rendered as
 // Andromeda NavItems inside the left Drawer so the drawer reads like the other
 // templates' drawers. LayoutGroup scopes NavItem's active-dot layoutId.
-function SoDrawerNav({ onNavigate }) {
+function SoDrawerNav({ onNavigate }: { onNavigate: () => void }) {
   return (
     <LayoutGroup id="so-drawer-nav">
       <nav style={{ display: 'flex', flexDirection: 'column' }}>
@@ -76,7 +76,10 @@ function SoDrawerNav({ onNavigate }) {
   );
 }
 
-function NavLinks({ orientation = 'horizontal', onNavigate }) {
+function NavLinks({ orientation = 'horizontal', onNavigate }: {
+  orientation?: 'horizontal' | 'vertical';
+  onNavigate?: () => void;
+}) {
   const vertical = orientation === 'vertical';
   return (
     <nav
@@ -145,7 +148,7 @@ function NavLinks({ orientation = 'horizontal', onNavigate }) {
 }
 
 // ── User menu items (shared shape with mission-control / resource-planning) ─
-const userMenuItems = [
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
@@ -442,6 +445,14 @@ export default function ServiceOrder() {
       </MobileDrawer>
 
       <style>{`
+        /* Standalone hosts (a CLI install into a fresh app): pin the shell to the
+           viewport exactly like the on-site preview does — the dashboard owns the
+           screen, panels scroll internally, the sidebar stays full-height, and
+           the host page never shows through. The AI Canvas preview opts out via
+           .aic-tpl-host: there the surrounding shell sizes this element. The
+           mobile block below still releases the pin on phones. */
+        .so-shell { height: 100dvh !important; min-height: 100dvh; }
+        .aic-tpl-host .so-shell { height: 100% !important; min-height: 0; }
         ${mq.md} {
           /* Below md the shell releases its desktop pin: it grows to content
              height and the ROUTE COLUMN scrolls the page as one document
@@ -452,6 +463,10 @@ export default function ServiceOrder() {
             min-height: 100dvh !important;
             overflow: visible !important;
           }
+          /* The on-site opt-out above is more specific than .so-shell, so the
+             phone release must be repeated at that specificity or the site's
+             mobile preview would stay pinned. */
+          .aic-tpl-host .so-shell { height: auto !important; }
           .so-main { overflow-y: visible !important; }
           /* Bento collapses to a single column; the two panels stack
              top-to-bottom (metadata, then SLA) in source order. */

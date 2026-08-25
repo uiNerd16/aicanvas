@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: PanelHeader
 // Title row that sits at the top of a panel — sentence-case mono
@@ -16,6 +15,7 @@
 'use client';
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { tokens } from '../tokens';
 import { cn } from './lib/utils';
 import { mq } from './lib/responsive';
@@ -28,8 +28,13 @@ import { mq } from './lib/responsive';
  * @property {React.CSSProperties} [style]
  */
 
+export type PanelHeaderProps = Omit<ComponentPropsWithoutRef<'div'>, 'title'> & {
+  title: ReactNode;
+  actions?: ReactNode;
+};
+
 /** @type {React.ForwardRefExoticComponent<PanelHeaderProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const PanelHeader = forwardRef(function PanelHeader(
+export const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(function PanelHeader(
   { title, actions, className, style, ...props },
   ref,
 ) {

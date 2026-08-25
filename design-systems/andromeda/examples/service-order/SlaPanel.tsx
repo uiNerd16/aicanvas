@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SERVICE ORDER · SlaPanel
 // Right panel — standalone. surface.raised bg, accent corner
@@ -60,10 +59,10 @@ export function SlaPanel() {
   useEffect(() => {
     // After the grid has finished its stagger, count up the percentage to the
     // initial value. Then hand off to the live drift.
-    let rafId;
+    let rafId: number | undefined;
     const startTimer = setTimeout(() => {
       const start = performance.now();
-      const tick = (now) => {
+      const tick = (now: number) => {
         const t = Math.min(1, (now - start) / PERCENT_DURATION);
         // ease-out cubic — fast start, gentle settle
         const eased = 1 - Math.pow(1 - t, 3);

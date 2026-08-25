@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Row 3 left — Vehicles Table
 // ============================================================
@@ -8,12 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { Card, CardHeader } from '../../components/Card';
 import { Badge } from '../../components/Badge';
+import type { BadgeProps } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { rowContainer, rowItem } from '../../components/lib/motion';
 import { vehicles, vehicleStatusLabel } from './data';
 
+type Vehicle = (typeof vehicles)[number];
+
 // Local map: data status → Badge variant
-const vehicleBadgeVariant = {
+const vehicleBadgeVariant: Record<keyof typeof vehicleStatusLabel, BadgeProps['variant']> = {
   active:  'accent',
   standby: 'default',
   caution: 'warning',
@@ -39,7 +41,7 @@ const headerSeparatorStyle = {
   backgroundRepeat: 'no-repeat',
 };
 
-function VehicleRow({ vehicle, isLast }) {
+function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -112,7 +114,7 @@ function VehicleRow({ vehicle, isLast }) {
   );
 }
 
-export function VehiclesTable({ className }) {
+export function VehiclesTable({ className }: { className?: string }) {
   return (
     <Card className={className} style={{ flex: '0 0 calc(65% - 10px)', minWidth: 0 }}>
       <CardHeader>
@@ -124,7 +126,7 @@ export function VehiclesTable({ className }) {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            /// Fleet
+            {'/// Fleet'}
           </span>
           <span style={{
             fontFamily: tokens.typography.fontMono,
@@ -152,13 +154,13 @@ export function VehiclesTable({ className }) {
         <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={headerSeparatorStyle}>
-            {[
+            {([
               { label: 'Callsign',     align: 'left'  },
               { label: 'Type',         align: 'left'  },
               { label: 'Status',       align: 'left'  },
               { label: 'Distance',     align: 'right' },
               { label: 'Last Contact', align: 'right' },
-            ].map((col, i) => (
+            ] as const).map((col, i) => (
               <th key={i} style={{
                 padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
                 textAlign: col.align,

@@ -1,6 +1,3 @@
-// @ts-nocheck — design-systems components are not type-checked yet
-// (see design-systems/CLAUDE.md). Demos consume those components, so this
-// file inherits the same posture.
 'use client'
 
 import { useState } from 'react'
@@ -220,7 +217,7 @@ function CardDemo() {
                 letterSpacing: tokens.typography.tracking.widest,
               }}
             >
-              /// Default
+              {'/// Default'}
             </span>
             <CardTitle>Default card</CardTitle>
           </div>
@@ -247,7 +244,7 @@ function CardDemo() {
                 letterSpacing: tokens.typography.tracking.widest,
               }}
             >
-              /// Glow
+              {'/// Glow'}
             </span>
             <CardTitle>Highlight card</CardTitle>
           </div>
@@ -371,9 +368,9 @@ function ProgressBarDemo() {
 }
 
 // Organic demo telemetry — deterministic (no Math.random) so SSR/client agree.
-const _tdFract = (x) => x - Math.floor(x)
-const _tdNoise = (i, s) => _tdFract(Math.sin((i + 1) * 12.9898 + s * 78.233) * 43758.5453)
-const _tdClamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
+const _tdFract = (x: number) => x - Math.floor(x)
+const _tdNoise = (i: number, s: number) => _tdFract(Math.sin((i + 1) * 12.9898 + s * 78.233) * 43758.5453)
+const _tdClamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 const TREND_DATA = Array.from({ length: 18 }, (_, i) => {
   const planned = _tdClamp(
     Math.round(120 + Math.sin(i / 4) * 14 + Math.sin(i / 1.7 + 1) * 9 + (_tdNoise(i, 1) - 0.5) * 26),
@@ -896,7 +893,7 @@ function DateRangePickerDemo() {
       <Row label="Range">
         <DateRangePicker
           value={range}
-          presetLabel={presetLabel}
+          presetLabel={presetLabel ?? undefined}
           onChange={(next) => {
             setRange(next)
             setPresetLabel(null)
@@ -1078,7 +1075,7 @@ export function AndromedaDemo({ slug }: { slug: string }) {
           letterSpacing: tokens.typography.tracking.wider,
         }}
       >
-        /// No demo wired for "{slug}"
+        {'/// No demo wired for "'}{slug}{'"'}
       </div>
     )
   }

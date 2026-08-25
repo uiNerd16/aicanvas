@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Row 2 right — Subsystem Status
 // ============================================================
@@ -6,24 +5,28 @@
 import { tokens } from '../../tokens';
 import { Card, CardHeader, CardContent } from '../../components/Card';
 import { Badge } from '../../components/Badge';
+import type { BadgeProps } from '../../components/Badge';
 import { ProgressBar } from '../../components/ProgressBar';
+import type { ProgressBarProps } from '../../components/ProgressBar';
 import { systems } from './data';
 
+type SystemState = (typeof systems)[number]['status'];
+
 // Map data-level status names → new Badge variants
-const statusBadgeVariant = {
+const statusBadgeVariant: Record<SystemState, BadgeProps['variant']> = {
   nominal: 'accent',
   caution: 'warning',
   fault:   'fault',
 };
 
-const statusLabel = {
+const statusLabel: Record<SystemState, string> = {
   nominal: 'OK',
   caution: 'Caution',
   fault:   'Fault',
 };
 
 // Map data-level status names → new ProgressBar variants
-const progressVariant = {
+const progressVariant: Record<SystemState, ProgressBarProps['variant']> = {
   nominal: 'default',
   caution: 'warning',
   fault:   'fault',
@@ -41,7 +44,7 @@ export function SystemStatus() {
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
-            /// Subsystems
+            {'/// Subsystems'}
           </span>
           <span style={{
             fontFamily: tokens.typography.fontMono,

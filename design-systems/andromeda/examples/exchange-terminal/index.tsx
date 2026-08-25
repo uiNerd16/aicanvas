@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL
 // ============================================================
@@ -26,6 +25,7 @@ import {
   DrawerDescription,
   DrawerBody,
 } from '../../components/Drawer';
+import type { DrawerProps } from '../../components/Drawer';
 import { useCascadeProps } from '../../components/lib/motion';
 import { mq } from '../../components/lib/responsive';
 import { AndromedaIcon } from '../../AndromedaIcon';
@@ -112,7 +112,7 @@ const NAV_MENUS = {
   'Finance':     ['Earn', 'Pool', 'Loans', 'BNB Vault', 'Liquidity Farming'],
 };
 
-function TopBar({ onMenu }) {
+function TopBar({ onMenu }: { onMenu: () => void }) {
   return (
     <header
       style={{
@@ -249,13 +249,13 @@ function TopBar({ onMenu }) {
 }
 
 // ─── PairHeader ────────────────────────────────────────────────────────────
-const fmt = (n, d = 2) =>
+const fmt = (n: number, d = 2) =>
   n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 // Demoted stat — small label above small value. Used only for the
 // secondary metrics (24h high/low/volumes) which sit at tier-2 of the
 // PairHeader hierarchy below the hero price.
-function Stat({ label, value }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1], minWidth: 0 }}>
       <span
@@ -523,7 +523,7 @@ function OrderTabs() {
           whiteSpace: 'nowrap',
         }}
       >
-        /// Andromeda Exchange
+        {'/// Andromeda Exchange'}
       </span>
     </div>
   );
@@ -531,7 +531,7 @@ function OrderTabs() {
 
 // ─── Composition ───────────────────────────────────────────────────────────
 // ─── Drawer nav — the same NAV_MENUS as the desktop TopBar, stacked. ─────────
-function NavDrawer({ open, onOpenChange }) {
+function NavDrawer({ open, onOpenChange }: Pick<DrawerProps, 'open' | 'onOpenChange'>) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} side="left" size={280}>
       <DrawerHeader>

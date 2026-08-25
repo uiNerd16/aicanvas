@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SIGNAL ROOM: Sidebar
 // Console nav + pinned channels list + user card. Mirrors the
@@ -16,6 +15,7 @@
 // ============================================================
 
 import { motion, LayoutGroup } from 'framer-motion';
+import type { MotionProps } from 'framer-motion';
 import {
   UserCircle,
   Gear,
@@ -25,11 +25,13 @@ import {
 import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { NavItem } from '../../components/NavItem';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { UserCard } from '../../components/UserCard';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems, channels } from './data';
+import type { Channel } from './data';
 
-function InsetDivider({ side = 'bottom' }) {
+function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -46,7 +48,7 @@ function InsetDivider({ side = 'bottom' }) {
   );
 }
 
-const userMenuItems = [
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
@@ -63,7 +65,7 @@ const STATUS_DOT = {
   fault:   tokens.color.red[300],
 };
 
-function ChannelRow({ ch }) {
+function ChannelRow({ ch }: { ch: Channel }) {
   const dot = STATUS_DOT[ch.status] ?? tokens.color.text.muted;
   return (
     <div
@@ -136,7 +138,13 @@ function ChannelRow({ ch }) {
 // active dot slides between siblings; the desktop aside and the drawer get
 // distinct group ids so a mounted-but-hidden copy can't fight the visible one
 // for the shared layout animation.
-export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-room-sidebar' }) {
+type SidebarNavProps = {
+  activeNav: string;
+  onNavChange: (id: string) => void;
+  layoutGroupId?: string;
+};
+
+export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-room-sidebar' }: SidebarNavProps) {
   return (
     <>
       {/* Section label */}
@@ -150,7 +158,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
           letterSpacing: tokens.typography.tracking.widest,
         }}
       >
-        /// Console
+        {'/// Console'}
       </div>
 
       {/* Primary nav */}
@@ -191,7 +199,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
             letterSpacing: tokens.typography.tracking.widest,
           }}
         >
-          /// Channels
+          {'/// Channels'}
         </div>
         <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {channels.slice(0, 3).map(ch => (
@@ -203,7 +211,14 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
   );
 }
 
-export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
+type SidebarProps = {
+  activeNav: string;
+  onNavChange: (id: string) => void;
+  motionProps?: MotionProps;
+  className?: string;
+};
+
+export function Sidebar({ activeNav, onNavChange, motionProps, className }: SidebarProps) {
   return (
     <motion.aside
       {...(motionProps ?? {})}

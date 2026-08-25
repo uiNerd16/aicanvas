@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // RESOURCE PLANNING · RequestsPanel
 // Top-right card. Three breakdown cells (approved / pending /
@@ -20,14 +19,21 @@ const BUCKETS = [
   { key: 'approved', label: 'Approved', color: tokens.color.accent[400], borderColor: tokens.color.accent[200] },
   { key: 'pending',  label: 'Pending',  color: tokens.color.orange[400], borderColor: tokens.color.orange[200] },
   { key: 'rejected', label: 'Rejected', color: tokens.color.red[400],    borderColor: tokens.color.red[200]    },
-];
+] as const;
 
 // ── Single breakdown cell ─────────────────────────────────────────
 // `rp-req-cell` carries the responsive separator swap: the desktop
 // vertical border (borderRight, inline below) drops below `mq.md` and
 // becomes a horizontal one when the three cells stack — see <style> in
 // RequestsPanel.
-function Cell({ label, value, share, last = false }) {
+type CellProps = {
+  label: string;
+  value: string;
+  share: number;
+  last?: boolean;
+};
+
+function Cell({ label, value, share, last = false }: CellProps) {
   return (
     <div
       className={last ? 'rp-req-cell rp-req-cell-last' : 'rp-req-cell'}

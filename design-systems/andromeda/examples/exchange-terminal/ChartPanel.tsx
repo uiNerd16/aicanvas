@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL · ChartPanel
 // Custom SVG candlestick chart + MA polylines + volume strip below.
@@ -14,7 +13,7 @@ import { mq } from '../../components/lib/responsive';
 import { Dropdown } from './Dropdown';
 import { candles, last, maSeries } from './data';
 
-function InsetDivider({ side = 'bottom' }) {
+function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -69,8 +68,8 @@ const yLabels = (() => {
   return out;
 })();
 
-const cx = (i) => i + 0.5;
-const cy = (p) => yMax - p;
+const cx = (i: number) => i + 0.5;
+const cy = (p: number) => yMax - p;
 
 const MA_COLORS = {
   5:  tokens.color.accent[200],
@@ -78,7 +77,7 @@ const MA_COLORS = {
   20: tokens.color.red[200],
 };
 
-function maPath(series) {
+function maPath(series: (number | null)[]) {
   let started = false;
   let d = '';
   for (let i = 0; i < N; i++) {
@@ -90,13 +89,13 @@ function maPath(series) {
   return d.trim();
 }
 
-const fmtNum = (n, d = 2) =>
+const fmtNum = (n: number | null, d = 2) =>
   n == null
     ? '—'
     : n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 // ── Chart header ─────────────────────────────────────────────────
-function TimeframeChip({ label, active }) {
+function TimeframeChip({ label, active }: { label: string; active?: boolean }) {
   return (
     <button
       type="button"
@@ -121,7 +120,7 @@ function TimeframeChip({ label, active }) {
   );
 }
 
-function ViewTab({ label, active }) {
+function ViewTab({ label, active }: { label: string; active?: boolean }) {
   return (
     <button
       type="button"
@@ -211,7 +210,7 @@ function ChartHeader() {
 }
 
 // ── OHLC + MA legend ─────────────────────────────────────────────
-function LegendKV({ label, value, valueColor }) {
+function LegendKV({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
   return (
     <span style={{ display: 'inline-flex', gap: tokens.spacing[1], alignItems: 'baseline' }}>
       <span style={{ color: tokens.color.text.muted }}>{label}</span>
@@ -220,7 +219,7 @@ function LegendKV({ label, value, valueColor }) {
   );
 }
 
-function LegendMA({ label, color, value }) {
+function LegendMA({ label, color, value }: { label: string; color: string; value: string }) {
   return (
     <span style={{ display: 'inline-flex', gap: tokens.spacing[1], alignItems: 'baseline' }}>
       <span style={{ color }}>{label}:</span>
@@ -346,7 +345,7 @@ function CandlesSvg() {
         );
       })}
 
-      {[5, 10, 20].map((p) => (
+      {([5, 10, 20] as const).map((p) => (
         <path
           key={`ma-${p}`}
           d={maPath(maSeries[p])}
@@ -504,7 +503,7 @@ function XAxisLabels() {
 
 // ── Volume legend ─────────────────────────────────────────────────
 function VolumeLegend() {
-  const fmt = (n) => (n >= 1000 ? `${(n / 1000).toFixed(3)}K` : `${n.toFixed(0)}`);
+  const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(3)}K` : `${n.toFixed(0)}`);
   return (
     <div
       style={{

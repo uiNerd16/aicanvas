@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Header
 // Title left, mission clock center, status + bell right.
@@ -13,9 +12,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
 import { mq } from '../../components/lib/responsive';
+import type { useCascadeProps } from '../../components/lib/motion';
 import { CornerMarkers } from '../../components/CornerMarkers';
 
-function pad(n) { return String(n).padStart(2, '0'); }
+function pad(n: number) { return String(n).padStart(2, '0'); }
 
 function MissionClock() {
   // Display "T+ HH:MM:SS" — counts up from page mount.
@@ -64,7 +64,10 @@ function MissionClock() {
   );
 }
 
-export function Header({ sectionTitle = 'Overview', motionProps }) {
+export function Header({ sectionTitle = 'Overview', motionProps }: {
+  sectionTitle?: string;
+  motionProps?: ReturnType<typeof useCascadeProps>;
+}) {
   return (
     <motion.header
       {...(motionProps ?? {})}
@@ -93,7 +96,7 @@ export function Header({ sectionTitle = 'Overview', motionProps }) {
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}>
-          /// Section
+          {'/// Section'}
         </span>
         <h1 style={{
           margin: 0,

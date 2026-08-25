@@ -954,7 +954,7 @@ Token-driven typography is half the system's identity; copy convention is the ot
 - Don't promote a DS component to a homepage standalone speculatively — promotion is a per-component user decision
 - Don't position content at offset 0 inside a panel with corner markers
 - Don't use `translateX(-50%)` on the first or last X-axis label
-- Don't strip `@ts-nocheck` partially — all-or-nothing per file
+- Don't add `@ts-nocheck` to any design-system file; the folder is fully typed and tsc-checked
 - Don't import `meridian/` tokens or components into `andromeda/`, or vice versa
 - Don't add a `// New` badge to any component (system retired 2026-04-19)
 - Don't comment WHAT the code does — names handle that. Comments only explain non-obvious WHY.

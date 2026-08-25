@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: RadarChart
 // Andromeda-styled radar/spider chart built on recharts primitives.
@@ -20,6 +19,7 @@
 'use client';
 
 import { forwardRef, useId, useState, useEffect, useRef } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { useInView, motion } from 'framer-motion';
 import {
   RadarChart as ReRadarChart,
@@ -37,13 +37,21 @@ import { CornerMarkers } from './CornerMarkers';
 // Framer wants seconds + a cubic-bezier array; tokens store ms strings and
 // CSS cubic-bezier() strings. Convert at the boundary, same pattern as
 // StatTile / lib/motion.
-const ms = (v) => parseInt(v, 10) / 1000;
+const ms = (v: string) => parseInt(v, 10) / 1000;
 // Token-driven equivalent of tokens.motion.easing.out
 // ('cubic-bezier(0, 0, 0.2, 1)') — fast start, soft landing. Keep in sync.
-const EASE_OUT = [0, 0, 0.2, 1];
+const EASE_OUT: [number, number, number, number] = [0, 0, 0.2, 1];
+
+type RadarRow = Record<string, string | number>;
+
+type RadarSeries = {
+  key: string;
+  label: string;
+  color?: string;
+};
 
 // ── Default demo data ────────────────────────────────────────────────────────
-const DEFAULT_DATA = [
+const DEFAULT_DATA: RadarRow[] = [
   { axis: 'HULL',   nominal: 92, critical: 68 },
   { axis: 'POWER',  nominal: 78, critical: 45 },
   { axis: 'NAV',    nominal: 88, critical: 80 },
@@ -52,13 +60,29 @@ const DEFAULT_DATA = [
   { axis: 'THRUST', nominal: 72, critical: 55 },
 ];
 
-const DEFAULT_SERIES = [
+const DEFAULT_SERIES: RadarSeries[] = [
   { key: 'nominal',  label: 'Nominal',  color: tokens.color.accent[300] },
   { key: 'critical', label: 'Critical', color: tokens.color.red[300] },
 ];
 
 // ── Custom tooltip ───────────────────────────────────────────────────────────
-function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
+// recharts clones this element with the hover state, so every prop it injects
+// is optional here.
+type RadarTooltipEntry = {
+  dataKey?: string;
+  value?: string | number;
+  color?: string;
+};
+
+type SpaceTooltipProps = {
+  active?: boolean;
+  payload?: readonly RadarTooltipEntry[];
+  label?: string | number;
+  series?: RadarSeries[];
+  onFirstActive?: () => void;
+};
+
+function SpaceTooltip({ active, payload, label, series, onFirstActive }: SpaceTooltipProps) {
   useEffect(() => {
     if (active && payload?.length) onFirstActive?.();
   }, [active]);
@@ -122,7 +146,17 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }) {
 }
 
 // ── Custom polar angle tick ──────────────────────────────────────────────────
-function SpaceTick({ x, y, payload, cx, cy }) {
+type SpaceTickProps = {
+  x: number;
+  y: number;
+  payload: { value: string | number };
+  cx: number;
+  cy: number;
+};
+
+function SpaceTick(props: Partial<SpaceTickProps>) {
+  // recharts hands a polar tick element its full geometry when it clones it.
+  const { x, y, payload, cx, cy } = props as SpaceTickProps;
   // Nudge label slightly away from center
   const dx = x - cx;
   const dy = y - cy;
@@ -184,8 +218,16 @@ function useTooltipTransition() {
   return { shown, onFirstActivation };
 }
 
+type RadarChartProps = ComponentPropsWithoutRef<'div'> & {
+  data?: RadarRow[];
+  series?: RadarSeries[];
+  label?: string;
+  title?: string;
+  description?: string;
+};
+
 /** @type {React.ForwardRefExoticComponent<RadarChartProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const RadarChart = forwardRef(function RadarChart(
+export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function RadarChart(
   {
     data = DEFAULT_DATA,
     series = DEFAULT_SERIES,
@@ -210,8 +252,8 @@ export const RadarChart = forwardRef(function RadarChart(
   // decoration. Gated on useInView so a RadarChart below the fold doesn't
   // burn its reveal off-screen (same contract as StatTile / ProgressBar).
   // `margin: '-10% 0px'` triggers slightly before it's fully on-screen.
-  const internalRef = useRef(null);
-  const setRefs = (node) => {
+  const internalRef = useRef<HTMLDivElement | null>(null);
+  const setRefs = (node: HTMLDivElement | null) => {
     internalRef.current = node;
     if (typeof outerRef === 'function') outerRef(node);
     else if (outerRef) outerRef.current = node;

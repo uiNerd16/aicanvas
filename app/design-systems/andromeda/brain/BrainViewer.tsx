@@ -99,7 +99,7 @@ function renderMd(raw: string): string {
 
   // Protect fenced code blocks first
   const blocks: string[] = []
-  let text = md.replace(/```[\w]*\n([\s\S]*?)```/gm, (_, code) => {
+  const text = md.replace(/```[\w]*\n([\s\S]*?)```/gm, (_, code) => {
     const i = blocks.length
     blocks.push(
       `<pre style="background:${C.surface.raised};border:1px solid ${C.border.subtle};padding:14px 18px;overflow-x:auto;font-size:12px;line-height:1.75;margin:14px 0;font-family:${MONO}"><code>${esc(code).trimEnd()}</code></pre>`,

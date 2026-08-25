@@ -1,12 +1,9 @@
-// @ts-nocheck — showcase consumes JSX design-system components whose
-// forwardRef wrappers lack TypeScript prop types in a .tsx context.
-//
 // Sibling component (NOT a route file). Both the showcase route and
 // the ideation Andromeda landing render this so the body lives in one
 // place.
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import Link from 'next/link'
 import { JetBrains_Mono } from 'next/font/google'
 import { SiteFooter } from '../../../components/SiteFooter'
@@ -188,7 +185,7 @@ function Section({
               letterSpacing: tokens.typography.tracking.widest,
             }}
           >
-            /// {kicker ?? 'Component'}
+            {'/// '}{kicker ?? 'Component'}
           </span>
           <CardTitle>{title}</CardTitle>
         </div>
@@ -199,7 +196,7 @@ function Section({
           <Link
             href={`/design-systems/andromeda/${slug}`}
             className={buttonVariants({ variant: 'ghost', size: 'sm' })}
-            style={andromedaVars()}
+            style={andromedaVars() as CSSProperties}
           >
             Open {title}
             <ArrowUpRight weight="regular" size={14} />
@@ -947,7 +944,7 @@ export default function AndromedaShowcase({
                       letterSpacing: tokens.typography.tracking.widest,
                     }}
                   >
-                    /// Default
+                    {'/// Default'}
                   </span>
                   <CardTitle>Default card</CardTitle>
                 </div>
@@ -978,7 +975,7 @@ export default function AndromedaShowcase({
                       letterSpacing: tokens.typography.tracking.widest,
                     }}
                   >
-                    /// Glow
+                    {'/// Glow'}
                   </span>
                   <CardTitle>Highlight card</CardTitle>
                 </div>
@@ -987,7 +984,7 @@ export default function AndromedaShowcase({
               <CardContent>
                 <CardDescription>
                   Tinted accent gradient surface. Use for the card you want to
-                  draw the user's eye to first.
+                  draw the user&apos;s eye to first.
                 </CardDescription>
               </CardContent>
               <CardFooter>
@@ -1655,7 +1652,7 @@ export default function AndromedaShowcase({
             <Card>
               <CardHeader>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>/// Body</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>{'/// Body'}</span>
                   <CardTitle>Solo</CardTitle>
                 </div>
               </CardHeader>
@@ -1668,7 +1665,7 @@ export default function AndromedaShowcase({
             <Card>
               <CardHeader>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[1] }}>
-                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>/// Heading</span>
+                  <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.widest }}>{'/// Heading'}</span>
                   <CardTitle>Next Destination</CardTitle>
                 </div>
                 <Badge variant="accent">LOCKED</Badge>

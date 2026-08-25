@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: SearchField
 // Command-bar-style search input with an optional ⌘-K shortcut chip.
@@ -10,7 +9,9 @@
 'use client';
 
 import { forwardRef, useState } from 'react';
+import type { ChangeEvent, ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { MagnifyingGlass } from '@phosphor-icons/react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 
 /**
@@ -27,8 +28,24 @@ import { tokens } from '../tokens';
  * @property {boolean} [disabled] Disables the field: dims it to the disabled opacity, shows a not-allowed cursor, and disables the underlying input.
  */
 
+type SearchFieldOwnProps = {
+  placeholder?: string;
+  shortcut?: string | null;
+  icon?: PhosphorIcon | null;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (next: string) => void;
+  ariaLabel?: string;
+  className?: string;
+  style?: CSSProperties;
+  disabled?: boolean;
+};
+
+export type SearchFieldProps = SearchFieldOwnProps &
+  Omit<ComponentPropsWithoutRef<'input'>, keyof SearchFieldOwnProps | 'onChange'>;
+
 /** @type {React.ForwardRefExoticComponent<SearchFieldProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange'>>} */
-export const SearchField = forwardRef(function SearchField(
+export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(function SearchField(
   {
     placeholder = 'Search anything',
     shortcut = '⌘ K',
@@ -74,7 +91,7 @@ export const SearchField = forwardRef(function SearchField(
     ? 'var(--andromeda-text-primary, #F5F5F5)'
     : 'var(--andromeda-text-muted, #9A9A9A)';
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const next = e.target.value;
     if (!isControlled) setUncontrolledValue(next);
     onValueChange?.(next);

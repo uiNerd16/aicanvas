@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // MISSION CONTROL: Sidebar
 //
@@ -19,13 +18,15 @@ import {
   SignOut,
 } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import type { useCascadeProps } from '../../components/lib/motion';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { NavItem } from '../../components/NavItem';
 import { UserCard } from '../../components/UserCard';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { AndromedaIcon } from '../../AndromedaIcon';
 import { navItems } from './data';
 
-function InsetDivider({ side = 'bottom' }) {
+function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -42,7 +43,13 @@ function InsetDivider({ side = 'bottom' }) {
   );
 }
 
-const userMenuItems = [
+type SidebarNavProps = {
+  activeNav: string;
+  onNavChange: (id: string) => void;
+  layoutGroupId?: string;
+};
+
+const userMenuItems: UserMenuItem[] = [
   { id: 'profile',     label: 'Profile',             icon: UserCircle },
   { id: 'preferences', label: 'Preferences',         icon: Gear },
   { id: 'shortcuts',   label: 'Keyboard Shortcuts',  icon: Keyboard },
@@ -55,7 +62,7 @@ const userMenuItems = [
 // NavItem's `layoutId` so the active dot slides between siblings; the desktop
 // aside and the drawer get distinct group ids so a mounted-but-hidden copy
 // can't fight the visible one for the shared layout animation.
-export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-control-sidebar' }) {
+export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-control-sidebar' }: SidebarNavProps) {
   return (
     <>
       {/* Section label */}
@@ -67,7 +74,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-co
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
       }}>
-        /// Console
+        {'/// Console'}
       </div>
 
       <nav style={{
@@ -91,7 +98,10 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-co
   );
 }
 
-export function Sidebar({ activeNav, onNavChange, motionProps, className }) {
+export function Sidebar({ activeNav, onNavChange, motionProps, className }: Omit<SidebarNavProps, 'layoutGroupId'> & {
+  motionProps?: ReturnType<typeof useCascadeProps>;
+  className?: string;
+}) {
   return (
     <motion.aside
       {...(motionProps ?? {})}

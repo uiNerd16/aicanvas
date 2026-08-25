@@ -1,10 +1,10 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SHARED UTILITIES
 // shadcn/ui-style helpers used by all Andromeda components.
 // ============================================================
 
 import { clsx } from 'clsx';
+import type { ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { tokens } from '../../tokens';
 
@@ -16,7 +16,7 @@ import { tokens } from '../../tokens';
  * @param {...(string | undefined | null | false | Record<string, boolean>)} inputs
  * @returns {string}
  */
-export function cn(...inputs) {
+export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
@@ -29,9 +29,11 @@ export function cn(...inputs) {
  * @param {string} cssBezier e.g. tokens.motion.easing.out
  * @returns {[number, number, number, number]}
  */
-export function easingArray(cssBezier) {
+export function easingArray(cssBezier: string): [number, number, number, number] {
   const m = String(cssBezier).match(/[\d.]+/g);
-  return m && m.length === 4 ? m.map(Number) : [0.4, 0, 0.2, 1];
+  return m && m.length === 4
+    ? (m.map(Number) as [number, number, number, number])
+    : [0.4, 0, 0.2, 1];
 }
 
 /**

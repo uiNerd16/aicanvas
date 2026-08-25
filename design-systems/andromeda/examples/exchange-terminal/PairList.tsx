@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // EXCHANGE TERMINAL · PairList + MarketTrades
 // ============================================================
@@ -35,7 +34,7 @@ const COL_HEADER = {
   whiteSpace: 'nowrap',
 };
 
-function InsetDivider({ side = 'bottom' }) {
+function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -52,7 +51,7 @@ function InsetDivider({ side = 'bottom' }) {
   );
 }
 
-function TabButton({ label, active, hasMenu, leadingStar }) {
+function TabButton({ label, active, hasMenu, leadingStar }: { label: string; active?: boolean; hasMenu?: boolean; leadingStar?: boolean }) {
   return (
     <button
       type="button"
@@ -98,9 +97,9 @@ function TabButton({ label, active, hasMenu, leadingStar }) {
   );
 }
 
-const fmtPrice = (n) => n.toFixed(3);
+const fmtPrice = (n: number) => n.toFixed(3);
 
-function PairRow({ row }) {
+function PairRow({ row }: { row: (typeof pairs)[number] }) {
   const pos = row.chg >= 0;
   const changeColor = pos ? tokens.color.accent[200] : tokens.color.red[200];
   return (
@@ -146,7 +145,7 @@ function PairRow({ row }) {
   );
 }
 
-function TradeRow({ row }) {
+function TradeRow({ row }: { row: (typeof trades)[number] }) {
   const pos = row.side === 'buy';
   const priceColor = pos ? tokens.color.accent[200] : tokens.color.red[200];
   return (
@@ -170,7 +169,7 @@ function TradeRow({ row }) {
   );
 }
 
-function ColumnHeaders({ template, labels }) {
+function ColumnHeaders({ template, labels }: { template: string; labels: string[] }) {
   return (
     <div
       style={{

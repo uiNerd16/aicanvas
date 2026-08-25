@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: TrendChart
 // The canonical multi-series time-series chart. One configurable
@@ -20,10 +19,12 @@
 'use client';
 
 import { forwardRef, useId, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, ReactElement, ReactNode } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
 } from 'recharts';
+import type { AxisDomainItem, YAxisTickContentProps } from 'recharts';
 import { motion, useInView } from 'framer-motion';
 import { ChartLine, ChartBar } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
@@ -31,12 +32,22 @@ import { andromedaVars, easingArray } from './lib/utils';
 import { useReducedMotion } from './lib/motion';
 import { SegmentedControl } from './SegmentedControl';
 
-const sec = (v) => parseInt(v, 10) / 1000; // "500ms" → 0.5
+const sec = (v: string) => parseInt(v, 10) / 1000; // "500ms" → 0.5
 // framer boundary: derived from tokens, cannot follow runtime var overrides
 const EASE_OUT = easingArray(tokens.motion.easing.out); // = [0, 0, 0.2, 1]
 
+type TrendRole = 'baseline' | 'live' | 'context' | 'threshold';
+type TrendMode = 'line' | 'area' | 'bar';
+
+type TrendSeries = {
+  key: string;
+  label: string;
+  role?: TrendRole;
+  color?: string;
+};
+
 // Multi-series colour hierarchy (the Andromeda charts rules).
-const ROLE_COLOR = {
+const ROLE_COLOR: Record<TrendRole, string> = {
   baseline:  tokens.color.text.primary,
   live:      tokens.color.accent[300],
   context:   tokens.color.text.faint,
@@ -45,11 +56,11 @@ const ROLE_COLOR = {
 const MODE_ICON  = { line: ChartLine, area: ChartLine, bar: ChartBar };
 const MODE_LABEL = { line: 'Line chart', area: 'Area chart', bar: 'Bar chart' };
 
-const colorOf = (s) => s.color ?? ROLE_COLOR[s.role] ?? tokens.color.text.primary;
-const isThreshold = (s) => s.role === 'threshold';
+const colorOf = (s: TrendSeries) => s.color ?? ROLE_COLOR[s.role as TrendRole] ?? tokens.color.text.primary;
+const isThreshold = (s: TrendSeries) => s.role === 'threshold';
 
 // Inset divider (12px from each edge) separating header / footer from the plot.
-function InsetDivider({ side }) {
+function InsetDivider({ side }: { side: 'top' | 'bottom' }) {
   return (
     <span
       aria-hidden
@@ -67,12 +78,32 @@ function InsetDivider({ side }) {
 }
 
 // ── Tooltip ──────────────────────────────────────────────────────
-function buildTooltip(series, labelFormatter, valueFormatter) {
-  return function ChartTooltip({ active, payload, label }) {
+// recharts clones the returned element with the hover state, so every prop it
+// injects is optional here.
+type TrendTooltipEntry = {
+  dataKey?: string;
+  value?: number;
+};
+
+type TrendTooltipProps = {
+  active?: boolean;
+  payload?: readonly TrendTooltipEntry[];
+  label?: string | number;
+};
+
+type TrendLabelFormatter = (label: string | number | undefined) => string;
+type TrendValueFormatter = (value: number | undefined) => string;
+
+function buildTooltip(
+  series: TrendSeries[],
+  labelFormatter?: TrendLabelFormatter,
+  valueFormatter?: TrendValueFormatter,
+) {
+  return function ChartTooltip({ active, payload, label }: TrendTooltipProps) {
     if (!active || !payload?.length) return null;
     const ordered = series
       .map((s) => ({ s, p: payload.find((p) => p.dataKey === s.key) }))
-      .filter((row) => row.p);
+      .filter((row) => row.p) as Array<{ s: TrendSeries; p: TrendTooltipEntry }>;
     return (
       <div
         style={{
@@ -139,7 +170,12 @@ function buildTooltip(series, labelFormatter, valueFormatter) {
 }
 
 // ── Legend chip ──────────────────────────────────────────────────
-function LegendChip({ color, label, active, onClick }) {
+function LegendChip({ color, label, active, onClick }: {
+  color: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -213,8 +249,26 @@ const AXIS_TICK = {
  * @property {React.CSSProperties} [style]   Inline styles merged onto the root container element.
  */
 
+type TrendChartProps = ComponentPropsWithoutRef<'div'> & {
+  data: Array<Record<string, string | number>>;
+  series: TrendSeries[];
+  xKey?: string;
+  modes?: TrendMode[];
+  defaultMode?: TrendMode;
+  title?: string;
+  yLabel?: string;
+  tooltipLabelFormatter?: TrendLabelFormatter;
+  valueFormatter?: TrendValueFormatter;
+  xInterval?: number;
+  showLegend?: boolean;
+  showYAxis?: boolean;
+  domain?: [AxisDomainItem, AxisDomainItem];
+  footerSlot?: ReactNode;
+  height?: number | 'fill';
+};
+
 /** @type {React.ForwardRefExoticComponent<TrendChartProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const TrendChart = forwardRef(function TrendChart(
+export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function TrendChart(
   {
     data,
     series,
@@ -238,8 +292,8 @@ export const TrendChart = forwardRef(function TrendChart(
   ref,
 ) {
   const [mode, setMode] = useState(defaultMode ?? modes[0]);
-  const [visible, setVisible] = useState(() =>
-    Object.fromEntries(series.map((s) => [s.key, true])),
+  const [visible, setVisible] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(series.map((s) => [s.key, true] as const)),
   );
   // Stable chart id. Without one, recharts derives its internal clipPath id
   // from a module-level counter (`uniqueId('recharts')`), which cannot agree
@@ -248,11 +302,11 @@ export const TrendChart = forwardRef(function TrendChart(
   // delimiters (":" / "«»") are not valid inside an SVG id.
   const chartId = `andromeda-trend-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
-  const innerRef = useRef(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
   const reducedMotion = useReducedMotion();
   const inView = useInView(innerRef, { once: true, margin: '-10% 0px' });
 
-  const setRefs = (node) => {
+  const setRefs = (node: HTMLDivElement | null) => {
     innerRef.current = node;
     if (typeof ref === 'function') ref(node);
     else if (ref) ref.current = node;
@@ -290,7 +344,7 @@ export const TrendChart = forwardRef(function TrendChart(
   // Y tick labels are LEFT-aligned flush with the yLabel kicker at the plot's
   // top-left, not right-aligned inside a reserved gutter, so the numbers share
   // the same left edge as the unit caption above them (no stray left inset).
-  const yTick = ({ x, y, payload }) => (
+  const yTick = ({ x, y, payload }: YAxisTickContentProps) => (
     <text
       x={parseInt(tokens.spacing[1], 10)}
       y={y}
@@ -309,12 +363,12 @@ export const TrendChart = forwardRef(function TrendChart(
   // bound of a caller-supplied domain survives the mode switch — which also
   // means a card can pass a fitted domain for its area mode without silently
   // producing a lying bar chart when the user flips the toggle.
-  const yDomain = mode === 'bar' ? [0, Array.isArray(domain) ? domain[1] : 'auto'] : domain;
+  const yDomain: [AxisDomainItem, AxisDomainItem] = mode === 'bar' ? [0, Array.isArray(domain) ? domain[1] : 'auto'] : domain;
   const yAxis = (
     <YAxis domain={yDomain} tick={yTick} axisLine={false} tickLine={false} width={showYAxis ? 34 : 0} hide={!showYAxis} />
   );
 
-  let chart;
+  let chart: ReactElement;
   if (mode === 'bar') {
     chart = (
       <BarChart id={chartId} data={data} margin={chartMargin}>
@@ -403,7 +457,8 @@ export const TrendChart = forwardRef(function TrendChart(
             <SegmentedControl
               size="md"
               value={mode}
-              onChange={setMode}
+              // The control only ever reports back one of `modes`, its own options.
+              onChange={setMode as (next: string) => void}
               options={modes.map((m) => ({ value: m, icon: MODE_ICON[m], ariaLabel: MODE_LABEL[m] }))}
             />
           ) : null}

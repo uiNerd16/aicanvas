@@ -1,4 +1,3 @@
-// @ts-nocheck — consumes Andromeda tokens which are not type-checked yet.
 import ResourcePlanning from '../../../../../design-systems/andromeda/examples/resource-planning'
 import { tokens } from '../../../../../design-systems/andromeda/tokens'
 import { TemplatePreviewShell } from '../../../../_components/TemplatePreviewShell'

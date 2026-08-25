@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // SHARED TEMPLATE MOBILE CHROME
 //
@@ -23,6 +22,7 @@
 
 'use client';
 
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { List, UserCircle, Gear, Keyboard, SignOut } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
@@ -31,11 +31,13 @@ import { useCascadeProps } from '../../components/lib/motion';
 import { IconButton } from '../../components/IconButton';
 import { Drawer, DrawerBody } from '../../components/Drawer';
 import { UserCard } from '../../components/UserCard';
+import type { UserCardProps } from '../../components/UserCard';
+import type { UserMenuItem } from '../../components/UserMenu';
 import { AndromedaIcon } from '../../AndromedaIcon';
 
 // Generic account menu — same set the desktop sidebars use. Templates can
 // override via `user.items`, but they all share this by default.
-const DEFAULT_USER_MENU_ITEMS = [
+const DEFAULT_USER_MENU_ITEMS: UserMenuItem[] = [
   { id: 'profile', label: 'Profile', icon: UserCircle },
   { id: 'preferences', label: 'Preferences', icon: Gear },
   { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
@@ -46,7 +48,7 @@ const DEFAULT_USER_MENU_ITEMS = [
 // Brand lockup — icon + "Andromeda" over the template name, mono uppercase.
 // Mirrors the desktop sidebar's logo block (examples/*/Sidebar.tsx) so the
 // top bar and drawer header read identically to the web sidebar.
-function Brand({ templateName, iconSize }) {
+function Brand({ templateName, iconSize }: { templateName: string; iconSize: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing[3], minWidth: 0 }}>
       <AndromedaIcon size={iconSize} />
@@ -90,7 +92,11 @@ function Brand({ templateName, iconSize }) {
 // toggle. Index 0 is always right: the bar is the topmost mobile element,
 // and the desktop index-0 siblings (sidebars) are display:none below md,
 // so the two never share a visible cascade slot.
-export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }) {
+export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }: {
+  templateName: string;
+  onMenuOpen?: () => void;
+  menuOpen?: boolean;
+}) {
   const cascade = useCascadeProps(0);
   return (
     <motion.div
@@ -132,9 +138,19 @@ export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }) {
   );
 }
 
+type MobileDrawerUser = Pick<UserCardProps, 'name' | 'role' | 'src' | 'status'> & {
+  items?: UserCardProps['items'];
+};
+
 // Mobile drawer: mirrors the desktop sidebar — logo header, the template's
 // nav (children), and a bottom user block. Left side, 70vw.
-export function MobileDrawer({ open, onOpenChange, templateName, user, children }) {
+export function MobileDrawer({ open, onOpenChange, templateName, user, children }: {
+  open: boolean;
+  onOpenChange?: (next: boolean) => void;
+  templateName: string;
+  user?: MobileDrawerUser;
+  children?: ReactNode;
+}) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} side="left" size="70vw">
       {/* Logo header — mirrors the sidebar logo block. */}

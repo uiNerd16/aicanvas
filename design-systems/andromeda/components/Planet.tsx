@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Planet
 // Particle-sphere rendered with Three.js — a slowly-rotating
@@ -22,7 +21,7 @@ import { mq } from './lib/responsive';
 
 /** Soft radial sprite. Multiplied by vertex color and blended additively
  *  so each particle reads as a tiny glow on the dark void. */
-function makeSprite(): THREE.CanvasTexture {
+function makeSprite(): THREE.CanvasTexture | undefined {
   const size = 64;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
@@ -100,7 +99,7 @@ export function Planet({
     // RESOLVED CSS vars at mount time — a themed page renders a themed planet.
     // Mount-time read only; var changes after mount don't re-tint.
     const cs = getComputedStyle(container);
-    const accent = (stop) =>
+    const accent = (stop: Extract<keyof typeof tokens.color.accent, number>) =>
       cs.getPropertyValue(`--andromeda-accent-${stop}`).trim() ||
       tokens.color.accent[stop];
     const cHi  = new THREE.Color(accent(100)); // lit highlight
@@ -160,7 +159,8 @@ export function Planet({
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
 
-    const sprite = makeSprite();
+    // A browser canvas always yields a 2d context, so the sprite is always built.
+    const sprite = makeSprite() as THREE.CanvasTexture;
     const mat = new THREE.PointsMaterial({
       size:         particleSize,
       map:          sprite,
