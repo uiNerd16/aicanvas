@@ -38,6 +38,7 @@ import type { ComponentMeta } from '../../lib/component-registry'
 // into the bundle).
 import { getDesignSystemMeta, type DesignSystemSlug } from '../../lib/design-system-meta'
 import { track } from '../../lib/analytics'
+import { copyText } from '../useCopied'
 import { trackInstall } from '../../lib/track-install'
 import { BlockPreviewFrame } from './BlockPreviewFrame'
 import { useSession } from '../auth/SessionProvider'
@@ -314,11 +315,9 @@ export default function ComponentPageView({
 
   async function copyDeps() {
     if (!depsCommand) return
-    try {
-      await navigator.clipboard.writeText(depsCommand)
-      setDepsCopied(true)
-      setTimeout(() => setDepsCopied(false), 2000)
-    } catch {}
+    if (!(await copyText(depsCommand))) return
+    setDepsCopied(true)
+    setTimeout(() => setDepsCopied(false), 2000)
   }
 
   // Refresh button — incrementing this key remounts the preview wrapper,
@@ -406,11 +405,9 @@ export default function ComponentPageView({
       ? (codeState.status === 'ready' ? codeState.code : null)
       : code
     if (source == null) return
-    try {
-      await navigator.clipboard.writeText(source)
-      setCodeCopied(true)
-      setTimeout(() => setCodeCopied(false), 2000)
-    } catch {}
+    if (!(await copyText(source))) return
+    setCodeCopied(true)
+    setTimeout(() => setCodeCopied(false), 2000)
   }
 
   const { open: openAuthModal } = useAuthModal()
@@ -488,28 +485,26 @@ export default function ComponentPageView({
       promptFreeAccount()
       return
     }
-    try {
-      track('CLI Copy', { component: slug })
-      trackInstall(installSlug, designSystem ?? null, pkgManager)
-      await navigator.clipboard.writeText(cliCommand)
-      setCliCopied(true)
-      setTimeout(() => setCliCopied(false), 4000)
-    } catch {}
+    trackInstall(installSlug, designSystem ?? null, pkgManager)
+    // The event is sent either way, so the total still counts everyone who
+    // asked for the command; `ok` separates the ones who actually got it.
+    const ok = await copyText(cliCommand)
+    track('CLI Copy', { component: slug, ok })
+    if (!ok) return
+    setCliCopied(true)
+    setTimeout(() => setCliCopied(false), 4000)
   }
 
   async function copyRemixPrompt() {
     if (!remixPrompt) return
-    try {
-      track('Remix Prompt Copy', { component: slug })
-      // Copies exactly what is on screen. Only ever reached when the prompt is
-      // NOT paywalled: a locked prompt opens the paywall instead of copying, so
-      // nobody walks away with blocks 1-2 believing they have a working prompt.
-      await navigator.clipboard.writeText(
-        remixPrompt,
-      )
-      setRemixCopied(true)
-      setTimeout(() => setRemixCopied(false), 2500)
-    } catch {}
+    // Copies exactly what is on screen. Only ever reached when the prompt is
+    // NOT paywalled: a locked prompt opens the paywall instead of copying, so
+    // nobody walks away with blocks 1-2 believing they have a working prompt.
+    const ok = await copyText(remixPrompt)
+    track('Remix Prompt Copy', { component: slug, ok })
+    if (!ok) return
+    setRemixCopied(true)
+    setTimeout(() => setRemixCopied(false), 2500)
   }
 
   return (
@@ -988,7 +983,7 @@ export default function ComponentPageView({
                                     : pkgManager === 'yarn'
                                     ? `yarn dlx shadcn@latest add ${installReference}`
                                     : `bunx shadcn@latest add ${installReference}`
-                                  navigator.clipboard.writeText(cmd)
+                                  void copyText(cmd)
                                   trackInstall(installSlug, designSystem ?? null, pkgManager)
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
@@ -1072,7 +1067,7 @@ export default function ComponentPageView({
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('<html class="dark">')
+                                void copyText('<html class="dark">')
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
@@ -1108,7 +1103,7 @@ export default function ComponentPageView({
                                 ))}
                                 <button
                                   onClick={() => {
-                                    navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
+                                    void copyText(FONT_SNIPPETS[fontFramework])
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
@@ -1139,7 +1134,7 @@ export default function ComponentPageView({
                             <div className={`flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 ${FONT_PKG_SNIPPET ? 'mb-2' : ''}`}>
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
-                                onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                onClick={() => { void copyText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
                                 aria-label="Copy install command"
                                 className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
@@ -1151,7 +1146,7 @@ export default function ComponentPageView({
                                 <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
                                   <span className="font-mono text-xs text-sand-500">layout.tsx</span>
                                   <button
-                                    onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                    onClick={() => { void copyText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
                                     aria-label="Copy font setup snippet"
                                     className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                   >
@@ -1259,7 +1254,7 @@ export default function ComponentPageView({
                             <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('<html class="dark">')
+                                void copyText('<html class="dark">')
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
@@ -1295,7 +1290,7 @@ export default function ComponentPageView({
                                 ))}
                                 <button
                                   onClick={() => {
-                                    navigator.clipboard.writeText(FONT_SNIPPETS[fontFramework])
+                                    void copyText(FONT_SNIPPETS[fontFramework])
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
@@ -1326,7 +1321,7 @@ export default function ComponentPageView({
                             <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
                               <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
-                                onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
+                                onClick={() => { void copyText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
                                 aria-label="Copy install command"
                                 className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                               >
@@ -1337,7 +1332,7 @@ export default function ComponentPageView({
                               <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
                                 <span className="font-mono text-xs text-sand-500">layout.tsx</span>
                                 <button
-                                  onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
+                                  onClick={() => { void copyText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
                                   aria-label="Copy font setup snippet"
                                   className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
                                 >
@@ -1404,7 +1399,7 @@ export default function ComponentPageView({
                         </button>
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(`AICANVAS_TOKEN=${userToken}`)
+                            void copyText(`AICANVAS_TOKEN=${userToken}`)
                             setMcpTokenCopied(true)
                             setTimeout(() => setMcpTokenCopied(false), 2000)
                           }}

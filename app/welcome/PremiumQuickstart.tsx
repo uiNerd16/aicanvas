@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Check, Copy, Eye, EyeSlash } from '@phosphor-icons/react'
 import { track } from '../lib/analytics'
+import { copyText } from '../components/useCopied'
 
 // ─── PremiumQuickstart ────────────────────────────────────────────────────────
 // The quiet helper card on the premium /welcome view. The page has already led
@@ -22,18 +23,20 @@ export function PremiumQuickstart({ token }: { token: string | null }) {
 
   const cmd = (t: string) => `npx shadcn@latest add "https://aicanvas.me/r/andromeda-all.json?token=${t}"`
 
-  function copyCmd() {
+  async function copyCmd() {
     if (!token) return
-    navigator.clipboard.writeText(cmd(token))
-    track('CLI Copy', { component: 'welcome-quickstart' })
+    const ok = await copyText(cmd(token))
+    track('CLI Copy', { component: 'welcome-quickstart', ok })
+    if (!ok) return
     setCmdCopied(true)
     setTimeout(() => setCmdCopied(false), 2000)
   }
 
-  function copyToken() {
+  async function copyToken() {
     if (!token) return
-    navigator.clipboard.writeText(`AICANVAS_TOKEN=${token}`)
-    track('MCP Token Copy', {})
+    const ok = await copyText(`AICANVAS_TOKEN=${token}`)
+    track('MCP Token Copy', { ok })
+    if (!ok) return
     setTokenCopied(true)
     setTimeout(() => setTokenCopied(false), 2000)
   }

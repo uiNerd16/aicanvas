@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Copy, Check, Eye, EyeSlash } from '@phosphor-icons/react'
 import { track } from '../../../lib/analytics'
+import { copyText } from '../../../components/useCopied'
 
 // ─── McpTokenSection ──────────────────────────────────────────────────────────
 // Shows the signed-in user's AI Canvas API token on /account/settings so they
@@ -24,19 +25,21 @@ export function McpTokenSection({ token }: Props) {
   const [copied, setCopied] = useState(false)
   const [cmdCopied, setCmdCopied] = useState(false)
 
-  function copy() {
+  async function copy() {
     if (!token) return
-    navigator.clipboard.writeText(token)
+    const ok = await copyText(token)
     // Anonymous adoption signal — the event carries no token and no account.
-    track('MCP Token Copy', {})
+    track('MCP Token Copy', { ok })
+    if (!ok) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function copyCmd() {
+  async function copyCmd() {
     if (!token) return
-    navigator.clipboard.writeText(installCmd(token))
-    track('CLI Copy', { component: 'settings' })
+    const ok = await copyText(installCmd(token))
+    track('CLI Copy', { component: 'settings', ok })
+    if (!ok) return
     setCmdCopied(true)
     setTimeout(() => setCmdCopied(false), 2000)
   }

@@ -87,7 +87,19 @@ export function Planet({
     const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 100);
     camera.position.z = 3;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // Three dropped its WebGL1 fallback, so this throws outright on a browser
+    // that cannot hand back a webgl2 context: hardware acceleration switched
+    // off, an older or virtualised machine, a hardened browser, or simply too
+    // many live contexts on one page (browsers cap it around sixteen). The throw
+    // happens synchronously inside an effect with no error boundary above it,
+    // which takes down the entire page rather than this one canvas. A planet
+    // nobody can render is worth an empty box, never a dead page.
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      return;
+    }
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     // Transparent canvas — let the parent (Card / void) show through.
@@ -212,6 +224,13 @@ export function Planet({
       geo.dispose();
       mat.dispose();
       sprite.dispose();
+      // Hand the GPU context back explicitly. dispose() alone frees the scene
+      // but leaves the context alive, and a browser only grants about sixteen
+      // per page, so a component that mounts and unmounts a few times exhausts
+      // them and the next mount is the one that fails to get a context at all.
+      try {
+        renderer.forceContextLoss();
+      } catch {}
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
