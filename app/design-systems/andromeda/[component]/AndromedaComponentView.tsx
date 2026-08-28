@@ -92,7 +92,6 @@ export function AndromedaComponentView({
   const [fullscreen, setFullscreen] = useState(false)
   const [installTab, setInstallTab] = useState<'cli' | 'manual'>('cli')
   const [pkgManager, setPkgManager] = useState<'pnpm' | 'npm' | 'yarn' | 'bun'>('npm')
-  const [darkCopied, setDarkCopied] = useState(false)
   const mainCardRef = useRef<HTMLDivElement>(null)
 
   // Source is never shipped in this page's HTML. It's fetched on demand from
@@ -413,7 +412,7 @@ export function AndromedaComponentView({
                     visible at all times. When the install is account-gated and
                     the visitor is signed out, the copy button opens the auth
                     modal instead of copying. */}
-                <Step number={1}>
+                <Step number={1} isLast>
                   <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                     Run the following command. New project? Run{' '}
                     <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
@@ -476,46 +475,16 @@ export function AndromedaComponentView({
                   </div>
                 </Step>
 
-                {/* Step 2 — dark mode */}
-                <Step number={2} isLast>
-                  <div className="mb-2.5 flex items-center gap-2">
-                    <p className="text-sm text-sand-600 dark:text-sand-400">
-                      For dark mode, add the{' '}
-                      <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
-                        dark
-                      </code>{' '}
-                      class to your{' '}
-                      <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
-                        &lt;html&gt;
-                      </code>{' '}
-                      element:
-                    </p>
-                    <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">
-                      Optional
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                    <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void copyText('<html class="dark">')
-                        setDarkCopied(true)
-                        setTimeout(() => setDarkCopied(false), 2000)
-                      }}
-                      className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
-                    >
-                      {darkCopied
-                        ? <Check weight="regular" size={14} className="text-olive-500" />
-                        : <Copy weight="regular" size={14} />}
-                    </button>
-                  </div>
-                </Step>
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Manual: copy the source */}
-                <Step number={1} isLast>
+                {/* Manual: copy the source. This pane shows the component's own
+                    file, whose imports (`../tokens`, `./lib/utils`) point at the
+                    Andromeda foundation, so it does not compile alone — hence
+                    step 2. The CLI item has no such gap: it bundles the shared
+                    helpers and declares tokens + sibling components as registry
+                    dependencies. */}
+                <Step number={1}>
                   <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                     Copy and paste the following code into your project:
                   </p>
@@ -538,6 +507,22 @@ export function AndromedaComponentView({
                       {renderCodePane()}
                     </div>
                   </div>
+                </Step>
+
+                {/* Step 2 — the foundation this file imports */}
+                <Step number={2} isLast>
+                  <p className="text-sm text-sand-600 dark:text-sand-400">
+                    This file imports the Andromeda foundation, so it expects{' '}
+                    <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                      tokens.ts
+                    </code>{' '}
+                    one folder up and the{' '}
+                    <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">
+                      lib/
+                    </code>{' '}
+                    folder beside it, plus any Andromeda component it renders.
+                    The CLI tab installs all of them for you.
+                  </p>
                 </Step>
               </div>
             )}
