@@ -134,7 +134,16 @@ export default async function RootLayout({
   // can see. Sec-Fetch-Dest is the browser's own answer to "is this document
   // being framed", sent on the document request itself; a browser too old to
   // send it just gets the full shell, which is slower but never wrong.
-  if ((await headers()).get('sec-fetch-dest') === 'iframe') {
+  // Sec-Fetch-Site narrows the branch to the site's own embeds: pages framed
+  // anywhere else render client components that expect the providers this
+  // branch skips, so a cross-site frame (which X-Frame-Options refuses to
+  // display anyway) must fall through to the full shell. A client that omits
+  // either header also falls through — slower but never wrong.
+  const reqHeaders = await headers()
+  if (
+    reqHeaders.get('sec-fetch-dest') === 'iframe' &&
+    reqHeaders.get('sec-fetch-site') === 'same-origin'
+  ) {
     return (
       <html
         lang="en"
