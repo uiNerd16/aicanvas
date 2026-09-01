@@ -214,7 +214,7 @@ function CodeBlock({
       <button
         type="button"
         onClick={onCopy}
-        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+        className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
         aria-label={`Copy ${label}`}
       >
         {copied ? (

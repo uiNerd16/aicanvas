@@ -980,7 +980,7 @@ export default function ComponentPageView({
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     pkgManager === pm
                                       ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   {pm}
@@ -1006,7 +1006,7 @@ export default function ComponentPageView({
                                   setDepsCopied(true)
                                   setTimeout(() => setDepsCopied(false), 2000)
                                 }}
-                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {depsCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1022,7 +1022,7 @@ export default function ComponentPageView({
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     installTier === 'component'
                                       ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   Just this component
@@ -1035,7 +1035,7 @@ export default function ComponentPageView({
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     installTier === 'system'
                                       ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   Whole {systemMeta.name}
@@ -1059,7 +1059,7 @@ export default function ComponentPageView({
                                   signed out and it succeeds, writing a
                                   placeholder rather than the component. */}
                               {needsFreeAccount && (
-                                <p className="mt-2 text-xs text-sand-500">
+                                <p className="mt-2 text-xs text-sand-600 dark:text-sand-500">
                                   Free account required. Signed out, this
                                   installs a placeholder file instead of the
                                   component.
@@ -1088,7 +1088,7 @@ export default function ComponentPageView({
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1112,7 +1112,7 @@ export default function ComponentPageView({
                                   <button
                                     key={fw}
                                     onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
                                   >
                                     {fw === 'html' ? 'HTML' : 'Next.js'}
                                   </button>
@@ -1123,7 +1123,7 @@ export default function ComponentPageView({
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
-                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
                                     ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1150,7 +1150,7 @@ export default function ComponentPageView({
                               <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                               </button>
@@ -1158,10 +1158,10 @@ export default function ComponentPageView({
                             {FONT_PKG_SNIPPET && (
                               <div className="overflow-hidden rounded-lg bg-sand-100 dark:bg-sand-950">
                                 <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
-                                  <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                                  <span className="font-mono text-xs text-sand-600 dark:text-sand-500">layout.tsx</span>
                                   <button
                                     onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
-                                    className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                    className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                   >
                                     {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                                   </button>
@@ -1188,7 +1188,7 @@ export default function ComponentPageView({
                             </code>
                             <button
                               onClick={copyDeps}
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {depsCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1209,13 +1209,13 @@ export default function ComponentPageView({
                           </p>
                           <div className="relative rounded-lg bg-sand-100 dark:bg-sand-950">
                             <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
-                              <span className="font-mono text-xs text-sand-500">
+                              <span className="font-mono text-xs text-sand-600 dark:text-sand-500">
                                 {slug}.tsx
                               </span>
                               <button
                                 onClick={copyCode}
                                 disabled={enforcing && codeState.status !== 'ready'}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 {codeCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1238,7 +1238,7 @@ export default function ComponentPageView({
                                   <button
                                     type="button"
                                     onClick={openCode}
-                                    className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-700 dark:hover:text-sand-300"
+                                    className="w-full py-6 text-center text-sm text-sand-600 dark:text-sand-500 transition-colors hover:text-sand-700 dark:hover:text-sand-300"
                                   >
                                     {codeState.status === 'loading' ? 'Loading source…' : 'Load the source'}
                                   </button>
@@ -1269,7 +1269,7 @@ export default function ComponentPageView({
                                 setDarkCopied(true)
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1293,7 +1293,7 @@ export default function ComponentPageView({
                                   <button
                                     key={fw}
                                     onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
                                   >
                                     {fw === 'html' ? 'HTML' : 'Next.js'}
                                   </button>
@@ -1304,7 +1304,7 @@ export default function ComponentPageView({
                                     setFontCopied(true)
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
-                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
                                     ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1331,17 +1331,17 @@ export default function ComponentPageView({
                               <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { navigator.clipboard.writeText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                               </button>
                             </div>
                             <div className="overflow-hidden rounded-lg bg-sand-100 dark:bg-sand-950">
                               <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
-                                <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                                <span className="font-mono text-xs text-sand-600 dark:text-sand-500">layout.tsx</span>
                                 <button
                                   onClick={() => { navigator.clipboard.writeText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
-                                  className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                                  className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                                 </button>
@@ -1396,7 +1396,7 @@ export default function ComponentPageView({
                       <div className="flex shrink-0 items-center gap-0.5">
                         <button
                           onClick={() => setMcpTokenRevealed((v) => !v)}
-                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                          className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                           aria-label={mcpTokenRevealed ? 'Hide MCP token' : 'Reveal MCP token'}
                           aria-pressed={mcpTokenRevealed}
                         >
@@ -1410,7 +1410,7 @@ export default function ComponentPageView({
                             setMcpTokenCopied(true)
                             setTimeout(() => setMcpTokenCopied(false), 2000)
                           }}
-                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+                          className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                           aria-label="Copy MCP token"
                         >
                           {mcpTokenCopied

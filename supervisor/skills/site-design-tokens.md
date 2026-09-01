@@ -78,9 +78,19 @@ Three traps, all of them measured rather than guessed:
   value that was there and change only the light base. The table above is for code
   being written from scratch.
 - **Some surfaces stay dark in both themes** and must not be paired: the component
-  preview stage, code and install slabs (the syntax theme is github-dark), modal
-  scrims, and the `/design-systems`, `/lab` and `/ideation` subtrees, which pin
-  themselves with a scoped `dark` class rather than by writing `<html>`.
+  preview stage, modal scrims, and the `/design-systems`, `/lab` and `/ideation`
+  subtrees, which pin themselves with a scoped `dark` class rather than by writing
+  `<html>`.
+- **Code and install slabs DO follow the theme** (ruled 2026-08-31, replacing the
+  earlier always-dark line). A slab is `bg-sand-100 dark:bg-sand-950` sitting on a
+  `bg-sand-50` card, with `border-sand-200`, `bg-sand-200` pills and `text-sand-700`
+  code. Shiki carries both themes at once: `themes: { light: 'github-light', dark:
+  'github-dark' }` puts the light colours inline and the dark ones in a
+  `--shiki-dark` variable, and the wrapper swaps them with
+  `dark:[&_span]:!text-[var(--shiki-dark)]` so the preview scope still wins over the
+  site scope. Both call sites (`HighlightedCode.tsx` and the gated
+  `/api/component-code` route) must pass the same pair or runtime-fetched source
+  stops matching the build-time look.
 
 ## Text colors in dark preview context
 

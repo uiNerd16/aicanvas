@@ -44,7 +44,7 @@ export function McpTokenSection({ token }: Props) {
             <button
               type="button"
               onClick={() => setRevealed((v) => !v)}
-              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+              className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
               aria-label={revealed ? 'Hide token' : 'Reveal token'}
               aria-pressed={revealed}
             >
@@ -55,7 +55,7 @@ export function McpTokenSection({ token }: Props) {
             <button
               type="button"
               onClick={copy}
-              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
+              className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
               aria-label="Copy token"
             >
               {copied
