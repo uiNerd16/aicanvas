@@ -44,6 +44,7 @@ import { BlockPreviewFrame } from './BlockPreviewFrame'
 import { useSession } from '../auth/SessionProvider'
 import { useAuthModal } from '../auth/AuthModalProvider'
 import { Button } from '../Button'
+import { useTheme } from '../ThemeProvider'
 import { buttonClasses } from '../buttonClasses'
 import { SaveButton } from '../SaveButton'
 import { HighlightedCodeView } from '../HighlightedCodeView'
@@ -251,7 +252,19 @@ export default function ComponentPageView({
   // same bug in reverse. Safe on mount: `user` starts from the server-provided
   // initialUser, so a normal load never fires a second fetch.
   useEffect(() => { if (enforcing) setCodeState({ status: 'idle' }) }, [enforcing, slug, user?.id])
-  const [cardTheme, setCardTheme] = useState<'dark' | 'light'>('dark')
+  // The preview starts on whatever the site is set to, so a visitor browsing in
+  // light does not get slapped with a dark box, then pins to their own choice
+  // the moment they touch the toggle. Derived rather than synced with an
+  // effect: the site theme is already correct during SSR (ThemeProvider is
+  // seeded from the cookie), so there is nothing to reconcile and no frame of
+  // the wrong theme. It reads the site and never writes it, which is the whole
+  // point — the previous version of this toggle wrote <html> and dragged the
+  // entire site dark with it.
+  //
+  // A dark-only component ignores both: it has no light rendering to show.
+  const { theme: siteTheme } = useTheme()
+  const [themeOverride, setThemeOverride] = useState<'dark' | 'light' | null>(null)
+  const cardTheme: 'dark' | 'light' = dualTheme ? (themeOverride ?? siteTheme) : 'dark'
   const [cliCopied, setCliCopied] = useState(false)
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false)
   const [mcpTokenRevealed, setMcpTokenRevealed] = useState(false)
@@ -510,7 +523,7 @@ export default function ComponentPageView({
   return (
     <>
       {/* Top stripe — sticky (desktop only; mobile uses MobileNav) */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
         <Breadcrumbs crumbs={[{ label: 'Components & Blocks', href: '/components' }, { label: name }]} />
         <HeaderSocials />
       </div>
@@ -560,7 +573,7 @@ export default function ComponentPageView({
               const useCaseChips = (useCases ?? []).slice(0, 3)
               return (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <TagIcon weight="regular" size={14} className="shrink-0 text-sand-400 dark:text-sand-500" />
+                  <TagIcon weight="regular" size={14} className="shrink-0 text-sand-600 dark:text-sand-500" />
                   {designSystem && <PremiumBadge />}
                   {premium && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
@@ -581,7 +594,7 @@ export default function ComponentPageView({
                     </span>
                   ))}
                   {useCaseChips.map((label) => (
-                    <span key={label} className="rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
+                    <span key={label} className="rounded-full border border-sand-200 bg-sand-50 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400">
                       {label}
                     </span>
                   ))}
@@ -591,7 +604,7 @@ export default function ComponentPageView({
             {systemMeta && (
               <Link
                 href={`/design-systems/${systemMeta.slug}`}
-                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-sand-500 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-sand-600 transition-colors hover:text-sand-900 dark:text-sand-400 dark:hover:text-sand-100"
               >
                 Part of {systemMeta.name} design system
                 <ArrowRight weight="regular" size={12} />
@@ -600,10 +613,10 @@ export default function ComponentPageView({
           </div>
 
           {/* Main card */}
-          <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm dark:border-sand-800 dark:bg-sand-900 dark:shadow-none">
+          <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-200 bg-sand-100 shadow-sm dark:border-sand-800 dark:bg-sand-900 dark:shadow-none">
 
             {/* Tab bar — tabs left, card theme toggle right */}
-            <div className="flex items-center justify-between border-b border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-between border-b border-sand-200 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Preview / Code tabs */}
               <div className="flex items-center gap-0.5">
@@ -611,8 +624,8 @@ export default function ComponentPageView({
                   onClick={() => setActiveTab('preview')}
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'preview'
-                      ? 'bg-sand-200 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                      ? 'bg-sand-50 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
                   <Eye weight="regular" size={15} />
@@ -622,8 +635,8 @@ export default function ComponentPageView({
                   onClick={() => setActiveTab('code')}
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
                     activeTab === 'code'
-                      ? 'bg-sand-200 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
-                      : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                      ? 'bg-sand-50 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                      : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                   }`}
                 >
                   <Code weight="regular" size={15} />
@@ -643,7 +656,7 @@ export default function ComponentPageView({
                     disabled={!dualTheme}
                     onClick={() => {
                       if (!dualTheme) return
-                      setCardTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+                      setThemeOverride(cardTheme === 'dark' ? 'light' : 'dark')
                     }}
                     className="overflow-hidden"
                   >
@@ -671,7 +684,7 @@ export default function ComponentPageView({
                       )}
                     </AnimatePresence>
                   </Button>
-                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/toggle:block">
+                  <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-100 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/toggle:block">
                     {dualTheme
                       ? cardTheme === 'dark' ? 'Switch to light' : 'Switch to dark'
                       : 'Dark mode only'}
@@ -690,7 +703,7 @@ export default function ComponentPageView({
                     >
                       <ArrowClockwise weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/refresh:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-100 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/refresh:block">
                       Refresh
                     </div>
                   </div>
@@ -714,7 +727,7 @@ export default function ComponentPageView({
                     >
                       <CornersOut weight="regular" size={16} />
                     </Button>
-                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-700 bg-sand-800 px-2.5 py-1.5 text-xs text-sand-300 group-hover/fullscreen:block">
+                    <div className="pointer-events-none absolute top-full right-0 z-10 mt-1.5 hidden whitespace-nowrap rounded-lg border border-sand-300 bg-sand-100 px-2.5 py-1.5 text-xs text-sand-700 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-300 group-hover/fullscreen:block">
                       Full screen
                     </div>
                   </div>
@@ -834,7 +847,7 @@ export default function ComponentPageView({
             </div>
 
             {/* Action bar */}
-            <div className="flex items-center justify-end gap-2 border-t border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-end gap-2 border-t border-sand-200 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
 
               {/* Save — signed out, opens the same soft-gate modal as Copy CLI. */}
               <SaveButton slug={slug} system={designSystem ?? null} />
@@ -900,13 +913,13 @@ export default function ComponentPageView({
                   </span>
                 )}
               </h2>
-              <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mb-4 mt-1 text-sm text-sand-600 dark:text-sand-400">
                 One command adds this component to your project.
               </p>
 
               {/* CLI / Manual tabs */}
-              <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
-                <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+              <div className="overflow-hidden rounded-xl border border-sand-200 dark:border-sand-800">
+                <div className="flex border-b border-sand-200 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
                   <button
                     onClick={() => {
                       if (installTab !== 'cli') track('Install Tab Switch', { component: slug, tab: 'cli' })
@@ -915,7 +928,7 @@ export default function ComponentPageView({
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'cli'
                         ? 'text-sand-900 dark:text-sand-50'
-                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                        : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                     }`}
                   >
                     CLI
@@ -931,7 +944,7 @@ export default function ComponentPageView({
                     className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
                       installTab === 'manual'
                         ? 'text-sand-900 dark:text-sand-50'
-                        : 'text-sand-400 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
+                        : 'text-sand-600 hover:text-sand-600 dark:text-sand-500 dark:hover:text-sand-300'
                     }`}
                   >
                     Manual
@@ -950,19 +963,19 @@ export default function ComponentPageView({
                           button opens the auth modal instead of copying. */}
                       <Step number={1}>
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
-                            Run the following command. New project? Run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
+                            Run the following command. New project? Run <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">npx shadcn@latest init</code> first to set up Tailwind and path aliases.
                           </p>
-                          <div className="overflow-hidden rounded-lg bg-sand-950">
+                          <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
                             {/* Package manager switcher */}
-                            <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                            <div className="flex items-center gap-1 border-b border-sand-200 dark:border-sand-800 px-4 py-2">
                               {(['pnpm', 'npm', 'yarn', 'bun'] as const).map((pm) => (
                                 <button
                                   key={pm}
                                   onClick={() => { setPkgManager(pm); setDepsCopied(false) }}
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     pkgManager === pm
-                                      ? 'bg-sand-800 text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-300'
+                                      ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   {pm}
@@ -989,7 +1002,7 @@ export default function ComponentPageView({
                                   setTimeout(() => setDepsCopied(false), 2000)
                                 }}
                                 aria-label="Copy install command"
-                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {depsCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -999,13 +1012,13 @@ export default function ComponentPageView({
 
                             {/* Tier toggle — only for components belonging to a design system */}
                             {systemMeta && (
-                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                              <div className="flex items-center gap-1 border-b border-sand-200 dark:border-sand-800 px-4 py-2">
                                 <button
                                   onClick={() => setInstallTier('component')}
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     installTier === 'component'
-                                      ? 'bg-sand-800 text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-300'
+                                      ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   Just this component
@@ -1017,8 +1030,8 @@ export default function ComponentPageView({
                                   }}
                                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                                     installTier === 'system'
-                                      ? 'bg-sand-800 text-sand-100'
-                                      : 'text-sand-500 hover:text-sand-300'
+                                      ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100'
+                                      : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'
                                   }`}
                                 >
                                   Whole {systemMeta.name}
@@ -1028,7 +1041,7 @@ export default function ComponentPageView({
 
                             {/* Command */}
                             <div className="px-4 py-3.5">
-                              <code className="font-mono text-sm text-sand-300 break-all">
+                              <code className="font-mono text-sm text-sand-700 dark:text-sand-300 break-all">
                                 {pkgManager === 'pnpm'
                                   ? `pnpm dlx shadcn@latest add ${installReferenceMasked}`
                                   : pkgManager === 'bun'
@@ -1042,7 +1055,7 @@ export default function ComponentPageView({
                                   signed out and it succeeds, writing a
                                   placeholder rather than the component. */}
                               {needsFreeAccount && (
-                                <p className="mt-2 text-xs text-sand-500">
+                                <p className="mt-2 text-xs text-sand-600 dark:text-sand-500">
                                   Free account required. Signed out, this
                                   installs a placeholder file instead of the
                                   component.
@@ -1059,12 +1072,12 @@ export default function ComponentPageView({
                       >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
-                              For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                              For dark mode, add the <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
-                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                            <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{'<html class="dark">'}</code>
                             <button
                               onClick={() => {
                                 void copyText('<html class="dark">')
@@ -1072,7 +1085,7 @@ export default function ComponentPageView({
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
                               aria-label="Copy dark mode snippet"
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1088,15 +1101,15 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className="overflow-hidden rounded-lg bg-sand-950">
-                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                            <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
+                              <div className="flex items-center gap-1 border-b border-sand-200 dark:border-sand-800 px-4 py-2">
                                 {(['html', 'nextjs'] as const).map((fw) => (
                                   <button
                                     key={fw}
                                     onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
                                   >
                                     {fw === 'html' ? 'HTML' : 'Next.js'}
                                   </button>
@@ -1108,7 +1121,7 @@ export default function ComponentPageView({
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
                                   aria-label="Copy font snippet"
-                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
                                     ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1116,7 +1129,7 @@ export default function ComponentPageView({
                                 </button>
                               </div>
                               <div className="px-4 py-3.5">
-                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                                <code className="whitespace-pre font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
                               </div>
                             </div>
                         </Step>
@@ -1127,34 +1140,34 @@ export default function ComponentPageView({
                         <Step number={3} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
-                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>.{fontPkgSelfContained ? ' Install the package:' : ' Install and register it:'}
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className={`flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 ${FONT_PKG_SNIPPET ? 'mb-2' : ''}`}>
-                              <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
+                            <div className={`flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3 ${FONT_PKG_SNIPPET ? 'mb-2' : ''}`}>
+                              <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { void copyText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
                                 aria-label="Copy install command"
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                               </button>
                             </div>
                             {FONT_PKG_SNIPPET && (
-                              <div className="overflow-hidden rounded-lg bg-sand-950">
-                                <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
-                                  <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                              <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
+                                <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
+                                  <span className="font-mono text-xs text-sand-600 dark:text-sand-500">layout.tsx</span>
                                   <button
                                     onClick={() => { void copyText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
                                     aria-label="Copy font setup snippet"
-                                    className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                    className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                   >
                                     {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                                   </button>
                                 </div>
                                 <div className="px-4 py-3.5">
-                                  <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_PKG_SNIPPET}</code>
+                                  <code className="whitespace-pre font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_SNIPPET}</code>
                                 </div>
                               </div>
                             )}
@@ -1169,14 +1182,14 @@ export default function ComponentPageView({
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Install the following dependencies:
                           </p>
-                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                            <code className="font-mono text-sm text-sand-300">
+                          <div className="flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-700 dark:text-sand-300">
                               {depsCommand}
                             </code>
                             <button
                               onClick={copyDeps}
                               aria-label="Copy install command"
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {depsCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1195,23 +1208,23 @@ export default function ComponentPageView({
                           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                             Copy and paste the following code into your project:
                           </p>
-                          <div className="relative rounded-lg bg-sand-950">
-                            <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
-                              <span className="font-mono text-xs text-sand-500">
+                          <div className="relative rounded-lg bg-sand-200 dark:bg-sand-950">
+                            <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
+                              <span className="font-mono text-xs text-sand-600 dark:text-sand-500">
                                 {slug}.tsx
                               </span>
                               <button
                                 onClick={copyCode}
                                 aria-label="Copy code"
                                 disabled={enforcing && codeState.status !== 'ready'}
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 {codeCopied
                                   ? <Check weight="regular" size={14} className="text-olive-500" />
                                   : <Copy weight="regular" size={14} />}
                               </button>
                             </div>
-                            <div className="max-h-64 overflow-y-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
+                            <div className="max-h-64 overflow-y-auto p-4 [scrollbar-color:#C4BFB7_transparent] dark:[scrollbar-color:#4A453F_transparent]" style={{ scrollbarWidth: 'thin' }}>
                               {enforcing ? (
                                 codeState.status === 'locked' ? (
                                   <Paywall reason={codeState.reason} limit={codeState.limit} name={name} />
@@ -1219,7 +1232,7 @@ export default function ComponentPageView({
                                   codeState.highlighted ? (
                                     <HighlightedCodeView html={codeState.highlighted} />
                                   ) : (
-                                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-200">
+                                    <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-sand-800 dark:text-sand-200">
                                       {codeState.code}
                                     </pre>
                                   )
@@ -1227,7 +1240,7 @@ export default function ComponentPageView({
                                   <button
                                     type="button"
                                     onClick={openCode}
-                                    className="w-full py-6 text-center text-sm text-sand-500 transition-colors hover:text-sand-300"
+                                    className="w-full py-6 text-center text-sm text-sand-600 dark:text-sand-500 transition-colors hover:text-sand-700 dark:hover:text-sand-300"
                                   >
                                     {codeState.status === 'loading' ? 'Loading source…' : 'Load the source'}
                                   </button>
@@ -1246,12 +1259,12 @@ export default function ComponentPageView({
                       >
                           <div className="mb-2.5 flex items-center gap-2">
                             <p className="text-sm text-sand-600 dark:text-sand-400">
-                              For dark mode, add the <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
+                              For dark mode, add the <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">dark</code> class to your <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">&lt;html&gt;</code> element:
                             </p>
-                            <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                            <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                           </div>
-                          <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                            <code className="font-mono text-sm text-sand-300">{'<html class="dark">'}</code>
+                          <div className="flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
+                            <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{'<html class="dark">'}</code>
                             <button
                               onClick={() => {
                                 void copyText('<html class="dark">')
@@ -1259,7 +1272,7 @@ export default function ComponentPageView({
                                 setTimeout(() => setDarkCopied(false), 2000)
                               }}
                               aria-label="Copy dark mode snippet"
-                              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                              className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                             >
                               {darkCopied
                                 ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1275,15 +1288,15 @@ export default function ComponentPageView({
                               <p className="text-sm text-sand-600 dark:text-sand-400">
                                 This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontName}</span>. Add it to your project:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className="overflow-hidden rounded-lg bg-sand-950">
-                              <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                            <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
+                              <div className="flex items-center gap-1 border-b border-sand-200 dark:border-sand-800 px-4 py-2">
                                 {(['html', 'nextjs'] as const).map((fw) => (
                                   <button
                                     key={fw}
                                     onClick={() => { setFontFramework(fw); setFontCopied(false) }}
-                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-800 text-sand-100' : 'text-sand-500 hover:text-sand-300'}`}
+                                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${fontFramework === fw ? 'bg-sand-200 dark:bg-sand-800 text-sand-900 dark:text-sand-100' : 'text-sand-600 dark:text-sand-500 hover:text-sand-700 dark:hover:text-sand-300'}`}
                                   >
                                     {fw === 'html' ? 'HTML' : 'Next.js'}
                                   </button>
@@ -1295,7 +1308,7 @@ export default function ComponentPageView({
                                     setTimeout(() => setFontCopied(false), 2000)
                                   }}
                                   aria-label="Copy font snippet"
-                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                  className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontCopied
                                     ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -1303,7 +1316,7 @@ export default function ComponentPageView({
                                 </button>
                               </div>
                               <div className="px-4 py-3.5">
-                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
+                                <code className="whitespace-pre font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_SNIPPETS[fontFramework]}</code>
                               </div>
                             </div>
                         </Step>
@@ -1314,33 +1327,33 @@ export default function ComponentPageView({
                         <Step number={manualStep.font} isLast>
                             <div className="mb-2.5 flex items-center gap-2">
                               <p className="text-sm text-sand-600 dark:text-sand-400">
-                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
+                                This component uses <span className="font-semibold text-sand-700 dark:text-sand-300">{fontPkgClass}</span> from <code className="rounded bg-sand-50 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">{fontPkgName}</code>. Install and register it:
                               </p>
-                              <span className="ml-auto shrink-0 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-medium text-sand-400 dark:bg-sand-800 dark:text-sand-500">Optional</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-sand-50 px-2 py-0.5 text-xs font-medium text-sand-600 dark:bg-sand-800 dark:text-sand-500">Optional</span>
                             </div>
-                            <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3 mb-2">
-                              <code className="font-mono text-sm text-sand-300">{FONT_PKG_INSTALL}</code>
+                            <div className="flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3 mb-2">
+                              <code className="font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_INSTALL}</code>
                               <button
                                 onClick={() => { void copyText(FONT_PKG_INSTALL!); setFontPkgInstallCopied(true); setTimeout(() => setFontPkgInstallCopied(false), 2000) }}
                                 aria-label="Copy install command"
-                                className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                               >
                                 {fontPkgInstallCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                               </button>
                             </div>
-                            <div className="overflow-hidden rounded-lg bg-sand-950">
-                              <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
-                                <span className="font-mono text-xs text-sand-500">layout.tsx</span>
+                            <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
+                              <div className="flex items-center justify-between border-b border-sand-200 dark:border-sand-800 px-4 py-2">
+                                <span className="font-mono text-xs text-sand-600 dark:text-sand-500">layout.tsx</span>
                                 <button
                                   onClick={() => { void copyText(FONT_PKG_SNIPPET!); setFontPkgSnippetCopied(true); setTimeout(() => setFontPkgSnippetCopied(false), 2000) }}
                                   aria-label="Copy font setup snippet"
-                                  className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                                  className="shrink-0 rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                                 >
                                   {fontPkgSnippetCopied ? <Check weight="regular" size={14} className="text-olive-500" /> : <Copy weight="regular" size={14} />}
                                 </button>
                               </div>
                               <div className="px-4 py-3.5">
-                                <code className="whitespace-pre font-mono text-sm text-sand-300">{FONT_PKG_SNIPPET}</code>
+                                <code className="whitespace-pre font-mono text-sm text-sand-700 dark:text-sand-300">{FONT_PKG_SNIPPET}</code>
                               </div>
                             </div>
                         </Step>
@@ -1359,7 +1372,7 @@ export default function ComponentPageView({
               <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">
                 Install with AI Canvas MCP
               </h2>
-              <p className="mb-4 mt-1 text-sm text-sand-500 dark:text-sand-400">
+              <p className="mb-4 mt-1 text-sm text-sand-600 dark:text-sand-400">
                 With AI Canvas MCP, your AI knows every component we ship. Ask
                 for one inside Claude Code, Codex, or Cursor and it installs the
                 component you pick. Works with any AI Canvas account, free or
@@ -1382,14 +1395,14 @@ export default function ComponentPageView({
               {user && (
                 userToken ? (
                   <div className="mt-4">
-                    <div className="flex items-center justify-between gap-2 rounded-lg bg-sand-950 px-4 py-3">
-                      <code className="font-mono text-sm text-sand-300 break-all">
+                    <div className="flex items-center justify-between gap-2 rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
+                      <code className="font-mono text-sm text-sand-700 dark:text-sand-300 break-all">
                         AICANVAS_TOKEN={mcpTokenRevealed ? userToken : 'aic_••••••••'}
                       </code>
                       <div className="flex shrink-0 items-center gap-0.5">
                         <button
                           onClick={() => setMcpTokenRevealed((v) => !v)}
-                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                          className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                           aria-label={mcpTokenRevealed ? 'Hide MCP token' : 'Reveal MCP token'}
                           aria-pressed={mcpTokenRevealed}
                         >
@@ -1403,7 +1416,7 @@ export default function ComponentPageView({
                             setMcpTokenCopied(true)
                             setTimeout(() => setMcpTokenCopied(false), 2000)
                           }}
-                          className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                          className="rounded-md p-1.5 text-sand-600 dark:text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
                           aria-label="Copy MCP token"
                         >
                           {mcpTokenCopied
@@ -1417,9 +1430,9 @@ export default function ComponentPageView({
                   /* Token still loading — placeholder mirrors the token row so
                      nothing jumps when it lands. */
                   <div className="mt-4" aria-hidden>
-                    <div className="flex items-center justify-between rounded-lg bg-sand-950 px-4 py-3">
-                      <div className="h-4 w-40 animate-pulse rounded bg-sand-800" />
-                      <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-800" />
+                    <div className="flex items-center justify-between rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
+                      <div className="h-4 w-40 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
+                      <div className="h-5 w-5 shrink-0 animate-pulse rounded bg-sand-200 dark:bg-sand-800" />
                     </div>
                   </div>
                 )
@@ -1468,7 +1481,7 @@ export default function ComponentPageView({
                             {i > 0 && (
                               <span
                                 aria-hidden="true"
-                                className="h-3 w-px bg-sand-300 dark:bg-sand-700"
+                                className="h-3 w-px bg-sand-200 dark:bg-sand-700"
                               />
                             )}
                             <span className="flex items-center gap-1.5">
@@ -1478,7 +1491,7 @@ export default function ComponentPageView({
                                 height={iconHeight}
                                 fill="currentColor"
                                 aria-hidden="true"
-                                className="shrink-0 text-sand-500 dark:text-sand-400"
+                                className="shrink-0 text-sand-600 dark:text-sand-400"
                               >
                                 <path d={icon.path} />
                               </svg>
@@ -1529,7 +1542,7 @@ export default function ComponentPageView({
                   <Link
                     key={col.slug}
                     href={`/components/collection/${col.slug}`}
-                    className="rounded-full border border-sand-300 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
+                    className="rounded-full border border-sand-200 px-3.5 py-1.5 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 dark:border-sand-800 dark:text-sand-300 dark:hover:border-sand-700 dark:hover:text-sand-50"
                   >
                     {col.title}
                   </Link>
@@ -1607,7 +1620,7 @@ export default function ComponentPageView({
                         <Link
                           href={`/components/${c.slug}`}
                           onClick={() => track('Component Card Click', { component: c.slug, position: relatedStart + i, source: 'related' })}
-                          className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+                          className="group flex flex-col overflow-hidden rounded-xl border border-sand-200 bg-sand-100 transition-colors duration-200 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                         >
                           <div className="relative aspect-video overflow-hidden bg-sand-950">
                             {c.image ? (
@@ -1679,7 +1692,7 @@ export default function ComponentPageView({
               className={`absolute inset-0 isolate overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] transition-colors duration-300 sm:inset-10 sm:rounded-2xl sm:border sm:shadow-2xl [&::-webkit-scrollbar]:hidden ${
                 cardTheme === 'dark'
                   ? 'dark bg-sand-950 sm:border-sand-800'
-                  : 'bg-sand-100 sm:border-sand-300'
+                  : 'bg-sand-100 sm:border-sand-200'
               }`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1717,13 +1730,13 @@ export default function ComponentPageView({
                 : '50%',
             }}
           >
-            <div className="flex items-center gap-3 rounded-xl border border-sand-700 bg-sand-800 px-4 py-3 shadow-lg">
+            <div className="flex items-center gap-3 rounded-xl border border-sand-200 bg-sand-100 px-4 py-3 shadow-lg dark:border-sand-700 dark:bg-sand-800">
               <Check weight="regular" size={16} className="shrink-0 text-olive-500" />
               <div>
-                <p className="text-sm font-semibold text-sand-50">
+                <p className="text-sm font-semibold text-sand-900 dark:text-sand-50">
                   Install command copied
                 </p>
-                <p className="mt-0.5 text-xs text-sand-400">
+                <p className="mt-0.5 text-xs text-sand-600 dark:text-sand-400">
                   Paste into your terminal to install this component.
                 </p>
               </div>
@@ -1762,7 +1775,7 @@ export default function ComponentPageView({
           initial={false}
           animate={{ x: remixOpen ? '0%' : '105%' }}
           transition={{ type: 'spring', stiffness: 380, damping: 40 }}
-          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-300 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-sand-200 bg-sand-100 shadow-2xl outline-none dark:border-sand-800 dark:bg-sand-900"
         >
           {/* Header */}
           <div className="flex items-start justify-between gap-5 px-6 py-5 sm:px-8">
@@ -1801,7 +1814,7 @@ export default function ComponentPageView({
           </div>
 
           {/* Divider — inset to match the content padding on both sides */}
-          <div className="mx-6 border-t border-sand-300 dark:border-sand-800 sm:mx-8" />
+          <div className="mx-6 border-t border-sand-200 dark:border-sand-800 sm:mx-8" />
 
           {/* Body */}
           <div
@@ -1831,7 +1844,7 @@ export default function ComponentPageView({
                     that wraps to two lines and turns a tidy card into a wall of
                     monospace. Nothing is lost by cutting it: the visible form
                     is masked anyway, and the button copies the real command. */}
-                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-200">
+                <code className="min-w-0 flex-1 truncate rounded-lg bg-sand-200 dark:bg-sand-950 px-3 py-2 font-mono text-xs leading-relaxed text-sand-800 dark:text-sand-200">
                   npx shadcn@latest add {installReferenceMasked}
                 </code>
                 {/* copyCli already sends a non-subscriber to the paywall
@@ -1890,7 +1903,7 @@ export default function ComponentPageView({
                 still reads as a single document. Rendering head, lock and tail as
                 three rounded cards made a paywalled prompt look broken rather
                 than gated. */}
-            <div className="mt-4 overflow-hidden rounded-xl bg-sand-950 font-mono text-xs leading-relaxed text-sand-200">
+            <div className="mt-4 overflow-hidden rounded-xl bg-sand-200 dark:bg-sand-950 font-mono text-xs leading-relaxed text-sand-800 dark:text-sand-200">
               <pre
                 className={`whitespace-pre-wrap break-words px-5 pt-5 ${
                   promptLocked

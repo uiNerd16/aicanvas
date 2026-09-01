@@ -27,8 +27,12 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       // exactly and can never overflow it, so that column must not reserve a
       // scrollbar gutter it can never use. AndromedaContentColumn owns the
       // scrolling here. See .app-scroll-column in globals.css.
+      // Pinned dark, on purpose. This subtree is not site chrome: it paints
+      // with its own palette and has no light rendering, so it opts out of the
+      // site theme the same way a preview box does, with a scoped `dark` class
+      // rather than by touching <html>.
       data-owns-scroll
-      className={`flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
+      className={`dark flex h-full w-full flex-1 flex-col overflow-hidden bg-sand-950 md:flex-row ${jetbrainsMono.variable}`}
     >
       {/* Desktop-only rail. Below md the embedded Sidebar (a full-height 240px
           aside) would fill the viewport and bury the page, so it's hidden and

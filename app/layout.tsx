@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { Manrope, Geist_Mono } from 'next/font/google'
 import { GeistPixelCircle } from 'geist/font/pixel'
 import { Suspense } from 'react'
@@ -14,6 +14,7 @@ import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { PaywallModalProvider } from './components/billing/PaywallModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { PageEnterFade } from './components/PageEnterFade'
 import { SiteBeacon } from './components/SiteBeacon'
 import { PaddlePaymentLink } from './components/billing/PaddlePaymentLink'
 // Registry-free nav counts (generated) — keeps the heavy component-registry,
@@ -166,23 +167,29 @@ export default async function RootLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // The visitor's site theme, read server-side so the very first byte already
+  // carries the right class. Dark is the default: no cookie means dark, which
+  // is what every visitor before the toggle existed will keep getting.
+  //
+  // A cookie rather than localStorage precisely so this can happen here. The
+  // server cannot read localStorage, so that route would paint dark and then
+  // correct itself, and a light visitor would eat a dark flash on every single
+  // navigation. This layout already awaits headers() and the Supabase user, so
+  // reading one more request value costs nothing that was not already dynamic.
+  const theme = (await cookies()).get('theme')?.value === 'light' ? 'light' : 'dark'
+
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      // `dark` is in the server-rendered className so SSR HTML already
-      // matches what ThemeProvider sets client-side. Without it, the inline
-      // <head> script adds `dark` pre-paint, but React's hydration pass
-      // reconciles the html className back to JSX → strips `dark` for one
-      // frame → ThemeProvider's effect re-adds it. That round-trip is the
-      // visible dark → light → dark flash on refresh.
-      className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} dark h-full antialiased`}
+      // The theme class is server-rendered so SSR HTML already matches what the
+      // client will have. It cannot be left to a script in <head>: React's
+      // hydration pass reconciles the html className back to this JSX, so a
+      // class only the script knows about is stripped for a frame, which is
+      // exactly the visible flash on refresh.
+      className={`${manrope.variable} ${geistMono.variable} ${GeistPixelCircle.variable} ${theme === 'dark' ? 'dark ' : ''}h-full antialiased`}
     >
       <head>
-        {/* Defense-in-depth: extension scripts or future theme toggles might
-            mutate the class before hydration. Re-asserting `dark` in the
-            head script keeps the live DOM correct even if something else
-            stripped it. */}
         {/* The frame=1 check tags mobile-preview iframe documents pre-paint.
             The framed template routes are dynamic + streamed, so the forced-dark
             <style> inside FramePayload (TemplatePreviewShell) arrives with the
@@ -194,7 +201,7 @@ export default async function RootLayout({
             attribute, not a class: React reconciles the html className during
             hydration (which strips classes the JSX doesn't know), but leaves
             other attributes alone. */}
-        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('dark');if(/[?&]frame=1(?:&|$)/.test(location.search))document.documentElement.setAttribute('data-frame','')` }} />
+        <script dangerouslySetInnerHTML={{ __html: `if(/[?&]frame=1(?:&|$)/.test(location.search))document.documentElement.setAttribute('data-frame','')` }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -206,8 +213,8 @@ export default async function RootLayout({
         {process.env.NODE_ENV === 'development' && <script src="/pufi.js" defer />}
         {process.env.NODE_ENV === 'development' && <script src="/koko.js" defer />}
       </head>
-      <body className="flex h-full flex-col overflow-hidden bg-sand-200 dark:bg-sand-950 md:flex-row">
-        <ThemeProvider>
+      <body className="flex h-full flex-col overflow-hidden bg-sand-50 dark:bg-sand-950 md:flex-row">
+        <ThemeProvider initial={theme}>
           <SessionProvider initialUser={user}>
             <AuthModalProvider>
              <PaywallModalProvider>
@@ -229,7 +236,7 @@ export default async function RootLayout({
                   full-height strip it can never paint a bar in. In CSS rather
                   than an inline style so the :has() release can out-specify
                   it; an inline declaration would always win. */}
-              <div className="app-scroll-column aic-page-scroll flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-200 dark:bg-sand-950">
+              <div className="app-scroll-column aic-page-scroll flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-sand-50 dark:bg-sand-950">
                 {children}
               </div>
               {/* Global auth dialog — toggles between sign-in and sign-up modes */}
@@ -245,6 +252,10 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <SiteBeacon />
+        {/* Fades the scroll column in on client-side navigations */}
+        <Suspense fallback={null}>
+          <PageEnterFade />
+        </Suspense>
         <DevBranchBadge />
         {/* Resumes checkout when the URL carries a Paddle payment link (?_ptxn=) */}
         <PaddlePaymentLink />
