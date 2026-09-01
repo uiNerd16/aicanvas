@@ -12,6 +12,13 @@ import { andromedaLightVars, themeColor } from '../../../design-systems/andromed
 // AndromedaThemeSync takes over.
 export function AndromedaThemePreview() {
   const [lightOn, setLightOn] = useState(false)
+  // Inside the phone-preview iframe the content mirrors the embedding page
+  // (AndromedaThemeSync), so the frame must not carry a second, competing
+  // toggle floating over the mock.
+  const [framed, setFramed] = useState(false)
+  useEffect(() => {
+    setFramed(window.self !== window.top)
+  }, [])
 
   useEffect(() => {
     if (!lightOn) return
@@ -28,7 +35,7 @@ export function AndromedaThemePreview() {
     }
   }, [lightOn])
 
-  if (process.env.NODE_ENV !== 'development') return null
+  if (process.env.NODE_ENV !== 'development' || framed) return null
 
   return (
     <button

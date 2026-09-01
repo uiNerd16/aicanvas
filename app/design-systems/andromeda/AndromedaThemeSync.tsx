@@ -15,18 +15,31 @@ import { andromedaLightVars } from '../../../design-systems/andromeda/components
 // hands every component back the dark literal baked into its own fallback.
 // So dark is not a second palette to keep in sync. It is the absence of one.
 //
-// Activation is deliberately narrow, because a missing `dark` class does not
-// prove the visitor chose light. Inside any iframe the sync never runs: the
-// template phone preview loads the bare ?frame=1 shell, which carries no
-// theme state at all, and its stage is pinned dark. And while the dev-only
-// preview toggle owns the channel (it marks <html> with
-// data-andromeda-theme-preview) the sync stands down, then re-asserts the
-// site's answer the moment the marker leaves.
+// Activation is deliberately positive, because a missing `dark` class does
+// not prove the visitor chose light. In the top document the class decides
+// (and the dev preview toggle, which marks <html> with
+// data-andromeda-theme-preview, takes precedence while present). Inside the
+// same-origin phone-preview iframe, whose bare ?frame=1 shell carries no
+// theme state at all, the sync instead MIRRORS the embedding page: light
+// exactly when the parent's channel is live, dark otherwise. A cross-origin
+// embed gets no mirror and keeps the dark default.
 export function AndromedaThemeSync() {
   useEffect(() => {
-    if (window.self !== window.top) return
     const root = document.documentElement
-    if (root.hasAttribute('data-frame')) return
+    const framed = window.self !== window.top
+
+    let stateRoot = root
+    if (framed) {
+      try {
+        stateRoot = window.parent.document.documentElement
+      } catch {
+        return
+      }
+    } else if (root.hasAttribute('data-frame')) {
+      // A frame shell opened directly as the top document stays dark: its
+      // stage is pinned to the void and carries no theme state to follow.
+      return
+    }
 
     const vars = andromedaLightVars()
     const names = Object.keys(vars)
@@ -36,8 +49,13 @@ export function AndromedaThemeSync() {
     const probe = names[0]
 
     const sync = () => {
-      if (root.hasAttribute('data-andromeda-theme-preview')) return
-      const wantLight = !root.classList.contains('dark')
+      let wantLight: boolean
+      if (framed) {
+        wantLight = stateRoot.style.getPropertyValue(probe) !== ''
+      } else {
+        if (root.hasAttribute('data-andromeda-theme-preview')) return
+        wantLight = !root.classList.contains('dark')
+      }
       const hasLight = root.style.getPropertyValue(probe) !== ''
       if (wantLight === hasLight) return
       if (wantLight) {
@@ -49,7 +67,7 @@ export function AndromedaThemeSync() {
 
     sync()
     const observer = new MutationObserver(sync)
-    observer.observe(root, {
+    observer.observe(stateRoot, {
       attributes: true,
       attributeFilter: ['class', 'style', 'data-andromeda-theme-preview'],
     })
