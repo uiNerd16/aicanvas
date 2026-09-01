@@ -405,3 +405,53 @@ html[data-frame]:has([data-card-theme="light"]) {
   .aic-beam-tail,
   .aic-beam-head { animation: none; opacity: 0; }
 }
+
+/* ── Andromeda light channel ──────────────────────────────────────────────────
+   Generated from the light palette in design-systems/andromeda/tokens.ts via
+   andromedaLightVars(); _tools/light-contrast.selfcheck.mjs fails when this
+   block drifts from the tokens. Scoped on purpose: only Andromeda's own
+   routes (.andromeda-theme-scope on their layout) follow the site theme, so a
+   free-lane Andromeda component on the always-dark preview stage stays dark;
+   [data-frame] documents mirror their parent via AndromedaThemeSync instead. */
+html:not(.dark):not([data-frame]) .andromeda-theme-scope {
+  --andromeda-theme-text-primary: #1A1A1C;
+  --andromeda-theme-text-secondary: #4A4A4D;
+  --andromeda-theme-text-muted: #5A5A5E;
+  --andromeda-theme-text-faint: #89898D;
+  --andromeda-theme-surface-base: #F4F4F5;
+  --andromeda-theme-surface-raised: #FAFAFB;
+  --andromeda-theme-surface-overlay: #FFFFFF;
+  --andromeda-theme-surface-hover: #ECECEE;
+  --andromeda-theme-surface-active: #E3E3E5;
+  --andromeda-theme-surface-alpha: rgba(0, 0, 0, 0.45);
+  --andromeda-theme-border-subtle: #E5E5E7;
+  --andromeda-theme-border-base: #C8C8CB;
+  --andromeda-theme-border-bright: #A5A5A9;
+  --andromeda-theme-border-strong: #6F6F73;
+  --andromeda-theme-border-alpha: rgba(0, 0, 0, 0.14);
+  --andromeda-theme-accent-100: #0D4239;
+  --andromeda-theme-accent-200: #0D5D51;
+  --andromeda-theme-accent-300: #0B7A6A;
+  --andromeda-theme-accent-400: #3DBA9C;
+  --andromeda-theme-accent-500: #D7F7EF;
+  --andromeda-theme-accent-alpha: rgba(11, 122, 106, 0.22);
+  --andromeda-theme-accent-on: #0D4239;
+  --andromeda-theme-red-100: #5C1414;
+  --andromeda-theme-red-200: #9A2121;
+  --andromeda-theme-red-300: #C22B2B;
+  --andromeda-theme-red-400: #F5A3A3;
+  --andromeda-theme-red-500: #FBDADA;
+  --andromeda-theme-red-alpha: rgba(194, 43, 43, 0.22);
+  --andromeda-theme-red-on: #5C1414;
+  --andromeda-theme-orange-100: #4A3410;
+  --andromeda-theme-orange-200: #7A5310;
+  --andromeda-theme-orange-300: #8F6000;
+  --andromeda-theme-orange-400: #F3C878;
+  --andromeda-theme-orange-500: #FBE8C7;
+  --andromeda-theme-orange-alpha: rgba(143, 96, 0, 0.22);
+  --andromeda-theme-orange-on: #4A3410;
+  --andromeda-theme-gradient-accent-fade: linear-gradient(180deg, #E3F4F0 0%, #F4F4F5 100%);
+  --andromeda-theme-gradient-accent-sweep: radial-gradient(ellipse 80% 70% at 0% 0%, #DDF2EC 0%, #E9F5F1 25%, #FAFAFB 65%);
+  --andromeda-theme-gradient-surface-soft: linear-gradient(180deg, #FFFFFF 0%, #F1F1F2 100%);
+  --andromeda-theme-shadow-color: rgba(17, 17, 20, 0.16);
+}

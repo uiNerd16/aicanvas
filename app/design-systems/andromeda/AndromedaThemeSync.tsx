@@ -3,84 +3,48 @@
 import { useEffect } from 'react'
 import { andromedaLightVars } from '../../../design-systems/andromeda/components/lib/utils'
 
-// Andromeda ships two themes and the site already has a light/dark state, so
-// the Andromeda routes follow it rather than carrying a switch of their own.
+// Top documents need no JS for Andromeda theming: globals.css defines the
+// --andromeda-theme-* channel under .andromeda-theme-scope whenever <html>
+// carries no `dark` class and is not a frame document, so the palette is
+// right from the very first server paint, with nothing to hydrate.
 //
-// This only ever READS the site theme. The `dark` class on <html> belongs to
-// ThemeProvider and nothing else may write it: a page that previews a design
-// system must never be able to move the site it is previewed on.
-//
-// Light means defining the --andromeda-theme-* channel on <html>, which every
-// andromedaVars() root below reads through; dark means removing it, which
-// hands every component back the dark literal baked into its own fallback.
-// So dark is not a second palette to keep in sync. It is the absence of one.
-//
-// Activation is deliberately positive, because a missing `dark` class does
-// not prove the visitor chose light. In the top document the class decides
-// (and the dev preview toggle, which marks <html> with
-// data-andromeda-theme-preview, takes precedence while present). Inside the
-// same-origin phone-preview iframe, whose bare ?frame=1 shell carries no
-// theme state at all, the sync instead MIRRORS the embedding page: light
-// exactly when the parent's channel is live, dark otherwise. A cross-origin
-// embed gets no mirror and keeps the dark default.
+// This component exists for the one place CSS cannot reach: the same-origin
+// phone-preview iframe. Its bare ?frame=1 shell carries no theme state and
+// its document is excluded from the CSS rule via [data-frame], so the frame
+// MIRRORS the embedding page instead, light exactly when the parent shows
+// light, by writing the channel inline on the frame document's root. It only
+// ever READS the parent's theme; the `dark` class and the cookie belong to
+// ThemeProvider alone (lib/theme/scope.test.ts enforces that split). A
+// cross-origin embed gets no mirror and keeps the dark default.
 export function AndromedaThemeSync() {
   useEffect(() => {
-    const root = document.documentElement
-    const framed = window.self !== window.top
-
-    let stateRoot = root
-    if (framed) {
-      try {
-        stateRoot = window.parent.document.documentElement
-      } catch {
-        return
-      }
-    } else if (root.hasAttribute('data-frame')) {
-      // A frame shell opened directly as the top document stays dark: its
-      // stage is pinned to the void and carries no theme state to follow.
+    if (window.self === window.top) return
+    let parentRoot: HTMLElement
+    try {
+      parentRoot = window.parent.document.documentElement
+    } catch {
       return
     }
-
+    const frameRoot = window.document.documentElement
     const vars = andromedaLightVars()
     const names = Object.keys(vars)
-    // The DOM is the state: probing one channel property instead of caching a
-    // flag means a third party clearing the set (or the preview toggle
-    // handing control back) is noticed and corrected on the next mutation.
     const probe = names[0]
 
     const sync = () => {
-      let wantLight: boolean
-      if (framed) {
-        wantLight = stateRoot.style.getPropertyValue(probe) !== ''
-      } else {
-        if (root.hasAttribute('data-andromeda-theme-preview')) return
-        wantLight = !root.classList.contains('dark')
-      }
-      const hasLight = root.style.getPropertyValue(probe) !== ''
+      const wantLight = !parentRoot.classList.contains('dark')
+      const hasLight = frameRoot.style.getPropertyValue(probe) !== ''
       if (wantLight === hasLight) return
       if (wantLight) {
-        for (const name of names) root.style.setProperty(name, vars[name as keyof typeof vars])
+        for (const name of names) frameRoot.style.setProperty(name, vars[name as keyof typeof vars])
       } else {
-        for (const name of names) root.style.removeProperty(name)
+        for (const name of names) frameRoot.style.removeProperty(name)
       }
     }
 
     sync()
     const observer = new MutationObserver(sync)
-    observer.observe(stateRoot, {
-      attributes: true,
-      attributeFilter: ['class', 'style', 'data-andromeda-theme-preview'],
-    })
-
-    return () => {
-      observer.disconnect()
-      // Leaving the route must leave <html> exactly as it was found, unless
-      // the preview toggle currently owns the properties (its own cleanup
-      // removes them).
-      if (!root.hasAttribute('data-andromeda-theme-preview')) {
-        for (const name of names) root.style.removeProperty(name)
-      }
-    }
+    observer.observe(parentRoot, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
   }, [])
 
   return null

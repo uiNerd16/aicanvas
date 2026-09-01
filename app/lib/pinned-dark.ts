@@ -12,8 +12,9 @@
  */
 export function isPinnedDarkRoute(pathname: string | null | undefined): boolean {
   if (!pathname) return false
-  return pathname.startsWith('/design-systems')
-    || pathname.startsWith('/ideation')
+  // /design-systems is deliberately NOT in this list: Andromeda ships a
+  // light theme and its routes follow the site toggle like any other page.
+  return pathname.startsWith('/ideation')
     || pathname.startsWith('/lab')
     || pathname.startsWith('/tune')
 }

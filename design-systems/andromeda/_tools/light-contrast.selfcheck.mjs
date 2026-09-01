@@ -5,11 +5,16 @@
 // has to clear WCAG AA on BOTH of them. This walks the pairings the
 // components actually paint and prints the ratio for each.
 //
-//   node design-systems/andromeda/_tools/light-contrast.selfcheck.mjs
+//   node --import ./design-systems/andromeda/_tools/ts-resolve.mjs \
+//        design-systems/andromeda/_tools/light-contrast.selfcheck.mjs
+//   (or: npm run andromeda:contrast)
 //
 // No dependencies, and no build step: Node strips the types out of
-// tokens.ts on import. Exits 1 on the first failing run so it can
-// sit in front of any palette change.
+// tokens.ts on import; ts-resolve.mjs follows the extensionless
+// imports inside components/lib. Exits 1 on failure so it can sit in
+// front of any palette change. Also guards app/globals.css: the
+// Andromeda light channel block there must match andromedaLightVars()
+// declaration for declaration.
 // ============================================================
 
 import { tokens, light } from '../tokens.ts';
@@ -158,6 +163,45 @@ if (failed) {
   console.error(`\n${failed} pairing${failed === 1 ? '' : 's'} below the floor:`);
   for (const line of failures) console.error(`  ${line}`);
   process.exit(1);
+}
+
+// ── globals.css drift guard ─────────────────────────────────────────
+// The zero-flash CSS block must stay a byte-faithful projection of
+// andromedaLightVars(); a palette edit that forgets to regenerate it
+// ships a light theme that disagrees with the tokens.
+{
+  const { andromedaLightVars } = await import('../components/lib/utils.ts');
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+  const here = dirname(fileURLToPath(import.meta.url));
+  const css = readFileSync(join(here, '..', '..', '..', 'app', 'globals.css'), 'utf8');
+  const selector = 'html:not(.dark):not([data-frame]) .andromeda-theme-scope {';
+  const start = css.indexOf(selector);
+  if (start === -1) {
+    console.error('\nglobals.css: the Andromeda light channel block is missing.');
+    process.exit(1);
+  }
+  const body = css.slice(start + selector.length, css.indexOf('}', start));
+  const inCss = new Map(
+    body.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('--'))
+      .map((l) => [l.slice(0, l.indexOf(':')).trim(), l.slice(l.indexOf(':') + 1).replace(/;$/, '').trim()]),
+  );
+  const expected = andromedaLightVars();
+  const drift = [];
+  for (const [name, value] of Object.entries(expected)) {
+    if (!inCss.has(name)) drift.push(`missing in css: ${name}`);
+    else if (inCss.get(name) !== String(value)) drift.push(`differs: ${name}  css=${inCss.get(name)}  tokens=${value}`);
+  }
+  for (const name of inCss.keys()) {
+    if (!(name in expected)) drift.push(`stray in css: ${name}`);
+  }
+  if (drift.length) {
+    console.error(`\nglobals.css light channel drifted from the tokens (${drift.length}):`);
+    for (const line of drift) console.error(`  ${line}`);
+    process.exit(1);
+  }
+  console.log(`globals.css light channel matches andromedaLightVars() (${Object.keys(expected).length} declarations).`);
 }
 
 console.log(`\nAll pairings clear on both themes.`);

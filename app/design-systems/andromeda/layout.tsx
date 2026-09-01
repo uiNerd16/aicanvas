@@ -3,7 +3,6 @@ import { JetBrains_Mono } from 'next/font/google'
 import { Sidebar } from '../../components/Sidebar'
 import { AndromedaContentColumn } from './AndromedaContentColumn'
 import { AndromedaThemeSync } from './AndromedaThemeSync'
-import { AndromedaThemePreview } from './AndromedaThemePreview'
 // Registry-free nav counts (generated) so the client Sidebar never pulls the
 // heavy registry (keeps three.js etc. out of the bundle).
 import { CATEGORY_COUNTS, TOTAL_COMPONENTS } from '../../lib/component-nav.generated'
@@ -29,17 +28,15 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       // exactly and can never overflow it, so that column must not reserve a
       // scrollbar gutter it can never use. AndromedaContentColumn owns the
       // scrolling here. See .app-scroll-column in globals.css.
-      // Pinned dark, on purpose. This subtree is not site chrome: it paints
-      // with its own palette and has no light rendering, so it opts out of the
-      // site theme the same way a preview box does, with a scoped `dark` class
-      // rather than by touching <html>.
+      // andromeda-theme-scope is where the light palette enters: globals.css
+      // defines the --andromeda-theme-* channel under this class whenever the
+      // site theme is light, so Andromeda follows the site toggle from the
+      // first server paint. No scoped `dark` pin here anymore.
       data-owns-scroll
-      className={`dark flex h-full w-full flex-1 flex-col overflow-hidden bg-sand-950 md:flex-row ${jetbrainsMono.variable}`}
+      className={`andromeda-theme-scope flex h-full w-full flex-1 flex-col overflow-hidden md:flex-row ${jetbrainsMono.variable}`}
     >
-      {/* Keeps the Andromeda palette on the same light/dark answer as the rest
-          of the site, for as long as the route is mounted. Renders nothing. */}
+      {/* Mirrors the page theme into the phone-preview iframe. Renders nothing. */}
       <AndromedaThemeSync />
-      <AndromedaThemePreview />
       {/* Desktop-only rail. Below md the embedded Sidebar (a full-height 240px
           aside) would fill the viewport and bury the page, so it's hidden and
           the global MobileNav drawer takes over on mobile. */}
