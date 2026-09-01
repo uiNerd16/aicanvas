@@ -192,20 +192,20 @@ function CodeBlock({
 }) {
   return (
     <div
-      className={`flex gap-3 rounded-lg bg-sand-950 px-4 py-3.5 ${
+      className={`flex gap-3 rounded-lg bg-sand-100 dark:bg-sand-950 px-4 py-3.5 ${
         multiline ? 'items-start' : 'items-center justify-between'
       }`}
     >
       {multiline ? (
         <pre
-          className="min-w-0 flex-1 overflow-x-auto font-mono text-sm leading-relaxed text-sand-300"
+          className="min-w-0 flex-1 overflow-x-auto font-mono text-sm leading-relaxed text-sand-700 dark:text-sand-300"
           style={NO_LIGATURES}
         >
           {command}
         </pre>
       ) : (
         <code
-          className="block min-w-0 flex-1 overflow-x-auto font-mono text-sm text-sand-300"
+          className="block min-w-0 flex-1 overflow-x-auto font-mono text-sm text-sand-700 dark:text-sand-300"
           style={NO_LIGATURES}
         >
           {command}
@@ -214,7 +214,7 @@ function CodeBlock({
       <button
         type="button"
         onClick={onCopy}
-        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
         aria-label={`Copy ${label}`}
       >
         {copied ? (

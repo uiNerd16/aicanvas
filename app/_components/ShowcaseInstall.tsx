@@ -174,8 +174,8 @@ function ShowcaseInstallButtons({ installs }: { installs: InstallAction[] }) {
                 )}
               </Button>
             </div>
-            <div className="rounded-lg bg-sand-950 px-4 py-3">
-              <code className="block break-all font-mono text-xs text-sand-300">{cliCommandMasked}</code>
+            <div className="rounded-lg bg-sand-100 dark:bg-sand-950 px-4 py-3">
+              <code className="block break-all font-mono text-xs text-sand-700 dark:text-sand-300">{cliCommandMasked}</code>
             </div>
             <div className="space-y-1.5">
               {bullets.map((line, i) => (

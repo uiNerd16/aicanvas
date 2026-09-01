@@ -36,15 +36,15 @@ export function McpTokenSection({ token }: Props) {
       </p>
 
       {token ? (
-        <div className="mt-4 flex items-center justify-between gap-2 rounded-lg bg-sand-950 px-4 py-3">
-          <code className="min-w-0 flex-1 truncate font-mono text-sm text-sand-300">
+        <div className="mt-4 flex items-center justify-between gap-2 rounded-lg bg-sand-100 dark:bg-sand-950 px-4 py-3">
+          <code className="min-w-0 flex-1 truncate font-mono text-sm text-sand-700 dark:text-sand-300">
             {revealed ? token : MASKED}
           </code>
           <div className="flex shrink-0 items-center gap-0.5">
             <button
               type="button"
               onClick={() => setRevealed((v) => !v)}
-              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
               aria-label={revealed ? 'Hide token' : 'Reveal token'}
               aria-pressed={revealed}
             >
@@ -55,7 +55,7 @@ export function McpTokenSection({ token }: Props) {
             <button
               type="button"
               onClick={copy}
-              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+              className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-800 dark:hover:text-sand-200 active:scale-90"
               aria-label="Copy token"
             >
               {copied
