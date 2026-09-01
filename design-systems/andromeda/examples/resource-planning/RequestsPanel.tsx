@@ -8,6 +8,7 @@
 'use client';
 
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { PanelHeader } from '../../components/PanelHeader';
@@ -16,9 +17,9 @@ import { ArrowClockwise, Export, Check, EyeSlash } from '@phosphor-icons/react';
 import { requestsBreakdown } from './data';
 
 const BUCKETS = [
-  { key: 'approved', label: 'Approved', color: tokens.color.accent[400], borderColor: tokens.color.accent[200] },
-  { key: 'pending',  label: 'Pending',  color: tokens.color.orange[400], borderColor: tokens.color.orange[200] },
-  { key: 'rejected', label: 'Rejected', color: tokens.color.red[400],    borderColor: tokens.color.red[200]    },
+  { key: 'approved', label: 'Approved', color: themeColor.accent[400], borderColor: themeColor.accent[200] },
+  { key: 'pending',  label: 'Pending',  color: themeColor.orange[400], borderColor: themeColor.orange[200] },
+  { key: 'rejected', label: 'Rejected', color: themeColor.red[400],    borderColor: themeColor.red[200]    },
 ] as const;
 
 // ── Single breakdown cell ─────────────────────────────────────────
@@ -45,14 +46,14 @@ function Cell({ label, value, share, last = false }: CellProps) {
         justifyContent: 'space-between',
         gap: tokens.spacing[2],
         padding: `${tokens.spacing[5]} ${tokens.spacing[5]}`,
-        borderRight: last ? 'none' : `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        borderRight: last ? 'none' : `${tokens.border.thin} ${themeColor.border.subtle}`,
       }}
     >
       <span
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}
@@ -64,7 +65,7 @@ function Cell({ label, value, share, last = false }: CellProps) {
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size['2xl'],
           fontWeight: tokens.typography.weight.bold,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           letterSpacing: tokens.typography.tracking.tight,
           lineHeight: tokens.typography.lineHeight.tight,
         }}
@@ -75,7 +76,7 @@ function Cell({ label, value, share, last = false }: CellProps) {
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           letterSpacing: tokens.typography.tracking.wide,
         }}
       >
@@ -126,7 +127,7 @@ export function RequestsPanel() {
     <div
       style={{
         position: 'relative',
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         flexDirection: 'column',
         // Fill the grid cell so this matches the Capacity panel's height in the
@@ -178,7 +179,7 @@ export function RequestsPanel() {
           .rp-req-cells { flex-direction: column !important; }
           .rp-req-cell {
             border-right: none !important;
-            border-bottom: ${tokens.border.thin} ${tokens.color.border.subtle} !important;
+            border-bottom: ${tokens.border.thin} ${themeColor.border.subtle} !important;
           }
           .rp-req-cell-last { border-bottom: none !important; }
         }

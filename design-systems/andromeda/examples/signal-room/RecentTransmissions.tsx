@@ -15,6 +15,7 @@
 
 import { Play, Pause } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
 import { IconButton } from '../../components/IconButton';
@@ -29,8 +30,8 @@ function PeakBar({ value }: { value: number }) {
         position: 'relative',
         height: '4px',
         width: '88px',
-        background: tokens.color.surface.overlay,
-        border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        background: themeColor.surface.overlay,
+        border: `${tokens.border.thin} ${themeColor.border.subtle}`,
         borderRadius: tokens.radius.frame,
         display: 'inline-block',
       }}
@@ -42,7 +43,7 @@ function PeakBar({ value }: { value: number }) {
           top: 0,
           bottom: 0,
           width: `${value}%`,
-          background: value > 85 ? tokens.color.orange[300] : tokens.color.text.primary,
+          background: value > 85 ? themeColor.orange[300] : themeColor.text.primary,
         }}
       />
     </div>
@@ -71,7 +72,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTr
         />
       ),
     },
-    { key: 'id', header: 'ID', width: '96px', hideBelow: 'md', fold: 'none', color: tokens.color.text.faint },
+    { key: 'id', header: 'ID', width: '96px', hideBelow: 'md', fold: 'none', color: themeColor.text.faint },
     {
       key: 'track',
       header: 'Track',
@@ -82,7 +83,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTr
             style={{
               fontFamily: tokens.typography.fontSans,
               fontSize: tokens.typography.size.sm,
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               fontWeight: tokens.typography.weight.medium,
               letterSpacing: tokens.typography.tracking.tight,
               lineHeight: 'var(--andromeda-leading-none, 1)',
@@ -97,7 +98,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTr
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               lineHeight: 'var(--andromeda-leading-none, 1)',
@@ -111,10 +112,10 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTr
         </div>
       ),
     },
-    { key: 'duration', header: 'Duration', width: '110px', hideBelow: 'md', fold: 'meta', color: tokens.color.text.primary },
-    { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r: Transmission) => `${r.plays} plays`, color: tokens.color.text.primary },
+    { key: 'duration', header: 'Duration', width: '110px', hideBelow: 'md', fold: 'meta', color: themeColor.text.primary },
+    { key: 'plays', header: 'Plays', width: '100px', hideBelow: 'md', fold: 'meta', infoValue: (r: Transmission) => `${r.plays} plays`, color: themeColor.text.primary },
     { key: 'peak', header: 'Peak', width: '124px', hideBelow: 'md', infoValue: (r: Transmission) => `${r.peak}%`, render: (r: Transmission) => <PeakBar value={r.peak} /> },
-    { key: 'last', header: 'Last', width: '84px', hideBelow: 'md', color: tokens.color.text.faint },
+    { key: 'last', header: 'Last', width: '84px', hideBelow: 'md', color: themeColor.text.faint },
   ];
 
   return (
@@ -126,7 +127,7 @@ export function RecentTransmissions({ onPlay, currentCode, isPlaying }: RecentTr
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               cursor: 'pointer',

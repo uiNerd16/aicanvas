@@ -16,7 +16,7 @@ import { tokens } from '../../tokens';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Checkbox } from '../../components/Checkbox';
 import { rowContainer, rowItem } from '../../components/lib/motion';
-import { easingArray } from '../../components/lib/utils';
+import { easingArray, themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { requestRows, filterTabs } from './data';
 
@@ -30,14 +30,14 @@ function InsetDivider({ side = 'bottom' }) {
         right: tokens.spacing[3],
         [side]: 0,
         height: 'var(--andromeda-border-width, 1px)',
-        background: tokens.color.border.subtle,
+        background: themeColor.border.subtle,
         pointerEvents: 'none',
       }}
     />
   );
 }
 
-const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${themeColor.border.subtle} ${tokens.spacing[3]}, ${themeColor.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
 const rowSeparatorStyle = {
   backgroundImage: ROW_INSET_LINE,
   backgroundSize: '100% var(--andromeda-border-width, 1px)',
@@ -80,7 +80,7 @@ function FilterTab({ label, count, active, onClick }: FilterTabProps) {
         cursor: 'pointer',
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
-        color: active ? tokens.color.text.primary : tokens.color.text.muted,
+        color: active ? themeColor.text.primary : themeColor.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
         transition: `color var(--andromeda-duration-normal) var(--andromeda-easing-out)`,
@@ -94,8 +94,8 @@ function FilterTab({ label, count, active, onClick }: FilterTabProps) {
           style={{
             position: 'absolute',
             inset: 0,
-            background: tokens.color.surface.active,
-            border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+            background: themeColor.surface.active,
+            border: `${tokens.border.thin} ${themeColor.border.bright}`,
             borderRadius: tokens.radius.frame,
             zIndex: 0,
             pointerEvents: 'none',
@@ -107,7 +107,7 @@ function FilterTab({ label, count, active, onClick }: FilterTabProps) {
         <span
           style={{
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: themeColor.text.faint,
             letterSpacing: tokens.typography.tracking.wide,
           }}
         >
@@ -138,7 +138,7 @@ function ColHeader({ children, sorted, align = 'left' }: ColHeaderProps) {
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
         fontWeight: tokens.typography.weight.medium,
-        color: sorted ? tokens.color.text.primary : tokens.color.text.muted,
+        color: sorted ? themeColor.text.primary : themeColor.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
         lineHeight: 'var(--andromeda-leading-none, 1)',
@@ -193,7 +193,7 @@ export function RequestsTable() {
     <div
       style={{
         position: 'relative',
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
@@ -238,9 +238,9 @@ export function RequestsTable() {
             flexShrink: 0,
             padding: `0 ${tokens.spacing[2]}`,
             background: 'transparent',
-            border: `${tokens.border.thin} ${tokens.color.border.base}`,
+            border: `${tokens.border.thin} ${themeColor.border.base}`,
             borderRadius: tokens.radius.frame,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
           }}
         >
           <MagnifyingGlass weight="regular" size={14} />
@@ -256,7 +256,7 @@ export function RequestsTable() {
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
               letterSpacing: tokens.typography.tracking.wider,
@@ -357,7 +357,7 @@ export function RequestsTable() {
                             top: tokens.spacing[1],
                             bottom: tokens.spacing[1],
                             width: '2px',
-                            background: tokens.color.accent[300],
+                            background: themeColor.accent[300],
                             transformOrigin: 'left',
                             pointerEvents: 'none',
                           }}
@@ -382,7 +382,7 @@ export function RequestsTable() {
                         style={{
                           fontFamily: tokens.typography.fontMono,
                           fontSize: tokens.typography.size.sm,
-                          color: tokens.color.text.primary,
+                          color: themeColor.text.primary,
                           letterSpacing: tokens.typography.tracking.wide,
                           lineHeight: 'var(--andromeda-leading-none, 1)',
                           height: '16px',
@@ -396,7 +396,7 @@ export function RequestsTable() {
                         style={{
                           fontFamily: tokens.typography.fontMono,
                           fontSize: tokens.typography.size.xs,
-                          color: tokens.color.text.muted,
+                          color: themeColor.text.muted,
                           letterSpacing: tokens.typography.tracking.wide,
                           lineHeight: 'var(--andromeda-leading-none, 1)',
                         }}
@@ -410,7 +410,7 @@ export function RequestsTable() {
                       padding: `${tokens.spacing[3]} ${tokens.spacing[3]}`,
                       fontFamily: tokens.typography.fontMono,
                       fontSize: tokens.typography.size.sm,
-                      color: tokens.color.text.secondary,
+                      color: themeColor.text.secondary,
                       letterSpacing: tokens.typography.tracking.wide,
                       whiteSpace: 'nowrap',
                       verticalAlign: 'top',
@@ -427,7 +427,7 @@ export function RequestsTable() {
                       fontFamily: tokens.typography.fontMono,
                       fontSize: tokens.typography.size.sm,
                       fontWeight: tokens.typography.weight.medium,
-                      color: tokens.color.text.primary,
+                      color: themeColor.text.primary,
                       letterSpacing: tokens.typography.tracking.wide,
                       whiteSpace: 'nowrap',
                       verticalAlign: 'top',

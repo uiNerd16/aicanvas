@@ -30,7 +30,7 @@ import type {
 } from 'react';
 import { CalendarBlank, CaretDown, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { cn } from './lib/utils';
+import { andromedaVars, cn } from './lib/utils';
 import { mq } from './lib/responsive';
 
 // Color values used in the calendar's INLINE styles as var-with-fallback, so
@@ -358,7 +358,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
         else if (ref) ref.current = node;
       }}
       className={cn('adp-root', className)}
-      style={{ position: 'relative', display: 'inline-flex', ...style }}
+      style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       {...props}
     >
       <PickerStyles />

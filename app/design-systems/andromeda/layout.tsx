@@ -2,6 +2,8 @@ import { Suspense, type ReactNode } from 'react'
 import { JetBrains_Mono } from 'next/font/google'
 import { Sidebar } from '../../components/Sidebar'
 import { AndromedaContentColumn } from './AndromedaContentColumn'
+import { AndromedaThemeSync } from './AndromedaThemeSync'
+import { AndromedaThemePreview } from './AndromedaThemePreview'
 // Registry-free nav counts (generated) so the client Sidebar never pulls the
 // heavy registry (keeps three.js etc. out of the bundle).
 import { CATEGORY_COUNTS, TOTAL_COMPONENTS } from '../../lib/component-nav.generated'
@@ -34,6 +36,10 @@ export default function AndromedaLayout({ children }: { children: ReactNode }) {
       data-owns-scroll
       className={`dark flex h-full w-full flex-1 flex-col overflow-hidden bg-sand-950 md:flex-row ${jetbrainsMono.variable}`}
     >
+      {/* Keeps the Andromeda palette on the same light/dark answer as the rest
+          of the site, for as long as the route is mounted. Renders nothing. */}
+      <AndromedaThemeSync />
+      <AndromedaThemePreview />
       {/* Desktop-only rail. Below md the embedded Sidebar (a full-height 240px
           aside) would fill the viewport and bury the page, so it's hidden and
           the global MobileNav drawer takes over on mobile. */}

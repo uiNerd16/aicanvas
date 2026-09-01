@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 
 type DropdownProps = {
   label: ReactNode;
@@ -59,28 +60,28 @@ export function Dropdown({
     nav: {
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       fontSize: tokens.typography.size.sm,
-      color: tokens.color.text.primary,
+      color: themeColor.text.primary,
       letterSpacing: tokens.typography.tracking.wider,
     },
     tab: {
       padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
       fontSize: tokens.typography.size.sm,
-      color: active ? tokens.color.text.primary : tokens.color.text.muted,
+      color: active ? themeColor.text.primary : themeColor.text.muted,
       letterSpacing: tokens.typography.tracking.normal,
     },
     chip: {
       padding: `${tokens.spacing[2]} ${tokens.spacing[2]}`,
       fontSize: tokens.typography.size.sm,
-      color: active ? tokens.color.accent[200] : tokens.color.text.secondary,
+      color: active ? themeColor.accent[200] : themeColor.text.secondary,
       letterSpacing: tokens.typography.tracking.wider,
     },
     chunk: {
       padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
       fontSize: tokens.typography.size.sm,
-      color: tokens.color.text.secondary,
+      color: themeColor.text.secondary,
       letterSpacing: tokens.typography.tracking.wide,
-      border: `${tokens.border.thin} ${tokens.color.border.base}`,
-      background: tokens.color.surface.hover,
+      border: `${tokens.border.thin} ${themeColor.border.base}`,
+      background: themeColor.surface.hover,
     },
   }[variant];
 
@@ -111,7 +112,7 @@ export function Dropdown({
           weight="regular"
           size={iconSize}
           style={{
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             transform: open ? 'rotate(180deg)' : 'none',
             transition: 'transform 160ms ease',
           }}
@@ -126,8 +127,8 @@ export function Dropdown({
             top: 'calc(100% + 4px)',
             [align === 'right' ? 'right' : 'left']: 0,
             minWidth: '160px',
-            background: tokens.color.surface.overlay,
-            border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+            background: themeColor.surface.overlay,
+            border: `${tokens.border.thin} ${themeColor.border.bright}`,
             padding: tokens.spacing[1],
             zIndex: 1000,
             boxShadow: `0 12px 28px rgba(0, 0, 0, 0.55)`,
@@ -150,7 +151,7 @@ export function Dropdown({
                   width: '100%',
                   padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
                   background: isSelected
-                    ? tokens.color.surface.active
+                    ? themeColor.surface.active
                     : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
@@ -160,8 +161,8 @@ export function Dropdown({
                     ? tokens.typography.weight.semibold
                     : tokens.typography.weight.regular,
                   color: isSelected
-                    ? tokens.color.accent[200]
-                    : tokens.color.text.secondary,
+                    ? themeColor.accent[200]
+                    : themeColor.text.secondary,
                   textAlign: 'left',
                   textTransform: 'uppercase',
                   letterSpacing: tokens.typography.tracking.wide,

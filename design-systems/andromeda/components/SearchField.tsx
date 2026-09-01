@@ -13,6 +13,7 @@ import type { ChangeEvent, ComponentPropsWithoutRef, CSSProperties } from 'react
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
+import { andromedaVars, themeColor } from './lib/utils';
 
 /**
  * @typedef {object} SearchFieldProps
@@ -103,6 +104,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       style={{
+        ...andromedaVars(),
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
@@ -163,7 +165,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
               pointerEvents: 'none',
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.md,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               letterSpacing: tokens.typography.tracking.wide,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -196,7 +198,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
             background: 'transparent',
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.md,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             letterSpacing: tokens.typography.tracking.wide,
             caretColor: 'var(--andromeda-accent-400, #109380)',
           }}
@@ -210,9 +212,9 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
             flexShrink: 0,
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: themeColor.text.faint,
             padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-            border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+            border: `${tokens.border.thin} ${themeColor.border.subtle}`,
             borderRadius: tokens.radius.frame,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,

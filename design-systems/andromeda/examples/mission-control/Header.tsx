@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import type { useCascadeProps } from '../../components/lib/motion';
 import { CornerMarkers } from '../../components/CornerMarkers';
@@ -36,8 +37,8 @@ function MissionClock() {
       alignItems: 'center',
       gap: tokens.spacing[3],
       padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-      border: `${tokens.border.thin} ${tokens.color.border.base}`,
-      background: tokens.color.surface.raised,
+      border: `${tokens.border.thin} ${themeColor.border.base}`,
+      background: themeColor.surface.raised,
       position: 'relative',
       minWidth: 0,
     }}>
@@ -45,7 +46,7 @@ function MissionClock() {
       <span style={{
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.muted,
+        color: themeColor.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
       }}>
@@ -54,7 +55,7 @@ function MissionClock() {
       <span style={{
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.md,
-        color: tokens.color.accent[300],
+        color: themeColor.accent[300],
         fontWeight: tokens.typography.weight.medium,
         letterSpacing: tokens.typography.tracking.wide,
       }}>
@@ -76,7 +77,7 @@ export function Header({ sectionTitle = 'Overview', motionProps }: {
         position: 'relative',
         height: tokens.layout.headerHeight,
         flexShrink: 0,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         alignItems: 'center',
         padding: `0 ${tokens.spacing[6]}`,
@@ -92,7 +93,7 @@ export function Header({ sectionTitle = 'Overview', motionProps }: {
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}>
@@ -103,7 +104,7 @@ export function Header({ sectionTitle = 'Overview', motionProps }: {
           fontFamily: tokens.typography.fontSans,
           fontSize: tokens.typography.size.lg,
           fontWeight: tokens.typography.weight.semibold,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           letterSpacing: '-0.01em',
         }}>
           {sectionTitle}
@@ -126,16 +127,16 @@ export function Header({ sectionTitle = 'Overview', motionProps }: {
           width: '6px',
           height: '6px',
           flexShrink: 0,
-          background: tokens.color.accent[400],
-          border: `${tokens.border.thin} ${tokens.color.accent[400]}`,
-          boxShadow: `0 0 6px ${tokens.color.accent[500]}`, // 6px glow is a bespoke dot value, not the 8px system glow
+          background: themeColor.accent[400],
+          border: `${tokens.border.thin} ${themeColor.accent[400]}`,
+          boxShadow: `0 0 6px ${themeColor.accent[500]}`, // 6px glow is a bespoke dot value, not the 8px system glow
         }} />
         <span
           className="mc-status-label"
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.accent[100],
+            color: themeColor.accent[100],
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wider,
           }}

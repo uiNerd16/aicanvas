@@ -88,7 +88,9 @@ export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinne
 
   const sz = SIZE_MAP[size] ?? SIZE_MAP.md;
   const bright = colorByVariant[variant] ?? colorByVariant.default;
-  const dim = `var(--andromeda-text-faint, ${tokens.color.text.faint})`;
+  // Resting cells are quiet graphics, not text: border weight, not text ink,
+  // so they recede on both grounds instead of reading as solid blocks.
+  const dim = `var(--andromeda-border-base, ${tokens.color.border.base})`;
 
   const cells: ReactElement[] = [];
   for (let r = 0; r < 3; r++) {

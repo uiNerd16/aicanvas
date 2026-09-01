@@ -28,7 +28,9 @@ import type { AxisDomainItem, YAxisTickContentProps } from 'recharts';
 import { motion, useInView } from 'framer-motion';
 import { ChartLine, ChartBar } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { andromedaVars, easingArray } from './lib/utils';
+import { andromedaVars, easingArray, themeColor } from './lib/utils';
+import { useResolvedColors } from './lib/theme';
+import type { ColorSpec } from './lib/theme';
 import { useReducedMotion } from './lib/motion';
 import { SegmentedControl } from './SegmentedControl';
 
@@ -46,17 +48,43 @@ type TrendSeries = {
   color?: string;
 };
 
-// Multi-series colour hierarchy (the Andromeda charts rules).
-const ROLE_COLOR: Record<TrendRole, string> = {
-  baseline:  tokens.color.text.primary,
-  live:      tokens.color.accent[300],
-  context:   tokens.color.text.faint,
-  threshold: tokens.color.red[300],
+// Every color recharts needs, as [custom property, dark literal]. recharts
+// hands its color props to SVG presentation ATTRIBUTES, which never substitute
+// a var(), so these are read back resolved from the DOM instead (./lib/theme).
+const CHART_VARS = {
+  textPrimary:   ['--andromeda-text-primary',   tokens.color.text.primary],
+  textMuted:     ['--andromeda-text-muted',     tokens.color.text.muted],
+  textFaint:     ['--andromeda-text-faint',     tokens.color.text.faint],
+  borderSubtle:  ['--andromeda-border-subtle',  tokens.color.border.subtle],
+  borderBright:  ['--andromeda-border-bright',  tokens.color.border.bright],
+  surfaceHover:  ['--andromeda-surface-hover',  tokens.color.surface.hover],
+  surfaceRaised: ['--andromeda-surface-raised', tokens.color.surface.raised],
+  accent300:     ['--andromeda-accent-300',     tokens.color.accent[300]],
+  red300:        ['--andromeda-red-300',        tokens.color.red[300]],
+} as const satisfies ColorSpec;
+
+type ChartColors = Record<keyof typeof CHART_VARS, string>;
+
+// Multi-series colour hierarchy (the Andromeda charts rules), in the two forms
+// the chart needs: the CSS one for the HTML sinks (legend chip, tooltip
+// swatch), and a key into the resolved map above for the plot itself.
+const ROLE_CSS: Record<TrendRole, string> = {
+  baseline:  themeColor.text.primary,
+  live:      themeColor.accent[300],
+  context:   themeColor.text.faint,
+  threshold: themeColor.red[300],
+};
+const ROLE_KEY: Record<TrendRole, keyof ChartColors> = {
+  baseline:  'textPrimary',
+  live:      'accent300',
+  context:   'textFaint',
+  threshold: 'red300',
 };
 const MODE_ICON  = { line: ChartLine, area: ChartLine, bar: ChartBar };
 const MODE_LABEL = { line: 'Line chart', area: 'Area chart', bar: 'Bar chart' };
 
-const colorOf = (s: TrendSeries) => s.color ?? ROLE_COLOR[s.role as TrendRole] ?? tokens.color.text.primary;
+const cssColorOf = (s: TrendSeries) => s.color ?? ROLE_CSS[s.role as TrendRole] ?? themeColor.text.primary;
+const colorOf = (s: TrendSeries, c: ChartColors) => s.color ?? c[ROLE_KEY[s.role as TrendRole] ?? 'textPrimary'];
 const isThreshold = (s: TrendSeries) => s.role === 'threshold';
 
 // Inset divider (12px from each edge) separating header / footer from the plot.
@@ -70,7 +98,7 @@ function InsetDivider({ side }: { side: 'top' | 'bottom' }) {
         right: tokens.spacing[3],
         [side]: 0,
         height: 'var(--andromeda-border-width, 1px)',
-        background: tokens.color.border.subtle,
+        background: themeColor.border.subtle,
         pointerEvents: 'none',
       }}
     />
@@ -107,8 +135,8 @@ function buildTooltip(
     return (
       <div
         style={{
-          background: tokens.color.surface.overlay,
-          border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+          background: themeColor.surface.overlay,
+          border: `${tokens.border.thin} ${themeColor.border.bright}`,
           padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
           fontFamily: tokens.typography.fontMono,
           maxWidth: '220px',
@@ -124,7 +152,7 @@ function buildTooltip(
         <div
           style={{
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
             marginBottom: tokens.spacing[2],
@@ -144,17 +172,17 @@ function buildTooltip(
                   alignItems: 'center',
                   gap: tokens.spacing[2],
                   fontSize: tokens.typography.size.sm,
-                  color: tokens.color.text.muted,
+                  color: themeColor.text.muted,
                   letterSpacing: tokens.typography.tracking.wide,
                 }}
               >
-                <span aria-hidden style={{ width: '6px', height: '6px', background: colorOf(s), flexShrink: 0 }} />
+                <span aria-hidden style={{ width: '6px', height: '6px', background: cssColorOf(s), flexShrink: 0 }} />
                 {s.label}
               </span>
               <span
                 style={{
                   fontSize: tokens.typography.size.sm,
-                  color: tokens.color.text.primary,
+                  color: themeColor.text.primary,
                   fontWeight: tokens.typography.weight.medium,
                   letterSpacing: tokens.typography.tracking.wide,
                 }}
@@ -192,7 +220,7 @@ function LegendChip({ color, label, active, onClick }: {
         opacity: active ? 1 : 0.4,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.sm,
-        color: tokens.color.text.secondary,
+        color: themeColor.text.secondary,
         letterSpacing: tokens.typography.tracking.wide,
       }}
     >
@@ -207,7 +235,6 @@ function LegendChip({ color, label, active, onClick }: {
 const AXIS_TICK = {
   fontFamily: tokens.typography.fontMono,
   fontSize: parseInt(tokens.typography.size.xs, 10),
-  fill: tokens.color.text.muted,
   letterSpacing: '0.05em',
 };
 
@@ -303,6 +330,8 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
   const chartId = `andromeda-trend-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   const innerRef = useRef<HTMLDivElement | null>(null);
+  // Plot colors, resolved off the chart's own root (see CHART_VARS).
+  const c = useResolvedColors(innerRef, CHART_VARS);
   const reducedMotion = useReducedMotion();
   const inView = useInView(innerRef, { once: true, margin: '-10% 0px' });
 
@@ -332,10 +361,11 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
   // RAW: recharts margin sink — numeric px, var() cannot resolve; sourced from spacing tokens (left:0 off-scale)
   const chartMargin = { top: parseInt(tokens.spacing[8], 10), right: parseInt(tokens.spacing[2], 10), left: 0, bottom: parseInt(tokens.spacing[3], 10) };
 
-  // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
-  const grid = <CartesianGrid strokeDasharray={tokens.chart.dash} stroke={tokens.color.border.subtle} vertical={false} />;
+  // RESOLVED: recharts attribute sink, var() cannot resolve, so `c` carries the
+  // value the theme currently computes to.
+  const grid = <CartesianGrid strokeDasharray={tokens.chart.dash} stroke={c.borderSubtle} vertical={false} />;
   const xAxis = (
-    <XAxis dataKey={xKey} tick={AXIS_TICK} axisLine={{ stroke: tokens.color.border.subtle }} tickLine={false} interval={xInterval} />
+    <XAxis dataKey={xKey} tick={{ ...AXIS_TICK, fill: c.textMuted }} axisLine={{ stroke: c.borderSubtle }} tickLine={false} interval={xInterval} />
   );
   // YAxis reserves a left tick gutter. On compact cards (showYAxis=false) the
   // gutter is dropped so the plot fills its card edge-to-edge with no stray
@@ -352,7 +382,9 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
       textAnchor="start"
       fontFamily={tokens.typography.fontMono}
       fontSize={parseInt(tokens.typography.size.xs, 10)}
-      fill={tokens.color.text.muted}
+      // The fill is a STYLE, not an attribute: this text is ours, so the CSS
+      // property resolves the var() an attribute would have printed literally.
+      style={{ fill: themeColor.text.muted }}
       letterSpacing="0.05em"
     >
       {payload.value}
@@ -375,14 +407,14 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
         {grid}{xAxis}{yAxis}
         <RechartsTooltip
           content={<ChartTooltip />}
-          cursor={{ fill: tokens.color.surface.hover }}
+          cursor={{ fill: c.surfaceHover }}
           position={{ y: 0 }}
           allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
           wrapperStyle={{ zIndex: 40 }}
         />
         {shown.map((s) => (
-          <Bar key={s.key} dataKey={s.key} fill={colorOf(s)} isAnimationActive={false} />
+          <Bar key={s.key} dataKey={s.key} fill={colorOf(s, c)} isAnimationActive={false} />
         ))}
       </BarChart>
     );
@@ -393,16 +425,16 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
         <defs>
           {shown.map((s) => (
             <linearGradient key={s.key} id={`tc-fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colorOf(s)} style={{ stopOpacity: Filled ? 'var(--andromeda-chart-fill-opacity, 0.12)' : 0 }} />
-              <stop offset="100%" stopColor={colorOf(s)} stopOpacity={0} />
+              <stop offset="0%" stopColor={colorOf(s, c)} style={{ stopOpacity: Filled ? 'var(--andromeda-chart-fill-opacity, 0.12)' : 0 }} />
+              <stop offset="100%" stopColor={colorOf(s, c)} stopOpacity={0} />
             </linearGradient>
           ))}
         </defs>
         {grid}{xAxis}{yAxis}
         <RechartsTooltip
           content={<ChartTooltip />}
-          // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
-          cursor={{ stroke: tokens.color.border.bright, strokeWidth: 1, strokeDasharray: tokens.chart.dash }}
+          // RESOLVED: recharts attribute sink, var() cannot resolve
+          cursor={{ stroke: c.borderBright, strokeWidth: 1, strokeDasharray: tokens.chart.dash }}
           position={{ y: 0 }}
           allowEscapeViewBox={{ x: false, y: true }}
           offset={12}
@@ -413,14 +445,14 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
             key={s.key}
             type="monotone"
             dataKey={s.key}
-            stroke={colorOf(s)}
+            stroke={colorOf(s, c)}
             // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
             strokeWidth={tokens.chart.lineWidth}
             // RAW: recharts attribute sink — '4 4' threshold dash stays literal, var() cannot resolve
             strokeDasharray={isThreshold(s) ? '4 4' : undefined}
             fill={`url(#tc-fill-${s.key})`}
             dot={false}
-            activeDot={{ r: 4, fill: colorOf(s), stroke: tokens.color.surface.raised, strokeWidth: 1 }}
+            activeDot={{ r: 4, fill: colorOf(s, c), stroke: c.surfaceRaised, strokeWidth: 1 }}
             isAnimationActive={false}
           />
         ))}
@@ -445,7 +477,7 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
                 fontFamily: tokens.typography.fontSans,
                 fontSize: tokens.typography.size.xl,
                 fontWeight: tokens.typography.weight.semibold,
-                color: tokens.color.text.primary,
+                color: themeColor.text.primary,
                 letterSpacing: tokens.typography.tracking.tight,
               }}
             >
@@ -481,7 +513,7 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
               left: tokens.spacing[1],
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
             }}
@@ -510,7 +542,7 @@ export const TrendChart = forwardRef<HTMLDivElement, TrendChartProps>(function T
             ? series.map((s) => (
                 <LegendChip
                   key={s.key}
-                  color={colorOf(s)}
+                  color={cssColorOf(s)}
                   label={s.label}
                   active={visible[s.key]}
                   onClick={() => setVisible((v) => ({ ...v, [s.key]: !v[s.key] }))}

@@ -21,7 +21,8 @@
     "gsc:audit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gsc-audit.ts",
     "gsc:submit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gsc-submit.ts",
     "gsc:keywords": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/gsc-keywords.ts",
-    "lint:prompts": "node scripts/lint-prompts.mjs"
+    "lint:prompts": "node scripts/lint-prompts.mjs",
+    "andromeda:contrast": "node design-systems/andromeda/_tools/light-contrast.selfcheck.mjs"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.78.0",

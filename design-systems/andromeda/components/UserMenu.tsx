@@ -34,7 +34,7 @@ import { CaretUpDown } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, themeColor } from './lib/utils';
 import { mq } from './lib/responsive';
 
 // Motion locals — framer-motion takes seconds + a 4-tuple bezier, but
@@ -168,13 +168,13 @@ function UserMenuItemRow({ item, onClose }: { item: UserMenuItem; onClose: () =>
         style={{
           height: '1px',
           margin: `${tokens.spacing[1]} 0`,
-          background: tokens.color.border.subtle,
+          background: themeColor.border.subtle,
         }}
       />
     );
   }
   const Icon = item.icon;
-  const baseColor = item.destructive ? tokens.color.red[300] : tokens.color.text.secondary;
+  const baseColor = item.destructive ? themeColor.red[300] : themeColor.text.secondary;
   return (
     <button
       type="button"
@@ -250,8 +250,8 @@ export function UserMenuPanel({ open, items, placement = 'bottom', align = 'star
         // scroll on a phone. box-sizing keeps the border inside that cap.
         maxWidth: `calc(100vw - ${tokens.spacing[4]})`,
         boxSizing: 'border-box',
-        background: tokens.color.surface.raised,
-        border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        background: themeColor.surface.raised,
+        border: `${tokens.border.thin} ${themeColor.border.base}`,
         borderRadius: tokens.radius.frame,
         padding: tokens.spacing[1],
         zIndex: 1000,
@@ -387,7 +387,7 @@ export const UserMenu = forwardRef<HTMLDivElement, UserMenuProps>(function UserM
           gap: tokens.spacing[2],
           padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
           cursor: 'pointer',
-          background: highlight ? tokens.color.surface.hover : 'transparent',
+          background: highlight ? themeColor.surface.hover : 'transparent',
           transition: `background ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
         }}
       >
@@ -401,7 +401,7 @@ export const UserMenu = forwardRef<HTMLDivElement, UserMenuProps>(function UserM
           }}
           style={{
             display: 'inline-flex',
-            color: highlight ? tokens.color.text.secondary : tokens.color.text.faint,
+            color: highlight ? themeColor.text.secondary : themeColor.text.faint,
             transition: `color ${tokens.motion.duration.fast} ${tokens.motion.easing.standard}`,
           }}
         >
