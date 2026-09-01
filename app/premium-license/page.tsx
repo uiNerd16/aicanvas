@@ -17,7 +17,7 @@ export default function PremiumLicensePage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/premium-license" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
+        <Link href="/premium-license" className="text-sm font-semibold text-olive-600 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Premium License
         </Link>
         <div className="flex items-center justify-end">
@@ -27,7 +27,7 @@ export default function PremiumLicensePage() {
 
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Premium License</span>
+          <span className="text-olive-600 dark:text-olive-500">/Premium License</span>
         </p>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -53,7 +53,7 @@ export default function PremiumLicensePage() {
             <li>
               <strong className="text-sand-700 dark:text-sand-200">Provider, we, us:</strong> the
               Munich-based sole trader who operates aicanvas.me, identified in the{' '}
-              <Link href="/impressum" className="text-olive-700 dark:text-olive-400 hover:underline">
+              <Link href="/impressum" className="text-olive-600 dark:text-olive-400 hover:underline">
                 Impressum
               </Link>
               .
@@ -385,15 +385,15 @@ export default function PremiumLicensePage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">14. Contact</h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             Questions about this License? Email{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
             . See also our{' '}
-            <Link href="/terms" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/terms" className="text-olive-600 dark:text-olive-400 hover:underline">
               Terms
             </Link>{' '}
             and{' '}
-            <Link href="/refund" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/refund" className="text-olive-600 dark:text-olive-400 hover:underline">
               Refund &amp; Cancellation Policy
             </Link>
             .

@@ -176,7 +176,7 @@ export function AccountBilling() {
         )}
 
         <p className="mt-4 flex items-start gap-2 border-t border-sand-200 pt-4 text-xs leading-relaxed text-sand-600 dark:border-sand-800 dark:text-sand-400">
-          <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-700 dark:text-olive-500" />
+          <ShieldCheck weight="regular" size={15} className="mt-px shrink-0 text-olive-600 dark:text-olive-500" />
           <span>
             Billing is securely handled by{' '}
             <span className="font-semibold text-sand-700 dark:text-sand-300">Paddle</span>, our
@@ -207,7 +207,7 @@ export function AccountBilling() {
         </div>
 
 {rotateState === 'done' && !refreshing && (
-          <p className="mt-3 text-xs text-olive-700 dark:text-olive-400">
+          <p className="mt-3 text-xs text-olive-600 dark:text-olive-400">
             Done. The old token is disabled. Copy the new one from the API token card below.
           </p>
         )}

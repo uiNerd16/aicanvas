@@ -15,7 +15,7 @@ export default function ImpressumPage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/impressum" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
+        <Link href="/impressum" className="text-sm font-semibold text-olive-600 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Impressum
         </Link>
         <div className="flex items-center justify-end">
@@ -25,7 +25,7 @@ export default function ImpressumPage() {
 
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Impressum</span>
+          <span className="text-olive-600 dark:text-olive-500">/Impressum</span>
         </p>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -112,7 +112,7 @@ export default function ImpressumPage() {
             einsetzen. Premium-Inhalte (Komponenten, Blöcke, Templates und
             Design-Systeme) stehen nicht unter der MIT-Lizenz, sondern
             unterliegen der{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>
             . Die Website selbst (Layout, Texte, Branding) ist das Werk des
@@ -126,7 +126,7 @@ export default function ImpressumPage() {
             released under the MIT licence. You are free to copy them, modify
             them, and ship them. Premium content (components, blocks, templates
             and design systems) is not MIT licensed and is governed by the{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>
             . The website itself (page layout, written copy, branding) is the
@@ -169,7 +169,7 @@ export default function ImpressumPage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">Kontakt / Contact</h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             E-Mail / Email:{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
           </p>

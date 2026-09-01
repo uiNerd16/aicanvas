@@ -120,7 +120,7 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
         <button
           type="button"
           onClick={() => setMagicSent(false)}
-          className="mt-4 text-sm font-semibold text-olive-700 hover:underline dark:text-olive-400"
+          className="mt-4 text-sm font-semibold text-olive-600 hover:underline dark:text-olive-400"
         >
           Use a different email
         </button>
@@ -182,7 +182,7 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
             />
             <Link
               href="/account/forgot-password"
-              className="mt-2 inline-block text-xs font-semibold text-olive-700 hover:underline dark:text-olive-400"
+              className="mt-2 inline-block text-xs font-semibold text-olive-600 hover:underline dark:text-olive-400"
             >
               Forgot password?
             </Link>
@@ -225,14 +225,14 @@ export function SignInFormFields({ next, onSuccess, onSwitchToSignUp, initialErr
           <button
             type="button"
             onClick={onSwitchToSignUp}
-            className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
+            className="font-semibold text-olive-600 hover:underline dark:text-olive-400"
           >
             Create an account
           </button>
         ) : (
           <Link
             href={`/account/sign-up?next=${encodeURIComponent(next)}`}
-            className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
+            className="font-semibold text-olive-600 hover:underline dark:text-olive-400"
           >
             Create an account
           </Link>

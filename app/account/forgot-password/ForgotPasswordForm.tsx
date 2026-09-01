@@ -95,7 +95,7 @@ export function ForgotPasswordForm() {
         Remembered it?{' '}
         <Link
           href="/account/sign-in"
-          className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
+          className="font-semibold text-olive-600 hover:underline dark:text-olive-400"
         >
           Sign in
         </Link>

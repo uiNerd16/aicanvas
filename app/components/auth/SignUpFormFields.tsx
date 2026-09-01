@@ -177,14 +177,14 @@ export function SignUpFormFields({ next, onSwitchToSignIn }: Props) {
               <button
                 type="button"
                 onClick={onSwitchToSignIn}
-                className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
+                className="font-semibold text-olive-600 hover:underline dark:text-olive-400"
               >
                 Sign in
               </button>
             ) : (
               <Link
                 href={`/account/sign-in?next=${encodeURIComponent(next)}`}
-                className="font-semibold text-olive-700 hover:underline dark:text-olive-400"
+                className="font-semibold text-olive-600 hover:underline dark:text-olive-400"
               >
                 Sign in
               </Link>

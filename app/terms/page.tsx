@@ -14,7 +14,7 @@ export default function TermsPage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/terms" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
+        <Link href="/terms" className="text-sm font-semibold text-olive-600 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Terms
         </Link>
         <div className="flex items-center justify-end">
@@ -24,7 +24,7 @@ export default function TermsPage() {
 
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Terms</span>
+          <span className="text-olive-600 dark:text-olive-500">/Terms</span>
         </p>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -42,7 +42,7 @@ export default function TermsPage() {
             individual (the &ldquo;Creator&rdquo;), reachable at{' '}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="text-olive-700 dark:text-olive-400 hover:underline"
+              className="text-olive-600 dark:text-olive-400 hover:underline"
             >
               {CONTACT_EMAIL}
             </a>
@@ -93,7 +93,7 @@ export default function TermsPage() {
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             Premium Components, design systems, and templates are closed-source
             and are licensed, not sold, under the separate{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>
             , not under MIT. A paid subscription provides ongoing access,
@@ -137,7 +137,7 @@ export default function TermsPage() {
             Components, design systems, and templates are proprietary, are not
             part of the public registry or repository, and are not
             redistributable. They are licensed separately under the{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>{' '}
             (see &sect; 2b and &sect; 7). The website chrome itself (page
@@ -254,7 +254,7 @@ export default function TermsPage() {
             registry or repository. They are proprietary works, made available
             only to subscribers with an active Premium subscription, and are
             licensed solely under the{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>
             , which forms part of these terms by reference. By subscribing to or
@@ -354,7 +354,7 @@ export default function TermsPage() {
             Questions about these terms? Email{' '}
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="text-olive-700 dark:text-olive-400 hover:underline"
+              className="text-olive-600 dark:text-olive-400 hover:underline"
             >
               {CONTACT_EMAIL}
             </a>

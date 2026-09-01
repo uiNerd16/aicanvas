@@ -466,7 +466,7 @@ function CollectionPicker({
         onClick={() => setOpen((o) => !o)}
         className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors ${
           value
-            ? 'border-olive-500/40 bg-olive-500/10 text-olive-700 dark:text-olive-400'
+            ? 'border-olive-500/40 bg-olive-500/10 text-olive-600 dark:text-olive-400'
             : 'border-dashed border-sand-200 bg-transparent text-sand-600 hover:border-sand-300 hover:text-sand-700 dark:border-sand-700 dark:text-sand-500 dark:hover:border-sand-600 dark:hover:text-sand-300'
         }`}
       >
@@ -502,7 +502,7 @@ function CollectionPicker({
                     onClick={() => commit(name)}
                     className={`flex w-full items-center justify-between px-3 py-2 text-xs font-medium transition-colors hover:bg-sand-50 dark:hover:bg-sand-800 ${
                       value === name
-                        ? 'text-olive-700 dark:text-olive-400'
+                        ? 'text-olive-600 dark:text-olive-400'
                         : 'text-sand-700 dark:text-sand-300'
                     }`}
                   >

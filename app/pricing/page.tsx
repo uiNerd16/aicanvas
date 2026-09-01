@@ -170,7 +170,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
                 size={18}
                 className={`mt-0.5 shrink-0 ${
                   plan.featured
-                    ? 'text-olive-700 dark:text-olive-400'
+                    ? 'text-olive-600 dark:text-olive-400'
                     : 'text-sand-600 dark:text-sand-300'
                 }`}
               />
@@ -221,7 +221,7 @@ export default function PricingPage() {
         <div />
         <Link
           href="/pricing"
-          className="text-sm font-semibold text-olive-700 transition-colors dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-600 transition-colors dark:text-olive-500 dark:hover:text-olive-400"
         >
           /Pricing
         </Link>
@@ -233,13 +233,13 @@ export default function PricingPage() {
       <main className="relative mx-auto w-full max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Pricing</span>
+          <span className="text-olive-600 dark:text-olive-500">/Pricing</span>
         </p>
 
         {/* ── Hero ── */}
         <Section className="text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-sand-200 bg-sand-100 px-3 py-1 text-xs font-semibold text-sand-700 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300">
-            <Sparkle weight="regular" size={12} className="text-olive-700 dark:text-olive-400" />
+            <Sparkle weight="regular" size={12} className="text-olive-600 dark:text-olive-400" />
             Our Pricing Plan
           </span>
           <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50">

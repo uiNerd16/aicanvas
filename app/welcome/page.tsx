@@ -23,7 +23,7 @@ export default function WelcomePage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
-        <Link href="/welcome" className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400">
+        <Link href="/welcome" className="text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400">
           /Welcome
         </Link>
         <div className="flex items-center justify-end">
@@ -32,7 +32,7 @@ export default function WelcomePage() {
       </header>
 
       <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
-        <span className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-olive-500/15 text-olive-700 ring-1 ring-olive-500/30 dark:text-olive-400">
+        <span className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-olive-500/15 text-olive-600 ring-1 ring-olive-500/30 dark:text-olive-400">
           <Lightning weight="fill" size={26} />
         </span>
 

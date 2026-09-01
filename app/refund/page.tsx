@@ -17,7 +17,7 @@ export default function RefundPage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/refund" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
+        <Link href="/refund" className="text-sm font-semibold text-olive-600 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Refund
         </Link>
         <div className="flex items-center justify-end">
@@ -27,7 +27,7 @@ export default function RefundPage() {
 
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Refund</span>
+          <span className="text-olive-600 dark:text-olive-500">/Refund</span>
         </p>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -60,7 +60,7 @@ export default function RefundPage() {
               href="https://www.paddle.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-olive-700 dark:text-olive-400 hover:underline"
+              className="text-olive-600 dark:text-olive-400 hover:underline"
             >
               Paddle.com
             </a>
@@ -71,7 +71,7 @@ export default function RefundPage() {
               href="https://www.paddle.com/legal/checkout-buyer-terms"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-olive-700 dark:text-olive-400 hover:underline"
+              className="text-olive-600 dark:text-olive-400 hover:underline"
             >
               Paddle&apos;s buyer terms
             </a>
@@ -110,7 +110,7 @@ export default function RefundPage() {
             Beyond that, refund requests are handled by Paddle under its buyer
             terms and at its discretion, for example an accidental charge or a
             duplicate payment. To request a refund, contact us at{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>{' '}
             or reach Paddle directly through the receipt email Paddle sends after
@@ -125,7 +125,7 @@ export default function RefundPage() {
           </h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             For any billing question, a wrong charge, or a dispute, email{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>{' '}
             first and we will sort it out quickly. As Merchant of Record, Paddle
@@ -149,7 +149,7 @@ export default function RefundPage() {
             fee, but it does not revoke what you already installed, so you may
             keep using and shipping those components in your projects. This is
             set out in the{' '}
-            <Link href="/premium-license" className="text-olive-700 dark:text-olive-400 hover:underline">
+            <Link href="/premium-license" className="text-olive-600 dark:text-olive-400 hover:underline">
               AI Canvas Premium License
             </Link>
             . Cancelling stops future Premium access, including downloads,
@@ -165,7 +165,7 @@ export default function RefundPage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">7. Contact</h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             Questions about refunds or cancellation? Email{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
             .

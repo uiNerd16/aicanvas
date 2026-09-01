@@ -36,7 +36,7 @@ function AnswerText({ item }: { item: FaqItem }) {
       {a.slice(0, idx)}
       <Link
         href={link.href}
-        className="font-medium text-olive-700 underline decoration-olive-400/40 underline-offset-2 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
+        className="font-medium text-olive-600 underline decoration-olive-400/40 underline-offset-2 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
       >
         {link.label}
       </Link>
@@ -69,7 +69,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
         <div />
         <Link
           href="/components"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /FAQ
         </Link>
@@ -81,7 +81,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/FAQ</span>
+          <span className="text-olive-600 dark:text-olive-500">/FAQ</span>
         </p>
 
         {/* ── Hero ── */}
@@ -147,7 +147,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
                       >
                         <span
                           className={`w-7 shrink-0 text-sm font-bold tabular-nums ${
-                            isOpen ? 'text-olive-700 dark:text-olive-500' : 'text-sand-600'
+                            isOpen ? 'text-olive-600 dark:text-olive-500' : 'text-sand-600'
                           }`}
                         >
                           {String(i + 1).padStart(2, '0')}
@@ -159,7 +159,7 @@ export function FaqView({ categories }: { categories: FaqCategory[] }) {
                           weight="regular"
                           size={16}
                           className={`shrink-0 transition-transform duration-200 ${
-                            isOpen ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-600'
+                            isOpen ? 'rotate-90 text-olive-600 dark:text-olive-500' : 'text-sand-600'
                           }`}
                         />
                       </button>

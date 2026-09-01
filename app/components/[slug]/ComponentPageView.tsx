@@ -581,7 +581,7 @@ export default function ComponentPageView({
                   <TagIcon weight="regular" size={14} className="shrink-0 text-sand-600 dark:text-sand-500" />
                   {designSystem && <PremiumBadge />}
                   {premium && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-700 dark:text-olive-400">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                       <Lightning weight="regular" size={12} />
                       Premium
                     </span>
@@ -1784,7 +1784,7 @@ export default function ComponentPageView({
                 {/* Same pill as the tag row on the page behind. Says what the
                     lock further down is about before the reader reaches it. */}
                 {premium && (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-700 dark:text-olive-400">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
                     <Lightning weight="regular" size={12} />
                     Premium
                   </span>

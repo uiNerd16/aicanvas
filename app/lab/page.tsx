@@ -92,7 +92,7 @@ const STATUS_STYLES: Record<Status, string> = {
   planned:
     'border-sand-300 bg-sand-200/60 text-sand-600 dark:border-sand-700 dark:bg-sand-800/60 dark:text-sand-400',
   live:
-    'border-olive-500/30 bg-olive-500/15 text-olive-700 dark:text-olive-300',
+    'border-olive-500/30 bg-olive-500/15 text-olive-600 dark:text-olive-300',
 }
 
 // Display label for the status pill. Decoupled from the status key so we can

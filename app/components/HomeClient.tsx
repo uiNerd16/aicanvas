@@ -261,7 +261,7 @@ export function HomeClient({
           ) : (
             <>
               <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components &amp; Blocks</Link>
-              {category && <span className="text-olive-700 dark:text-olive-500">/{category}</span>}
+              {category && <span className="text-olive-600 dark:text-olive-500">/{category}</span>}
             </>
           )}
         </p>
@@ -371,7 +371,7 @@ export function HomeClient({
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="flex items-center justify-center"
                 >
-                  <EmptyIcon weight="thin" size={48} className="text-olive-700 dark:text-olive-500" />
+                  <EmptyIcon weight="thin" size={48} className="text-olive-600 dark:text-olive-500" />
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -411,7 +411,7 @@ export function HomeClient({
                     <button
                       key={word}
                       onClick={() => applySuggestion(word)}
-                      className="group flex items-center gap-1.5 rounded-full border border-olive-500/30 bg-olive-500/10 px-3.5 py-1.5 text-sm font-semibold text-olive-700 transition-all hover:border-olive-500/60 hover:bg-olive-500/20 active:scale-95 dark:text-olive-400"
+                      className="group flex items-center gap-1.5 rounded-full border border-olive-500/30 bg-olive-500/10 px-3.5 py-1.5 text-sm font-semibold text-olive-600 transition-all hover:border-olive-500/60 hover:bg-olive-500/20 active:scale-95 dark:text-olive-400"
                     >
                       <Sparkle weight="regular" size={13} className="opacity-60 transition-opacity group-hover:opacity-100" />
                       {word}

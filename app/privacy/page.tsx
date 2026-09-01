@@ -19,7 +19,7 @@ export default function PrivacyPage() {
     <div className="min-h-full bg-sand-50 dark:bg-sand-950">
       <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
-        <Link href="/privacy" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
+        <Link href="/privacy" className="text-sm font-semibold text-olive-600 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Privacy
         </Link>
         <div className="flex items-center justify-end">
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
 
       <main className="relative mx-auto max-w-3xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/Privacy</span>
+          <span className="text-olive-600 dark:text-olive-500">/Privacy</span>
         </p>
 
         <h1 className="text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             <br />
             Deutschland
             <br />
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
           </p>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
               href="https://www.paddle.com/legal/privacy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-olive-700 dark:text-olive-400 hover:underline"
+              className="text-olive-600 dark:text-olive-400 hover:underline"
             >
               its own privacy policy
             </a>
@@ -268,7 +268,7 @@ export default function PrivacyPage() {
             collect personal data from children under 16. If you believe a
             child under 16 has created an account or otherwise provided
             personal data to AI Canvas, email{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>{' '}
             and we will delete the account and the data.
@@ -475,7 +475,7 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-4 leading-relaxed text-sand-600 dark:text-sand-400">
             To exercise any of these rights, email{' '}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-700 dark:text-olive-400 hover:underline">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-olive-600 dark:text-olive-400 hover:underline">
               {CONTACT_EMAIL}
             </a>
             . We respond within 30 days. Before acting on a rights request we

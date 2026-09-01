@@ -178,7 +178,7 @@ export default function FeedbackPage() {
         <div />
         <Link
           href="/feedback"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /Feedback
         </Link>
@@ -190,7 +190,7 @@ export default function FeedbackPage() {
       <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         <div className="flex-1">
           <p className="mb-6 text-sm font-semibold md:hidden">
-            <span className="text-olive-700 dark:text-olive-500">/Feedback</span>
+            <span className="text-olive-600 dark:text-olive-500">/Feedback</span>
           </p>
 
           <h1 className="text-center text-3xl font-extrabold tracking-tight text-sand-900 dark:text-sand-50 sm:text-4xl">
@@ -205,7 +205,7 @@ export default function FeedbackPage() {
           {sent ? (
             <div className="mx-auto mt-8 w-full max-w-xl rounded-2xl border border-olive-500/30 bg-olive-500/10 p-6">
               <div className="flex items-start gap-3">
-                <CheckCircle weight="regular" size={22} className="mt-0.5 shrink-0 text-olive-700 dark:text-olive-400" />
+                <CheckCircle weight="regular" size={22} className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-400" />
                 <div>
                   <h2 className="text-base font-bold text-sand-900 dark:text-sand-50">Got it, thank you</h2>
                   <p className="mt-1 text-sm leading-relaxed text-sand-700 dark:text-sand-300">
@@ -214,7 +214,7 @@ export default function FeedbackPage() {
                   </p>
                   <Link
                     href="/components"
-                    className="mt-4 inline-block text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
+                    className="mt-4 inline-block text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
                   >
                     Back to components
                   </Link>
@@ -267,7 +267,7 @@ export default function FeedbackPage() {
                       How has AI Canvas been so far?
                     </label>
                     <span
-                      className={`text-xs font-semibold tabular-nums ${rated ? 'text-olive-700 dark:text-olive-400' : 'text-sand-600 dark:text-sand-500'}`}
+                      className={`text-xs font-semibold tabular-nums ${rated ? 'text-olive-600 dark:text-olive-400' : 'text-sand-600 dark:text-sand-500'}`}
                     >
                       {rated ? `${score} / 10` : 'optional'}
                     </span>
@@ -336,7 +336,7 @@ export default function FeedbackPage() {
                       : 'Your feedback'}{' '}
                   {/* Decorative: the required state itself comes from the input's
                       `required` attribute, which is what assistive tech reads. */}
-                  <span aria-hidden="true" className="text-olive-700 dark:text-olive-400">*</span>
+                  <span aria-hidden="true" className="text-olive-600 dark:text-olive-400">*</span>
                 </label>
                 <textarea
                   id="message"
@@ -359,7 +359,7 @@ export default function FeedbackPage() {
               <div>
                 <label htmlFor="email" className={LABEL_CLASS}>
                   {category === 'billing' ? 'Email used at checkout' : 'Email'}{' '}
-                  <span aria-hidden="true" className="text-olive-700 dark:text-olive-400">*</span>
+                  <span aria-hidden="true" className="text-olive-600 dark:text-olive-400">*</span>
                 </label>
                 <input
                   id="email"
