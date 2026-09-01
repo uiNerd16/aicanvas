@@ -35,7 +35,7 @@ const SAND_USAGE: Record<string, string> = {
 const OLIVE_USAGE: Record<string, string> = {
   'olive-400': 'Hover accent, gradient end',
   'olive-500': 'Primary accent: buttons, badges, logo',
-  'olive-600': 'Pressed or darker accent state',
+  'olive-600': 'Light-mode accent text, pressed state',
 }
 
 const EMBER_USAGE: Record<string, string> = {
@@ -80,7 +80,7 @@ const SEMANTIC_ROLES = [
   { role: 'Secondary text', light: 'text-sand-600', dark: 'text-sand-400' },
   { role: 'Border default', light: 'border-sand-200', dark: 'border-sand-800' },
   { role: 'Border hover', light: 'border-sand-300', dark: 'border-sand-700' },
-  { role: 'Accent', light: 'text-olive-700', dark: 'text-olive-400' },
+  { role: 'Accent', light: 'text-olive-600', dark: 'text-olive-400' },
   { role: 'Secondary accent', light: 'text-ember-500', dark: 'text-ember-400' },
   { role: 'Highlight (occasional)', light: 'text-cyan-600', dark: 'text-cyan-400' },
 ]
@@ -261,7 +261,7 @@ export default function DesignSystemPage() {
               className="rounded-2xl border border-sand-200 p-6 dark:border-sand-800"
             >
               <div className="mb-2 flex items-baseline gap-3">
-                <span className="font-mono text-xs text-olive-700 dark:text-olive-500">{t.weight}</span>
+                <span className="font-mono text-xs text-olive-600 dark:text-olive-500">{t.weight}</span>
                 <span className="text-sm font-semibold text-sand-700 dark:text-sand-300">{t.name}</span>
                 <span className="text-xs text-sand-600 dark:text-sand-500">{t.usage}</span>
               </div>

@@ -167,7 +167,7 @@ function Toast({ message }: { message: string | null }) {
           className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-full border border-sand-200 bg-sand-100/95 px-4 py-2.5 text-sm font-semibold text-sand-900 shadow-xl backdrop-blur dark:border-sand-700 dark:bg-sand-800/95 dark:text-sand-50"
           role="status"
         >
-          <Check weight="regular" size={15} className="text-olive-700 dark:text-olive-500" />
+          <Check weight="regular" size={15} className="text-olive-600 dark:text-olive-500" />
           {message}
         </motion.div>
       ) : null}
@@ -309,7 +309,7 @@ export function InstallCards() {
                 {active && (
                   <motion.span
                     layoutId="mcpToolHighlight"
-                    className="absolute inset-0 rounded-lg bg-sand-100 shadow-sm ring-1 ring-sand-200 dark:bg-sand-800 dark:ring-sand-700"
+                    className="absolute inset-0 rounded-lg bg-sand-50 shadow-sm ring-1 ring-sand-300 dark:bg-sand-800 dark:ring-sand-700"
                     transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 )}
@@ -343,7 +343,7 @@ export function InstallCards() {
                   {active && (
                     <motion.span
                       layoutId="mcpScopeUnderline"
-                      className="absolute inset-x-0 -bottom-px h-px bg-sand-900 dark:bg-sand-50"
+                      className="absolute inset-x-0 -bottom-px h-0.5 bg-sand-900 dark:h-px dark:bg-sand-50"
                       transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                     />
                   )}

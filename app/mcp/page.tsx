@@ -44,7 +44,7 @@ export default function McpPage() {
         <div />
         <Link
           href="/mcp"
-          className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+          className="text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
         >
           /MCP
         </Link>
@@ -56,7 +56,7 @@ export default function McpPage() {
       <main className="relative mx-auto w-full max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
         {/* Mobile breadcrumb */}
         <p className="mb-6 text-sm font-semibold md:hidden">
-          <span className="text-olive-700 dark:text-olive-500">/MCP</span>
+          <span className="text-olive-600 dark:text-olive-500">/MCP</span>
         </p>
 
         {/* ── Hero ────────────────────────────────────────────────────── */}
@@ -65,7 +65,7 @@ export default function McpPage() {
             <span className="block font-normal text-sand-600 dark:text-sand-300">
               AI Canvas MCP connected with
             </span>
-            <span className="block text-olive-700 dark:text-olive-500">
+            <span className="block text-olive-600 dark:text-olive-500">
               Claude Code, Codex, and Cursor.
             </span>
           </h1>
@@ -106,7 +106,7 @@ export default function McpPage() {
               {i === 1 && (
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full bg-olive-500/25 blur-3xl"
+                  className="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full bg-olive-400/35 blur-3xl dark:bg-olive-500/25"
                 />
               )}
               <h3 className="relative text-base font-bold text-sand-900 dark:text-sand-50">
@@ -139,7 +139,7 @@ export default function McpPage() {
               <Sparkle
                 weight="regular"
                 size={14}
-                className="mt-0.5 shrink-0 text-olive-700 dark:text-olive-500"
+                className="mt-0.5 shrink-0 text-olive-600 dark:text-olive-500"
               />
               <span>{prompt}</span>
             </li>

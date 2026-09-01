@@ -105,18 +105,15 @@ export function StackedCards() {
                 handleClick()
               }
             } : undefined}
-            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-300 bg-sand-100 transition-[border-color,box-shadow] duration-200 hover:border-sand-500 hover:shadow-lg hover:shadow-black/20 dark:border-sand-700 dark:bg-sand-800 dark:hover:border-sand-600 ${isFront ? 'touch-none' : ''}`}
+            className={`absolute flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sand-300 bg-sand-100 transition-[border-color,box-shadow] duration-200 hover:border-sand-500 dark:border-sand-700 dark:bg-sand-800 dark:hover:border-sand-600 ${isFront ? 'touch-none shadow-[0_4px_16px_rgba(0,0,0,0.10)] dark:shadow-[0_6px_28px_rgba(0,0,0,0.28)]' : 'shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.14)]'}`}
             style={{
               zIndex: isExiting ? 11 : pos.zIndex,
               transformOrigin: 'bottom center',
-              boxShadow: isFront
-                ? '0 6px 28px rgba(0,0,0,0.28)'
-                : '0 3px 10px rgba(0,0,0,0.14)',
             }}
           >
             {(relPos < 6 || isExiting) && (
               <span className={`text-sm font-bold leading-none ${
-                (isFront || isExiting) ? 'text-olive-700 dark:text-olive-400'
+                (isFront || isExiting) ? 'text-olive-600 dark:text-olive-400'
                 : relPos === 1         ? 'text-sand-700 dark:text-sand-300'
                 : relPos === 2         ? 'text-sand-600 dark:text-sand-400'
                 : relPos === 3         ? 'text-sand-600'
@@ -254,16 +251,25 @@ export function WireIcons() {
               </motion.span>
             )}
           </AnimatePresence>
-          <motion.img
-            src="/ai-canvas-wire.svg"
-            alt={WIRE_ALTS[idx]}
+          {/* Inline copy of /ai-canvas-wire.svg: the file bakes in its dark
+              stroke, and this row needs a per-theme color. */}
+          <motion.svg
+            role={WIRE_ALTS[idx] === '' ? undefined : 'img'}
+            aria-label={WIRE_ALTS[idx] === '' ? undefined : WIRE_ALTS[idx]}
             aria-hidden={WIRE_ALTS[idx] === '' ? true : undefined}
             width={28}
             height={24}
+            viewBox="0 0 28 24"
+            fill="none"
             animate={{ scale: scale(idx), y: y(idx) }}
             transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-            className="cursor-pointer"
-          />
+            className="cursor-pointer text-sand-200 dark:text-[#383836]"
+          >
+            <path
+              d="M8.14844 0.5H19.8516C20.3849 0.500107 20.8777 0.783538 21.1465 1.24414L22.3184 3.25195L26.3926 10.2363C27.0283 11.3261 27.0283 12.6739 26.3926 13.7637L22.3184 20.748L21.1465 22.7559C20.8777 23.2165 20.3849 23.4999 19.8516 23.5H8.14844C7.61514 23.4999 7.12231 23.2165 6.85352 22.7559L1.01953 12.7559C0.747129 12.2888 0.747129 11.7112 1.01953 11.2441L6.85352 1.24414C7.12231 0.783538 7.61514 0.500107 8.14844 0.5ZM8.5625 2.75684L3.5625 11.7568L3.42773 12L3.5625 12.2432L8.5625 21.2432L8.70605 21.5H19.1201L18.6816 20.748L13.5781 12L18.6816 3.25195L19.1201 2.5H8.70605L8.5625 2.75684Z"
+              stroke="currentColor"
+            />
+          </motion.svg>
         </a>
       ))}
     </div>
@@ -603,14 +609,14 @@ export function FaqAccordion() {
               aria-expanded={open}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
             >
-              <span className={`w-7 shrink-0 text-sm font-bold tabular-nums ${open ? 'text-olive-700 dark:text-olive-500' : 'text-sand-600'}`}>
+              <span className={`w-7 shrink-0 text-sm font-bold tabular-nums ${open ? 'text-olive-600 dark:text-olive-500' : 'text-sand-600'}`}>
                 {String(i + 1).padStart(2, '0')}
               </span>
               <h3 className="flex-1 text-base font-semibold text-sand-900 dark:text-sand-50">{q}</h3>
               <CaretRight
                 weight="regular"
                 size={16}
-                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-700 dark:text-olive-500' : 'text-sand-600'}`}
+                className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-90 text-olive-600 dark:text-olive-500' : 'text-sand-600'}`}
               />
             </button>
             {/* Answer stays in the DOM (SEO); grid-rows trick animates the collapse */}

@@ -98,7 +98,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
             />
             {' '}Native Components and Blocks,
             <br />
-            <span className="mt-2 inline-block text-olive-700 dark:text-olive-500">Design Systems and Templates</span>
+            <span className="mt-2 inline-block text-olive-600 dark:text-olive-500">Design Systems and Templates</span>
           </h1>
 
           <p
@@ -165,33 +165,30 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
               fill="none"
             >
               <rect
-                className="aic-beam-tail"
+                className="aic-beam-tail stroke-sand-600 dark:stroke-[#D6E2FF]"
                 x="0"
                 y="0"
                 width="100%"
                 height="100%"
                 rx="24"
                 pathLength={100}
-                stroke="#D6E2FF"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeDasharray="26 74"
                 opacity={0.22}
               />
               <rect
-                className="aic-beam-head"
+                className="aic-beam-head stroke-sand-600 [filter:drop-shadow(0_0_5px_rgba(87,87,89,0.35))] dark:stroke-[#D6E2FF] dark:[filter:drop-shadow(0_0_5px_rgba(214,226,255,0.65))]"
                 x="0"
                 y="0"
                 width="100%"
                 height="100%"
                 rx="24"
                 pathLength={100}
-                stroke="#D6E2FF"
                 strokeWidth="1.75"
                 strokeLinecap="round"
                 strokeDasharray="7 93"
                 opacity={0.9}
-                style={{ filter: 'drop-shadow(0 0 5px rgba(214,226,255,0.65))' }}
               />
             </svg>
 
@@ -221,8 +218,8 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                         do not have to overpromise: the cache window is 24h, so
                         "Live" would be false. See REVALIDATE_SECONDS. */}
                     <span className="relative flex h-1.5 w-1.5" aria-hidden>
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-400 opacity-75" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-olive-400" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-olive-700 opacity-75 dark:bg-olive-400" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-olive-700 dark:bg-olive-400" />
                     </span>
                     Updates daily
                   </span>
@@ -348,7 +345,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 <Fire weight="fill" size={15} />
               </span>
               <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
-                <span className="text-xs font-semibold uppercase tracking-wider text-olive-700 dark:text-olive-400">Featured</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">Featured</span>
                 <h2 className="text-2xl font-bold tracking-tight text-sand-900 dark:text-sand-50">Andromeda • Design System</h2>
                 <p className="text-sm leading-relaxed text-sand-600 dark:text-sand-400">
                   A complete design system for dashboards, control panels, and data-dense
@@ -400,7 +397,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 audience: 'Designers',
                 description: 'Start from something already crafted, then reshape it in your AI agent, Cursor, Claude Code, or Codex, whichever you use: the colors, the layout, the motion, fast, without rebuilding it from scratch.',
                 badges: ['Cursor', 'Claude Code', 'Codex'],
-                badgeStyle: 'text-olive-700 ring-olive-500/30 bg-olive-500/5 dark:text-olive-500',
+                badgeStyle: 'text-olive-600 ring-olive-500/30 bg-olive-500/5 dark:text-olive-500',
               },
               {
                 icon: <RocketLaunch weight="regular" size={18} />,
@@ -492,13 +489,13 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 className="flex items-start gap-5 py-5"
               >
                 {/* Node on the timeline */}
-                <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-100 text-sand-700 shadow-[0_4px_16px_rgba(0,0,0,0.4)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300">
+                <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-100 text-sand-700 shadow-[0_2px_10px_rgba(0,0,0,0.08)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
                   {step.icon}
                 </div>
                 {/* Content */}
                 <div className="flex-1 pt-0.5">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-base font-bold tabular-nums text-olive-700 dark:text-olive-500">{step.num}</span>
+                    <span className="text-base font-bold tabular-nums text-olive-600 dark:text-olive-500">{step.num}</span>
                     <h3 className="text-base font-bold text-sand-900 dark:text-sand-50">{step.title}</h3>
                   </div>
                   <p className="mt-1.5 text-base leading-relaxed text-sand-600 dark:text-sand-500">{step.desc}</p>
@@ -522,7 +519,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
               </p>
               <Link
                 href="/faq"
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
+                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400"
               >
                 See all FAQs
                 <CaretRight weight="regular" size={14} />

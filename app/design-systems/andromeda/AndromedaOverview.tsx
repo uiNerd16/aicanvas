@@ -395,7 +395,7 @@ export function AndromedaOverview() {
             <Link
               key={t.slug}
               href={`/design-systems/andromeda/templates/${t.folder}`}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-950 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-50 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl hover:shadow-sand-300/60 dark:border-sand-800 dark:bg-sand-950 dark:hover:border-sand-700 dark:hover:shadow-2xl dark:hover:shadow-black/50"
             >
               <div className="relative aspect-video overflow-hidden bg-sand-900">
                 {/* Premium badge — same Aceternity-style pill as premium
