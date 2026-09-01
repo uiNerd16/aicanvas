@@ -350,12 +350,14 @@ export const light = {
       alpha:  'rgba(0, 0, 0, 0.14)',
     },
     // Accent, turquoise, inked. 100 is the deepest (text on a 500 fill),
-    // 300 stays the base you draw with, 500 is the pale tinted fill.
+    // 300 stays the base you draw with, 400 is the visible mid green
+    // (heat steps, marked borders, the online dot), 500 is the pale
+    // tinted fill.
     accent: {
       100:   '#0D4239',
       200:   '#0D5D51',
       300:   '#0B7A6A',
-      400:   '#A9EFE0',
+      400:   '#3DBA9C',
       500:   '#D7F7EF',
       alpha: 'rgba(11, 122, 106, 0.22)',
       on:    '#0D4239',
