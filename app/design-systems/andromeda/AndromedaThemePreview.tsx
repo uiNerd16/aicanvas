@@ -17,9 +17,14 @@ export function AndromedaThemePreview() {
     if (!lightOn) return
     const root = document.documentElement
     const vars = andromedaLightVars()
+    // The marker tells AndromedaThemeSync to stand down while this toggle
+    // owns the channel; removing it LAST hands control back so the sync can
+    // re-assert the site's real theme.
+    root.setAttribute('data-andromeda-theme-preview', '')
     for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value)
     return () => {
       for (const name of Object.keys(vars)) root.style.removeProperty(name)
+      root.removeAttribute('data-andromeda-theme-preview')
     }
   }, [lightOn])
 

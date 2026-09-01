@@ -14,37 +14,54 @@ import { andromedaLightVars } from '../../../design-systems/andromeda/components
 // andromedaVars() root below reads through; dark means removing it, which
 // hands every component back the dark literal baked into its own fallback.
 // So dark is not a second palette to keep in sync. It is the absence of one.
+//
+// Activation is deliberately narrow, because a missing `dark` class does not
+// prove the visitor chose light. Inside any iframe the sync never runs: the
+// template phone preview loads the bare ?frame=1 shell, which carries no
+// theme state at all, and its stage is pinned dark. And while the dev-only
+// preview toggle owns the channel (it marks <html> with
+// data-andromeda-theme-preview) the sync stands down, then re-asserts the
+// site's answer the moment the marker leaves.
 export function AndromedaThemeSync() {
   useEffect(() => {
+    if (window.self !== window.top) return
     const root = document.documentElement
+    if (root.hasAttribute('data-frame')) return
+
     const vars = andromedaLightVars()
     const names = Object.keys(vars)
-    // Only touch the DOM when the answer actually changed. The observer fires
-    // on any class mutation, and ~40 setProperty calls per keystroke of an
-    // unrelated class would be 40 style recalcs for nothing.
-    let applied: boolean | null = null
+    // The DOM is the state: probing one channel property instead of caching a
+    // flag means a third party clearing the set (or the preview toggle
+    // handing control back) is noticed and corrected on the next mutation.
+    const probe = names[0]
 
     const sync = () => {
-      const isDark = root.classList.contains('dark')
-      if (applied === !isDark) return
-      applied = !isDark
-      if (isDark) {
-        for (const name of names) root.style.removeProperty(name)
-      } else {
+      if (root.hasAttribute('data-andromeda-theme-preview')) return
+      const wantLight = !root.classList.contains('dark')
+      const hasLight = root.style.getPropertyValue(probe) !== ''
+      if (wantLight === hasLight) return
+      if (wantLight) {
         for (const name of names) root.style.setProperty(name, vars[name as keyof typeof vars])
+      } else {
+        for (const name of names) root.style.removeProperty(name)
       }
     }
 
     sync()
     const observer = new MutationObserver(sync)
-    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['class', 'style', 'data-andromeda-theme-preview'],
+    })
 
     return () => {
       observer.disconnect()
-      // Leaving the route must leave <html> exactly as it was found. These
-      // properties are global, and a stale light theme would follow the user
-      // onto every page after this one.
-      for (const name of names) root.style.removeProperty(name)
+      // Leaving the route must leave <html> exactly as it was found, unless
+      // the preview toggle currently owns the properties (its own cleanup
+      // removes them).
+      if (!root.hasAttribute('data-andromeda-theme-preview')) {
+        for (const name of names) root.style.removeProperty(name)
+      }
     }
   }, [])
 
