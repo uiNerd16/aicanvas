@@ -243,7 +243,7 @@ function FramePayload({ children }: { children: ReactNode }) {
            does not send Sec-Fetch-Dest gets the full site shell instead of the
            iframe branch, and that shell paints theme backgrounds on inner
            wrapper divs (body's flex column, the content column's
-           bg-sand-100 dark:bg-sand-950). For a light-theme visitor those
+           bg-sand-200 dark:bg-sand-950). For a light-theme visitor those
            wrappers are light sand while the composition's entrance animation is
            still fading in, which reads as a flash filling the phone screen.
            Force every ancestor of the frame viewport to the dark surface too;
@@ -422,7 +422,7 @@ function TopBar({
   onReload: () => void
 }) {
   return (
-    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-sand-200 bg-sand-100/90 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
+    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-sand-200 bg-sand-50/90 backdrop-blur dark:border-sand-800 dark:bg-sand-950/90">
       {/* Logo block — mirrors the site Sidebar rail exactly (w-60, px-4, gap-2,
           wordmark always shown) and carries the SAME full-height border-r the
           sidebar draws. Keeps the logo in the identical spot and makes the
@@ -460,7 +460,7 @@ function TopBar({
         {/* Device toggles (Desktop / Mobile) + Replay — sized to match the
             right-side buttons (~32px). Shown from md up; the cluster hides on a
             real phone, where you already see the responsive layout. */}
-        <div className="hidden items-center gap-0.5 justify-self-center rounded-lg border border-sand-200 bg-sand-50 p-0.5 md:flex dark:border-sand-800 dark:bg-sand-900">
+        <div className="hidden items-center gap-0.5 justify-self-center rounded-lg border border-sand-200 bg-sand-100 p-0.5 md:flex dark:border-sand-800 dark:bg-sand-900">
           {DEVICE_ORDER.map(({ key, label, icon: Icon }) => {
             const active = device === key
             return (
@@ -472,7 +472,7 @@ function TopBar({
                 aria-pressed={active}
                 className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
                   active
-                    ? 'bg-sand-50 text-sand-900 shadow-sm dark:bg-sand-800 dark:text-sand-50'
+                    ? 'bg-sand-100 text-sand-900 shadow-sm dark:bg-sand-800 dark:text-sand-50'
                     : 'text-sand-600 hover:text-sand-800 dark:text-sand-400 dark:hover:text-sand-100'
                 }`}
               >
@@ -566,7 +566,7 @@ function TemplateSwitcher({
           phone-width menu never runs off the right edge; desktop viewports keep
           the full 260px (100vw-170px is >260 there, so min() picks 260). */}
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-[min(260px,calc(100vw-170px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-50 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
+        <div className="absolute left-0 top-full z-50 mt-2 w-[min(260px,calc(100vw-170px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-100 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
           {siblings.map((t) => {
             const active = t.slug === templateSlug
             const folder = t.slug.startsWith(`${systemSlug}-`)
@@ -581,7 +581,7 @@ function TemplateSwitcher({
                 className={`flex items-center justify-between gap-3 px-3 py-2 text-sm transition-colors ${
                   active
                     ? 'font-semibold text-olive-700 dark:text-olive-400'
-                    : 'text-sand-700 hover:bg-sand-100/70 dark:text-sand-300 dark:hover:bg-sand-800/70'
+                    : 'text-sand-700 hover:bg-sand-50/70 dark:text-sand-300 dark:hover:bg-sand-800/70'
                 }`}
               >
                 <span className="truncate">{t.name}</span>
@@ -740,7 +740,7 @@ function InstallButton({
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-50 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-100 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
           <div className="space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -770,7 +770,7 @@ function InstallButton({
                 )}
               </Button>
             </div>
-            <div className="rounded-lg bg-sand-100 dark:bg-sand-950 px-4 py-3">
+            <div className="rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
               <code className="block break-all font-mono text-xs text-sand-700 dark:text-sand-300">{cliCommandMasked}</code>
             </div>
             <div className="space-y-1.5">

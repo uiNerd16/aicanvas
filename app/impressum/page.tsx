@@ -12,8 +12,8 @@ import { HeaderSocials } from '../components/HeaderSocials'
 
 export default function ImpressumPage() {
   return (
-    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-50 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/impressum" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Impressum

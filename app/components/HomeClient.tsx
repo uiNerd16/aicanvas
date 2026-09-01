@@ -225,10 +225,10 @@ export function HomeClient({
   const emptyPhrase = EMPTY_BEATS[emptyIdx].phrase
 
   return (
-    <div className="flex min-h-full flex-col bg-sand-100 dark:bg-sand-950">
+    <div className="flex min-h-full flex-col bg-sand-50 dark:bg-sand-950">
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
         {q && !category ? (
           <p className="min-w-0 truncate text-sm font-semibold text-sand-600 dark:text-sand-400">
             {totalResults} {totalResults === 1 ? 'result' : 'results'}
@@ -250,7 +250,7 @@ export function HomeClient({
       </div>
 
       {/* ── Grid ── */}
-      <div className="flex flex-1 flex-col bg-sand-100 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
+      <div className="flex flex-1 flex-col bg-sand-50 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
         {/* Mobile breadcrumb — shown above cards on small screens */}
         <p className="mb-4 text-sm font-semibold md:hidden">
           {q && !category ? (
@@ -426,7 +426,7 @@ export function HomeClient({
             {suggestions.length === 0 && (
               <button
                 onClick={clearSearch}
-                className="mt-8 rounded-lg border border-sand-200 bg-sand-50 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+                className="mt-8 rounded-lg border border-sand-200 bg-sand-100 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
               >
                 Browse all components
               </button>

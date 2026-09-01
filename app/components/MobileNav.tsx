@@ -165,7 +165,7 @@ export function MobileNav({
   return (
     <div className={pinnedDark ? 'dark contents' : 'contents'}>
       {/* ── Mobile top bar ── */}
-      <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-200 bg-sand-100 px-4 dark:border-sand-800 dark:bg-sand-950 md:hidden">
+      <div className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-sand-200 bg-sand-50 px-4 dark:border-sand-800 dark:bg-sand-950 md:hidden">
         <Link href="/" className="flex items-center gap-2 font-bold text-sand-900 dark:text-sand-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/ai-canvas-icon.svg" alt="" width={18} height={15} className="shrink-0" />
@@ -199,7 +199,7 @@ export function MobileNav({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sand-100 shadow-2xl dark:bg-sand-950 md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-sand-50 shadow-2xl dark:bg-sand-950 md:hidden"
             >
               {/* Drawer header */}
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-sand-200 px-4 dark:border-sand-800">
@@ -233,7 +233,7 @@ export function MobileNav({
                     placeholder="Search..."
                     // 16px font-size prevents iOS Safari from auto-zooming on focus.
                     style={{ fontSize: 16 }}
-                    className="w-full rounded-lg border border-sand-200 bg-sand-50 py-1.5 pl-8 pr-8 text-sand-900 outline-none transition-colors placeholder:text-sand-600 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
+                    className="w-full rounded-lg border border-sand-200 bg-sand-100 py-1.5 pl-8 pr-8 text-sand-900 outline-none transition-colors placeholder:text-sand-600 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
                   />
                   {searchValue && (
                     <button

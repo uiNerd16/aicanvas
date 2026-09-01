@@ -14,8 +14,8 @@ import { HeaderSocials } from '../components/HeaderSocials'
 
 export default function RefundPage() {
   return (
-    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-50 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/refund" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Refund
@@ -85,7 +85,7 @@ export default function RefundPage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">3. Cancelling your subscription</h2>
           <p className="mt-3 leading-relaxed text-sand-600 dark:text-sand-400">
             You can cancel at any time from the customer portal linked in your{' '}
-            <code className="rounded bg-sand-50 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
+            <code className="rounded bg-sand-100 dark:bg-sand-900 px-1 py-0.5 text-xs text-sand-700 dark:text-sand-300">
               /account/settings
             </code>
             . Cancellation stops future renewals and takes effect at the end of

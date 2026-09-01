@@ -85,7 +85,7 @@ export function PremiumCards({
     >
       {/* ── Free card ── */}
       {showFree && (
-        <div className="relative flex flex-col rounded-3xl border border-sand-200 bg-sand-50 p-2 dark:border-sand-800 dark:bg-sand-900">
+        <div className="relative flex flex-col rounded-3xl border border-sand-200 bg-sand-100 p-2 dark:border-sand-800 dark:bg-sand-900">
           <div className={cardPad}>
             <div className="flex items-center gap-4">
               <div className={`flex ${iconBox} shrink-0 items-end justify-center`}>
@@ -102,7 +102,7 @@ export function PremiumCards({
                 price and CTA align across both cards. */}
             <div
               aria-hidden
-              className="invisible mt-3 inline-flex rounded-lg border border-sand-200 bg-sand-100/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
+              className="invisible mt-3 inline-flex rounded-lg border border-sand-200 bg-sand-50/70 p-0.5 dark:border-sand-700 dark:bg-sand-950"
             >
               <span className="rounded-md px-3 py-1 text-xs font-semibold">Monthly</span>
             </div>
@@ -119,7 +119,7 @@ export function PremiumCards({
               {user ? 'Browse Components' : 'Sign up Free'}
             </Link>
           </div>
-          <div className={`flex-1 rounded-2xl bg-sand-100/70 dark:bg-sand-950 ${listPad}`}>
+          <div className={`flex-1 rounded-2xl bg-sand-50/70 dark:bg-sand-950 ${listPad}`}>
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-500">
               ALWAYS INCLUDED
             </p>
@@ -136,7 +136,7 @@ export function PremiumCards({
       )}
 
       {/* ── Premium card ── */}
-      <div className="relative flex flex-col rounded-3xl border border-olive-500/50 bg-sand-50 p-2 dark:border-olive-500/40 dark:bg-sand-900">
+      <div className="relative flex flex-col rounded-3xl border border-olive-500/50 bg-sand-100 p-2 dark:border-olive-500/40 dark:bg-sand-900">
         <div className={cardPad}>
           <div className="flex items-center gap-4">
             <div className={`flex ${iconBox} shrink-0 items-end justify-center`}>
@@ -154,13 +154,13 @@ export function PremiumCards({
           {/* Billing cycle toggle + struck yearly-anchor price sit side by side. */}
           <div className="mt-3 flex items-center gap-3">
           {/* Billing cycle toggle — defaults to Yearly; the selected option is highlighted. */}
-          <div className="inline-flex rounded-lg border border-sand-200 bg-sand-100/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
+          <div className="inline-flex rounded-lg border border-sand-200 bg-sand-50/70 p-0.5 dark:border-sand-700 dark:bg-sand-950">
             <button
               type="button"
               onClick={() => setCycle('monthly')}
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                 cycle === 'monthly'
-                  ? 'bg-sand-50 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
+                  ? 'bg-sand-100 text-sand-900 dark:bg-sand-800 dark:text-sand-50'
                   : 'text-sand-600 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
               }`}
             >
@@ -222,7 +222,7 @@ export function PremiumCards({
             </UpgradeButton>
           )}
         </div>
-        <div className={`flex-1 rounded-2xl bg-sand-100/70 dark:bg-sand-950 ${listPad}`}>
+        <div className={`flex-1 rounded-2xl bg-sand-50/70 dark:bg-sand-950 ${listPad}`}>
           {/* The comparison label only makes sense next to the Free card;
               the premium-only modal renders the list without it. */}
           {showFree && (
@@ -262,7 +262,7 @@ const PAYMENT_LOGOS: [string, string][] = [
 
 function TrustStrip() {
   return (
-    <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sand-200 bg-sand-50/60 px-6 py-4 dark:border-sand-800 dark:bg-sand-900/50 sm:flex-row">
+    <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-sand-200 bg-sand-100/60 px-6 py-4 dark:border-sand-800 dark:bg-sand-900/50 sm:flex-row">
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-sand-700 dark:text-sand-200">
         <span className="flex items-center gap-1.5">
           <Lock weight="regular" size={16} className="text-olive-700 dark:text-olive-400" />

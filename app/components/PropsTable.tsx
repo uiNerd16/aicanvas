@@ -48,7 +48,7 @@ export function PropsTable({ propTables }: { propTables: PropTable[] }) {
                   <col className="w-[32%]" />
                 </colgroup>
                 <thead>
-                  <tr className="border-b border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
+                  <tr className="border-b border-sand-200 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
                     <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Prop</th>
                     <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Type</th>
                     <th className="px-4 py-2.5 font-semibold text-sand-700 dark:text-sand-300">Default</th>

@@ -13,8 +13,8 @@ const extLink = 'text-olive-700 hover:underline dark:text-olive-400'
 
 export default function CreditsPage() {
   return (
-    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+    <div className="min-h-full bg-sand-50 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link href="/credits" className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400">
           /Credits

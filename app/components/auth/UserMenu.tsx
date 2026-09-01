@@ -50,12 +50,12 @@ export function UserMenu() {
         <CaretDown size={12} weight="regular" className={`shrink-0 transition-transform ${open ? '-rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-sand-200 bg-sand-50 shadow-lg dark:border-sand-700 dark:bg-sand-900">
+        <div className="absolute bottom-full left-0 right-0 mb-1 overflow-hidden rounded-lg border border-sand-200 bg-sand-100 shadow-lg dark:border-sand-700 dark:bg-sand-900">
           {status === 'not-premium' && (
             <button
               type="button"
               onClick={() => { setOpen(false); openPaywall({ reason: 'upgrade' }) }}
-              className="flex w-full items-center gap-2 border-b border-sand-200 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-olive-500 dark:hover:bg-sand-800"
+              className="flex w-full items-center gap-2 border-b border-sand-200 px-3 py-2 text-sm font-semibold text-olive-700 transition-colors hover:bg-sand-50 dark:border-sand-700 dark:text-olive-500 dark:hover:bg-sand-800"
             >
               <Lightning size={14} weight="regular" />
               Upgrade to Premium
@@ -64,7 +64,7 @@ export function UserMenu() {
           <Link
             href="/account/saved"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <Heart size={14} weight="regular" />
             Saved
@@ -72,7 +72,7 @@ export function UserMenu() {
           <Link
             href="/account/lab"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <Flask size={14} weight="regular" />
             Made in Lab
@@ -80,7 +80,7 @@ export function UserMenu() {
           <Link
             href="/account/history"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <ClockClockwise size={14} weight="regular" />
             Activity
@@ -88,7 +88,7 @@ export function UserMenu() {
           <Link
             href="/account/settings"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <Gear size={14} weight="regular" />
             Settings
@@ -96,7 +96,7 @@ export function UserMenu() {
           <Link
             href="/account"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <User size={14} weight="regular" />
             Profile
@@ -104,7 +104,7 @@ export function UserMenu() {
           <button
             type="button"
             onClick={signOut}
-            className="flex w-full items-center gap-2 border-t border-sand-200 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
+            className="flex w-full items-center gap-2 border-t border-sand-200 px-3 py-2 text-sm text-sand-700 transition-colors hover:bg-sand-50 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
           >
             <SignOut size={14} weight="regular" />
             Sign out

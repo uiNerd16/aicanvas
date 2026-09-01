@@ -14,7 +14,7 @@ export default async function AccountPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-sand-200 bg-sand-50 p-6 dark:border-sand-800 dark:bg-sand-900">
+      <div className="rounded-xl border border-sand-200 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900">
         <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">Profile</h2>
         <dl className="mt-4 space-y-3">
           <div className="flex justify-between border-b border-sand-200 pb-3 dark:border-sand-800">
@@ -28,7 +28,7 @@ export default async function AccountPage() {
         </dl>
       </div>
 
-      <div className="rounded-xl border border-sand-200 bg-sand-50 p-6 dark:border-sand-800 dark:bg-sand-900">
+      <div className="rounded-xl border border-sand-200 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900">
         <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">Session</h2>
         <p className="mt-2 text-sm text-sand-600 dark:text-sand-400">
           Sign out on this device. Your saved components and history stay safe.

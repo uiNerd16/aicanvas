@@ -51,9 +51,9 @@ is the thing to read before changing anything here.
 
 | Role | Light | Dark |
 |---|---|---|
-| Page background | `bg-sand-100` | `dark:bg-sand-950` |
-| Card / panel | `bg-sand-50` | `dark:bg-sand-900` |
-| Raised (menu, input, active row) | `bg-sand-50` + border | `dark:bg-sand-800` |
+| Page background | `bg-sand-50` | `dark:bg-sand-950` |
+| Card / panel | `bg-sand-100` | `dark:bg-sand-900` |
+| Raised (menu, input, active row) | `bg-sand-100` + border | `dark:bg-sand-800` |
 | Hover fill | `bg-sand-200/50` | `dark:bg-sand-800/60` |
 | Border, divider | `border-sand-200` | `dark:border-sand-800` |
 | Border hover / outline button | `border-sand-300` | `dark:border-sand-700` |
@@ -82,8 +82,8 @@ Three traps, all of them measured rather than guessed:
   subtrees, which pin themselves with a scoped `dark` class rather than by writing
   `<html>`.
 - **Code and install slabs DO follow the theme** (ruled 2026-08-31, replacing the
-  earlier always-dark line). A slab is `bg-sand-100 dark:bg-sand-950` sitting on a
-  `bg-sand-50` card, with `border-sand-200`, `bg-sand-200` pills and `text-sand-700`
+  earlier always-dark line). A slab is `bg-sand-200 dark:bg-sand-950` sitting on a
+  `bg-sand-100` card, itself on a `bg-sand-50` page, with `border-sand-200`, `bg-sand-200` pills and `text-sand-700`
   code. Shiki carries both themes at once: `themes: { light: 'github-light', dark:
   'github-dark' }` puts the light colours inline and the dark ones in a
   `--shiki-dark` variable, and the wrapper swaps them with

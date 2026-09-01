@@ -62,11 +62,11 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
       // so there the column scrolls and keeps its gutter. That is the whole
       // difference between the two pages.) See .app-scroll-column in globals.css.
       data-owns-scroll
-      className="aic-page-scroll flex min-h-full flex-col overflow-x-hidden bg-sand-100 dark:bg-sand-950"
+      className="aic-page-scroll flex min-h-full flex-col overflow-x-hidden bg-sand-50 dark:bg-sand-950"
     >
 
       {/* ── Top bar ── */}
-      <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+      <div className="sticky top-0 z-20 hidden h-14 shrink-0 items-center justify-between border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
         <span className="text-sm font-semibold text-sand-900 dark:text-sand-50">Overview</span>
         <HeaderSocials />
       </div>
@@ -78,7 +78,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
           <StackedCards />
 
           <span
-            className="aic-hero-rise mb-5 inline-flex items-center rounded-full border border-sand-300 bg-sand-50 px-3 py-1 text-xs font-semibold text-sand-700 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300"
+            className="aic-hero-rise mb-5 inline-flex items-center rounded-full border border-sand-300 bg-sand-100 px-3 py-1 text-xs font-semibold text-sand-700 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300"
             style={{ animationDelay: '0.1s' }}
           >
             One command, zero tokens
@@ -216,7 +216,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                   }}
                 />
                 <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-sand-50/70 px-2.5 py-1 text-[10px] font-semibold text-sand-900 dark:bg-sand-800/70 dark:text-sand-200">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-sand-100/70 px-2.5 py-1 text-[10px] font-semibold text-sand-900 dark:bg-sand-800/70 dark:text-sand-200">
                     {/* The pulsing dot carries the "alive" feeling so the words
                         do not have to overpromise: the cache window is 24h, so
                         "Live" would be false. See REVALIDATE_SECONDS. */}
@@ -339,7 +339,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
           <Reveal>
             <Link
               href="/design-systems/andromeda"
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-200 bg-sand-50 transition-all duration-200 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-200 bg-sand-100 transition-all duration-200 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
             >
               <span
                 aria-hidden
@@ -421,10 +421,10 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 key={audience}
                 y={14}
                 delay={i * 0.08}
-                className="flex flex-col rounded-xl border border-sand-200 bg-sand-50 p-5 dark:border-sand-800 dark:bg-sand-900"
+                className="flex flex-col rounded-xl border border-sand-200 bg-sand-100 p-5 dark:border-sand-800 dark:bg-sand-900"
               >
                 <div className="mb-3 flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sand-50 text-sand-700 dark:bg-sand-800 dark:text-sand-300">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sand-100 text-sand-700 dark:bg-sand-800 dark:text-sand-300">
                     {icon}
                   </div>
                   <span className="text-sm font-bold text-sand-900 dark:text-sand-50">{audience}</span>
@@ -492,7 +492,7 @@ export function HomePageClient({ total, pulls, carouselItems }: Props) {
                 className="flex items-start gap-5 py-5"
               >
                 {/* Node on the timeline */}
-                <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-50 text-sand-700 shadow-[0_4px_16px_rgba(0,0,0,0.4)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300">
+                <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-100 text-sand-700 shadow-[0_4px_16px_rgba(0,0,0,0.4)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300">
                   {step.icon}
                 </div>
                 {/* Content */}

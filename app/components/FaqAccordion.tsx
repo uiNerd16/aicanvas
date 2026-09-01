@@ -83,8 +83,8 @@ export function FaqAccordion({
             transition={{ duration: 0.3 }}
             className={`rounded-xl border transition-colors ${
               isOpen
-                ? 'border-sand-300 bg-sand-50 dark:border-sand-700 dark:bg-sand-900'
-                : 'border-sand-200 bg-sand-50/60 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
+                ? 'border-sand-300 bg-sand-100 dark:border-sand-700 dark:bg-sand-900'
+                : 'border-sand-200 bg-sand-100/60 hover:border-sand-300 dark:border-sand-800 dark:bg-sand-900/50 dark:hover:border-sand-700'
             }`}
           >
             {/* Row div toggles (so the question can hold a real anchor);

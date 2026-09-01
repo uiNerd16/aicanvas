@@ -48,8 +48,8 @@ Semantic quick reference:
 
 | Role | Light | Dark |
 |---|---|---|
-| Page background | `bg-sand-100` | `dark:bg-sand-950` |
-| Card / surface | `bg-sand-50` | `dark:bg-sand-900` |
+| Page background | `bg-sand-50` | `dark:bg-sand-950` |
+| Card / surface | `bg-sand-100` | `dark:bg-sand-900` |
 | Primary text | `text-sand-900` | `dark:text-sand-50` |
 | Body text | `text-sand-700` | `dark:text-sand-300` |
 | Secondary text | `text-sand-600` | `dark:text-sand-400` |

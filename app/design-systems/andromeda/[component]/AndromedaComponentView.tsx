@@ -273,7 +273,7 @@ export function AndromedaComponentView({
       </div>
 
       {/* ── Main card (Preview / Code) ──────────────────────────────────── */}
-      <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+      <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
         {/* Tab bar */}
         <div className="flex items-center justify-between border-b border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
           <div className="flex items-center gap-0.5">
@@ -374,7 +374,7 @@ export function AndromedaComponentView({
 
         {/* CLI / Manual tabs */}
         <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
-          <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+          <div className="flex border-b border-sand-300 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
             <button
               type="button"
               onClick={() => setInstallTab('cli')}
@@ -405,7 +405,7 @@ export function AndromedaComponentView({
             </button>
           </div>
 
-          <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
+          <div className="bg-sand-50 px-5 py-6 dark:bg-sand-900">
             {installTab === 'cli' ? (
               <div className="space-y-6">
                 {/* Step 1 — shadcn add. The command + package-manager row stay
@@ -561,7 +561,7 @@ export function AndromedaComponentView({
                   onClick={() => pageRelated(-1)}
                   disabled={!canGoPrev}
                   aria-label="Previous components"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-50 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-100 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                 >
                   <ArrowLeft weight="regular" size={15} />
                 </button>
@@ -570,7 +570,7 @@ export function AndromedaComponentView({
                   onClick={() => pageRelated(1)}
                   disabled={!canGoNext}
                   aria-label="Next components"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-50 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-100 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                 >
                   <ArrowRight weight="regular" size={15} />
                 </button>
@@ -610,7 +610,7 @@ export function AndromedaComponentView({
                   >
                     <Link
                       href={`/design-systems/andromeda/${c.slug}`}
-                      className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+                      className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-50 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                     >
                       <div
                         className="relative aspect-video overflow-hidden"

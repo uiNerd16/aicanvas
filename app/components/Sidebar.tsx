@@ -195,7 +195,7 @@ export function Sidebar({
   if (embedded && TEMPLATE_LEAF_RE.test(pathname ?? '')) return null
 
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sand-200 bg-sand-100 dark:border-sand-800 dark:bg-sand-950">
+    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-sand-200 bg-sand-50 dark:border-sand-800 dark:bg-sand-950">
 
       {/* ── Logo ── */}
       <div className="flex h-14 shrink-0 items-center border-b border-sand-200 px-4 dark:border-sand-800">
@@ -222,7 +222,7 @@ export function Sidebar({
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search…"
-            className="w-full rounded-lg border border-sand-200 bg-sand-50 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-600 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
+            className="w-full rounded-lg border border-sand-200 bg-sand-100 py-1.5 pl-8 pr-8 text-sm text-sand-900 outline-none transition-colors placeholder:text-sand-600 hover:border-sand-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-50 dark:placeholder:text-sand-500 dark:hover:border-sand-600 dark:focus:border-olive-500 dark:focus:ring-olive-500/20"
           />
           {searchValue && (
             <button

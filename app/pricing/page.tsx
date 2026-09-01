@@ -113,7 +113,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.55, delay, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`relative flex flex-col rounded-3xl border bg-sand-50 p-2 dark:bg-sand-900 ${
+      className={`relative flex flex-col rounded-3xl border bg-sand-100 p-2 dark:bg-sand-900 ${
         plan.featured
           ? 'border-olive-500/50 dark:border-olive-500/40'
           : 'border-sand-200 dark:border-sand-800'
@@ -155,7 +155,7 @@ function PlanCard({ plan, delay }: { plan: Plan; delay: number }) {
       </div>
 
       {/* Bottom — features inset */}
-      <div className="flex-1 rounded-2xl bg-sand-100/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
+      <div className="flex-1 rounded-2xl bg-sand-50/70 px-5 py-6 dark:bg-sand-950 sm:px-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sand-600 dark:text-sand-500">
           {plan.listLabel}
         </p>
@@ -215,9 +215,9 @@ const PRICING_FAQ: FaqItem[] = [
 export default function PricingPage() {
   const premium = premiumEnabled()
   return (
-    <div className="flex min-h-full flex-col bg-sand-100 dark:bg-sand-950">
+    <div className="flex min-h-full flex-col bg-sand-50 dark:bg-sand-950">
       {/* ── Top bar — mirrors /About: olive /Pricing centered, HeaderSocials right ── */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link
           href="/pricing"
@@ -238,7 +238,7 @@ export default function PricingPage() {
 
         {/* ── Hero ── */}
         <Section className="text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sand-200 bg-sand-50 px-3 py-1 text-xs font-semibold text-sand-700 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sand-200 bg-sand-100 px-3 py-1 text-xs font-semibold text-sand-700 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-300">
             <Sparkle weight="regular" size={12} className="text-olive-700 dark:text-olive-400" />
             Our Pricing Plan
           </span>

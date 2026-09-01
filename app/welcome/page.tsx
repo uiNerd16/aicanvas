@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-100 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
+    <div className="min-h-full bg-sand-50 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:grid">
         <div />
         <Link href="/welcome" className="text-sm font-semibold text-olive-700 transition-colors hover:text-olive-800 dark:text-olive-500 dark:hover:text-olive-400">
           /Welcome
@@ -53,7 +53,7 @@ export default function WelcomePage() {
           Sign in to access Premium
         </Link>
 
-        <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400">
+        <div className="mt-6 flex items-center gap-2 rounded-xl border border-sand-200 bg-sand-100 px-4 py-3 text-sm text-sand-600 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400">
           <EnvelopeSimple weight="regular" size={18} className="shrink-0 text-sand-600 dark:text-sand-500" />
           We also emailed you a sign-in link. No email? You can still sign in above.
         </div>

@@ -85,7 +85,7 @@ export function PasswordSection({ hasPassword, email }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-sand-200 bg-sand-50 p-6 dark:border-sand-800 dark:bg-sand-900">
+    <div className="rounded-xl border border-sand-200 bg-sand-100 p-6 dark:border-sand-800 dark:bg-sand-900">
       <div className="text-lg font-bold text-sand-900 dark:text-sand-50">
         {hasPassword ? 'Change password' : 'Set a password'}
       </div>

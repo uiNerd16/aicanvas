@@ -213,7 +213,7 @@ function ValueItem({ icon: Icon, heading, children, delay = 0 }) {
           {/* Icon chip — same aesthetic as the home-page steps: neutral surface,
               1px border, soft drop shadow. Dark mode matches that section exactly;
               light mode gets the neutral equivalent. */}
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-100 text-sand-600 shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sand-300 bg-sand-50 text-sand-600 shadow-[0_4px_16px_rgba(0,0,0,0.12)] dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
             <Icon weight="regular" size={16} />
           </span>
           <span className="text-base font-bold text-sand-900 dark:text-sand-50">{heading}</span>
@@ -325,7 +325,7 @@ export function AndromedaOverview() {
       <motion.section className="mt-14" {...reveal}>
         <Link
           href="/design-systems/andromeda/system"
-          className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
+          className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-50 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
         >
           <div className="flex flex-col justify-center gap-3 p-6 sm:w-1/2 sm:p-8">
             <span className="text-xs font-semibold uppercase tracking-wider text-olive-600 dark:text-olive-400">
@@ -355,7 +355,7 @@ export function AndromedaOverview() {
       <motion.section className="mt-14" {...reveal}>
         <Link
           href="/design-systems/andromeda/brain"
-          className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
+          className="group relative flex flex-col overflow-hidden rounded-2xl border border-sand-300 bg-sand-50 shadow-sm transition-all duration-200 hover:border-sand-400 hover:shadow-xl dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700 sm:flex-row"
         >
           <div className="relative min-h-[280px] overflow-hidden sm:min-h-[360px] sm:w-1/2">
             <BrainWireframePreview />
@@ -419,7 +419,7 @@ export function AndromedaOverview() {
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                 />
               </div>
-              <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-100 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)]">
+              <div className="relative -mt-4 flex flex-1 flex-col gap-3 rounded-t-2xl bg-sand-50 p-5 shadow-[0_-8px_24px_rgba(0,0,0,0.10)] dark:bg-sand-900 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.25)]">
                 <div>
                   <h3 className="font-bold text-sand-900 dark:text-sand-50">{t.name}</h3>
                   <p className="mt-1 line-clamp-2 text-sm font-normal text-sand-600 dark:text-sand-400">{t.blurb}</p>
@@ -501,7 +501,7 @@ export function AndromedaOverview() {
                 >
                   <Link
                     href={`/design-systems/andromeda/${c.slug}`}
-                    className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-50 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                   >
                     <div className="relative aspect-video overflow-hidden bg-sand-950">
                       {c.image ? (

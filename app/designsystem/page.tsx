@@ -19,9 +19,9 @@ function readScale(prefix: string): { token: string; hex: string }[] {
 }
 
 const SAND_USAGE: Record<string, string> = {
-  'sand-50': 'Elevated surfaces, hover fills',
+  'sand-50': 'Page background (light)',
   'sand-100': 'Card background (light), input fills',
-  'sand-200': 'Page background (light)',
+  'sand-200': 'Code and install slabs (light)',
   'sand-300': 'Borders (light), dividers',
   'sand-400': 'Muted borders, placeholder icons',
   'sand-500': 'Secondary text (light)',
@@ -72,9 +72,9 @@ const TYPOGRAPHY = [
 // ─── Semantic mappings ───────────────────────────────────────────────────────
 
 const SEMANTIC_ROLES = [
-  { role: 'Page background', light: 'bg-sand-100', dark: 'bg-sand-950' },
-  { role: 'Card / surface', light: 'bg-sand-50', dark: 'bg-sand-900' },
-  { role: 'Elevated (navbar)', light: 'bg-sand-100/90', dark: 'bg-sand-950/90' },
+  { role: 'Page background', light: 'bg-sand-50', dark: 'bg-sand-950' },
+  { role: 'Card / surface', light: 'bg-sand-100', dark: 'bg-sand-900' },
+  { role: 'Elevated (navbar)', light: 'bg-sand-50/90', dark: 'bg-sand-950/90' },
   { role: 'Primary text', light: 'text-sand-900', dark: 'text-sand-50' },
   { role: 'Body text', light: 'text-sand-700', dark: 'text-sand-300' },
   { role: 'Secondary text', light: 'text-sand-600', dark: 'text-sand-400' },
@@ -146,7 +146,7 @@ export default function DesignSystemPage() {
           Design System
         </h1>
         <p className="max-w-2xl text-lg text-sand-600 dark:text-sand-400">
-          AI Canvas global design tokens: colors, typography, spacing, and semantic mappings used across the entire website. Hex values are read live from <code className="rounded bg-sand-50 px-1.5 py-0.5 font-mono text-sm dark:bg-sand-800">app/globals.css</code>, so they always match the site.
+          AI Canvas global design tokens: colors, typography, spacing, and semantic mappings used across the entire website. Hex values are read live from <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-sm dark:bg-sand-800">app/globals.css</code>, so they always match the site.
         </p>
       </div>
 
@@ -226,7 +226,7 @@ export default function DesignSystemPage() {
         <div className="overflow-hidden rounded-2xl border border-sand-200 dark:border-sand-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-sand-50 dark:bg-sand-900">
+              <tr className="bg-sand-100 dark:bg-sand-900">
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Role</th>
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Light</th>
                 <th className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">Dark</th>
@@ -236,7 +236,7 @@ export default function DesignSystemPage() {
               {SEMANTIC_ROLES.map((row, i) => (
                 <tr
                   key={row.role}
-                  className={i % 2 === 0 ? 'bg-sand-50 dark:bg-sand-950' : 'bg-sand-100 dark:bg-sand-900'}
+                  className={i % 2 === 0 ? 'bg-sand-100 dark:bg-sand-950' : 'bg-sand-50 dark:bg-sand-900'}
                 >
                   <td className="px-4 py-3 text-sand-900 dark:text-sand-100">{row.role}</td>
                   <td className="px-4 py-3 font-mono text-xs text-sand-600 dark:text-sand-400">{row.light}</td>
@@ -252,7 +252,7 @@ export default function DesignSystemPage() {
       <section className="mb-16">
         <SectionTitle>Typography</SectionTitle>
         <p className="mb-6 text-sm text-sand-600 dark:text-sand-400">
-          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-50 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
+          Font: <span className="font-semibold text-sand-700 dark:text-sand-200">Manrope</span>, loaded via next/font/google and registered as <code className="rounded bg-sand-100 px-1.5 py-0.5 font-mono text-xs dark:bg-sand-800">--font-sans</code>
         </p>
         <div className="flex flex-col gap-6">
           {TYPOGRAPHY.map((t) => (
@@ -324,7 +324,7 @@ export default function DesignSystemPage() {
               key={asset.name}
               className="overflow-hidden rounded-2xl border border-sand-200 dark:border-sand-800"
             >
-              <div className="flex h-44 items-center justify-center bg-sand-50 dark:bg-sand-100">
+              <div className="flex h-44 items-center justify-center bg-sand-100 dark:bg-sand-100">
                 <img
                   src={asset.svg}
                   alt={`AI Canvas ${asset.name}`}
@@ -344,7 +344,7 @@ export default function DesignSystemPage() {
                   <a
                     href={asset.png}
                     download
-                    className="rounded-lg border border-sand-200 px-3.5 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:bg-sand-50 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
+                    className="rounded-lg border border-sand-200 px-3.5 py-1.5 text-xs font-semibold text-sand-700 transition-colors hover:bg-sand-100 dark:border-sand-700 dark:text-sand-300 dark:hover:bg-sand-800"
                   >
                     PNG
                   </a>

@@ -28,7 +28,7 @@ const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 type Status = 'idle' | 'submitting'
 
 const inputCls =
-  'w-full rounded-lg border border-sand-300 bg-sand-100 px-3 py-2 text-sm text-sand-900 placeholder:text-sand-400 focus:border-olive-500 focus:outline-none dark:border-sand-800 dark:bg-sand-900 dark:text-sand-50'
+  'w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm text-sand-900 placeholder:text-sand-400 focus:border-olive-500 focus:outline-none dark:border-sand-800 dark:bg-sand-900 dark:text-sand-50'
 const labelCls = 'block text-sm font-semibold text-sand-900 dark:text-sand-50'
 const helpCls = 'mt-1 text-xs text-sand-600 dark:text-sand-500'
 
@@ -105,8 +105,8 @@ function KuendigenForm() {
   const needsToken = Boolean(TURNSTILE_SITE_KEY) && !token
 
   return (
-    <div className="min-h-full bg-sand-100 dark:bg-sand-950">
-      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-950 px-6 md:grid">
+    <div className="min-h-full bg-sand-50 dark:bg-sand-950">
+      <header className="sticky top-0 z-50 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/kuendigen" className="text-sm font-semibold text-olive-700 dark:text-olive-500 transition-colors hover:text-olive-800 dark:hover:text-olive-400">
           /Kündigen
@@ -154,7 +154,7 @@ function KuendigenForm() {
           </div>
         )}
         {state === 'invalid' && (
-          <div className="mt-6 flex items-start gap-2 rounded-lg border border-sand-300 dark:border-sand-700 bg-sand-50 dark:bg-sand-900 p-4">
+          <div className="mt-6 flex items-start gap-2 rounded-lg border border-sand-300 dark:border-sand-700 bg-sand-100 dark:bg-sand-900 p-4">
             <WarningCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-600 dark:text-sand-400" />
             <p className="text-sm text-sand-700 dark:text-sand-300">
               Dieser Bestätigungslink ist ungültig oder abgelaufen. Bitte sende das Formular erneut. /
@@ -163,7 +163,7 @@ function KuendigenForm() {
           </div>
         )}
         {state === 'error' && (
-          <div className="mt-6 flex items-start gap-2 rounded-lg border border-sand-300 dark:border-sand-700 bg-sand-50 dark:bg-sand-900 p-4">
+          <div className="mt-6 flex items-start gap-2 rounded-lg border border-sand-300 dark:border-sand-700 bg-sand-100 dark:bg-sand-900 p-4">
             <WarningCircle weight="regular" size={18} className="mt-0.5 shrink-0 text-sand-600 dark:text-sand-400" />
             <p className="text-sm text-sand-700 dark:text-sand-300">
               Wir konnten die Kündigung gerade nicht abschließen. Bitte schreib uns an{' '}
@@ -176,7 +176,7 @@ function KuendigenForm() {
         )}
 
         {state === 'submitted' ? (
-          <div className="mt-8 rounded-2xl border border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-900 p-6">
+          <div className="mt-8 rounded-2xl border border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-900 p-6">
             <CheckCircle weight="regular" size={24} className="text-olive-700 dark:text-olive-400" />
             <h2 className="mt-3 text-lg font-bold text-sand-900 dark:text-sand-50">Anfrage erhalten / Request received</h2>
             <p className="mt-2 leading-relaxed text-sand-600 dark:text-sand-400">
@@ -197,7 +197,7 @@ function KuendigenForm() {
             <div>
               <label className={labelCls}>Art der Kündigung / Type of cancellation</label>
               <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-900 px-3 py-2 text-sm text-sand-700 dark:text-sand-200">
+                <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-900 px-3 py-2 text-sm text-sand-700 dark:text-sand-200">
                   <input
                     type="radio"
                     name="kind"
@@ -207,7 +207,7 @@ function KuendigenForm() {
                   />
                   Ordentlich / Ordinary
                 </label>
-                <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-50 dark:bg-sand-900 px-3 py-2 text-sm text-sand-700 dark:text-sand-200">
+                <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-100 dark:bg-sand-900 px-3 py-2 text-sm text-sand-700 dark:text-sand-200">
                   <input
                     type="radio"
                     name="kind"
@@ -259,7 +259,7 @@ function KuendigenForm() {
                 yearly) is resolved server-side from Paddle by email. */}
             <div>
               <label className={labelCls}>Vertrag / Subscription</label>
-              <p className="mt-1.5 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-50/60 dark:bg-sand-900/60 px-3 py-2 text-sm text-sand-700 dark:text-sand-300">
+              <p className="mt-1.5 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-100/60 dark:bg-sand-900/60 px-3 py-2 text-sm text-sand-700 dark:text-sand-300">
                 AI Canvas Premium
               </p>
             </div>
@@ -270,7 +270,7 @@ function KuendigenForm() {
                 soon as possible after we review the stated reason. */}
             <div>
               <label className={labelCls}>Beendigungszeitpunkt / When it ends</label>
-              <p className="mt-1.5 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-50/60 dark:bg-sand-900/60 px-3 py-2 text-sm text-sand-700 dark:text-sand-300">
+              <p className="mt-1.5 rounded-lg border border-sand-200 dark:border-sand-800 bg-sand-100/60 dark:bg-sand-900/60 px-3 py-2 text-sm text-sand-700 dark:text-sand-300">
                 {kind === 'ordentlich'
                   ? 'Zum Ende des Abrechnungszeitraums / End of billing period'
                   : 'So bald wie möglich, nach Prüfung deines Grundes / As soon as possible, after we review your reason'}

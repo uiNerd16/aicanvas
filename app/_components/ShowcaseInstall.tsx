@@ -149,7 +149,7 @@ function ShowcaseInstallButtons({ installs }: { installs: InstallAction[] }) {
       ))}
 
       {active && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-50 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(480px,calc(100vw-24px))] overflow-hidden rounded-xl border border-sand-200 bg-sand-100 shadow-2xl dark:border-sand-800 dark:bg-sand-900">
           <div className="space-y-3 p-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ function ShowcaseInstallButtons({ installs }: { installs: InstallAction[] }) {
                 )}
               </Button>
             </div>
-            <div className="rounded-lg bg-sand-100 dark:bg-sand-950 px-4 py-3">
+            <div className="rounded-lg bg-sand-200 dark:bg-sand-950 px-4 py-3">
               <code className="block break-all font-mono text-xs text-sand-700 dark:text-sand-300">{cliCommandMasked}</code>
             </div>
             <div className="space-y-1.5">
