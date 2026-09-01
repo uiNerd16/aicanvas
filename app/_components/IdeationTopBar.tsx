@@ -110,12 +110,12 @@ export function IdeationTopBar() {
       {isBrainReader ? (
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
-          <TopAuthPill showStatusPill={false} />
+          <TopAuthPill />
         </div>
       ) : isShowcase ? (
         <div className="flex items-center gap-2">
           <div id="andromeda-install-slot" />
-          <TopAuthPill showStatusPill={false} />
+          <TopAuthPill />
         </div>
       ) : (
         <HeaderSocials />

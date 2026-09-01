@@ -8,7 +8,6 @@ import { GITHUB_URL, X_URL } from '../lib/config'
 import type { ReactNode } from 'react'
 import { CATEGORIES, getCategoryByLabel } from '../lib/categories'
 import { buttonClasses } from './Button'
-import { ThemeToggle } from './ThemeToggle'
 import { DesignSystemsPole, TEMPLATE_LEAF_RE } from '../_components/DesignSystemsPole'
 
 // ── Tier structure ────────────────────────────────────────────────────────
@@ -488,9 +487,6 @@ export function Sidebar({
           >
             <XLogo weight="regular" size={18} />
           </a>
-          {/* Pushed to the far edge: it is a site setting, not a third social
-              link, and reading as one would invite a stray click. */}
-          <ThemeToggle className="ml-auto" />
         </div>
       </div>
 
