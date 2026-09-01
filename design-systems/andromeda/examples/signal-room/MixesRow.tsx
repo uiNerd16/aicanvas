@@ -15,6 +15,7 @@
 // ============================================================
 
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { Card } from '../../components/Card';
 import { PanelHeader } from '../../components/PanelHeader';
@@ -38,7 +39,7 @@ export function MixesRow({ onPlay, currentCode, isPlaying }: MixesRowProps) {
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               cursor: 'pointer',

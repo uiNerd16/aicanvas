@@ -26,6 +26,7 @@ import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { List, UserCircle, Gear, Keyboard, SignOut } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { useCascadeProps } from '../../components/lib/motion';
 import { IconButton } from '../../components/IconButton';
@@ -56,7 +57,7 @@ function Brand({ templateName, iconSize }: { templateName: string; iconSize: num
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
           fontWeight: tokens.typography.weight.semibold,
@@ -66,7 +67,7 @@ function Brand({ templateName, iconSize }: { templateName: string; iconSize: num
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
           overflow: 'hidden',
@@ -110,8 +111,8 @@ export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }: {
         justifyContent: 'space-between',
         gap: tokens.spacing[3],
         padding: `0 ${tokens.spacing[4]}`,
-        background: tokens.color.surface.raised,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        background: themeColor.surface.raised,
+        borderBottom: `${tokens.border.thin} ${themeColor.border.subtle}`,
         display: 'none',
       }}
     >
@@ -127,7 +128,7 @@ export function MobileTopBar({ templateName, onMenuOpen, menuOpen = false }: {
         style={{
           flexShrink: 0,
           ...(menuOpen
-            ? { background: tokens.color.surface.active, color: tokens.color.text.primary }
+            ? { background: themeColor.surface.active, color: themeColor.text.primary }
             : null),
         }}
       />
@@ -161,7 +162,7 @@ export function MobileDrawer({ open, onOpenChange, templateName, user, children 
         alignItems: 'center',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[4]} ${tokens.spacing[3]}`,
-        borderBottom: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        borderBottom: `${tokens.border.thin} ${themeColor.border.subtle}`,
       }}>
         <Brand templateName={templateName} iconSize={28} />
       </div>
@@ -176,7 +177,7 @@ export function MobileDrawer({ open, onOpenChange, templateName, user, children 
         <div style={{
           position: 'relative',
           flexShrink: 0,
-          borderTop: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          borderTop: `${tokens.border.thin} ${themeColor.border.subtle}`,
         }}>
           <UserCard
             name={user.name}

@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { Card, CardHeader } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import type { BadgeProps } from '../../components/Badge';
@@ -26,8 +27,8 @@ const vehicleBadgeVariant: Record<keyof typeof vehicleStatusLabel, BadgeProps['v
 // reads as a deliberate inset, never edge-to-edge. TR borders don't render
 // under `border-collapse: collapse`, so the line is delivered as a
 // background-image gradient instead. See `rules.md` → Section dividers.
-const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.subtle} ${tokens.spacing[3]}, ${tokens.color.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
-const HEADER_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${tokens.color.border.base} ${tokens.spacing[3]}, ${tokens.color.border.base} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const ROW_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${themeColor.border.subtle} ${tokens.spacing[3]}, ${themeColor.border.subtle} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
+const HEADER_INSET_LINE = `linear-gradient(to right, transparent ${tokens.spacing[3]}, ${themeColor.border.base} ${tokens.spacing[3]}, ${themeColor.border.base} calc(100% - ${tokens.spacing[3]}), transparent calc(100% - ${tokens.spacing[3]}))`;
 const rowSeparatorStyle = {
   backgroundImage: ROW_INSET_LINE,
   backgroundSize: '100% 1px',
@@ -51,7 +52,7 @@ function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? tokens.color.surface.hover : 'transparent',
+        background: hovered ? themeColor.surface.hover : 'transparent',
         transition: 'background 0.15s ease',
         ...(isLast ? null : rowSeparatorStyle),
       }}
@@ -61,7 +62,7 @@ function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) 
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           fontWeight: tokens.typography.weight.medium,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
@@ -74,7 +75,7 @@ function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) 
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
         }}>
@@ -92,7 +93,7 @@ function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) 
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.secondary,
+          color: themeColor.text.secondary,
           letterSpacing: tokens.typography.tracking.wide,
         }}>
           {vehicle.distance}
@@ -103,7 +104,7 @@ function VehicleRow({ vehicle, isLast }: { vehicle: Vehicle; isLast: boolean }) 
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wide,
         }}>
@@ -122,7 +123,7 @@ export function VehiclesTable({ className }: { className?: string }) {
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
@@ -131,7 +132,7 @@ export function VehiclesTable({ className }: { className?: string }) {
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.md,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             fontWeight: tokens.typography.weight.medium,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wider,
@@ -168,7 +169,7 @@ export function VehiclesTable({ className }: { className?: string }) {
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.xs,
                 fontWeight: tokens.typography.weight.medium,
-                color: tokens.color.text.faint,
+                color: themeColor.text.faint,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.widest,
               }}>

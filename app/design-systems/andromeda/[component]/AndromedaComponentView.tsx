@@ -23,6 +23,7 @@ import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { themeColor } from '../../../../design-systems/andromeda/components/lib/utils'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
 import { useAuthModal } from '../../../components/auth/AuthModalProvider'
@@ -197,7 +198,7 @@ export function AndromedaComponentView({
       ) : (
         <pre
           className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed"
-          style={{ color: tokens.color.text.secondary }}
+          style={{ color: themeColor.text.secondary }}
         >
           {codeState.code}
         </pre>
@@ -205,7 +206,7 @@ export function AndromedaComponentView({
     ) : (
       <div
         className="flex min-h-[200px] items-center justify-center text-sm"
-        style={{ color: tokens.color.text.faint }}
+        style={{ color: themeColor.text.faint }}
       >
         Loading source…
       </div>
@@ -320,7 +321,7 @@ export function AndromedaComponentView({
           {tab === 'preview' ? (
             <div
               className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
-              style={{ backgroundColor: tokens.color.surface.base }}
+              style={{ backgroundColor: themeColor.surface.base }}
             >
               {!fullscreen && <AndromedaDemo slug={slug} />}
             </div>
@@ -328,7 +329,7 @@ export function AndromedaComponentView({
             <div
               className="min-h-[420px] overflow-auto p-5"
               style={{
-                backgroundColor: tokens.color.surface.base,
+                backgroundColor: themeColor.surface.base,
                 maxHeight: '70vh',
                 scrollbarWidth: 'thin',
               }}
@@ -600,7 +601,7 @@ export function AndromedaComponentView({
                     >
                       <div
                         className="relative aspect-video overflow-hidden"
-                        style={{ backgroundColor: tokens.color.surface.base }}
+                        style={{ backgroundColor: themeColor.surface.base }}
                       >
                         {c.image ? (
                           <img
@@ -625,7 +626,7 @@ export function AndromedaComponentView({
                                 style={{
                                   fontFamily: tokens.typography.fontMono,
                                   fontSize: tokens.typography.size.xs,
-                                  color: tokens.color.text.faint,
+                                  color: themeColor.text.faint,
                                   textTransform: 'uppercase',
                                   letterSpacing: tokens.typography.tracking.widest,
                                 }}
@@ -671,7 +672,7 @@ export function AndromedaComponentView({
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 overflow-auto sm:inset-10 sm:rounded-2xl sm:border sm:border-sand-800 sm:shadow-2xl"
-            style={{ backgroundColor: tokens.color.surface.base }}
+            style={{ backgroundColor: themeColor.surface.base }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex min-h-full items-center justify-center p-8 sm:p-12">

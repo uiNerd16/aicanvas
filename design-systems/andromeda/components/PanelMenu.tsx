@@ -22,7 +22,7 @@ import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { IconButton } from './IconButton';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, themeColor } from './lib/utils';
 
 /**
  * @typedef {object} MenuItem
@@ -90,8 +90,8 @@ const MENU_PANEL_STYLE: CSSProperties = {
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
   overflowY: 'auto',
   boxSizing: 'border-box',
-  background: tokens.color.surface.overlay,
-  border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+  background: themeColor.surface.overlay,
+  border: `${tokens.border.thin} ${themeColor.border.bright}`,
   borderRadius: tokens.radius.frame,
   padding: tokens.spacing[1],
   zIndex: 1000,
@@ -194,7 +194,7 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
         style={{
           height: '1px',
           margin: `${tokens.spacing[1]} 0`,
-          background: tokens.color.border.base,
+          background: themeColor.border.base,
         }}
       />
     );
@@ -245,10 +245,10 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   }
 
   const color = item.destructive
-    ? tokens.color.red[300]
+    ? themeColor.red[300]
     : item.selected
-      ? tokens.color.text.primary
-      : tokens.color.text.secondary;
+      ? themeColor.text.primary
+      : themeColor.text.secondary;
 
   return (
     <div
@@ -445,8 +445,8 @@ export const PanelMenu = forwardRef<HTMLDivElement, PanelMenuProps>(function Pan
         }}
         data-state={open ? 'open' : 'closed'}
         style={open ? {
-          background: tokens.color.surface.active,
-          color: tokens.color.text.primary,
+          background: themeColor.surface.active,
+          color: themeColor.text.primary,
         } : undefined}
       />
 

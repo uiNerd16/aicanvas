@@ -18,6 +18,7 @@ import {
   SignOut,
 } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import type { useCascadeProps } from '../../components/lib/motion';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { NavItem } from '../../components/NavItem';
@@ -36,7 +37,7 @@ function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
         right: tokens.spacing[3],
         [side]: 0,
         height: '1px',
-        background: tokens.color.border.subtle,
+        background: themeColor.border.subtle,
         pointerEvents: 'none',
       }}
     />
@@ -70,7 +71,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'mission-co
         padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.faint,
+        color: themeColor.text.faint,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
       }}>
@@ -110,7 +111,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Omit
         position: 'relative',
         width: tokens.layout.sidebarWidth,
         flexShrink: 0,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         flexDirection: 'column',
         backdropFilter: 'blur(2px)',
@@ -133,7 +134,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Omit
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
             fontWeight: tokens.typography.weight.semibold,
@@ -143,7 +144,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Omit
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>

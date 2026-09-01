@@ -26,6 +26,7 @@
 
 import { useState } from 'react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { useCascadeProps } from '../../components/lib/motion';
 import { Sidebar, SidebarNav } from './Sidebar';
@@ -64,9 +65,9 @@ export default function MissionControl() {
         // (often white), and a transparent shell bleeds the host through every
         // gutter. The AI Canvas preview paints this same surface behind us, so
         // on-site rendering is unchanged.
-        background: tokens.color.surface.base,
+        background: themeColor.surface.base,
         fontFamily: tokens.typography.fontSans,
-        color: tokens.color.text.primary,
+        color: themeColor.text.primary,
         overflow: 'hidden',
         gap: tokens.spacing[4],
         padding: tokens.spacing[4],

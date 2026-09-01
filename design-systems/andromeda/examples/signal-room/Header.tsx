@@ -15,6 +15,7 @@
 import { motion } from 'framer-motion';
 import type { MotionProps } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { SearchField } from '../../components/SearchField';
@@ -33,7 +34,7 @@ export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
         position: 'relative',
         height: tokens.layout.headerHeight,
         flexShrink: 0,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         alignItems: 'center',
         padding: `0 ${tokens.spacing[6]}`,
@@ -50,7 +51,7 @@ export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}
@@ -63,7 +64,7 @@ export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
             fontFamily: tokens.typography.fontSans,
             fontSize: tokens.typography.size.lg,
             fontWeight: tokens.typography.weight.semibold,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             letterSpacing: '-0.01em',
           }}
         >
@@ -90,10 +91,10 @@ export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
             width: '6px',
             height: '6px',
             flexShrink: 0,
-            background: tokens.color.accent[400],
-            border: `${tokens.border.thin} ${tokens.color.accent[400]}`,
+            background: themeColor.accent[400],
+            border: `${tokens.border.thin} ${themeColor.accent[400]}`,
             // Bespoke glow blur (6px, not the 8px glow token), left literal
-            boxShadow: `0 0 6px ${tokens.color.accent[500]}`,
+            boxShadow: `0 0 6px ${themeColor.accent[500]}`,
           }}
         />
         <span
@@ -101,7 +102,7 @@ export function Header({ sectionTitle = 'Library', motionProps }: HeaderProps) {
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.accent[100],
+            color: themeColor.accent[100],
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wider,
           }}

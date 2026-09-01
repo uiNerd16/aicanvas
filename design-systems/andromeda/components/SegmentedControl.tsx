@@ -14,7 +14,7 @@ import type { ComponentPropsWithoutRef, ComponentType } from 'react';
 import { motion } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 import type { IconWeight } from '@phosphor-icons/react';
-import { cn, andromedaVars, easingArray } from './lib/utils';
+import { cn, andromedaVars, easingArray, themeColor } from './lib/utils';
 import { mq } from './lib/responsive';
 import { tokens } from '../tokens';
 
@@ -137,9 +137,9 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
       style={{
         ...andromedaVars(),
         height: `var(${cellVar}, ${cellSize}px)`,
-        border: `${tokens.border.thin} ${tokens.color.border.base}`,
+        border: `${tokens.border.thin} ${themeColor.border.base}`,
         borderRadius: tokens.radius.frame,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         ...style,
       }}
       {...props}
@@ -169,7 +169,7 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
               padding: showLabel ? `0 ${tokens.spacing[3]}` : 0,
               background: 'transparent',
               border: 'none',
-              borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${tokens.color.border.base}`,
+              borderLeft: i === 0 ? 'none' : `${tokens.border.thin} ${themeColor.border.base}`,
               cursor: 'pointer',
               flexShrink: 0,
               // A segment never wraps its label — a wrapped label breaks the
@@ -181,7 +181,7 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
               fontWeight: active ? tokens.typography.weight.medium : tokens.typography.weight.regular,
-              color: active ? tokens.color.text.primary : tokens.color.text.muted,
+              color: active ? themeColor.text.primary : themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
               transition: `color ${tokens.motion.duration.normal} ${tokens.motion.easing.out}`,
@@ -198,7 +198,7 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: tokens.color.surface.active,
+                  background: themeColor.surface.active,
                   zIndex: 0,
                   pointerEvents: 'none',
                 }}

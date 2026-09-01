@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { IdeationTopBar } from '../../_components/IdeationTopBar'
-import { tokens } from '../../../design-systems/andromeda/tokens'
+import { themeColor } from '../../../design-systems/andromeda/components/lib/utils'
 
 // Template leaf routes own the full viewport (sidebar + topbar are suppressed).
 // On DESKTOP (md+) the template pins itself to 100vh and manages its own
@@ -39,11 +39,14 @@ export function AndromedaContentColumn({ children }: { children: ReactNode }) {
       ? 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950'
       : 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto'
 
+  // The void goes through the theme channel, not the raw token, so the column
+  // behind the components turns light with them instead of framing them in a
+  // dark border.
   const style = isTemplate
-    ? { backgroundColor: tokens.color.surface.base }
+    ? { backgroundColor: themeColor.surface.base }
     : isOverview
       ? { scrollbarGutter: 'stable' }
-      : { backgroundColor: tokens.color.surface.base, scrollbarGutter: 'stable' }
+      : { backgroundColor: themeColor.surface.base, scrollbarGutter: 'stable' }
 
   return (
     <div className={className} style={style}>

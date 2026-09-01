@@ -14,6 +14,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 import { tokens } from '../tokens';
+import { themeColor } from './lib/utils';
 
 // Layout effect on the client (measure + correct before paint, no flash),
 // plain effect on the server (avoids the useLayoutEffect SSR warning).
@@ -132,11 +133,11 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
               textAlign: 'center',
               zIndex: 100,
               padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-              background: tokens.color.surface.overlay,
-              border: `${tokens.border.thin} ${tokens.color.border.base}`,
+              background: themeColor.surface.overlay,
+              border: `${tokens.border.thin} ${themeColor.border.base}`,
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.secondary,
+              color: themeColor.text.secondary,
               letterSpacing: tokens.typography.tracking.wider,
               textTransform: 'uppercase',
             }}
