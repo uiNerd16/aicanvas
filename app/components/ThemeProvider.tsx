@@ -29,13 +29,29 @@ export function ThemeProvider({ initial, children }: { initial: Theme; children:
   const [theme, setThemeState] = useState<Theme>(initial)
 
   function setTheme(next: Theme) {
-    setThemeState(next)
-    document.documentElement.classList.toggle('dark', next === 'dark')
-    // A year, so the choice survives. Carries the word light or dark and
-    // nothing else: no id, no session, nothing that could identify a visitor.
-    document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax${
-      location.protocol === 'https:' ? '; secure' : ''
-    }`
+    const root = document.documentElement
+    const apply = () => {
+      setThemeState(next)
+      root.classList.toggle('dark', next === 'dark')
+      // A year, so the choice survives. Carries the word light or dark and
+      // nothing else: no id, no session, nothing that could identify a visitor.
+      document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax${
+        location.protocol === 'https:' ? '; secure' : ''
+      }`
+    }
+    // Soft cross-fade between the two paints where the browser supports view
+    // transitions; plain swap otherwise. While the fade runs, .theme-switching
+    // silences per-element color transitions (see globals.css) so every surface
+    // lands on its new color instantly UNDER the fade — without it the few
+    // transition-colors elements lag the rest and the flip shimmers.
+    if (typeof document.startViewTransition === 'function') {
+      root.classList.add('theme-switching')
+      document
+        .startViewTransition(apply)
+        .finished.finally(() => root.classList.remove('theme-switching'))
+    } else {
+      apply()
+    }
   }
 
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>
