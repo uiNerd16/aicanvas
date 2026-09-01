@@ -25,32 +25,50 @@ const ThemeContext = createContext<{ theme: Theme; setTheme: (next: Theme) => vo
   setTheme: () => {},
 })
 
+// Counts theme switches so overlapping transitions never clean up after each
+// other; see the token guard in setTheme.
+let switchSeq = 0
+
 export function ThemeProvider({ initial, children }: { initial: Theme; children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(initial)
 
   function setTheme(next: Theme) {
-    const root = document.documentElement
+    const token = ++switchSeq
     const apply = () => {
       setThemeState(next)
-      root.classList.toggle('dark', next === 'dark')
+      document.documentElement.classList.toggle('dark', next === 'dark')
       // A year, so the choice survives. Carries the word light or dark and
       // nothing else: no id, no session, nothing that could identify a visitor.
       document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax${
         location.protocol === 'https:' ? '; secure' : ''
       }`
     }
+    // Token-guarded: a second toggle skips the first view transition, whose
+    // `finished` settles immediately and would otherwise strip the class from
+    // under the still-running second fade.
+    const clear = () => {
+      if (token === switchSeq) document.documentElement.classList.remove('theme-switching')
+    }
     // Soft cross-fade between the two paints where the browser supports view
-    // transitions; plain swap otherwise. While the fade runs, .theme-switching
-    // silences per-element color transitions (see globals.css) so every surface
-    // lands on its new color instantly UNDER the fade — without it the few
-    // transition-colors elements lag the rest and the flip shimmers.
-    if (typeof document.startViewTransition === 'function') {
-      root.classList.add('theme-switching')
-      document
-        .startViewTransition(apply)
-        .finished.finally(() => root.classList.remove('theme-switching'))
+    // transitions — EXCEPT while a component preview is on the page: a root
+    // view transition cross-fades a frozen screenshot over the still-animating
+    // preview, which visibly double-images it, so those pages flip instantly.
+    // Either way .theme-switching silences per-element color transitions (see
+    // globals.css) so every surface lands on its new color at once instead of
+    // shimmering in patches.
+    document.documentElement.classList.add('theme-switching')
+    if (
+      typeof document.startViewTransition === 'function' &&
+      !document.querySelector('[data-card-theme]')
+    ) {
+      // catch: `finished` rejects if apply() throws (a denied cookie write);
+      // unhandled, SiteBeacon would report that as a js_error.
+      document.startViewTransition(apply).finished.catch(() => {}).finally(clear)
     } else {
       apply()
+      // Two frames: the first paints the new theme while transitions are
+      // still frozen, the second releases them.
+      requestAnimationFrame(() => requestAnimationFrame(clear))
     }
   }
 

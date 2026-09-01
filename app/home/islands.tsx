@@ -197,9 +197,10 @@ export function AnimatedCount({ to, suffix = '' }: { to: number; suffix?: string
 const WIRE_SCALES  = [1.5, 1.2, 1.1]
 const WIRE_Y       = [-8, -4, -2]
 const WIRE_LABELS  = ['For developers', 'For designers', 'For makers and founders']
-// Only the first icon carries descriptive alt text; the other two are decorative
-// duplicates and use alt="" so screen readers skip them and crawlers don't see
-// the brand name repeated three times in a row.
+// Only the first icon carries a descriptive accessible name (role="img" +
+// aria-label on the inline svg); the other two are decorative duplicates and
+// stay aria-hidden so screen readers skip them and crawlers don't see the
+// brand name repeated three times in a row.
 const WIRE_ALTS    = [
   'AI Canvas component registry: animated React components preview',
   '',

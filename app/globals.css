@@ -35,7 +35,7 @@
 @variant dark (&:where(.dark, .dark *):not([data-card-theme="light"], [data-card-theme="light"] *));
 
 :root {
-  --background: #E3E3E8;
+  --background: #F4F4FA;
   --foreground: #1B1B1C;
 }
 
@@ -107,11 +107,11 @@ html.dark {
   /* Deep end of the olive ramp. Dark enough to carry sand-50 text at about
      6:1, which is what the selection highlight needs to stay readable. */
   --color-olive-700: #56631F;
-  /* Light-mode accent. The ramp above was drawn to glow on sand-950, so its
-     brightest four steps all land between 1.1:1 and 2.6:1 on a light page and
-     an accent link painted with them is effectively invisible. This step is the
-     one that survives: 5.2:1 on the darkest light surface we would consider and
-     7.4:1 on the lightest, while still reading olive rather than near-black.
+  /* Light-mode accent hover. The ramp above was drawn to glow on sand-950, so
+     its brightest steps land between 1.2:1 and 3:1 on a light page. This deep
+     step reads clearly everywhere: 6.1:1 on the darkest light surface we would
+     consider and 7.4:1 on the lightest, while still olive rather than
+     near-black.
      Light mode uses olive-600 for accent text (chosen by eye over the
      higher-contrast 700) and this for its hover; dark mode never touches it. */
   --color-olive-800: #4A551A;
@@ -187,13 +187,24 @@ html[data-frame]:has([data-card-theme="light"]) {
   animation-timing-function: ease-in-out;
 }
 
-.theme-switching * {
+/* Preview scope stays sovereign: a [data-card-theme] wrapper and everything
+   inside it keeps its transitions during a SITE flip (the site must never
+   reach into a preview). [data-theme-keep-transition] exempts the theme
+   toggle's own icon cross-fade, the one animation the flip should show. */
+.theme-switching
+  *:not(
+    [data-card-theme],
+    [data-card-theme] *,
+    [data-theme-keep-transition],
+    [data-theme-keep-transition] *
+  ) {
   transition: none !important;
 }
 
 /* ── Page-enter transition ── */
-/* Played on the scroll column by app/template.tsx on client-side navigations:
-   a 200ms fade. Keep the duration in sync with ENTER_MS in template.tsx. */
+/* Played on the scroll column by app/components/PageEnterFade.tsx on
+   client-side navigations: a 200ms fade. Keep the duration in sync with
+   ENTER_MS there. */
 .aic-page-enter {
   animation: aicPageFade 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }

@@ -12,8 +12,8 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 | Token | Hex | Use in components |
 |---|---|---|
-| `sand-50` | `#F4F4FA` | **Light card / panel surfaces**, dark-mode primary text |
-| `sand-100` | `#EEEEF3` | **Light page background** |
+| `sand-50` | `#F4F4FA` | **Light page background**, dark-mode primary text |
+| `sand-100` | `#EEEEF3` | Light card / panel surfaces |
 | `sand-200` | `#DFDFE3` | Light borders, hover fills |
 | `sand-300` | `#CACACD` | Light border hover, outline buttons |
 | `sand-400` | `#9B9B9E` | Muted icons, placeholders |
@@ -36,9 +36,11 @@ Always `bg-sand-950` — never zinc, never black, never transparent.
 
 > Olive buttons must use `text-sand-950` — NOT white. Olive has insufficient contrast with white.
 >
-> The top of the ramp is for dark surfaces only. On a light page olive-400/500/600
-> measure 1.1, 1.4 and 2.1 against the background, so an accent link painted with
-> them is invisible. Light mode uses the bottom two steps.
+> The top of the ramp is for dark surfaces only. On a light page olive-400/500
+> measure 1.2 and 2.0 against the background, so an accent link painted with them
+> is invisible. Light accent text is `olive-600` (~3:1, a deliberate call carried
+> by size and weight), hover is `olive-800`; `olive-700` is the selection
+> highlight.
 
 ## Light mode
 
@@ -65,15 +67,18 @@ is the thing to read before changing anything here.
 
 Three traps, all of them measured rather than guessed:
 
-- **The top of the olive ramp does not work on light.** olive-400/500 land near 1.1
-  and 1.4 against a light page and cannot carry text. Accent TEXT on light is
+- **The top of the olive ramp does not work on light.** olive-400/500 land near 1.2
+  and 2.0 against a light page and cannot carry text. Accent TEXT on light is
   `olive-600` — a deliberate design call at roughly 3:1, carried by size and
-  weight; if a small accent label ever looks washed out, `olive-700` (5.1) is the
+  weight; if a small accent label ever looks washed out, `olive-700` (6.0) is the
   higher-contrast step. Hover stays `olive-800`. `bg-olive-500` remains the accent
-  FILL in both themes, always carrying `text-sand-950`.
-- **`text-sand-500` is not a text colour in light mode** (2.75 on the page). Use
-  `sand-600` for anything a reader reads; `sand-500` is fine only on a decorative
-  glyph such as a separator dot or a chevron.
+  FILL in both themes, always carrying `text-sand-950`; a tiny decorative fill
+  (the pulsing dot) may deepen to `olive-700` on light where olive-500 would
+  vanish.
+- **`text-sand-500` is not a text colour in light mode** (3.9 on the page — the
+  bar here is gray legibility, and olive-600 above is a deliberate accent
+  exception below it). Use `sand-600` for anything a reader reads; `sand-500` is
+  fine only on a decorative glyph such as a separator dot or a chevron.
 - **Never change an element's DARK value while adding its light half.** Dark is the
   default theme; a sweep that pairs `text-sand-500` to `dark:text-sand-400` because
   the table says so has just restyled the site for every existing visitor. Keep the

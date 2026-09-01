@@ -35,12 +35,10 @@ export function TopAuthPill() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
-          <SignIn size={13} weight="regular" />
-          Sign in
-        </Button>
-      </div>
+      <Button variant="outline" size="xs" onClick={() => openAuthModal()}>
+        <SignIn size={13} weight="regular" />
+        Sign in
+      </Button>
     )
   }
 
@@ -54,8 +52,7 @@ export function TopAuthPill() {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative" ref={ref}>
+    <div className="relative" ref={ref}>
         <Button
           variant="outline"
           size="xs"
@@ -133,7 +130,6 @@ export function TopAuthPill() {
             </button>
           </div>
         )}
-      </div>
     </div>
   )
 }

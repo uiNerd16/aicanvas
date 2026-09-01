@@ -36,6 +36,8 @@ const OLIVE_USAGE: Record<string, string> = {
   'olive-400': 'Hover accent, gradient end',
   'olive-500': 'Primary accent: buttons, badges, logo',
   'olive-600': 'Light-mode accent text, pressed state',
+  'olive-700': 'Selection highlight',
+  'olive-800': 'Light-mode accent hover',
 }
 
 const EMBER_USAGE: Record<string, string> = {
@@ -81,6 +83,7 @@ const SEMANTIC_ROLES = [
   { role: 'Border default', light: 'border-sand-200', dark: 'border-sand-800' },
   { role: 'Border hover', light: 'border-sand-300', dark: 'border-sand-700' },
   { role: 'Accent', light: 'text-olive-600', dark: 'text-olive-400' },
+  { role: 'Accent hover', light: 'text-olive-800', dark: 'text-olive-300' },
   { role: 'Secondary accent', light: 'text-ember-500', dark: 'text-ember-400' },
   { role: 'Highlight (occasional)', light: 'text-cyan-600', dark: 'text-cyan-400' },
 ]

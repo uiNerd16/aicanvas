@@ -14,6 +14,7 @@ import { AuthModalProvider } from './components/auth/AuthModalProvider'
 import { PaywallModalProvider } from './components/billing/PaywallModalProvider'
 import { AuthModal } from './components/auth/AuthModal'
 import { DevBranchBadge } from './components/DevBranchBadge'
+import { PageEnterFade } from './components/PageEnterFade'
 import { SiteBeacon } from './components/SiteBeacon'
 import { PaddlePaymentLink } from './components/billing/PaddlePaymentLink'
 // Registry-free nav counts (generated) — keeps the heavy component-registry,
@@ -242,6 +243,10 @@ export default async function RootLayout({
         <Analytics />
         <SpeedInsights />
         <SiteBeacon />
+        {/* Fades the scroll column in on client-side navigations */}
+        <Suspense fallback={null}>
+          <PageEnterFade />
+        </Suspense>
         <DevBranchBadge />
         {/* Resumes checkout when the URL carries a Paddle payment link (?_ptxn=) */}
         <PaddlePaymentLink />

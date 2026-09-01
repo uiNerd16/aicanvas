@@ -47,8 +47,12 @@ describe('theme scope contract', () => {
       .filter((f) => {
         const src = readFileSync(f, 'utf8')
         // Writing the class on <html>, or writing the cookie the server reads.
+        // The alias pattern closes the two-line variant (`const root =
+        // document.documentElement; root.classList.toggle('dark', …)`) that
+        // the literal chain above cannot see.
         return /documentElement\.classList\.(add|remove|toggle)\(\s*['"`]dark/.test(src)
           || /document\.cookie\s*=\s*[`'"]theme=/.test(src)
+          || /=\s*document\.documentElement\b/.test(src)
       })
       .map((f) => f.slice(root.length + 1))
 

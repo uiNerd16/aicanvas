@@ -24,7 +24,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       title={dark ? 'Light theme' : 'Dark theme'}
       className={`${buttonClasses({ variant: 'icon', size: 'md' })} ${className}`}
     >
-      <span className="relative block h-[18px] w-[18px]">
+      <span className="relative block h-[18px] w-[18px]" data-theme-keep-transition>
         <Sun
           weight="regular"
           size={18}
