@@ -16,7 +16,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { tokens } from '../tokens';
 import { useReducedMotion } from './lib/motion';
-import { cn } from './lib/utils';
+import { andromedaVars, cn } from './lib/utils';
 import { subscribeToTheme } from './lib/theme';
 import { mq } from './lib/responsive';
 
@@ -290,6 +290,7 @@ export function Planet({
         ref={containerRef}
         className={cn('andromeda-planet', className)}
         style={{
+          ...andromedaVars(),
           width: '100%',
           height: '100%',
           // Hero set-piece: never let the WebGL canvas push past the viewport.

@@ -13,7 +13,7 @@ import type { ChangeEvent, ComponentPropsWithoutRef, CSSProperties } from 'react
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
-import { themeColor } from './lib/utils';
+import { andromedaVars, themeColor } from './lib/utils';
 
 /**
  * @typedef {object} SearchFieldProps
@@ -104,6 +104,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       style={{
+        ...andromedaVars(),
         position: 'relative',
         display: 'flex',
         alignItems: 'center',

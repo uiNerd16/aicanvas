@@ -14,7 +14,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 import { tokens } from '../tokens';
-import { themeColor } from './lib/utils';
+import { andromedaVars, themeColor } from './lib/utils';
 
 // Layout effect on the client (measure + correct before paint, no flash),
 // plain effect on the server (avoids the useLayoutEffect SSR warning).
@@ -94,7 +94,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
     <div
       ref={ref}
       className={className}
-      style={{ position: 'relative', display: 'inline-flex', ...style }}
+      style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
       onFocus={() => setVisible(true)}

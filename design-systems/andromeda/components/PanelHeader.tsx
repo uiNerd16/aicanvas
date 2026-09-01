@@ -17,7 +17,7 @@
 import { forwardRef } from 'react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { tokens } from '../tokens';
-import { cn, themeColor } from './lib/utils';
+import { andromedaVars, cn, themeColor } from './lib/utils';
 import { mq } from './lib/responsive';
 
 /**
@@ -44,6 +44,7 @@ export const PanelHeader = forwardRef<HTMLDivElement, PanelHeaderProps>(function
       data-slot="panel-header"
       className={cn('am-panel-header', className)}
       style={{
+        ...andromedaVars(),
         position: 'relative',
         display: 'flex',
         alignItems: 'center',
