@@ -164,8 +164,17 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   // when the parent menu is clamped near x=0 on a phone. Mirrors the parent
   // menu's reposition clamp; runs before paint, re-measures on resize/scroll.
   const [flipLeft, setFlipLeft] = useState(false);
+  // Viewport coords for the flyout. The panel scrolls (overflowY: auto), and
+  // an absolutely-positioned child at left:100% sits outside its scroll box,
+  // so the panel CLIPS it invisible. The flyout therefore renders with fixed
+  // coords measured from the item, which escape the clip; the scroll listener
+  // below (capture) re-measures so it tracks internal panel scrolling too.
+  const [subPos, setSubPos] = useState<{ top: number; left: number; right: number } | null>(null);
   useIsomorphicLayoutEffect(() => {
-    if (!submenuOpen) return;
+    if (!submenuOpen) {
+      setSubPos(null);
+      return;
+    }
     const decide = () => {
       const itemEl = itemRef.current;
       const sub = submenuRef.current;
@@ -177,6 +186,7 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
       const rightOverflows = ir.right + gap + w > window.innerWidth - margin;
       const leftFits = ir.left - gap - w >= margin;
       setFlipLeft(rightOverflows && leftFits);
+      setSubPos({ top: ir.top, left: ir.right, right: ir.left });
     };
     decide();
     window.addEventListener('resize', decide);
@@ -305,11 +315,15 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
           }}
           style={{
             ...MENU_PANEL_STYLE,
-            position: 'absolute',
-            top: 0,
+            position: 'fixed',
+            top: `${subPos?.top ?? 0}px`,
             ...(flipLeft
-              ? { right: '100%', marginRight: tokens.spacing[1] }
-              : { left: '100%', marginLeft: tokens.spacing[1] }),
+              ? {
+                  left: `${(subPos?.right ?? 0) - (parseInt(tokens.spacing[1], 10) || 4)}px`,
+                  transform: 'translateX(-100%)',
+                }
+              : { left: `${(subPos?.left ?? 0) + (parseInt(tokens.spacing[1], 10) || 4)}px` }),
+            visibility: subPos ? 'visible' : 'hidden',
             zIndex: 1001,
           }}
         >
