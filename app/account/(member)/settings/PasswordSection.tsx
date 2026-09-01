@@ -22,7 +22,7 @@ import { Button } from '../../../components/Button'
 
 type Props = { hasPassword: boolean; email: string }
 
-const LABEL = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-400'
+const LABEL = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-400'
 
 export function PasswordSection({ hasPassword, email }: Props) {
   const router = useRouter()
