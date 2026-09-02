@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Step } from '../components/Step'
-import { CodeBlock, Toast, useToast } from '../mcp/InstallCards'
+import { CodeBlock, Toast, useToast } from '../components/CopyBlocks'
 
 // memoryHD ships from its own public repository. Two paths in: the plugin
 // marketplace (persistent) or a plain clone + --plugin-dir (try it first).
@@ -52,7 +52,7 @@ export function MemoryInstall() {
               type="button"
               onClick={() => setPath(t.id)}
               aria-pressed={active}
-              className={`relative min-w-0 flex-1 rounded-lg px-2 py-2.5 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
+              className={`relative min-h-11 min-w-0 flex-1 rounded-lg px-2 py-3 text-xs font-semibold transition-colors sm:px-4 sm:text-sm ${
                 active
                   ? 'bg-sand-50 text-sand-900 shadow-sm ring-1 ring-sand-300 dark:bg-sand-800 dark:text-sand-50 dark:ring-sand-700'
                   : 'text-sand-500 hover:text-sand-700 dark:text-sand-500 dark:hover:text-sand-300'
@@ -89,8 +89,9 @@ export function MemoryInstall() {
             </Step>
             <Step number={2}>
               <p className="text-sm text-sand-600 dark:text-sand-400">
-                Restart Claude Code so the hooks load. That is the whole setup:
-                no config file, no API key, no service.
+                Claude Code activates it as it installs; if it does not say so,
+                run <code className="rounded bg-sand-200 px-1 py-0.5 font-mono text-xs text-sand-800 dark:bg-sand-800 dark:text-sand-200">/reload-plugins</code>.
+                That is the whole setup: no config file, no API key, no service.
               </p>
             </Step>
           </>
@@ -118,7 +119,7 @@ export function MemoryInstall() {
           </>
         )}
 
-        <Step number={path === 'marketplace' ? 3 : 3} isLast>
+        <Step number={3} isLast>
           <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
             Test it. Say this, then start a new session and ask about deploys:
           </p>

@@ -17,7 +17,7 @@ import { MemoryInstall } from './MemoryInstall'
 import { Step } from '../components/Step'
 import { SiteFooter } from '../components/SiteFooter'
 import { HeaderSocials } from '../components/HeaderSocials'
-import { SITE_URL } from '../lib/config'
+import { GITHUB_URL, SITE_URL } from '../lib/config'
 
 export const metadata: Metadata = {
   title: 'Agentic Workflows: Memory and a Second Builder for Claude Code',
@@ -64,7 +64,7 @@ const MEMORY_FEATURES = [
   {
     icon: LockKey,
     title: 'Keys cannot land in notes',
-    body: 'A write gate refuses API keys, tokens, and database passwords before they reach disk. Notes are plaintext, so secrets never become notes.',
+    body: 'A write gate refuses key-shaped strings before they reach disk: API tokens, private key blocks, connection URLs with an inline password. Notes are plaintext, so the gate exists.',
   },
   {
     icon: Broom,
@@ -172,8 +172,8 @@ export default function AgenticWorkflowsPage() {
                 <span className="font-semibold text-sand-900 dark:text-sand-50">
                   Every prompt after, it comes back on its own.
                 </span>{' '}
-                The hook matches your words against the index and injects the
-                notes that matter, stamped with their age.
+                The hook matches your words against the index and injects
+                pointers to the notes that matter, stamped with their age.
               </p>
             </Step>
             <Step number={3}>
@@ -245,46 +245,48 @@ export default function AgenticWorkflowsPage() {
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
                 <tr className="border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
-                  <th className="px-4 py-3 font-semibold text-sand-500 dark:text-sand-500" />
-                  <th className="px-4 py-3 font-bold text-sand-900 dark:text-sand-50">
+                  <th scope="col" className="px-4 py-3">
+                    <span className="sr-only">Capability</span>
+                  </th>
+                  <th scope="col" className="px-4 py-3 font-bold text-sand-900 dark:text-sand-50">
                     With memoryHD
                   </th>
-                  <th className="px-4 py-3 font-semibold text-sand-600 dark:text-sand-400">
+                  <th scope="col" className="px-4 py-3 font-semibold text-sand-600 dark:text-sand-400">
                     Memory on its own
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-sand-300 bg-sand-50 dark:divide-sand-800 dark:bg-sand-950/40">
                 <tr>
-                  <td className="px-4 py-3 font-semibold text-sand-700 dark:text-sand-300">
+                  <th scope="row" className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">
                     Recall
-                  </td>
+                  </th>
                   <td className="px-4 py-3 text-sand-700 dark:text-sand-300">
                     Fires on every prompt, from a keyword index
                   </td>
-                  <td className="px-4 py-3 text-sand-500 dark:text-sand-500">
+                  <td className="px-4 py-3 text-sand-600 dark:text-sand-500">
                     When the model thinks to look
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 font-semibold text-sand-700 dark:text-sand-300">
+                  <th scope="row" className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">
                     Freshness
-                  </td>
+                  </th>
                   <td className="px-4 py-3 text-sand-700 dark:text-sand-300">
                     Age stamped on every pointer, stale flagged
                   </td>
-                  <td className="px-4 py-3 text-sand-500 dark:text-sand-500">
+                  <td className="px-4 py-3 text-sand-600 dark:text-sand-500">
                     Visible only if the note is opened
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 font-semibold text-sand-700 dark:text-sand-300">
+                  <th scope="row" className="px-4 py-3 text-left font-semibold text-sand-700 dark:text-sand-300">
                     Cleanup
-                  </td>
+                  </th>
                   <td className="px-4 py-3 text-sand-700 dark:text-sand-300">
                     Audited against the repo, you approve each fix
                   </td>
-                  <td className="px-4 py-3 text-sand-500 dark:text-sand-500">
+                  <td className="px-4 py-3 text-sand-600 dark:text-sand-500">
                     Best effort while writing
                   </td>
                 </tr>
@@ -316,8 +318,18 @@ export default function AgenticWorkflowsPage() {
             ))}
           </ul>
           <p className="mt-4 text-sm text-sand-500 dark:text-sand-400">
-            Tested on Linux, macOS, and Windows. The full source, the test
-            suites, and the recall benchmark are in the repository.
+            Needs Node 18 or newer, nothing else. Tested on Linux, macOS, and
+            Windows. The full source, the test suites, and the recall benchmark
+            are in{' '}
+            <a
+              href="https://github.com/uiNerd16/memoryHD"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-sand-700 underline underline-offset-2 hover:text-sand-900 dark:text-sand-300 dark:hover:text-sand-50"
+            >
+              the repository
+            </a>
+            .
           </p>
         </section>
 
@@ -360,7 +372,7 @@ export default function AgenticWorkflowsPage() {
             The cage is running in production at AI Canvas today and is being
             hardened for a public release. Watch the{' '}
             <a
-              href="https://github.com/uiNerd16"
+              href={GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-sand-700 underline underline-offset-2 hover:text-sand-900 dark:text-sand-300 dark:hover:text-sand-50"
