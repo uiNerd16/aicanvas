@@ -93,6 +93,8 @@ The indirection exists because Andromeda paints from inline custom properties, a
 
 Colors only. Sizes, spacing, motion, and geometry carry no theme — a light page is the same layout in different ink.
 
+`must` — An overlay that portals to `<body>` (PanelMenu, Drawer) leaves the channel-defining ancestor behind. It copies the channel it inherited at its trigger onto the portaled root with `inheritedThemeVars(el)`, so the overlay paints as the surface it came from. A fixed box inside a Card is laid out against the Card, not the viewport (the backdrop blur makes it a containing block): measure the box's own 0,0 before converting viewport coords.
+
 ### Light keeps the distance, not the lightness
 
 `must` — The light palette is not the dark one inverted channel by channel. Each stop keeps its contrast DISTANCE from the ground, so the scale reads the same way it always did and simply runs the other direction:

@@ -22,7 +22,7 @@ import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { IconButton } from './IconButton';
-import { andromedaVars, themeColor } from './lib/utils';
+import { andromedaVars, inheritedThemeVars, themeColor } from './lib/utils';
 
 /**
  * @typedef {object} MenuItem
@@ -186,7 +186,21 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
       const rightOverflows = ir.right + gap + w > window.innerWidth - margin;
       const leftFits = ir.left - gap - w >= margin;
       setFlipLeft(rightOverflows && leftFits);
-      setSubPos({ top: ir.top, left: ir.right, right: ir.left });
+      // A fixed box is laid out against the viewport only while no ancestor
+      // establishes a containing block; a transform, filter or backdrop-filter
+      // (the Card's blur, so every inline docs menu) re-bases it on that
+      // ancestor, and viewport coords would land far off. Park the flyout at
+      // 0,0, read where that lands, and express the item coords in that frame.
+      // The inline overrides are undone right away so React's paint owns them.
+      const prev = { left: sub.style.left, top: sub.style.top, transform: sub.style.transform };
+      sub.style.left = '0px';
+      sub.style.top = '0px';
+      sub.style.transform = 'none';
+      const origin = sub.getBoundingClientRect();
+      sub.style.left = prev.left;
+      sub.style.top = prev.top;
+      sub.style.transform = prev.transform;
+      setSubPos({ top: ir.top - origin.top, left: ir.right - origin.left, right: ir.left - origin.left });
     };
     decide();
     window.addEventListener('resize', decide);
@@ -403,6 +417,14 @@ export const PanelMenu = forwardRef<HTMLDivElement, PanelMenuProps>(function Pan
   useIsomorphicLayoutEffect(() => {
     if (staticOpen) return;
     if (!open) { setCoords(null); return; }
+    // The body portal sits outside whatever ancestor defines the theme
+    // channel, so the menu wears the channel it inherited at the trigger.
+    // Written to the DOM here, before paint; React never manages these keys.
+    const trigger0 = wrapperRef.current;
+    const menu0 = menuRef.current;
+    if (trigger0 && menu0) {
+      for (const [name, value] of Object.entries(inheritedThemeVars(trigger0))) menu0.style.setProperty(name, value);
+    }
     const reposition = () => {
       const trigger = wrapperRef.current;
       const menu = menuRef.current;

@@ -291,6 +291,30 @@ export function andromedaVars() {
 }
 
 /**
+ * inheritedThemeVars — the theme channel as it resolves on `el`, for portals.
+ *
+ * A menu or drawer that portals to <body> leaves the ancestor that defines
+ * the --andromeda-theme-* channel behind and would fall back to dark on a
+ * light page. Read the channel off the element that opened it and spread the
+ * result on the portaled root, before andromedaVars(): the overlay then paints
+ * exactly as the surface it came from, in either theme. Empty when the
+ * channel is not defined (dark) or there is no DOM.
+ *
+ * @param {Element | null} el
+ * @returns {Record<string, string>}
+ */
+export function inheritedThemeVars(el: Element | null): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!el || typeof getComputedStyle === 'undefined') return out;
+  const cs = getComputedStyle(el);
+  for (const name of Object.keys(andromedaLightVars())) {
+    const value = cs.getPropertyValue(name).trim();
+    if (value) out[name] = value;
+  }
+  return out;
+}
+
+/**
  * andromedaLightVars — the light theme, as the channel andromedaVars() reads.
  *
  * Put these on any ancestor (`style` prop, or setProperty on an element) and
