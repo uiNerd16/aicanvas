@@ -59,7 +59,10 @@ export function Paywall({
   const title = name ? `Unlock ${name}` : 'Premium content'
 
   return (
-    <div className="relative min-h-[360px] w-full overflow-hidden">
+    // Scoped dark with its own ground: the lock replaces a code slab, and code
+    // slabs render dark in both site themes; without the pinned background the
+    // black fade would sit on a light card in light mode.
+    <div className="dark relative min-h-[360px] w-full overflow-hidden bg-sand-950">
       <pre
         aria-hidden
         className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-sand-600 opacity-30 blur-[3px]"
