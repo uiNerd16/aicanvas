@@ -23,6 +23,7 @@ import { Button, buttonClasses } from '../components/Button'
 import { INSTALL_CONTENTS } from '../lib/install-contents.generated'
 import { getDesignSystemTemplateMeta } from '../lib/design-system-meta'
 import dynamic from 'next/dynamic'
+import { useTheme } from '../components/ThemeProvider'
 // The dot-grid standalone, reused as the mobile preview backdrop. Loaded
 // dynamically (client-only) so it never enters the initial page bundle — it
 // ships only when a desktop user opens the Mobile preview. The page an end user
@@ -307,6 +308,9 @@ function PreviewChrome({
   // Honour the OS "reduce motion" setting — the device-toggle crossfade/scale
   // below collapses to an instant swap when it's on.
   const reduce = useReducedMotion()
+  // The phone stage follows the site theme: light ground behind a light frame.
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const reload = () =>
     device === 'desktop'
       ? setDesktopNonce((n) => n + 1)
@@ -363,7 +367,7 @@ function PreviewChrome({
           {device !== 'desktop' && (
             <motion.div
               key="mobile-frame"
-              className="absolute inset-0 z-10 flex items-stretch justify-center overflow-hidden bg-sand-950 p-4 md:p-6"
+              className="absolute inset-0 z-10 flex items-stretch justify-center overflow-hidden bg-sand-50 p-4 md:p-6 dark:bg-sand-950"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -374,16 +378,18 @@ function PreviewChrome({
                   the frame; it tracks the cursor at the window level regardless,
                   so dots in the margin still light up as you move the mouse. */}
               <div className="pointer-events-none absolute inset-0">
-                {/* Themed to match the page: seamless sand-950 backdrop, faint
-                    sand-neutral dots that light up to the olive accent near the
-                    cursor. Raw rgb values (a canvas can't read Tailwind tokens);
-                    the token each value maps to is noted inline below. */}
+                {/* Themed to match the page: a seamless page-ground backdrop,
+                    faint sand-neutral dots that light up to the olive accent
+                    near the cursor. Raw rgb values (a canvas can't read
+                    Tailwind tokens); the token each value maps to is noted
+                    inline below. The grid reads these live, so a toggle
+                    repaints it. */}
                 <InteractiveDotGrid
                   showLabel={false}
                   colors={{
-                    background: '#0E0E0F', // sand-950 — matches bg-sand-950 backdrop
+                    background: isDark ? '#0E0E0F' : '#F4F4FA', // sand-950 / sand-50 — matches the backdrop
                     dot: '123,123,125', //     sand-500 — faint neutral grid
-                    highlight: '218,228,160', // olive-400 — accent, lit near the cursor
+                    highlight: isDark ? '218,228,160' : '134,150,49', // olive-400 / olive-600 — accent, lit near the cursor
                     baseAlpha: 0.22,
                     peakAlpha: 0.95,
                   }}
@@ -399,9 +405,10 @@ function PreviewChrome({
                 // otherwise index DEVICES with a non-frame key. colorScheme
                 // keeps the browser's own pre-load iframe canvas dark, so the
                 // network round-trip can't blink white before the document
-                // paints.
-                style={{ width: DEVICES.phone.width, colorScheme: 'dark' }}
-                className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-800 bg-sand-950 shadow-2xl"
+                // paints. It follows the site theme, as the frame's own
+                // document does (AndromedaThemeSync mirrors the parent).
+                style={{ width: DEVICES.phone.width, colorScheme: theme }}
+                className="relative h-full max-w-full shrink-0 rounded-2xl border border-sand-300 bg-sand-50 shadow-2xl dark:border-sand-800 dark:bg-sand-950"
                 initial={{ scale: reduce ? 1 : 0.985 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: reduce ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
