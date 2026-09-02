@@ -51,7 +51,7 @@ export default function PremiumLicensePage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">1. Definitions</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-600 dark:text-sand-400">
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Provider, we, us:</strong> the
+              <strong className="text-sand-700 dark:text-sand-200">Provider, we, us:</strong>{' '}the
               Munich-based sole trader who operates aicanvas.me, identified in the{' '}
               <Link href="/impressum" className="text-olive-600 dark:text-olive-400 hover:underline">
                 Impressum
@@ -59,7 +59,7 @@ export default function PremiumLicensePage() {
               .
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Premium Components:</strong> the
+              <strong className="text-sand-700 dark:text-sand-200">Premium Components:</strong>{' '}the
               closed-source components, design systems, templates, and their
               accompanying source code, assets, and documentation that we make
               available only to subscribers and that are delivered through the
@@ -69,28 +69,28 @@ export default function PremiumLicensePage() {
               cover all of them.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Subscription:</strong> your
+              <strong className="text-sand-700 dark:text-sand-200">Subscription:</strong>{' '}your
               active, paid AI Canvas Premium plan.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">You, Licensee:</strong> the
+              <strong className="text-sand-700 dark:text-sand-200">You, Licensee:</strong>{' '}the
               individual or entity that holds the Subscription.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Installed Component:</strong> a
+              <strong className="text-sand-700 dark:text-sand-200">Installed Component:</strong>{' '}a
               specific Premium Component, in the version delivered to you, that
               you actually installed or downloaded through the Premium install
               channel while your Subscription was active and while the payment
               for that period had not been reversed.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">End Product:</strong> an
+              <strong className="text-sand-700 dark:text-sand-200">End Product:</strong>{' '}an
               application, website, or client project you build that incorporates
               one or more Premium Components, where the Premium Components are a
               part of, and not the point of, the End Product.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">End User:</strong> a user of an
+              <strong className="text-sand-700 dark:text-sand-200">End User:</strong>{' '}a user of an
               End Product. A customer of your End Product is an End User, not a
               sublicensee of the Premium Components.
             </li>
