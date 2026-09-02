@@ -848,7 +848,7 @@ function PanelMenuDemo() {
         <Row label="Default · panel actions">
           <PanelMenu
             align="left"
-            defaultOpen
+            staticOpen
             items={[
               { label: 'Refresh',   icon: ArrowClockwise, onSelect: () => {} },
               { label: 'Configure', icon: Sliders,        onSelect: () => {} },
@@ -863,7 +863,7 @@ function PanelMenuDemo() {
         <Row label="With submenu">
           <PanelMenu
             align="left"
-            defaultOpen
+            staticOpen
             items={[
               { label: 'Edit', icon: Pencil, onSelect: () => {} },
               { label: 'Copy', icon: Copy,   onSelect: () => {} },
