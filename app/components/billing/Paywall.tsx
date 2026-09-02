@@ -59,7 +59,10 @@ export function Paywall({
   const title = name ? `Unlock ${name}` : 'Premium content'
 
   return (
-    <div className="relative min-h-[360px] w-full overflow-hidden bg-sand-300 dark:bg-sand-950">
+    // No ground of its own: the teaser shows the surrounding slab at the top
+    // and the overlay gradient fades it out toward sand-300 (sand-950 dark),
+    // so the wall blends in instead of starting on a hard edge.
+    <div className="relative min-h-[360px] w-full overflow-hidden">
       <pre
         aria-hidden
         className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-sand-600 opacity-30 blur-[3px]"
