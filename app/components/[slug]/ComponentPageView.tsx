@@ -528,7 +528,7 @@ export default function ComponentPageView({
         <HeaderSocials />
       </div>
 
-      <main className="bg-sand-200 dark:bg-sand-950">
+      <main className="bg-sand-50 dark:bg-sand-950">
         <div className="relative mx-auto max-w-4xl px-4 pt-6 pb-8 sm:px-6 sm:pt-12">
 
           {/* Mobile back button */}
