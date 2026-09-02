@@ -576,7 +576,7 @@ export default function ComponentPageView({
                   <TagIcon weight="regular" size={14} className="shrink-0 text-sand-600 dark:text-sand-500" />
                   {designSystem && <PremiumBadge />}
                   {premium && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-olive-600/40 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:border-olive-500/25 dark:text-olive-400">
                       <Lightning weight="regular" size={12} />
                       Premium
                     </span>
@@ -587,7 +587,7 @@ export default function ComponentPageView({
                       className={
                         premium
                           ? 'rounded-full border border-sand-300 bg-sand-200 px-2.5 py-0.5 text-xs font-semibold text-sand-600 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-400'
-                          : 'rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400'
+                          : 'rounded-full border border-olive-600/40 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:border-olive-500/25 dark:text-olive-400'
                       }
                     >
                       {tag.label}
@@ -1790,7 +1790,7 @@ export default function ComponentPageView({
                 {/* Same pill as the tag row on the page behind. Says what the
                     lock further down is about before the reader reaches it. */}
                 {premium && (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-olive-500/25 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:text-olive-400">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-olive-600/40 bg-olive-500/10 px-2.5 py-0.5 text-xs font-semibold text-olive-600 dark:border-olive-500/25 dark:text-olive-400">
                     <Lightning weight="regular" size={12} />
                     Premium
                   </span>
@@ -1851,7 +1851,14 @@ export default function ComponentPageView({
                     instead of copying, so only the label was lying: it offered
                     a clipboard action beside a command that is already dots.
                     Same treatment as the locked prompt below. */}
-                <Button variant="primary" size="sm" onClick={copyCli}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={copyCli}
+                  // Light keeps this ink-dark: a solid olive fill inside the
+                  // olive-tinted card reads green-on-green on the light page.
+                  className="!bg-sand-900 !text-sand-50 hover:!bg-sand-800 dark:!bg-olive-500 dark:!text-sand-950 dark:hover:!bg-olive-400"
+                >
                   {needsPremium
                     ? <LockSimple weight="regular" size={15} />
                     : cliCopied
