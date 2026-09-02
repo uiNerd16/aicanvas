@@ -108,9 +108,10 @@ export function IdeationTopBar() {
     <div className={headerClass}>
       <Breadcrumbs crumbs={crumbs} />
       {isBrainReader ? (
+        // No ThemeToggle here: the brain reader is a pinned-dark surface with
+        // no light rendering to switch to.
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
-          <ThemeToggle />
           <TopAuthPill />
         </div>
       ) : isShowcase ? (

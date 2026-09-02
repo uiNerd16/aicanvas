@@ -46,7 +46,7 @@
 html {
   color-scheme: light;
 }
-html.dark {
+.dark {
   color-scheme: dark;
 }
 /* The same two scopes as the dark variant, and for the same reason. color-scheme

@@ -77,7 +77,7 @@ export default async function AndromedaBrainReaderPage() {
     // Premium user, unreadable/empty bundle (degraded build). Never redirect a
     // paying subscriber to the pitch page; tell them plainly instead.
     return (
-      <div style={{ flex: 1, padding: '40px 48px', maxWidth: 720, color: '#A3A3A3', fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', monospace" }}>
+      <div className="dark" style={{ flex: 1, background: '#0E0E0F', padding: '40px 48px', maxWidth: 720, color: '#A3A3A3', fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono Variable'), 'JetBrains Mono', monospace" }}>
         <h1 style={{ fontSize: 15, color: '#F5F5F5', marginBottom: 12 }}>Brain temporarily unavailable</h1>
         <p style={{ fontSize: 13, lineHeight: 1.6 }}>
           Your Premium access is active, but the Brain files could not be loaded
@@ -88,5 +88,11 @@ export default async function AndromedaBrainReaderPage() {
     )
   }
 
-  return <BrainViewer files={files} />
+  // Scoped dark: the reader is a dark editorial surface with its own palette
+  // and no light rendering, like the brain landing above it.
+  return (
+    <div className="dark" style={{ background: '#0E0E0F', minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <BrainViewer files={files} />
+    </div>
+  )
 }
