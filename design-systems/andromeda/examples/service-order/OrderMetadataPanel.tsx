@@ -101,7 +101,7 @@ function FollowUpDropdown({ initial = '24:00 Hours' }: { initial?: string }) {
             zIndex: 50,
             background: themeColor.surface.raised,
             border: `${tokens.border.thin} ${themeColor.border.base}`,
-            boxShadow: `0 8px 32px ${themeColor.surface.base}`,
+            boxShadow: 'var(--andromeda-shadow-md, 0 8px 21.6px rgba(0, 0, 0, 0.45))',
           }}
         >
           <CornerMarkers />

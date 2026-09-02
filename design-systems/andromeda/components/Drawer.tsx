@@ -282,7 +282,9 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
                 'bg-[color:var(--andromeda-surface-raised)]',
                 '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
                 'rounded-[var(--andromeda-radius-frame,0px)]',
-                'shadow-[0_0_60px_var(--andromeda-surface-base)]',
+                // The shadow primitive, not the page colour: a light ground
+                // would otherwise cast a white glow.
+                'shadow-[0_0_60px_var(--andromeda-shadow-color)]',
                 'outline-none',
                 className,
               )}
