@@ -367,26 +367,26 @@ export default function PrivacyPage() {
           </p>
           <ul className="mt-4 space-y-3 leading-relaxed text-sand-600 dark:text-sand-400">
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Vercel Inc.</strong> (USA):
+              <strong className="text-sand-700 dark:text-sand-200">Vercel Inc.</strong>{' '}(USA):
               hosting, request logs, cookieless Web Analytics, performance
               measurement (Speed Insights). Edge serving from Frankfurt where
               possible.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Supabase Inc.</strong> (USA):
+              <strong className="text-sand-700 dark:text-sand-200">Supabase Inc.</strong>{' '}(USA):
               authentication and account database. It also generates the account
               emails (sign-up confirmation, magic links, password reset), which
               are delivered via Resend (below). EU-region project where available.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Resend (Resend, Inc.)</strong> (USA):
+              <strong className="text-sand-700 dark:text-sand-200">Resend (Resend, Inc.)</strong>{' '}(USA):
               delivers our outbound email: the account emails above and any
               message you send through the contact form. Mail is sent via Amazon
               SES in the EU region (Ireland) and authenticated with SPF/DKIM; we
               use no open- or click-tracking.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Google Ireland Ltd.</strong> (EU) /{' '}
+              <strong className="text-sand-700 dark:text-sand-200">Google Ireland Ltd.</strong>{' '}(EU) /{' '}
               Google LLC (USA): only if you choose &ldquo;Sign in with Google.&rdquo;
               Google authenticates you and returns your email, name, and profile
               identifier to us. Google&apos;s own privacy policy applies to their
@@ -400,14 +400,14 @@ export default function PrivacyPage() {
               We send it no account data; it serves only public image URLs.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Brevo (Sendinblue GmbH)</strong> (EU,
+              <strong className="text-sand-700 dark:text-sand-200">Brevo (Sendinblue GmbH)</strong>{' '}(EU,
               Germany): our newsletter platform. It stores the email address
               (and, for Google sign-ins, the name) of newsletter recipients and
               delivers the newsletter. Unsubscribes are synced back to us
               automatically.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Paddle.com Market Ltd</strong> (UK) /{' '}
+              <strong className="text-sand-700 dark:text-sand-200">Paddle.com Market Ltd</strong>{' '}(UK) /{' '}
               Paddle, Inc. (USA): our payment provider and Merchant of Record for
               Premium subscriptions. Paddle handles checkout, payment processing,
               billing, sales tax and VAT, and refunds, and processes the billing
@@ -415,7 +415,7 @@ export default function PrivacyPage() {
               policy. Legal basis: Art. 6(1)(b) GDPR (performance of the contract).
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Cloudflare, Inc.</strong> (USA):
+              <strong className="text-sand-700 dark:text-sand-200">Cloudflare, Inc.</strong>{' '}(USA):
               provides the cookieless bot-protection check (Turnstile) on the
               login-free cancellation form. To assess whether a request is
               automated, Cloudflare receives the visitor&apos;s IP address and
@@ -430,18 +430,18 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-bold text-sand-900 dark:text-sand-50">6. Retention</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-sand-600 dark:text-sand-400">
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Account data</strong> is kept for
+              <strong className="text-sand-700 dark:text-sand-200">Account data</strong>{' '}is kept for
               as long as your account exists. When you delete your account, your
               account row, saved components, install history, and preferences
               are removed via cascade.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Contact messages</strong> are kept
+              <strong className="text-sand-700 dark:text-sand-200">Contact messages</strong>{' '}are kept
               only as long as needed to handle your enquiry and any follow-up,
               then deleted.
             </li>
             <li>
-              <strong className="text-sand-700 dark:text-sand-200">Server logs</strong> are kept for
+              <strong className="text-sand-700 dark:text-sand-200">Server logs</strong>{' '}are kept for
               the period set by Vercel&apos;s default log retention (typically a few
               weeks).
             </li>
