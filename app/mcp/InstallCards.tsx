@@ -145,7 +145,7 @@ const SCOPES: { id: Scope; label: string; desc: React.ReactNode }[] = [
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 
-function useToast() {
+export function useToast() {
   const [message, setMessage] = useState<string | null>(null)
   useEffect(() => {
     if (!message) return
@@ -155,7 +155,7 @@ function useToast() {
   return { message, show: setMessage }
 }
 
-function Toast({ message }: { message: string | null }) {
+export function Toast({ message }: { message: string | null }) {
   return (
     <AnimatePresence>
       {message ? (
@@ -177,7 +177,7 @@ function Toast({ message }: { message: string | null }) {
 
 // ── Code block with copy button (matches the per-component install style) ───
 
-function CodeBlock({
+export function CodeBlock({
   command,
   copied,
   onCopy,

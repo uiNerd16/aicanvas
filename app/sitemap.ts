@@ -104,6 +104,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/agentic-workflows`,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/lab`,
       changeFrequency: 'monthly',
       priority: 0.6,

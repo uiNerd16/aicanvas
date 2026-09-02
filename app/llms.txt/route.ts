@@ -37,6 +37,9 @@ After that, every \`npx shadcn@latest add @aicanvas/<component-name>\` is authen
 
 ## MCP server
 AI agents can browse and install AI Canvas components through the official MCP server, [@aicanvas/mcp on npm](https://www.npmjs.com/package/@aicanvas/mcp). Run it with \`npx -y @aicanvas/mcp\` (stdio transport). It exposes read-only tools: list_categories, list_components, search_components, get_component, get_install_command, list_systems, get_system, list_templates, get_template. Setup guide: ${SITE_URL}/mcp
+
+## Agentic workflows
+AI Canvas also ships agent tooling: memoryHD, a free Apache-2.0 Claude Code plugin that saves decisions as plain Markdown notes and recalls the relevant ones on every prompt with a freshness stamp, and the GPT cage, a supervised second-builder plugin (in final hardening). Overview and install: ${SITE_URL}/agentic-workflows
 `
 
   const grouped = new Map<string, typeof COMPONENTS>()
