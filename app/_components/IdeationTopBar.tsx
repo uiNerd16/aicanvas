@@ -109,16 +109,18 @@ export function IdeationTopBar() {
   return (
     <div className={isPinnedDarkRoute(pathname) ? `dark ${headerClass}` : headerClass}>
       <Breadcrumbs crumbs={crumbs} />
+      {/* Right cluster order whenever a bar carries a CTA: theme toggle,
+          then the CTA, then the user. */}
       {isBrainReader ? (
         <div className="flex items-center gap-2">
-          <div id="brain-install-slot" />
           <ThemeToggle />
+          <div id="brain-install-slot" />
           <TopAuthPill />
         </div>
       ) : isShowcase ? (
         <div className="flex items-center gap-2">
-          <div id="andromeda-install-slot" />
           <ThemeToggle />
+          <div id="andromeda-install-slot" />
           <TopAuthPill />
         </div>
       ) : (
