@@ -213,31 +213,53 @@ function ThresholdBar({ value }: { value: number }) {
 }
 
 // ── Sparkline (active allocations) ───────────────────────────────
+// The live measurement of the cell, so it takes the live-series ink and the
+// same stroke, fill and marker conventions as TrendChart: accent-300 line at
+// the chart line width, the accent fill topping out at the chart fill opacity,
+// and one marker on the last point, the reading the big value shows.
 function Sparkline({ data }: { data: Array<{ t: number; v: number }> }) {
+  // Fit the range to the data with a little headroom either side, so the rise
+  // reads without the line kissing the top and bottom of the slot.
+  const values = data.map((d) => d.v);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const pad = (max - min) * 0.12 || 1;
+  const lastIndex = data.length - 1;
   return (
     <div style={{ height: `${VIZ_HEIGHT}px`, width: '100%' }}>
       {/* Fixed height (not "100%"): the wrapper is exactly VIZ_HEIGHT anyway,
           and a known height stops recharts warning "width(-1) and height(-1)"
           on its first pre-measure render — same pattern as RadarChart. */}
       <ResponsiveContainer width="100%" height={VIZ_HEIGHT}>
-        <AreaChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 2 }}>
+        <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 2 }}>
           <defs>
             <linearGradient id="rp-spark-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   style={{ stopColor: themeColor.text.primary }} stopOpacity={0.12} />
-              <stop offset="100%" style={{ stopColor: themeColor.text.primary }} stopOpacity={0}    />
+              <stop offset="0%"   style={{ stopColor: themeColor.accent[300] }} stopOpacity={tokens.chart.fillOpacity} />
+              <stop offset="100%" style={{ stopColor: themeColor.accent[300] }} stopOpacity={0} />
             </linearGradient>
           </defs>
-          {/* Hidden axis — clamps the Y range to the actual data so the
-              rise reads visually instead of being flattened by the default
-              [0, dataMax] domain. */}
-          <YAxis hide domain={['dataMin', 'dataMax']} />
+          <YAxis hide domain={[min - pad, max + pad]} />
           <Area
             type="monotone"
             dataKey="v"
-            style={{ stroke: themeColor.text.primary }}
-            strokeWidth={1.25}
+            style={{ stroke: themeColor.accent[300] }}
+            strokeWidth={tokens.chart.lineWidth}
             fill="url(#rp-spark-fill)"
-            dot={false}
+            dot={(props: { cx?: number; cy?: number; index?: number }) =>
+              props.index === lastIndex && props.cx != null && props.cy != null ? (
+                <circle
+                  key="spark-end"
+                  cx={props.cx}
+                  cy={props.cy}
+                  r={3}
+                  style={{ fill: themeColor.accent[300], stroke: themeColor.surface.raised }}
+                  strokeWidth={1.5}
+                />
+              ) : (
+                <g key={`spark-${props.index ?? 'none'}`} />
+              )
+            }
+            activeDot={false}
             isAnimationActive={false}
           />
         </AreaChart>
