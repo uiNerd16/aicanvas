@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { PanelHeader } from '../../components/PanelHeader';
@@ -40,14 +41,14 @@ function Cell({ label, children, last = false }: CellProps) {
         justifyContent: 'space-between',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[5]} ${tokens.spacing[5]}`,
-        borderRight: last ? 'none' : `${tokens.border.thin} ${tokens.color.border.subtle}`,
+        borderRight: last ? 'none' : `${tokens.border.thin} ${themeColor.border.subtle}`,
       }}
     >
       <span
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}
@@ -81,10 +82,10 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }: BigVa
   const up = hasDelta && delta > 0;
   const good = polarity === 'lower-is-better' ? !up : up;
   const deltaColor = !hasDelta || flat || polarity === 'none'
-    ? tokens.color.text.muted
+    ? themeColor.text.muted
     : good
-      ? tokens.color.accent[300]
-      : tokens.color.red[300];
+      ? themeColor.accent[300]
+      : themeColor.red[300];
 
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: tokens.spacing[2] }}>
@@ -94,7 +95,7 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }: BigVa
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size['3xl'],
           fontWeight: tokens.typography.weight.bold,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           letterSpacing: tokens.typography.tracking.tight,
           lineHeight: tokens.typography.lineHeight.tight,
         }}
@@ -106,7 +107,7 @@ function BigValue({ value, suffix, delta, polarity = 'higher-is-better' }: BigVa
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.md,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             letterSpacing: tokens.typography.tracking.wide,
           }}
         >
@@ -151,7 +152,7 @@ function BarGrid({ values }: { values: number[] }) {
             minWidth: 0,
             height: `${Math.max(8, v * VIZ_HEIGHT)}px`,
             transform: 'skewX(-12deg)',
-            background: tokens.color.accent[400],
+            background: themeColor.accent[400],
           }}
         />
       ))}
@@ -179,8 +180,8 @@ function ThresholdBar({ value }: { value: number }) {
           position: 'relative',
           marginTop: '8px',
           height: '12px',
-          background: `linear-gradient(90deg, ${tokens.color.red[400]} 0%, ${tokens.color.orange[300]} 50%, ${tokens.color.accent[300]} 100%)`,
-          border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          background: `linear-gradient(90deg, ${themeColor.red[400]} 0%, ${themeColor.orange[300]} 50%, ${themeColor.accent[300]} 100%)`,
+          border: `${tokens.border.thin} ${themeColor.border.subtle}`,
           borderRadius: tokens.radius.frame,
         }}
       >
@@ -195,15 +196,15 @@ function ThresholdBar({ value }: { value: number }) {
             height: 0,
             borderLeft: `4px solid transparent`,
             borderRight: `4px solid transparent`,
-            borderTop: `6px solid ${tokens.color.text.primary}`,
+            borderTop: `6px solid ${themeColor.text.primary}`,
           }}
         />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, letterSpacing: tokens.typography.tracking.wider }}>
+        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: themeColor.text.faint, letterSpacing: tokens.typography.tracking.wider }}>
           0%
         </span>
-        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: tokens.color.text.faint, letterSpacing: tokens.typography.tracking.wider }}>
+        <span style={{ fontFamily: tokens.typography.fontMono, fontSize: tokens.typography.size.xs, color: themeColor.text.faint, letterSpacing: tokens.typography.tracking.wider }}>
           100%
         </span>
       </div>
@@ -212,31 +213,53 @@ function ThresholdBar({ value }: { value: number }) {
 }
 
 // ── Sparkline (active allocations) ───────────────────────────────
+// The live measurement of the cell, so it takes the live-series ink and the
+// same stroke, fill and marker conventions as TrendChart: accent-300 line at
+// the chart line width, the accent fill topping out at the chart fill opacity,
+// and one marker on the last point, the reading the big value shows.
 function Sparkline({ data }: { data: Array<{ t: number; v: number }> }) {
+  // Fit the range to the data with a little headroom either side, so the rise
+  // reads without the line kissing the top and bottom of the slot.
+  const values = data.map((d) => d.v);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const pad = (max - min) * 0.12 || 1;
+  const lastIndex = data.length - 1;
   return (
     <div style={{ height: `${VIZ_HEIGHT}px`, width: '100%' }}>
       {/* Fixed height (not "100%"): the wrapper is exactly VIZ_HEIGHT anyway,
           and a known height stops recharts warning "width(-1) and height(-1)"
           on its first pre-measure render — same pattern as RadarChart. */}
       <ResponsiveContainer width="100%" height={VIZ_HEIGHT}>
-        <AreaChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 2 }}>
+        <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 2 }}>
           <defs>
             <linearGradient id="rp-spark-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={tokens.color.text.primary} stopOpacity={0.12} />
-              <stop offset="100%" stopColor={tokens.color.text.primary} stopOpacity={0}    />
+              <stop offset="0%"   style={{ stopColor: themeColor.accent[300] }} stopOpacity={tokens.chart.fillOpacity} />
+              <stop offset="100%" style={{ stopColor: themeColor.accent[300] }} stopOpacity={0} />
             </linearGradient>
           </defs>
-          {/* Hidden axis — clamps the Y range to the actual data so the
-              rise reads visually instead of being flattened by the default
-              [0, dataMax] domain. */}
-          <YAxis hide domain={['dataMin', 'dataMax']} />
+          <YAxis hide domain={[min - pad, max + pad]} />
           <Area
             type="monotone"
             dataKey="v"
-            stroke={tokens.color.text.primary}
-            strokeWidth={1.25}
+            style={{ stroke: themeColor.accent[300] }}
+            strokeWidth={tokens.chart.lineWidth}
             fill="url(#rp-spark-fill)"
-            dot={false}
+            dot={(props: { cx?: number; cy?: number; index?: number }) =>
+              props.index === lastIndex && props.cx != null && props.cy != null ? (
+                <circle
+                  key="spark-end"
+                  cx={props.cx}
+                  cy={props.cy}
+                  r={3}
+                  style={{ fill: themeColor.accent[300], stroke: themeColor.surface.raised }}
+                  strokeWidth={1.5}
+                />
+              ) : (
+                <g key={`spark-${props.index ?? 'none'}`} />
+              )
+            }
+            activeDot={false}
             isAnimationActive={false}
           />
         </AreaChart>
@@ -251,7 +274,7 @@ export function CapacityPanel() {
     <div
       style={{
         position: 'relative',
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         flexDirection: 'column',
         // Fill the grid cell so the top-row panels (Capacity + Requests) always
@@ -304,7 +327,7 @@ export function CapacityPanel() {
           .rp-cap-cells { flex-direction: column !important; }
           .rp-cap-cell {
             border-right: none !important;
-            border-bottom: ${tokens.border.thin} ${tokens.color.border.subtle} !important;
+            border-bottom: ${tokens.border.thin} ${themeColor.border.subtle} !important;
           }
           .rp-cap-cell-last { border-bottom: none !important; }
         }

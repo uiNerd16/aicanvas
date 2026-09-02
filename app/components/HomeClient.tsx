@@ -225,14 +225,14 @@ export function HomeClient({
   const emptyPhrase = EMPTY_BEATS[emptyIdx].phrase
 
   return (
-    <div className="flex min-h-full flex-col bg-sand-200 dark:bg-sand-950">
+    <div className="flex min-h-full flex-col bg-sand-50 dark:bg-sand-950">
 
       {/* ── Top bar (desktop only — mobile uses MobileNav) ── */}
-      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
+      <div className="sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex">
         {q && !category ? (
           <p className="min-w-0 truncate text-sm font-semibold text-sand-600 dark:text-sand-400">
             {totalResults} {totalResults === 1 ? 'result' : 'results'}
-            <span className="text-sand-400 dark:text-sand-500"> for </span>
+            <span className="text-sand-600 dark:text-sand-500"> for </span>
             <span className="text-sand-900 dark:text-sand-50">&ldquo;{query}&rdquo;</span>
           </p>
         ) : (
@@ -250,7 +250,7 @@ export function HomeClient({
       </div>
 
       {/* ── Grid ── */}
-      <div className="flex flex-1 flex-col bg-sand-200 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
+      <div className="flex flex-1 flex-col bg-sand-50 px-4 pt-4 dark:bg-sand-950 md:px-6 md:pt-6">
         {/* Mobile breadcrumb — shown above cards on small screens */}
         <p className="mb-4 text-sm font-semibold md:hidden">
           {q && !category ? (
@@ -261,7 +261,7 @@ export function HomeClient({
           ) : (
             <>
               <Link href="/components" className="text-sand-900 transition-colors hover:text-sand-600 dark:text-sand-50 dark:hover:text-sand-400">Components &amp; Blocks</Link>
-              {category && <span className="text-olive-500">/{category}</span>}
+              {category && <span className="text-olive-600 dark:text-olive-500">/{category}</span>}
             </>
           )}
         </p>
@@ -281,7 +281,7 @@ export function HomeClient({
                 ("Components & blocks" + "Design systems & templates") read as a
                 consistent pair. Browsing shows no title (the top bar names it). */}
             {q && !category && (
-              <h2 className="mx-auto mb-4 w-full max-w-[1800px] text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+              <h2 className="mx-auto mb-4 w-full max-w-[1800px] text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-500">
                 Components &amp; blocks
               </h2>
             )}
@@ -323,7 +323,7 @@ export function HomeClient({
             item's own page. ── */}
         {extras.length > 0 && (
           <div className="mx-auto mt-10 w-full max-w-[1800px]">
-            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-sand-500 dark:text-sand-500">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-500">
               Design systems &amp; templates
             </h2>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -371,7 +371,7 @@ export function HomeClient({
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="flex items-center justify-center"
                 >
-                  <EmptyIcon weight="thin" size={48} className="text-olive-500" />
+                  <EmptyIcon weight="thin" size={48} className="text-olive-600 dark:text-olive-500" />
                 </motion.span>
               </AnimatePresence>
             </div>
@@ -387,7 +387,7 @@ export function HomeClient({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-sm leading-relaxed text-sand-500 dark:text-sand-400"
+                  className="text-sm leading-relaxed text-sand-600 dark:text-sand-400"
                 >
                   {emptyPhrase}
                 </motion.p>
@@ -403,7 +403,7 @@ export function HomeClient({
             {/* "Did you mean?" chips */}
             {suggestions.length > 0 && (
               <div className="mt-6 w-full">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-sand-400 dark:text-sand-600">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-sand-600 dark:text-sand-600">
                   Did you mean
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2">
@@ -426,7 +426,7 @@ export function HomeClient({
             {suggestions.length === 0 && (
               <button
                 onClick={clearSearch}
-                className="mt-8 rounded-lg border border-sand-300 bg-sand-100 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-400 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
+                className="mt-8 rounded-lg border border-sand-200 bg-sand-100 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-300 hover:text-sand-900 active:scale-95 dark:border-sand-700 dark:bg-sand-900 dark:text-sand-300 dark:hover:border-sand-600 dark:hover:text-sand-100"
               >
                 Browse all components
               </button>

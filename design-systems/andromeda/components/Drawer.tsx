@@ -29,6 +29,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   createContext,
@@ -42,7 +43,7 @@ import type {
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { HTMLMotionProps } from 'framer-motion';
-import { cn, andromedaVars, easingArray } from './lib/utils';
+import { cn, andromedaVars, inheritedThemeVars, easingArray } from './lib/utils';
 import { CornerMarkers } from './CornerMarkers';
 import { tokens } from '../tokens';
 
@@ -117,7 +118,17 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
 
   // Panel node + the element focused before opening (to restore focus on close).
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<HTMLSpanElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  // The body portal sits outside whatever ancestor defines the theme channel,
+  // so the root wears the channel the anchor inherited. Written to the DOM
+  // before the first paint; React never manages these keys.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!open || !root) return;
+    for (const [name, value] of Object.entries(inheritedThemeVars(anchorRef.current))) root.style.setProperty(name, value);
+  }, [open, canPortal]);
 
   // ── Focus return — capture the trigger on open, restore it on close. ─────
   // Capturing in a layout-ish effect keyed on `open` grabs document.activeElement
@@ -197,7 +208,11 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onOpenChange]);
 
-  if (!canPortal) return null;
+  // The drawer itself lives in a <body> portal, outside whatever ancestor
+  // defines the theme channel. This inert anchor stays where the Drawer was
+  // placed, so the channel can be read off it and carried into the portal.
+  const anchor = <span ref={anchorRef} hidden data-slot="drawer-anchor" />;
+  if (!canPortal) return anchor;
 
   const cfg = SIDE_MAP[side] ?? SIDE_MAP.right;
   const closedOffset = cfg.sign * 100;
@@ -215,12 +230,16 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
   const panelAnimate = { [cfg.axis]: 0, opacity: 1 };
   const panelExit    = { [cfg.axis]: `${closedOffset}%`, opacity: 1 };
 
-  return createPortal(
+  return (
+    <>
+      {anchor}
+      {createPortal(
     <DrawerContext.Provider value={{ titleId, descId }}>
       <AnimatePresence>
         {open ? (
           <div
             key="drawer-root"
+            ref={rootRef}
             data-slot="drawer-root"
             style={{ ...andromedaVars() } as CSSProperties}
             className="fixed inset-0 z-[1000]"
@@ -263,7 +282,9 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
                 'bg-[color:var(--andromeda-surface-raised)]',
                 '[backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)]',
                 'rounded-[var(--andromeda-radius-frame,0px)]',
-                'shadow-[0_0_60px_var(--andromeda-surface-base)]',
+                // The shadow primitive, not the page colour: a light ground
+                // would otherwise cast a white glow.
+                'shadow-[0_0_60px_var(--andromeda-shadow-color)]',
                 'outline-none',
                 className,
               )}
@@ -281,6 +302,8 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
       </AnimatePresence>
     </DrawerContext.Provider>,
     document.body,
+      )}
+    </>
   );
 });
 

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { Card, CardHeader, CardContent } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import type { BadgeProps } from '../../components/Badge';
@@ -40,7 +41,7 @@ export function SystemStatus() {
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.muted,
+            color: themeColor.text.muted,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}>
@@ -49,7 +50,7 @@ export function SystemStatus() {
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.md,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             fontWeight: tokens.typography.weight.medium,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wider,
@@ -67,7 +68,7 @@ export function SystemStatus() {
                 <span style={{
                   fontFamily: tokens.typography.fontMono,
                   fontSize: tokens.typography.size.xs,
-                  color: tokens.color.text.primary,
+                  color: themeColor.text.primary,
                   fontWeight: tokens.typography.weight.medium,
                   textTransform: 'uppercase',
                   letterSpacing: tokens.typography.tracking.wider,
@@ -83,7 +84,7 @@ export function SystemStatus() {
                 <span style={{
                   fontFamily: tokens.typography.fontMono,
                   fontSize: tokens.typography.size.xs,
-                  color: tokens.color.text.faint,
+                  color: themeColor.text.faint,
                   letterSpacing: tokens.typography.tracking.wider,
                   flexShrink: 0,
                   width: '28px',

@@ -29,7 +29,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { cn, andromedaVars } from './lib/utils';
+import { cn, andromedaVars, themeColor } from './lib/utils';
+import { useResolvedColors } from './lib/theme';
+import type { ColorSpec } from './lib/theme';
 import { useReducedMotion } from './lib/motion';
 import { tokens } from '../tokens';
 import { CornerMarkers } from './CornerMarkers';
@@ -50,6 +52,21 @@ type RadarSeries = {
   color?: string;
 };
 
+// The colors recharts needs, as [custom property, dark literal]. recharts hands
+// its color props to SVG presentation ATTRIBUTES, which never substitute a
+// var(), so these are read back resolved from the DOM (./lib/theme).
+const RADAR_VARS = {
+  borderSubtle: ['--andromeda-border-subtle', tokens.color.border.subtle],
+  accent300:    ['--andromeda-accent-300',    tokens.color.accent[300]],
+  red300:       ['--andromeda-red-300',       tokens.color.red[300]],
+} as const satisfies ColorSpec;
+
+type RadarColors = Record<keyof typeof RADAR_VARS, string>;
+
+// `stop` is internal: the two built-in series name a palette stop instead of
+// carrying a fixed color, so they follow the theme. Callers set `color`.
+type RadarSeriesInternal = RadarSeries & { stop?: keyof RadarColors };
+
 // ── Default demo data ────────────────────────────────────────────────────────
 const DEFAULT_DATA: RadarRow[] = [
   { axis: 'HULL',   nominal: 92, critical: 68 },
@@ -60,9 +77,9 @@ const DEFAULT_DATA: RadarRow[] = [
   { axis: 'THRUST', nominal: 72, critical: 55 },
 ];
 
-const DEFAULT_SERIES: RadarSeries[] = [
-  { key: 'nominal',  label: 'Nominal',  color: tokens.color.accent[300] },
-  { key: 'critical', label: 'Critical', color: tokens.color.red[300] },
+const DEFAULT_SERIES: RadarSeriesInternal[] = [
+  { key: 'nominal',  label: 'Nominal',  stop: 'accent300' },
+  { key: 'critical', label: 'Critical', stop: 'red300' },
 ];
 
 // ── Custom tooltip ───────────────────────────────────────────────────────────
@@ -92,11 +109,11 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }: SpaceTo
   return (
     <div style={{
       // Solid raised surface so text is always legible against any chart color
-      background: tokens.color.surface.raised,
+      background: themeColor.surface.raised,
       // tokens.border.thin === 'var(--andromeda-border-width, 1px) solid'; keep
       // color.border.base to stay pixel-identical (siblings use bright, but
       // switching here would change default rendering — hard rule 1).
-      border: `${tokens.border.thin} ${tokens.color.border.base}`,
+      border: `${tokens.border.thin} ${themeColor.border.base}`,
       padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
@@ -108,7 +125,7 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }: SpaceTo
       <div style={{
         fontFamily: tokens.typography.fontMono,
         fontSize: tokens.typography.size.xs,
-        color: tokens.color.text.muted,
+        color: themeColor.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.widest,
         marginBottom: tokens.spacing[1],
@@ -132,10 +149,10 @@ function SpaceTooltip({ active, payload, label, series, onFirstActive }: SpaceTo
               background: entry.color,
               flexShrink: 0,
             }} />
-            <span style={{ color: tokens.color.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>
+            <span style={{ color: themeColor.text.secondary, textTransform: 'uppercase', letterSpacing: tokens.typography.tracking.wider }}>
               {s?.label ?? entry.dataKey}
             </span>
-            <span style={{ color: tokens.color.text.primary, marginLeft: 'auto', paddingLeft: tokens.spacing[3] }}>
+            <span style={{ color: themeColor.text.primary, marginLeft: 'auto', paddingLeft: tokens.spacing[3] }}>
               {entry.value}
             </span>
           </div>
@@ -174,7 +191,7 @@ function SpaceTick(props: Partial<SpaceTickProps>) {
         fontFamily: tokens.typography.fontMono,
         // Identity constant: the 9px polar tick is off the text scale
         fontSize: '9px',
-        fill: tokens.color.text.muted,
+        fill: themeColor.text.muted,
         textTransform: 'uppercase',
         letterSpacing: tokens.typography.tracking.wider,
       }}
@@ -261,6 +278,13 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
   const inView = useInView(internalRef, { once: true, margin: '-10% 0px' });
   const reducedMotion = useReducedMotion();
 
+  // Plot colors, resolved off this chart's own root (see RADAR_VARS). An
+  // explicit series `color` always wins; otherwise the series draws its named
+  // stop, and anything unnamed falls back to the accent, as it always has.
+  const c = useResolvedColors(internalRef, RADAR_VARS);
+  const plotColor = (s: RadarSeries) =>
+    s.color ?? c[(s as RadarSeriesInternal).stop ?? 'accent300'];
+
   // Reduced motion: render the chart fully visible immediately — no wipe,
   // no transition. Otherwise wipe from hidden (inset top→bottom) to fully
   // revealed once in view.
@@ -280,7 +304,7 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
       className={cn('relative', className)}
       style={{
         ...andromedaVars(),
-        background: 'var(--andromeda-surface-raised, #141415)',
+        background: themeColor.surface.raised,
         ...style,
       }}
       {...props}
@@ -301,13 +325,13 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
           right: tokens.spacing[3],
           bottom: 0,
           height: '1px',
-          background: tokens.color.border.subtle,
+          background: themeColor.border.subtle,
           pointerEvents: 'none',
         }} />
         <span style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}>
@@ -317,7 +341,7 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.md,
           fontWeight: tokens.typography.weight.medium,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
         }}>
@@ -327,7 +351,7 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
           <span style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: themeColor.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.wide,
             marginTop: '2px',
@@ -352,9 +376,9 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
         <ResponsiveContainer width="100%" height={280}>
           <ReRadarChart id={chartId} data={data} margin={{ top: 16, right: 24, bottom: 16, left: 24 }}>
             {/* Grid rings */}
-            {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
+            {/* RESOLVED: recharts attribute sink, var() cannot resolve */}
             <PolarGrid
-              stroke={tokens.color.border.subtle}
+              stroke={c.borderSubtle}
               strokeWidth={parseInt(tokens.border.width)}
               gridType="polygon"
             />
@@ -364,8 +388,8 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
               dataKey="axis"
               tick={<SpaceTick />}
               tickLine={false}
-              // RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal
-              axisLine={{ stroke: tokens.color.border.subtle, strokeWidth: parseInt(tokens.border.width) }}
+              // RESOLVED: recharts attribute sink, var() cannot resolve
+              axisLine={{ stroke: c.borderSubtle, strokeWidth: parseInt(tokens.border.width) }}
             />
 
             {/* isAnimationActive always off — recharts never tweens position.
@@ -385,19 +409,19 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
             />
 
             {/* Series */}
-            {/* RAW: recharts attribute sink — var() cannot resolve; revarnish maps the literal */}
+            {/* RESOLVED: recharts attribute sink, var() cannot resolve */}
             {series.map((s, i) => (
               <Radar
                 key={s.key}
                 dataKey={s.key}
-                stroke={s.color ?? tokens.color.accent[300]}
+                stroke={plotColor(s)}
                 strokeWidth={1.5}
-                fill={s.color ?? tokens.color.accent[300]}
+                fill={plotColor(s)}
                 fillOpacity={i === 0 ? 0.12 : 0.06}
                 dot={false}
                 activeDot={{
                   r: 3,
-                  fill: s.color ?? tokens.color.accent[300],
+                  fill: plotColor(s),
                   strokeWidth: 0,
                 }}
               />
@@ -420,7 +444,7 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
           right: tokens.spacing[3],
           top: 0,
           height: '1px',
-          background: tokens.color.border.subtle,
+          background: themeColor.border.subtle,
           pointerEvents: 'none',
         }} />
         {series.map(s => (
@@ -433,13 +457,13 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(function R
               display: 'inline-block',
               width: 8,
               height: 2,
-              background: s.color ?? 'var(--andromeda-accent-300, #0FCFB2)',
+              background: plotColor(s),
               flexShrink: 0,
             }} />
             <span style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
             }}>

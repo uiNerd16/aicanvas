@@ -36,6 +36,7 @@ import {
 } from '@phosphor-icons/react';
 import { motion, LayoutGroup } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Button } from '../../components/Button';
@@ -58,13 +59,13 @@ function HoverStyles() {
     <style>{`
       /* off-token: 'ease' keyword (and .rp-row's 100ms) have no Andromeda motion token — left literal */
       .rp-nav { transition: color 140ms ease; }
-      .rp-nav:hover { color: ${tokens.color.text.primary} !important; }
+      .rp-nav:hover { color: ${themeColor.text.primary} !important; }
 
       .rp-row { transition: background 100ms ease; cursor: pointer; }
-      .rp-row:hover { background: ${tokens.color.surface.hover}; }
+      .rp-row:hover { background: ${themeColor.surface.hover}; }
 
       .rp-link { transition: color 140ms ease; }
-      .rp-link:hover { color: ${tokens.color.text.primary} !important; }
+      .rp-link:hover { color: ${themeColor.text.primary} !important; }
     `}</style>
   );
 }
@@ -101,7 +102,7 @@ function TopNav() {
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
               fontWeight: active ? tokens.typography.weight.semibold : tokens.typography.weight.regular,
-              color: active ? tokens.color.text.primary : tokens.color.text.muted,
+              color: active ? themeColor.text.primary : themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
             }}
@@ -116,7 +117,7 @@ function TopNav() {
                   right: 0,
                   bottom: '-2px',
                   height: '2px',
-                  background: tokens.color.accent[300],
+                  background: themeColor.accent[300],
                 }}
               />
             ) : null}
@@ -165,7 +166,7 @@ function TopBar() {
         alignItems: 'center',
         gap: tokens.spacing[5],
         padding: `0 ${tokens.spacing[6]}`,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
       }}
     >
       <CornerMarkers />
@@ -178,7 +179,7 @@ function TopBar() {
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               fontWeight: tokens.typography.weight.semibold,
@@ -191,7 +192,7 @@ function TopBar() {
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
             }}
@@ -208,7 +209,7 @@ function TopBar() {
         style={{
           width: 'var(--andromeda-border-width, 1px)',
           height: tokens.spacing[6],
-          background: tokens.color.border.base,
+          background: themeColor.border.base,
           flexShrink: 0,
         }}
       />
@@ -263,7 +264,7 @@ function StatusBar() {
         alignItems: 'center',
         gap: tokens.spacing[4],
         padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
       }}
     >
       <CornerMarkers />
@@ -281,7 +282,7 @@ function StatusBar() {
         style={{
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           letterSpacing: tokens.typography.tracking.wide,
         }}
       >
@@ -303,7 +304,7 @@ function StatusBar() {
           cursor: 'pointer',
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.sm,
-          color: tokens.color.text.muted,
+          color: themeColor.text.muted,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.wider,
         }}
@@ -353,9 +354,9 @@ export default function ResourcePlanning() {
         // than the visible area and eats the right padding (left looks fine, right
         // is clipped). Matches mission-control / signal-room.
         width: '100%',
-        background: tokens.color.surface.base,
+        background: themeColor.surface.base,
         fontFamily: tokens.typography.fontSans,
-        color: tokens.color.text.primary,
+        color: themeColor.text.primary,
         overflow: 'hidden',
         gap: tokens.spacing[3],
         padding: tokens.spacing[6],

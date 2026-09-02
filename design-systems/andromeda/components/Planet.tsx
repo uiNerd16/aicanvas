@@ -16,11 +16,25 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { tokens } from '../tokens';
 import { useReducedMotion } from './lib/motion';
-import { cn } from './lib/utils';
+import { andromedaVars, cn } from './lib/utils';
+import { subscribeToTheme } from './lib/theme';
 import { mq } from './lib/responsive';
 
-/** Soft radial sprite. Multiplied by vertex color and blended additively
- *  so each particle reads as a tiny glow on the dark void. */
+/**
+ * Perceived brightness, 0 to 1, of a `#rgb` or `#rrggbb` color string.
+ * Anything it cannot parse reads as bright, which keeps the dark theme's
+ * additive glow as the default answer.
+ */
+function luma(css: string) {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(css.trim());
+  if (!m) return 1;
+  const h = m[1].length === 3 ? m[1].replace(/./g, (d) => d + d) : m[1];
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** Soft radial sprite. Multiplied by vertex color, and blended additively on a
+ *  dark ground so each particle reads as a tiny glow on the void. */
 function makeSprite(): THREE.CanvasTexture | undefined {
   const size = 64;
   const canvas = document.createElement('canvas');
@@ -108,16 +122,12 @@ export function Planet({
 
     // ── Andromeda palette → THREE.Color ─────────────────────────────────────
     // WebGL needs raw hex (var() cannot resolve on the GPU), so read the
-    // RESOLVED CSS vars at mount time — a themed page renders a themed planet.
-    // Mount-time read only; var changes after mount don't re-tint.
-    const cs = getComputedStyle(container);
+    // RESOLVED CSS vars off the container, so a themed page renders a themed
+    // planet. Read again whenever the theme moves (see paint() below), so a
+    // flip retints the surface without restarting the rotation.
     const accent = (stop: Extract<keyof typeof tokens.color.accent, number>) =>
-      cs.getPropertyValue(`--andromeda-accent-${stop}`).trim() ||
+      getComputedStyle(container).getPropertyValue(`--andromeda-accent-${stop}`).trim() ||
       tokens.color.accent[stop];
-    const cHi  = new THREE.Color(accent(100)); // lit highlight
-    const cLit = new THREE.Color(accent(200)); // lit body
-    const cMid = new THREE.Color(accent(400)); // terminator
-    const cShd = new THREE.Color(accent(500)); // shadow side
 
     // Light comes from the front-right, slightly above. Choose a direction
     // that's NOT axis-aligned so the rotating planet shows a moving terminator.
@@ -126,6 +136,12 @@ export function Planet({
     // ── Buffer geometry: positions + per-vertex colors ──────────────────────
     const positions = new Float32Array(particleCount * 3);
     const colors    = new Float32Array(particleCount * 3);
+    // The three per-particle shading inputs, kept so a repaint can reuse them.
+    // Resampling instead would re-roll every random draw, and the surface and
+    // its highlight specks would visibly jump on a theme change.
+    const litness  = new Float32Array(particleCount);
+    const equators = new Float32Array(particleCount);
+    const specks   = new Uint8Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
       // Uniform-on-sphere sampling
@@ -144,32 +160,54 @@ export function Planet({
 
       // Lambert-style: dot(normal, lightDir) ∈ [-1, 1] → [0, 1]
       const dot = (x * lightDir.x + y * lightDir.y + z * lightDir.z) / r;
-      const lit = (dot + 1) * 0.5;
-
-      // Two-stop ramp: shadow → mid (lit ∈ [0, 0.5]), then mid → lit (lit ∈ [0.5, 1]).
-      const c = new THREE.Color();
-      if (lit < 0.5) c.lerpColors(cShd, cMid, lit * 2);
-      else           c.lerpColors(cMid, cLit, (lit - 0.5) * 2);
+      litness[i] = (dot + 1) * 0.5;
 
       // Equator emphasis — particles near the equator ride a tiny bit brighter,
       // suggesting cloud bands without a literal texture.
-      const equator = 1 - Math.abs(y / r) * 0.18;
+      equators[i] = 1 - Math.abs(y / r) * 0.18;
 
       // 1% of well-lit particles become highlight specks — adds tiny "city
       // light" / atmospheric sparkle on the lit hemisphere.
-      let cr = c.r * equator, cg = c.g * equator, cb = c.b * equator;
-      if (Math.random() < 0.012 && lit > 0.62) {
-        cr = cHi.r; cg = cHi.g; cb = cHi.b;
+      specks[i] = Math.random() < 0.012 && litness[i] > 0.62 ? 1 : 0;
+    }
+
+    // Fill the color attribute from the palette as it resolves right now, and
+    // answer with the blend mode that palette calls for.
+    const ramp = new THREE.Color();
+    function paint() {
+      const hi  = accent(100); // lit highlight
+      const lit = accent(200); // lit body
+      const cHi  = new THREE.Color(hi);
+      const cLit = new THREE.Color(lit);
+      const cMid = new THREE.Color(accent(400)); // terminator
+      const cShd = new THREE.Color(accent(500)); // shadow side
+
+      for (let i = 0; i < particleCount; i++) {
+        const l = litness[i];
+        // Two-stop ramp: shadow → mid (l ∈ [0, 0.5]), then mid → lit (l ∈ [0.5, 1]).
+        if (l < 0.5) ramp.lerpColors(cShd, cMid, l * 2);
+        else         ramp.lerpColors(cMid, cLit, (l - 0.5) * 2);
+
+        const e = equators[i];
+        const speck = specks[i] === 1;
+        colors[i * 3]     = speck ? cHi.r : ramp.r * e;
+        colors[i * 3 + 1] = speck ? cHi.g : ramp.g * e;
+        colors[i * 3 + 2] = speck ? cHi.b : ramp.b * e;
       }
 
-      colors[i * 3]     = cr;
-      colors[i * 3 + 1] = cg;
-      colors[i * 3 + 2] = cb;
+      // Additive blending is what makes the particles read as a glowing body on
+      // a dark void: each one ADDS light to what is behind it. Over a light
+      // ground that only bleaches them, because adding to near-white cannot
+      // darken anything. Decide from the palette itself rather than from any
+      // theme flag, so a custom palette gets the right answer too: a dark lit
+      // color means the planet is meant to be drawn ON light, not made of it.
+      return luma(lit) < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
     }
 
     const geo = new THREE.BufferGeometry();
+    const colorAttr = new THREE.BufferAttribute(colors, 3);
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+    geo.setAttribute('color',    colorAttr);
 
     // A browser canvas always yields a 2d context, so the sprite is always built.
     const sprite = makeSprite() as THREE.CanvasTexture;
@@ -179,7 +217,14 @@ export function Planet({
       vertexColors: true,
       transparent:  true,
       depthWrite:   false,
-      blending:     THREE.AdditiveBlending,
+      blending:     paint(),
+    });
+
+    // Repaint in place on a theme change: same sphere, same specks, new palette.
+    const unsubscribeTheme = subscribeToTheme(() => {
+      mat.blending = paint();
+      mat.needsUpdate = true;
+      colorAttr.needsUpdate = true;
     });
 
     const mesh = new THREE.Points(geo, mat);
@@ -220,6 +265,7 @@ export function Planet({
     return () => {
       alive = false;
       cancelAnimationFrame(raf);
+      unsubscribeTheme();
       ro.disconnect();
       geo.dispose();
       mat.dispose();
@@ -244,6 +290,7 @@ export function Planet({
         ref={containerRef}
         className={cn('andromeda-planet', className)}
         style={{
+          ...andromedaVars(),
           width: '100%',
           height: '100%',
           // Hero set-piece: never let the WebGL canvas push past the viewport.

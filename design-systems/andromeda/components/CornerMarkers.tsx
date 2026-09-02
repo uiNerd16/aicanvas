@@ -4,7 +4,7 @@
 // Defining motif of Andromeda — four L-shaped brackets that hug
 // each corner of the nearest position:relative ancestor.
 // Geometry comes from `tokens.marker.{size,offset,borderWidth}`.
-// Color defaults to `tokens.color.border.bright` — every bracket
+// Color defaults to `themeColor.border.bright` — every bracket
 // in the system uses this same value so the motif stays consistent.
 //
 // Each bracket curves at its OUTER corner to match the system frame
@@ -19,7 +19,7 @@
 
 import { forwardRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
-import { cn } from './lib/utils';
+import { cn, themeColor } from './lib/utils';
 import { tokens } from '../tokens';
 
 /**
@@ -27,7 +27,7 @@ import { tokens } from '../tokens';
  * @property {number} [size]        px square the bracket lives inside; defaults to tokens.marker.size
  * @property {number} [offset]      px inset from the corner; defaults to tokens.marker.offset
  * @property {number} [borderWidth] px stroke thickness; defaults to tokens.marker.borderWidth
- * @property {string} [color]       any CSS color; defaults to tokens.color.border.bright
+ * @property {string} [color]       any CSS color; defaults to themeColor.border.bright
  * @property {number} [radius]      px corner curve; defaults to the --andromeda-radius-frame token
  * @property {string} [className]
  */
@@ -68,7 +68,7 @@ export const CornerMarkers = forwardRef<HTMLDivElement, CornerMarkersProps>(func
   const bw = borderWidth != null ? `${borderWidth}px` : `var(--andromeda-marker-width, ${tokens.marker.borderWidth}px)`;
   // The defining motif must follow a theme like its own stroke width does;
   // the explicit color prop still wins (var only when no prop given).
-  const c  = color       ?? `var(--andromeda-border-bright, ${tokens.color.border.bright})`;
+  const c  = color       ?? `var(--andromeda-border-bright, ${themeColor.border.bright})`;
   // Corner curve. Same explicit-prop-wins-over-var rule as the stroke width.
   // The bracket is `s` px square, so the browser clamps the curve to that box
   // — a large frame radius just fills the bracket into a quarter-round.

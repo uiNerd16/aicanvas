@@ -26,7 +26,7 @@ import { motion } from 'framer-motion';
 import { CaretUpDown } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { Avatar } from './Avatar';
-import { andromedaVars, easingArray } from './lib/utils';
+import { andromedaVars, easingArray, themeColor } from './lib/utils';
 import {
   UserMenuPanel,
   UserMenuStyles,
@@ -125,7 +125,7 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(function UserC
           alignItems: 'center',
           gap: tokens.spacing[3],
           cursor: 'pointer',
-          background: highlight ? tokens.color.surface.hover : 'transparent',
+          background: highlight ? themeColor.surface.hover : 'transparent',
           transition: `background var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
         }}
       >
@@ -136,7 +136,7 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(function UserC
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
               fontWeight: tokens.typography.weight.semibold,
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
               overflow: 'hidden',
@@ -151,7 +151,7 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(function UserC
               style={{
                 fontFamily: tokens.typography.fontMono,
                 fontSize: tokens.typography.size.xs,
-                color: tokens.color.text.muted,
+                color: themeColor.text.muted,
                 textTransform: 'uppercase',
                 letterSpacing: tokens.typography.tracking.wide,
               }}
@@ -169,7 +169,7 @@ export const UserCard = forwardRef<HTMLDivElement, UserCardProps>(function UserC
           }}
           style={{
             display: 'inline-flex',
-            color: highlight ? tokens.color.text.secondary : tokens.color.text.faint,
+            color: highlight ? themeColor.text.secondary : themeColor.text.faint,
             transition: `color var(--andromeda-duration-fast, ${tokens.motion.duration.fast}) var(--andromeda-easing-standard, ${tokens.motion.easing.standard})`,
           }}
         >

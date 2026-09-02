@@ -16,6 +16,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { MotionProps } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { MusicPlayer } from '../../components/MusicPlayer';
 import { nowPlaying } from './data';
@@ -87,7 +88,7 @@ export function Transport({ current, isPlaying, onTogglePlay, motionProps }: Tra
             right: ${tokens.spacing[3]} !important;
             bottom: ${tokens.spacing[3]} !important;
             z-index: 20 !important;
-            background: ${tokens.color.surface.base} !important;
+            background: ${themeColor.surface.base} !important;
             padding-top: ${tokens.spacing[3]} !important;
           }
           .sr-transport-spacer { display: block !important; }

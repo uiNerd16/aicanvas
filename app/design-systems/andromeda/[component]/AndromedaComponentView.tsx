@@ -23,6 +23,7 @@ import { HighlightedCodeView } from '../../../components/HighlightedCodeView'
 import { AndromedaDemo } from '../../../_lib/andromeda/andromeda-demos'
 import { andromedaRegistrySlug } from '../../../_lib/andromeda/andromeda-meta'
 import { tokens } from '../../../../design-systems/andromeda/tokens'
+import { themeColor } from '../../../../design-systems/andromeda/components/lib/utils'
 import { trackInstall } from '../../../lib/track-install'
 import { useSession } from '../../../components/auth/SessionProvider'
 import { useAuthModal } from '../../../components/auth/AuthModalProvider'
@@ -197,7 +198,7 @@ export function AndromedaComponentView({
       ) : (
         <pre
           className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed"
-          style={{ color: tokens.color.text.secondary }}
+          style={{ color: themeColor.text.secondary }}
         >
           {codeState.code}
         </pre>
@@ -205,7 +206,7 @@ export function AndromedaComponentView({
     ) : (
       <div
         className="flex min-h-[200px] items-center justify-center text-sm"
-        style={{ color: tokens.color.text.faint }}
+        style={{ color: themeColor.text.faint }}
       >
         Loading source…
       </div>
@@ -273,7 +274,7 @@ export function AndromedaComponentView({
       </div>
 
       {/* ── Main card (Preview / Code) ──────────────────────────────────── */}
-      <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+      <div ref={mainCardRef} className="overflow-hidden rounded-2xl border border-sand-300 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
         {/* Tab bar */}
         <div className="flex items-center justify-between border-b border-sand-300 px-3 py-3 dark:border-sand-800 sm:px-5 sm:py-4">
           <div className="flex items-center gap-0.5">
@@ -316,11 +317,13 @@ export function AndromedaComponentView({
         </div>
 
         {/* Content area */}
-        <div className="relative min-h-[420px]">
+        {/* isolate: an opened demo menu (z 1000 inside the stage) must never
+            paint over the sticky top bar. */}
+        <div className="relative isolate min-h-[420px]">
           {tab === 'preview' ? (
             <div
               className="flex min-h-[420px] items-center justify-center overflow-auto p-8 sm:p-12"
-              style={{ backgroundColor: tokens.color.surface.base }}
+              style={{ backgroundColor: themeColor.surface.base }}
             >
               {!fullscreen && <AndromedaDemo slug={slug} />}
             </div>
@@ -328,7 +331,7 @@ export function AndromedaComponentView({
             <div
               className="min-h-[420px] overflow-auto p-5"
               style={{
-                backgroundColor: tokens.color.surface.base,
+                backgroundColor: themeColor.surface.base,
                 maxHeight: '70vh',
                 scrollbarWidth: 'thin',
               }}
@@ -374,7 +377,7 @@ export function AndromedaComponentView({
 
         {/* CLI / Manual tabs */}
         <div className="overflow-hidden rounded-xl border border-sand-300 dark:border-sand-800">
-          <div className="flex border-b border-sand-300 bg-sand-100 dark:border-sand-800 dark:bg-sand-900">
+          <div className="flex border-b border-sand-300 bg-sand-50 dark:border-sand-800 dark:bg-sand-900">
             <button
               type="button"
               onClick={() => setInstallTab('cli')}
@@ -405,7 +408,7 @@ export function AndromedaComponentView({
             </button>
           </div>
 
-          <div className="bg-sand-100 px-5 py-6 dark:bg-sand-900">
+          <div className="bg-sand-50 px-5 py-6 dark:bg-sand-900">
             {installTab === 'cli' ? (
               <div className="space-y-6">
                 {/* Step 1 — shadcn add. The command + package-manager row stay
@@ -420,8 +423,8 @@ export function AndromedaComponentView({
                     </code>{' '}
                     first to set up Tailwind and path aliases.
                   </p>
-                  <div className="overflow-hidden rounded-lg bg-sand-950">
-                    <div className="flex items-center gap-1 border-b border-sand-800 px-4 py-2">
+                  <div className="overflow-hidden rounded-lg bg-sand-200 dark:bg-sand-950">
+                    <div className="flex items-center gap-1 border-b border-sand-300 px-4 py-2 dark:border-sand-800">
                       {(['pnpm', 'npm', 'yarn', 'bun'] as const).map((pm) => (
                         <button
                           key={pm}
@@ -429,8 +432,8 @@ export function AndromedaComponentView({
                           onClick={() => { setPkgManager(pm); setCliCopied(false) }}
                           className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                             pkgManager === pm
-                              ? 'bg-sand-800 text-sand-100'
-                              : 'text-sand-500 hover:text-sand-300'
+                              ? 'bg-sand-300 text-sand-900 dark:bg-sand-800 dark:text-sand-100'
+                              : 'text-sand-600 hover:text-sand-800 dark:text-sand-500 dark:hover:text-sand-300'
                           }`}
                         >
                           {pm}
@@ -454,7 +457,7 @@ export function AndromedaComponentView({
                           setCliCopied(true)
                           setTimeout(() => setCliCopied(false), 2000)
                         }}
-                        className="ml-auto shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                        className="ml-auto shrink-0 rounded-md p-1.5 text-sand-600 transition-all hover:text-sand-800 active:scale-90 dark:text-sand-500 dark:hover:text-sand-200"
                       >
                         {cliCopied
                           ? <Check weight="regular" size={14} className="text-olive-500" />
@@ -462,7 +465,7 @@ export function AndromedaComponentView({
                       </button>
                     </div>
                     <div className="px-4 py-3.5">
-                      <code className="break-all font-mono text-sm text-sand-300">
+                      <code className="break-all font-mono text-sm text-sand-800 dark:text-sand-300">
                         {pkgManager === 'pnpm'
                           ? `pnpm dlx shadcn@latest add ${installReferenceMasked}`
                           : pkgManager === 'bun'
@@ -488,22 +491,22 @@ export function AndromedaComponentView({
                   <p className="mb-2.5 text-sm text-sand-600 dark:text-sand-400">
                     Copy and paste the following code into your project:
                   </p>
-                  <div className="relative rounded-lg bg-sand-950">
-                    <div className="flex items-center justify-between border-b border-sand-800 px-4 py-2">
-                      <span className="font-mono text-xs text-sand-500">
+                  <div className="relative rounded-lg bg-sand-200 dark:bg-sand-950">
+                    <div className="flex items-center justify-between border-b border-sand-300 px-4 py-2 dark:border-sand-800">
+                      <span className="font-mono text-xs text-sand-600 dark:text-sand-500">
                         {name}.tsx
                       </span>
                       <button
                         type="button"
                         onClick={copyCode}
-                        className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                        className="shrink-0 rounded-md p-1.5 text-sand-600 transition-all hover:text-sand-800 active:scale-90 dark:text-sand-500 dark:hover:text-sand-200"
                       >
                         {codeCopied
                           ? <Check weight="regular" size={14} className="text-olive-500" />
                           : <Copy weight="regular" size={14} />}
                       </button>
                     </div>
-                    <div className="max-h-96 overflow-auto p-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4A453F transparent' }}>
+                    <div className="max-h-96 overflow-auto p-4 [scrollbar-color:#C4BFB7_transparent] dark:[scrollbar-color:#4A453F_transparent]" style={{ scrollbarWidth: 'thin' }}>
                       {renderCodePane()}
                     </div>
                   </div>
@@ -547,7 +550,7 @@ export function AndromedaComponentView({
                   onClick={() => pageRelated(-1)}
                   disabled={!canGoPrev}
                   aria-label="Previous components"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-50 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-100 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                 >
                   <ArrowLeft weight="regular" size={15} />
                 </button>
@@ -556,7 +559,7 @@ export function AndromedaComponentView({
                   onClick={() => pageRelated(1)}
                   disabled={!canGoNext}
                   aria-label="Next components"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-100 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-50 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-sand-300 bg-sand-50 text-sand-600 transition-all duration-150 hover:border-sand-400 hover:bg-sand-100 hover:text-sand-900 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:border-sand-800 dark:bg-sand-900 dark:text-sand-400 dark:hover:border-sand-700 dark:hover:bg-sand-800 dark:hover:text-sand-100"
                 >
                   <ArrowRight weight="regular" size={15} />
                 </button>
@@ -596,11 +599,11 @@ export function AndromedaComponentView({
                   >
                     <Link
                       href={`/design-systems/andromeda/${c.slug}`}
-                      className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-100 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
+                      className="group flex flex-col overflow-hidden rounded-xl border border-sand-300 bg-sand-50 transition-colors duration-200 hover:border-sand-400 dark:border-sand-800 dark:bg-sand-900 dark:hover:border-sand-700"
                     >
                       <div
                         className="relative aspect-video overflow-hidden"
-                        style={{ backgroundColor: tokens.color.surface.base }}
+                        style={{ backgroundColor: themeColor.surface.base }}
                       >
                         {c.image ? (
                           <img
@@ -625,7 +628,7 @@ export function AndromedaComponentView({
                                 style={{
                                   fontFamily: tokens.typography.fontMono,
                                   fontSize: tokens.typography.size.xs,
-                                  color: tokens.color.text.faint,
+                                  color: themeColor.text.faint,
                                   textTransform: 'uppercase',
                                   letterSpacing: tokens.typography.tracking.widest,
                                 }}
@@ -671,7 +674,7 @@ export function AndromedaComponentView({
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 overflow-auto sm:inset-10 sm:rounded-2xl sm:border sm:border-sand-800 sm:shadow-2xl"
-            style={{ backgroundColor: tokens.color.surface.base }}
+            style={{ backgroundColor: themeColor.surface.base }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex min-h-full items-center justify-center p-8 sm:p-12">

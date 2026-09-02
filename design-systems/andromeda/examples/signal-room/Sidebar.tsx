@@ -23,6 +23,7 @@ import {
   SignOut,
 } from '@phosphor-icons/react';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { NavItem } from '../../components/NavItem';
 import type { UserMenuItem } from '../../components/UserMenu';
@@ -41,7 +42,7 @@ function InsetDivider({ side = 'bottom' }: { side?: 'top' | 'bottom' }) {
         right: tokens.spacing[3],
         [side]: 0,
         height: 'var(--andromeda-border-width, 1px)',
-        background: tokens.color.border.subtle,
+        background: themeColor.border.subtle,
         pointerEvents: 'none',
       }}
     />
@@ -60,13 +61,13 @@ const userMenuItems: UserMenuItem[] = [
 // channel's signal (accent = live, orange = hot, red = offline), the one place
 // colour is allowed on the rail. Unknown status falls back to a neutral pale dot.
 const STATUS_DOT = {
-  nominal: tokens.color.accent[300],
-  caution: tokens.color.orange[300],
-  fault:   tokens.color.red[300],
+  nominal: themeColor.accent[300],
+  caution: themeColor.orange[300],
+  fault:   themeColor.red[300],
 };
 
 function ChannelRow({ ch }: { ch: Channel }) {
-  const dot = STATUS_DOT[ch.status] ?? tokens.color.text.muted;
+  const dot = STATUS_DOT[ch.status] ?? themeColor.text.muted;
   return (
     <div
       style={{
@@ -84,9 +85,9 @@ function ChannelRow({ ch }: { ch: Channel }) {
           width: '24px',
           height: '24px',
           flexShrink: 0,
-          border: `${tokens.border.thin} ${tokens.color.border.subtle}`,
+          border: `${tokens.border.thin} ${themeColor.border.subtle}`,
           borderRadius: tokens.radius.frame,
-          background: tokens.color.surface.overlay,
+          background: themeColor.surface.overlay,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -107,7 +108,7 @@ function ChannelRow({ ch }: { ch: Channel }) {
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.primary,
+            color: themeColor.text.primary,
             letterSpacing: tokens.typography.tracking.wide,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -120,7 +121,7 @@ function ChannelRow({ ch }: { ch: Channel }) {
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: themeColor.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}
@@ -153,7 +154,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
           padding: `${tokens.spacing[3]} ${tokens.spacing[3]} ${tokens.spacing[2]}`,
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.xs,
-          color: tokens.color.text.faint,
+          color: themeColor.text.faint,
           textTransform: 'uppercase',
           letterSpacing: tokens.typography.tracking.widest,
         }}
@@ -194,7 +195,7 @@ export function SidebarNav({ activeNav, onNavChange, layoutGroupId = 'signal-roo
             padding: `0 ${tokens.spacing[3]} ${tokens.spacing[2]}`,
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.xs,
-            color: tokens.color.text.faint,
+            color: themeColor.text.faint,
             textTransform: 'uppercase',
             letterSpacing: tokens.typography.tracking.widest,
           }}
@@ -227,7 +228,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Side
         position: 'relative',
         width: tokens.layout.sidebarWidth,
         flexShrink: 0,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
         display: 'flex',
         flexDirection: 'column',
         backdropFilter: 'blur(var(--andromeda-blur-sm, 2px))',
@@ -253,7 +254,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Side
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               fontWeight: tokens.typography.weight.semibold,
@@ -265,7 +266,7 @@ export function Sidebar({ activeNav, onNavChange, motionProps, className }: Side
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
             }}

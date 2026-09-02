@@ -95,13 +95,11 @@ const buttonVariants = cva(
           // On-accent foreground: tracks the accent family, NOT the neutral
           // text ramp, so a theme that darkens text keeps the label legible.
           'text-[color:var(--andromeda-accent-on)]',
-          'bg-[color:var(--andromeda-accent-400)]',
-          'border-[color:var(--andromeda-accent-200)]',
-          'hover:bg-[color:var(--andromeda-accent-400)]',
-          'hover:border-[color:var(--andromeda-accent-200)]',
-          'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-400)]',
-          'active:bg-[color:var(--andromeda-accent-400)]',
-          'active:border-[color:var(--andromeda-accent-200)]',
+          'bg-[color:var(--andromeda-accent-500)]',
+          'border-[color:var(--andromeda-accent-400)]',
+          'hover:border-[color:var(--andromeda-accent-300)]',
+          'hover:shadow-[0_0_var(--andromeda-glow,8px)_var(--andromeda-accent-500)]',
+          'active:border-[color:var(--andromeda-accent-300)]',
         ],
         outline: [
           'text-[color:var(--andromeda-text-primary)]',
@@ -122,7 +120,7 @@ const buttonVariants = cva(
         destructive: [
           // On-fault foreground: bound to the red family, not the text ramp.
           'text-[color:var(--andromeda-red-on)]',
-          'bg-[color:var(--andromeda-red-400)]',
+          'bg-[color:var(--andromeda-red-500)]',
           'border-[color:var(--andromeda-red-400)]',
           'hover:bg-[color:var(--andromeda-red-400)]',
           'hover:border-[color:var(--andromeda-red-300)]',

@@ -22,7 +22,7 @@ import { CaretRight, DotsThreeVertical } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
 import { tokens } from '../tokens';
 import { IconButton } from './IconButton';
-import { andromedaVars } from './lib/utils';
+import { andromedaVars, inheritedThemeVars, themeColor } from './lib/utils';
 
 /**
  * @typedef {object} MenuItem
@@ -90,8 +90,8 @@ const MENU_PANEL_STYLE: CSSProperties = {
   maxHeight: `calc(100vh - ${tokens.spacing[4]})`,
   overflowY: 'auto',
   boxSizing: 'border-box',
-  background: tokens.color.surface.overlay,
-  border: `${tokens.border.thin} ${tokens.color.border.bright}`,
+  background: themeColor.surface.overlay,
+  border: `${tokens.border.thin} ${themeColor.border.bright}`,
   borderRadius: tokens.radius.frame,
   padding: tokens.spacing[1],
   zIndex: 1000,
@@ -164,8 +164,17 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   // when the parent menu is clamped near x=0 on a phone. Mirrors the parent
   // menu's reposition clamp; runs before paint, re-measures on resize/scroll.
   const [flipLeft, setFlipLeft] = useState(false);
+  // Viewport coords for the flyout. The panel scrolls (overflowY: auto), and
+  // an absolutely-positioned child at left:100% sits outside its scroll box,
+  // so the panel CLIPS it invisible. The flyout therefore renders with fixed
+  // coords measured from the item, which escape the clip; the scroll listener
+  // below (capture) re-measures so it tracks internal panel scrolling too.
+  const [subPos, setSubPos] = useState<{ top: number; left: number; right: number } | null>(null);
   useIsomorphicLayoutEffect(() => {
-    if (!submenuOpen) return;
+    if (!submenuOpen) {
+      setSubPos(null);
+      return;
+    }
     const decide = () => {
       const itemEl = itemRef.current;
       const sub = submenuRef.current;
@@ -177,6 +186,21 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
       const rightOverflows = ir.right + gap + w > window.innerWidth - margin;
       const leftFits = ir.left - gap - w >= margin;
       setFlipLeft(rightOverflows && leftFits);
+      // A fixed box is laid out against the viewport only while no ancestor
+      // establishes a containing block; a transform, filter or backdrop-filter
+      // (the Card's blur, so every inline docs menu) re-bases it on that
+      // ancestor, and viewport coords would land far off. Park the flyout at
+      // 0,0, read where that lands, and express the item coords in that frame.
+      // The inline overrides are undone right away so React's paint owns them.
+      const prev = { left: sub.style.left, top: sub.style.top, transform: sub.style.transform };
+      sub.style.left = '0px';
+      sub.style.top = '0px';
+      sub.style.transform = 'none';
+      const origin = sub.getBoundingClientRect();
+      sub.style.left = prev.left;
+      sub.style.top = prev.top;
+      sub.style.transform = prev.transform;
+      setSubPos({ top: ir.top - origin.top, left: ir.right - origin.left, right: ir.left - origin.left });
     };
     decide();
     window.addEventListener('resize', decide);
@@ -194,7 +218,7 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
         style={{
           height: '1px',
           margin: `${tokens.spacing[1]} 0`,
-          background: tokens.color.border.base,
+          background: themeColor.border.base,
         }}
       />
     );
@@ -245,10 +269,10 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
   }
 
   const color = item.destructive
-    ? tokens.color.red[300]
+    ? themeColor.red[300]
     : item.selected
-      ? tokens.color.text.primary
-      : tokens.color.text.secondary;
+      ? themeColor.text.primary
+      : themeColor.text.secondary;
 
   return (
     <div
@@ -305,11 +329,15 @@ function MenuItem({ item, onClose }: { item: MenuItem; onClose: () => void }) {
           }}
           style={{
             ...MENU_PANEL_STYLE,
-            position: 'absolute',
-            top: 0,
+            position: 'fixed',
+            top: `${subPos?.top ?? 0}px`,
             ...(flipLeft
-              ? { right: '100%', marginRight: tokens.spacing[1] }
-              : { left: '100%', marginLeft: tokens.spacing[1] }),
+              ? {
+                  left: `${(subPos?.right ?? 0) - (parseInt(tokens.spacing[1], 10) || 4)}px`,
+                  transform: 'translateX(-100%)',
+                }
+              : { left: `${(subPos?.left ?? 0) + (parseInt(tokens.spacing[1], 10) || 4)}px` }),
+            visibility: subPos ? 'visible' : 'hidden',
             zIndex: 1001,
           }}
         >
@@ -389,6 +417,14 @@ export const PanelMenu = forwardRef<HTMLDivElement, PanelMenuProps>(function Pan
   useIsomorphicLayoutEffect(() => {
     if (staticOpen) return;
     if (!open) { setCoords(null); return; }
+    // The body portal sits outside whatever ancestor defines the theme
+    // channel, so the menu wears the channel it inherited at the trigger.
+    // Written to the DOM here, before paint; React never manages these keys.
+    const trigger0 = wrapperRef.current;
+    const menu0 = menuRef.current;
+    if (trigger0 && menu0) {
+      for (const [name, value] of Object.entries(inheritedThemeVars(trigger0))) menu0.style.setProperty(name, value);
+    }
     const reposition = () => {
       const trigger = wrapperRef.current;
       const menu = menuRef.current;
@@ -445,8 +481,8 @@ export const PanelMenu = forwardRef<HTMLDivElement, PanelMenuProps>(function Pan
         }}
         data-state={open ? 'open' : 'closed'}
         style={open ? {
-          background: tokens.color.surface.active,
-          color: tokens.color.text.primary,
+          background: themeColor.surface.active,
+          color: themeColor.text.primary,
         } : undefined}
       />
 

@@ -31,6 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import { motion, LayoutGroup } from 'framer-motion';
 import { tokens } from '../../tokens';
+import { themeColor } from '../../components/lib/utils';
 import { mq } from '../../components/lib/responsive';
 import { CornerMarkers } from '../../components/CornerMarkers';
 import { Badge } from '../../components/Badge';
@@ -53,7 +54,7 @@ function HoverStyles() {
     <style>{`
       /* off-token: 'ease' keyword (no matching Andromeda easing token) — left literal */
       .so-nav        { transition: color 140ms ease; }
-      .so-nav:hover  { color: ${tokens.color.text.primary} !important; }
+      .so-nav:hover  { color: ${themeColor.text.primary} !important; }
     `}</style>
   );
 }
@@ -103,14 +104,14 @@ function NavLinks({ orientation = 'horizontal', onNavigate }: {
               padding: vertical
                 ? `${tokens.spacing[3]} ${tokens.spacing[4]}`
                 : `${tokens.spacing[2]} 0`,
-              background: vertical && active ? tokens.color.surface.active : 'transparent',
+              background: vertical && active ? themeColor.surface.active : 'transparent',
               border: 'none',
               cursor: 'pointer',
               textAlign: 'left',
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.sm,
               fontWeight: active ? tokens.typography.weight.semibold : tokens.typography.weight.regular,
-              color: active ? tokens.color.text.primary : tokens.color.text.muted,
+              color: active ? themeColor.text.primary : themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.wider,
             }}
@@ -127,7 +128,7 @@ function NavLinks({ orientation = 'horizontal', onNavigate }: {
                         top: tokens.spacing[2],
                         bottom: tokens.spacing[2],
                         width: '2px',
-                        background: tokens.color.accent[300],
+                        background: themeColor.accent[300],
                       }
                     : {
                         position: 'absolute',
@@ -135,7 +136,7 @@ function NavLinks({ orientation = 'horizontal', onNavigate }: {
                         right: 0,
                         bottom: '-2px',
                         height: '2px',
-                        background: tokens.color.accent[300],
+                        background: themeColor.accent[300],
                       }
                 }
               />
@@ -169,7 +170,7 @@ function TopBar() {
         alignItems: 'center',
         gap: tokens.spacing[5],
         padding: `0 ${tokens.spacing[6]}`,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
       }}
     >
       <CornerMarkers />
@@ -182,7 +183,7 @@ function TopBar() {
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.primary,
+              color: themeColor.text.primary,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
               fontWeight: tokens.typography.weight.semibold,
@@ -194,7 +195,7 @@ function TopBar() {
             style={{
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.muted,
+              color: themeColor.text.muted,
               textTransform: 'uppercase',
               letterSpacing: tokens.typography.tracking.widest,
             }}
@@ -204,7 +205,7 @@ function TopBar() {
         </div>
       </div>
 
-      <span className="so-nav-divider" aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[6], background: tokens.color.border.base, flexShrink: 0 }} />
+      <span className="so-nav-divider" aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[6], background: themeColor.border.base, flexShrink: 0 }} />
 
       {/* Inline nav — hidden below `mq.md`, where the hamburger + Drawer take over. */}
       <div className="so-inline-nav" style={{ display: 'flex', alignItems: 'center' }}>
@@ -222,7 +223,7 @@ function TopBar() {
           style={{
             fontFamily: tokens.typography.fontMono,
             fontSize: tokens.typography.size.sm,
-            color: tokens.color.text.secondary,
+            color: themeColor.text.secondary,
             letterSpacing: tokens.typography.tracking.wider,
           }}
         >
@@ -263,7 +264,7 @@ function PageHeaderStrip() {
         flexWrap: 'wrap',
         gap: tokens.spacing[3],
         padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`,
-        background: tokens.color.surface.raised,
+        background: themeColor.surface.raised,
       }}
     >
       <CornerMarkers />
@@ -273,7 +274,7 @@ function PageHeaderStrip() {
           fontFamily: tokens.typography.fontMono,
           fontSize: tokens.typography.size.md,
           fontWeight: tokens.typography.weight.semibold,
-          color: tokens.color.text.primary,
+          color: themeColor.text.primary,
           letterSpacing: tokens.typography.tracking.wider,
           textTransform: 'uppercase',
         }}
@@ -285,9 +286,9 @@ function PageHeaderStrip() {
 
       <div className="so-page-header-cluster" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: tokens.spacing[5] }}>
         {[
-          { label: 'Issues',    value: pageMetrics[0].value, icon: Warning,      color: tokens.color.orange[300] },
-          { label: 'Accidents', value: pageMetrics[2].value, icon: XCircle,      color: tokens.color.red[300]    },
-          { label: 'Resolved',  value: pageMetrics[1].value, icon: CheckCircle,  color: tokens.color.accent[300] },
+          { label: 'Issues',    value: pageMetrics[0].value, icon: Warning,      color: themeColor.orange[300] },
+          { label: 'Accidents', value: pageMetrics[2].value, icon: XCircle,      color: themeColor.red[300]    },
+          { label: 'Resolved',  value: pageMetrics[1].value, icon: CheckCircle,  color: themeColor.accent[300] },
         ].map(({ label, value, icon: Icon, color }) => (
           <span
             key={label}
@@ -302,13 +303,13 @@ function PageHeaderStrip() {
               textTransform: 'uppercase',
             }}
           >
-            <Icon weight="regular" size={14} color={color} />
+            <Icon weight="regular" size={14} style={{ color }} />
             {label}
             <span style={{ color }}>{value}</span>
           </span>
         ))}
 
-        <span aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[5], background: tokens.color.border.base }} />
+        <span aria-hidden style={{ width: 'var(--andromeda-border-width, 1px)', height: tokens.spacing[5], background: themeColor.border.base }} />
 
         <Tooltip label="Refresh"><IconButton aria-label="Refresh" variant="ghost" size="sm" icon={ArrowsClockwise} /></Tooltip>
         <Tooltip label="Hide"><IconButton aria-label="Hide"    variant="ghost" size="sm" icon={EyeSlash} /></Tooltip>
@@ -366,9 +367,9 @@ export default function ServiceOrder() {
         // than the visible area and eats the right padding (left looks fine, right
         // is clipped). Matches mission-control / signal-room.
         width: '100%',
-        background: tokens.color.surface.base,
+        background: themeColor.surface.base,
         fontFamily: tokens.typography.fontSans,
-        color: tokens.color.text.primary,
+        color: themeColor.text.primary,
         overflow: 'hidden',
         gap: tokens.spacing[3],
         padding: tokens.spacing[6],
