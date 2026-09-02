@@ -384,14 +384,14 @@ export default function AndromedaShowcase({
         `}</style>
 
         {/* Page header — AI Canvas site style (Manrope), not the Andromeda mono
-            aesthetic of the demos below. Fixed light-on-dark colours because the
-            showcase surface is always the Andromeda void. */}
+            aesthetic of the demos below. Site sand/olive pairs so the header follows
+            the site theme like the rest of the page. */}
         <header style={{ marginBottom: tokens.spacing[6], fontFamily: "var(--font-sans), 'Manrope', system-ui, sans-serif" }}>
           <div
+            className="text-olive-600 dark:text-olive-400"
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: '#DAE4A0',
               textTransform: 'uppercase',
               letterSpacing: '0.12em',
               marginBottom: 10,
@@ -400,12 +400,11 @@ export default function AndromedaShowcase({
             Andromeda
           </div>
           <h1
-            className="as-title"
+            className="as-title text-sand-900 dark:text-sand-50"
             style={{
               margin: 0,
               fontSize: 'clamp(30px, 4.5vw, 42px)',
               fontWeight: 800,
-              color: '#F4F4FA',
               letterSpacing: '-0.02em',
               lineHeight: 1.05,
             }}
@@ -413,23 +412,23 @@ export default function AndromedaShowcase({
             System
           </h1>
           <p
+            className="text-sand-600 dark:text-sand-400"
             style={{
               margin: '16px 0 0 0',
               maxWidth: '56ch',
               fontSize: 16,
               fontWeight: 400,
               lineHeight: 1.6,
-              color: '#9B9B9E',
             }}
           >
             Built for designers, developers, and teams who want a system, not a stylesheet. Tokens, components, templates, and a documented brain that keeps everyone aligned.
           </p>
           <div
+            className="text-sand-500"
             style={{
               marginTop: 16,
               fontSize: 11,
               fontWeight: 600,
-              color: '#7B7B7D',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
             }}
