@@ -59,25 +59,21 @@ export function Paywall({
   const title = name ? `Unlock ${name}` : 'Premium content'
 
   return (
-    // Scoped dark with its own ground: the lock replaces a code slab, and code
-    // slabs render dark in both site themes; without the pinned background the
-    // black fade would sit on a light card in light mode.
-    <div className="dark relative min-h-[360px] w-full overflow-hidden bg-sand-950">
+    <div className="relative min-h-[360px] w-full overflow-hidden bg-sand-300 dark:bg-sand-950">
       <pre
         aria-hidden
         className="pointer-events-none absolute inset-0 select-none overflow-hidden whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-sand-600 opacity-30 blur-[3px]"
       >
         {teaser}
       </pre>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-sand-950/0 via-sand-950/85 to-sand-950 px-4 text-center">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-sand-800 bg-sand-900">
-          <LockSimple weight="regular" size={20} className="text-olive-400" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-sand-300/0 via-sand-300/85 to-sand-300 px-4 text-center dark:from-sand-950/0 dark:via-sand-950/85 dark:to-sand-950">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full border border-sand-400 bg-sand-200 dark:border-sand-800 dark:bg-sand-900">
+          <LockSimple weight="regular" size={20} className="text-olive-600 dark:text-olive-400" />
         </div>
-        <h3 className="text-base font-bold text-sand-50">{title}</h3>
-        <p className="max-w-xs text-sm leading-relaxed text-sand-400">{subtitle}</p>
-        {/* Fixed dark skin, not buttonClasses: this panel is bg-sand-950 in both
-            site themes, so the outline variant's light-mode default would put
-            sand-700 text on black. */}
+        <h3 className="text-base font-bold text-sand-900 dark:text-sand-50">{title}</h3>
+        <p className="max-w-xs text-sm leading-relaxed text-sand-600 dark:text-sand-400">{subtitle}</p>
+        {/* Hand-skinned, not buttonClasses: the wall paints its own faded
+            ground in each theme, so the buttons pair with it directly. */}
         <div className="mt-1 flex items-center gap-2">
           <Link
             href="/pricing"
@@ -89,7 +85,7 @@ export function Paywall({
             <button
               type="button"
               onClick={() => open()}
-              className="rounded-lg border border-sand-700 px-4 py-2 text-sm font-semibold text-sand-200 transition-colors hover:border-sand-600 hover:text-sand-50"
+              className="rounded-lg border border-sand-500 px-4 py-2 text-sm font-semibold text-sand-700 transition-colors hover:border-sand-600 hover:text-sand-900 dark:border-sand-700 dark:text-sand-200 dark:hover:border-sand-600 dark:hover:text-sand-50"
             >
               Log in
             </button>
