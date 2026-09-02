@@ -1916,7 +1916,7 @@ export default function ComponentPageView({
                 {remixPrompt}
               </pre>
               {promptLocked && (
-                <Paywall reason="premium-only" teaser={LOCKED_PROMPT_TEASER} name={name} />
+                <Paywall reason="premium-only" appearance="themed" teaser={LOCKED_PROMPT_TEASER} name={name} />
               )}
             </div>
           </div>
