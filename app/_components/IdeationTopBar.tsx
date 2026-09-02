@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { HeaderSocials } from '../components/HeaderSocials'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Breadcrumbs, type Crumb } from '../components/Breadcrumbs'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
@@ -81,7 +82,7 @@ function buildCrumbs(pathname: string): Crumb[] | null {
 }
 
 const headerClass =
-  'sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-300 bg-sand-200 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex'
+  'sticky top-0 z-10 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-sand-200 bg-sand-50 px-6 dark:border-sand-800 dark:bg-sand-950 md:flex'
 
 export function IdeationTopBar() {
   const pathname = usePathname() ?? '/ideation'
@@ -109,11 +110,13 @@ export function IdeationTopBar() {
       {isBrainReader ? (
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
+          <ThemeToggle />
           <TopAuthPill />
         </div>
       ) : isShowcase ? (
         <div className="flex items-center gap-2">
           <div id="andromeda-install-slot" />
+          <ThemeToggle />
           <TopAuthPill />
         </div>
       ) : (

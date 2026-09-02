@@ -36,7 +36,7 @@ export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   const className = isTemplate
     ? 'aic-page-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:overflow-y-hidden'
     : isOverview
-      ? 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-200 dark:bg-sand-950'
+      ? 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto bg-sand-50 dark:bg-sand-950'
       : 'aic-page-scroll flex flex-1 scroll-smooth flex-col overflow-y-auto'
 
   // The void goes through the theme channel, not the raw token, so the column

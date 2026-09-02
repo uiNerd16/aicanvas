@@ -129,10 +129,16 @@ const jetbrainsMono = JetBrains_Mono({
 function useAndromedaColors() {
   const [themed, setThemed] = useState(false)
   useEffect(() => {
-    const read = () => setThemed(
-      !!getComputedStyle(document.documentElement)
-        .getPropertyValue('--andromeda-theme-surface-base').trim(),
-    )
+    // The channel lives on the layout's .andromeda-theme-scope div, never on
+    // <html>, so probe the scope element; a page without the scope (the
+    // ideation landing) reads as unthemed and stays dark, which is true.
+    const read = () => {
+      const scope = document.querySelector('.andromeda-theme-scope')
+      setThemed(
+        !!scope
+        && !!getComputedStyle(scope).getPropertyValue('--andromeda-theme-surface-base').trim(),
+      )
+    }
     read()
     return subscribeToTheme(read)
   }, [])

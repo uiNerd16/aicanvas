@@ -35,8 +35,12 @@ export function AndromedaThemeSync() {
       const hasLight = frameRoot.style.getPropertyValue(probe) !== ''
       if (wantLight === hasLight) return
       if (wantLight) {
+        // The marker lets the frame shell's forced-dark pins (globals.css and
+        // the FramePayload style block) step aside without a flash.
+        frameRoot.setAttribute('data-frame-light', '')
         for (const name of names) frameRoot.style.setProperty(name, vars[name as keyof typeof vars])
       } else {
+        frameRoot.removeAttribute('data-frame-light')
         for (const name of names) frameRoot.style.removeProperty(name)
       }
     }

@@ -61,7 +61,9 @@ export default async function WelcomePage() {
   }
 
   return (
-    <div className="min-h-full bg-sand-950">
+    // Scoped dark: this page is a dark set piece with no light rendering, so
+    // it opts out of the site theme the way pinned-dark.ts documents.
+    <div className="dark min-h-full bg-sand-950">
       <header className="sticky top-0 z-30 hidden h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-sand-800 bg-sand-950 px-6 md:grid">
         <div />
         <Link href="/welcome" className="text-sm font-semibold text-olive-500 transition-colors hover:text-olive-400">

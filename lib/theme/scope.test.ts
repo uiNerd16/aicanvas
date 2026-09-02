@@ -44,6 +44,9 @@ describe('theme scope contract', () => {
     const offenders = walk(join(root, 'app'))
       .filter((f) => !f.endsWith('ThemeProvider.tsx'))
       .filter((f) => !f.endsWith('.test.ts'))
+      // The frame mirror writes theme VARS on the frame document's root, never
+      // the dark class or the cookie; reviewed exception.
+      .filter((f) => !f.endsWith('AndromedaThemeSync.tsx'))
       .filter((f) => {
         const src = readFileSync(f, 'utf8')
         // Writing the class on <html>, or writing the cookie the server reads.
@@ -52,7 +55,7 @@ describe('theme scope contract', () => {
         // the literal chain above cannot see.
         return /documentElement\.classList\.(add|remove|toggle)\(\s*['"`]dark/.test(src)
           || /document\.cookie\s*=\s*[`'"]theme=/.test(src)
-          || /=\s*document\.documentElement\b/.test(src)
+          || /=\s*(?:window\.(?:parent\.)?)?document\.documentElement\b/.test(src)
       })
       .map((f) => f.slice(root.length + 1))
 

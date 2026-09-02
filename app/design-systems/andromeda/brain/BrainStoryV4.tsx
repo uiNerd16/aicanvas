@@ -820,7 +820,9 @@ export function BrainStoryV4() {
   }, [dirs])
 
   return (
-    <div style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
+    // Scoped dark: the brain landing is a dark editorial set piece with its own
+    // palette, so its chrome must not follow the site theme.
+    <div className="dark" style={{ minHeight: '100vh', background: C.base, display: 'flex', flexDirection: 'column' }}>
       {/* top tab — left-aligned breadcrumb (Andromeda -> overview, current page
           in olive), consistent with the content pages' breadcrumb pattern. */}
       <header className="sticky top-0 z-50 hidden h-14 items-center justify-between gap-4 border-b border-sand-800 bg-sand-950 px-6 md:flex">

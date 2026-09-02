@@ -142,11 +142,11 @@ body {
    var(--background) (#1A1712, warm brown) inside the phone frame until the
    template streams in. Pin the framed document to the preview surface
    (sand-950) from the very first paint. */
-html[data-frame] {
+html[data-frame]:not([data-frame-light]) {
   color-scheme: dark;
 }
-html[data-frame],
-html[data-frame] body {
+html[data-frame]:not([data-frame-light]),
+html[data-frame]:not([data-frame-light]) body {
   background: #0e0e0f !important;
   transition: none !important;
 }
@@ -156,10 +156,13 @@ html[data-frame] body {
    is drawn dark. The wrapper is server-rendered from ?theme=, so :has() matches
    on the first paint and no flash is introduced. */
 html[data-frame]:has([data-card-theme="light"]),
-html[data-frame]:has([data-card-theme="light"]) body {
+html[data-frame][data-frame-light],
+html[data-frame]:has([data-card-theme="light"]) body,
+html[data-frame][data-frame-light] body {
   background: var(--color-sand-50) !important;
 }
-html[data-frame]:has([data-card-theme="light"]) {
+html[data-frame]:has([data-card-theme="light"]),
+html[data-frame][data-frame-light] {
   color-scheme: light;
 }
 

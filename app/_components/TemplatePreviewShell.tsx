@@ -18,6 +18,7 @@ import { useSession } from '../components/auth/SessionProvider'
 import { usePaywallModal } from '../components/billing/PaywallModalProvider'
 import { usePremiumStatus } from '../components/billing/usePremiumStatus'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { Button, buttonClasses } from '../components/Button'
 import { INSTALL_CONTENTS } from '../lib/install-contents.generated'
 import { getDesignSystemTemplateMeta } from '../lib/design-system-meta'
@@ -234,9 +235,13 @@ function FramePayload({ children }: { children: ReactNode }) {
            color-scheme:dark so the browser's default canvas is dark while the
            document is still loading. Scoped to the iframe — the site's own
            theme transition is untouched. */
-        html { color-scheme: dark; }
-        html, body {
+        html:not([data-frame-light]) { color-scheme: dark; }
+        html:not([data-frame-light]), html:not([data-frame-light]) body {
           background: #0E0E0F !important;
+          transition: none !important;
+        }
+        html[data-frame-light], html[data-frame-light] body {
+          background: #F4F4F5 !important;
           transition: none !important;
         }
         /* html/body alone is NOT enough on the fallback path. A browser that
@@ -249,8 +254,12 @@ function FramePayload({ children }: { children: ReactNode }) {
            Force every ancestor of the frame viewport to the dark surface too;
            :has() matches ancestors only, so the composition's own surfaces are
            untouched. */
-        body *:has(.mc-frame-viewport) {
+        html:not([data-frame-light]) body *:has(.mc-frame-viewport) {
           background: #0E0E0F !important;
+          transition: none !important;
+        }
+        html[data-frame-light] body *:has(.mc-frame-viewport) {
+          background: #F4F4F5 !important;
           transition: none !important;
         }
         /* Overlay-style scrollbars: hide the bar AND drop the reserved 18px
@@ -492,8 +501,9 @@ function TopBar({
           </button>
         </div>
 
-        {/* Right — entitlement CTA + auth */}
+        {/* Right — theme toggle + entitlement CTA + auth */}
         <div className="flex items-center justify-end gap-2">
+          <ThemeToggle />
           <RightCluster
             templateSlug={templateSlug}
             systemName={systemName}
