@@ -91,7 +91,7 @@ export default async function AndromedaBrainReaderPage() {
   // Scoped dark: the reader is a dark editorial surface with its own palette
   // and no light rendering, like the brain landing above it.
   return (
-    <div className="dark" style={{ background: '#0E0E0F', minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+    <div className="dark" style={{ background: '#0E0E0F', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
       <BrainViewer files={files} />
     </div>
   )

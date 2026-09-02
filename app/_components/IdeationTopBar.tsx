@@ -5,6 +5,7 @@ import { HeaderSocials } from '../components/HeaderSocials'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { TopAuthPill } from '../components/auth/TopAuthPill'
 import { Breadcrumbs, type Crumb } from '../components/Breadcrumbs'
+import { isPinnedDarkRoute } from '../lib/pinned-dark'
 import { ANDROMEDA_COMPONENT_META } from '../_lib/andromeda/andromeda-meta'
 
 // The sticky top-bar breadcrumb for design-system + ideation routes. One
@@ -104,8 +105,10 @@ export function IdeationTopBar() {
   const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
   const isShowcase = pathname === '/design-systems/andromeda/system'
 
+  // Pinned-dark surfaces (the brain routes) keep a dark bar over a dark page
+  // in either site theme.
   return (
-    <div className={headerClass}>
+    <div className={isPinnedDarkRoute(pathname) ? `dark ${headerClass}` : headerClass}>
       <Breadcrumbs crumbs={crumbs} />
       {isBrainReader ? (
         // No ThemeToggle here: the brain reader is a pinned-dark surface with
