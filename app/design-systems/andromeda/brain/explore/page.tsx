@@ -88,10 +88,11 @@ export default async function AndromedaBrainReaderPage() {
     )
   }
 
-  // The reader paints from its own palette in both themes (see BrainViewer)
-  // and follows the site toggle like the brain landing above it.
+  // The reader paints from its own palette in both themes (see BrainViewer);
+  // the page ground belongs to the scroll column (AndromedaContentColumn), so
+  // it holds past this box's height.
   return (
-    <div className="flex min-h-full flex-col bg-sand-50 dark:bg-sand-950">
+    <div className="flex flex-col">
       <BrainViewer files={files} />
     </div>
   )

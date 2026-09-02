@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { IdeationTopBar } from '../../_components/IdeationTopBar'
 import { themeColor } from '../../../design-systems/andromeda/components/lib/utils'
-import { tokens } from '../../../design-systems/andromeda/tokens'
 
 // Template leaf routes own the full viewport (sidebar + topbar are suppressed).
 // On DESKTOP (md+) the template pins itself to 100vh and manages its own
@@ -21,15 +20,14 @@ const TEMPLATE_LEAF_RE = /^\/design-systems\/[^/]+\/templates\/[^/]+/
 // container (not a min-h-full child) so it always covers the full scrollable
 // height — a child can two-tone when content overflows.
 const OVERVIEW_RE = /^\/design-systems\/andromeda\/?$/
-// The brain routes are dark set pieces with no light rendering; the scroll
-// column itself paints the raw dark void so the ground holds past any child's
-// box height, in either site theme.
+// The brain routes are AI Canvas chrome too (sand/olive in both themes), so
+// they take the same page surface as the overview, on the scroll container
+// for the same reason.
 const BRAIN_RE = /^\/design-systems\/andromeda\/brain(\/|$)/
 export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? ''
   const isTemplate = TEMPLATE_LEAF_RE.test(pathname)
-  const isOverview = OVERVIEW_RE.test(pathname)
-  const isBrain = BRAIN_RE.test(pathname)
+  const isOverview = OVERVIEW_RE.test(pathname) || BRAIN_RE.test(pathname)
 
   // No bottom padding on template leaves: the old `pb-28` was terminal-scroll
   // clearance for the retired floating TemplateChrome widget. Templates now
@@ -50,11 +48,9 @@ export function AndromedaContentColumn({ children }: { children: ReactNode }) {
   // dark border.
   const style = isTemplate
     ? { backgroundColor: themeColor.surface.base }
-    : isBrain
-      ? { backgroundColor: tokens.color.surface.base, scrollbarGutter: 'stable' }
-      : isOverview
-        ? { scrollbarGutter: 'stable' }
-        : { backgroundColor: themeColor.surface.base, scrollbarGutter: 'stable' }
+    : isOverview
+      ? { scrollbarGutter: 'stable' }
+      : { backgroundColor: themeColor.surface.base, scrollbarGutter: 'stable' }
 
   return (
     <div className={className} style={style}>
