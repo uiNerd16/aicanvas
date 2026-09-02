@@ -1851,14 +1851,7 @@ export default function ComponentPageView({
                     instead of copying, so only the label was lying: it offered
                     a clipboard action beside a command that is already dots.
                     Same treatment as the locked prompt below. */}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={copyCli}
-                  // Light keeps this ink-dark: a solid olive fill inside the
-                  // olive-tinted card reads green-on-green on the light page.
-                  className="!bg-sand-900 !text-sand-50 hover:!bg-sand-800 dark:!bg-olive-500 dark:!text-sand-950 dark:hover:!bg-olive-400"
-                >
+                <Button variant="primary" size="sm" onClick={copyCli}>
                   {needsPremium
                     ? <LockSimple weight="regular" size={15} />
                     : cliCopied
