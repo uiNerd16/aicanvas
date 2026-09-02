@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   title: 'The GPT Cage: A Second AI Builder, Locked Down',
   description:
     'Claude-to-GPT delegation packaged as a Claude Code plugin: a skill that sets the policy and an MCP server whose sandbox flags live in code. A read lane, a write lane with no network and no git, and a diff you approve.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v3/gpt-cage` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   // Design variant page, kept out of the index while directions are compared.
-  robots: { index: false, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'A second builder, and the cage that makes it safe',
     description:

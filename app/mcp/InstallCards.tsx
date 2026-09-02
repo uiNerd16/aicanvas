@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Step } from '../components/Step'
 import { CodeBlock, Toast, useToast } from '../components/CopyBlocks'
+import { copyText } from '../components/useCopied'
 
 // ── Static config ────────────────────────────────────────────────────────────
 
@@ -162,19 +163,18 @@ export function InstallCards() {
     return () => { cancelled = true }
   }, [])
 
-  function copy(text: string, toast: string, setLocal: (v: boolean) => void) {
+  async function copy(text: string, toast: string, setLocal: (v: boolean) => void) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
       show('Copy not supported, copy it manually')
       return
     }
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setLocal(true)
-        show(toast)
-        setTimeout(() => setLocal(false), 2000)
-      })
-      .catch(() => show('Copy failed, try again'))
+    if (!(await copyText(text))) {
+      show('Copy failed, try again')
+      return
+    }
+    setLocal(true)
+    show(toast)
+    setTimeout(() => setLocal(false), 2000)
   }
 
   const isCodex = tool === 'codex'

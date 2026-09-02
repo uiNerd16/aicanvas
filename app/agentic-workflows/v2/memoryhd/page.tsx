@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: 'memoryHD: Persistent Memory for Claude Code',
   description:
     'memoryHD is a free Apache-2.0 Claude Code plugin. It writes notes as you work, recalls the right one on every prompt, keeps keys out of the notes, and proposes cleanup you approve.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v2/memoryhd` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   robots: { index: false, follow: false },
 }
 

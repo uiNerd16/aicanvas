@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Step } from '../components/Step'
 import { CodeBlock, Toast, useToast } from '../components/CopyBlocks'
+import { copyText } from '../components/useCopied'
 
 // memoryHD ships from its own public repository. Two paths in: the plugin
 // marketplace (persistent) or a plain clone + --plugin-dir (try it first).
@@ -20,19 +21,18 @@ export function MemoryInstall() {
   const [path, setPath] = useState<Path>('marketplace')
   const [copied, setCopied] = useState<string | null>(null)
 
-  function copy(text: string, toast: string, key: string) {
+  async function copy(text: string, toast: string, key: string) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
       show('Copy not supported, copy it manually')
       return
     }
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setCopied(key)
-        show(toast)
-        setTimeout(() => setCopied(null), 2000)
-      })
-      .catch(() => show('Copy failed, try again'))
+    if (!(await copyText(text))) {
+      show('Copy failed, try again')
+      return
+    }
+    setCopied(key)
+    show(toast)
+    setTimeout(() => setCopied((c) => (c === key ? null : c)), 2000)
   }
 
   return (

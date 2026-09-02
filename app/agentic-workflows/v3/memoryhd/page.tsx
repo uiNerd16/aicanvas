@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   title: 'memoryHD: Persistent Memory for Claude Code',
   description:
     'memoryHD writes notes as you work and recalls the right one on every prompt, with its age attached. Plain markdown files you own, a librarian that only proposes cleanup, and a write gate that keeps keys out. Free and Apache-2.0.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v3/memoryhd` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   // Design variant page, kept out of the index while directions are compared.
-  robots: { index: false, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'Decide it once, and your agent keeps it',
     description:

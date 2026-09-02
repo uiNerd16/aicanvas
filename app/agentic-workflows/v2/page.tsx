@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: 'Claude Code Plugins for Memory and Delegation',
   description:
     'A small catalog of Claude Code plugins: memoryHD gives your agent a memory that recalls the right note on every prompt, and the GPT cage puts a second builder in a sandbox that cannot reach git, the network, or your secrets.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v2` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   robots: { index: false, follow: false },
 }
 

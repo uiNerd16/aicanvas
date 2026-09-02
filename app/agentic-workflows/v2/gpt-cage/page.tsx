@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: 'The GPT Cage: Sandboxed Delegation for Claude Code',
   description:
     'A Claude Code plugin that lets your agent hand work to a second model inside a sandbox. Two tools, one read-only and one write, with no git access, refused secret paths, and a diff you review.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v2/gpt-cage` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   robots: { index: false, follow: false },
 }
 

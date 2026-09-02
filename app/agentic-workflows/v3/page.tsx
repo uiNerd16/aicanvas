@@ -20,10 +20,10 @@ export const metadata: Metadata = {
   title: 'Agentic Workflows: Memory, Delegation, and the Gate in the Middle',
   description:
     'One person, a team of agents, and the guardrails that make that safe. memoryHD gives Claude Code a memory it cannot skip. The GPT cage gives it a second builder that cannot reach git, the network, or your secrets.',
-  alternates: { canonical: `${SITE_URL}/agentic-workflows/v3` },
+  alternates: { canonical: `${SITE_URL}/agentic-workflows` },
   // Design variant of /agentic-workflows. Kept out of the index while both
   // directions are side by side; drop this line when one of them wins.
-  robots: { index: false, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'One person, a team of agents, and the guardrails in between',
     description:
