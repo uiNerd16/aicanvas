@@ -105,16 +105,14 @@ export function IdeationTopBar() {
   const isBrainReader = pathname === '/design-systems/andromeda/brain/explore'
   const isShowcase = pathname === '/design-systems/andromeda/system'
 
-  // Pinned-dark surfaces (the brain routes) keep a dark bar over a dark page
-  // in either site theme.
+  // Pinned-dark surfaces keep a dark bar over a dark page in either site theme.
   return (
     <div className={isPinnedDarkRoute(pathname) ? `dark ${headerClass}` : headerClass}>
       <Breadcrumbs crumbs={crumbs} />
       {isBrainReader ? (
-        // No ThemeToggle here: the brain reader is a pinned-dark surface with
-        // no light rendering to switch to.
         <div className="flex items-center gap-2">
           <div id="brain-install-slot" />
+          <ThemeToggle />
           <TopAuthPill />
         </div>
       ) : isShowcase ? (

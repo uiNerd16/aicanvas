@@ -13,10 +13,9 @@
 export function isPinnedDarkRoute(pathname: string | null | undefined): boolean {
   if (!pathname) return false
   // /design-systems is deliberately NOT in this list: Andromeda ships a
-  // light theme and its routes follow the site toggle like any other page.
-  return pathname === '/design-systems/andromeda/brain'
-    || pathname.startsWith('/design-systems/andromeda/brain/')
-    || pathname.startsWith('/welcome')
+  // light theme and every one of its routes, the brain pages included,
+  // follows the site toggle like any other page.
+  return pathname.startsWith('/welcome')
     || pathname.startsWith('/ideation')
     || pathname.startsWith('/lab')
     || pathname.startsWith('/tune')
