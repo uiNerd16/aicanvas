@@ -54,15 +54,15 @@ export function McpTokenSection({ token }: Props) {
 
       {token ? (
         <>
-          <div className="mt-4 flex items-center justify-between gap-2 rounded-lg bg-sand-950 px-4 py-3">
-            <code className="min-w-0 flex-1 truncate font-mono text-sm text-sand-300">
+          <div className="mt-4 flex items-center justify-between gap-2 rounded-lg bg-sand-200 px-4 py-3 dark:bg-sand-950">
+            <code className="min-w-0 flex-1 truncate font-mono text-sm text-sand-800 dark:text-sand-300">
               {revealed ? token : MASKED}
             </code>
             <div className="flex shrink-0 items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => setRevealed((v) => !v)}
-                className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                className="rounded-md p-1.5 text-sand-600 transition-all hover:text-sand-800 active:scale-90 dark:text-sand-500 dark:hover:text-sand-200"
                 aria-label={revealed ? 'Hide token' : 'Reveal token'}
                 aria-pressed={revealed}
               >
@@ -73,7 +73,7 @@ export function McpTokenSection({ token }: Props) {
               <button
                 type="button"
                 onClick={copy}
-                className="rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+                className="rounded-md p-1.5 text-sand-600 transition-all hover:text-sand-800 active:scale-90 dark:text-sand-500 dark:hover:text-sand-200"
                 aria-label="Copy token"
               >
                 {copied
@@ -86,14 +86,14 @@ export function McpTokenSection({ token }: Props) {
           <h3 className="mt-5 text-sm font-semibold text-sand-900 dark:text-sand-50">
             Personal install command
           </h3>
-          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-sand-950 px-4 py-3">
-            <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-xs text-sand-300">
+          <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-sand-200 px-4 py-3 dark:bg-sand-950">
+            <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-xs text-sand-800 dark:text-sand-300">
               {installCmd(revealed ? token : MASKED)}
             </code>
             <button
               type="button"
               onClick={copyCmd}
-              className="shrink-0 rounded-md p-1.5 text-sand-500 transition-all hover:text-sand-200 active:scale-90"
+              className="shrink-0 rounded-md p-1.5 text-sand-600 transition-all hover:text-sand-800 active:scale-90 dark:text-sand-500 dark:hover:text-sand-200"
               aria-label="Copy install command"
             >
               {cmdCopied
