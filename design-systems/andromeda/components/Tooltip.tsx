@@ -138,6 +138,13 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
               left: '50%',
               x: `calc(-50% + ${shiftX}px)`,
               pointerEvents: 'none',
+              // Size to the label, never to the trigger. An absolutely
+              // positioned box shrink-to-fits against its containing block,
+              // which here is the trigger wrapper less the 50% inset: on a 24px
+              // icon button that leaves about 12px, so the label broke after
+              // every word. max-content sizes to the text instead, and it is
+              // the trigger-width independence that matters, not a nowrap rule.
+              width: 'max-content',
               // Clamp to the viewport so a long centred label can't overflow a
               // screen edge and force horizontal page scroll on a phone. A
               // label that outgrows the clamp wraps (overflowWrap) rather than
