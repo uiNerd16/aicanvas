@@ -1,4 +1,3 @@
-// @ts-nocheck — design-systems/ is not type-checked (see design-systems/CLAUDE.md). Strip this after a proper typing pass.
 // ============================================================
 // COMPONENT: Tooltip
 // Wraps any child and shows a floating label on hover.
@@ -11,8 +10,11 @@
 'use client';
 
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Transition } from 'framer-motion';
 import { tokens } from '../tokens';
+import { andromedaVars, themeColor } from './lib/utils';
 
 // Layout effect on the client (measure + correct before paint, no flash),
 // plain effect on the server (avoids the useLayoutEffect SSR warning).
@@ -21,21 +23,26 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 // Keep the clamped tooltip this far (token) clear of either viewport edge.
 const EDGE_INSET = parseInt(tokens.spacing[2], 10); // 8px
 
-const ms = (v) => parseInt(v, 10) / 1000;
-const ENTER_TX = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] }; // easing.out
-const EXIT_TX  = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] }; // easing.in
+const ms = (v: string) => parseInt(v, 10) / 1000;
+const ENTER_TX: Transition = { duration: ms(tokens.motion.duration.normal), ease: [0, 0, 0.2, 1] }; // easing.out
+const EXIT_TX: Transition  = { duration: ms(tokens.motion.duration.fast),   ease: [0.4, 0, 1, 1] }; // easing.in
 
 /**
  * @typedef {object} TooltipProps
- * @property {string} label              Text shown in the tooltip.
+ * @property {React.ReactNode} label     Content shown in the tooltip.
  * @property {'top'|'bottom'} [position='top']
  * @property {React.ReactNode} children  The trigger element.
  * @property {string} [className]
  * @property {React.CSSProperties} [style]
  */
 
+export type TooltipProps = ComponentPropsWithoutRef<'div'> & {
+  label: ReactNode;
+  position?: 'top' | 'bottom';
+};
+
 /** @type {React.ForwardRefExoticComponent<TooltipProps & React.HTMLAttributes<HTMLDivElement>>} */
-export const Tooltip = forwardRef(function Tooltip(
+export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
   { label, position = 'top', children, className, style, ...props },
   ref,
 ) {
@@ -45,7 +52,7 @@ export const Tooltip = forwardRef(function Tooltip(
   // viewport instead of overflowing it and forcing horizontal page scroll. 0 in
   // the common (mid-screen) case; measured only while visible.
   const [shiftX, setShiftX] = useState(0);
-  const floatRef = useRef(null);
+  const floatRef = useRef<HTMLDivElement | null>(null);
 
   const floatStyle =
     position === 'bottom'
@@ -103,7 +110,7 @@ export const Tooltip = forwardRef(function Tooltip(
     <div
       ref={ref}
       className={className}
-      style={{ position: 'relative', display: 'inline-flex', ...style }}
+      style={{ ...andromedaVars(), position: 'relative', display: 'inline-flex', ...style }}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
       onFocus={() => setVisible(true)}
@@ -142,11 +149,11 @@ export const Tooltip = forwardRef(function Tooltip(
               textAlign: 'center',
               zIndex: 100,
               padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-              background: tokens.color.surface.overlay,
-              border: `${tokens.border.thin} ${tokens.color.border.base}`,
+              background: themeColor.surface.overlay,
+              border: `${tokens.border.thin} ${themeColor.border.base}`,
               fontFamily: tokens.typography.fontMono,
               fontSize: tokens.typography.size.xs,
-              color: tokens.color.text.secondary,
+              color: themeColor.text.secondary,
               letterSpacing: tokens.typography.tracking.wider,
               textTransform: 'uppercase',
             }}
