@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Transition } from 'framer-motion';
 import { tokens } from '../tokens';
 import { andromedaVars, inheritedThemeVars, themeColor } from './lib/utils';
+import { useReducedMotion } from './lib/motion';
 
 // Layout effect on the client (measure + correct before paint, no flash),
 // plain effect on the server (avoids the useLayoutEffect SSR warning).
@@ -54,10 +55,11 @@ export type TooltipProps = ComponentPropsWithoutRef<'div'> & {
 type Anchor = { left: number; top: number | null; bottom: number | null };
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
-  { label, position = 'top', portal = false, children, className, style, ...props },
+  { label, position = 'top', portal = false, children, className, style, onKeyDown, ...props },
   ref,
 ) {
   const [visible, setVisible] = useState(false);
+  const reducedMotion = useReducedMotion();
   // Horizontal correction (px) applied on top of the -50% centre transform so a
   // centred-but-clamped label on a trigger near a screen edge stays inside the
   // viewport instead of overflowing it and forcing horizontal page scroll. 0 in
@@ -189,11 +191,15 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
     textTransform: 'uppercase',
   };
 
+  // 4px of travel toward the trigger on entry, back out on exit. Under
+  // prefers-reduced-motion the slide is dropped and only the fade remains,
+  // which is the motion foundation's rule for decorative entrances.
+  const slide = reducedMotion ? 0 : position === 'bottom' ? -4 : 4;
   const motionProps = {
     role: 'tooltip' as const,
-    initial: { opacity: 0, y: position === 'bottom' ? -4 : 4 },
+    initial: { opacity: 0, y: slide },
     animate: { opacity: 1, y: 0, transition: ENTER_TX },
-    exit: { opacity: 0, y: position === 'bottom' ? -4 : 4, transition: EXIT_TX },
+    exit: { opacity: 0, y: slide, transition: EXIT_TX },
   };
 
   // Centre horizontally — the box's own -50% pulls it back by half its width,
@@ -246,6 +252,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
       onMouseLeave={() => setVisible(false)}
       onFocus={() => setVisible(true)}
       onBlur={() => setVisible(false)}
+      // Escape dismisses an open label without moving focus, as the WAI-ARIA
+      // tooltip pattern asks; the caller's own handler still runs after it.
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setVisible(false);
+        onKeyDown?.(event);
+      }}
       {...props}
     >
       {children}
