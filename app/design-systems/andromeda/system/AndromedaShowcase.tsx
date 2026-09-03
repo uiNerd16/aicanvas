@@ -1774,7 +1774,7 @@ export default function AndromedaShowcase({
         <Section
           title="Tooltip"
           slug="tooltip"
-          description="Hover label for icon-only controls. Wraps any child and floats a mono uppercase label above (or below) it. Shows on keyboard focus too, carries role='tooltip', and clamps itself away from the viewport edges. No portal, so it stays in the nearest stacking context."
+          description="Hover label for icon-only controls. Wraps any child and floats a mono uppercase label above (or below) it. Shows on keyboard focus too, carries role='tooltip', and clamps itself away from the viewport edges. Inline by default, so it stays in the nearest stacking context; pass portal to lift it to the body when the trigger sits in a panel that clips or scrolls."
         >
           <Row label="Position · top (default)">
             <Tooltip label="Refresh">
@@ -1800,6 +1800,32 @@ export default function AndromedaShowcase({
             <Tooltip label="Settings" position="bottom">
               <IconButton aria-label="Settings" icon={Gear} />
             </Tooltip>
+          </Row>
+          <Row label="Portal · trigger inside a scrolling panel">
+            {/* The panel below clips and scrolls, which is exactly what an
+                inline tooltip cannot survive: it gets cut at the edge and
+                summons a horizontal scrollbar for as long as it is open.
+                `portal` lifts the label to <body> instead. */}
+            <div
+              style={{
+                display: 'flex',
+                gap: tokens.spacing[3],
+                padding: tokens.spacing[3],
+                maxWidth: '260px',
+                overflow: 'auto',
+                border: `${tokens.border.thin} ${c.border.subtle}`,
+              }}
+            >
+              <Tooltip label="Refresh" portal>
+                <IconButton aria-label="Refresh" icon={ArrowClockwise} />
+              </Tooltip>
+              <Tooltip label="Settings" portal>
+                <IconButton aria-label="Settings" icon={Gear} />
+              </Tooltip>
+              <Tooltip label="Notifications" portal>
+                <IconButton aria-label="Notifications" icon={Bell} />
+              </Tooltip>
+            </div>
           </Row>
         </Section>
 
