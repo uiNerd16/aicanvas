@@ -327,7 +327,13 @@ export default function AndromedaShowcase({
         minHeight: '100vh',
         width: '100%',
         boxSizing: 'border-box',
-        backgroundColor: c.surface.base,
+        // No ground of its own. This page is site chrome, not a template, so the
+        // page ground belongs to AndromedaContentColumn (bg-sand-50 / sand-950)
+        // and the shell lets it through. Painting Andromeda's own surface.base
+        // here put a seam in the light theme, where the two grounds are one
+        // step apart (#F4F4F5 against sand-50 #F4F4FA); in dark they are the
+        // same value, which is why only light ever showed it. The Section
+        // cards still lift off it on surface.raised, so depth is unchanged.
         // All-longhand (no `padding` shorthand) so paddingBottom isn't clobbered.
         paddingTop: tokens.spacing[10],
         paddingLeft: tokens.spacing[8],
