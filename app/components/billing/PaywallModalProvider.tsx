@@ -101,7 +101,7 @@ function PaywallModalView({
       role="dialog"
       aria-modal="true"
       aria-label="Upgrade to Premium"
-      className="dark fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center"
+      className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center"
     >
       <div
         aria-hidden="true"
@@ -113,21 +113,21 @@ function PaywallModalView({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative z-10 my-auto w-full max-w-lg rounded-2xl bg-sand-950 p-6 shadow-2xl outline-none sm:p-8"
+        className="relative z-10 my-auto w-full max-w-lg rounded-2xl bg-sand-100 p-6 shadow-2xl outline-none sm:p-8 dark:bg-sand-950"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-sand-400 transition-colors hover:bg-sand-800 hover:text-sand-100"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-sand-600 transition-colors hover:bg-sand-200 hover:text-sand-900 dark:text-sand-400 dark:hover:bg-sand-800 dark:hover:text-sand-100"
         >
           <X weight="regular" size={18} />
         </button>
 
         <div className="text-center">
-          <h3 className="text-xl font-bold text-sand-50">{title}</h3>
+          <h3 className="text-xl font-bold text-sand-900 dark:text-sand-50">{title}</h3>
           {subtitle && (
-            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-sand-400">{subtitle}</p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-sand-600 dark:text-sand-400">{subtitle}</p>
           )}
         </div>
 
@@ -137,7 +137,7 @@ function PaywallModalView({
 
         {/* Accepted payment methods — a card-width container matching the
             Premium card so it reads as the bottom of the same column. */}
-        <div className="mx-auto mt-5 max-w-md rounded-2xl border border-sand-800 bg-sand-900/50 px-4 py-3">
+        <div className="mx-auto mt-5 max-w-md rounded-2xl border border-sand-200 bg-sand-50 px-4 py-3 dark:border-sand-800 dark:bg-sand-900/50">
           <PaymentMethods />
         </div>
 
@@ -151,7 +151,7 @@ function PaywallModalView({
             <Link
               href="/welcome"
               onClick={onClose}
-              className="font-medium text-olive-400 transition-colors hover:text-olive-300"
+              className="font-medium text-olive-600 transition-colors hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300"
             >
               Sign in with the address you used at checkout
             </Link>
