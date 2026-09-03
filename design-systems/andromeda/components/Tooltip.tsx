@@ -12,7 +12,7 @@
 
 'use client';
 
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -70,11 +70,14 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
 
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const floatRef = useRef<HTMLDivElement | null>(null);
-  const setWrap = (node: HTMLDivElement | null) => {
+  // Stable across renders: a fresh callback ref each render makes React detach
+  // (null) and re-attach the forwarded ref on every state change, and this
+  // component re-renders on every measure.
+  const setWrap = useCallback((node: HTMLDivElement | null) => {
     wrapRef.current = node;
     if (typeof ref === 'function') ref(node);
     else if (ref) (ref as { current: HTMLDivElement | null }).current = node;
-  };
+  }, [ref]);
 
   const inlineOffset =
     position === 'bottom'
@@ -104,11 +107,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
   // follow the trigger on its own: the capture-phase scroll listener re-runs
   // the measure so the label tracks scrolling in ANY ancestor, not just the page.
   useIsomorphicLayoutEffect(() => {
-    if (!visible || !label) {
-      setShiftX(0);
-      setAnchor(null);
-      return undefined;
-    }
+    // Nothing to reset on close. The float stays mounted through its exit
+    // animation, and nulling the anchor there would hide a portaled label
+    // mid-fade (its visibility rides on the anchor), while zeroing shiftX
+    // would jump an inline one sideways as it fades. Both are re-measured,
+    // before paint, on the next open.
+    if (!visible || !label) return undefined;
     const measure = () => {
       const wrap = wrapRef.current;
       const node = floatRef.current;
