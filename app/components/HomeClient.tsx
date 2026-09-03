@@ -13,6 +13,7 @@ import { SiteFooter } from './SiteFooter'
 import { INITIAL_LOAD, LOAD_MORE_SIZE } from './LoadMore'
 import { LoadMore } from './LoadMore'
 import type { ComponentMeta } from '../lib/component-registry'
+import { searchTokens, matchesQuery, effectiveTokens } from '../lib/search-match'
 import { ANDROMEDA_COMPONENT_META, ANDROMEDA_TEMPLATE_META } from '../_lib/andromeda/andromeda-meta'
 
 // ─── Fuzzy "Did you mean?" helpers ───────────────────────────────────────────
@@ -76,6 +77,19 @@ function findSuggestions(query: string, vocab: string[], max = 3): string[] {
   return out
 }
 
+// Category keywords folded into each group's searchable text, so the type words
+// themselves match: "template(s)"/"dashboard(s)" surface every template,
+// "andromeda"/"component(s)"/"design system(s)" surface the components. Not
+// shown anywhere — matching only.
+const COMPONENT_KW = 'andromeda components design systems'
+const TEMPLATE_KW = 'andromeda templates dashboards design systems'
+const ANDROMEDA_TEXT = ANDROMEDA_COMPONENT_META.map(
+  (c) => `${c.name} ${c.description} ${COMPONENT_KW}`,
+)
+const TEMPLATE_TEXT = ANDROMEDA_TEMPLATE_META.map(
+  (t) => `${t.name} ${t.description} ${TEMPLATE_KW}`,
+)
+
 // ─── HomeClient ───────────────────────────────────────────────────────────────
 
 export function HomeClient({
@@ -98,13 +112,27 @@ export function HomeClient({
   const category      = categoryLabel ?? searchParams.get('category') ?? ''
 
   const q = query.trim().toLowerCase()
+
+  // One searchable string per component: name, description and tag labels, so a
+  // query word can match any of them. See app/lib/search-match.ts for why the
+  // query is matched word by word rather than as one phrase.
+  const gridText = useMemo(
+    () =>
+      components.map(
+        (c) => `${c.name} ${c.description} ${c.tags.map((t) => t.label).join(' ')}`,
+      ),
+    [components],
+  )
+  // Everything this page can match, so a query that finds nothing relaxes
+  // against the same set the grid and the extra group are filtered from.
+  const corpus = useMemo(
+    () => (category ? gridText : [...gridText, ...ANDROMEDA_TEXT, ...TEMPLATE_TEXT]),
+    [gridText, category],
+  )
+  const tokens = useMemo(() => effectiveTokens(searchTokens(q), corpus), [q, corpus])
+
   const filtered = q
-    ? components.filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.description.toLowerCase().includes(q) ||
-          c.tags.some((t) => t.label.toLowerCase().includes(q)),
-      )
+    ? components.filter((_, i) => matchesQuery(gridText[i], tokens))
     : components
 
   // ── Beyond the standalone catalog ──────────────────────────────────────────
@@ -114,17 +142,11 @@ export function HomeClient({
   // active query also scans those two meta sources and they render as their own
   // group below the grid, reusing ComponentCard so the aesthetic matches. They
   // link out to their own pages. Andromeda components are Free; templates Premium.
-  // Category keywords folded into each group's searchable text, so the type
-  // words themselves match: "template(s)"/"dashboard(s)" surface every template,
-  // "andromeda"/"component(s)"/"design system(s)" surface the components. Not
-  // shown anywhere — matching only.
-  const COMPONENT_KW = 'andromeda components design systems'
-  const TEMPLATE_KW = 'andromeda templates dashboards design systems'
   const extras =
     q && !category
       ? [
-          ...ANDROMEDA_COMPONENT_META.filter((c) =>
-            `${c.name} ${c.description} ${COMPONENT_KW}`.toLowerCase().includes(q),
+          ...ANDROMEDA_COMPONENT_META.filter((_, i) =>
+            matchesQuery(ANDROMEDA_TEXT[i], tokens),
           ).map((c) => ({
             key: `andromeda-${c.slug}`,
             name: c.name,
@@ -134,8 +156,8 @@ export function HomeClient({
             badge: 'Free',
             cta: 'View Component',
           })),
-          ...ANDROMEDA_TEMPLATE_META.filter((t) =>
-            `${t.name} ${t.description} ${TEMPLATE_KW}`.toLowerCase().includes(q),
+          ...ANDROMEDA_TEMPLATE_META.filter((_, i) =>
+            matchesQuery(TEMPLATE_TEXT[i], tokens),
           ).map((t) => ({
             key: `template-${t.folder}`,
             name: t.name,
