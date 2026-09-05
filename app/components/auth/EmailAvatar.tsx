@@ -34,6 +34,11 @@ function gradientFromEmail(email: string) {
 
 type UserLike = { user_metadata?: Record<string, unknown> | null } | null | undefined
 
+// Google hands us a 96px photo (…=s96-c). The largest circle we draw is 64px,
+// so ask for 128 — sharp on retina, and one URL for every size on the page
+// means the browser downloads it once.
+const PHOTO_PX = 128
+
 /**
  * Profile photo URL an OAuth provider stored on the account, if any. Supabase
  * writes Google's picture claim into user_metadata at sign-in under both
@@ -45,7 +50,11 @@ export function photoFromUser(user: UserLike): string | undefined {
   if (!meta) return undefined
   const url = meta.avatar_url ?? meta.picture
   if (typeof url !== 'string') return undefined
-  return /^https:\/\/[^\s'"()\\]+$/.test(url) ? url : undefined
+  if (!/^https:\/\/[^\s'"()\\]+$/.test(url)) return undefined
+  // googleusercontent takes the size as a path suffix, so replace whatever
+  // suffix came with the URL. `-c` crops to a square, which the circle wants.
+  if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com\//.test(url)) return url
+  return `${url.replace(/=[-\w]*$/, '')}=s${PHOTO_PX}-c`
 }
 
 type Props = {
