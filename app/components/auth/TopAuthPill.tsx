@@ -8,7 +8,7 @@ import { useSession } from './SessionProvider'
 import { useAuthModal } from './AuthModalProvider'
 import { createClient } from '../../lib/supabase/client'
 import { Button } from '../Button'
-import { EmailAvatar } from './EmailAvatar'
+import { EmailAvatar, photoFromUser } from './EmailAvatar'
 import { usePaywallModal } from '../billing/PaywallModalProvider'
 import { usePremiumStatus } from '../billing/usePremiumStatus'
 
@@ -59,7 +59,7 @@ export function TopAuthPill() {
           onClick={() => setOpen((v) => !v)}
           aria-label={`Account menu for ${email}`}
         >
-          <EmailAvatar email={email} className="h-4 w-4" />
+          <EmailAvatar email={email} photoUrl={photoFromUser(user)} className="h-4 w-4" />
           <CaretDown size={10} weight="regular" className={`transition-transform ${open ? '-rotate-180' : ''}`} />
         </Button>
         {open && (
